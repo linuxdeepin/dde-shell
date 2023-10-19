@@ -1,0 +1,43 @@
+Source: dde-shell
+Section: unknown
+Priority: optional
+Maintainer: Deepin Packages Builder <packages@deepin.com>
+Build-Depends:
+ debhelper-compat ( =12),
+ cmake,
+ qt6-base-dev,
+ qt6-declarative-dev,
+ qt6-base-dev-tools,
+ qt6-tools-dev,
+ libdtk6gui-dev,
+ libdtk6core-dev,
+ libdtkcommon-dev,
+Standards-Version: 3.9.8
+Homepage: http://www.deepin.org
+
+Package: libdde-shell
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+  libdtkcore5
+Multi-Arch: same
+Description: DDE Shell library
+ DDE Shell is a plugin system that integrates plugins developed based on this plugin system into DDE.
+
+Package: libdde-shell-dev
+Architecture: any
+Depends: ${misc:Depends}, libdde-shell( =${binary:Version})
+Description: DDE Shell devel library
+ DDE Shell is a plugin system that integrates plugins developed based on this plugin system into DDE.
+
+Package: dde-shell
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libdde-shell( =${binary:Version})
+Multi-Arch: same
+Description: An wrapper for developed based on dde-shell plugin system
+
+Package: dde-shell-example
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libdde-shell( =${binary:Version})
+Multi-Arch: same
+Description: DDE Shell example
+ This package contains some plugins based on dde-shell plugin system.

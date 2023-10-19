@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+#
+# SPDX-License-Identifier: CC0-1.0
+
+set(PUBLIC_HEADERS
+    dsglobal.h
+    dstypes.h
+    pluginmetadata.h
+    pluginloader.h
+    pluginfactory.h
+    applet.h
+    containment.h
+    corona.h
+    qmlengine.h
+)
+add_library(dde-shell-frame SHARED
+    ${PUBLIC_HEADERS}
+    private/applet_p.h
+    private/containment_p.h
+    private/corona_p.h
+    private/appletitem_p.h
+    appletitem.h
+    containmentitem.h
+    dstypes.cpp
+    pluginmetadata.cpp
+    pluginloader.cpp
+    pluginfactory.cpp
+    applet.cpp
+    containment.cpp
+    corona.cpp
+    appletitem.cpp
+    containmentitem.cpp
+    qmlengine.cpp
+)
+
+set_target_properties(dde-shell-frame PROPERTIES
+    VERSION ${CMAKE_PROJECT_VERSION}
+    SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR}
+    OUTPUT_NAME dde-shell
+    EXPORT_NAME Shell
+)
+target_link_libraries(dde-shell-frame
+PUBLIC
+    Dtk${DTK_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Quick
+)
+target_include_directories(dde-shell-frame INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+    $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
+)
+target_link_directories(dde-shell-frame INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:${LIB_INSTALL_DIR}>
+)
+
+target_compile_definitions(dde-shell-frame
+INTERFACE
+    DDE_SHELL_PACKAGE_PATH_SUBPATH="dde-shell"
+PRIVATE
+    DDE_SHELL_QML_INSTALL_DIR="${CMAKE_INSTALL_PREFIX}/${QML_INSTALL_DIR}"
+    DDE_SHELL_PLUGIN_INSTALL_DIR="${CMAKE_INSTALL_PREFIX}/${DDE_SHELL_PLUGIN_INSTALL_DIR}"
+)
+
+install(FILES ${PUBLIC_HEADERS} DESTINATION "${INCLUDE_INSTALL_DIR}")
+install(TARGETS dde-shell-frame EXPORT DDEShellTargets DESTINATION "${LIB_INSTALL_DIR}")
+install(EXPORT DDEShellTargets NAMESPACE Dde:: FILE DDEShellTargets.cmake DESTINATION "${CONFIG_INSTALL_DIR}")
+
+add_subdirectory(plugin)
