@@ -1,0 +1,2 @@
+usr/lib/*/lib*.so.*
+usr/lib/*/qt6/qml/org/deepin/ds/*

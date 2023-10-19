@@ -1,0 +1,8 @@
+{
+    "Plugin": {
+        "Version": "1.0",
+        "Id": "org.deepin.ds.applet-example-data",
+        "Url": "main.qml",
+        "Parent": "org.deepin.ds.containment-example"
+    }
+}
