@@ -9,7 +9,7 @@ project(DDEShell
     VERSION "${DS_VERSION}"
     DESCRIPTION "dde-shell"
     HOMEPAGE_URL "https://github.com/linuxdeepin/dde-shell"
-    LANGUAGES CXX
+    LANGUAGES CXX C
 )
 
 set(CMAKE_CXX_STANDARD 17)
@@ -44,11 +44,13 @@ set(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/dde-shell" CACHE STRING "He
 set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/DDEShell" CACHE STRING "CMake config file install directory")
 set(QML_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/qt${QT_VERSION_MAJOR}/qml" CACHE STRING "Qml plugin install directory")
 
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+find_package(ECM REQUIRED MO_MODULE)
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH};${ECM_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake")
 include(DDEShellPackageMacros)
 
-find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick)
+find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick WaylandClient)
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui)
+find_package(WaylandProtocols REQUIRED)
 
 add_subdirectory(frame)
 add_subdirectory(shell)

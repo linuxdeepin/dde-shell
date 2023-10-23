@@ -47,3 +47,8 @@ License: GPL-3.0-or-later
 Files: *.json
 Copyright: None
 License: CC0-1.0
+
+# wayland protocols
+Files: frame/layershell/protocol/wlr-layer-shell-unstable-v1.xml
+Copyright: 2017 Drew DeVault
+License: MIT

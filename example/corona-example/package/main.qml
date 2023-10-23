@@ -15,6 +15,7 @@ Window {
     width: Screen.width
     height: 200
     D.DWindow.enabled: true
+    DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom
 
     Control {
         anchors.fill: parent
