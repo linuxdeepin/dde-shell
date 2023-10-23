@@ -74,8 +74,11 @@ DApplet *DAppletItem::qmlAttachedProperties(QObject *object)
     }
     if (!item) {
         item = qobject_cast<QQuickItem *>(object);
-        if(auto applet = item->window()->property("_ds_window_applet").value<DApplet *>()) {
-            return applet;
+        QWindow *window = item ? item->window() : qobject_cast<QWindow *>(object);
+        if (window) {
+            if(auto applet = window->property("_ds_window_applet").value<DApplet *>()) {
+                return applet;
+            }
         }
     }
     return nullptr;

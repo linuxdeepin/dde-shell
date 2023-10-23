@@ -86,7 +86,7 @@ public:
         for (auto item : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
             result << item + "/dde-shell";
         }
-        qCDebug(dsLog()) << "Buildin package paths" << result;
+        qCDebug(dsLog()) << "Builtin package paths" << result;
 
         return result;
     }
@@ -105,7 +105,7 @@ public:
 
         result <<  DDE_SHELL_PLUGIN_INSTALL_DIR;
 
-        qCDebug(dsLog()) << "Buildin plugin paths" << result;
+        qCDebug(dsLog()) << "Builtin plugin paths" << result;
         return result;
     }
 
