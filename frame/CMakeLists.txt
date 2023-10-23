@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: CC0-1.0
-
 set(PUBLIC_HEADERS
     dsglobal.h
     dstypes.h
@@ -12,6 +11,7 @@ set(PUBLIC_HEADERS
     containment.h
     corona.h
     qmlengine.h
+    layershell/dlayershellwindow.h
 )
 add_library(dde-shell-frame SHARED
     ${PUBLIC_HEADERS}
@@ -31,6 +31,14 @@ add_library(dde-shell-frame SHARED
     appletitem.cpp
     containmentitem.cpp
     qmlengine.cpp
+    layershell/dlayershellwindow.cpp
+    layershell/qwaylandlayershellsurface.cpp
+    layershell/qwaylandlayershellintegration.cpp
+)
+
+qt_generate_wayland_protocol_client_sources(dde-shell-frame FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/layershell/protocol/wlr-layer-shell-unstable-v1.xml
+    ${WaylandProtocols_DATADIR}/stable/xdg-shell/xdg-shell.xml
 )
 
 set_target_properties(dde-shell-frame PROPERTIES
@@ -45,6 +53,8 @@ PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Quick
+PRIVATE
+    Qt${QT_VERSION_MAJOR}::WaylandClientPrivate
 )
 target_include_directories(dde-shell-frame INTERFACE
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
