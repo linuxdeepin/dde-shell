@@ -191,6 +191,25 @@ QList<DPluginMetaData> DPluginLoader::plugins() const
     return d->m_plugins.values();
 }
 
+QList<DPluginMetaData> DPluginLoader::rootPlugins() const
+{
+    D_DC(DPluginLoader);
+    QList<DPluginMetaData> rootPlugins;
+    for (auto item : plugins()) {
+        auto parent = parentPlugin(item.pluginId());
+
+        // root plugin can't has parent.
+        if (parent.isValid())
+            continue;
+
+        if (rootPlugins.contains(item))
+            continue;
+
+        rootPlugins << item;
+    }
+    return rootPlugins;
+}
+
 void DPluginLoader::addPackageDir(const QString &dir)
 {
     D_D(DPluginLoader);
