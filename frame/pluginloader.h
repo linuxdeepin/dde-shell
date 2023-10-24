@@ -27,6 +27,7 @@ public:
 
     static DPluginLoader *instance();
     QList<DPluginMetaData> plugins() const;
+    QList<DPluginMetaData> rootPlugins() const;
     void addPackageDir(const QString &dir);
     void addPluginDir(const QString &dir);
 

@@ -41,10 +41,14 @@ int main(int argc, char *argv[])
     QList<DApplet *> applets;
     if (parser.isSet(testOption)) {
         pluginIds << "org.deepin.ds.corona-example";
-    }
-    if (parser.isSet(coronaOption)) {
+    } else if (parser.isSet(coronaOption)) {
         pluginIds << parser.values(coronaOption);
+    } else {
+        for (auto item : DPluginLoader::instance()->rootPlugins()) {
+            pluginIds << item.pluginId();
+        }
     }
+
     qInfo() << "Loading plugin id" << pluginIds;
     for (auto pluginId : pluginIds) {
         auto applet = DPluginLoader::instance()->loadApplet(pluginId);
