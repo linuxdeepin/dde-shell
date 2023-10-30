@@ -66,6 +66,13 @@ target_link_directories(dde-shell-frame INTERFACE
     $<INSTALL_INTERFACE:${LIB_INSTALL_DIR}>
 )
 
+if (BUILD_WITH_X11)
+    target_compile_definitions(dde-shell-frame PRIVATE BUILD_WITH_X11=)
+    pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb-ewmh)
+    target_sources(dde-shell-frame PRIVATE layershell/x11dlayershellemulation.cpp)
+    target_link_libraries(dde-shell-frame PUBLIC PkgConfig::XCB)
+endif(BUILD_WITH_X11)
+
 target_compile_definitions(dde-shell-frame
 INTERFACE
     DDE_SHELL_PACKAGE_PATH_SUBPATH="dde-shell"

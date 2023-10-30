@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
-
 #include "dsglobal.h"
 #include "dlayershellwindow.h"
 #include "qwaylandlayershellintegration_p.h"
@@ -12,6 +11,10 @@
 #include <QLoggingCategory>
 
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
+
+#ifdef BUILD_WITH_X11
+#include "x11dlayershellemulation.h"
+#endif
 
 Q_LOGGING_CATEGORY(layershellwindow, "dde.shell.layershell.window")
 
@@ -40,26 +43,6 @@ public:
     bool closeOnDismissed = true;
 };
 
-class DLayerShellWindowWaylandPrivate : public DLayerShellWindowPrivate
-{
-public:
-    explicit DLayerShellWindowWaylandPrivate(QWindow * window)
-        : DLayerShellWindowPrivate(window)
-    {
-        QtWaylandClient::QWaylandWindow* waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(window->handle());
-        static QWaylandLayerShellIntegration *shellIntegration = nullptr;
-        if (!shellIntegration) {
-            shellIntegration = new QWaylandLayerShellIntegration();
-            if (!shellIntegration->initialize(waylandWindow->display())) {
-                delete shellIntegration;
-                shellIntegration = nullptr;
-                qCWarning(layershellwindow) << "failed to init dlayershell intergration";
-                return;
-            }
-        }
-        waylandWindow->setShellIntegration(shellIntegration);
-    }
-};
 void DLayerShellWindow::setAnchors(DLayerShellWindow::Anchors anchors)
 {
     if (anchors != d->anchors) {
@@ -211,15 +194,32 @@ DLayerShellWindow::~DLayerShellWindow()
 
 DLayerShellWindow::DLayerShellWindow(QWindow* window)
     : QObject(window)
+    , d(new DLayerShellWindowPrivate(window))
 {
     s_map.insert(window, this);
     window->create();
     auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(window->handle());
     if (waylandWindow) {
-        d.reset(new DLayerShellWindowWaylandPrivate(window));
-    } else {
+        static QWaylandLayerShellIntegration *shellIntegration = nullptr;
+        if (!shellIntegration) {
+            shellIntegration = new QWaylandLayerShellIntegration();
+            if (!shellIntegration->initialize(waylandWindow->display())) {
+                delete shellIntegration;
+                shellIntegration = nullptr;
+                qCWarning(layershellwindow) << "failed to init dlayershell intergration";
+                return;
+            }
+        }
+        waylandWindow->setShellIntegration(shellIntegration);
+    }
+#ifdef BUILD_WITH_X11
+    else if (auto xcbWindow = dynamic_cast<QNativeInterface::Private::QXcbWindow*>(window->handle())) {
+        new LayerShellEmulation(window, this);
+        qCWarning(layershellwindow) << "not a wayland window, try to emulate on x11";
+    }
+#endif
+    else {
         qCWarning(layershellwindow) << "not a wayland window, will not create zwlr_layer_surface";
-        d.reset(new DLayerShellWindowPrivate(window));
     }
 }
 

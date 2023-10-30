@@ -22,6 +22,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+option(BUILD_WITH_X11 "Build X11 emulation" ON)
 
 set(DS_BUILD_WITH_QT6 ON CACHE BOOL "Build dde-shell with Qt6")
 
@@ -50,6 +51,7 @@ include(DDEShellPackageMacros)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick WaylandClient)
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui)
 find_package(WaylandProtocols REQUIRED)
+find_package(PkgConfig REQUIRED)
 
 add_subdirectory(frame)
 add_subdirectory(shell)
