@@ -1,1 +1,3 @@
 usr/bin/*
+usr/lib/*/dde-shell/org.deepin.ds.osd*
+usr/share/dde-shell/org.deepin.ds.osd*/

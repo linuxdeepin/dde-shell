@@ -47,13 +47,14 @@ find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH};${ECM_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake")
 include(DDEShellPackageMacros)
 
-find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick WaylandClient)
+find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick WaylandClient DBus)
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui)
 find_package(WaylandProtocols REQUIRED)
 
 add_subdirectory(frame)
 add_subdirectory(shell)
 add_subdirectory(example)
+add_subdirectory(coronas)
 
 configure_package_config_file(
     "${CMAKE_CURRENT_LIST_DIR}/misc/DDEShellConfig.cmake.in"

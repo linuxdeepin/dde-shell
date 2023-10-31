@@ -87,7 +87,7 @@ QObject *DQmlEngine::beginCreate()
         qCWarning(dsLog()) << "Loading url failed" << component->errorString();
         return nullptr;
     }
-    auto context = new QQmlContext(engine());
+    auto context = new QQmlContext(engine(), d->m_applet);
     auto object = component->beginCreate(context);
     d->m_context = context;
     d->m_rootObject = object;

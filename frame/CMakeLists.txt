@@ -50,6 +50,7 @@ set_target_properties(dde-shell-frame PROPERTIES
 target_link_libraries(dde-shell-frame
 PUBLIC
     Dtk${DTK_VERSION_MAJOR}::Core
+    Dtk${DTK_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Quick
