@@ -9,6 +9,9 @@
 
 #include <QLoggingCategory>
 
+#include <QDir>
+#include <DIconTheme>
+
 DS_BEGIN_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(dsLog)
@@ -38,6 +41,8 @@ void DCorona::load()
 void DCorona::init()
 {
     D_D(DCorona);
+    d->initDciSearchPaths();
+
     auto applet = this;
 
     DQmlEngine *engine = new DQmlEngine(applet, applet);
@@ -53,6 +58,22 @@ void DCorona::init()
     DContainment::init();
 
     engine->completeCreate();
+}
+
+void DCoronaPrivate::initDciSearchPaths()
+{
+    D_Q(DCorona);
+    DGUI_USE_NAMESPACE;
+    auto dciPaths = DIconTheme::dciThemeSearchPaths();
+    QList<DApplet *> list = m_applets;
+    list.append(q);
+    for (auto item : list) {
+        QDir root(item->pluginMetaData().pluginDir());
+        if (root.exists("icons")) {
+            dciPaths.push_back(root.absoluteFilePath("icons"));
+        }
+    }
+    DIconTheme::setDciThemeSearchPaths(dciPaths);
 }
 
 DS_END_NAMESPACE

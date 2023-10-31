@@ -7,14 +7,12 @@ import QtQuick.Controls 2.4
 import QtQuick.Window 2.15
 
 import org.deepin.ds 1.0
-import org.deepin.dtk 1.0 as D
 
 Window {
     id: root
     visible: true
     width: Screen.width
     height: 200
-    D.DWindow.enabled: true
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom
 
     Control {

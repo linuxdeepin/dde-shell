@@ -23,8 +23,7 @@ Homepage: http://www.deepin.org
 
 Package: libdde-shell
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends},
-  libdtkcore5
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Multi-Arch: same
 Description: DDE Shell library
  DDE Shell is a plugin system that integrates plugins developed based on this plugin system into DDE.
@@ -37,7 +36,8 @@ Description: DDE Shell devel library
 
 Package: dde-shell
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libdde-shell( =${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libdde-shell( =${binary:Version}),
+  libdtk6declarative, qml6-module-qtquick-controls2-styles-chameleon
 Multi-Arch: same
 Description: An wrapper for developed based on dde-shell plugin system
 
