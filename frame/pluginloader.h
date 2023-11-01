@@ -31,6 +31,9 @@ public:
     void addPackageDir(const QString &dir);
     void addPluginDir(const QString &dir);
 
+    QStringList disabledApplets() const;
+    void setDisabledApplets(const QStringList &pluginIds);
+
     DApplet *loadApplet(const QString &pluginId);
 
     QList<DPluginMetaData> childrenPlugin(const QString &pluginId) const;

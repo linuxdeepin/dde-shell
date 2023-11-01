@@ -14,6 +14,15 @@
 DS_USE_NAMESPACE
 DGUI_USE_NAMESPACE
 
+void outputPluginTreeStruct(const DPluginMetaData &plugin, int level)
+{
+    const QString separator(level * 4, ' ');
+    qInfo() << qPrintable(separator + plugin.pluginId());
+    for (auto item : DPluginLoader::instance()->childrenPlugin(plugin.pluginId())) {
+        outputPluginTreeStruct(item, level + 1);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -29,8 +38,23 @@ int main(int argc, char *argv[])
     parser.addOption(coronaOption);
     QCommandLineOption testOption(QStringList() << "t" << "test", "application test.");
     parser.addOption(testOption);
+    QCommandLineOption disableAppletOption("d", "disabled applet.", "disable-applet", QString());
+    parser.addOption(disableAppletOption);
+    parser.addPositionalArgument("list", "list all applet.");
 
     parser.process(a);
+
+    const auto positions = parser.positionalArguments();
+
+    if (positions.size() >= 1) {
+        const auto subcommand = positions[0];
+        if (subcommand == "list") {
+            for (auto item : DPluginLoader::instance()->rootPlugins()) {
+                outputPluginTreeStruct(item, 0);
+            }
+            return 0;
+        }
+    }
 
     Dtk::Core::DLogManager::registerConsoleAppender();
     Dtk::Core::DLogManager::registerFileAppender();
@@ -47,6 +71,10 @@ int main(int argc, char *argv[])
         for (auto item : DPluginLoader::instance()->rootPlugins()) {
             pluginIds << item.pluginId();
         }
+    }
+    if (parser.isSet(disableAppletOption)) {
+        const auto disabledApplets = parser.values(disableAppletOption);
+        DPluginLoader::instance()->setDisabledApplets(disabledApplets);
     }
 
     qInfo() << "Loading plugin id" << pluginIds;
