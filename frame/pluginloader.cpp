@@ -37,6 +37,8 @@ public:
     {
         D_Q(DPluginLoader);
 
+        m_plugins.clear();
+
         for (auto item : builtinPluginPaths()) {
             q->addPluginDir(item);
         }
@@ -62,6 +64,11 @@ public:
                 DPluginMetaData info = DPluginMetaData::fromJsonFile(metadataPath);
                 if (!info.isValid())
                     continue;
+
+                if (m_disabledPlugins.contains(info.pluginId())) {
+                    qCDebug(dsLog()) << "Don't load disabled applet." << info.pluginId();
+                    continue;
+                }
 
                 if (m_plugins.contains(info.pluginId()))
                     continue;
@@ -163,6 +170,7 @@ public:
 
     QStringList m_pluginDirs;
     QMap<QString, DPluginMetaData> m_plugins;
+    QStringList m_disabledPlugins;
 
     D_DECLARE_PUBLIC(DPluginLoader)
 };
@@ -222,6 +230,25 @@ void DPluginLoader::addPluginDir(const QString &dir)
     if (QCoreApplication::libraryPaths().contains(dir))
         return;
     QCoreApplication::addLibraryPath(dir);
+}
+
+QStringList DPluginLoader::disabledApplets() const
+{
+    D_DC(DPluginLoader);
+    return d->m_disabledPlugins;
+}
+
+void DPluginLoader::setDisabledApplets(const QStringList &pluginIds)
+{
+    D_D(DPluginLoader);
+    if (pluginIds.isEmpty() || d->m_disabledPlugins == pluginIds)
+        return;
+    for (auto item : pluginIds) {
+        if (item.isEmpty() || d->m_disabledPlugins.contains(item))
+            continue;
+        d->m_disabledPlugins << item;
+    }
+    d->init();
 }
 
 DApplet *DPluginLoader::loadApplet(const QString &pluginId)
