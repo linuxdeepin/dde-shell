@@ -15,7 +15,7 @@ DS_BEGIN_NAMESPACE
  * @brief 容器插件
  */
 class DContainmentPrivate;
-class Q_DECL_EXPORT DContainment : public DApplet
+class DS_SHARE DContainment : public DApplet
 {
     Q_OBJECT
     Q_PROPERTY(QList<QObject *> appletItems READ appletItems NOTIFY appletItemsChanged)

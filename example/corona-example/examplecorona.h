@@ -8,7 +8,7 @@
 
 DS_USE_NAMESPACE
 
-class Q_DECL_EXPORT ExampleCorona : public DCorona
+class ExampleCorona : public DCorona
 {
     Q_OBJECT
 public:

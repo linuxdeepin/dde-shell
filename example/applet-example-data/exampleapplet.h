@@ -8,12 +8,12 @@
 
 DS_USE_NAMESPACE
 
-class Q_DECL_EXPORT ExampleApplet : public DApplet
+class ExampleApplet : public DApplet
 {
     Q_OBJECT
     Q_PROPERTY(QString mainText READ mainText CONSTANT)
 public:
-    ExampleApplet(QObject *parent = nullptr);
+    explicit ExampleApplet(QObject *parent = nullptr);
 
     QString mainText() const;
 private:

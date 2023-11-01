@@ -16,7 +16,7 @@ class DAppletItemPrivate;
 /**
  * @brief UI插件实例项
  */
-class Q_DECL_EXPORT DAppletItem : public QQuickItem, public DTK_CORE_NAMESPACE::DObject
+class DS_SHARE DAppletItem : public QQuickItem, public DTK_CORE_NAMESPACE::DObject
 {
     Q_OBJECT
     D_DECLARE_PRIVATE(DAppletItem)

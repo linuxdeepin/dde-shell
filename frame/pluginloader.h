@@ -17,7 +17,7 @@ class DApplet;
  * @brief 插件加载，创建
  */
 class DPluginLoaderPrivate;
-class Q_DECL_EXPORT DPluginLoader : public QObject, public DTK_CORE_NAMESPACE::DObject
+class DS_SHARE DPluginLoader : public QObject, public DTK_CORE_NAMESPACE::DObject
 {
     Q_OBJECT
     D_DECLARE_PRIVATE(DPluginLoader)

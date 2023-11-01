@@ -18,7 +18,7 @@ class DApplet;
  * @brief 插件注册
  */
 class DAppletFactoryPrivate;
-class Q_DECL_EXPORT DAppletFactory : public QObject
+class DS_SHARE DAppletFactory : public QObject
 {
     Q_OBJECT
 public:
@@ -47,7 +47,7 @@ Q_DECLARE_INTERFACE(DS_NAMESPACE::DAppletFactory, DAppletFactory_iid)
  \
 namespace { \
  \
-class Q_DECL_EXPORT classname##AppletFactory : public DS_NAMESPACE::DAppletFactory \
+class DS_SHARE classname##AppletFactory : public DS_NAMESPACE::DAppletFactory \
 { \
     Q_OBJECT \
     Q_PLUGIN_METADATA(IID DAppletFactory_iid) \

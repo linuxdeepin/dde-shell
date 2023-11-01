@@ -6,6 +6,12 @@
 
 #include <QtCore/qglobal.h>
 
+#ifdef DS_LIB
+#define DS_SHARE Q_DECL_EXPORT
+#else
+#define DS_SHARE Q_DECL_IMPORT
+#endif
+
 #define DS_NAMESPACE ds
 
 #define DS_BEGIN_NAMESPACE namespace DS_NAMESPACE {
