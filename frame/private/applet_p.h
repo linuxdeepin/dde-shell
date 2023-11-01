@@ -13,7 +13,7 @@ DS_BEGIN_NAMESPACE
 /**
  * @brief 插件项，单个插件实例
  */
-class Q_DECL_EXPORT DAppletPrivate : public DTK_CORE_NAMESPACE::DObjectPrivate
+class DAppletPrivate : public DTK_CORE_NAMESPACE::DObjectPrivate
 {
 public:
     DAppletPrivate(DApplet *qq )

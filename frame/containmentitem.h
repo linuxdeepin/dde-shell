@@ -15,7 +15,7 @@ class DContainmentItemPrivate;
 /**
  * @brief UI插件实例项
  */
-class Q_DECL_EXPORT DContainmentItem : public DAppletItem
+class DS_SHARE DContainmentItem : public DAppletItem
 {
     Q_OBJECT
     D_DECLARE_PRIVATE(DContainmentItem)

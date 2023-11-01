@@ -14,7 +14,7 @@ DS_BEGIN_NAMESPACE
  * @brief 插件元数据
  */
 class DPluginMetaDataPrivate;
-class Q_DECL_EXPORT DPluginMetaData : public QObject
+class DS_SHARE DPluginMetaData : public QObject
 {
     Q_OBJECT
 public:

@@ -15,7 +15,7 @@ DS_BEGIN_NAMESPACE
  * @brief 插件集
  */
 class DCoronaPrivate;
-class Q_DECL_EXPORT DCorona : public DContainment
+class DS_SHARE DCorona : public DContainment
 {
     Q_OBJECT
     D_DECLARE_PRIVATE(DCorona)

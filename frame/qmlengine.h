@@ -16,7 +16,7 @@ class DQmlEnginePrivate;
 /**
  * @brief UI插件实例项
  */
-class Q_DECL_EXPORT DQmlEngine : public QObject, public DTK_CORE_NAMESPACE::DObject
+class DS_SHARE DQmlEngine : public QObject, public DTK_CORE_NAMESPACE::DObject
 {
     Q_OBJECT
     D_DECLARE_PRIVATE(DQmlEngine)

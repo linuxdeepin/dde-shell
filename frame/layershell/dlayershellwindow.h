@@ -15,7 +15,7 @@ DS_BEGIN_NAMESPACE
 
 class DLayerShellWindowPrivate;
 
-class Q_DECL_EXPORT DLayerShellWindow : public QObject
+class DS_SHARE DLayerShellWindow : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(Anchors anchors READ anchors WRITE setAnchors NOTIFY anchorsChanged)
