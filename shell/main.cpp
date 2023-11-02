@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     QList<QString> pluginIds;
     QList<DApplet *> applets;
     if (parser.isSet(testOption)) {
-        pluginIds << "org.deepin.ds.corona-example";
+        pluginIds << "org.deepin.ds.example";
     } else if (parser.isSet(coronaOption)) {
         pluginIds << parser.values(coronaOption);
     } else {

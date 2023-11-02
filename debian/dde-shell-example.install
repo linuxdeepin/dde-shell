@@ -1,2 +1,2 @@
-usr/lib/*/*dde-shell/*
-usr/share/dde-shell/*
+usr/lib/*/dde-shell/org.deepin.ds.example*
+usr/share/dde-shell/org.deepin.ds.example*/
