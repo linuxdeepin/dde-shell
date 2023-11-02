@@ -4,20 +4,20 @@
 
 #pragma once
 
-#include "corona.h"
+#include "panel.h"
 #include <QQuickItem>
 
 DS_BEGIN_NAMESPACE
 namespace osd {
 
-class OsdCorona : public DCorona
+class OsdPanel : public DPanel
 {
     Q_OBJECT
     Q_PROPERTY(bool visible READ visible NOTIFY visibleChanged FINAL)
     Q_PROPERTY(QString osdType READ osdType NOTIFY osdTypeChanged FINAL)
     Q_CLASSINFO("D-Bus Interface", "org.deepin.osdService")
 public:
-    explicit OsdCorona(QObject *parent = nullptr);
+    explicit OsdPanel(QObject *parent = nullptr);
 
     virtual void load() override;
     virtual void init() override;

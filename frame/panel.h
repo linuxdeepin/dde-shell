@@ -14,14 +14,14 @@ DS_BEGIN_NAMESPACE
 /**
  * @brief 插件集
  */
-class DCoronaPrivate;
-class DS_SHARE DCorona : public DContainment
+class DPanelPrivate;
+class DS_SHARE DPanel : public DContainment
 {
     Q_OBJECT
-    D_DECLARE_PRIVATE(DCorona)
+    D_DECLARE_PRIVATE(DPanel)
 public:
-    explicit DCorona(QObject *parent = nullptr);
-    virtual ~DCorona() override;
+    explicit DPanel(QObject *parent = nullptr);
+    virtual ~DPanel() override;
 
     QQuickWindow *window() const;
 

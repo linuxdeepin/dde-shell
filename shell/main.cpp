@@ -34,8 +34,8 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
 
-    QCommandLineOption coronaOption("c", "collections of corona.", "corona", QString());
-    parser.addOption(coronaOption);
+    QCommandLineOption panelOption("p", "collections of panel.", "panel", QString());
+    parser.addOption(panelOption);
     QCommandLineOption testOption(QStringList() << "t" << "test", "application test.");
     parser.addOption(testOption);
     QCommandLineOption disableAppletOption("d", "disabled applet.", "disable-applet", QString());
@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
     QList<DApplet *> applets;
     if (parser.isSet(testOption)) {
         pluginIds << "org.deepin.ds.example";
-    } else if (parser.isSet(coronaOption)) {
-        pluginIds << parser.values(coronaOption);
+    } else if (parser.isSet(panelOption)) {
+        pluginIds << parser.values(panelOption);
     } else {
         for (auto item : DPluginLoader::instance()->rootPlugins()) {
             pluginIds << item.pluginId();
