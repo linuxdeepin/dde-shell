@@ -1,7 +1,7 @@
 {
     "Plugin": {
         "Version": "1.0",
-        "Id": "org.deepin.ds.corona-example",
+        "Id": "org.deepin.ds.example",
         "Url": "main.qml",
         "ContainmentType": "Panel",
         "Position": "center"

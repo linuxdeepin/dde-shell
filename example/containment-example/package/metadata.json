@@ -1,9 +1,9 @@
 {
     "Plugin": {
         "Version": "1.0",
-        "Id": "org.deepin.ds.containment-example",
+        "Id": "org.deepin.ds.example.containment",
         "Url": "main.qml",
-        "Parent": "org.deepin.ds.corona-example",
+        "Parent": "org.deepin.ds.example",
         "ContainmentType": "Containment"
     }
 }

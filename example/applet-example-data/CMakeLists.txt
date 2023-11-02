@@ -11,4 +11,4 @@ target_link_libraries(ds-example-applet-data PRIVATE
     dde-shell-frame
 )
 
-ds_install_package(PACKAGE org.deepin.ds.applet-example-data TARGET ds-example-applet-data)
+ds_install_package(PACKAGE org.deepin.ds.example.applet-data TARGET ds-example-applet-data)
