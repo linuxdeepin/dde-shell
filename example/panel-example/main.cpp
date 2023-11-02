@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "panelview.h"
-#include "examplecorona.h"
+#include "examplepanel.h"
 #include "pluginloader.h"
 
 #include <QGuiApplication>
@@ -17,10 +17,10 @@ int main(int argc, char *argv[])
 
     DPluginLoader::instance()->addPackageDir("/home/repo/dde-shell/example");
 
-    ExampleCorona corona;
-    corona.load();
+    ExamplePanel panel;
+    panel.load();
 
-    auto view = corona.view();
+    auto view = panel.view();
     view->resize(600, 400);
     view->show();
 

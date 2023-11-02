@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "corona.h"
-#include "private/corona_p.h"
+#include "panel.h"
+#include "private/panel_p.h"
 
 #include "qmlengine.h"
 
@@ -16,31 +16,31 @@ DS_BEGIN_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(dsLog)
 
-DCorona::DCorona(QObject *parent)
-    : DContainment(*new DCoronaPrivate(this), parent)
+DPanel::DPanel(QObject *parent)
+    : DContainment(*new DPanelPrivate(this), parent)
 {
 }
 
-DCorona::~DCorona()
+DPanel::~DPanel()
 {
 
 }
 
-QQuickWindow *DCorona::window() const
+QQuickWindow *DPanel::window() const
 {
-    D_DC(DCorona);
+    D_DC(DPanel);
     return d->m_window;
 }
 
-void DCorona::load()
+void DPanel::load()
 {
-    D_D(DCorona);
+    D_D(DPanel);
     DContainment::load();
 }
 
-void DCorona::init()
+void DPanel::init()
 {
-    D_D(DCorona);
+    D_D(DPanel);
     d->initDciSearchPaths();
 
     auto applet = this;
@@ -60,9 +60,9 @@ void DCorona::init()
     engine->completeCreate();
 }
 
-void DCoronaPrivate::initDciSearchPaths()
+void DPanelPrivate::initDciSearchPaths()
 {
-    D_Q(DCorona);
+    D_Q(DPanel);
     DGUI_USE_NAMESPACE;
     auto dciPaths = DIconTheme::dciThemeSearchPaths();
     QList<DApplet *> list = m_applets;

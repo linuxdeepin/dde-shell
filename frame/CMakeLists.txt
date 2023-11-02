@@ -9,7 +9,7 @@ set(PUBLIC_HEADERS
     pluginfactory.h
     applet.h
     containment.h
-    corona.h
+    panel.h
     qmlengine.h
     layershell/dlayershellwindow.h
 )
@@ -17,7 +17,7 @@ add_library(dde-shell-frame SHARED
     ${PUBLIC_HEADERS}
     private/applet_p.h
     private/containment_p.h
-    private/corona_p.h
+    private/panel_p.h
     private/appletitem_p.h
     appletitem.h
     containmentitem.h
@@ -27,7 +27,7 @@ add_library(dde-shell-frame SHARED
     pluginfactory.cpp
     applet.cpp
     containment.cpp
-    corona.cpp
+    panel.cpp
     appletitem.cpp
     containmentitem.cpp
     qmlengine.cpp

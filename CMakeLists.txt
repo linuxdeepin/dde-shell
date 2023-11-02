@@ -56,7 +56,7 @@ find_package(PkgConfig REQUIRED)
 add_subdirectory(frame)
 add_subdirectory(shell)
 add_subdirectory(example)
-add_subdirectory(coronas)
+add_subdirectory(panels)
 
 configure_package_config_file(
     "${CMAKE_CURRENT_LIST_DIR}/misc/DDEShellConfig.cmake.in"

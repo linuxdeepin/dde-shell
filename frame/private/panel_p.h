@@ -5,7 +5,7 @@
 #pragma once
 
 #include "containment_p.h"
-#include "corona.h"
+#include "panel.h"
 
 #include <dobject_p.h>
 #include <QVariant>
@@ -14,10 +14,10 @@ DS_BEGIN_NAMESPACE
 /**
  * @brief 插件项
  */
-class DCoronaPrivate : public DContainmentPrivate
+class DPanelPrivate : public DContainmentPrivate
 {
 public:
-    explicit DCoronaPrivate(DCorona *qq)
+    explicit DPanelPrivate(DPanel *qq)
         : DContainmentPrivate(qq)
     {
 
@@ -27,7 +27,7 @@ public:
 
     QQuickWindow *m_window = nullptr;
 
-    D_DECLARE_PUBLIC(DCorona)
+    D_DECLARE_PUBLIC(DPanel)
 };
 
 DS_END_NAMESPACE

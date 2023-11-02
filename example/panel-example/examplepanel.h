@@ -4,15 +4,15 @@
 
 #pragma once
 
-#include "corona.h"
+#include "panel.h"
 
 DS_USE_NAMESPACE
 
-class ExampleCorona : public DCorona
+class ExamplePanel : public DPanel
 {
     Q_OBJECT
 public:
-    explicit ExampleCorona(QObject *parent = nullptr);
+    explicit ExamplePanel(QObject *parent = nullptr);
 
     void load() override;
 

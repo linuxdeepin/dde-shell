@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "osdcorona.h"
+#include "osdpanel.h"
 
 #include "pluginfactory.h"
 
@@ -15,22 +15,22 @@
 DS_BEGIN_NAMESPACE
 namespace osd {
 
-OsdCorona::OsdCorona(QObject *parent)
-    : DCorona(parent)
+OsdPanel::OsdPanel(QObject *parent)
+    : DPanel(parent)
 {
 }
 
-void OsdCorona::load()
+void OsdPanel::load()
 {
     QDBusConnection bus = QDBusConnection::sessionBus();
     if (!bus.registerService("org.deepin.dde.Shell")) {
         qWarning() << "register failed" << bus.lastError().message();
     }
 
-    DCorona::load();
+    DPanel::load();
 }
 
-void OsdCorona::init()
+void OsdPanel::init()
 {
     auto bus = QDBusConnection::sessionBus();
     bus.registerObject(QStringLiteral("/org/deepin/osdService"),
@@ -40,23 +40,23 @@ void OsdCorona::init()
     m_osdTimer = new QTimer(this);
     m_osdTimer->setInterval(m_interval);
     m_osdTimer->setSingleShot(true);
-    QObject::connect(m_osdTimer, &QTimer::timeout, this, &OsdCorona::hideOsd);
-    DCorona::init();
+    QObject::connect(m_osdTimer, &QTimer::timeout, this, &OsdPanel::hideOsd);
+    DPanel::init();
 }
 
 Q_LOGGING_CATEGORY(osdLog, "dde.shell.osd")
 
-QString OsdCorona::osdType() const
+QString OsdPanel::osdType() const
 {
     return m_osdType;
 }
 
-bool OsdCorona::visible() const
+bool OsdPanel::visible() const
 {
     return m_visible;
 }
 
-void OsdCorona::showText(const QString &text)
+void OsdPanel::showText(const QString &text)
 {
     qCInfo(osdLog()) << "show text" << text;
     m_osdTimer->setInterval(text == "SwitchWM3D" ? 2000 : 1000);
@@ -65,13 +65,13 @@ void OsdCorona::showText(const QString &text)
     showOsd();
 }
 
-void OsdCorona::hideOsd()
+void OsdPanel::hideOsd()
 {
     m_osdTimer->stop();
     setVisible(false);
 }
 
-void OsdCorona::showOsd()
+void OsdPanel::showOsd()
 {
     m_osdTimer->stop();
 
@@ -79,7 +79,7 @@ void OsdCorona::showOsd()
     setVisible(true);
 }
 
-void OsdCorona::setVisible(const bool visible)
+void OsdPanel::setVisible(const bool visible)
 {
     if (visible == m_visible)
         return;
@@ -87,15 +87,15 @@ void OsdCorona::setVisible(const bool visible)
     Q_EMIT visibleChanged();
 }
 
-void OsdCorona::setOsdType(const QString &osdType)
+void OsdPanel::setOsdType(const QString &osdType)
 {
     m_osdType = osdType;
     emit osdTypeChanged(m_osdType);
 }
 
-D_APPLET_CLASS(OsdCorona)
+D_APPLET_CLASS(OsdPanel)
 
 }
 DS_END_NAMESPACE
 
-#include "osdcorona.moc"
+#include "osdpanel.moc"
