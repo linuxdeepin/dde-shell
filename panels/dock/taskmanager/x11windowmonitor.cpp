@@ -1,0 +1,188 @@
+// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "dsglobal.h"
+#include "x11utils.h"
+#include "x11window.h"
+#include "abstractwindow.h"
+#include "x11windowmonitor.h"
+#include "abstractwindowmonitor.h"
+
+#include <memory>
+#include <thread>
+#include <cstdint>
+#include <iterator>
+#include <algorithm>
+#include <xcb/xcb.h>
+#include <xcb/xproto.h>
+
+#include <DDBusSender>
+
+#include <QPointer>
+#include <QGuiApplication>
+#include <QLoggingCategory>
+
+#define X11 X11Utils::instance()
+
+Q_LOGGING_CATEGORY(x11Log, "dde.shell.dock.taskmanager.x11windowmonitor")
+
+DS_BEGIN_NAMESPACE
+namespace dock {
+static QPointer<X11WindowMonitor> monitor;
+bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *message, qintptr *)
+{
+    if (eventType != "xcb_generic_event_t" || monitor.isNull())
+        return false;
+
+    auto xcb_event = reinterpret_cast<xcb_generic_event_t*>(message);
+    switch (xcb_event->response_type) {
+        case XCB_MAP_NOTIFY: {
+            auto mE = reinterpret_cast<xcb_map_notify_event_t*>(xcb_event);
+            Q_EMIT monitor->windowMapped(mE->window);
+            break;
+        }
+        case XCB_UNMAP_NOTIFY: {
+            auto uE = reinterpret_cast<xcb_unmap_notify_event_t*>(xcb_event);
+            Q_EMIT monitor->windowUnmapped(uE->window);
+            break;
+        }
+        case XCB_PROPERTY_NOTIFY: {
+            auto pE = reinterpret_cast<xcb_property_notify_event_t*>(xcb_event);
+            Q_EMIT monitor->windowPropertyChanged(pE->window, pE->atom);
+            break;
+        }
+    }
+    return false;
+};
+
+X11WindowMonitor::X11WindowMonitor(QObject* parent)
+    : AbstractWindowMonitor(parent)
+{
+    monitor = this;
+    connect(this, &X11WindowMonitor::windowMapped, this, &X11WindowMonitor::onWindowMapped);
+    connect(this, &X11WindowMonitor::windowUnmapped, this, &X11WindowMonitor::onWindowUnMapped);
+    connect(this, &X11WindowMonitor::windowPropertyChanged, this, &X11WindowMonitor::onWindowPropertyChanged);
+}
+
+void X11WindowMonitor::start()
+{
+    const xcb_setup_t *setup = xcb_get_setup(X11->getXcbConnection());
+    xcb_screen_iterator_t iter = xcb_setup_roots_iterator(setup);
+    xcb_screen_t *screen = iter.data;
+    m_rootWindow = screen->root;
+
+    uint32_t value_list[] = {
+            0                                   | XCB_EVENT_MASK_PROPERTY_CHANGE        |
+            XCB_EVENT_MASK_VISIBILITY_CHANGE    | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY    |
+            XCB_EVENT_MASK_STRUCTURE_NOTIFY     | XCB_EVENT_MASK_FOCUS_CHANGE           
+    };
+
+    xcb_change_window_attributes(X11->getXcbConnection(), m_rootWindow, XCB_CW_EVENT_MASK, value_list);
+    xcb_flush(X11->getXcbConnection());
+
+    m_xcbEventFilter.reset(new XcbEventFilter());
+    qApp->installNativeEventFilter(m_xcbEventFilter.get());
+    QMetaObject::invokeMethod(this, &X11WindowMonitor::handleRootWindowClientListChanged);
+}
+
+void X11WindowMonitor::stop()
+{
+    qApp->removeNativeEventFilter(m_xcbEventFilter.get());
+    m_xcbEventFilter.reset(nullptr);
+    Q_EMIT AbstractWindowMonitor::WindowMonitorShutdown();
+}
+
+QPointer<AbstractWindow> X11WindowMonitor::getWindowByWindowId(ulong windowId)
+{
+    return m_windows.value(windowId).get();
+}
+
+void X11WindowMonitor::presentWindows(QStringList windows)
+{
+    QList<uint32_t> windowIds;
+    std::transform(windows.begin(), windows.end(), std::back_inserter(windowIds),[](QString windowId){
+        return windowId.toUInt();
+    });
+
+    DDBusSender().interface("com.deepin.wm")
+                .path("/com/deepin/wm")
+                .service("com.deepin.wm")
+                .method("PresentWindows")
+                .arg(windowIds)
+                .call().waitForFinished();
+}
+
+void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)
+{
+    auto window = m_windows.value(xcb_window, nullptr);
+    if (window) return;
+
+    uint32_t value_list[] = { XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_VISIBILITY_CHANGE};
+    xcb_change_window_attributes(X11->getXcbConnection(), xcb_window, XCB_CW_EVENT_MASK, value_list);
+    window = QSharedPointer<X11Window>{new X11Window(xcb_window, this)};
+    m_windows.insert(xcb_window, window);
+    Q_EMIT AbstractWindowMonitor::windowAdded(static_cast<QPointer<AbstractWindow>>(window.get()));
+}
+
+void X11WindowMonitor::onWindowUnMapped(xcb_window_t xcb_window)
+{
+    auto window = m_windows.value(xcb_window, nullptr);
+    if (window) {
+        m_windows.remove(xcb_window);
+    }
+}
+
+void X11WindowMonitor::onWindowPropertyChanged(xcb_window_t window, xcb_atom_t atom)
+{
+    if (window == m_rootWindow) {
+        handleRootWindowPropertyNotifyEvent(atom);
+        return;
+    }
+
+    auto x11Window = m_windows.value(window);
+    if (!x11Window) {
+        return;
+    }
+
+    if (atom == X11->getAtomByName("_NET_WM_STATE")) {
+        x11Window->updateWindowState();
+    }else if (atom == X11->getAtomByName("_NET_WM_PID")) {
+        x11Window->updatePid();
+    } else if (atom == X11->getAtomByName("_NET_WM_NAME")) {
+        x11Window->updateTitle();
+    } else if (atom == X11->getAtomByName("_NET_WM_ICON")) {
+        x11Window->updateIcon();
+    } else if (atom == X11->getAtomByName("_NET_WM_ALLOWED_ACTIONS")) {
+        x11Window->updateWindowAllowedActions();
+    }else if (atom == X11->getAtomByName("_NET_WM_WINDOW_TYPE")) {
+        x11Window->updateWindowTypes();
+    }
+}
+
+void X11WindowMonitor::handleRootWindowPropertyNotifyEvent(xcb_atom_t atom)
+{
+    if (atom == X11->getAtomByName("_NET_CLIENT_LIST")) {
+        handleRootWindowClientListChanged();
+    }
+}
+
+void X11WindowMonitor::handleRootWindowClientListChanged()
+{
+    auto currentOpenedWindowList = X11->getWindowClientList(m_rootWindow);
+
+    for (auto openedWindows : currentOpenedWindowList) {
+        if (!m_windows.contains(openedWindows)) {
+            onWindowMapped(openedWindows);
+        }
+    }
+
+    for (auto alreadyOpenedWindow : m_windows.keys()) {
+        if (!currentOpenedWindowList.contains(alreadyOpenedWindow)) {
+            onWindowUnMapped(alreadyOpenedWindow);
+        }
+    }
+
+}
+}
+DS_END_NAMESPACE

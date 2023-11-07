@@ -18,6 +18,10 @@ Build-Depends:
  libdtk6core-dev,
  libdtkcommon-dev,
  libxcb-ewmh-dev,
+ libxcb-res0-dev,
+ libxcb-util-dev,
+ libxcb-icccm4-dev,
+ libxcb1-dev,
  extra-cmake-modules,
 Standards-Version: 3.9.8
 Homepage: http://www.deepin.org
