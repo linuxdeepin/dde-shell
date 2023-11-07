@@ -29,7 +29,7 @@ DPanel::~DPanel()
 QQuickWindow *DPanel::window() const
 {
     D_DC(DPanel);
-    return d->m_window;
+    return qobject_cast<QQuickWindow *>(d->m_rootObject);
 }
 
 void DPanel::load()
@@ -51,8 +51,8 @@ void DPanel::init()
 
     auto window = qobject_cast<QQuickWindow *>(rootObject);
     if (window) {
-        d->m_window = window;
-        d->m_window->setProperty("_ds_window_applet", QVariant::fromValue(applet));
+        applet->d_func()->setRootObject(window);
+        d->m_rootObject->setProperty("_ds_window_applet", QVariant::fromValue(applet));
     }
 
     DContainment::init();

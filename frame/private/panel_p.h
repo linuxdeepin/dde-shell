@@ -25,8 +25,6 @@ public:
 
     void initDciSearchPaths();
 
-    QQuickWindow *m_window = nullptr;
-
     D_DECLARE_PUBLIC(DPanel)
 };
 

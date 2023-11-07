@@ -22,6 +22,15 @@ public:
     }
 
     DPluginMetaData m_metaData;
+    QObject *m_rootObject{nullptr};
+    void setRootObject(QObject *root)
+    {
+        if (m_rootObject == root)
+            return;
+        m_rootObject = root;
+        D_Q(DApplet);
+        Q_EMIT q->rootObjectChanged();
+    }
 
     D_DECLARE_PUBLIC(DApplet);
 };
