@@ -1,0 +1,26 @@
+{
+	"magic": "dsg.config.meta",
+	"version": "1.0",
+	"contents": {
+		"Allow_Force_Quit": {
+			"value": "enabled",
+			"serial": 0,
+			"flags": [],
+			"name": "Allow_Force_Quit",
+			"name[zh_CN]": "强制退出",
+			"description": "allow force quit app ot not",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"Window_Split": {
+			"value": "disabled",
+			"serial": 0,
+			"flags": [],
+			"name": "Window_Split",
+			"name[zh_CN]": "窗口拆分",
+			"description": "is window split",
+			"permissions": "readwrite",
+			"visibility": "private"
+		}
+	}
+}

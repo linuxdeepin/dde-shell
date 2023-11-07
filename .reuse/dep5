@@ -43,6 +43,10 @@ Files: *.deepin.dde.*.xml */org.desktopspec.*.xml
 Copyright: UnionTech Software Technology Co., Ltd.
 License: GPL-3.0-or-later
 
+Files: panels/dock/api/dbus/**.xml panels/dock/taskmanager/api/dbus/**.xml
+Copyright: UnionTech Software Technology Co., Ltd.
+License: GPL-3.0-or-later
+
 # package json
 Files: *.json
 Copyright: None
@@ -52,6 +56,10 @@ License: CC0-1.0
 Files: frame/layershell/protocol/wlr-layer-shell-unstable-v1.xml
 Copyright: 2017 Drew DeVault
 License: MIT
+
+Files: panels/dock/taskmanager/api/wayland-protocols/ztreeland-foreign-toplevel-manager-v1.xml
+Copyright: None
+License: CC0-1.0
 
 # test bash
 Files: *.sh
