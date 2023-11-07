@@ -77,7 +77,7 @@ DQmlEngine::~DQmlEngine()
 QObject *DQmlEngine::beginCreate()
 {
     D_D(DQmlEngine);
-    QScopedPointer<QQmlComponent> component(new QQmlComponent(engine(), this));
+    std::unique_ptr<QQmlComponent> component(new QQmlComponent(engine(), this));
     const QString url = d->appletUrl();
     if (url.isEmpty())
         return nullptr;
@@ -91,7 +91,7 @@ QObject *DQmlEngine::beginCreate()
     auto object = component->beginCreate(context);
     d->m_context = context;
     d->m_rootObject = object;
-    d->m_component = component.take();
+    d->m_component = component.release();
     return object;
 }
 

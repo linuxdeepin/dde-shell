@@ -48,6 +48,12 @@ DPluginMetaData DApplet::pluginMetaData() const
     return d->m_metaData;
 }
 
+QObject *DApplet::rootObject() const
+{
+    D_DC(DApplet);
+    return d->m_rootObject;
+}
+
 void DApplet::init()
 {
 }

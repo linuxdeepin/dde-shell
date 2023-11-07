@@ -5,6 +5,7 @@
 #include "exampleapplet.h"
 
 #include "pluginfactory.h"
+#include "appletitem.h"
 
 ExampleApplet::ExampleApplet(QObject *parent)
     : DApplet(parent)
@@ -16,6 +17,17 @@ ExampleApplet::ExampleApplet(QObject *parent)
 QString ExampleApplet::mainText() const
 {
     return m_mainText;
+}
+
+void ExampleApplet::init()
+{
+    DApplet::init();
+
+    DAppletItem *root = qobject_cast<DAppletItem *>(rootObject());
+    Q_ASSERT(root);
+
+    m_mainText = QString("%1 - w:%2;h:%3").arg(m_mainText).arg(root->width()).arg(root->height());
+    Q_EMIT mainTextChanged();
 }
 
 D_APPLET_CLASS(ExampleApplet)

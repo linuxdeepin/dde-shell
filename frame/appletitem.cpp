@@ -4,6 +4,7 @@
 
 #include "appletitem.h"
 #include "private/appletitem_p.h"
+#include "private/applet_p.h"
 #include "applet.h"
 #include "qmlengine.h"
 
@@ -41,7 +42,7 @@ DAppletItem *DAppletItem::itemForApplet(DApplet *applet)
     if (it != g_appletItems.constEnd())
         return it.value();
 
-    QScopedPointer<DQmlEngine> engine(new DQmlEngine(applet, applet));
+    std::unique_ptr<DQmlEngine> engine(new DQmlEngine(applet, applet));
 
     auto rootObject = engine->beginCreate();
     if (!rootObject) {
@@ -55,10 +56,11 @@ DAppletItem *DAppletItem::itemForApplet(DApplet *applet)
     }
 
     item->d_func()->m_applet = applet;
-    item->d_func()->m_engine = engine.take();
+    item->d_func()->m_engine = engine.release();
     g_appletItems[applet] = item;
 
     item->d_func()->m_engine->completeCreate();
+    applet->d_func()->setRootObject(item);
 
     return item;
 }

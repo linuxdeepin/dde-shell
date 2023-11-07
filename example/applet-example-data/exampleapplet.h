@@ -11,11 +11,16 @@ DS_USE_NAMESPACE
 class ExampleApplet : public DApplet
 {
     Q_OBJECT
-    Q_PROPERTY(QString mainText READ mainText CONSTANT)
+    Q_PROPERTY(QString mainText READ mainText NOTIFY mainTextChanged CONSTANT)
 public:
     explicit ExampleApplet(QObject *parent = nullptr);
 
     QString mainText() const;
+
+    virtual void init() override;
+
+Q_SIGNALS:
+    void mainTextChanged();
 private:
     QString m_mainText;
 };
