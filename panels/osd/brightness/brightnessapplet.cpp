@@ -27,10 +27,6 @@ BrightnessApplet::BrightnessApplet(QObject *parent)
 
 }
 
-void BrightnessApplet::init()
-{
-}
-
 QString BrightnessApplet::iconName() const
 {
     return m_iconName;

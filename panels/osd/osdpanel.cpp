@@ -20,17 +20,18 @@ OsdPanel::OsdPanel(QObject *parent)
 {
 }
 
-void OsdPanel::load()
+bool OsdPanel::load()
 {
     QDBusConnection bus = QDBusConnection::sessionBus();
     if (!bus.registerService("org.deepin.dde.Shell")) {
         qWarning() << "register failed" << bus.lastError().message();
+        return false;
     }
 
-    DPanel::load();
+    return DPanel::load();
 }
 
-void OsdPanel::init()
+bool OsdPanel::init()
 {
     auto bus = QDBusConnection::sessionBus();
     bus.registerObject(QStringLiteral("/org/deepin/osdService"),
@@ -41,7 +42,7 @@ void OsdPanel::init()
     m_osdTimer->setInterval(m_interval);
     m_osdTimer->setSingleShot(true);
     QObject::connect(m_osdTimer, &QTimer::timeout, this, &OsdPanel::hideOsd);
-    DPanel::init();
+    return DPanel::init();
 }
 
 Q_LOGGING_CATEGORY(osdLog, "dde.shell.osd")

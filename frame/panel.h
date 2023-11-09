@@ -26,9 +26,9 @@ public:
     QQuickWindow *window() const;
 
     // 加载插件
-    virtual void load() override;
+    virtual bool load() override;
     // 初始化
-    virtual void init() override;
+    virtual bool init() override;
 };
 
 DS_END_NAMESPACE

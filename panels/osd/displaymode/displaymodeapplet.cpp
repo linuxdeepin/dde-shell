@@ -75,10 +75,6 @@ DisPlayModeApplet::DisPlayModeApplet(QObject *parent)
 
 }
 
-void DisPlayModeApplet::init()
-{
-}
-
 int DisPlayModeApplet::state() const
 {
     return m_state;

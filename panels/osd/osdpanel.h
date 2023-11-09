@@ -19,8 +19,8 @@ class OsdPanel : public DPanel
 public:
     explicit OsdPanel(QObject *parent = nullptr);
 
-    virtual void load() override;
-    virtual void init() override;
+    virtual bool load() override;
+    virtual bool init() override;
 
     bool visible() const;
     QString osdType() const;

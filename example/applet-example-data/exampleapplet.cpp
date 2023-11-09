@@ -6,6 +6,7 @@
 
 #include "pluginfactory.h"
 #include "appletitem.h"
+#include <DConfig>
 
 ExampleApplet::ExampleApplet(QObject *parent)
     : DApplet(parent)
@@ -19,7 +20,14 @@ QString ExampleApplet::mainText() const
     return m_mainText;
 }
 
-void ExampleApplet::init()
+bool ExampleApplet::load()
+{
+    DCORE_USE_NAMESPACE;
+    std::unique_ptr<DConfig> config(DConfig::create("org.deepin.ds.example", "org.deepin.ds.example"));
+    return config->value("loadAppletExampleData").toBool();
+}
+
+bool ExampleApplet::init()
 {
     DApplet::init();
 
@@ -28,6 +36,7 @@ void ExampleApplet::init()
 
     m_mainText = QString("%1 - w:%2;h:%3").arg(m_mainText).arg(root->width()).arg(root->height());
     Q_EMIT mainTextChanged();
+    return true;
 }
 
 D_APPLET_CLASS(ExampleApplet)

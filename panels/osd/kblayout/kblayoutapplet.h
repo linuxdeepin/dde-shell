@@ -39,7 +39,6 @@ class KBLayoutApplet : public DApplet
 
 public:
     explicit KBLayoutApplet(QObject *parent = nullptr);
-    virtual void init() override;
 
     QString currentLayout() const;
     QQmlListProperty<KBLayout> layouts();

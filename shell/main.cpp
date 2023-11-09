@@ -87,8 +87,14 @@ int main(int argc, char *argv[])
         applets << applet;
     }
     for (auto applet : applets) {
-        applet->load();
-        applet->init();
+        if (!applet->load()) {
+            qWarning() << "Plugin load failed:" << applet->pluginId();
+            continue;
+        }
+        if (!applet->init()) {
+            qWarning() << "Plugin init failed:" << applet->pluginId();
+            continue;
+        }
     }
 
     return a.exec();

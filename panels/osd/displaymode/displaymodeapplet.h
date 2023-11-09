@@ -55,7 +55,6 @@ class DisPlayModeApplet : public DApplet
     Q_PROPERTY(QQmlListProperty<DPItem> planItems READ planItems NOTIFY planItemsChanged FINAL)
 public:
     explicit DisPlayModeApplet(QObject *parent = nullptr);
-    virtual void init() override;
 
     int state() const;
     DPItem *currentPlanItem() const;

@@ -54,13 +54,14 @@ QObject *DApplet::rootObject() const
     return d->m_rootObject;
 }
 
-void DApplet::init()
+bool DApplet::load()
 {
+    return true;
 }
 
-void DApplet::load()
+bool DApplet::init()
 {
-
+    return true;
 }
 
 DS_END_NAMESPACE

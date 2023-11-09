@@ -35,11 +35,25 @@ DContainment::~DContainment()
 DApplet *DContainment::createApplet(const QString &pluginId)
 {
     D_D(DContainment);
+    const auto children = DPluginLoader::instance()->childrenPlugin(this->pluginId());
+    if (!children.contains(DPluginLoader::instance()->plugin(pluginId))) {
+        return nullptr;
+    }
     auto applet = DPluginLoader::instance()->loadApplet(pluginId);
     if (applet) {
+        applet->setParent(this);
         d->m_applets.append(applet);
     }
     return applet;
+}
+
+void DContainment::removeApplet(DApplet *applet)
+{
+    D_D(DContainment);
+    if (d->m_applets.contains(applet)) {
+        d->m_applets.removeOne(applet);
+        applet->deleteLater();
+    }
 }
 
 QList<DApplet *> DContainment::applets() const
@@ -55,35 +69,47 @@ QList<QObject *> DContainment::appletItems()
     return d->m_appletItems;
 }
 
-void DContainment::load()
+bool DContainment::load()
 {
     const auto children = DPluginLoader::instance()->childrenPlugin(pluginId());
     for (const auto &item : children) {
         const QString id = item.pluginId();
         auto applet = createApplet(id);
 
-        if (applet) {
-            applet->load();
+        if (!applet)
+            continue;
+
+        if (!applet->load()) {
+            removeApplet(applet);
         }
     }
-    DApplet::load();
+    return DApplet::load();
 }
 
-void DContainment::init()
+bool DContainment::init()
 {
     D_D(DContainment);
 
+    QList<DApplet *> failedApplets;
     for (auto applet : applets()) {
         auto appletItem = DAppletItem::itemForApplet(applet);
-        if (!appletItem || d->m_appletItems.contains(appletItem))
-            continue;
-        d->m_appletItems << appletItem;
+        if (appletItem && !d->m_appletItems.contains(appletItem)) {
+            d->m_appletItems << appletItem;
+        }
 
-        applet->init();
+        if (!applet->init()) {
+            failedApplets << applet;
+            continue;
+        }
     }
-    DApplet::init();
+    bool res = DApplet::init();
+
+    for (auto applet: failedApplets) {
+        removeApplet(applet);
+    }
 
     Q_EMIT appletItemsChanged();
+    return res;
 }
 
 DS_END_NAMESPACE

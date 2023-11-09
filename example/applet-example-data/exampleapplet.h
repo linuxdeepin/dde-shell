@@ -17,7 +17,8 @@ public:
 
     QString mainText() const;
 
-    virtual void init() override;
+    virtual bool load() override;
+    virtual bool init() override;
 
 Q_SIGNALS:
     void mainTextChanged();

@@ -17,7 +17,6 @@ class AudioApplet : public DApplet
     Q_PROPERTY(bool increaseVolume READ increaseVolume WRITE setIncreaseVolume NOTIFY increaseVolumeChanged FINAL)
 public:
     explicit AudioApplet(QObject *parent = nullptr);
-    virtual void init() override;
 
     double volumeValue() const;
     void setVolumeValue(double newVolumeValue);

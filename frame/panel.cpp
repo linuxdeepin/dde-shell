@@ -32,13 +32,13 @@ QQuickWindow *DPanel::window() const
     return qobject_cast<QQuickWindow *>(d->m_rootObject);
 }
 
-void DPanel::load()
+bool DPanel::load()
 {
     D_D(DPanel);
-    DContainment::load();
+    return DContainment::load();
 }
 
-void DPanel::init()
+bool DPanel::init()
 {
     D_D(DPanel);
     d->initDciSearchPaths();
@@ -55,9 +55,11 @@ void DPanel::init()
         d->m_rootObject->setProperty("_ds_window_applet", QVariant::fromValue(applet));
     }
 
-    DContainment::init();
+    bool res = DContainment::init();
 
     engine->completeCreate();
+
+    return res;
 }
 
 void DPanelPrivate::initDciSearchPaths()
