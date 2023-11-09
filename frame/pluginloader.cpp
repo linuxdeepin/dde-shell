@@ -22,6 +22,7 @@ DS_BEGIN_NAMESPACE;
 DCORE_USE_NAMESPACE
 
 static const QString MetaDataFileName{"metadata.json"};
+static const QString PluginSuffix{".so"};
 
 Q_DECLARE_LOGGING_CATEGORY(dsLog)
 
@@ -116,13 +117,29 @@ public:
         return result;
     }
 
+    bool existPlugin(const DPluginMetaData &data) const
+    {
+        const QString fileName = data.pluginId();
+        D_QC(DPluginLoader);
+        for (auto item : q->pluginDirs()) {
+            const QDir dir(item);
+            if (dir.exists(fileName + PluginSuffix))
+                return true;
+        }
+        return false;
+    }
+
     DAppletFactory *appletFactory(const DPluginMetaData &data)
     {
+        if (!existPlugin(data))
+            return nullptr;
+
         DAppletFactory *factory = nullptr;
         const QString fileName = data.pluginId();
         QPluginLoader loader(fileName);
         loader.load();
         if (!loader.isLoaded()) {
+            qCWarning(dsLog) << "Load the plugin failed." << loader.errorString();
             return factory;
         }
 
@@ -230,6 +247,11 @@ void DPluginLoader::addPluginDir(const QString &dir)
     if (QCoreApplication::libraryPaths().contains(dir))
         return;
     QCoreApplication::addLibraryPath(dir);
+}
+
+QStringList DPluginLoader::pluginDirs() const
+{
+    return QCoreApplication::libraryPaths();
 }
 
 QStringList DPluginLoader::disabledApplets() const

@@ -30,6 +30,7 @@ public:
     QList<DPluginMetaData> rootPlugins() const;
     void addPackageDir(const QString &dir);
     void addPluginDir(const QString &dir);
+    QStringList pluginDirs() const;
 
     QStringList disabledApplets() const;
     void setDisabledApplets(const QStringList &pluginIds);
