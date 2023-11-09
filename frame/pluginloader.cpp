@@ -329,4 +329,10 @@ DPluginMetaData DPluginLoader::parentPlugin(const QString &pluginId) const
     return d->pluginMetaData(parentId);
 }
 
+DPluginMetaData DPluginLoader::plugin(const QString &pluginId) const
+{
+    D_DC(DPluginLoader);
+    return d->pluginMetaData(pluginId);
+}
+
 DS_END_NAMESPACE

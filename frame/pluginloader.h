@@ -39,6 +39,7 @@ public:
 
     QList<DPluginMetaData> childrenPlugin(const QString &pluginId) const;
     DPluginMetaData parentPlugin(const QString &pluginId) const;
+    DPluginMetaData plugin(const QString &pluginId) const;
 };
 
 DS_END_NAMESPACE

@@ -25,12 +25,13 @@ public:
     virtual ~DContainment() override;
 
     DApplet *createApplet(const QString &pluginId);
+    void removeApplet(DApplet *applet);
 
     QList<DApplet *> applets() const;
     QList<QObject *> appletItems();
 
-    void load() override;
-    void init() override;
+    bool load() override;
+    bool init() override;
 
 protected:
     explicit DContainment(DContainmentPrivate &dd, QObject *parent = nullptr);

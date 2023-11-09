@@ -16,7 +16,6 @@ class BrightnessApplet : public DApplet
     Q_PROPERTY(double brightness READ brightness NOTIFY brightnessChanged FINAL)
 public:
     explicit BrightnessApplet(QObject *parent = nullptr);
-    virtual void init() override;
 
     double brightness() const;
     QString iconName() const;

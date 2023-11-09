@@ -11,16 +11,17 @@ ExamplePanel::ExamplePanel(QObject *parent)
 {
 }
 
-void ExamplePanel::load()
+bool ExamplePanel::load()
 {
-    DPanel::load();
+    return DPanel::load();
 }
 
-void ExamplePanel::init()
+bool ExamplePanel::init()
 {
     DPanel::init();
     Q_ASSERT(rootObject());
     Q_ASSERT(window());
+    return true;
 }
 
 D_APPLET_CLASS(ExamplePanel)

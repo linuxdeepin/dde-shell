@@ -33,9 +33,8 @@ public:
 
     DPluginMetaData pluginMetaData() const;
 
-    virtual void init();
-
-    virtual void load();
+    virtual bool load();
+    virtual bool init();
 
 Q_SIGNALS:
     void rootObjectChanged();

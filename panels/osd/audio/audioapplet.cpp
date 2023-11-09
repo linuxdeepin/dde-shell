@@ -41,10 +41,6 @@ AudioApplet::AudioApplet(QObject *parent)
 
 }
 
-void AudioApplet::init()
-{
-}
-
 bool AudioApplet::increaseVolume() const
 {
     return m_increaseVolume;

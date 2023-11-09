@@ -101,10 +101,6 @@ KBLayoutApplet::KBLayoutApplet(QObject *parent)
 {
 }
 
-void KBLayoutApplet::init()
-{
-}
-
 QQmlListProperty<KBLayout> KBLayoutApplet::layouts()
 {
     return QQmlListProperty<KBLayout>(this, &m_layouts);
