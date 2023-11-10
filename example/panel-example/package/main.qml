@@ -15,14 +15,17 @@ Window {
     height: 200
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom
 
-    Control {
+    Repeater {
         anchors.fill: parent
-        padding: 20
-
-        contentItem: Applet.appletItems[0]
-        background: Rectangle {
-            color: "plum"
-            opacity: 0.8
+        model: Applet.appletItems
+        Control {
+            anchors.fill: parent
+            padding: 20
+            contentItem: modelData
+            background: Rectangle {
+                color: "plum"
+                opacity: 0.8
+            }
         }
     }
 }
