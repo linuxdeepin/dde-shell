@@ -4,17 +4,17 @@
 
 #pragma once
 
+#include "dsglobal.h"
 #include "dlayershellwindow.h"
+
 #include <QObject>
 #include <QWindow>
 
-#include <qobject.h>
-#include <qtmetamacros.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
 class xcb_connection_t;
-
+DS_BEGIN_NAMESPACE
 class LayerShellEmulation : public QObject
 {
     Q_OBJECT
@@ -30,5 +30,6 @@ private slots:
 
 private:
     QWindow* m_window;
-    DS_NAMESPACE::DLayerShellWindow* m_dlayerShellWindow;
+    DLayerShellWindow* m_dlayerShellWindow;
 };
+DS_END_NAMESPACE

@@ -11,9 +11,8 @@ import org.deepin.ds 1.0
 Window {
     id: root
     visible: true
-    width: Screen.width
     height: 200
-    DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom
+    DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorLeft | DLayerShellWindow.AnchorRight
 
     Repeater {
         anchors.fill: parent
