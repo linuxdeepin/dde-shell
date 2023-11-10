@@ -31,9 +31,9 @@ public:
 
     QWindow* parentWindow;
     QString scope = QStringLiteral("window");
-    DLayerShellWindow::Anchors anchors = {DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom | DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight};
+    DLayerShellWindow::Anchors anchors = {DLayerShellWindow::AnchorNone};
     int32_t exclusionZone = 0;
-    DLayerShellWindow::KeyboardInteractivity keyboardInteractivity = DLayerShellWindow::KeyboardInteractivityExclusive;
+    DLayerShellWindow::KeyboardInteractivity keyboardInteractivity = DLayerShellWindow::KeyboardInteractivityNone;
     DLayerShellWindow::Layer layer = DLayerShellWindow::LayerTop;
     int leftMargin = 0;
     int rightMargin = 0;

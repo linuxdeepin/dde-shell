@@ -38,18 +38,21 @@ QWaylandLayeShellSurface::QWaylandLayeShellSurface(QtWayland::zwlr_layer_shell_v
     init(shell->get_layer_surface(window->waylandSurface()->object(), output, m_dlayerShellWindow->layer(), m_dlayerShellWindow->scope()));
 
     set_layer(m_dlayerShellWindow->layer());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, [this](){
+    connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, [this, window](){
         set_layer(m_dlayerShellWindow->layer());
+        window->waylandSurface()->commit();
     });
 
     set_anchor(m_dlayerShellWindow->anchors());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::anchorsChanged, this,[this](){
+    connect(m_dlayerShellWindow, &DLayerShellWindow::anchorsChanged, this,[this, window](){
         set_anchor(m_dlayerShellWindow->anchors());
+        window->waylandSurface()->commit();
     });
 
     set_exclusive_zone(m_dlayerShellWindow->exclusionZone());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::exclusionZoneChanged, this,[this](){
+    connect(m_dlayerShellWindow, &DLayerShellWindow::exclusionZoneChanged, this,[this, window](){
         set_exclusive_zone(m_dlayerShellWindow->exclusionZone());
+        window->waylandSurface()->commit();
     });
 
     set_margin(m_dlayerShellWindow->topMargin(), m_dlayerShellWindow->rightMargin(), m_dlayerShellWindow->bottomMargin(), m_dlayerShellWindow->leftMargin());
@@ -58,8 +61,9 @@ QWaylandLayeShellSurface::QWaylandLayeShellSurface(QtWayland::zwlr_layer_shell_v
     });
 
     set_keyboard_interactivity(m_dlayerShellWindow->keyboardInteractivity());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::keyboardInteractivityChanged, this, [this](){
+    connect(m_dlayerShellWindow, &DLayerShellWindow::keyboardInteractivityChanged, this, [this, window](){
         set_keyboard_interactivity(m_dlayerShellWindow->keyboardInteractivity());
+        window->waylandSurface()->commit();
     });
 
 
@@ -73,7 +77,7 @@ QWaylandLayeShellSurface::QWaylandLayeShellSurface(QtWayland::zwlr_layer_shell_v
         size.setHeight(0);
     }
 
-    if (size.isValid() && !size.isEmpty()) {
+    if (size.isValid()) {
         set_size(size.width(), size.height());
     }
 }
@@ -111,8 +115,9 @@ void QWaylandLayeShellSurface::applyConfigure()
 
 void QWaylandLayeShellSurface::setWindowGeometry(const QRect &geometry)
 {
-    const bool horizontallyConstrained = m_dlayerShellWindow->anchors() & (DLayerShellWindow::AnchorLeft & DLayerShellWindow::AnchorRight);
-    const bool verticallyConstrained = m_dlayerShellWindow->anchors() & (DLayerShellWindow::AnchorTop & DLayerShellWindow::AnchorBottom);
+    auto anchors = m_dlayerShellWindow->anchors();
+    const bool horizontallyConstrained =(anchors & (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight);
+    const bool verticallyConstrained = (anchors & (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom);
 
     QSize size = geometry.size();
     if (horizontallyConstrained) {
