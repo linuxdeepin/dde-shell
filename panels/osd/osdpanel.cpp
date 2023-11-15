@@ -23,10 +23,8 @@ OsdPanel::OsdPanel(QObject *parent)
 bool OsdPanel::load()
 {
     QDBusConnection bus = QDBusConnection::sessionBus();
-    if (!bus.registerService("org.deepin.dde.Shell")) {
-        qWarning() << "register failed" << bus.lastError().message();
-        return false;
-    }
+    // TODO
+    bus.registerService("org.deepin.dde.Shell");
 
     return DPanel::load();
 }
@@ -34,9 +32,12 @@ bool OsdPanel::load()
 bool OsdPanel::init()
 {
     auto bus = QDBusConnection::sessionBus();
-    bus.registerObject(QStringLiteral("/org/deepin/osdService"),
+    if (!bus.registerObject(QStringLiteral("/org/deepin/osdService"),
+                       QStringLiteral("org.deepin.osdService"),
                        this,
-                       QDBusConnection::ExportAllSlots | QDBusConnection::ExportAllSignals);
+                           QDBusConnection::ExportAllSlots)) {
+        return false;
+    }
 
     m_osdTimer = new QTimer(this);
     m_osdTimer->setInterval(m_interval);
