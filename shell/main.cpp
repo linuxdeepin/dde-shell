@@ -8,6 +8,8 @@
 #include <DLog>
 #include <DGuiApplicationHelper>
 
+#include <csignal>
+
 #include "applet.h"
 #include "pluginloader.h"
 
@@ -23,9 +25,14 @@ void outputPluginTreeStruct(const DPluginMetaData &plugin, int level)
     }
 }
 
+static void exitApp(int signal)
+{
+    Q_UNUSED(signal);
+    QCoreApplication::exit();
+}
+
 int main(int argc, char *argv[])
 {
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QGuiApplication a(argc, argv);
     a.setOrganizationName("deepin");
     a.setApplicationName("org.deepin.dde-shell");
@@ -60,6 +67,12 @@ int main(int argc, char *argv[])
     Dtk::Core::DLogManager::registerFileAppender();
     Dtk::Core::DLogManager::registerJournalAppender();
     qInfo() << "Log path is:" << Dtk::Core::DLogManager::getlogFilePath();
+
+    // add signal handler, and call QCoreApplication::exit.
+    std::signal(SIGINT, exitApp);
+    std::signal(SIGABRT, exitApp);
+    std::signal(SIGTERM, exitApp);
+    std::signal(SIGKILL, exitApp);
 
     QList<QString> pluginIds;
     QList<DApplet *> applets;
@@ -96,6 +109,13 @@ int main(int argc, char *argv[])
             continue;
         }
     }
+
+    QObject::connect(qApp, &QCoreApplication::aboutToQuit, [applets]() {
+        qInfo() << "Exit dde-shell.";
+        for (auto item : applets) {
+            item->deleteLater();
+        }
+    });
 
     return a.exec();
 }
