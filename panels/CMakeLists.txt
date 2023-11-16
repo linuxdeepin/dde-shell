@@ -4,3 +4,4 @@
 
 add_subdirectory(osd)
 add_subdirectory(dock)
+add_subdirectory(notification)
