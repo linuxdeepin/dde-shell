@@ -1,3 +1,27 @@
+dde-shell (0.0.1) unstable; urgency=medium
+
+  * feat: add plugin framework structure and example(Issue: https://github.com/linuxdeepin/developer-center/issues/5810)
+  * feat: add layershell wrap(Issue: https://github.com/linuxdeepin/developer-center/issues/5808)
+  * feat: load all root applet by default(Issue: https://github.com/linuxdeepin/developer-center/issues/5965)
+  * fix: failed fetch Applet attached property for Panel
+  * fix: Fix typo in cmakelist
+  * fix: target link error in qt6.6
+  * chore: redefine DS_SHARE
+  * feat: don't load disabled applet by option
+  * fix: missing dependencies for debian
+  * feat: add x11 layershell emulation
+  * feat: add osd plugin(Issue: https://github.com/linuxdeepin/developer-center/issues/6026)
+  * fix: missing some dependices for debian(Issue: https://github.com/linuxdeepin/developer-center/issues/6026)
+  * chore: rename 'corona' to 'panel'
+  * feat: support to access AppletItem for Applet
+  * feat: add plugin's check
+  * fix: example crashed
+  * feat: filter unload applet
+  * fix: layershell wrap bugs
+  * feat: add signal handler to release applets
+
+ -- YeShanShan <yeshanshan@deepin.org>  Fri, 17 Nov 2023 08:58:18 +0800
+
 dde-shell (0.0.0) unstable; urgency=medium
 
   * chore: init
