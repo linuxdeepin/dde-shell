@@ -26,7 +26,7 @@ public:
     QQuickWindow *window() const;
 
     // 加载插件
-    virtual bool load() override;
+    virtual bool load(const DAppletData &data = DAppletData()) override;
     // 初始化
     virtual bool init() override;
 };

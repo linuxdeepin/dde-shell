@@ -22,6 +22,7 @@ public:
     {
 
     }
+    QList<DAppletData> groupList(const DAppletData &data) const;
     QList<DApplet *> m_applets;
     QList<QObject *> m_appletItems;
 

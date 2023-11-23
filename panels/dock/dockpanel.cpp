@@ -28,9 +28,9 @@ DockPanel::DockPanel(QObject * parent)
 {
 }
 
-bool DockPanel::load()
+bool DockPanel::load(const DAppletData &data)
 {
-    DPanel::load();
+    DPanel::load(data);
     return true;
 }
 

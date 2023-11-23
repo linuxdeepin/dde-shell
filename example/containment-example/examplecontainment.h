@@ -4,17 +4,18 @@
 
 #pragma once
 
-#include "panel.h"
+#include "containment.h"
 
 DS_USE_NAMESPACE
 
-class ExamplePanel : public DPanel
+class ExampleContainment : public DContainment
 {
     Q_OBJECT
 public:
-    explicit ExamplePanel(QObject *parent = nullptr);
+    explicit ExampleContainment(QObject *parent = nullptr);
+    ~ExampleContainment();
 
     virtual bool load(const DAppletData &data) override;
-
-    virtual bool init() override;
+private:
+    DPluginMetaData targetPlugin() const;
 };

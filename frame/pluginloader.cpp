@@ -273,7 +273,7 @@ void DPluginLoader::setDisabledApplets(const QStringList &pluginIds)
     d->init();
 }
 
-DApplet *DPluginLoader::loadApplet(const QString &pluginId)
+DApplet *DPluginLoader::loadApplet(const QString &pluginId, const QString &id)
 {
     D_D(DPluginLoader);
     DPluginMetaData metaData = d->pluginMetaData(pluginId);
@@ -296,6 +296,11 @@ DApplet *DPluginLoader::loadApplet(const QString &pluginId)
     }
     if (applet) {
         applet->setMetaData(metaData);
+    }
+    if (id.isEmpty()) {
+        applet->setId(QUuid::createUuid().toString());
+    } else {
+        applet->setId(id);
     }
     return applet;
 }

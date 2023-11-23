@@ -5,6 +5,7 @@
 #pragma once
 
 #include "dsglobal.h"
+#include "appletdata.h"
 #include "pluginmetadata.h"
 
 #include <DObject>
@@ -16,24 +17,27 @@ DS_BEGIN_NAMESPACE
  */
 class DAppletItem;
 class DAppletPrivate;
+class DPluginLoader;
 class DS_SHARE DApplet : public QObject, public DTK_CORE_NAMESPACE::DObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString id READ id CONSTANT FINAL)
     Q_PROPERTY(QString pluginId READ pluginId CONSTANT FINAL)
     Q_PROPERTY(QObject *rootObject READ rootObject NOTIFY rootObjectChanged)
     D_DECLARE_PRIVATE(DApplet)
     friend class DAppletItem;
+    friend class DPluginLoader;
 public:
     explicit DApplet(QObject *parent = nullptr);
     virtual ~DApplet() override;
 
-    void setMetaData(const DPluginMetaData &metaData);
+    QString id() const;
     QString pluginId() const;
     QObject *rootObject() const;
 
     DPluginMetaData pluginMetaData() const;
 
-    virtual bool load();
+    virtual bool load(const DAppletData &data = DAppletData());
     virtual bool init();
 
 Q_SIGNALS:
@@ -41,6 +45,10 @@ Q_SIGNALS:
 
 protected:
     explicit DApplet(DAppletPrivate &dd, QObject *parent = nullptr);
+
+private:
+    void setMetaData(const DPluginMetaData &metaData);
+    void setId(const QString &id);
 };
 
 DS_END_NAMESPACE

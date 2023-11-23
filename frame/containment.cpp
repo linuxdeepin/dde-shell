@@ -32,18 +32,24 @@ DContainment::~DContainment()
 
 }
 
-DApplet *DContainment::createApplet(const QString &pluginId)
+DApplet *DContainment::createApplet(const DAppletData &data)
 {
     D_D(DContainment);
     const auto children = DPluginLoader::instance()->childrenPlugin(this->pluginId());
-    if (!children.contains(DPluginLoader::instance()->plugin(pluginId))) {
+    if (!children.contains(DPluginLoader::instance()->plugin(data.pluginId()))) {
         return nullptr;
     }
-    auto applet = DPluginLoader::instance()->loadApplet(pluginId);
-    if (applet) {
-        applet->setParent(this);
-        d->m_applets.append(applet);
+    auto applet = DPluginLoader::instance()->loadApplet(data.pluginId(), data.id());
+    if (!applet) {
+        return nullptr;
     }
+
+    applet->setParent(this);
+
+    if (!applet->load(data)) {
+        return nullptr;
+    }
+    d->m_applets.append(applet);
     return applet;
 }
 
@@ -69,21 +75,24 @@ QList<QObject *> DContainment::appletItems()
     return d->m_appletItems;
 }
 
-bool DContainment::load()
+DApplet *DContainment::applet(const QString &id) const
 {
-    const auto children = DPluginLoader::instance()->childrenPlugin(pluginId());
-    for (const auto &item : children) {
-        const QString id = item.pluginId();
-        auto applet = createApplet(id);
-
-        if (!applet)
-            continue;
-
-        if (!applet->load()) {
-            removeApplet(applet);
-        }
+    D_DC(DContainment);
+    for (auto item : d->m_applets) {
+        if (item->id() == id)
+            return item;
     }
-    return DApplet::load();
+    return nullptr;
+}
+
+bool DContainment::load(const DAppletData &data)
+{
+    D_D(DContainment);
+
+    for (const auto &item : d->groupList(data)) {
+        createApplet(item);
+    }
+    return DApplet::load(data);
 }
 
 bool DContainment::init()
@@ -110,6 +119,19 @@ bool DContainment::init()
 
     Q_EMIT appletItemsChanged();
     return res;
+}
+
+QList<DAppletData> DContainmentPrivate::groupList(const DAppletData &data) const
+{
+    if (!data.groupList().isEmpty())
+        return data.groupList();
+
+    QList<DAppletData> groups;
+    const auto children = DPluginLoader::instance()->childrenPlugin(m_metaData.pluginId());
+    for (auto item : children) {
+        groups << DAppletData::fromPluginMetaData(item);
+    }
+    return groups;
 }
 
 DS_END_NAMESPACE

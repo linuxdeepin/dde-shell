@@ -20,7 +20,7 @@ QString ExampleApplet::mainText() const
     return m_mainText;
 }
 
-bool ExampleApplet::load()
+bool ExampleApplet::load(const DAppletData &)
 {
     DCORE_USE_NAMESPACE;
     std::unique_ptr<DConfig> config(DConfig::create("org.deepin.ds.example", "org.deepin.ds.example"));

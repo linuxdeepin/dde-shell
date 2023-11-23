@@ -8,6 +8,7 @@ set(PUBLIC_HEADERS
     pluginloader.h
     pluginfactory.h
     applet.h
+    appletdata.h
     containment.h
     panel.h
     qmlengine.h
@@ -22,6 +23,7 @@ add_library(dde-shell-frame SHARED
     appletitem.h
     containmentitem.h
     dstypes.cpp
+    appletdata.cpp
     pluginmetadata.cpp
     pluginloader.cpp
     pluginfactory.cpp

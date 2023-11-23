@@ -32,10 +32,10 @@ QQuickWindow *DPanel::window() const
     return qobject_cast<QQuickWindow *>(d->m_rootObject);
 }
 
-bool DPanel::load()
+bool DPanel::load(const DAppletData &data)
 {
     D_D(DPanel);
-    return DContainment::load();
+    return DContainment::load(data);
 }
 
 bool DPanel::init()

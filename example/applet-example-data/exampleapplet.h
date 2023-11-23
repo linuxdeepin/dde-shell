@@ -17,7 +17,7 @@ public:
 
     QString mainText() const;
 
-    virtual bool load() override;
+    virtual bool load(const DAppletData &) override;
     virtual bool init() override;
 
 Q_SIGNALS:
