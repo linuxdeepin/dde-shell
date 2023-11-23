@@ -16,12 +16,10 @@ DS_BEGIN_NAMESPACE
 class DAppletPrivate : public DTK_CORE_NAMESPACE::DObjectPrivate
 {
 public:
-    DAppletPrivate(DApplet *qq )
-        : DTK_CORE_NAMESPACE::DObjectPrivate(qq)
-    {
-    }
+    explicit DAppletPrivate(DApplet *qq);
 
     DPluginMetaData m_metaData;
+    QString m_id;
     QObject *m_rootObject{nullptr};
     void setRootObject(QObject *root)
     {

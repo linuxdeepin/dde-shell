@@ -11,9 +11,9 @@ ExamplePanel::ExamplePanel(QObject *parent)
 {
 }
 
-bool ExamplePanel::load()
+bool ExamplePanel::load(const DAppletData &data)
 {
-    return DPanel::load();
+    return DPanel::load(data);
 }
 
 bool ExamplePanel::init()

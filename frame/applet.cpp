@@ -6,12 +6,18 @@
 #include "private/applet_p.h"
 
 #include <QLoggingCategory>
+#include <QUuid>
 
 DS_BEGIN_NAMESPACE
 
 DCORE_USE_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(dsLog)
+
+DAppletPrivate::DAppletPrivate(DApplet *qq)
+    : DTK_CORE_NAMESPACE::DObjectPrivate(qq)
+{
+}
 
 DApplet::DApplet(QObject *parent)
     : DApplet(*new DAppletPrivate(this), parent)
@@ -28,6 +34,18 @@ DApplet::DApplet(DAppletPrivate &dd, QObject *parent)
 DApplet::~DApplet()
 {
 
+}
+
+QString DApplet::id() const
+{
+    D_DC(DApplet);
+    return d->m_id;
+}
+
+void DApplet::setId(const QString &id)
+{
+    D_D(DApplet);
+    d->m_id = id;
 }
 
 void DApplet::setMetaData(const DPluginMetaData &metaData)
@@ -54,7 +72,7 @@ QObject *DApplet::rootObject() const
     return d->m_rootObject;
 }
 
-bool DApplet::load()
+bool DApplet::load(const DAppletData &)
 {
     return true;
 }

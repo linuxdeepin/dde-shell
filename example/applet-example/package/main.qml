@@ -17,7 +17,7 @@ AppletItem {
         color: "green"
         TextEx {
             anchors.centerIn: parent
-            text: "Hello world"
+            text: "Hello world \n" + String(Applet.id).slice(1, 16)
         }
     }
 }
