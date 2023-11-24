@@ -100,7 +100,7 @@ bool DContainment::init()
     D_D(DContainment);
 
     QList<DApplet *> failedApplets;
-    for (auto applet : applets()) {
+    for (const auto &applet : applets()) {
         auto appletItem = DAppletItem::itemForApplet(applet);
         if (appletItem && !d->m_appletItems.contains(appletItem)) {
             d->m_appletItems << appletItem;
@@ -113,7 +113,7 @@ bool DContainment::init()
     }
     bool res = DApplet::init();
 
-    for (auto applet: failedApplets) {
+    for (const auto &applet: failedApplets) {
         removeApplet(applet);
     }
 
@@ -128,7 +128,7 @@ QList<DAppletData> DContainmentPrivate::groupList(const DAppletData &data) const
 
     QList<DAppletData> groups;
     const auto children = DPluginLoader::instance()->childrenPlugin(m_metaData.pluginId());
-    for (auto item : children) {
+    for (const auto &item : children) {
         groups << DAppletData::fromPluginMetaData(item);
     }
     return groups;

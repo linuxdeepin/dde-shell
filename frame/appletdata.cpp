@@ -80,7 +80,7 @@ QList<DAppletData> DAppletData::groupList() const
 {
     QList<DAppletData> res;
     auto groups = d->m_metaData["Group"].toList();
-    for (auto item : groups) {
+    for (const auto &item : groups) {
         DAppletData group(item.toMap());
         res << group;
     }
