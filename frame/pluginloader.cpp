@@ -40,13 +40,11 @@ public:
 
         m_plugins.clear();
 
-        for (auto item : builtinPluginPaths()) {
+        for (const auto &item : builtinPluginPaths()) {
             q->addPluginDir(item);
         }
 
-        const QString rootDir(QCoreApplication::applicationDirPath());
-
-        for (auto item : m_pluginDirs) {
+        for (const auto &item : m_pluginDirs) {
             const QDirIterator::IteratorFlags flags = QDirIterator::Subdirectories;
             const QStringList nameFilters = {MetaDataFileName};
 
@@ -91,7 +89,7 @@ public:
         if (!packageDir.isEmpty())
             result << packageDir;
 
-        for (auto item : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+        for (const auto &item : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
             result << item + "/dde-shell";
         }
         qCDebug(dsLog()) << "Builtin package paths" << result;
@@ -121,7 +119,7 @@ public:
     {
         const QString fileName = data.pluginId();
         D_QC(DPluginLoader);
-        for (auto item : q->pluginDirs()) {
+        for (const auto &item : q->pluginDirs()) {
             const QDir dir(item);
             if (dir.exists(fileName + PluginSuffix))
                 return true;
@@ -220,7 +218,7 @@ QList<DPluginMetaData> DPluginLoader::rootPlugins() const
 {
     D_DC(DPluginLoader);
     QList<DPluginMetaData> rootPlugins;
-    for (auto item : plugins()) {
+    for (const auto &item : plugins()) {
         auto parent = parentPlugin(item.pluginId());
 
         // root plugin can't has parent.
@@ -265,7 +263,7 @@ void DPluginLoader::setDisabledApplets(const QStringList &pluginIds)
     D_D(DPluginLoader);
     if (pluginIds.isEmpty() || d->m_disabledPlugins == pluginIds)
         return;
-    for (auto item : pluginIds) {
+    for (const auto &item : pluginIds) {
         if (item.isEmpty() || d->m_disabledPlugins.contains(item))
             continue;
         d->m_disabledPlugins << item;
@@ -314,7 +312,7 @@ QList<DPluginMetaData> DPluginLoader::childrenPlugin(const QString &pluginId) co
 
     const DPluginMetaData target(metaData);
     QList<DPluginMetaData> result;
-    for (auto md : d->m_plugins.values()) {
+    for (const auto &md : d->m_plugins) {
         const QString parentId(md.value("Parent").toString());
         if (parentId == target.pluginId()) {
             result << md;

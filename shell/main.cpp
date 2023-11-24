@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     } else if (parser.isSet(panelOption)) {
         pluginIds << parser.values(panelOption);
     } else {
-        for (auto item : DPluginLoader::instance()->rootPlugins()) {
+        for (const auto &item : DPluginLoader::instance()->rootPlugins()) {
             pluginIds << item.pluginId();
         }
     }
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     }
 
     qInfo() << "Loading plugin id" << pluginIds;
-    for (auto pluginId : pluginIds) {
+    for (const auto &pluginId : pluginIds) {
         auto applet = DPluginLoader::instance()->loadApplet(pluginId);
         if (!applet) {
             qWarning() << "Loading plugin failed:" << pluginId;

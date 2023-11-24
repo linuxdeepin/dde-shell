@@ -69,7 +69,7 @@ void DPanelPrivate::initDciSearchPaths()
     auto dciPaths = DIconTheme::dciThemeSearchPaths();
     QList<DApplet *> list = m_applets;
     list.append(q);
-    for (auto item : list) {
+    for (const auto &item : list) {
         QDir root(item->pluginMetaData().pluginDir());
         if (root.exists("icons")) {
             dciPaths.push_back(root.absoluteFilePath("icons"));

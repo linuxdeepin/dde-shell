@@ -11,7 +11,7 @@ DS_USE_NAMESPACE
 class ExampleApplet : public DApplet
 {
     Q_OBJECT
-    Q_PROPERTY(QString mainText READ mainText NOTIFY mainTextChanged CONSTANT)
+    Q_PROPERTY(QString mainText READ mainText NOTIFY mainTextChanged)
 public:
     explicit ExampleApplet(QObject *parent = nullptr);
 
