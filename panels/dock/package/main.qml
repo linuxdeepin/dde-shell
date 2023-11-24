@@ -71,13 +71,13 @@ Window {
     }
 
     function position2Anchors(position) {
-        if (position == 0)
+        if (position === 0)
             return DLayerShellWindow.AnchorLeft | DLayerShellWindow.AnchorRight | DLayerShellWindow.AnchorTop
-        if (position == 1)
+        if (position === 1)
             return DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
-        if (position == 2)
+        if (position === 2)
             return DLayerShellWindow.AnchorLeft | DLayerShellWindow.AnchorRight | DLayerShellWindow.AnchorBottom
-        if (position == 3)
+        if (position === 3)
             return DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorLeft
     }
 
