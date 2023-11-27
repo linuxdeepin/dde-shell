@@ -17,11 +17,11 @@ void DAppletFactory::registerInstance(CreateAppletFunction func)
 {
     const QString key = metaObject()->className();
     if (g_appletFactory.contains(key)) {
-        qCWarning(dsLog()) << "The applet factory has registed" << key;
+        qCWarning(dsLog()) << "The applet factory has registered" << key;
         return;
     }
     g_appletFactory[key] = func;
-    qCDebug(dsLog()) << "Registed the applet factory" << key;
+    qCDebug(dsLog()) << "Registered the applet factory" << key;
 }
 
 DAppletFactory::DAppletFactory(QObject *parent)
