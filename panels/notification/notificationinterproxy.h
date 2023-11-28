@@ -23,6 +23,7 @@ public:
         Closed = 3,
         Unknown = 4,
         Action = 5,
+        Processed = 6,
         NotProcessedYet,
     };
 
@@ -30,6 +31,7 @@ public:
 
     bool replaceNotificationBubble(bool replace);
     void handleBubbleEnd(int type, int id);
+    void handleBubbleEnd(int type, int id, const QVariantMap &bubbleParams);
     void handleBubbleEnd(int type, int id, const QVariantMap &bubbleParams, const QVariantMap &selectedHints);
 
 Q_SIGNALS:

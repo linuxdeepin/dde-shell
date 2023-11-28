@@ -43,12 +43,20 @@ bool NotificationProxy::replaceNotificationBubble(bool replace)
 {
     auto reply = notificationInter().method("ReplaceBubble").arg(replace).call();
     reply.waitForFinished();
+    if (reply.isError()) {
+        qWarning() << "replaceNotificationBubble call failed:" << reply.error().message();
+    }
     return !reply.isError();
 }
 
 void NotificationProxy::handleBubbleEnd(int type, int id)
 {
     return handleBubbleEnd(type, id, {}, {});
+}
+
+void NotificationProxy::handleBubbleEnd(int type, int id, const QVariantMap &bubbleParams)
+{
+    return handleBubbleEnd(type, id, bubbleParams, {});
 }
 
 void NotificationProxy::handleBubbleEnd(int type, int id, const QVariantMap &bubbleParams, const QVariantMap &selectedHints)
