@@ -80,7 +80,7 @@ void NotificationPanel::onShowBubble(const QString &appName, uint replaceId,
     QObject::connect(bubble, &BubbleItem::timeout, this, &NotificationPanel::onBubbleTimeout);
     if (m_bubbles->isReplaceBubble(bubble)) {
         auto oldBubble = m_bubbles->replaceBubble(bubble);
-        m_interproxy->handleBubbleEnd(NotificationProxy::NotProcessedYet, oldBubble->id(), oldBubble->toMap(), {});
+        m_interproxy->handleBubbleEnd(NotificationProxy::NotProcessedYet, oldBubble->id(), oldBubble->toMap());
         oldBubble->deleteLater();
     } else {
         m_bubbles->push(bubble);
@@ -94,7 +94,7 @@ void NotificationPanel::onBubbleTimeout()
         return;
 
     m_interproxy->handleBubbleEnd(NotificationProxy::Expired, bubble->id());
-    m_interproxy->handleBubbleEnd(NotificationProxy::NotProcessedYet, bubble->id(), bubble->toMap(), {});
+    m_interproxy->handleBubbleEnd(NotificationProxy::NotProcessedYet, bubble->id(), bubble->toMap());
     m_bubbles->remove(bubble);
 }
 
@@ -127,6 +127,7 @@ void NotificationPanel::defaultActionInvoke(int bubbleIndex)
     QVariantMap selectedHints;
     selectedHints["actionId"] = bubble->defaultActionId();
     m_interproxy->handleBubbleEnd(NotificationProxy::Action, bubble->id(), bubble->toMap(), selectedHints);
+    m_interproxy->handleBubbleEnd(NotificationProxy::Processed, bubble->id(), bubble->toMap());
     m_bubbles->remove(bubbleIndex);
 }
 
@@ -140,7 +141,8 @@ void NotificationPanel::actionInvoke(int bubbleIndex, const QString &actionId)
     selectedHints["actionId"] = actionId;
     QVariantMap bubbleParams;
     selectedHints["replaceId"] = bubble->replaceId();
-    m_interproxy->handleBubbleEnd(NotificationProxy::Action, bubble->id(), bubbleParams, selectedHints);
+    m_interproxy->handleBubbleEnd(NotificationProxy::Action, bubble->id(), bubble->toMap(), selectedHints);
+    m_interproxy->handleBubbleEnd(NotificationProxy::Processed, bubble->id(), bubble->toMap());
     m_bubbles->remove(bubbleIndex);
 }
 
@@ -150,7 +152,8 @@ void NotificationPanel::close(int bubbleIndex)
     if (!bubble)
         return;
 
-    m_interproxy->handleBubbleEnd(NotificationProxy::Dismissed, bubble->id(), {}, {});
+    m_interproxy->handleBubbleEnd(NotificationProxy::Dismissed, bubble->id());
+    m_interproxy->handleBubbleEnd(NotificationProxy::Processed, bubble->id(), bubble->toMap());
     m_bubbles->remove(bubbleIndex);
 }
 
@@ -160,8 +163,8 @@ void NotificationPanel::delayProcess(int bubbleIndex)
     if (!bubble)
         return;
 
-    m_interproxy->handleBubbleEnd(NotificationProxy::Dismissed, bubble->id(), {}, {});
-    m_interproxy->handleBubbleEnd(NotificationProxy::NotProcessedYet, bubble->id(), bubble->toMap(), {});
+    m_interproxy->handleBubbleEnd(NotificationProxy::Dismissed, bubble->id());
+    m_interproxy->handleBubbleEnd(NotificationProxy::NotProcessedYet, bubble->id(), bubble->toMap());
     m_bubbles->remove(bubbleIndex);
 }
 
