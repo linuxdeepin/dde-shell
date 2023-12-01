@@ -23,6 +23,7 @@ class DS_SHARE DApplet : public QObject, public DTK_CORE_NAMESPACE::DObject
     Q_OBJECT
     Q_PROPERTY(QString id READ id CONSTANT FINAL)
     Q_PROPERTY(QString pluginId READ pluginId CONSTANT FINAL)
+    Q_PROPERTY(DApplet *parent READ parentApplet CONSTANT FINAL)
     Q_PROPERTY(QObject *rootObject READ rootObject NOTIFY rootObjectChanged)
     D_DECLARE_PRIVATE(DApplet)
     friend class DAppletItem;
@@ -34,6 +35,7 @@ public:
     QString id() const;
     QString pluginId() const;
     QObject *rootObject() const;
+    DApplet *parentApplet() const;
 
     DPluginMetaData pluginMetaData() const;
 
