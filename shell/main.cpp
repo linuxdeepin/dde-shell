@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include <QApplication>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 
@@ -33,7 +34,7 @@ static void exitApp(int signal)
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication a(argc, argv);
+    QApplication a(argc, argv);
     a.setOrganizationName("deepin");
     a.setApplicationName("org.deepin.dde-shell");
 
