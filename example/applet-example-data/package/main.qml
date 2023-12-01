@@ -16,7 +16,9 @@ AppletItem {
         color: "gray"
         Text {
             anchors.centerIn: parent
-            text: Applet.mainText
+            text: Applet.mainText + "\n" +
+                  String("this AppletId:%1 \n").arg(String(Applet.id).slice(1, 10)) +
+                  String("parent AppletId:%2 \n").arg(String(Applet.parent.id).slice(1, 10))
         }
     }
 }

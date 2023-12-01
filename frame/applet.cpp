@@ -72,6 +72,11 @@ QObject *DApplet::rootObject() const
     return d->m_rootObject;
 }
 
+DApplet *DApplet::parentApplet() const
+{
+    return qobject_cast<DApplet *>(parent());
+}
+
 bool DApplet::load(const DAppletData &)
 {
     return true;
