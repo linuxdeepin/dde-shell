@@ -7,8 +7,7 @@
 #include "dsglobal.h"
 #include "waylandwindow.h"
 #include "abstractwindowmonitor.h"
-#include "qwayland-ext-foreign-toplevel-list-v1.h"
-#include "qwayland-ztreeland-foreign-toplevel-manager-v1.h"
+#include "qwayland-treeland-foreign-toplevel-manager-v1.h"
 
 #include <QHash>
 #include <QList>
@@ -18,23 +17,6 @@
 
 DS_BEGIN_NAMESPACE
 namespace dock {
-class ExtForeignToplevelList: public QWaylandClientExtensionTemplate<ExtForeignToplevelList>, public QtWayland::ext_foreign_toplevel_list_v1
-{
-    Q_OBJECT
-public:
-    explicit ExtForeignToplevelList(WaylandWindowMonitor* monitor);
-
-Q_SIGNALS:
-    void newExtForeignToplevelHandle(ExtForeignToplevelHandle *handle);
-
-protected:
-    virtual void ext_foreign_toplevel_list_v1_toplevel(struct ::ext_foreign_toplevel_handle_v1 *toplevel);
-    virtual void ext_foreign_toplevel_list_v1_finished();
-
-private:
-    WaylandWindowMonitor* m_monitor;
-};
-
 class ForeignToplevelManager : public QWaylandClientExtensionTemplate<ForeignToplevelManager>, public QtWayland::ztreeland_foreign_toplevel_manager_v1
 {
     Q_OBJECT
@@ -76,7 +58,6 @@ private Q_SLOTS:
 
 private:
     QHash<ulong, QSharedPointer<WaylandWindow>> m_windows;
-    QScopedPointer<ExtForeignToplevelList> m_extForeignToplevelList;
     QScopedPointer<ForeignToplevelManager> m_foreignToplevelManager;
 
 };

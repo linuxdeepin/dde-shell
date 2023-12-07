@@ -57,7 +57,7 @@ Files: frame/layershell/protocol/wlr-layer-shell-unstable-v1.xml
 Copyright: 2017 Drew DeVault
 License: MIT
 
-Files: panels/dock/taskmanager/api/wayland-protocols/ztreeland-foreign-toplevel-manager-v1.xml
+Files: panels/dock/taskmanager/api/wayland-protocols/treeland-foreign-toplevel-manager-v1.xml
 Copyright: None
 License: CC0-1.0
 
