@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS DBus)
+find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS DBus WaylandClient)
 
 set_source_files_properties(
     ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ApplicationManager1.Application.xml
@@ -73,11 +73,12 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
 
 qt_generate_wayland_protocol_client_sources(dock-taskmanager
     FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/api/wayland-protocols/ztreeland-foreign-toplevel-manager-v1.xml
+        ${CMAKE_CURRENT_SOURCE_DIR}/api/wayland-protocols/treeland-foreign-toplevel-manager-v1.xml
         ${WaylandProtocols_DATADIR}/staging/ext-foreign-toplevel-list/ext-foreign-toplevel-list-v1.xml
 )
 target_link_libraries(dock-taskmanager PRIVATE
     dde-shell-frame
+    Qt::WaylandClientPrivate
 )
 
 if (BUILD_WITH_X11)

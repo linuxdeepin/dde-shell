@@ -13,24 +13,6 @@
 DS_BEGIN_NAMESPACE
 
 namespace dock {
-ExtForeignToplevelList::ExtForeignToplevelList(WaylandWindowMonitor* monitor)
-    : QWaylandClientExtensionTemplate<ExtForeignToplevelList>(1)
-    , QtWayland::ext_foreign_toplevel_list_v1()
-    , m_monitor(monitor)
-{
-}
-
-void ExtForeignToplevelList::ext_foreign_toplevel_list_v1_toplevel(struct ::ext_foreign_toplevel_handle_v1 *toplevel)
-{
-    ExtForeignToplevelHandle *handle = new ExtForeignToplevelHandle(toplevel);
-    connect(handle, &ExtForeignToplevelHandle::handlerIsReady, m_monitor,&WaylandWindowMonitor::handleExtForeignToplevelHandleAdded, Qt::UniqueConnection);
-}
-
-void ExtForeignToplevelList::ext_foreign_toplevel_list_v1_finished()
-{
-
-}
-
 ForeignToplevelManager::ForeignToplevelManager(WaylandWindowMonitor* monitor)
     : QWaylandClientExtensionTemplate<ForeignToplevelManager>(1)
     , m_monitor(monitor)
@@ -50,15 +32,11 @@ WaylandWindowMonitor::WaylandWindowMonitor(QObject* parent)
 
 void WaylandWindowMonitor::start()
 {
-    m_extForeignToplevelList.reset(new ExtForeignToplevelList(this));
-    connect(m_extForeignToplevelList.get(), &ExtForeignToplevelList::newExtForeignToplevelHandle, this, &WaylandWindowMonitor::handleExtForeignToplevelHandleAdded);
-
     m_foreignToplevelManager.reset(new ForeignToplevelManager(this));
     connect(m_foreignToplevelManager.get(), &ForeignToplevelManager::newForeignToplevelHandle, this, &WaylandWindowMonitor::handleForeignToplevelHandleAdded);
 }
 void WaylandWindowMonitor::stop()
 {
-    m_extForeignToplevelList.reset(nullptr);
     m_foreignToplevelManager.reset(nullptr);
 }
 
@@ -94,44 +72,9 @@ void WaylandWindowMonitor::handleForeignToplevelHandleAdded()
         Q_EMIT AbstractWindowMonitor::windowAdded(static_cast<QPointer<AbstractWindow>>(window.get()));
 }
 
-void WaylandWindowMonitor::handleExtForeignToplevelHandleAdded()
-{
-    auto handle = qobject_cast<ExtForeignToplevelHandle*>(sender());
-    if (!handle) {
-        return;
-    }
-
-    auto id = handle->id();
-    auto window = m_windows.value(id, nullptr);
-    connect(handle, &ExtForeignToplevelHandle::handlerIsDeleted,this, &WaylandWindowMonitor::handleExtForeignToplevelHandleRemoved, Qt::UniqueConnection);
-
-    if (!window) {
-        window = QSharedPointer<WaylandWindow>(new WaylandWindow(id, this));
-        m_windows.insert(id, window);
-    }
-
-    window->setExtForeignToplevelHandle(handle);
-    if (window->isReady())
-        Q_EMIT AbstractWindowMonitor::windowAdded(static_cast<QPointer<AbstractWindow>>(window.get()));
-}
-
 void WaylandWindowMonitor::handleForeignToplevelHandleRemoved()
 {
     auto handle = qobject_cast<ForeignToplevelHandle*>(sender());
-    if (!handle) {
-        return;
-    }
-
-    auto id = handle->id();
-    auto window = m_windows.value(id, nullptr);
-
-    if (window) {
-        m_windows.remove(id);
-    }
-}
-void WaylandWindowMonitor::handleExtForeignToplevelHandleRemoved()
-{
-    auto handle = qobject_cast<ExtForeignToplevelHandle*>(sender());
     if (!handle) {
         return;
     }

@@ -6,9 +6,9 @@
 
 #include "dsglobal.h"
 #include "abstractwindow.h"
-#include "qwayland-ext-foreign-toplevel-list-v1.h"
-#include "qwayland-ztreeland-foreign-toplevel-manager-v1.h"
+#include "qwayland-treeland-foreign-toplevel-manager-v1.h"
 
+#include <cstdint>
 #include <sys/types.h>
 
 #include <QScopedPointer>
@@ -16,35 +16,6 @@
 
 DS_BEGIN_NAMESPACE
 namespace dock {
-class ExtForeignToplevelHandle : public QWaylandClientExtensionTemplate<ExtForeignToplevelHandle>, public QtWayland::ext_foreign_toplevel_handle_v1
-{
-    Q_OBJECT
-public:
-    explicit ExtForeignToplevelHandle(struct ::ext_foreign_toplevel_handle_v1 *object);
-    
-    ulong id() const;
-    bool isReady() const;
-    QString title() const;
-
-Q_SIGNALS:
-    // those signals only used for windowmonitor
-    void handlerIsReady();
-    void handlerIsDeleted();
-
-protected:
-    void ext_foreign_toplevel_handle_v1_closed() override;
-    void ext_foreign_toplevel_handle_v1_done() override;
-    void ext_foreign_toplevel_handle_v1_title(const QString &title) override;
-    void ext_foreign_toplevel_handle_v1_app_id(const QString &app_id) override;
-    void ext_foreign_toplevel_handle_v1_identifier(const QString &identifier) override;
-
-private:
-    bool m_isReady;
-    QString m_title;
-    QString m_appId;
-    ulong m_identifier;
-};
-
 class ForeignToplevelHandle : public QWaylandClientExtensionTemplate<ForeignToplevelHandle>, public QtWayland::ztreeland_foreign_toplevel_handle_v1
 {
     Q_OBJECT
@@ -54,24 +25,36 @@ public:
     bool isReady() const;
     ulong id() const;
     pid_t pid() const;
+    QString title() const;
+    QList<uint32_t> state() const;
 
 Q_SIGNALS:
     // those signals only used for windowmonitor
     void handlerIsReady();
     void handlerIsDeleted();
 
+    // for window info
+    void pidChanged();
+    void titleChanged();
+    void isActiveChanged();
+
 protected:
-    void ztreeland_foreign_toplevel_handle_v1_app_id(const QString &app_id) override;
     void ztreeland_foreign_toplevel_handle_v1_pid(uint32_t pid) override;
+    void ztreeland_foreign_toplevel_handle_v1_title(const QString &title) override;
+    void ztreeland_foreign_toplevel_handle_v1_app_id(const QString &app_id) override;
+    void ztreeland_foreign_toplevel_handle_v1_identifier(const QString &identifier) override;
+    void ztreeland_foreign_toplevel_handle_v1_state(wl_array *state) override;
     void ztreeland_foreign_toplevel_handle_v1_done() override;
     void ztreeland_foreign_toplevel_handle_v1_closed() override;
-    void ztreeland_foreign_toplevel_handle_v1_identifier(const QString &identifier) override;
 
 private:
     uint32_t m_pid;
+    QString m_title;
     bool m_isReady;
     QString m_appId;
     ulong m_identifier;
+
+    QList<uint32_t> m_states;
 };
 
 class WaylandWindowMonitor;
@@ -80,35 +63,41 @@ class WaylandWindow : public AbstractWindow
 {
     Q_OBJECT
 
+    enum WindowState {
+        Active      = QtWayland::ztreeland_foreign_toplevel_handle_v1::state_activated,
+        Maximized   = QtWayland::ztreeland_foreign_toplevel_handle_v1::state_maximized,
+        Minimized   = QtWayland::ztreeland_foreign_toplevel_handle_v1::state_minimized,
+        Fullscreen  = QtWayland::ztreeland_foreign_toplevel_handle_v1::state_fullscreen
+    };
+
 public:
     ~WaylandWindow();
 
-    virtual uint32_t id() override;
-    virtual pid_t pid() override;
-    virtual QString icon() override;
-    virtual QString title() override;
-    virtual bool isActive() override;
-    virtual bool shouldSkip() override;
-    virtual bool isMinimized() override;
-    virtual bool allowClose() override;
+    uint32_t id() override;
+    pid_t pid() override;
+    QString icon() override;
+    QString title() override;
+    bool isActive() override;
+    bool shouldSkip() override;
+    bool isMinimized() override;
+    bool allowClose() override;
 
-    virtual void close() override;
-    virtual void activate() override;
-    virtual void maxmize() override;
-    virtual void minimize() override;
-    virtual void killClient() override;
+    void close() override;
+    void activate() override;
+    void maxmize() override;
+    void minimize() override;
+    void killClient() override;
 
 private:
-    virtual void updatePid() override;
-    virtual void updateIcon() override;
-    virtual void updateTitle() override;
-    virtual void updateIsActive() override;
-    virtual void updateShouldSkip() override;
-    virtual void updateAllowClose() override;
-    virtual void updateIsMinimized() override;
+    void updatePid() override;
+    void updateIcon() override;
+    void updateTitle() override;
+    void updateIsActive() override;
+    void updateShouldSkip() override;
+    void updateAllowClose() override;
+    void updateIsMinimized() override;
 
     void setForeignToplevelHandle(ForeignToplevelHandle* handle);
-    void setExtForeignToplevelHandle(ExtForeignToplevelHandle* handle);
 
     bool isReady();
 
@@ -120,7 +109,6 @@ private:
 private:
     uint32_t m_id;
 
-    QScopedPointer<ExtForeignToplevelHandle> m_extForeignToplevelHandle;
     QScopedPointer<ForeignToplevelHandle> m_foreignToplevelHandle;
 };
 }
