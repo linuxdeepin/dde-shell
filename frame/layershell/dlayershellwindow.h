@@ -24,7 +24,7 @@ class DS_SHARE DLayerShellWindow : public QObject
     Q_PROPERTY(int rightMargin READ rightMargin WRITE setRightMargin NOTIFY marginsChanged)
     Q_PROPERTY(int topMargin READ topMargin WRITE setTopMargin NOTIFY marginsChanged)
     Q_PROPERTY(int bottomMargin READ bottomMargin WRITE setBottomMargin NOTIFY marginsChanged)
-    Q_PROPERTY(uint32_t exclusionZone READ exclusionZone WRITE setExclusiveZone NOTIFY exclusionZoneChanged)
+    Q_PROPERTY(int32_t exclusionZone READ exclusionZone WRITE setExclusiveZone NOTIFY exclusionZoneChanged)
     Q_PROPERTY(Layer layer READ layer WRITE setLayer NOTIFY layerChanged)
     Q_PROPERTY(KeyboardInteractivity keyboardInteractivity READ keyboardInteractivity WRITE setKeyboardInteractivity NOTIFY keyboardInteractivityChanged)
     Q_PROPERTY(ScreenConfiguration screenConfiguration READ screenConfiguration WRITE setScreenConfiguration)
