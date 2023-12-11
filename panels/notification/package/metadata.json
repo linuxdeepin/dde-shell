@@ -3,6 +3,7 @@
         "Version": "1.0",
         "Id": "org.deepin.ds.notification",
         "Url": "main.qml",
-        "ContainmentType": "Panel"
+        "ContainmentType": "Panel",
+        "Category": "DDE"
     }
 }

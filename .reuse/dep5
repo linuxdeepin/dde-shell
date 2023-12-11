@@ -65,3 +65,8 @@ License: CC0-1.0
 Files: *.sh
 Copyright: None
 License: CC0-1.0
+
+# services
+Files: misc/*.service
+Copyright: None
+License: CC0-1.0
