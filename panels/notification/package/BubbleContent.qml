@@ -14,7 +14,7 @@ D.Control {
 
     MouseArea {
         anchors.fill: parent
-
+        hoverEnabled: true
         onClicked: {
             if (!bubble.hasDefaultAction)
                 return
@@ -35,7 +35,6 @@ D.Control {
         }
     }
     contentItem: RowLayout {
-
         D.QtIcon {
             Layout.leftMargin: 10
             sourceSize: Qt.size(40, 40)
@@ -48,7 +47,6 @@ D.Control {
             Layout.bottomMargin: 10
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.maximumWidth: 500
             Layout.minimumHeight: 40
             Text {
                 visible: bubble.title !== ""
@@ -63,17 +61,19 @@ D.Control {
             Text {
                 visible: bubble.text !== ""
                 Layout.alignment: Qt.AlignLeft
+                elide: Text.ElideRight
                 text: bubble.text
                 Layout.fillWidth: true
-                elide: Text.ElideRight
-                maximumLineCount: 1
+                maximumLineCount: 2
                 font: D.DTK.fontManager.t7
                 textFormat: Text.PlainText
+                wrapMode: Text.WrapAnywhere
             }
         }
 
         Loader {
-            Layout.alignment: Qt.AlignRight
+            Layout.bottomMargin: 10
+            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             active: bubble.hasDisplayAction
             sourceComponent: BubbleAction {
                 bubble: control.bubble
@@ -83,14 +83,22 @@ D.Control {
                 }
             }
         }
-
-        D.ActionButton {
-            icon.name: "window_close"
-            Layout.alignment: Qt.AlignRight
-            onClicked: {
-                console.log("close", bubble.index)
-                Applet.close(bubble.index)
-            }
-        }
+        
+    }
+    
+    Button {
+         id: closeBtn
+         visible: control.hovered
+         width: 18
+         height: 18
+         icon.name: "window-close"
+         icon.width: 10
+         icon.height: 10
+         anchors.right: parent.right
+         anchors.top: parent.top
+         anchors.topMargin: -7
+         anchors.rightMargin: -7
+         z: control.z + 1
+         onClicked: Applet.delayProcess(bubble.index)
     }
 }

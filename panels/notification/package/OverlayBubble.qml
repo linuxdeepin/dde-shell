@@ -15,28 +15,27 @@ D.Control {
 
     contentItem: ColumnLayout {
         spacing: 0
+        Rectangle {
+            Layout.bottomMargin: -30
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: bubbleContent.width -  2 * 18
+            Layout.preferredHeight: 36
+            radius: 18
+            opacity: 0.8
+            z: control.z + control.z + 1
+        }
         NormalBubble {
             id: bubbleContent
+            Layout.fillWidth: true
+            Layout.maximumWidth: 340
             bubble: control.bubble
-        }
-        Repeater {
-            model: bubble.overlayCount
-            Rectangle {
-                Layout.topMargin: -30
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: bubbleContent.width - (index + 1) * 40
-                Layout.preferredHeight: 50
-                radius: 18
-                opacity: 0.8
-                z: 1 - bubble.level - (index + 1)
-            }
         }
     }
 
     z: bubble.level <= 1 ? 0 : 1 - bubble.level
 
     background: Rectangle {
-        implicitWidth: 600
+        implicitWidth: 200
         radius: 18
         opacity: 1
         color: "transparent"

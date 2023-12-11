@@ -13,25 +13,26 @@ import org.deepin.dtk 1.0 as D
 Window {
     id: root
     visible: Applet.visible
-    width: 600
-    height: Math.max(10, bubbleView.height)
-    DLayerShellWindow.topMargin: 10
-    DLayerShellWindow.leftMargin: 800
+    width: 340 + 48
+    height: Math.max(10, bubbleView.height + 48)
+    DLayerShellWindow.bottomMargin: 10
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
-    DLayerShellWindow.anchors: DLayerShellWindow.AnchorTop
+    DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
 
     ListView  {
+        anchors.centerIn: parent
         id: bubbleView
-        width: root.width
+        width: root.width - 48
         height: contentHeight
         spacing: 10
         model: Applet.bubbles
         interactive: false
-
+        verticalLayoutDirection: ListView.BottomToTop
         add: Transition {
-            NumberAnimation { properties: "y"; from: -100; duration: 500 }
+            NumberAnimation { properties: "x"; from: 100; duration: 500 }
         }
         delegate: Bubble {
+            width: 340
             bubble: model
         }
     }
