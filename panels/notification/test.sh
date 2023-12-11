@@ -19,5 +19,7 @@ notify-send "long body long body long body long body long body long body long bo
 
 dunstify -a dde-control-center -i dde-control-center body summary
 
+dunstify -a dde-control-center -i deepin-screen-recorder hello-world!hello-world!hello-world!hello-world! summary -A "sdf,defaults"
+
 NOTIFICATION_ID=$(dunstify -p -a dde-control-center -i dde-control-center body summary)
 dunstify -a dde-control-center -i dde-control-center body summary-replace -r ${NOTIFICATION_ID}
