@@ -1,4 +1,6 @@
 usr/bin/*
+/usr/lib/systemd/*/dde-shell*.service
+/usr/lib/systemd/*/dde-shell-plugin*.service
 usr/lib/*/dde-shell/org.deepin.ds.osd*
 usr/share/dde-shell/org.deepin.ds.osd*/
 usr/lib/*/dde-shell/org.deepin.ds.dock*

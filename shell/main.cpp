@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
 
     QCommandLineOption panelOption("p", "collections of panel.", "panel", QString());
     parser.addOption(panelOption);
+    QCommandLineOption categoryOption("C", "collections of root panels by category.", "category", QString());
+    parser.addOption(categoryOption);
     QCommandLineOption testOption(QStringList() << "t" << "test", "application test.");
     parser.addOption(testOption);
     QCommandLineOption disableAppletOption("d", "disabled applet.", "disable-applet", QString());
@@ -81,6 +83,17 @@ int main(int argc, char *argv[])
         pluginIds << "org.deepin.ds.example";
     } else if (parser.isSet(panelOption)) {
         pluginIds << parser.values(panelOption);
+    } else if (parser.isSet(categoryOption)) {
+        const QList<QString> &categories = parser.values(categoryOption);
+        for (const auto &item : DPluginLoader::instance()->rootPlugins()) {
+            const auto catetroy = item.value("Category").toString();
+            if (catetroy.isEmpty())
+                continue;
+            if (categories.contains(catetroy)) {
+                pluginIds << item.pluginId();
+            }
+        }
+
     } else {
         for (const auto &item : DPluginLoader::instance()->rootPlugins()) {
             pluginIds << item.pluginId();

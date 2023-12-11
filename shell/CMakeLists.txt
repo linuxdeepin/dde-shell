@@ -3,6 +3,11 @@
 # SPDX-License-Identifier: CC0-1.0
 
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Widgets)
+if (NOT DEFINED SYSTEMD_USER_UNIT_DIR)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(Systemd REQUIRED systemd)
+    pkg_get_variable(SYSTEMD_USER_UNIT_DIR systemd systemduserunitdir)
+endif()
 
 add_executable(dde-shell
     main.cpp
@@ -15,5 +20,14 @@ target_link_libraries(dde-shell PRIVATE
     Dtk${DTK_VERSION_MAJOR}::Gui
 )
 
+configure_file(${CMAKE_SOURCE_DIR}/misc/dde-shell-plugin@.service.in
+    ${CMAKE_CURRENT_BINARY_DIR}/dde-shell-plugin@.service
+    @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/misc/dde-shell@.service.in
+    ${CMAKE_CURRENT_BINARY_DIR}/dde-shell@.service
+    @ONLY)
+
 install(TARGETS dde-shell DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dde-shell@.service DESTINATION ${SYSTEMD_USER_UNIT_DIR})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dde-shell-plugin@.service DESTINATION ${SYSTEMD_USER_UNIT_DIR})
