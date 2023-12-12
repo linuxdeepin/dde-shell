@@ -52,7 +52,6 @@ bool DPanel::init()
     auto window = qobject_cast<QQuickWindow *>(rootObject);
     if (window) {
         applet->d_func()->setRootObject(window);
-        d->m_rootObject->setProperty("_ds_window_applet", QVariant::fromValue(applet));
     }
 
     bool res = DContainment::init();

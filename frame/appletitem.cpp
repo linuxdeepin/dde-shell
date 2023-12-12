@@ -11,6 +11,7 @@
 #include <dobject_p.h>
 #include <QLoggingCategory>
 #include <QQmlEngine>
+#include <QQmlContext>
 #include <QQuickWindow>
 
 DS_BEGIN_NAMESPACE
@@ -67,21 +68,8 @@ DAppletItem *DAppletItem::itemForApplet(DApplet *applet)
 
 DApplet *DAppletItem::qmlAttachedProperties(QObject *object)
 {
-    QQuickItem *item = qobject_cast<QQuickItem *>(object);
-    while (item) {
-        if (auto appletItem = qobject_cast<DAppletItem *>(item)) {
-            return appletItem->applet();
-        }
-        item = item->parentItem();
-    }
-    if (!item) {
-        item = qobject_cast<QQuickItem *>(object);
-        QWindow *window = item ? item->window() : qobject_cast<QWindow *>(object);
-        if (window) {
-            if(auto applet = window->property("_ds_window_applet").value<DApplet *>()) {
-                return applet;
-            }
-        }
+    if (auto context = qmlContext(object)) {
+        return context->contextProperty("_ds_applet").value<DApplet *>();
     }
     return nullptr;
 }

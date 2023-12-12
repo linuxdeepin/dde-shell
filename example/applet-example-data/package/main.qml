@@ -31,5 +31,8 @@ AppletItem {
         LP.MenuItem {
             text: "item 1"
         }
+        LP.MenuItem {
+            text: "non Item " + String(Applet.id).slice(0, 5)
+        }
     }
 }
