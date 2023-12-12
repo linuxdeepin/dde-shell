@@ -88,6 +88,7 @@ QObject *DQmlEngine::beginCreate()
         return nullptr;
     }
     auto context = new QQmlContext(engine(), d->m_applet);
+    context->setContextProperty("_ds_applet", d->m_applet);
     auto object = component->beginCreate(context);
     d->m_context = context;
     d->m_rootObject = object;
