@@ -8,6 +8,7 @@
 #include "containment.h"
 #include "pluginmetadata.h"
 #include "pluginfactory.h"
+#include "panel.h"
 
 #include <dobject_p.h>
 #include <QCoreApplication>
@@ -284,8 +285,13 @@ DApplet *DPluginLoader::loadApplet(const QString &pluginId, const QString &id)
         applet = factory->create();
     }
     if (!applet) {
-        if (metaData.value("ContainmentType").isValid()) {
-            applet = new DContainment();
+        const auto containmentType = metaData.value("ContainmentType");
+        if (containmentType.isValid()) {
+            if (containmentType == "Panel") {
+                applet = new DPanel();
+            } else {
+                applet = new DContainment();
+            }
         }
     }
 

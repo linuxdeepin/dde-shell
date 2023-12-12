@@ -113,18 +113,27 @@ int main(int argc, char *argv[])
         }
         applets << applet;
     }
+
+    QList<DApplet *> failedApplets;
     for (auto applet : applets) {
         if (!applet->load()) {
             qWarning() << "Plugin load failed:" << applet->pluginId();
+            failedApplets << applet;
             continue;
         }
         if (!applet->init()) {
             qWarning() << "Plugin init failed:" << applet->pluginId();
+            failedApplets << applet;
             continue;
         }
     }
 
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit, [applets]() {
+    for (auto item : std::as_const(failedApplets)) {
+        applets.removeOne(item);
+        item->deleteLater();
+    }
+
+    QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [applets]() {
         qInfo() << "Exit dde-shell.";
         for (auto item : applets) {
             item->deleteLater();

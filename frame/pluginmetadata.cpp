@@ -91,6 +91,7 @@ DPluginMetaData DPluginMetaData::fromJsonFile(const QString &file)
     const QJsonObject metaData = QJsonDocument::fromJson(f.readAll(), &error).object();
     if (error.error) {
         qCWarning(dsLog) << "error parsing" << file << error.errorString();
+        return DPluginMetaData();
     }
 
     DPluginMetaData result;

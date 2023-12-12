@@ -19,6 +19,13 @@ DAppletPrivate::DAppletPrivate(DApplet *qq)
 {
 }
 
+DAppletPrivate::~DAppletPrivate()
+{
+    if (m_rootObject) {
+        m_rootObject->deleteLater();
+    }
+}
+
 DApplet::DApplet(QObject *parent)
     : DApplet(*new DAppletPrivate(this), parent)
 {

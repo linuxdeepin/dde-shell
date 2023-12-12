@@ -61,7 +61,11 @@ bool ExampleContainment::load(const DAppletData &data)
         groups << DAppletData::fromPluginMetaData(item);
     }
     for (const auto &group : groups) {
-        createApplet(group);
+        if (auto applet = createApplet(group)) {
+            if (!applet->load(group)) {
+                removeApplet(applet);
+            }
+        }
     }
     return DApplet::load(data);
 }

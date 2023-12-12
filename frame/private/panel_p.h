@@ -6,6 +6,7 @@
 
 #include "containment_p.h"
 #include "panel.h"
+#include "qmlengine.h"
 
 #include <dobject_p.h>
 #include <QVariant>
@@ -24,6 +25,7 @@ public:
     }
 
     void initDciSearchPaths();
+    DQmlEngine *m_engine = nullptr;
 
     D_DECLARE_PUBLIC(DPanel)
 };
