@@ -13,7 +13,7 @@ ContainmentItem {
     objectName: "containment item"
     RowLayout {
         Repeater {
-            model: Applet.appletItems
+            model: Containment.appletItems
             delegate: Control {
                 contentItem: modelData
             }

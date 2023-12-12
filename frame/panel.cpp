@@ -45,7 +45,7 @@ bool DPanel::init()
 
     auto applet = this;
 
-    DQmlEngine *engine = new DQmlEngine(applet, applet);
+    std::unique_ptr<DQmlEngine> engine(new DQmlEngine(applet, applet));
 
     auto rootObject = engine->beginCreate();
 
@@ -57,7 +57,10 @@ bool DPanel::init()
 
     bool res = DContainment::init();
 
-    engine->completeCreate();
+    if (res) {
+        engine->completeCreate();
+        d->m_engine = engine.release();
+    }
 
     return res;
 }

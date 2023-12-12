@@ -17,6 +17,7 @@ class DAppletPrivate : public DTK_CORE_NAMESPACE::DObjectPrivate
 {
 public:
     explicit DAppletPrivate(DApplet *qq);
+    ~DAppletPrivate() override;
 
     DPluginMetaData m_metaData;
     QString m_id;

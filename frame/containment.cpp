@@ -46,20 +46,21 @@ DApplet *DContainment::createApplet(const DAppletData &data)
 
     applet->setParent(this);
 
-    if (!applet->load(data)) {
-        return nullptr;
-    }
     d->m_applets.append(applet);
     return applet;
 }
 
 void DContainment::removeApplet(DApplet *applet)
 {
+    Q_ASSERT(applet);
     D_D(DContainment);
     if (d->m_applets.contains(applet)) {
         d->m_applets.removeOne(applet);
-        applet->deleteLater();
     }
+    if (auto view = applet->rootObject()) {
+        d->m_appletItems.removeOne(view);
+    }
+    applet->deleteLater();
 }
 
 QList<DApplet *> DContainment::applets() const
@@ -90,7 +91,14 @@ bool DContainment::load(const DAppletData &data)
     D_D(DContainment);
 
     for (const auto &item : d->groupList(data)) {
-        createApplet(item);
+        auto applet = createApplet(item);
+        if (!applet)
+            continue;
+
+        if (!applet->load(data)) {
+            removeApplet(applet);
+            continue;
+        }
     }
     return DApplet::load(data);
 }
