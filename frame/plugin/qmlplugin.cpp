@@ -6,6 +6,7 @@
 #include "applet.h"
 #include "appletitem.h"
 #include "containmentitem.h"
+#include "panel.h"
 #include "dstypes.h"
 #include "layershell/dlayershellwindow.h"
 
@@ -25,6 +26,7 @@ void QmlpluginPlugin::registerTypes(const char *uri)
     qmlRegisterUncreatableType<DAppletItem>(uri, 1, 0, "Applet", "Applet Attached");
     qmlRegisterType<DContainmentItem>(uri, 1, 0, "ContainmentItem");
     qmlRegisterUncreatableType<DContainmentItem>(uri, 1, 0, "Containment", "Containment Attached");
+    qmlRegisterUncreatableType<DPanel>(uri, 1, 0, "Panel", "Panel Attached");
     qmlRegisterType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow");
     qmlRegisterUncreatableType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow","LayerShell Attached");
 }

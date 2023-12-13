@@ -4,12 +4,14 @@
 
 #include "panel.h"
 #include "private/panel_p.h"
+#include "containmentitem.h"
 
 #include "qmlengine.h"
 
 #include <QLoggingCategory>
 
 #include <QDir>
+#include <QQmlContext>
 #include <DIconTheme>
 
 DS_BEGIN_NAMESPACE
@@ -62,6 +64,18 @@ bool DPanel::init()
     }
 
     return res;
+}
+
+DPanel *DPanel::qmlAttachedProperties(QObject *object)
+{
+    auto applet = qobject_cast<DApplet *>(DContainmentItem::qmlAttachedProperties(object));
+    while (applet) {
+        if (auto panel = qobject_cast<DPanel *>(applet)) {
+            return panel;
+        }
+        applet = applet->parentApplet();
+    }
+    return nullptr;
 }
 
 void DPanelPrivate::initDciSearchPaths()

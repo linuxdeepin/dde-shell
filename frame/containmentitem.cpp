@@ -5,6 +5,7 @@
 #include "containmentitem.h"
 
 #include <QLoggingCategory>
+#include <QQmlContext>
 #include <QQmlEngine>
 
 DS_BEGIN_NAMESPACE
@@ -22,7 +23,14 @@ DContainmentItem::~DContainmentItem()
 
 DContainment *DContainmentItem::qmlAttachedProperties(QObject *object)
 {
-    return qobject_cast<DContainment *>(DAppletItem::qmlAttachedProperties(object));
+    auto applet = DAppletItem::qmlAttachedProperties(object);
+    while (applet) {
+        if (auto containment = qobject_cast<DContainment *>(applet)) {
+            return containment;
+        }
+        applet = applet->parentApplet();
+    }
+    return nullptr;
 }
 
 DS_END_NAMESPACE
