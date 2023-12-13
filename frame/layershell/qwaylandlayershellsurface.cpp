@@ -19,7 +19,7 @@ Q_LOGGING_CATEGORY(layershellsurface, "dde.shell.layershell.surface")
 
 DS_BEGIN_NAMESPACE
 
-QWaylandLayeShellSurface::QWaylandLayeShellSurface(QtWayland::zwlr_layer_shell_v1 *shell, QtWaylandClient::QWaylandWindow *window)
+QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell_v1 *shell, QtWaylandClient::QWaylandWindow *window)
     : QtWaylandClient::QWaylandShellSurface(window)
     , QtWayland::zwlr_layer_surface_v1()
     , m_dlayerShellWindow(DLayerShellWindow::get(window->window()))
@@ -82,19 +82,19 @@ QWaylandLayeShellSurface::QWaylandLayeShellSurface(QtWayland::zwlr_layer_shell_v
     }
 }
 
-QWaylandLayeShellSurface::~QWaylandLayeShellSurface()
+QWaylandLayerShellSurface::~QWaylandLayerShellSurface()
 {
     destroy();
 }
 
-void QWaylandLayeShellSurface::zwlr_layer_surface_v1_closed()
+void QWaylandLayerShellSurface::zwlr_layer_surface_v1_closed()
 {
     if (m_dlayerShellWindow->closeOnDismissed()) {
         window()->window()->close();
     }
 }
 
-void QWaylandLayeShellSurface::zwlr_layer_surface_v1_configure(uint32_t serial, uint32_t width, uint32_t height)
+void QWaylandLayerShellSurface::zwlr_layer_surface_v1_configure(uint32_t serial, uint32_t width, uint32_t height)
 {
     ack_configure(serial);
     m_pendingSize = QSize(width, height);
@@ -108,12 +108,12 @@ void QWaylandLayeShellSurface::zwlr_layer_surface_v1_configure(uint32_t serial, 
     }
 }
 
-void QWaylandLayeShellSurface::applyConfigure()
+void QWaylandLayerShellSurface::applyConfigure()
 {
     window()->resizeFromApplyConfigure(m_pendingSize);
 }
 
-void QWaylandLayeShellSurface::setWindowGeometry(const QRect &geometry)
+void QWaylandLayerShellSurface::setWindowGeometry(const QRect &geometry)
 {
     auto anchors = m_dlayerShellWindow->anchors();
     const bool horizontallyConstrained =(anchors & (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight);
