@@ -34,7 +34,16 @@ qt_add_dbus_adaptor(dock_sources
     DockAdaptor
 )
 
-add_library(dockpanel SHARED ${dock_sources})
+qt_policy(SET QTP0001 OLD)
+qt_add_qml_module(dockpanel
+    PLUGIN_TARGET dockpanel-plugin
+    URI "org.deepin.ds.dock"
+    VERSION "1.0"
+    SHARED
+    SOURCES ${dock_sources}
+    QML_FILES OverflowContainer.qml
+    OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock
+)
 
 target_link_libraries(dockpanel PRIVATE
     dde-shell-frame
