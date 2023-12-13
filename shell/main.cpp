@@ -10,6 +10,7 @@
 #include <DGuiApplicationHelper>
 
 #include <csignal>
+#include <iostream>
 
 #include "applet.h"
 #include "pluginloader.h"
@@ -17,10 +18,14 @@
 DS_USE_NAMESPACE
 DGUI_USE_NAMESPACE
 
+DS_BEGIN_NAMESPACE
+Q_DECLARE_LOGGING_CATEGORY(dsLog)
+DS_END_NAMESPACE
+
 void outputPluginTreeStruct(const DPluginMetaData &plugin, int level)
 {
     const QString separator(level * 4, ' ');
-    qInfo() << qPrintable(separator + plugin.pluginId());
+    std::cout << qPrintable(separator + plugin.pluginId()) << std::endl;
     for (auto item : DPluginLoader::instance()->childrenPlugin(plugin.pluginId())) {
         outputPluginTreeStruct(item, level + 1);
     }
@@ -69,7 +74,7 @@ int main(int argc, char *argv[])
     Dtk::Core::DLogManager::registerConsoleAppender();
     Dtk::Core::DLogManager::registerFileAppender();
     Dtk::Core::DLogManager::registerJournalAppender();
-    qInfo() << "Log path is:" << Dtk::Core::DLogManager::getlogFilePath();
+    qCInfo(dsLog) << "Log path is:" << Dtk::Core::DLogManager::getlogFilePath();
 
     // add signal handler, and call QCoreApplication::exit.
     std::signal(SIGINT, exitApp);
@@ -104,11 +109,11 @@ int main(int argc, char *argv[])
         DPluginLoader::instance()->setDisabledApplets(disabledApplets);
     }
 
-    qInfo() << "Loading plugin id" << pluginIds;
+    qCInfo(dsLog) << "Loading plugin id" << pluginIds;
     for (const auto &pluginId : pluginIds) {
         auto applet = DPluginLoader::instance()->loadApplet(pluginId);
         if (!applet) {
-            qWarning() << "Loading plugin failed:" << pluginId;
+            qCWarning(dsLog) << "Loading plugin failed:" << pluginId;
             continue;
         }
         applets << applet;
@@ -117,12 +122,12 @@ int main(int argc, char *argv[])
     QList<DApplet *> failedApplets;
     for (auto applet : applets) {
         if (!applet->load()) {
-            qWarning() << "Plugin load failed:" << applet->pluginId();
+            qCWarning(dsLog) << "Plugin load failed:" << applet->pluginId();
             failedApplets << applet;
             continue;
         }
         if (!applet->init()) {
-            qWarning() << "Plugin init failed:" << applet->pluginId();
+            qCWarning(dsLog) << "Plugin init failed:" << applet->pluginId();
             failedApplets << applet;
             continue;
         }
@@ -134,7 +139,7 @@ int main(int argc, char *argv[])
     }
 
     QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [applets]() {
-        qInfo() << "Exit dde-shell.";
+        qCInfo(dsLog) << "Exit dde-shell.";
         for (auto item : applets) {
             item->deleteLater();
         }
