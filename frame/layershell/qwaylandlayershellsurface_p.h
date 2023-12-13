@@ -13,12 +13,12 @@
 
 DS_BEGIN_NAMESPACE
 
-class QWaylandLayeShellSurface : public QtWaylandClient::QWaylandShellSurface, public QtWayland::zwlr_layer_surface_v1
+class QWaylandLayerShellSurface : public QtWaylandClient::QWaylandShellSurface, public QtWayland::zwlr_layer_surface_v1
 {
     Q_OBJECT
 public:
-    QWaylandLayeShellSurface(QtWayland::zwlr_layer_shell_v1 *shell, QtWaylandClient::QWaylandWindow *window);
-    ~QWaylandLayeShellSurface() override;
+    QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell_v1 *shell, QtWaylandClient::QWaylandWindow *window);
+    ~QWaylandLayerShellSurface() override;
 
     bool isExposed() const override
     {

@@ -22,7 +22,7 @@ QWaylandLayerShellIntegration::~QWaylandLayerShellIntegration()
 
 QtWaylandClient::QWaylandShellSurface *QWaylandLayerShellIntegration::createShellSurface(QtWaylandClient::QWaylandWindow *window)
 {
-    return new QWaylandLayeShellSurface(this, window);
+    return new QWaylandLayerShellSurface(this, window);
 }
 
 DS_END_NAMESPACE
