@@ -24,6 +24,7 @@ class DockPanel : public DPanel, public QDBusContext
     Q_PROPERTY(HideState hideState READ hideState NOTIFY hideStateChanged FINAL)
     Q_PROPERTY(HideMode hideMode READ hideMode WRITE setHideMode NOTIFY hideModeChanged FINAL)
     Q_PROPERTY(DisplayMode displayMode READ displayMode WRITE setDisplayMode NOTIFY displayModeChanged FINAL)
+    Q_PROPERTY(ColorTheme colorTheme READ colorTheme WRITE setColorTheme NOTIFY colorThemeChanged FINAL)
     Q_PROPERTY(uint dockSize READ dockSize WRITE setDockSize NOTIFY dockSizeChanged FINAL)
 
 public:
@@ -47,6 +48,9 @@ public:
     DisplayMode displayMode();
     void setDisplayMode(DisplayMode mode);
 
+    ColorTheme colorTheme();
+    void setColorTheme(ColorTheme theme);
+
     HideState hideState();
 
     uint dockSize();
@@ -60,11 +64,14 @@ Q_SIGNALS:
     void frontendWindowRectChanged(QRect frontendWindowRect);
     void geometryChanged(QRect geometry);
     void positionChanged(Position position);
-    void hideModeChanged(HideMode mode);
-    void hideStateChanged(HideState state);
+    void hideModeChanged(HideMode mode); // not emitted
+    void hideStateChanged(HideState state); // not emitted
     void displayModeChanged(DisplayMode mode);
-    void dockSizeChanged(uint size);
+    void dockSizeChanged(uint size); // not emitted
+    void colorThemeChanged(ColorTheme theme);
 
+private:
+    ColorTheme m_theme;
 };
 
 }

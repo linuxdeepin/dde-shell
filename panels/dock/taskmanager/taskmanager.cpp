@@ -25,6 +25,8 @@
 #include "x11windowmonitor.h"
 #endif
 
+Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtInfoMsg)
+
 #define Settings TaskManagerSettings::instance()
 
 DS_BEGIN_NAMESPACE
@@ -108,6 +110,7 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
 
 void TaskManager::clickItem(const QString& itemId)
 {
+    qCInfo(taskManagerLog) << "Item" << itemId << "is clicked.";
     auto appitem = AppItemModel::instance()->getAppItemById(itemId);
     if (appitem->hasWindow())
         appitem->active();
@@ -117,6 +120,7 @@ void TaskManager::clickItem(const QString& itemId)
 
 void TaskManager::clickItemMenu(const QString& itemId, const QString& menuId)
 {
+    qCInfo(taskManagerLog) << "Item" << itemId << "menu" << menuId << "is clicked.";
     auto appitem = AppItemModel::instance()->getAppItemById(itemId);
     if(!appitem) return;
     if (menuId == DOCK_ACTION_ALLWINDOW) {

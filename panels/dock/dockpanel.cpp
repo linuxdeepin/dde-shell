@@ -25,6 +25,7 @@ namespace dock {
 
 DockPanel::DockPanel(QObject * parent)
     : DPanel(parent)
+    , m_theme(ColorTheme::Light)
 {
 }
 
@@ -55,7 +56,11 @@ bool DockPanel::init()
             Q_EMIT onWindowGeometryChanged();
         });
     });
-    
+    connect(this, &DockPanel::displayModeChanged, this, &DockPanel::dockSizeChanged);
+    connect(DockSettings::instance(), &DockSettings::windowSizeFashionChanged, this, &DockPanel::dockSizeChanged);
+    connect(DockSettings::instance(), &DockSettings::windowSizeEfficientChanged, this, &DockPanel::dockSizeChanged);
+    connect(DockSettings::instance(), &DockSettings::displayModeChanged, this, &DockPanel::displayModeChanged);
+    connect(DockSettings::instance(), &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
     DPanel::init();
     // those connections need connect after DPanel::init() which create QQuickWindow
     // xChanged yChanged not woker on wayland, so use above positionChanged instead
@@ -127,13 +132,26 @@ void DockPanel::setDisplayMode(DisplayMode mode)
     DockSettings::instance()->setDisplayMode(mode);
 }
 
+ColorTheme DockPanel::colorTheme()
+{
+    return m_theme;
+}
+
+void DockPanel::setColorTheme(ColorTheme theme)
+{
+    if (theme == m_theme)
+        return;
+    m_theme = theme;
+    Q_EMIT this->colorThemeChanged(theme);
+}
+
 uint DockPanel::dockSize()
 {
     switch (displayMode()) {
-        case Fashion:
-            return DockSettings::instance()->windowSizeFashion();
-        case Efficient:
-            return DockSettings::instance()->windowSizeEfficient();
+    case Fashion:
+        return DockSettings::instance()->windowSizeFashion();
+    case Efficient:
+        return DockSettings::instance()->windowSizeEfficient();
     }
     qCWarning(dockLog()) << "unknown display mode return MIN_DOCK_SIZE";
     return MIN_DOCK_SIZE;
