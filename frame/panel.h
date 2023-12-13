@@ -29,6 +29,10 @@ public:
     virtual bool load(const DAppletData &data = DAppletData()) override;
     // 初始化
     virtual bool init() override;
+
+    static DPanel *qmlAttachedProperties(QObject *object);
 };
 
 DS_END_NAMESPACE
+
+QML_DECLARE_TYPEINFO(DS_NAMESPACE::DPanel, QML_HAS_ATTACHED_PROPERTIES)
