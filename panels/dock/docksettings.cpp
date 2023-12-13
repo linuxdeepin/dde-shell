@@ -56,7 +56,7 @@ static QString displayMode2String(DisplayMode mode)
     }
 }
 
-static DisplayMode Qstring2DisplayMode(const QString& modeStr)
+static DisplayMode string2DisplayMode(const QString& modeStr)
 {
     if ("fashion" == modeStr)
         return DisplayMode::Fashion;
@@ -140,8 +140,11 @@ HideMode DockSettings::hideMode()
 
 void DockSettings::setHideMode(HideMode mode)
 {
+    if (hideMode() == mode)
+        return;
     if (m_dockConfig && m_dockConfig->isValid()) {
         m_dockConfig->setValue(keyHideMode, hideMode2String(mode));
+        Q_EMIT this->hideModeChanged(mode);
     } else {
         qCCritical(dockSettingsLog()) << "unable set config for hidemode";
     }
@@ -159,8 +162,11 @@ Position DockSettings::position()
 
 void DockSettings::setPosition(Position position)
 {
+    if (this->position() == position)
+        return;
     if (m_dockConfig && m_dockConfig->isValid()) {
         m_dockConfig->setValue(keyPosition, position2String(position));
+        Q_EMIT this->positionChanged(position);
     } else {
         qCCritical(dockSettingsLog()) << "unable set config for position";
     }
@@ -169,7 +175,7 @@ void DockSettings::setPosition(Position position)
 DisplayMode DockSettings::displayMode()
 {
     if (m_dockConfig && m_dockConfig->isValid()) {
-        return Qstring2DisplayMode(m_dockConfig->value(keyDisplayMode).toString());
+        return string2DisplayMode(m_dockConfig->value(keyDisplayMode).toString());
     } else {
         qCCritical(dockSettingsLog()) << "unable get config for displaymode";
         return DisplayMode::Fashion;
@@ -178,8 +184,11 @@ DisplayMode DockSettings::displayMode()
 
 void DockSettings::setDisplayMode(DisplayMode mode)
 {
+    if (displayMode() == mode)
+        return;
     if (m_dockConfig && m_dockConfig->isValid()) {
         m_dockConfig->setValue(keyDisplayMode, displayMode2String(mode));
+        Q_EMIT this->displayModeChanged(mode);
     } else {
         qCCritical(dockSettingsLog()) << "unable to set config for displaymode";
     }
@@ -197,8 +206,11 @@ uint DockSettings::windowSizeFashion()
 
 void DockSettings::setWindowSizeFashion(uint size)
 {
+    if (windowSizeFashion() == size)
+        return;
     if(m_dockConfig && m_dockConfig->isValid()) {
         m_dockConfig->setValue(keyWindowSizeFashion, size);
+        Q_EMIT this->windowSizeFashionChanged(size);
     } else {
         qCCritical(dockSettingsLog()) << "unable to set dconfig for windowSizeFashion";
     }
@@ -216,8 +228,11 @@ uint DockSettings::windowSizeEfficient()
 
 void DockSettings::setWindowSizeEfficient(uint size)
 {
+    if (windowSizeEfficient() == size)
+        return;
     if(m_dockConfig && m_dockConfig->isValid()) {
         m_dockConfig->setValue(keyWindowSizeEfficient, size);
+        Q_EMIT this->windowSizeEfficientChanged(size);
     } else {
         qCCritical(dockSettingsLog()) << "unable to set dconfig for windowSizeEfficient";
     }

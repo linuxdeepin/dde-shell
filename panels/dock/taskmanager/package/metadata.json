@@ -2,7 +2,7 @@
     "Plugin": {
         "Version": "1.0",
         "Id": "org.deepin.ds.dock.taskmanager",
-        "Url": "taskmanager.qml",
+        "Url": "TaskManager.qml",
         "Parent": "org.deepin.ds.dock"
     }
 }
