@@ -19,7 +19,7 @@ set_target_properties(dde-shell-plugin PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/plugins/${URI_PATH}"
     OUTPUT_NAME dde-shell-plugin
 )
-set(QML_IMPORT_PATH "${PROJECT_BINARY_DIR}/plugins/${URI_PATH}" CACHE STRING "Qt Creator extra qml import paths")
+set(QML_IMPORT_PATH "${PROJECT_BINARY_DIR}/plugins" CACHE STRING "Qt Creator extra qml import paths")
 add_custom_command(TARGET dde-shell-plugin
 POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E  copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/qmldir" "${PROJECT_BINARY_DIR}/plugins/${URI_PATH}"    #out-file
