@@ -10,9 +10,13 @@
 #include "dsglobal.h"
 
 #include <QtCore>
+#include <QQmlEngine>
 
 DS_BEGIN_NAMESPACE
 namespace dock {
+
+Q_NAMESPACE
+QML_NAMED_ELEMENT(Dock)
 
 constexpr uint MIN_DOCK_SIZE = 40;
 constexpr uint MAX_DOCK_SIZE = 100;
@@ -26,6 +30,11 @@ enum DisplayMode {
     Efficient   = 1,
     // deprecreated
 //    Classic     = 2,
+};
+
+enum ColorTheme {
+    Light = 0,
+    Dark  = 1,
 };
 
 ///
@@ -56,13 +65,25 @@ enum HideState {
     Hide        = 2,
 };
 
-enum class AniAction {
-    Show = 0,
-    Hide
+enum AniAction {
+    AA_Show = 0,
+    AA_Hide
 };
+
+Q_ENUM_NS(DisplayMode)
+Q_ENUM_NS(ColorTheme)
+Q_ENUM_NS(HideMode)
+Q_ENUM_NS(Position)
+Q_ENUM_NS(HideState)
+Q_ENUM_NS(AniAction)
 }
 
 DS_END_NAMESPACE
 
 Q_DECLARE_METATYPE(DS_NAMESPACE::dock::DisplayMode)
+Q_DECLARE_METATYPE(DS_NAMESPACE::dock::ColorTheme)
+Q_DECLARE_METATYPE(DS_NAMESPACE::dock::HideMode)
+Q_DECLARE_METATYPE(DS_NAMESPACE::dock::HideState)
+Q_DECLARE_METATYPE(DS_NAMESPACE::dock::AniAction)
 Q_DECLARE_METATYPE(DS_NAMESPACE::dock::Position)
+
