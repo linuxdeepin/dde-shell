@@ -26,8 +26,6 @@ public:
 
     DApplet *applet() const;
 
-    static DAppletItem *itemForApplet(DApplet *applet);
-
     static DApplet *qmlAttachedProperties(QObject *object);
 };
 

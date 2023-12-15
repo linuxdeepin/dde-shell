@@ -31,9 +31,9 @@ NotificationPanel::~NotificationPanel()
     }
 }
 
-bool NotificationPanel::load(const DAppletData &data)
+bool NotificationPanel::load()
 {
-    return DPanel::load(data);
+    return DPanel::load();
 }
 
 bool NotificationPanel::init()

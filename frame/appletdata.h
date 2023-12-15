@@ -21,7 +21,8 @@ class DS_SHARE DAppletData : public QObject
 public:
     explicit DAppletData();
     explicit DAppletData(const QVariantMap &data);
-    explicit DAppletData(const DAppletData &other);
+    DAppletData(const DAppletData &other);
+    explicit DAppletData(const QString &pluginId);
     DAppletData &operator=(const DAppletData &other);
     bool operator==(const DAppletData &other) const;
     virtual ~DAppletData() override;
@@ -30,8 +31,10 @@ public:
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
 
     QString id() const;
+    void setId(const QString &id);
     QString pluginId() const;
     QList<DAppletData> groupList() const;
+    void setGroupList(const QList<DAppletData> &groupList);
     QVariantMap toMap() const;
 
     static DAppletData fromPluginMetaData(const DPluginMetaData &metaData);

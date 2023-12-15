@@ -19,7 +19,7 @@ class OsdPanel : public DPanel
 public:
     explicit OsdPanel(QObject *parent = nullptr);
 
-    virtual bool load(const DAppletData &data) override;
+    virtual bool load() override;
     virtual bool init() override;
 
     bool visible() const;

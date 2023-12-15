@@ -43,17 +43,18 @@ public:
         }
         return s_engine;
     }
-    QString appletUrl() const
+    void continueLoading()
     {
-        if (!m_applet)
-            return QString();
-
-        auto url = m_applet->pluginMetaData().value("Url").toString();
-        if (url.isEmpty())
-            return QString();
-
-        return QDir(m_applet->pluginMetaData().pluginDir()).absoluteFilePath(url);
+        D_Q(DQmlEngine);
+        if (m_component->isReady()) {
+            m_rootObject = m_component->beginCreate(m_context);
+            Q_EMIT q->createFinished();
+        } else if (m_component->isError()) {
+            qCWarning(dsLog()) << "Loading url failed" << m_component->errorString();
+            Q_EMIT q->createFinished();
+        }
     }
+    D_DECLARE_PUBLIC(DQmlEngine)
 };
 
 DQmlEngine::DQmlEngine(QObject *parent)
@@ -74,28 +75,6 @@ DQmlEngine::~DQmlEngine()
 {
 }
 
-QObject *DQmlEngine::beginCreate()
-{
-    D_D(DQmlEngine);
-    std::unique_ptr<QQmlComponent> component(new QQmlComponent(engine(), this));
-    const QString url = d->appletUrl();
-    if (url.isEmpty())
-        return nullptr;
-
-    component->loadUrl(url);
-    if (component->isError()) {
-        qCWarning(dsLog()) << "Loading url failed" << component->errorString();
-        return nullptr;
-    }
-    auto context = new QQmlContext(engine(), d->m_applet);
-    context->setContextProperty("_ds_applet", d->m_applet);
-    auto object = component->beginCreate(context);
-    d->m_context = context;
-    d->m_rootObject = object;
-    d->m_component = component.release();
-    return object;
-}
-
 void DQmlEngine::completeCreate()
 {
     D_D(DQmlEngine);
@@ -106,6 +85,32 @@ void DQmlEngine::completeCreate()
         return;
 
     d->m_component->completeCreate();
+    Q_EMIT finished();
+}
+
+bool DQmlEngine::create()
+{
+    D_D(DQmlEngine);
+    std::unique_ptr<QQmlComponent> component(new QQmlComponent(engine(), this));
+    const QString url = d->m_applet->pluginMetaData().url();
+    if (url.isEmpty())
+        return true;
+
+    component->loadUrl(url, QQmlComponent::Asynchronous);
+
+    auto context = new QQmlContext(engine(), d->m_applet);
+    context->setContextProperty("_ds_applet", d->m_applet);
+    d->m_context = context;
+    d->m_component = component.release();
+    if (d->m_component->isLoading()) {
+        QObject::connect(d->m_component, &QQmlComponent::statusChanged, this, [this]() {
+            D_D(DQmlEngine);
+            d->continueLoading();
+        });
+    } else {
+        d->continueLoading();
+    }
+    return true;
 }
 
 QObject *DQmlEngine::createObject(const QUrl &url)

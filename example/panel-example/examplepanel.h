@@ -14,7 +14,7 @@ class ExamplePanel : public DPanel
 public:
     explicit ExamplePanel(QObject *parent = nullptr);
 
-    virtual bool load(const DAppletData &data) override;
+    virtual bool load() override;
 
     virtual bool init() override;
 };

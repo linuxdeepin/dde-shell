@@ -37,7 +37,7 @@ ExampleContainment::~ExampleContainment()
     }
 }
 
-bool ExampleContainment::load(const DAppletData &data)
+bool ExampleContainment::load()
 {
     DCORE_USE_NAMESPACE;
     std::unique_ptr<DConfig> config(DConfig::create("org.deepin.ds.example", "org.deepin.ds.example"));
@@ -60,14 +60,11 @@ bool ExampleContainment::load(const DAppletData &data)
     for (auto item : children) {
         groups << DAppletData::fromPluginMetaData(item);
     }
-    for (const auto &group : groups) {
-        if (auto applet = createApplet(group)) {
-            if (!applet->load(group)) {
-                removeApplet(applet);
-            }
-        }
-    }
-    return DApplet::load(data);
+    auto data = appletData();
+    data.setGroupList(groups);
+    setAppletData(data);
+
+    return DApplet::load();
 }
 
 DPluginMetaData ExampleContainment::targetPlugin() const

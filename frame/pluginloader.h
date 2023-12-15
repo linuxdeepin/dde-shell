@@ -12,7 +12,7 @@
 DS_BEGIN_NAMESPACE
 
 class DApplet;
-
+class DAppletData;
 /**
  * @brief 插件加载，创建
  */
@@ -35,7 +35,7 @@ public:
     QStringList disabledApplets() const;
     void setDisabledApplets(const QStringList &pluginIds);
 
-    DApplet *loadApplet(const QString &pluginId, const QString &id = QString());
+    DApplet *loadApplet(const DAppletData &data);
 
     QList<DPluginMetaData> childrenPlugin(const QString &pluginId) const;
     DPluginMetaData parentPlugin(const QString &pluginId) const;

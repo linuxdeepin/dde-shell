@@ -11,16 +11,19 @@ ExamplePanel::ExamplePanel(QObject *parent)
 {
 }
 
-bool ExamplePanel::load(const DAppletData &data)
+bool ExamplePanel::load()
 {
-    return DPanel::load(data);
+    return DPanel::load();
 }
 
 bool ExamplePanel::init()
 {
     DPanel::init();
-    Q_ASSERT(rootObject());
-    Q_ASSERT(window());
+    QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
+        Q_ASSERT(rootObject());
+        Q_ASSERT(window());
+    });
+
     return true;
 }
 

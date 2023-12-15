@@ -7,7 +7,6 @@
 
 #include "pluginloader.h"
 #include "pluginmetadata.h"
-#include "appletitem.h"
 
 #include <QLoggingCategory>
 
@@ -39,12 +38,25 @@ DApplet *DContainment::createApplet(const DAppletData &data)
     if (!children.contains(DPluginLoader::instance()->plugin(data.pluginId()))) {
         return nullptr;
     }
-    auto applet = DPluginLoader::instance()->loadApplet(data.pluginId(), data.id());
+    auto applet = DPluginLoader::instance()->loadApplet(data);
     if (!applet) {
         return nullptr;
     }
 
     applet->setParent(this);
+
+    QObject::connect(applet, &DApplet::rootObjectChanged, this, [this, applet]() {
+        if (auto object = applet->rootObject()) {
+            D_D(DContainment);
+            d->m_appletItems << object;
+            Q_EMIT appletItemsChanged();
+            QObject::connect(object, &QObject::destroyed, this, [this, object]() {
+                D_D(DContainment);
+                d->m_appletItems.removeAll(object);
+                Q_EMIT appletItemsChanged();
+            });
+        }
+    });
 
     d->m_applets.append(applet);
     return applet;
@@ -76,6 +88,13 @@ QList<QObject *> DContainment::appletItems()
     return d->m_appletItems;
 }
 
+QQmlListProperty<QObject> DContainment::appletItemList()
+{
+    D_D(DContainment);
+
+    return QQmlListProperty<QObject>(this, &d->m_appletItems);
+}
+
 DApplet *DContainment::applet(const QString &id) const
 {
     D_DC(DContainment);
@@ -86,60 +105,18 @@ DApplet *DContainment::applet(const QString &id) const
     return nullptr;
 }
 
-bool DContainment::load(const DAppletData &data)
+bool DContainment::load()
 {
     D_D(DContainment);
 
-    for (const auto &item : d->groupList(data)) {
-        auto applet = createApplet(item);
-        if (!applet)
-            continue;
-
-        if (!applet->load(data)) {
-            removeApplet(applet);
-            continue;
-        }
-    }
-    return DApplet::load(data);
+    return DApplet::load();
 }
 
 bool DContainment::init()
 {
     D_D(DContainment);
 
-    QList<DApplet *> failedApplets;
-    for (const auto &applet : applets()) {
-        auto appletItem = DAppletItem::itemForApplet(applet);
-        if (appletItem && !d->m_appletItems.contains(appletItem)) {
-            d->m_appletItems << appletItem;
-        }
-
-        if (!applet->init()) {
-            failedApplets << applet;
-            continue;
-        }
-    }
-    bool res = DApplet::init();
-
-    for (const auto &applet: failedApplets) {
-        removeApplet(applet);
-    }
-
-    Q_EMIT appletItemsChanged();
-    return res;
-}
-
-QList<DAppletData> DContainmentPrivate::groupList(const DAppletData &data) const
-{
-    if (!data.groupList().isEmpty())
-        return data.groupList();
-
-    QList<DAppletData> groups;
-    const auto children = DPluginLoader::instance()->childrenPlugin(m_metaData.pluginId());
-    for (const auto &item : children) {
-        groups << DAppletData::fromPluginMetaData(item);
-    }
-    return groups;
+    return DApplet::init();
 }
 
 DS_END_NAMESPACE

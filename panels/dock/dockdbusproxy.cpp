@@ -27,7 +27,7 @@ DockPanel* DockDBusProxy::parent() const
 
 QRect DockDBusProxy::geometry()
 {
-    return parent()->window()->geometry();
+    return parent()->window() ? parent()->window()->geometry() : QRect();
 }
 
 QRect DockDBusProxy::frontendWindowRect()

@@ -20,13 +20,13 @@ OsdPanel::OsdPanel(QObject *parent)
 {
 }
 
-bool OsdPanel::load(const DAppletData &data)
+bool OsdPanel::load()
 {
     QDBusConnection bus = QDBusConnection::sessionBus();
     // TODO
     bus.registerService("org.deepin.dde.Shell");
 
-    return DPanel::load(data);
+    return DPanel::load();
 }
 
 bool OsdPanel::init()

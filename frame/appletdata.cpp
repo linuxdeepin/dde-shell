@@ -33,6 +33,12 @@ DAppletData::DAppletData(const DAppletData &other)
 {
 }
 
+DAppletData::DAppletData(const QString &pluginId)
+    : DAppletData()
+{
+    d->m_metaData["PluginId"] = pluginId;
+}
+
 DAppletData &DAppletData::operator=(const DAppletData &other)
 {
     d = other.d;
@@ -87,9 +93,23 @@ QList<DAppletData> DAppletData::groupList() const
     return res;
 }
 
+void DAppletData::setGroupList(const QList<DAppletData> &groupList)
+{
+    QList<QVariant> groups;
+    for (const auto &item : std::as_const(groupList)) {
+        groups << item.toMap();
+    }
+    d->m_metaData["Group"] = groups;
+}
+
 QVariantMap DAppletData::toMap() const
 {
     return d->m_metaData;
+}
+
+void DAppletData::setId(const QString &id)
+{
+    d->m_metaData["Id"] = id;
 }
 
 DAppletData DAppletData::fromPluginMetaData(const DPluginMetaData &metaData)

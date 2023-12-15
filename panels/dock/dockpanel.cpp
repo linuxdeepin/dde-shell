@@ -29,9 +29,9 @@ DockPanel::DockPanel(QObject * parent)
 {
 }
 
-bool DockPanel::load(const DAppletData &data)
+bool DockPanel::load()
 {
-    DPanel::load(data);
+    DPanel::load();
     return true;
 }
 
@@ -62,23 +62,31 @@ bool DockPanel::init()
     connect(DockSettings::instance(), &DockSettings::displayModeChanged, this, &DockPanel::displayModeChanged);
     connect(DockSettings::instance(), &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
     DPanel::init();
-    // those connections need connect after DPanel::init() which create QQuickWindow
-    // xChanged yChanged not woker on wayland, so use above positionChanged instead
-    // connect(window(), &QQuickWindow::xChanged, this, &DockPanel::onWindowGeometryChanged);
-    // connect(window(), &QQuickWindow::yChanged, this, &DockPanel::onWindowGeometryChanged);
-    connect(window(), &QQuickWindow::widthChanged, this, &DockPanel::onWindowGeometryChanged);
-    connect(window(), &QQuickWindow::heightChanged, this, &DockPanel::onWindowGeometryChanged);
-    QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
+
+    QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
+        if (rootObject()) {
+            // those connections need connect after DPanel::init() which create QQuickWindow
+            // xChanged yChanged not woker on wayland, so use above positionChanged instead
+            // connect(window(), &QQuickWindow::xChanged, this, &DockPanel::onWindowGeometryChanged);
+            // connect(window(), &QQuickWindow::yChanged, this, &DockPanel::onWindowGeometryChanged);
+            connect(window(), &QQuickWindow::widthChanged, this, &DockPanel::onWindowGeometryChanged);
+            connect(window(), &QQuickWindow::heightChanged, this, &DockPanel::onWindowGeometryChanged);
+            QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
+        }
+    });
+
     return true;
 }
 
 QRect DockPanel::geometry()
 {
+    Q_ASSERT(window());
     return window()->geometry();
 }
 
 QRect DockPanel::frontendWindowRect()
 {
+    Q_ASSERT(window());
     auto ratio = window()->devicePixelRatio();
     auto screenGeometry = window()->screen()->geometry();
     auto geometry = window()->geometry();

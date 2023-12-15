@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
+#include <QDir>
 
 DS_BEGIN_NAMESPACE
 
@@ -78,6 +79,15 @@ QString DPluginMetaData::pluginId() const
 QString DPluginMetaData::pluginDir() const
 {
     return d->m_pluginDir;
+}
+
+QString DPluginMetaData::url() const
+{
+    auto url = value("Url").toString();
+    if (url.isEmpty())
+        return QString();
+
+    return QDir(pluginDir()).absoluteFilePath(url);
 }
 
 DPluginMetaData DPluginMetaData::fromJsonFile(const QString &file)

@@ -15,7 +15,6 @@ DS_BEGIN_NAMESPACE
 /**
  * @brief 插件项，单个插件实例
  */
-class DAppletItem;
 class DAppletPrivate;
 class DPluginLoader;
 class DS_SHARE DApplet : public QObject, public DTK_CORE_NAMESPACE::DObject
@@ -26,7 +25,6 @@ class DS_SHARE DApplet : public QObject, public DTK_CORE_NAMESPACE::DObject
     Q_PROPERTY(DApplet *parent READ parentApplet CONSTANT FINAL)
     Q_PROPERTY(QObject *rootObject READ rootObject NOTIFY rootObjectChanged)
     D_DECLARE_PRIVATE(DApplet)
-    friend class DAppletItem;
     friend class DPluginLoader;
 public:
     explicit DApplet(QObject *parent = nullptr);
@@ -38,8 +36,11 @@ public:
     DApplet *parentApplet() const;
 
     DPluginMetaData pluginMetaData() const;
+    DAppletData appletData() const;
+    void setAppletData(const DAppletData &data);
+    void setRootObject(QObject *root);
 
-    virtual bool load(const DAppletData &data = DAppletData());
+    virtual bool load();
     virtual bool init();
 
 Q_SIGNALS:
@@ -50,7 +51,6 @@ protected:
 
 private:
     void setMetaData(const DPluginMetaData &metaData);
-    void setId(const QString &id);
 };
 
 DS_END_NAMESPACE

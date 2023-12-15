@@ -30,7 +30,7 @@ class DockPanel : public DPanel, public QDBusContext
 public:
     explicit DockPanel(QObject *parent = nullptr);
 
-    bool load(const DAppletData &data) override;
+    bool load() override;
     bool init() override;
 
     void ReloadPlugins();

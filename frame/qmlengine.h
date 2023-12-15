@@ -25,13 +25,18 @@ public:
     explicit DQmlEngine(DApplet *applet, QObject *parent = nullptr);
     virtual ~DQmlEngine() override;
 
-    QObject *beginCreate();
-    void completeCreate();
     QObject *rootObject() const;
 
     QQmlEngine *engine();
 
     static QObject *createObject(const QUrl &url);
+
+    bool create();
+    void completeCreate();
+
+Q_SIGNALS:
+    void finished();
+    void createFinished();
 };
 
 DS_END_NAMESPACE
