@@ -27,6 +27,9 @@ public:
 
     void applyConfigure() override;
     void setWindowGeometry(const QRect &geometry) override;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+    void attachPopup(QWaylandShellSurface *popup) override;
+#endif
 
 private:
     void zwlr_layer_surface_v1_configure(uint32_t serial, uint32_t width, uint32_t height) override;
