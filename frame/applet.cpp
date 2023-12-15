@@ -46,19 +46,28 @@ DApplet::~DApplet()
 QString DApplet::id() const
 {
     D_DC(DApplet);
-    return d->m_id;
-}
-
-void DApplet::setId(const QString &id)
-{
-    D_D(DApplet);
-    d->m_id = id;
+    return d->m_data.id();
 }
 
 void DApplet::setMetaData(const DPluginMetaData &metaData)
 {
     D_D(DApplet);
     d->m_metaData = metaData;
+}
+
+void DApplet::setAppletData(const DAppletData &data)
+{
+    D_D(DApplet);
+    d->m_data = data;
+}
+
+void DApplet::setRootObject(QObject *root)
+{
+    D_D(DApplet);
+    if (d->m_rootObject == root)
+        return;
+    d->m_rootObject = root;
+    Q_EMIT rootObjectChanged();
 }
 
 QString DApplet::pluginId() const
@@ -73,6 +82,12 @@ DPluginMetaData DApplet::pluginMetaData() const
     return d->m_metaData;
 }
 
+DAppletData DApplet::appletData() const
+{
+    D_DC(DApplet);
+    return d->m_data;
+}
+
 QObject *DApplet::rootObject() const
 {
     D_DC(DApplet);
@@ -84,7 +99,7 @@ DApplet *DApplet::parentApplet() const
     return qobject_cast<DApplet *>(parent());
 }
 
-bool DApplet::load(const DAppletData &)
+bool DApplet::load()
 {
     return true;
 }

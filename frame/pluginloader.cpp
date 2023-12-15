@@ -17,6 +17,9 @@
 #include <QLoggingCategory>
 #include <QPluginLoader>
 #include <QStandardPaths>
+#include <QThread>
+#include <QFuture>
+#include <QtConcurrent>
 
 DS_BEGIN_NAMESPACE;
 
@@ -38,13 +41,19 @@ public:
     void init()
     {
         D_Q(DPluginLoader);
-
-        m_plugins.clear();
-
         for (const auto &item : builtinPluginPaths()) {
             q->addPluginDir(item);
         }
 
+        if (m_loadMetaDatas.isRunning())
+            m_loadMetaDatas.cancel();
+
+        m_plugins.clear();
+        m_loadMetaDatas = QtConcurrent::run(std::bind(&DPluginLoaderPrivate::initPlugins, this));
+    }
+
+    void initPlugins()
+    {
         for (const auto &item : m_pluginDirs) {
             const QDirIterator::IteratorFlags flags = QDirIterator::Subdirectories;
             const QStringList nameFilters = {MetaDataFileName};
@@ -183,10 +192,17 @@ public:
 
         return QString();
     }
+    void ensureCompleted() const
+    {
+        if (m_loadMetaDatas.isRunning()) {
+            const_cast<DPluginLoaderPrivate *>(this)->m_loadMetaDatas.waitForFinished();
+        }
+    }
 
     QStringList m_pluginDirs;
     QMap<QString, DPluginMetaData> m_plugins;
     QStringList m_disabledPlugins;
+    QFuture<void> m_loadMetaDatas;
 
     D_DECLARE_PUBLIC(DPluginLoader)
 };
@@ -212,12 +228,14 @@ DPluginLoader *DPluginLoader::instance()
 QList<DPluginMetaData> DPluginLoader::plugins() const
 {
     D_DC(DPluginLoader);
+    d->ensureCompleted();
     return d->m_plugins.values();
 }
 
 QList<DPluginMetaData> DPluginLoader::rootPlugins() const
 {
     D_DC(DPluginLoader);
+    d->ensureCompleted();
     QList<DPluginMetaData> rootPlugins;
     for (const auto &item : plugins()) {
         auto parent = parentPlugin(item.pluginId());
@@ -272,9 +290,11 @@ void DPluginLoader::setDisabledApplets(const QStringList &pluginIds)
     d->init();
 }
 
-DApplet *DPluginLoader::loadApplet(const QString &pluginId, const QString &id)
+DApplet *DPluginLoader::loadApplet(const DAppletData &data)
 {
     D_D(DPluginLoader);
+    d->ensureCompleted();
+    const QString pluginId(data.pluginId());
     DPluginMetaData metaData = d->pluginMetaData(pluginId);
     if (!metaData.isValid())
         return nullptr;
@@ -300,11 +320,11 @@ DApplet *DPluginLoader::loadApplet(const QString &pluginId, const QString &id)
     }
     if (applet) {
         applet->setMetaData(metaData);
-    }
-    if (id.isEmpty()) {
-        applet->setId(QUuid::createUuid().toString());
-    } else {
-        applet->setId(id);
+        DAppletData dt = data;
+        if (dt.id().isEmpty()) {
+            dt.setId(QUuid::createUuid().toString());
+        }
+        applet->setAppletData(dt);
     }
     return applet;
 }
@@ -312,6 +332,7 @@ DApplet *DPluginLoader::loadApplet(const QString &pluginId, const QString &id)
 QList<DPluginMetaData> DPluginLoader::childrenPlugin(const QString &pluginId) const
 {
     D_DC(DPluginLoader);
+    d->ensureCompleted();
     DPluginMetaData metaData = d->pluginMetaData(pluginId);
     if (!metaData.isValid())
         return {};
@@ -330,6 +351,7 @@ QList<DPluginMetaData> DPluginLoader::childrenPlugin(const QString &pluginId) co
 DPluginMetaData DPluginLoader::parentPlugin(const QString &pluginId) const
 {
     D_DC(DPluginLoader);
+    d->ensureCompleted();
     DPluginMetaData metaData = d->pluginMetaData(pluginId);
     if (!metaData.isValid())
         return DPluginMetaData();
@@ -341,6 +363,7 @@ DPluginMetaData DPluginLoader::parentPlugin(const QString &pluginId) const
 DPluginMetaData DPluginLoader::plugin(const QString &pluginId) const
 {
     D_DC(DPluginLoader);
+    d->ensureCompleted();
     return d->pluginMetaData(pluginId);
 }
 

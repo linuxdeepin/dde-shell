@@ -20,7 +20,7 @@ QString ExampleApplet::mainText() const
     return m_mainText;
 }
 
-bool ExampleApplet::load(const DAppletData &)
+bool ExampleApplet::load()
 {
     DCORE_USE_NAMESPACE;
     std::unique_ptr<DConfig> config(DConfig::create("org.deepin.ds.example", "org.deepin.ds.example"));
@@ -31,11 +31,14 @@ bool ExampleApplet::init()
 {
     DApplet::init();
 
-    DAppletItem *root = qobject_cast<DAppletItem *>(rootObject());
-    Q_ASSERT(root);
+    QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
+        DAppletItem *root = qobject_cast<DAppletItem *>(rootObject());
+        if (root) {
+            m_mainText = QString("%1 - w:%2;h:%3").arg(m_mainText).arg(root->width()).arg(root->height());
+            Q_EMIT mainTextChanged();
+        }
+    });
 
-    m_mainText = QString("%1 - w:%2;h:%3").arg(m_mainText).arg(root->width()).arg(root->height());
-    Q_EMIT mainTextChanged();
     return true;
 }
 

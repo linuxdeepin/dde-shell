@@ -65,6 +65,7 @@ PUBLIC
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Quick
 PRIVATE
+    Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::WaylandClientPrivate
 )
 target_include_directories(dde-shell-frame INTERFACE

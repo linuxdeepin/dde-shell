@@ -8,6 +8,7 @@
 
 #include <DObject>
 #include <QVariant>
+#include <QQmlListProperty>
 
 DS_BEGIN_NAMESPACE
 
@@ -18,7 +19,7 @@ class DContainmentPrivate;
 class DS_SHARE DContainment : public DApplet
 {
     Q_OBJECT
-    Q_PROPERTY(QList<QObject *> appletItems READ appletItems NOTIFY appletItemsChanged)
+    Q_PROPERTY(QQmlListProperty<QObject> appletItems READ appletItemList NOTIFY appletItemsChanged)
     D_DECLARE_PRIVATE(DContainment)
 public:
     explicit DContainment(QObject *parent = nullptr);
@@ -29,10 +30,11 @@ public:
 
     QList<DApplet *> applets() const;
     QList<QObject *> appletItems();
+    QQmlListProperty<QObject> appletItemList();
 
     DApplet *applet(const QString &id) const;
 
-    bool load(const DAppletData &data = DAppletData()) override;
+    bool load() override;
     bool init() override;
 
 protected:

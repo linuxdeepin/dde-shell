@@ -22,7 +22,7 @@ public:
     explicit NotificationPanel(QObject *parent = nullptr);
     ~NotificationPanel();
 
-    virtual bool load(const DAppletData &data) override;
+    virtual bool load() override;
     virtual bool init() override;
 
     bool visible() const;

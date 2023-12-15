@@ -6,8 +6,6 @@
 #include "private/panel_p.h"
 #include "containmentitem.h"
 
-#include "qmlengine.h"
-
 #include <QLoggingCategory>
 
 #include <QDir>
@@ -34,10 +32,10 @@ QQuickWindow *DPanel::window() const
     return qobject_cast<QQuickWindow *>(d->m_rootObject);
 }
 
-bool DPanel::load(const DAppletData &data)
+bool DPanel::load()
 {
     D_D(DPanel);
-    return DContainment::load(data);
+    return DContainment::load();
 }
 
 bool DPanel::init()
@@ -45,25 +43,7 @@ bool DPanel::init()
     D_D(DPanel);
     d->initDciSearchPaths();
 
-    auto applet = this;
-
-    std::unique_ptr<DQmlEngine> engine(new DQmlEngine(applet, applet));
-
-    auto rootObject = engine->beginCreate();
-
-    auto window = qobject_cast<QQuickWindow *>(rootObject);
-    if (window) {
-        applet->d_func()->setRootObject(window);
-    }
-
-    bool res = DContainment::init();
-
-    if (res) {
-        engine->completeCreate();
-        d->m_engine = engine.release();
-    }
-
-    return res;
+    return DContainment::init();
 }
 
 DPanel *DPanel::qmlAttachedProperties(QObject *object)

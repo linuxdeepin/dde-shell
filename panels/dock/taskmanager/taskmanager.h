@@ -32,7 +32,7 @@ public:
     AppItemModel* dataModel();
 
     virtual bool init() override;
-    virtual bool load(const DAppletData &data) override;
+    virtual bool load() override;
 
     bool windowSplit();
     bool allowForceQuit();

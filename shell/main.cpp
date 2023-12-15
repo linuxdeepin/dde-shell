@@ -14,6 +14,7 @@
 
 #include "applet.h"
 #include "pluginloader.h"
+#include "appletloader.h"
 
 DS_USE_NAMESPACE
 DGUI_USE_NAMESPACE
@@ -36,6 +37,39 @@ static void exitApp(int signal)
     Q_UNUSED(signal);
     QCoreApplication::exit();
 }
+
+class AppletManager
+{
+public:
+    explicit AppletManager(const QList<DApplet *> &applets)
+    {
+        for (auto applet : std::as_const(applets)) {
+            auto loader = new DAppletLoader(applet);
+            m_loaders << loader;
+
+            QObject::connect(loader, &DAppletLoader::failed, qApp, [this, loader]() {
+                m_loaders.removeOne(loader);
+                loader->deleteLater();
+            });
+        }
+    }
+    void exec()
+    {
+        for (auto loader : std::as_const(m_loaders)) {
+            loader->exec();
+        }
+    }
+    void quit()
+    {
+        for (auto item : std::as_const(m_loaders)) {
+            if (auto applet = item->applet()) {
+                applet->deleteLater();
+                item->deleteLater();
+            }
+        }
+    }
+    QList<DAppletLoader *> m_loaders;
+};
 
 int main(int argc, char *argv[])
 {
@@ -111,7 +145,7 @@ int main(int argc, char *argv[])
 
     qCInfo(dsLog) << "Loading plugin id" << pluginIds;
     for (const auto &pluginId : pluginIds) {
-        auto applet = DPluginLoader::instance()->loadApplet(pluginId);
+        auto applet = DPluginLoader::instance()->loadApplet(DAppletData{pluginId});
         if (!applet) {
             qCWarning(dsLog) << "Loading plugin failed:" << pluginId;
             continue;
@@ -119,30 +153,12 @@ int main(int argc, char *argv[])
         applets << applet;
     }
 
-    QList<DApplet *> failedApplets;
-    for (auto applet : applets) {
-        if (!applet->load()) {
-            qCWarning(dsLog) << "Plugin load failed:" << applet->pluginId();
-            failedApplets << applet;
-            continue;
-        }
-        if (!applet->init()) {
-            qCWarning(dsLog) << "Plugin init failed:" << applet->pluginId();
-            failedApplets << applet;
-            continue;
-        }
-    }
+    AppletManager manager(applets);
+    manager.exec();
 
-    for (auto item : std::as_const(failedApplets)) {
-        applets.removeOne(item);
-        item->deleteLater();
-    }
-
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [applets]() {
+    QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [&manager]() {
         qCInfo(dsLog) << "Exit dde-shell.";
-        for (auto item : applets) {
-            item->deleteLater();
-        }
+        manager.quit();
     });
 
     return a.exec();

@@ -52,7 +52,7 @@ TaskManager::TaskManager(QObject* parent)
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
 }
 
-bool TaskManager::load(const DAppletData &data)
+bool TaskManager::load()
 {
     loadDockedAppItems();
     auto platformName = QGuiApplication::platformName();

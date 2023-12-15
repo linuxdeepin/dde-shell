@@ -29,6 +29,7 @@ public:
 
     QString pluginId() const;
     QString pluginDir() const;
+    QString url() const;
 
     static DPluginMetaData fromJsonFile(const QString &file);
 

@@ -11,6 +11,8 @@ endif()
 
 add_executable(dde-shell
     main.cpp
+    appletloader.h
+    appletloader.cpp
 )
 
 target_link_libraries(dde-shell PRIVATE

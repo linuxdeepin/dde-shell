@@ -15,7 +15,7 @@ public:
     explicit ExampleContainment(QObject *parent = nullptr);
     ~ExampleContainment();
 
-    virtual bool load(const DAppletData &data) override;
+    virtual bool load() override;
 private:
     DPluginMetaData targetPlugin() const;
 };
