@@ -1,3 +1,35 @@
+dde-shell (0.0.2) unstable; urgency=medium
+
+  * feat: add dock(issue: 6221)
+  * feat: support multi instance with same Applet(Issue: https://github.com/linuxdeepin/developer-center/issues/6245)
+  * chore: remove warning
+  * feat: add notification to display bubble(Issue: https://github.com/linuxdeepin/developer-center/issues/6095)
+  * optimize: use triple equal operator
+  * chore: correct typos in pluginfactory.cpp
+    Thanks to Felix Yan
+  * feat: support to find parent applet
+  * chore: Add Processed type
+  * feat: support to use labs-platform Controls
+  * chore: Change PUBLIC to PRIVATE for PkgConfig::XCB
+  * fix: exclusionZone type error
+  * feat: support systemd to manage plugin
+  * fix: can't access Applet for non Item
+  * fix: release rootObject when delete Applet
+  * feat: support to access the nearest Panel
+  * feat: add treeland-foreign-toplevel-manager support
+  * chore: modify qml import path
+  * chore: correct typo
+  * fix: lacking implementation of get_popup
+  * chore: optimize log
+  * feat: add qml plugin dockpanel
+  * feat: add window and state indicator
+  * feat: add drag and drop function
+  * fix: missing systemd package
+  * fix: missing labs package
+  * feat: Add new UI about notification
+ 
+ -- YeShanShan <yeshanshan@deepin.org>  Fri, 15 Dec 2023 09:20:22 +0800
+
 dde-shell (0.0.1) unstable; urgency=medium
 
   * feat: add plugin framework structure and example(Issue: https://github.com/linuxdeepin/developer-center/issues/5810)

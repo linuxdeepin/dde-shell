@@ -5,7 +5,7 @@ Maintainer: Deepin Packages Builder <packages@deepin.com>
 Build-Depends:
  debhelper-compat ( =12),
  cmake,
- libsystemd-dev [linux-any],
+ systemd,
  qt6-base-dev,
  qt6-declarative-dev,
  qt6-base-dev-tools,
