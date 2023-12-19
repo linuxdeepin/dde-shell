@@ -54,3 +54,5 @@ ds_install_package(PACKAGE org.deepin.ds.dock TARGET dockpanel)
 add_subdirectory(launcherItem)
 add_subdirectory(showdesktop)
 add_subdirectory(taskmanager)
+
+install(DIRECTORY "${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/" DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/")
