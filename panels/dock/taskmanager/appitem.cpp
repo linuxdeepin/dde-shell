@@ -26,6 +26,9 @@ AppItem::AppItem(QString id, QObject *parent)
     auto *tmp = new AppItemAdaptor(this);
     QDBusConnection::sessionBus().registerService("org.deepin.ds.Dock.TaskManager.Item");
     QDBusConnection::sessionBus().registerObject(QStringLiteral("/org/deepin/ds/Dock/TaskManager/Item/") + escapeToObjectPath(m_id), "org.deepin.ds.Dock.TaskManager.Item", this);
+    
+    connect(this, &AppItem::dockedChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
+    connect(this, &AppItem::itemWindowCountChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
 }
 
 AppItem::~AppItem()
@@ -236,8 +239,6 @@ void AppItem::removeWindow(QPointer<AbstractWindow> window)
     if (m_currentActiveWindow.get() == window && m_windows.size() > 0) {
         updateCurrentActiveWindow(m_windows.last().get());
     }
-
-    checkAppItemNeedDeleteAndDelete();
 }
 
 void AppItem::updateCurrentActiveWindow(QPointer<AbstractWindow> window)
