@@ -2,11 +2,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "dlayershellwindow.h"
 #include "dsglobal.h"
+#include "dlayershellwindow.h"
 #include "x11dlayershellemulation.h"
 
-#include <QDebug>
 #include <QScreen>
 #include <QMargins>
 #include <QGuiApplication>
@@ -36,7 +35,7 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     connect(m_dlayerShellWindow, &DLayerShellWindow::anchorsChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
     connect(m_dlayerShellWindow, &DLayerShellWindow::exclusionZoneChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
 
-    // qml height or wdth may update later, need to update anchor postion and exclusion zone
+    // qml height or width may update later, need to update anchor postion and exclusion zone
     connect(m_window, &QWindow::widthChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
     connect(m_window, &QWindow::widthChanged, this, &LayerShellEmulation::onPositionChanged);
 
@@ -110,12 +109,12 @@ void LayerShellEmulation::onPositionChanged()
     const bool verticallyConstrained = (anchors & (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom);
 
     if (horizontallyConstrained) {
-        x = (screen->geometry().left());
-        m_window->setWidth(screen->geometry().width());
+        x = (screen->geometry().left() + m_dlayerShellWindow->leftMargin());
+        m_window->setWidth(screen->geometry().width() - m_dlayerShellWindow->leftMargin() - m_dlayerShellWindow->rightMargin());
     }
     if (verticallyConstrained) {
-        y = (screen->geometry().top());
-        m_window->setHeight(screen->geometry().height());
+        y = (screen->geometry().top() + m_dlayerShellWindow->topMargin());
+        m_window->setHeight(screen->geometry().height() - m_dlayerShellWindow->topMargin() - m_dlayerShellWindow->bottomMargin());
     }
     m_window->setX(x), m_window->setY(y);
 }
@@ -128,7 +127,7 @@ void LayerShellEmulation::onExclusionZoneChanged()
     auto scaleFactor = qGuiApp->devicePixelRatio();
     auto *x11Application = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
     xcb_ewmh_connection_t ewmh_connection;
-    xcb_intern_atom_cookie_t * cookie = xcb_ewmh_init_atoms(x11Application->connection(), &ewmh_connection);
+    xcb_intern_atom_cookie_t *cookie = xcb_ewmh_init_atoms(x11Application->connection(), &ewmh_connection);
     xcb_ewmh_init_atoms_replies(&ewmh_connection, cookie, NULL);
     xcb_ewmh_wm_strut_partial_t strut_partial;
     memset(&strut_partial, 0, sizeof(xcb_ewmh_wm_strut_partial_t));
