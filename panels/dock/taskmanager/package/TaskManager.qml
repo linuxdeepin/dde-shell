@@ -18,7 +18,9 @@ AppletItem {
 
     Grid {
         id: appContainer
-        flow: useColumnLayout ? Grid.TopToBottom : Grid.LeftToRight
+        flow: useColumnLayout ? Grid.LeftToRight : Grid.TopToBottom
+        rows: useColumnLayout ? 0 : 1
+        columns: useColumnLayout ? 1 : 0
         move: Transition {
             NumberAnimation {
                 properties: "x,y"
@@ -47,6 +49,7 @@ AppletItem {
                     }
 
                     onDropped: function(drop) {
+                        // FIXME: Dragging doesn't end on dropped even if Drag.onDragFinished is executed
                         drop.accept()
                     }
 

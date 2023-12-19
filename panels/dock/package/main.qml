@@ -17,8 +17,8 @@ Window {
     visible: true
     property bool useColumnLayout: Applet.position % 2
 
-    width: useColumnLayout ? Applet.dockSize : 0
-    height: !useColumnLayout ? Applet.dockSize : 0
+    width: Applet.dockSize
+    height: Applet.dockSize
 
     D.DWindow.enabled: true
     DLayerShellWindow.anchors: position2Anchors(Applet.position)
@@ -108,6 +108,7 @@ Window {
 
     TapHandler {
         acceptedButtons: Qt.RightButton
+        gesturePolicy: TapHandler.WithinBounds
         onTapped: function(eventPoint, button) {
             if (button === Qt.RightButton) {
                 dockMenu.open()
@@ -123,7 +124,6 @@ Window {
             delegate: Loader {
                 sourceComponent: Control {
                     contentItem: model.modelData
-                    horizontalPadding: 5
                     Component.onCompleted: {
                         contentItem.parent = this
                     }
