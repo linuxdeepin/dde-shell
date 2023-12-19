@@ -1,3 +1,11 @@
+dde-shell (0.0.3) unstable; urgency=medium
+
+  * fix: transparent mouse event
+  * fix: unable set margins when anchor three sides in xorg
+  * fix: missing files for dock plugin
+
+ -- YeShanShan <yeshanshan@deepin.org>  Tue, 19 Dec 2023 15:20:17 +0800
+
 dde-shell (0.0.2) unstable; urgency=medium
 
   * feat: add dock(issue: 6221)
