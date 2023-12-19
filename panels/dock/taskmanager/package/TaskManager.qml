@@ -13,6 +13,7 @@ AppletItem {
     id: taskmanager
     property bool useColumnLayout: Applet.parent.position % 2
     property int dockSize: Applet.parent.dockSize
+    property int dockOrder: 15
 
     implicitWidth: useColumnLayout ? dockSize : appContainer.implicitWidth
     implicitHeight: useColumnLayout ? appContainer.implicitHeight : dockSize

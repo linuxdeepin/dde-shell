@@ -7,10 +7,12 @@ import QtQuick.Controls 2.15
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
+import org.deepin.ds.dock 1.0
 
 AppletItem {
     id: launcher
     property int dockSize: Applet.parent.dockSize
+    property int dockOrder: 12
     implicitWidth: dockSize
     implicitHeight: dockSize
 
