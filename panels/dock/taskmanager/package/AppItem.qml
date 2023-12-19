@@ -25,9 +25,6 @@ Item {
     signal clickItem(itemId: string)
     signal clickItemMenu(itemId: string, menuId: string)
 
-    width: 40
-    height: 40
-
     visible: !Drag.active // When in dragging, hide app item
     Drag.active: dragHandler.active
     Drag.source: appItem
@@ -96,6 +93,8 @@ Item {
         id: statusIndicator
         StatusIndicator {
             palette: itemPalette
+            width: icon.width * 1.1
+            height: icon.height * 1.1
         }
     }
 
@@ -128,7 +127,7 @@ Item {
     D.DciIcon {
         id: icon
         name: iconName
-        sourceSize: Qt.size(24, 24)
+        sourceSize: Qt.size(parent.width * 0.6, parent.height * 0.6)
         anchors.centerIn: parent
     }
 }
