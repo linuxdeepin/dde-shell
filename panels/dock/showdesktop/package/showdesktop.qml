@@ -11,6 +11,7 @@ import org.deepin.dtk 1.0 as D
 AppletItem {
     id: showdesktop
     property int dockSize: Applet.parent.dockSize
+    property int dockOrder: 13
     implicitWidth: dockSize
     implicitHeight: dockSize
 

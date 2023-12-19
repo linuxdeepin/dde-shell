@@ -43,7 +43,7 @@ Files: *.deepin.dde.*.xml */org.desktopspec.*.xml
 Copyright: UnionTech Software Technology Co., Ltd.
 License: GPL-3.0-or-later
 
-Files: panels/dock/api/dbus/**.xml panels/dock/taskmanager/api/dbus/**.xml
+Files: panels/dock/api/dbus/**.xml panels/dock/taskmanager/api/dbus/**.xml panels/dock/tray/protocol/*.xml
 Copyright: UnionTech Software Technology Co., Ltd.
 License: GPL-3.0-or-later
 

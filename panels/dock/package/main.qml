@@ -4,12 +4,15 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.4
+import QtQuick.Layouts 2.15
 import QtQuick.Window 2.15
+import QtWayland.Compositor
 import QtQml
 import Qt.labs.platform as LP
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
+import org.deepin.ds.dock.compositor 1.0
 import org.deepin.dtk 1.0 as D
 
 Window {
@@ -17,17 +20,17 @@ Window {
     visible: true
     property bool useColumnLayout: Applet.position % 2
 
-    width: Applet.dockSize
-    height: Applet.dockSize
+    width: Applet.position % 2 ? Applet.dockSize :  Applet.dockSize
+    height: Applet.position % 2 ? Applet.dockSize :  Applet.dockSize
 
     D.DWindow.enabled: true
     DLayerShellWindow.anchors: position2Anchors(Applet.position)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Applet.dockSize
-    DLayerShellWindow.leftMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - contentLoader.implicitWidth) / 2
-    DLayerShellWindow.rightMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - contentLoader.implicitWidth) / 2
-    DLayerShellWindow.topMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - contentLoader.implicitHeight) / 2
-    DLayerShellWindow.bottomMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - contentLoader.implicitHeight) / 2
+    DLayerShellWindow.leftMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - gridLayout.implicitWidth) / 2
+    DLayerShellWindow.rightMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - gridLayout.implicitWidth) / 2
+    DLayerShellWindow.topMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - gridLayout.implicitHeight) / 2
+    DLayerShellWindow.bottomMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - gridLayout.implicitHeight) / 2
 
     component EnumPropertyMenuItem: LP.MenuItem {
         required property string name
@@ -118,15 +121,78 @@ Window {
         }
     }
 
-    OverflowContainer {
-        id: contentLoader
+    GridLayout {
+        id: gridLayout
         anchors.fill: parent
-        useColumnLayout: dock.useColumnLayout
-        model: Applet.appletItems
-        delegate: Control {
-            contentItem: model.modelData
-            Component.onCompleted: {
-                contentItem.parent = this
+        columns: 1
+        rows: 1
+        flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
+
+        Item {
+            id: dockLeftPart
+            implicitWidth: leftLoader.implicitWidth
+            implicitHeight: leftLoader.implicitHeight
+            OverflowContainer {
+                id: leftLoader
+                anchors.fill: parent
+                useColumnLayout: dock.useColumnLayout
+                model: dockPartContainerFilter(0, 10)
+                delegate: Control {
+                    contentItem: model.modelData
+                    Component.onCompleted: {
+                        contentItem.parent = this
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            implicitWidth: (Applet.displayMode === Dock.Efficient || leftLoader.model.length === 0) ? 0 : Applet.dockSize * 0.6 + (dock.useColumnLayout ? 0 : 22)
+            implicitHeight: (Applet.displayMode === Dock.Efficient || leftLoader.model.length === 0) ? 0 : Applet.dockSize * 0.6 + (dock.useColumnLayout ? 22 : 0)
+            color: "transparent"
+        }
+
+        Item {
+            id: dockCenterPart
+            implicitWidth: centerLoader.implicitWidth
+            implicitHeight: centerLoader.implicitHeight
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            OverflowContainer {
+                id: centerLoader
+                anchors.fill: parent
+                useColumnLayout: dock.useColumnLayout
+                model: dockPartContainerFilter(10, 20)
+                delegate: Control {
+                    contentItem: model.modelData
+                    Component.onCompleted: {
+                        contentItem.parent = this
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            implicitWidth: (Applet.displayMode === Dock.Efficient || rightLoader.model.length === 0) ? 0 : Applet.dockSize * 0.6 + (dock.useColumnLayout ? 0 : 22)
+            implicitHeight: (Applet.displayMode === Dock.Efficient || rightLoader.model.length === 0) ? 0 : Applet.dockSize * 0.6 + (dock.useColumnLayout ? 22 : 0)
+            color: "transparent"
+        }
+
+        Item {
+            id: dockRightPart
+            implicitWidth: rightLoader.implicitWidth
+            implicitHeight: rightLoader.implicitHeight
+            OverflowContainer {
+                id: rightLoader
+                anchors.fill: parent
+                useColumnLayout: dock.useColumnLayout
+                model: dockPartContainerFilter(20, 30)
+                delegate: Control {
+                    contentItem: model.modelData
+                    Component.onCompleted: {
+                        contentItem.parent = this
+                    }
+                }
             }
         }
     }
@@ -142,5 +208,19 @@ Window {
         case Dock.Left:
             return DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorLeft
         }
+    }
+
+    function dockPartContainerFilter(left, right) {
+        return Applet.appletItems.filter(item => {
+            return item.dockOrder > left && item.dockOrder <= right;
+        }).sort((itemLeft, itemRight) => {
+            return parseInt(itemLeft.dockOrder) - parseInt(itemRight.dockOrder);
+        })
+    }
+
+    WaylandOutput {
+        compositor: DockCompositor.compositor
+        window: Panel.popupWindow
+        sizeFollowsWindow: true
     }
 }

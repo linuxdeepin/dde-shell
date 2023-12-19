@@ -43,14 +43,15 @@ QString AppItem::id()
 
 QString AppItem::icon()
 {
-    QString icon;
-    if (m_currentActiveWindow) {
-        icon = m_currentActiveWindow->icon();
-    }
-    if (icon.isEmpty() && m_desktopfileParser && !m_desktopfileParser.isNull()) {
-        icon = m_desktopfileParser->desktopIcon();
-    }
-    return icon;
+    return m_desktopfileParser->desktopIcon();
+    // QString icon;
+    // if (m_currentActiveWindow) {
+    //     icon = m_currentActiveWindow->icon();
+    // }
+    // if (icon.isEmpty() && m_desktopfileParser && !m_desktopfileParser.isNull()) {
+    //     icon = m_desktopfileParser->desktopIcon();
+    // }
+    // return icon;
 }
 
 QString AppItem::name()

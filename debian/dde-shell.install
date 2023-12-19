@@ -8,3 +8,6 @@ usr/share/dde-shell/org.deepin.ds.dock*/
 usr/lib/*/qt6/qml/org/deepin/ds/dock/*
 usr/lib/*/dde-shell/org.deepin.ds.notification*
 usr/share/dde-shell/org.deepin.ds.notification*/
+usr/libexec/dockplugin-loader
+usr/lib/*/qt5/plugins/wayland-shell-integration
+usr/lib/*/libdde-dockplugin-interface*
