@@ -42,9 +42,13 @@ Item {
     }
 
     // Use TapHandler for tap screen compatibility
+    // Using TapHandler also means that we need a complete single tap to trigger menu, not just a press down
     TapHandler {
         id: tapHandler
         acceptedButtons: Qt.LeftButton | Qt.RightButton
+        // NOTICE: Setting gesturePolicy is mandatory for exclusive point event grab.
+        // Otherwise default passive grab will propagate event to parent
+        gesturePolicy: TapHandler.WithinBounds
         onPressedChanged: {
             if (pressed) {
                 // Grab icon as image in advance for drag's use
@@ -55,7 +59,6 @@ Item {
         }
         onTapped: function(eventPoint, button) {
             if (button === Qt.RightButton) {
-                console.log("Right button is clicked")
                 contextMenu.open()
             } else {
                 appItem.clickItem(itemId)
