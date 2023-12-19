@@ -10,8 +10,9 @@ import org.deepin.dtk 1.0 as D
 
 AppletItem {
     id: launcher
-    implicitWidth: 40
-    implicitHeight: 40
+    property int dockSize: Applet.parent.dockSize
+    implicitWidth: dockSize
+    implicitHeight: dockSize
 
     D.ActionButton {
         anchors.fill: parent

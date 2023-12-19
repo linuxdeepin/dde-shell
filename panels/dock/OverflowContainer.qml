@@ -6,20 +6,52 @@ import QtQuick 2.15
 import QtQuick.Layouts 2.15
 
 Item {
-    id: container
-    width: gridLayout.width
-    height: gridLayout.height
-    enum Direction {
-        LeftToRight,
-        TopToBottom
+    id: root
+    required property bool useColumnLayout
+    property alias model: listView.model
+    property alias delegate: listView.delegate
+    property alias spacing: listView.spacing
+    property alias count: listView.count
+    property alias displaced: listView.displaced
+    ListView {
+        id: listView
+        anchors.fill: parent
+        orientation: useColumnLayout ? ListView.Vertical : ListView.Horizontal
+        layoutDirection: Qt.LeftToRight
+        verticalLayoutDirection: ListView.TopToBottom
+        interactive: false
+
     }
-    required property int direction
-    default property alias content: gridLayout.children
-    GridLayout {
-        id: gridLayout
-        anchors.centerIn: parent
-        columns: 1
-        rows: 1
-        flow: container.direction === OverflowContainer.Direction.LeftToRight ? GridLayout.TopToBottom : GridLayout.LeftToRight
+
+    function calculateImplicitWidth(prev, current) {
+        if (useColumnLayout) {
+            return Math.max(prev, current)
+        } else {
+            return prev + current + root.spacing
+        }
+    }
+
+    function calculateImplicitHeight(prev, current) {
+        if (useColumnLayout) {
+            return prev + current + root.spacing
+        } else {
+            return Math.max(prev, current)
+        }
+    }
+
+    implicitWidth: {
+        let width = 0
+        for (let child of listView.contentItem.visibleChildren) {
+            width = calculateImplicitWidth(width, child.implicitWidth)
+        }
+        return width
+    }
+
+    implicitHeight: {
+        let height = 0
+        for (let child of listView.contentItem.visibleChildren) {
+            height = calculateImplicitHeight(height, child.implicitHeight)
+        }
+        return height
     }
 }

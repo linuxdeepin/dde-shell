@@ -24,10 +24,10 @@ Window {
     DLayerShellWindow.anchors: position2Anchors(Applet.position)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Applet.dockSize
-    DLayerShellWindow.leftMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - contentLoader.width) / 2
-    DLayerShellWindow.rightMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - contentLoader.width) / 2
-    DLayerShellWindow.topMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - contentLoader.height) / 2
-    DLayerShellWindow.bottomMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - contentLoader.height) / 2
+    DLayerShellWindow.leftMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - contentLoader.implicitWidth) / 2
+    DLayerShellWindow.rightMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - contentLoader.implicitWidth) / 2
+    DLayerShellWindow.topMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - contentLoader.implicitHeight) / 2
+    DLayerShellWindow.bottomMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - contentLoader.implicitHeight) / 2
 
     component EnumPropertyMenuItem: LP.MenuItem {
         required property string name
@@ -118,16 +118,13 @@ Window {
 
     OverflowContainer {
         id: contentLoader
-        direction: useColumnLayout ? OverflowContainer.Direction.TopToBottom : OverflowContainer.Direction.LeftToRight
-        Repeater {
-            model: Applet.appletItems
-            delegate: Loader {
-                sourceComponent: Control {
-                    contentItem: model.modelData
-                    Component.onCompleted: {
-                        contentItem.parent = this
-                    }
-                }
+        anchors.fill: parent
+        useColumnLayout: dock.useColumnLayout
+        model: Applet.appletItems
+        delegate: Control {
+            contentItem: model.modelData
+            Component.onCompleted: {
+                contentItem.parent = this
             }
         }
     }
