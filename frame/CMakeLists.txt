@@ -36,6 +36,7 @@ add_library(dde-shell-frame SHARED
     layershell/dlayershellwindow.cpp
     layershell/qwaylandlayershellsurface.cpp
     layershell/qwaylandlayershellintegration.cpp
+    ddeshell_qml.qrc
 )
 
 qt_generate_wayland_protocol_client_sources(dde-shell-frame FILES

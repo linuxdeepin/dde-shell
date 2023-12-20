@@ -10,9 +10,19 @@
 #include "dstypes.h"
 #include "layershell/dlayershellwindow.h"
 
+#include <qqml.h>
+
 QML_DECLARE_TYPEINFO(DS_NAMESPACE::DLayerShellWindow, QML_HAS_ATTACHED_PROPERTIES)
 
 DS_BEGIN_NAMESPACE
+
+static inline void dsRegisterType(const char *uri, int versionMajor, int versionMinor, const char *qmlName)
+{
+    static QString urlTemplate = QStringLiteral("qrc:/ddeshell/qml/%1.qml");
+
+    const QUrl url(urlTemplate.arg(qmlName));
+    qmlRegisterType(url, uri, versionMajor, versionMinor, qmlName);
+}
 
 void QmlpluginPlugin::registerTypes(const char *uri)
 {
@@ -29,6 +39,9 @@ void QmlpluginPlugin::registerTypes(const char *uri)
     qmlRegisterUncreatableType<DPanel>(uri, 1, 0, "Panel", "Panel Attached");
     qmlRegisterType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow");
     qmlRegisterUncreatableType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow","LayerShell Attached");
+
+    dsRegisterType(uri, 1, 0, "PanelPopup");
+    dsRegisterType(uri, 1, 0, "PanelPopupWindow");
 }
 
 void QmlpluginPlugin::initializeEngine(QQmlEngine *engine, const char *uri)

@@ -30,6 +30,8 @@ public:
     QObject *rootObject() const;
 
     QQmlEngine *engine();
+
+    static QObject *createObject(const QUrl &url);
 };
 
 DS_END_NAMESPACE

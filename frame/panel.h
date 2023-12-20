@@ -19,11 +19,14 @@ class DS_SHARE DPanel : public DContainment
 {
     Q_OBJECT
     D_DECLARE_PRIVATE(DPanel)
+    Q_PROPERTY(QQuickWindow *popupWindow READ popupWindow NOTIFY popupWindowChanged)
 public:
     explicit DPanel(QObject *parent = nullptr);
     virtual ~DPanel() override;
 
     QQuickWindow *window() const;
+
+    QQuickWindow *popupWindow() const;
 
     // 加载插件
     virtual bool load(const DAppletData &data = DAppletData()) override;
@@ -31,6 +34,9 @@ public:
     virtual bool init() override;
 
     static DPanel *qmlAttachedProperties(QObject *object);
+
+Q_SIGNALS:
+    void popupWindowChanged();
 };
 
 DS_END_NAMESPACE
