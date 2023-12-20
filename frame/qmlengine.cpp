@@ -108,6 +108,24 @@ void DQmlEngine::completeCreate()
     d->m_component->completeCreate();
 }
 
+QObject *DQmlEngine::createObject(const QUrl &url)
+{
+    QQmlEngine *engine = DQmlEngine().engine();
+    std::unique_ptr<QQmlComponent> component(new QQmlComponent(engine));
+    component->loadUrl(url);
+    if (component->isError()) {
+        qCWarning(dsLog()) << "Loading url failed" << component->errorString();
+        return nullptr;
+    }
+    std::unique_ptr<QQmlContext> context(new QQmlContext(engine, engine->rootContext()));
+    auto object = component->beginCreate(context.get());
+    if (!object)
+        return nullptr;
+    component->completeCreate();
+    context.release();
+    return object;
+}
+
 QObject *DQmlEngine::rootObject() const
 {
     D_DC(DQmlEngine);

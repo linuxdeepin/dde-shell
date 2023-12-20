@@ -78,6 +78,13 @@ DPanel *DPanel::qmlAttachedProperties(QObject *object)
     return nullptr;
 }
 
+QQuickWindow *DPanel::popupWindow() const
+{
+    D_DC(DPanel);
+    d->ensurePopupWindow();
+    return d->m_popupWindow;
+}
+
 void DPanelPrivate::initDciSearchPaths()
 {
     D_Q(DPanel);
@@ -92,6 +99,24 @@ void DPanelPrivate::initDciSearchPaths()
         }
     }
     DIconTheme::setDciThemeSearchPaths(dciPaths);
+}
+
+void DPanelPrivate::ensurePopupWindow() const
+{
+    if (m_popupWindow)
+        return;
+    D_QC(DPanel);
+    if (!q->window())
+        return;
+
+    auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelPopupWindow.qml"));
+     if (!object)
+         return;
+     const_cast<DPanelPrivate *>(this)->m_popupWindow = qobject_cast<QQuickWindow *>(object);
+     if (m_popupWindow) {
+         m_popupWindow->setTransientParent(q->window());
+         Q_EMIT const_cast<DPanel *>(q)->popupWindowChanged();
+     }
 }
 
 DS_END_NAMESPACE

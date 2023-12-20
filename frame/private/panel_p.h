@@ -25,7 +25,10 @@ public:
     }
 
     void initDciSearchPaths();
+    void ensurePopupWindow() const;
+
     DQmlEngine *m_engine = nullptr;
+    QQuickWindow *m_popupWindow = nullptr;
 
     D_DECLARE_PUBLIC(DPanel)
 };

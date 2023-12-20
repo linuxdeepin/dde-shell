@@ -26,6 +26,20 @@ AppletItem {
             onClicked: platformMenu.open()
         }
     }
+
+    PanelPopup {
+        id: popup
+        x: 100
+        y: -200
+        width: 200
+        height: 200
+
+        Button {
+            text: "popup content"
+            anchors.centerIn: parent
+        }
+    }
+
     LP.Menu {
         id: platformMenu
         LP.MenuItem {
@@ -36,6 +50,12 @@ AppletItem {
         }
         LP.MenuItem {
             text: "Panel " + String(Panel.id).slice(0, 5)
+        }
+        LP.MenuItem {
+            text: "Popup"
+            onTriggered: {
+                popup.open()
+            }
         }
     }
 }
