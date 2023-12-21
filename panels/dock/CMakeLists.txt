@@ -34,6 +34,7 @@ qt_add_dbus_adaptor(dock_sources
     DockAdaptor
 )
 
+set_source_files_properties(MenuHelper.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_policy(SET QTP0001 OLD)
 qt_add_qml_module(dockpanel
     PLUGIN_TARGET dockpanel-plugin
@@ -41,7 +42,7 @@ qt_add_qml_module(dockpanel
     VERSION "1.0"
     SHARED
     SOURCES ${dock_sources}
-    QML_FILES OverflowContainer.qml
+    QML_FILES OverflowContainer.qml MenuHelper.qml
     OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock
 )
 

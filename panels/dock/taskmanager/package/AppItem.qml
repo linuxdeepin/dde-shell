@@ -56,7 +56,7 @@ Item {
         }
         onTapped: function(eventPoint, button) {
             if (button === Qt.RightButton) {
-                contextMenu.open()
+                MenuHelper.openMenu(contextMenu)
             } else {
                 appItem.clickItem(itemId)
             }

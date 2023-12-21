@@ -107,11 +107,13 @@ Window {
     }
 
     TapHandler {
-        acceptedButtons: Qt.RightButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         gesturePolicy: TapHandler.WithinBounds
         onTapped: function(eventPoint, button) {
-            if (button === Qt.RightButton) {
-                dockMenu.open()
+            let lastActive = MenuHelper.activeMenu
+            MenuHelper.closeCurrent()
+            if (button === Qt.RightButton && lastActive !== dockMenu) {
+                MenuHelper.openMenu(dockMenu)
             }
         }
     }
