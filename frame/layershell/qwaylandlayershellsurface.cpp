@@ -129,7 +129,6 @@ void QWaylandLayerShellSurface::setWindowGeometry(const QRect &geometry)
     set_size(size.width(), size.height());
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
 void QWaylandLayerShellSurface::attachPopup(QtWaylandClient::QWaylandShellSurface *popup)
 {
     std::any anyRole = popup->surfaceRole();
@@ -140,6 +139,4 @@ void QWaylandLayerShellSurface::attachPopup(QtWaylandClient::QWaylandShellSurfac
         qCWarning(layershellsurface) << "Cannot attach popup of unknown type";
     }
 }
-#endif
-
 DS_END_NAMESPACE
