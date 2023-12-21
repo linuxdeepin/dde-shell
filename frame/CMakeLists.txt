@@ -14,12 +14,18 @@ set(PUBLIC_HEADERS
     qmlengine.h
     layershell/dlayershellwindow.h
 )
-add_library(dde-shell-frame SHARED
-    ${PUBLIC_HEADERS}
+
+set(PRIVATE_HEADERS
     private/applet_p.h
     private/containment_p.h
     private/panel_p.h
     private/appletitem_p.h
+    layershell/qwaylandlayershellsurface_p.h
+    layershell/qwaylandlayershellintegration_p.h
+)
+add_library(dde-shell-frame SHARED
+    ${PUBLIC_HEADERS}
+    ${PRIVATE_HEADERS}
     appletitem.h
     containmentitem.h
     dstypes.cpp
@@ -49,6 +55,7 @@ set_target_properties(dde-shell-frame PROPERTIES
     OUTPUT_NAME dde-shell
     EXPORT_NAME Shell
 )
+
 target_link_libraries(dde-shell-frame
 PUBLIC
     Dtk${DTK_VERSION_MAJOR}::Core
@@ -70,9 +77,9 @@ target_link_directories(dde-shell-frame INTERFACE
 )
 
 if (BUILD_WITH_X11)
-    target_compile_definitions(dde-shell-frame PRIVATE BUILD_WITH_X11=)
+    target_compile_definitions(dde-shell-frame PRIVATE BUILD_WITH_X11)
     pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb-ewmh)
-    target_sources(dde-shell-frame PRIVATE layershell/x11dlayershellemulation.cpp)
+    target_sources(dde-shell-frame PRIVATE layershell/x11dlayershellemulation.h layershell/x11dlayershellemulation.cpp)
     target_link_libraries(dde-shell-frame PRIVATE PkgConfig::XCB)
 endif(BUILD_WITH_X11)
 
