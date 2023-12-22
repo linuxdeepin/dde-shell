@@ -45,8 +45,7 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
 
     set_anchor(m_dlayerShellWindow->anchors());
     connect(m_dlayerShellWindow, &DLayerShellWindow::anchorsChanged, this,[this, window](){
-        set_anchor(m_dlayerShellWindow->anchors());
-        window->waylandSurface()->commit();
+        trySetAnchorsAndSize();
     });
 
     set_exclusive_zone(m_dlayerShellWindow->exclusionZone());
@@ -66,19 +65,10 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
         window->waylandSurface()->commit();
     });
 
+    calcAndSetRequestSize(window->surfaceSize());
 
-    QSize size = window->surfaceSize();
-    const DLayerShellWindow::Anchors anchors = m_dlayerShellWindow->anchors();
-    if ((anchors & DLayerShellWindow::AnchorLeft) && (anchors & DLayerShellWindow::AnchorRight)) {
-        size.setWidth(0);
-    }
-
-    if ((anchors & DLayerShellWindow::AnchorTop) && (anchors & DLayerShellWindow::AnchorBottom )) {
-        size.setHeight(0);
-    }
-
-    if (size.isValid()) {
-        set_size(size.width(), size.height());
+    if (m_requestSize.isValid()) {
+        set_size(m_requestSize.width(), m_requestSize.height());
     }
 }
 
@@ -91,6 +81,37 @@ void QWaylandLayerShellSurface::zwlr_layer_surface_v1_closed()
 {
     if (m_dlayerShellWindow->closeOnDismissed()) {
         window()->window()->close();
+    }
+}
+
+void QWaylandLayerShellSurface::calcAndSetRequestSize(QSize requestSize)
+{
+    auto anchors = m_dlayerShellWindow->anchors();
+    const bool horizontallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorLeft, DLayerShellWindow::AnchorRight});
+    const bool verticallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorTop, DLayerShellWindow::AnchorBottom});
+    m_requestSize = requestSize;
+    if (horizontallyConstrained) {
+        m_requestSize.setWidth(0);
+    }
+    if (verticallyConstrained) {
+        m_requestSize.setHeight(0);
+    }
+}
+
+bool QWaylandLayerShellSurface::anchorsSizeConflict() const
+{
+    auto anchors = m_dlayerShellWindow->anchors();
+    const bool horizontallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorLeft, DLayerShellWindow::AnchorRight});
+    const bool verticallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorTop, DLayerShellWindow::AnchorBottom});
+    return (!horizontallyConstrained && m_requestSize.width() == 0) || (!verticallyConstrained && m_requestSize.height() == 0);
+}
+
+void QWaylandLayerShellSurface::trySetAnchorsAndSize()
+{
+    if (!anchorsSizeConflict()) {
+        set_anchor(m_dlayerShellWindow->anchors());
+        set_size(m_requestSize.width(), m_requestSize.height());
+        window()->waylandSurface()->commit();
     }
 }
 
@@ -115,18 +136,8 @@ void QWaylandLayerShellSurface::applyConfigure()
 
 void QWaylandLayerShellSurface::setWindowGeometry(const QRect &geometry)
 {
-    auto anchors = m_dlayerShellWindow->anchors();
-    const bool horizontallyConstrained =(anchors & (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight);
-    const bool verticallyConstrained = (anchors & (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom);
-
-    QSize size = geometry.size();
-    if (horizontallyConstrained) {
-        size.setWidth(0);
-    }
-    if (verticallyConstrained) {
-        size.setHeight(0);
-    }
-    set_size(size.width(), size.height());
+    calcAndSetRequestSize(geometry.size());
+    trySetAnchorsAndSize();
 }
 
 void QWaylandLayerShellSurface::attachPopup(QtWaylandClient::QWaylandShellSurface *popup)
