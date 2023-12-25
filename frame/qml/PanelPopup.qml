@@ -16,10 +16,8 @@ Item {
         if (!window)
             return
 
-        window.x = control.x
-        window.y = control.y
-        window.width = popup.width
-        window.height = popup.height
+        var rect = Qt.rect(control.x, control.y, popup.width, popup.height)
+        window.setGeometry(rect)
         window.show()
         popup.open()
     }
@@ -35,6 +33,7 @@ Item {
 
     Popup {
         id: popup
+        padding: 0
         width: control.width
         height: control.height
         parent: Panel.popupWindow ? Panel.popupWindow.contentItem : undefined
@@ -47,5 +46,7 @@ Item {
                     popup.close()
             })
         }
+        // TODO dtk's blur causes blurred screen.
+        background: null
     }
 }
