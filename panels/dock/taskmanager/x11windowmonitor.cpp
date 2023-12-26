@@ -98,19 +98,27 @@ QPointer<AbstractWindow> X11WindowMonitor::getWindowByWindowId(ulong windowId)
     return m_windows.value(windowId).get();
 }
 
-void X11WindowMonitor::presentWindows(QStringList windows)
+void X11WindowMonitor::presentWindows(QList<uint32_t> windows)
 {
-    QList<uint32_t> windowIds;
-    std::transform(windows.begin(), windows.end(), std::back_inserter(windowIds),[](QString windowId){
-        return windowId.toUInt();
-    });
-
     DDBusSender().interface("com.deepin.wm")
                 .path("/com/deepin/wm")
                 .service("com.deepin.wm")
                 .method("PresentWindows")
-                .arg(windowIds)
+                .arg(windows)
                 .call().waitForFinished();
+}
+
+void X11WindowMonitor::showWindowsPreview(QList<uint32_t> windowsId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+{
+    // custom created preview popup window and show at (relativePositionItem.x + previewXoffset, relativePositionItem.y + previewYoffset) pos
+    // direction is dock current position
+
+    qDebug() << windowsId << relativePositionItem << previewXoffset << previewYoffset << direction;
+}
+
+void X11WindowMonitor::hideWindowsPreview()
+{
+    qDebug() << "hide";
 }
 
 void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)

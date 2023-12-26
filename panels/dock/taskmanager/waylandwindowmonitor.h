@@ -12,6 +12,7 @@
 #include <QHash>
 #include <QList>
 #include <QObject>
+#include <QTimer>
 
 #include <QtWaylandClient/QWaylandClientExtension>
 
@@ -33,6 +34,29 @@ private:
     WaylandWindowMonitor* m_monitor;
 };
 
+class TreelandDockPreviewContext : public QWaylandClientExtensionTemplate<TreelandDockPreviewContext>, public QtWayland::treeland_dock_preview_context_v1
+{
+    Q_OBJECT
+
+public:
+    explicit TreelandDockPreviewContext(struct ::treeland_dock_preview_context_v1 *);
+    ~TreelandDockPreviewContext();
+    void showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    void hideWindowsPreview();
+
+Q_SIGNALS:
+    void entered();
+    void exited();
+
+protected:
+    virtual void treeland_dock_preview_context_v1_enter() override;
+    virtual void treeland_dock_preview_context_v1_leave() override;
+private:
+    bool m_isPreviewEntered;
+    bool m_isDockMouseAreaEnter;
+    QTimer* m_hideTimer;
+};
+
 class WaylandWindowMonitor : public AbstractWindowMonitor
 {
     Q_OBJECT
@@ -44,21 +68,20 @@ public:
 
     virtual QPointer<AbstractWindow> getWindowByWindowId(ulong windowId) override;
 
-    virtual void presentWindows(QStringList windows) override;
+    virtual void presentWindows(QList<uint32_t> windows) override;
+    virtual void showWindowsPreview(QList<uint32_t> windowsId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
+    virtual void hideWindowsPreview() override;
 
 private Q_SLOTS:
     friend class ForeignToplevelManager;
-    friend class ExtForeignToplevelList;
 
     void handleForeignToplevelHandleAdded();
-    void handleExtForeignToplevelHandleAdded();
-
     void handleForeignToplevelHandleRemoved();
-    void handleExtForeignToplevelHandleRemoved();
 
 private:
     QHash<ulong, QSharedPointer<WaylandWindow>> m_windows;
     QScopedPointer<ForeignToplevelManager> m_foreignToplevelManager;
+    QScopedPointer<TreelandDockPreviewContext> m_dockPreview;
 
 };
 }
