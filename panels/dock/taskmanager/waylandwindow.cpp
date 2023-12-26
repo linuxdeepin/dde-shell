@@ -6,6 +6,7 @@
 #include "waylandwindow.h"
 #include "abstractwindow.h"
 
+#include <cstdint>
 #include <sys/types.h>
 
 #include <QLoggingCategory>
@@ -21,9 +22,11 @@ ForeignToplevelHandle::ForeignToplevelHandle(struct ::ztreeland_foreign_toplevel
     , QtWayland::ztreeland_foreign_toplevel_handle_v1(object)
     , m_pid(0)
     , m_isReady(false)
-{}
+{
+    init(object);
+}
 
-ulong ForeignToplevelHandle::id() const
+uint32_t ForeignToplevelHandle::id() const
 {
     return m_identifier;
 }
@@ -70,9 +73,10 @@ void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_app_id(const QS
     m_appId = app_id;
 }
 
-void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_identifier(const QString &identifier)
+void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_identifier(uint32_t identifier)
 {
-    m_identifier = identifier.toULong();
+    if (identifier == m_identifier) return;
+    m_identifier = identifier;
 }
 
 void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_state(wl_array *state)

@@ -23,7 +23,7 @@ class ForeignToplevelHandle : public QWaylandClientExtensionTemplate<ForeignTopl
 public:
     explicit ForeignToplevelHandle(struct ::ztreeland_foreign_toplevel_handle_v1 *object);
     bool isReady() const;
-    ulong id() const;
+    uint32_t id() const;
     pid_t pid() const;
     QString title() const;
     QList<uint32_t> state() const;
@@ -42,7 +42,7 @@ protected:
     void ztreeland_foreign_toplevel_handle_v1_pid(uint32_t pid) override;
     void ztreeland_foreign_toplevel_handle_v1_title(const QString &title) override;
     void ztreeland_foreign_toplevel_handle_v1_app_id(const QString &app_id) override;
-    void ztreeland_foreign_toplevel_handle_v1_identifier(const QString &identifier) override;
+    void ztreeland_foreign_toplevel_handle_v1_identifier(uint32_t identifier) override;
     void ztreeland_foreign_toplevel_handle_v1_state(wl_array *state) override;
     void ztreeland_foreign_toplevel_handle_v1_done() override;
     void ztreeland_foreign_toplevel_handle_v1_closed() override;
@@ -52,7 +52,7 @@ private:
     QString m_title;
     bool m_isReady;
     QString m_appId;
-    ulong m_identifier;
+    uint32_t m_identifier;
 
     QList<uint32_t> m_states;
 };
