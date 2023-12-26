@@ -9,6 +9,14 @@
 #include "abstractwindowmonitor.h"
 
 #include <QPointer>
+#include <QIODevice>
+#include <QVarLengthArray>
+
+#include <QtWaylandClient/private/qwaylandwindow_p.h>
+
+#include <algorithm>
+#include <cstdint>
+#include <iterator>
 
 DS_BEGIN_NAMESPACE
 
@@ -23,6 +31,52 @@ void ForeignToplevelManager::ztreeland_foreign_toplevel_manager_v1_toplevel(stru
 {
     ForeignToplevelHandle* handle = new ForeignToplevelHandle(toplevel);
     connect(handle, &ForeignToplevelHandle::handlerIsReady, m_monitor,&WaylandWindowMonitor::handleForeignToplevelHandleAdded, Qt::UniqueConnection);
+}
+
+TreelandDockPreviewContext::TreelandDockPreviewContext(struct ::treeland_dock_preview_context_v1 *context)
+    : QWaylandClientExtensionTemplate<TreelandDockPreviewContext>(1)
+    , m_hideTimer(new QTimer(this))
+    , m_isPreviewEntered(false)
+    , m_isDockMouseAreaEnter(false)
+{
+    init(context);
+
+    m_hideTimer->setSingleShot(true);
+    m_hideTimer->setInterval(500);
+
+    connect(m_hideTimer, &QTimer::timeout, this, [this](){
+        if (!m_isDockMouseAreaEnter && !m_isPreviewEntered) {
+            close();
+        }
+    }, Qt::QueuedConnection);
+}
+
+TreelandDockPreviewContext::~TreelandDockPreviewContext()
+{
+    destroy();
+}
+
+void TreelandDockPreviewContext::showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+{
+    m_isDockMouseAreaEnter = true;
+    show(windowsId, previewXoffset, previewYoffset, direction);
+}
+
+void TreelandDockPreviewContext::hideWindowsPreview()
+{
+    m_isDockMouseAreaEnter = false;
+    m_hideTimer->start();
+}
+
+void TreelandDockPreviewContext::treeland_dock_preview_context_v1_enter()
+{
+    m_isPreviewEntered = true;
+}
+
+void TreelandDockPreviewContext::treeland_dock_preview_context_v1_leave()
+{
+    m_isPreviewEntered = false;
+    m_hideTimer->start();
 }
 
 WaylandWindowMonitor::WaylandWindowMonitor(QObject* parent)
@@ -45,9 +99,37 @@ QPointer<AbstractWindow> WaylandWindowMonitor::getWindowByWindowId(ulong windowI
     return m_windows.value(windowId).get();
 }
 
-void WaylandWindowMonitor::presentWindows(QStringList windows)
+void WaylandWindowMonitor::presentWindows(QList<uint32_t> windows)
 {
 
+}
+
+void WaylandWindowMonitor::showWindowsPreview(QList<uint32_t> windows, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+{
+    if (m_dockPreview.isNull()) {
+        auto window = qobject_cast<QWindow*>(relativePositionItem);
+        if (!window) return;
+        auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(window->handle());
+        if (!waylandWindow) return;
+
+        auto context = m_foreignToplevelManager->get_dock_preview_context(waylandWindow->wlSurface());
+        m_dockPreview.reset(new TreelandDockPreviewContext(context));
+    }
+
+    QVarLengthArray array = QVarLengthArray<uint32_t>();
+
+    for (auto window : windows) {
+        array.append(window);
+    }
+    
+    QByteArray windowIds(reinterpret_cast<char*>(array.data()));
+    m_dockPreview->showWindowsPreview(windowIds, previewXoffset, previewYoffset, direction);
+}
+
+void WaylandWindowMonitor::hideWindowsPreview()
+{
+    if (m_dockPreview.isNull()) return;
+    m_dockPreview->hideWindowsPreview();
 }
 
 void WaylandWindowMonitor::handleForeignToplevelHandleAdded()

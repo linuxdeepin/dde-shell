@@ -39,6 +39,8 @@ public:
 
     Q_INVOKABLE void clickItem(const QString& itemid);
     Q_INVOKABLE void clickItemMenu(const QString& itemId, const QString& menuId);
+    Q_INVOKABLE void showWindowsPreview(QStringList windowStrIds, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    Q_INVOKABLE void hideWindowsPreview();
 
 Q_SIGNALS:
     void appItemsChanged();
