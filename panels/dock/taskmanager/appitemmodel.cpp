@@ -64,6 +64,23 @@ QVariant AppItemModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+void AppItemModel::moveTo(const QString &id, int dIndex)
+{
+    auto item = getAppItemById(id);
+    int sIndex = m_appItems.indexOf(item);
+    if (sIndex == dIndex) {
+        return;
+    }
+    if (sIndex + 1 == dIndex) {
+        // Do not move from sIndex to sIndex + 1, as endMoveRows is not trivial, this operation equals do nothing.
+        // FIXME: maybe this is a bug of Qt? but swap these two is a compatible fix
+        std::swap(sIndex, dIndex);
+    }
+    beginMoveRows(QModelIndex(), sIndex, sIndex, QModelIndex(), dIndex);
+    m_appItems.move(sIndex, dIndex);
+    endMoveRows();
+}
+
 QPointer<AppItem> AppItemModel::getAppItemById(const QString& id) const
 {
     auto it = std::find_if(m_appItems.begin(), m_appItems.end(),[id](QPointer<AppItem> item){
