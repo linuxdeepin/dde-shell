@@ -19,9 +19,9 @@ DockTray::DockTray(QObject *parent)
 {
 };
 
-bool DockTray::init()
+bool DockTray::load()
 {
-    DApplet::init();
+    DApplet::load();
 
     QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
         if (rootObject()) {

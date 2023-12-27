@@ -39,6 +39,8 @@ add_library(dde-shell-frame SHARED
     appletitem.cpp
     containmentitem.cpp
     qmlengine.cpp
+    appletitemmodel.h
+    appletitemmodel.cpp
     layershell/dlayershellwindow.cpp
     layershell/qwaylandlayershellsurface.cpp
     layershell/qwaylandlayershellintegration.cpp

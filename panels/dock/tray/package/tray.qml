@@ -22,7 +22,7 @@ AppletItem {
     implicitWidth: useColumnLayout ? Panel.dockSize : trayContainter.implicitWidth
     implicitHeight: useColumnLayout ? trayContainter.implicitHeight : Panel.dockSize
 
-    PanelPopup {
+    PanelToolTip {
         id: popup
         width: popupContent.width
         height: popupContent.height
@@ -100,6 +100,12 @@ AppletItem {
     WaylandOutput {
         compositor: DockCompositor.compositor
         window: Panel.rootObject
+        sizeFollowsWindow: true
+    }
+
+    WaylandOutput {
+        compositor: DockCompositor.compositor
+        window: Panel.toolTipWindow
         sizeFollowsWindow: true
     }
 

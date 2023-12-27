@@ -30,7 +30,7 @@ public:
 
     DQmlEngine *m_engine = nullptr;
     QQuickWindow *m_popupWindow = nullptr;
-    QQuickWindow *m_ToolTipWindow = nullptr;
+    QQuickWindow *m_toolTipWindow = nullptr;
 
     D_DECLARE_PUBLIC(DPanel)
 };

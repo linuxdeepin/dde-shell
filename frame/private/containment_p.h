@@ -6,6 +6,7 @@
 
 #include "applet_p.h"
 #include "containment.h"
+#include "appletitemmodel.h"
 
 #include <dobject_p.h>
 #include <QVariant>
@@ -19,12 +20,13 @@ class DContainmentPrivate : public DAppletPrivate
 public:
     explicit DContainmentPrivate(DContainment *qq)
         : DAppletPrivate(qq)
+        , m_model(new DAppletItemModel())
     {
 
     }
     QList<DAppletData> groupList(const DAppletData &data) const;
     QList<DApplet *> m_applets;
-    QList<QObject *> m_appletItems;
+    DAppletItemModel *m_model = nullptr;
 
     D_DECLARE_PUBLIC(DContainment)
 };

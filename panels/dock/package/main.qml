@@ -136,12 +136,9 @@ Window {
                 id: leftLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
-                model: dockPartContainerFilter(0, 10)
-                delegate: Control {
-                    contentItem: model.modelData
-                    Component.onCompleted: {
-                        contentItem.parent = this
-                    }
+                model: DockPartAppletModel {
+                    leftDockOrder: 0
+                    rightDockOrder: 10
                 }
             }
         }
@@ -162,12 +159,9 @@ Window {
                 id: centerLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
-                model: dockPartContainerFilter(10, 20)
-                delegate: Control {
-                    contentItem: model.modelData
-                    Component.onCompleted: {
-                        contentItem.parent = this
-                    }
+                model: DockPartAppletModel {
+                    leftDockOrder: 10
+                    rightDockOrder: 20
                 }
             }
         }
@@ -186,12 +180,9 @@ Window {
                 id: rightLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
-                model: dockPartContainerFilter(20, 30)
-                delegate: Control {
-                    contentItem: model.modelData
-                    Component.onCompleted: {
-                        contentItem.parent = this
-                    }
+                model: DockPartAppletModel {
+                    leftDockOrder: 20
+                    rightDockOrder: 30
                 }
             }
         }
@@ -208,19 +199,5 @@ Window {
         case Dock.Left:
             return DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorLeft
         }
-    }
-
-    function dockPartContainerFilter(left, right) {
-        return Applet.appletItems.filter(item => {
-            return item.dockOrder > left && item.dockOrder <= right;
-        }).sort((itemLeft, itemRight) => {
-            return parseInt(itemLeft.dockOrder) - parseInt(itemRight.dockOrder);
-        })
-    }
-
-    WaylandOutput {
-        compositor: DockCompositor.compositor
-        window: Panel.popupWindow
-        sizeFollowsWindow: true
     }
 }

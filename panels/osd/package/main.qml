@@ -34,7 +34,7 @@ Window {
             }
 
             sourceComponent: Control {
-                contentItem: model.modelData
+                contentItem: model.data
                 padding: 10
 //                background: D.FloatingPanel { }
             }
