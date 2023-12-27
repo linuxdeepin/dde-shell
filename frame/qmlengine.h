@@ -30,6 +30,7 @@ public:
     QQmlEngine *engine();
 
     static QObject *createObject(const QUrl &url);
+    static QObject *createObject(const QUrl &url, const QVariantMap &initialProperties);
 
     bool create();
     void completeCreate();

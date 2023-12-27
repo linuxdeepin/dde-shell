@@ -26,9 +26,11 @@ public:
 
     void initDciSearchPaths();
     void ensurePopupWindow() const;
+    void ensureToolTipWindow() const;
 
     DQmlEngine *m_engine = nullptr;
     QQuickWindow *m_popupWindow = nullptr;
+    QQuickWindow *m_ToolTipWindow = nullptr;
 
     D_DECLARE_PUBLIC(DPanel)
 };

@@ -41,6 +41,7 @@ void QmlpluginPlugin::registerTypes(const char *uri)
     qmlRegisterUncreatableType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow","LayerShell Attached");
 
     dsRegisterType(uri, 1, 0, "PanelPopup");
+    dsRegisterType(uri, 1, 0, "PanelToolTip");
     dsRegisterType(uri, 1, 0, "PanelPopupWindow");
 }
 

@@ -115,6 +115,11 @@ bool DQmlEngine::create()
 
 QObject *DQmlEngine::createObject(const QUrl &url)
 {
+    return createObject(url, {});
+}
+
+QObject *DQmlEngine::createObject(const QUrl &url, const QVariantMap &initialProperties)
+{
     QQmlEngine *engine = DQmlEngine().engine();
     std::unique_ptr<QQmlComponent> component(new QQmlComponent(engine));
     component->loadUrl(url);
@@ -123,7 +128,7 @@ QObject *DQmlEngine::createObject(const QUrl &url)
         return nullptr;
     }
     std::unique_ptr<QQmlContext> context(new QQmlContext(engine, engine->rootContext()));
-    auto object = component->beginCreate(context.get());
+    auto object = component->createWithInitialProperties(initialProperties, context.get());
     if (!object)
         return nullptr;
     component->completeCreate();

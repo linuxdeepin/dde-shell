@@ -22,7 +22,9 @@ AppletItem {
                   String("parent AppletId:%2 \n").arg(String(Applet.parent.id).slice(1, 10))
         }
         MouseArea {
+            id: mouseArea
             anchors.fill: parent
+            hoverEnabled: true
             onClicked: platformMenu.open()
         }
     }
@@ -38,6 +40,16 @@ AppletItem {
             text: "popup content"
             anchors.centerIn: parent
         }
+    }
+
+    PanelToolTip {
+        id: toolTip
+        x: 100
+        y: -100
+        width: 100
+        height: 100
+        visible: mouseArea.containsMouse
+        text: "toolTip content"
     }
 
     LP.Menu {

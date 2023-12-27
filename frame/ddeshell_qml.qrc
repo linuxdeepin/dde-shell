@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/ddeshell">
         <file>qml/PanelPopup.qml</file>
+        <file>qml/PanelToolTip.qml</file>
         <file>qml/PanelPopupWindow.qml</file>
     </qresource>
 </RCC>
