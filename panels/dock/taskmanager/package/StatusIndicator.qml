@@ -7,7 +7,7 @@ import QtQuick.Controls 2.15
 
 Rectangle {
     required property AppItemPalette palette
-    radius: 6
+    radius: width * 0.2
     color: palette.rectIndicator
     border.width: 1
     border.color: palette.rectIndicatorBorder

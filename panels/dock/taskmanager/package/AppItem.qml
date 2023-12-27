@@ -11,7 +11,7 @@ import org.deepin.dtk 1.0 as D
 import Qt.labs.platform 1.1 as LP
 
 Item {
-    id: appItem
+    id: root
     required property int displayMode
     required property int colorTheme
     required property bool active
@@ -25,109 +25,90 @@ Item {
     signal clickItem(itemId: string)
     signal clickItemMenu(itemId: string, menuId: string)
 
-    visible: !Drag.active // When in dragging, hide app item
-    Drag.active: dragHandler.active
-    Drag.source: appItem
+    Drag.active: mouseArea.drag.active
+    Drag.source: root
     Drag.hotSpot.x: icon.width / 2
     Drag.hotSpot.y: icon.height / 2
     Drag.dragType: Drag.Automatic
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId }
-    Drag.supportedActions: Qt.MoveAction
 
-    DragHandler {
-        id: dragHandler
+    property int statusIndicatorSize: root.width * 0.9
+    property int iconSize: root.width * 0.6
+
+    Item {
+        anchors.fill: parent
+        id: appItem
+        visible: !root.Drag.active // When in dragging, hide app item
+        AppItemPalette {
+            id: itemPalette
+            displayMode: root.displayMode
+            colorTheme: root.colorTheme
+            active: root.active
+            backgroundColor: "orange"
+        }
+
+        StatusIndicator {
+            palette: itemPalette
+            width: root.statusIndicatorSize
+            height: root.statusIndicatorSize
+            anchors.centerIn: parent
+            visible: root.displayMode === Dock.Efficient && root.windows.length > 0
+        }
+
+        WindowIndicator {
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                bottom: parent.bottom
+                bottomMargin: 1
+            }
+            windows: root.windows
+            displayMode: root.displayMode
+            palette: itemPalette
+            visible: (root.displayMode === Dock.Efficient && root.windows.length > 1) || (root.displayMode === Dock.Fashion && root.windows.length > 0)
+        }
+
+        LP.Menu {
+            id: contextMenu
+            Instantiator {
+                id: menuItemInstantiator
+                model: JSON.parse(menus)
+                delegate: LP.MenuItem {
+                    text: modelData.name
+                    onTriggered: {
+                        root.clickItemMenu(root.itemId, modelData.id)
+                    }
+                }
+                onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
+                onObjectRemoved: (index, object) => contextMenu.removeItem(object)
+            }
+        }
+
+        D.DciIcon {
+            id: icon
+            name: root.iconName
+            sourceSize: Qt.size(iconSize, iconSize)
+            anchors.centerIn: parent
+        }
     }
 
-    // Use TapHandler for tap screen compatibility
-    // Using TapHandler also means that we need a complete single tap to trigger menu, not just a press down
-    TapHandler {
-        id: tapHandler
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        // NOTICE: Setting gesturePolicy is mandatory for exclusive point event grab.
-        // Otherwise default passive grab will propagate event to parent
-        gesturePolicy: TapHandler.WithinBounds
-        onPressedChanged: {
-            if (pressed) {
-                // Grab icon as image in advance for drag's use
+        drag.target: root
+        onPressed: function (mouse) {
+            if (mouse.button === Qt.LeftButton) {
                 icon.grabToImage(function(result) {
-                    appItem.Drag.imageSource = result.url;
+                    root.Drag.imageSource = result.url;
                 })
             }
         }
-        onTapped: function(eventPoint, button) {
-            if (button === Qt.RightButton) {
+        onClicked: function (mouse) {
+            if (mouse.button === Qt.RightButton) {
                 MenuHelper.openMenu(contextMenu)
             } else {
-                appItem.clickItem(itemId)
+                root.clickItem(root.itemId)
             }
         }
-    }
-
-    AppItemPalette {
-        id: itemPalette
-        displayMode: appItem.displayMode
-        colorTheme: appItem.colorTheme
-        active: appItem.active
-    }
-
-    Loader {
-        id: statusIndicatorLoader
-        anchors.centerIn: parent
-        property int displayMode: appItem.displayMode
-        sourceComponent: (displayMode === Dock.Efficient && windows.length > 0) ? statusIndicator : null
-    }
-
-    Loader {
-        id: windowIndicatorLoader
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            bottom: parent.bottom
-            bottomMargin: 1
-        }
-        property int displayMode: appItem.displayMode
-        property list<string> windows: appItem.windows
-        sourceComponent: (displayMode === Dock.Efficient && windows.length > 1) || (displayMode === Dock.Fashion && windows.length > 0) ? windowIndicator : null
-    }
-
-    Component {
-        id: statusIndicator
-        StatusIndicator {
-            palette: itemPalette
-            width: icon.width * 1.1
-            height: icon.height * 1.1
-        }
-    }
-
-    Component {
-        id: windowIndicator
-        WindowIndicator {
-            windows: appItem.windows
-            displayMode: appItem.displayMode
-            palette: itemPalette
-        }
-    }
-
-    LP.Menu {
-        id: contextMenu
-        Instantiator {
-            id: menuItemInstantiator
-            model: JSON.parse(menus)
-            delegate: LP.MenuItem {
-                text: modelData.name
-                onTriggered: {
-                    console.log(itemId, modelData.id)
-                    appItem.clickItemMenu(itemId, modelData.id)
-                }
-            }
-            onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
-            onObjectRemoved: (index, object) => contextMenu.removeItem(object)
-        }
-    }
-
-    D.DciIcon {
-        id: icon
-        name: iconName
-        sourceSize: Qt.size(parent.width * 0.6, parent.height * 0.6)
-        anchors.centerIn: parent
     }
 }
