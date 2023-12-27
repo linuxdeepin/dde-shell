@@ -36,12 +36,12 @@ AppItem::~AppItem()
     qCDebug(appitemLog()) << "destory appitem: " << m_id;
 }
 
-QString AppItem::id()
+QString AppItem::id() const
 {
     return m_id;
 }
 
-QString AppItem::icon()
+QString AppItem::icon() const
 {
     return m_desktopfileParser->desktopIcon();
     // QString icon;
@@ -54,14 +54,14 @@ QString AppItem::icon()
     // return icon;
 }
 
-QString AppItem::name()
+QString AppItem::name() const
 {
     if (m_desktopfileParser && !m_desktopfileParser.isNull())
         return m_desktopfileParser->name();
     return "";
 }
 
-QString AppItem::menus()
+QString AppItem::menus() const
 {
     bool isDesltopfileParserAvaliable = m_desktopfileParser && !m_desktopfileParser.isNull() && m_desktopfileParser->isValied();
     QJsonArray array;
@@ -110,7 +110,7 @@ QString AppItem::menus()
     return QJsonDocument(array).toJson();
 }
 
-QString AppItem::desktopfileID()
+QString AppItem::desktopfileID() const
 {
     if (m_desktopfileParser && !m_desktopfileParser.isNull()) {
         return m_desktopfileParser->id();
@@ -118,7 +118,7 @@ QString AppItem::desktopfileID()
     return "";
 }
 
-bool AppItem::isActive()
+bool AppItem::isActive() const
 {
     return m_currentActiveWindow && m_currentActiveWindow->isActive();
 }
@@ -140,7 +140,7 @@ void AppItem::active()
     }
 }
 
-bool AppItem::isDocked()
+bool AppItem::isDocked() const
 {
     return m_desktopfileParser &&
             !m_desktopfileParser.isNull() &&
@@ -156,7 +156,7 @@ void AppItem::setDocked(bool docked)
     }
 }
 
-QStringList AppItem::windows()
+QStringList AppItem::windows() const
 {
     QStringList ret;
     for (auto window : m_windows) {
@@ -165,7 +165,7 @@ QStringList AppItem::windows()
     return ret;
 }
 
-bool AppItem::hasWindow()
+bool AppItem::hasWindow() const
 {
     return m_windows.size() > 0;
 }

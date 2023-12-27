@@ -31,22 +31,22 @@ class AppItem : public QObject
 public:
     ~AppItem();
 
-    QString id();
-    QString icon();
-    QString name();
-    QString menus();
+    QString id() const;
+    QString icon() const;
+    QString name() const;
+    QString menus() const;
 
-    QString desktopfileID();
+    QString desktopfileID() const;
 
-    bool isActive();
+    bool isActive() const;
     void active();
 
-    bool isDocked();
+    bool isDocked() const;
     void setDocked(bool docked);
 
-    QStringList windows();
+    QStringList windows() const;
 
-    bool hasWindow();
+    bool hasWindow() const;
 
     void appendWindow(QPointer<AbstractWindow> window);
     void removeWindow(QPointer<AbstractWindow> window);
