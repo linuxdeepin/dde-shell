@@ -5,11 +5,13 @@
 import QtQuick 2.15
 
 import org.deepin.ds.dock 1.0
+import org.deepin.dtk as D
 
 Item {
     required property int displayMode
     required property int colorTheme
     required property bool active
+    required property color backgroundColor
 
     property color dotIndicator: {
         if (displayMode === Dock.Efficient) {
@@ -19,7 +21,7 @@ Item {
                 return active ? Qt.rgba(0, 0, 0, 0.8) : Qt.rgba(0, 0, 0, 0.3)
             }
         } else if (displayMode === Dock.Fashion) {
-            return active ? palette.button : "#ffffff"
+            return active ? backgroundColor : "#ffffff"
         } else {
             return "#00000000"
         }

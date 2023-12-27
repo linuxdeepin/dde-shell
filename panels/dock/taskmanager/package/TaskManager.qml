@@ -48,7 +48,6 @@ AppletItem {
                 }
 
                 onDropped: function(drop) {
-                    // FIXME: Dragging doesn't end on dropped even if Drag.onDragFinished is executed
                     drop.accept()
                     taskmanager.Applet.dataModel.moveTo(drop.source.itemId, visualIndex)
                 }
