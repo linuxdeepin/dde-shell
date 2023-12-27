@@ -65,6 +65,13 @@ QQuickWindow *DPanel::popupWindow() const
     return d->m_popupWindow;
 }
 
+QQuickWindow *DPanel::toolTipWindow() const
+{
+    D_DC(DPanel);
+    d->ensureToolTipWindow();
+    return d->m_ToolTipWindow;
+}
+
 void DPanelPrivate::initDciSearchPaths()
 {
     D_Q(DPanel);
@@ -96,6 +103,26 @@ void DPanelPrivate::ensurePopupWindow() const
      if (m_popupWindow) {
          m_popupWindow->setTransientParent(q->window());
          Q_EMIT const_cast<DPanel *>(q)->popupWindowChanged();
+     }
+}
+
+void DPanelPrivate::ensureToolTipWindow() const
+{
+    if (m_ToolTipWindow)
+        return;
+    D_QC(DPanel);
+    if (!q->window())
+        return;
+
+    QVariantMap properties;
+    properties["flags"] = Qt::ToolTip;
+    auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelPopupWindow.qml"), properties);
+     if (!object)
+         return;
+     const_cast<DPanelPrivate *>(this)->m_ToolTipWindow = qobject_cast<QQuickWindow *>(object);
+     if (m_ToolTipWindow) {
+         m_ToolTipWindow->setTransientParent(q->window());
+         Q_EMIT const_cast<DPanel *>(q)->toolTipWindowChanged();
      }
 }
 
