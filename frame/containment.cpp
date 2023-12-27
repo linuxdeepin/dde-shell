@@ -4,6 +4,7 @@
 
 #include "containment.h"
 #include "private/containment_p.h"
+#include "appletitemmodel.h"
 
 #include "pluginloader.h"
 #include "pluginmetadata.h"
@@ -48,12 +49,10 @@ DApplet *DContainment::createApplet(const DAppletData &data)
     QObject::connect(applet, &DApplet::rootObjectChanged, this, [this, applet]() {
         if (auto object = applet->rootObject()) {
             D_D(DContainment);
-            d->m_appletItems << object;
-            Q_EMIT appletItemsChanged();
+            d->m_model->append(object);
             QObject::connect(object, &QObject::destroyed, this, [this, object]() {
                 D_D(DContainment);
-                d->m_appletItems.removeAll(object);
-                Q_EMIT appletItemsChanged();
+                d->m_model->remove(object);
             });
         }
     });
@@ -70,7 +69,7 @@ void DContainment::removeApplet(DApplet *applet)
         d->m_applets.removeOne(applet);
     }
     if (auto view = applet->rootObject()) {
-        d->m_appletItems.removeOne(view);
+        d->m_model->remove(view);
     }
     applet->deleteLater();
 }
@@ -85,14 +84,14 @@ QList<QObject *> DContainment::appletItems()
 {
     D_D(DContainment);
 
-    return d->m_appletItems;
+    return d->m_model->rootObjects();
 }
 
-QQmlListProperty<QObject> DContainment::appletItemList()
+DAppletItemModel *DContainment::appletItemModel() const
 {
-    D_D(DContainment);
+    D_DC(DContainment);
 
-    return QQmlListProperty<QObject>(this, &d->m_appletItems);
+    return d->m_model;
 }
 
 DApplet *DContainment::applet(const QString &id) const

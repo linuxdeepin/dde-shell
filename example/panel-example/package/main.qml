@@ -20,7 +20,7 @@ Window {
         Control {
             anchors.fill: parent
             padding: 20
-            contentItem: modelData
+            contentItem: model.data
             background: Rectangle {
                 color: "plum"
                 opacity: 0.8

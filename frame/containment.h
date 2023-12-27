@@ -6,9 +6,10 @@
 
 #include "applet.h"
 
+Q_MOC_INCLUDE(<appletitemmodel.h>)
+
 #include <DObject>
 #include <QVariant>
-#include <QQmlListProperty>
 
 DS_BEGIN_NAMESPACE
 
@@ -16,10 +17,11 @@ DS_BEGIN_NAMESPACE
  * @brief 容器插件
  */
 class DContainmentPrivate;
+class DAppletItemModel;
 class DS_SHARE DContainment : public DApplet
 {
     Q_OBJECT
-    Q_PROPERTY(QQmlListProperty<QObject> appletItems READ appletItemList NOTIFY appletItemsChanged)
+    Q_PROPERTY(DAppletItemModel *appletItems READ appletItemModel CONSTANT)
     D_DECLARE_PRIVATE(DContainment)
 public:
     explicit DContainment(QObject *parent = nullptr);
@@ -30,7 +32,7 @@ public:
 
     QList<DApplet *> applets() const;
     QList<QObject *> appletItems();
-    QQmlListProperty<QObject> appletItemList();
+    DAppletItemModel *appletItemModel() const;
 
     DApplet *applet(const QString &id) const;
 
@@ -39,9 +41,6 @@ public:
 
 protected:
     explicit DContainment(DContainmentPrivate &dd, QObject *parent = nullptr);
-
-Q_SIGNALS:
-    void appletItemsChanged();
 };
 
 DS_END_NAMESPACE

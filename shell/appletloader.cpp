@@ -110,16 +110,19 @@ DApplet *DAppletLoader::applet() const
 
 void DAppletLoaderPrivate::doCreateRootObject(DApplet *applet)
 {
+    if (applet->pluginMetaData().url().isEmpty())
+        return;
+
     DQmlEngine *engine = new DQmlEngine(applet, applet);
     QObject::connect(engine, &DQmlEngine::createFinished, applet, [this, applet, engine]() {
         auto rootObject = engine->rootObject();
+        applet->setRootObject(rootObject);
         engine->completeCreate();
         if (!rootObject) {
             D_Q(DAppletLoader);
             qCWarning(dsLoaderLog) << "Create root failed:" << applet->pluginId();
             Q_EMIT q->failed();
         }
-        applet->setRootObject(rootObject);
     });
     if (!engine->create()) {
         engine->deleteLater();
@@ -192,6 +195,7 @@ void DAppletLoaderPrivate::load(DApplet *applet)
 
 void DAppletLoaderPrivate::createRootObject(DApplet *applet)
 {
+    doCreateRootObject(applet);
     if (auto containment = qobject_cast<DContainment *>(applet)) {
         auto applets = containment->applets();
         for (const auto &child : std::as_const(applets)) {
@@ -199,8 +203,6 @@ void DAppletLoaderPrivate::createRootObject(DApplet *applet)
             createRootObject(child);
         }
     }
-
-    doCreateRootObject(applet);
 }
 
 void DAppletLoaderPrivate::init(DApplet *applet)

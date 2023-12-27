@@ -15,7 +15,7 @@ ContainmentItem {
         Repeater {
             model: Containment.appletItems
             delegate: Control {
-                contentItem: modelData
+                contentItem: model.data
             }
         }
     }

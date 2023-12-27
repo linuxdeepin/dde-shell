@@ -21,7 +21,7 @@ class DockTray : public DApplet
 
 public:
     explicit DockTray(QObject *parent = nullptr);
-    virtual bool init() override;
+    virtual bool load() override;
 
 };
 }

@@ -19,6 +19,12 @@ Q_DECLARE_LOGGING_CATEGORY(dsLog)
 DPanel::DPanel(QObject *parent)
     : DContainment(*new DPanelPrivate(this), parent)
 {
+    QObject::connect(this, &DPanel::rootObjectChanged, this, [this]() {
+
+        D_D(DPanel);
+        d->ensurePopupWindow();
+        d->ensureToolTipWindow();
+    });
 }
 
 DPanel::~DPanel()
@@ -61,15 +67,13 @@ DPanel *DPanel::qmlAttachedProperties(QObject *object)
 QQuickWindow *DPanel::popupWindow() const
 {
     D_DC(DPanel);
-    d->ensurePopupWindow();
     return d->m_popupWindow;
 }
 
 QQuickWindow *DPanel::toolTipWindow() const
 {
     D_DC(DPanel);
-    d->ensureToolTipWindow();
-    return d->m_ToolTipWindow;
+    return d->m_toolTipWindow;
 }
 
 void DPanelPrivate::initDciSearchPaths()
@@ -93,14 +97,17 @@ void DPanelPrivate::ensurePopupWindow() const
     if (m_popupWindow)
         return;
     D_QC(DPanel);
-    if (!q->window())
+    if (!q->window()) {
+        qCWarning(dsLog) << "Failed to create PopupWindow because TransientParent window is empty.";
         return;
+    }
 
     auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelPopupWindow.qml"));
      if (!object)
          return;
      const_cast<DPanelPrivate *>(this)->m_popupWindow = qobject_cast<QQuickWindow *>(object);
      if (m_popupWindow) {
+         qCDebug(dsLog) << "Create PopupWidow successfully.";
          m_popupWindow->setTransientParent(q->window());
          Q_EMIT const_cast<DPanel *>(q)->popupWindowChanged();
      }
@@ -108,20 +115,23 @@ void DPanelPrivate::ensurePopupWindow() const
 
 void DPanelPrivate::ensureToolTipWindow() const
 {
-    if (m_ToolTipWindow)
+    if (m_toolTipWindow)
         return;
     D_QC(DPanel);
-    if (!q->window())
+    if (!q->window()) {
+        qCWarning(dsLog) << "Failed to create ToolTipWindow because TransientParent window is empty.";
         return;
+    }
 
     QVariantMap properties;
     properties["flags"] = Qt::ToolTip;
     auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelPopupWindow.qml"), properties);
      if (!object)
          return;
-     const_cast<DPanelPrivate *>(this)->m_ToolTipWindow = qobject_cast<QQuickWindow *>(object);
-     if (m_ToolTipWindow) {
-         m_ToolTipWindow->setTransientParent(q->window());
+     const_cast<DPanelPrivate *>(this)->m_toolTipWindow = qobject_cast<QQuickWindow *>(object);
+     if (m_toolTipWindow) {
+         qCDebug(dsLog) << "Create ToolTipWindow successfully.";
+         m_toolTipWindow->setTransientParent(q->window());
          Q_EMIT const_cast<DPanel *>(q)->toolTipWindowChanged();
      }
 }
