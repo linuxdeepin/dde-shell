@@ -21,7 +21,9 @@ public:
     explicit DPluginMetaData();
     DPluginMetaData(const DPluginMetaData &other);
     DPluginMetaData &operator=(const DPluginMetaData &other);
-    bool operator==(const DPluginMetaData  &other) const;
+    DPluginMetaData &operator=(DPluginMetaData &&other);
+    DPluginMetaData(DPluginMetaData &&other);
+    bool operator==(const DPluginMetaData &other) const;
     virtual ~DPluginMetaData() override;
 
     bool isValid() const;

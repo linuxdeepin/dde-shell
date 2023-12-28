@@ -11,6 +11,7 @@
 ExampleApplet::ExampleApplet(QObject *parent)
     : DApplet(parent)
     , m_mainText("Custom Applet")
+    , m_userData(false)
 {
 
 }
@@ -40,6 +41,19 @@ bool ExampleApplet::init()
     });
 
     return true;
+}
+
+bool ExampleApplet::userData() const
+{
+    return m_userData;
+}
+
+void ExampleApplet::setUserData(bool newUserData)
+{
+    if (m_userData == newUserData)
+        return;
+    m_userData = newUserData;
+    emit userDataChanged();
 }
 
 D_APPLET_CLASS(ExampleApplet)

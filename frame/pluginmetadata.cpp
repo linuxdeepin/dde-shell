@@ -44,6 +44,18 @@ DPluginMetaData &DPluginMetaData::operator=(const DPluginMetaData &other)
     return *this;
 }
 
+DPluginMetaData::DPluginMetaData(DPluginMetaData &&other)
+    : d(other.d)
+{
+    other.d = nullptr;
+}
+
+DPluginMetaData &DPluginMetaData::operator=(DPluginMetaData &&other)
+{
+    d.swap(other.d);
+    return *this;
+}
+
 bool DPluginMetaData::operator==(const DPluginMetaData &other) const
 {
     return d->m_pluginId == other.pluginId();

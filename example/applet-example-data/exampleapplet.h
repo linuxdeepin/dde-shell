@@ -5,6 +5,7 @@
 #pragma once
 
 #include "applet.h"
+#include "qqmlintegration.h"
 
 DS_USE_NAMESPACE
 
@@ -12,6 +13,7 @@ class ExampleApplet : public DApplet
 {
     Q_OBJECT
     Q_PROPERTY(QString mainText READ mainText NOTIFY mainTextChanged)
+    Q_PROPERTY(bool userData READ userData WRITE setUserData NOTIFY userDataChanged)
 public:
     explicit ExampleApplet(QObject *parent = nullptr);
 
@@ -20,8 +22,13 @@ public:
     virtual bool load() override;
     virtual bool init() override;
 
+    bool userData() const;
+    void setUserData(bool newUserData);
+
 Q_SIGNALS:
     void mainTextChanged();
+    void userDataChanged();
 private:
     QString m_mainText;
+    bool m_userData;
 };
