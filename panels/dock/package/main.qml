@@ -120,6 +120,19 @@ Window {
         }
     }
 
+    // TODO missing property binding to update ProxyModel's filter and sort opearation.
+    Repeater {
+        model: Applet.appletItems
+        delegate: Item {
+            property var order: model.data.dockOrder
+            onOrderChanged: {
+                dockLeftPartModel.update()
+                dockCenterPartModel.update()
+                dockRightPartModel.update()
+            }
+        }
+    }
+
     GridLayout {
         id: gridLayout
         anchors.fill: parent
@@ -136,6 +149,7 @@ Window {
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
                 model: DockPartAppletModel {
+                    id: dockLeftPartModel
                     leftDockOrder: 0
                     rightDockOrder: 10
                 }
@@ -160,6 +174,7 @@ Window {
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
                 model: DockPartAppletModel {
+                    id: dockCenterPartModel
                     leftDockOrder: 10
                     rightDockOrder: 20
                 }
@@ -182,6 +197,7 @@ Window {
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
                 model: DockPartAppletModel {
+                    id: dockRightPartModel
                     leftDockOrder: 20
                     rightDockOrder: 30
                 }
