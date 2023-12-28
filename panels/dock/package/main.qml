@@ -218,9 +218,12 @@ Window {
         }
     }
 
-    Component.onCompleted: {
-        Panel.compositorReady = Qt.binding(function() {
-            return DockCompositor.compositor.created
-        })
+    // can not move into DockCompositor
+    // Panel get a object instead of ds::dock::DockPanel during DockCompositor creating
+    Binding {
+        target: Panel
+        property: "compositorReady"
+        value: DockCompositor.compositor.created
+        when: DockCompositor.compositor.created
     }
 }
