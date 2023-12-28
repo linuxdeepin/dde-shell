@@ -1,3 +1,25 @@
+dde-shell (0.0.4) unstable; urgency=medium
+
+  * chore: optimize cmake
+  * chore: promote qt wayland version constraint
+  * fix: menu not closed when popup second one
+  * feat: add PanelPopup to manage Panel's popup
+  * refact: async load qml
+  * fix: PanelPopup's size is wrong
+  * fix: protocol error when changing anchors
+  * feat: add PanelToolTip
+  * feat: modify data model in dnd
+  * feat: add dock quick plugins
+  * chore: mark getters const
+  * fix: drag handler still active when finished
+  * refact: modify containment's appletItems type
+  * refact: adjust dock project
+  * fix: SortFilterModel can't update when item's property changed
+  * refact: use Binding instead of Qt.binding
+  * feat: add sub Applet's property example
+
+ -- YeShanShan <yeshanshan@deepin.org>  Thu, 28 Dec 2023 17:28:59 +0800
+
 dde-shell (0.0.3) unstable; urgency=medium
 
   * fix: transparent mouse event
