@@ -9,7 +9,6 @@ import Qt.labs.platform 1.1 as LP
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
-import org.deepin.ds.dock.compositor 1.0
 import org.deepin.ds.dock 1.0
 
 AppletItem {
@@ -23,6 +22,16 @@ AppletItem {
     implicitHeight: useColumnLayout ? trayContainter.implicitHeight : Panel.dockSize
 
     PanelToolTip {
+        id: tooltip
+        width: tooltipContent.width
+        height: tooltipContent.height
+
+        ShellSurfaceItem {
+            id: tooltipContent
+        }
+    }
+
+    PanelPopup {
         id: popup
         width: popupContent.width
         height: popupContent.height
@@ -63,12 +72,11 @@ AppletItem {
                     onEntered: {
                         var toolTipsurface = DockCompositor.tooltipMap[plugin.pluginId]
                         if (toolTipsurface !== undefined) {
-                            popupContent.shellSurface = toolTipsurface
-                            var itemPos = tray.getItemPopupPosition(pluginItem)
-                            popup.x = itemPos.x
-                            popup.y = itemPos.y
-                            console.log(itemPos)
-                            popup.open()
+                            tooltipContent.shellSurface = toolTipsurface
+                            var itemPos = tray.getItemPopupPosition(pluginItem, tooltip)
+                            tooltip.x = itemPos.x
+                            tooltip.y = itemPos.y
+                            tooltip.open()
                         }
                     }
 
@@ -77,20 +85,18 @@ AppletItem {
                         if (pluginPopup === undefined) {
                             plugin.click("", 0)
                         } else {
+                            tooltip.close()
                             popupContent.shellSurface = pluginPopup
                             popupShow = true
-                            var itemPos = tray.getItemPopupPosition(pluginItem)
+                            var itemPos = tray.getItemPopupPosition(pluginItem, popup)
                             popup.x = itemPos.x
                             popup.y = itemPos.y
-                            console.log(itemPos)
                             popup.open()
                         }
                     }
 
                     onExited: {
-                        if (!popupShow) {
-                            popup.close()
-                        }
+                        tooltip.close()
                     }
                 }
             }
@@ -109,25 +115,31 @@ AppletItem {
         sizeFollowsWindow: true
     }
 
-    function getItemPopupPosition(item) {
+    WaylandOutput {
+        compositor: DockCompositor.compositor
+        window: Panel.popupWindow
+        sizeFollowsWindow: true
+    }
+
+    function getItemPopupPosition(item, popupItem) {
         var itemPos = item.mapToItem(null,0,0)
 
         switch (Panel.position) {
         case Dock.Top:
-            itemPos.x -= popup.width / 2
+            itemPos.x -= popupItem.width / 2
             itemPos.y += Panel.dockSize
             break
         case Dock.Right:
-            itemPos.x -= (popup.width + 10)
-            itemPos.y -= popup.height / 2
+            itemPos.x -= (popupItem.width + 10)
+            itemPos.y -= popupItem.height / 2
             break
         case Dock.Bottom:
-            itemPos.x -= popup.width / 2
-            itemPos.y -= (popup.height + 10)
+            itemPos.x -= popupItem.width / 2
+            itemPos.y -= (popupItem.height + 10)
             break
         case Dock.Left:
             itemPos.x += Panel.dockSize
-            itemPos.y -= popup.height / 2
+            itemPos.y -= popupItem.height / 2
             break
         }
 
