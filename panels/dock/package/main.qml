@@ -6,13 +6,12 @@ import QtQuick 2.15
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 2.15
 import QtQuick.Window 2.15
-import QtWayland.Compositor
+
 import QtQml
 import Qt.labs.platform as LP
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
-import org.deepin.ds.dock.compositor 1.0
 import org.deepin.dtk 1.0 as D
 
 Window {
@@ -144,8 +143,9 @@ Window {
         }
 
         Rectangle {
-            implicitWidth: (Applet.displayMode === Dock.Efficient || leftLoader.model.length === 0) ? 0 : Applet.dockSize * 0.6 + (dock.useColumnLayout ? 0 : 22)
-            implicitHeight: (Applet.displayMode === Dock.Efficient || leftLoader.model.length === 0) ? 0 : Applet.dockSize * 0.6 + (dock.useColumnLayout ? 22 : 0)
+            visible: (Applet.displayMode === Dock.Fashion && leftLoader.model.count !== 0)
+            implicitWidth: Applet.dockSize * 0.6 + (dock.useColumnLayout ? 0 : 22)
+            implicitHeight: Applet.dockSize * 0.6 + (dock.useColumnLayout ? 22 : 0)
             color: "transparent"
         }
 
@@ -167,8 +167,9 @@ Window {
         }
 
         Rectangle {
-            implicitWidth: (Applet.displayMode === Dock.Efficient || rightLoader.model.length === 0) ? 0 : Applet.dockSize * 0.6 + (dock.useColumnLayout ? 0 : 22)
-            implicitHeight: (Applet.displayMode === Dock.Efficient || rightLoader.model.length === 0) ? 0 : Applet.dockSize * 0.6 + (dock.useColumnLayout ? 22 : 0)
+            visible: (Applet.displayMode === Dock.Fashion && rightLoader.model.count !== 0)
+            implicitWidth: Applet.dockSize * 0.6 + (dock.useColumnLayout ? 0 : 22)
+            implicitHeight: Applet.dockSize * 0.6 + (dock.useColumnLayout ? 22 : 0)
             color: "transparent"
         }
 
@@ -199,5 +200,11 @@ Window {
         case Dock.Left:
             return DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorLeft
         }
+    }
+
+    Component.onCompleted: {
+        Panel.compositorReady = Qt.binding(function() {
+            return DockCompositor.compositor.created
+        })
     }
 }

@@ -7,6 +7,7 @@
 #include "constants.h"
 #include "dockpanel.h"
 #include "dockadaptor.h"
+#include "environments.h"
 #include "docksettings.h"
 #include "pluginfactory.h"
 
@@ -26,7 +27,9 @@ namespace dock {
 DockPanel::DockPanel(QObject * parent)
     : DPanel(parent)
     , m_theme(ColorTheme::Light)
+    , m_compositorReady(false)
 {
+    connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
 }
 
 bool DockPanel::load()
@@ -183,6 +186,42 @@ void DockPanel::onWindowGeometryChanged()
 {
     Q_EMIT frontendWindowRectChanged(frontendWindowRect());
     Q_EMIT geometryChanged(geometry());
+}
+
+bool DockPanel::compositorReady()
+{
+    return m_compositorReady;
+}
+
+void DockPanel::setCompositorReady(bool ready)
+{
+    if (ready == m_compositorReady) {
+        return;
+    }
+
+    m_compositorReady = ready;
+    Q_EMIT compositorReadyChanged();
+}
+
+void DockPanel::loadDockPlugins()
+{
+    if(!m_compositorReady) return;
+
+    QStringList filters;
+    filters << "*.so";
+
+    for (auto pluginDir : pluginDirs) {
+        QDir dir(pluginDir);
+        auto plugins = dir.entryList(filters, QDir::Files);
+        foreach(QString plugin, plugins) {
+            plugin = pluginDir + plugin;
+#ifdef QT_DEBUG
+            QProcess::startDetached(QString("%1/../panels/dock/dockplugin/loader/dockplugin-loader").arg(qApp->applicationDirPath()), {"-p", plugin, "-platform", "wayland",});
+#else
+            QProcess::startDetached(QString("%1/%2/dockplugin-loader").arg(CMAKE_INSTALL_PREFIX).arg(CMAKE_INSTALL_LIBEXECDIR), {"-p", plugin, "-platform", "wayland"});
+#endif
+        }
+    }
 }
 
 D_APPLET_CLASS(DockPanel)

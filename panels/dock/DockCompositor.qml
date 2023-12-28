@@ -10,7 +10,7 @@ import QtWayland.Compositor
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
-import org.deepin.ds.dock.compositor 1.0
+import org.deepin.ds.dock 1.0
 
 Item {
     id: dockCompositor
@@ -57,23 +57,6 @@ Item {
 
     function handleDockSlidingPanelPluginSurfaceAdded(shellSurface) {
         slidingPanelPluginSurfaces.append({shellSurface: shellSurface})
-    }
-
-    function popupAt(x, y) {
-        popup.x = x
-        popup.y = y
-        popup.visible = true
-    }
-
-    D.PopupWindow {
-        id: popup
-        flags: Qt.Popup
-        height: content.height
-        width: content.width
-
-        ShellSurfaceItem {
-            id: content
-        }
     }
 
     WaylandCompositor {

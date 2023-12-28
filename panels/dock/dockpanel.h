@@ -12,6 +12,11 @@
 
 DS_BEGIN_NAMESPACE
 namespace dock {
+const QStringList pluginDirs = {
+    "/usr/lib/dde-dock/plugins/",
+    "/usr/lib/dde-dock/plugins/quick-trays/",
+    "/usr/lib/dde-dock/plugins/system-trays/"
+};
 
 class DockPanel : public DPanel, public QDBusContext
 {
@@ -26,6 +31,7 @@ class DockPanel : public DPanel, public QDBusContext
     Q_PROPERTY(DisplayMode displayMode READ displayMode WRITE setDisplayMode NOTIFY displayModeChanged FINAL)
     Q_PROPERTY(ColorTheme colorTheme READ colorTheme WRITE setColorTheme NOTIFY colorThemeChanged FINAL)
     Q_PROPERTY(uint dockSize READ dockSize WRITE setDockSize NOTIFY dockSizeChanged FINAL)
+    Q_PROPERTY(bool compositorReady READ compositorReady WRITE setCompositorReady NOTIFY compositorReadyChanged FINAL)
 
 public:
     explicit DockPanel(QObject *parent = nullptr);
@@ -56,9 +62,12 @@ public:
     uint dockSize();
     void setDockSize(uint size);
 
+    bool compositorReady();
+    void setCompositorReady(bool ready);
+
 private Q_SLOTS:
     void onWindowGeometryChanged();
-    void onQmlRootObjectChanged();
+    void loadDockPlugins();
 
 Q_SIGNALS:
     void frontendWindowRectChanged(QRect frontendWindowRect);
@@ -69,9 +78,11 @@ Q_SIGNALS:
     void displayModeChanged(DisplayMode mode);
     void dockSizeChanged(uint size); // not emitted
     void colorThemeChanged(ColorTheme theme);
+    void compositorReadyChanged();
 
 private:
     ColorTheme m_theme;
+    bool m_compositorReady;
 };
 
 }

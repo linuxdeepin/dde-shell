@@ -14,9 +14,8 @@ AppletItem {
     id: slidingpanel
     property int dockSize: Panel.dockSize
     property bool useColumnLayout: Panel.position % 2
-    // property int dockOrder: Panel.displayMode == Dock.Efficient ? 27 : 1
-    // TODO: not ready, so mark -1,
-    property int dockOrder: -1
+    property int dockOrder: Panel.displayMode == Dock.Efficient ? 27 : 1
+
     implicitWidth: useColumnLayout ? dockSize: content.implicitWidth
     implicitHeight: useColumnLayout ? content.implicitHeight : dockSize
 

@@ -37,7 +37,7 @@ add_library(dockpluginmanager SHARED
 
 ecm_add_qtwayland_client_protocol(dockpluginmanager
 PROTOCOL
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../protocol/dock-plugin-manager-v1.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/../protocol/dock-plugin-manager-v1.xml
 BASENAME
     dock-plugin-manager-v1
 )
