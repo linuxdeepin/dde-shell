@@ -20,7 +20,6 @@ public:
     {
     }
 
-    DApplet *m_applet = nullptr;
     DQmlEngine *m_engine = nullptr;
 };
 

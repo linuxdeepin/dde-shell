@@ -20,6 +20,7 @@ class DS_SHARE DAppletItem : public QQuickItem, public DTK_CORE_NAMESPACE::DObje
 {
     Q_OBJECT
     D_DECLARE_PRIVATE(DAppletItem)
+    Q_PROPERTY(DApplet *applet READ applet CONSTANT)
 public:
     explicit DAppletItem(QQuickItem *parent = nullptr);
     virtual ~DAppletItem() override;

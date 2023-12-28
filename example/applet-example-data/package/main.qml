@@ -9,6 +9,7 @@ import org.deepin.ds 1.0
 import Qt.labs.platform 1.1 as LP
 
 AppletItem {
+    id: root
     objectName: "appplet data"
     implicitWidth: 200
     implicitHeight: 100
@@ -27,6 +28,16 @@ AppletItem {
             hoverEnabled: true
             onClicked: platformMenu.open()
         }
+    }
+    Binding {
+        target: Applet
+        property: "userData"
+        value: true
+        when: root.applet.rootObject
+    }
+
+    Component.onCompleted: {
+        console.log("test before onCompleted", Applet.userData, root.applet)
     }
 
     PanelPopup {

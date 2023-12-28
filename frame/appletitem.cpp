@@ -30,7 +30,7 @@ DAppletItem::~DAppletItem()
 DApplet *DAppletItem::applet() const
 {
     D_DC(DAppletItem);
-    return d->m_applet;
+    return qmlAttachedProperties(const_cast<DAppletItem *>(this));
 }
 
 DApplet *DAppletItem::qmlAttachedProperties(QObject *object)
