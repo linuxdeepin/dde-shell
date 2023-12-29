@@ -78,7 +78,7 @@ qt_generate_wayland_protocol_client_sources(dock-taskmanager
 )
 target_link_libraries(dock-taskmanager PRIVATE
     dde-shell-frame
-    Qt::WaylandClientPrivate
+    Qt${QT_VERSION_MAJOR}::WaylandClientPrivate
 )
 
 if (BUILD_WITH_X11)

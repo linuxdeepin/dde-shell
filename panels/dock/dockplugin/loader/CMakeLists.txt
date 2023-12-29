@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-set(QT_MAJOR_VERSION 5)
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 find_package(Dtk REQUIRED COMPONENTS Gui Widget)
 
