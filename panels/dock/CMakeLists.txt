@@ -100,14 +100,14 @@ qt_generate_wayland_protocol_server_sources(dock-plugin
 )
 
 target_link_libraries(dock-plugin PUBLIC
-    Qt::Core
-    Qt::Gui
-    Qt::Qml
-    Qt::Widgets
-    Qt::WaylandCompositor
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Qml
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::WaylandCompositor
     dde-shell-frame
 PRIVATE
-    Qt::WaylandCompositorPrivate
+    Qt${QT_VERSION_MAJOR}::WaylandCompositorPrivate
 )
 
 install(DIRECTORY "${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/" DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/")
