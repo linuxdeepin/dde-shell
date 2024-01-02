@@ -124,10 +124,32 @@ void TaskManager::clickItemMenu(const QString& itemId, const QString& menuId)
     auto appitem = AppItemModel::instance()->getAppItemById(itemId);
     if(!appitem) return;
     if (menuId == DOCK_ACTION_ALLWINDOW) {
-        m_windowMonitor->presentWindows(appitem->windows());
+        QList<uint32_t> windowIds;
+        auto windows = appitem->windows();
+        std::transform(windows.begin(), windows.end(), std::back_inserter(windowIds), [](const QString &windowId) {
+            return windowId.toUInt();
+        });
+
+        m_windowMonitor->presentWindows(windowIds);
         return;
     }
     if (appitem) appitem->handleMenu(menuId);
+}
+
+void TaskManager::showWindowsPreview(QStringList windowStrIds, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+{
+    if (windowStrIds.size() == 0) return;
+    QList<uint32_t> windowIds;
+    std::transform(windowStrIds.begin(), windowStrIds.end(), std::back_inserter(windowIds), [](const QString &windowStrId) {
+        return windowStrId.toUInt();
+    });
+
+    m_windowMonitor->showWindowsPreview(windowIds, relativePositionItem, previewXoffset, previewYoffset, direction);
+}
+
+void TaskManager::hideWindowsPreview()
+{
+    m_windowMonitor->hideWindowsPreview();
 }
 
 void TaskManager::loadDockedAppItems()

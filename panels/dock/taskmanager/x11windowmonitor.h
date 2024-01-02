@@ -37,7 +37,9 @@ public:
     virtual void stop() override;
 
     virtual QPointer<AbstractWindow> getWindowByWindowId(ulong windowId) override;
-    virtual void presentWindows(QStringList windows) override;
+    virtual void presentWindows(QList<uint32_t> windows) override;
+    virtual void showWindowsPreview(QList<uint32_t> windowsId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
+    virtual void hideWindowsPreview() override;
 
 Q_SIGNALS:
     void windowMapped(xcb_window_t window);
