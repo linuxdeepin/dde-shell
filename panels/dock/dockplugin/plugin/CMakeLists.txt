@@ -58,7 +58,10 @@ set_target_properties(dockpluginmanager PROPERTIES
 set_target_properties(dockpluginmanager-interface PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/plugins/"
     OUTPUT_NAME dde-dockplugin-interface
+    VERSION ${CMAKE_PROJECT_VERSION}
+    SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR}
 )
 
-install(TARGETS dockpluginmanager-interface DESTINATION ${CMAKE_INSTALL_LIBDIR})
+# Do not install .so development library for we don't want others to link to it.
+install(TARGETS dockpluginmanager-interface LIBRARY NAMELINK_SKIP DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(TARGETS dockpluginmanager DESTINATION ${CMAKE_INSTALL_LIBDIR}/qt5/plugins/wayland-shell-integration)
