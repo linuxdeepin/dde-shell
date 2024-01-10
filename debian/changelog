@@ -1,3 +1,17 @@
+dde-shell (0.0.5) unstable; urgency=medium
+
+  * feat: add application preview in dock
+  * fix: worng place and way to install libdde-dockplugin-interface
+  * fix: missing ds.dock configs
+  * fix: tooltip reparent error
+  * fix: show-desktop shown on treeland
+  * feat: set radius for dock in Fashion mode
+  * fix: plugin theme not follow dock
+  * fix: tmp adjust dock ui and datetime theme
+  * chore: dock disable some menu on release
+
+ -- tsic404 <liuheng@deepin.org>  Wed, 10 Jan 2024 17:25:52 +0800
+
 dde-shell (0.0.4) unstable; urgency=medium
 
   * chore: optimize cmake
