@@ -1,9 +1,14 @@
 # SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+
 configure_file(environments.h.in environments.h @ONLY)
 
+find_package(PkgConfig REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS Core DBus Gui Qml WaylandCompositor Widgets)
+pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
 
 file(
     GLOB dock_panel_sources
@@ -48,6 +53,7 @@ add_library(dockpanel SHARED
 )
 
 target_link_libraries(dockpanel PRIVATE
+    PkgConfig::WaylandClient
     dde-shell-frame
 )
 
@@ -107,6 +113,7 @@ target_link_libraries(dock-plugin PUBLIC
     Qt${QT_VERSION_MAJOR}::WaylandCompositor
     dde-shell-frame
 PRIVATE
+    PkgConfig::WaylandClient
     Qt${QT_VERSION_MAJOR}::WaylandCompositorPrivate
 )
 

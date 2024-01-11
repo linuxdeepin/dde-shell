@@ -203,6 +203,22 @@ void DockPanel::setCompositorReady(bool ready)
     Q_EMIT compositorReadyChanged();
 }
 
+HideState DockPanel::hideState()
+{
+// TODO: implement this function
+    return HideState::Unknown;
+}
+
+void DockPanel::ReloadPlugins()
+{
+// TODO: implement this function
+}
+
+void DockPanel::callShow()
+{
+// TODO: implement this function
+}
+
 void DockPanel::loadDockPlugins()
 {
     if(!m_compositorReady) return;

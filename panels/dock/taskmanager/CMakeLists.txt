@@ -76,9 +76,11 @@ qt_generate_wayland_protocol_client_sources(dock-taskmanager
         ${CMAKE_CURRENT_SOURCE_DIR}/api/wayland-protocols/treeland-foreign-toplevel-manager-v1.xml
         ${WaylandProtocols_DATADIR}/staging/ext-foreign-toplevel-list/ext-foreign-toplevel-list-v1.xml
 )
+
 target_link_libraries(dock-taskmanager PRIVATE
     dde-shell-frame
     Qt${QT_VERSION_MAJOR}::WaylandClientPrivate
+    PkgConfig::WaylandClient
 )
 
 if (BUILD_WITH_X11)

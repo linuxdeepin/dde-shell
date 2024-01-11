@@ -46,6 +46,7 @@ target_link_libraries(dockpluginmanager
 PUBLIC
     dockpluginmanager-interface
 PRIVATE
+    PkgConfig::WaylandClient
     Qt5::WaylandClientPrivate
     Qt5::XkbCommonSupportPrivate
 )
