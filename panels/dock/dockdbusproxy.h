@@ -33,7 +33,7 @@ public:
     void setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible);
     void setPluginVisible(const QString &pluginName, bool visible);
     bool getPluginVisible(const QString &pluginName);
-    QString getPluginKey(const QString &pluginNam);
+    QString getPluginKey(const QString &pluginName);
     void resizeDock(int offset, bool dragging);
     QStringList GetLoadedPlugins();
     void ReloadPlugins();

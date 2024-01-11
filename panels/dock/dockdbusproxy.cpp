@@ -67,7 +67,59 @@ void DockDBusProxy::setDisplayMode(DisplayMode mode)
 
 HideState DockDBusProxy::hideState()
 {
-    return HideState::Unknown;
+    return parent()->hideState();
+}
+
+QStringList DockDBusProxy::GetLoadedPlugins()
+{
+// TODO: implement this function
+    return QStringList();
+}
+
+void DockDBusProxy::ReloadPlugins()
+{
+    parent()->ReloadPlugins();
+}
+
+void DockDBusProxy::callShow()
+{
+    parent()->callShow();
+}
+
+void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible)
+{
+// TODO: implement this function
+    Q_UNUSED(settingKey)
+    Q_UNUSED(itemKey)
+    Q_UNUSED(visible)
+}
+
+void DockDBusProxy::setPluginVisible(const QString &pluginName, bool visible)
+{
+// TODO: implement this function
+    Q_UNUSED(pluginName)
+    Q_UNUSED(visible)
+}
+
+bool DockDBusProxy::getPluginVisible(const QString &pluginName)
+{
+// TODO: implement this function
+    Q_UNUSED(pluginName)
+    return true;
+}
+
+QString DockDBusProxy::getPluginKey(const QString &pluginName)
+{
+// TODO: implement this function
+    Q_UNUSED(pluginName)
+    return QString();
+}
+
+void DockDBusProxy::resizeDock(int offset, bool dragging)
+{
+// TODO: implement this function
+    Q_UNUSED(offset)
+    Q_UNUSED(dragging)
 }
 
 }
