@@ -14,7 +14,7 @@ DS_BEGIN_NAMESPACE
 namespace dock {
 DockDconfig::DockDconfig(QObject* parent)
     : DockAbstractConfig(parent)
-    , m_dconfig(DConfig::create("dde-dock", "com.deepin.dde.dock", QString(), this))
+    , m_dconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock", QString(), this))
 {
     connect(m_dconfig.data(), &DConfig::valueChanged, this, &DockAbstractConfig::valueChanged);
 }

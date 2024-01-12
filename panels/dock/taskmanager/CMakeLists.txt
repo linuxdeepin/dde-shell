@@ -99,3 +99,4 @@ if (BUILD_WITH_X11)
 endif(BUILD_WITH_X11)
 
 ds_install_package(PACKAGE org.deepin.ds.dock.taskmanager TARGET dock-taskmanager)
+dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.taskmanager.json dconfig/org.deepin.ds.dock.taskmanager.am.json)
