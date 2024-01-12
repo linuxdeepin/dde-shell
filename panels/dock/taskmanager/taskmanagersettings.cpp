@@ -29,7 +29,7 @@ TaskManagerSettings* TaskManagerSettings::instance()
 
 TaskManagerSettings::TaskManagerSettings(QObject *parent)
     : QObject(parent)
-    , m_taskManagerDconfig(DConfig::create("dde-dock", "org.deepin.ds.dock.taskmanager", QString(), this))
+    , m_taskManagerDconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.taskmanager", QString(), this))
 {
     connect(m_taskManagerDconfig, &DConfig::valueChanged, this, [this](const QString &key){
         if (TASKMANAGER_ALLOWFOCEQUIT_KEY == key) {

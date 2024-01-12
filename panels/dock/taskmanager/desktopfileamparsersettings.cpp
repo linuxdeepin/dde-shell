@@ -10,7 +10,7 @@ DS_BEGIN_NAMESPACE
 namespace dock {
 DesktopFileAMParserSettings::DesktopFileAMParserSettings(QObject *parent)
     : QObject(parent)
-    , m_dconfig(DConfig::create("dde-dock", "org.deepin.ds.dock.taskmanager.am", QString(), this))
+    , m_dconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.taskmanager.am", QString(), this))
 {
     connect(m_dconfig, &DConfig::valueChanged, this, [this](const QString& key){
         if (key == AM_DOCKEDAPPIDS_KEY) {
