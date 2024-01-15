@@ -176,8 +176,32 @@ void WidgetPlugin::removeValue(PluginsItemInterface *const itemInter, const QStr
 {
 }
 
-void WidgetPlugin::updateDockInfo(PluginsItemInterface *const, const DockPart &)
+void WidgetPlugin::updateDockInfo(PluginsItemInterface *const, const DockPart &part)
 {
+    switch (part) {
+        case DockPart::QuickShow: {
+            if (m_widget) {
+                m_widget->update();
+
+                auto plugin = getPlugin(m_widget.get());
+                plugin->setContextMenu(m_pluginItem->itemContextMenu(plugin->itemKey()));
+            }
+            break;
+        }
+
+        // TODO: implement below cases
+        case DockPart::QuickPanel: {
+            break;
+        }
+
+        case DockPart::SystemPanel: {
+            break;
+        }
+
+        case DockPart::DCCSetting: {
+            break;
+        }
+    }
 }
 
 
