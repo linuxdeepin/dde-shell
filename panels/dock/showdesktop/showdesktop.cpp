@@ -7,6 +7,7 @@
 #include "pluginfactory.h"
 
 #include <QProcess>
+#include <QGuiApplication>
 
 DS_BEGIN_NAMESPACE
 namespace dock {
@@ -16,6 +17,11 @@ ShowDesktop::ShowDesktop(QObject *parent)
     , m_iconName("deepin-toggle-desktop")
 {
 
+}
+
+bool ShowDesktop::load()
+{
+    return QStringLiteral("xcb") == QGuiApplication::platformName();
 }
 
 bool ShowDesktop::init()

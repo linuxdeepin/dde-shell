@@ -17,6 +17,7 @@ class ShowDesktop : public DApplet
 public:
     explicit ShowDesktop(QObject *parent = nullptr);
     virtual bool init() override;
+    virtual bool load() override;
 
     QString iconName() const;
     void setIconName(const QString& iconName);
