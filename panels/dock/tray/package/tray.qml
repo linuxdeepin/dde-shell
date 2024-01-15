@@ -58,11 +58,6 @@ AppletItem {
                 width: 28
                 height: 28
                 shellSurface: plugin
-                onSurfaceDestroyed: {
-                    delete DockCompositor.tooltipMap[plugin.pluginId]
-                    delete DockCompositor.popupMap[plugin.pluginId]
-                    DockCompositor.trayPluginSurfaces.remove(index)
-                }
 
                 MouseArea {
                     anchors.fill: parent

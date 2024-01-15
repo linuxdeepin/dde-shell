@@ -15,6 +15,10 @@ import org.deepin.ds.dock 1.0
 Item {
     id: dockCompositor
 
+    property alias dockPosition: pluginManager.dockPosition
+    property alias dockColorTheme: pluginManager.dockColorTheme
+    property alias dockDisplayMode: pluginManager.dockDisplayMode
+
     property var tooltipMap: ({})
     property var popupMap: ({})
 
@@ -26,6 +30,15 @@ Item {
     property ListModel slidingPanelPluginSurfaces: ListModel {}
 
     property var compositor: waylandCompositor
+
+    function removeDockPluginSurface(model, object) {
+        for (var i = 0; i < model.count; ++i) {
+            if (object === model.get(i).shellSurface) {
+                model.remove(i)
+                break
+            }
+        }
+    }
 
     function handlePluginTooltipSurfaceAdded(shellSurface) {
         tooltipMap[shellSurface.pluginId] = (shellSurface)
@@ -64,32 +77,71 @@ Item {
         socketName: "dockplugin"
 
         DockPluginManager {
+            id: pluginManager
+
             onPluginSurfaceCreated: (dockPluginSurface) => {
                 switch(dockPluginSurface.surfaceType) {
                 case DockPluginManager.Tooltip:
                     dockCompositor.handlePluginTooltipSurfaceAdded(dockPluginSurface)
-                    break;
+                    break
                 case DockPluginManager.Popup:
                     dockCompositor.handleTrayPopupSurfaceAdded(dockPluginSurface)
-                    break;
+                    break
                 case DockPluginManager.Tray:
                     dockCompositor.handleDockTrayIconSurfaceAdded(dockPluginSurface)
-                    break;
+                    break
                 case DockPluginManager.Fixed:
                     dockCompositor.handleDockFixedPluginSurfaceAdded(dockPluginSurface)
-                    break;
+                    break
                 case DockPluginManager.System:
                     dockCompositor.handleDockSystemPluginSurfacesAdded(dockPluginSurface)
-                    break;
+                    break
                 case DockPluginManager.Tool:
                     dockCompositor.handleDockToolPluginSurfaceAdded(dockPluginSurface)
-                    break;
+                    break
                 case DockPluginManager.Quick:
                     dockCompositor.handleDockQuickPluginSurfaceAdded(dockPluginSurface)
-                    break;
+                    break
                 case DockPluginManager.SlidingPanel:
                     dockCompositor.handleDockSlidingPanelPluginSurfaceAdded(dockPluginSurface)
-                    break;
+                    break
+                }
+            }
+
+            onPluginSurfaceDestroyed: (dockPluginSurface) => {
+                switch(dockPluginSurface.surfaceType) {
+                case DockPluginManager.Tooltip: {
+                    delete dockCompositor.tooltipMap[dockPluginSurface.pluginId]
+                    break
+                }
+                case DockPluginManager.Popup: {
+                    delete dockCompositor.popupMap[dockPluginSurface.pluginId]
+                    break
+                }
+                case DockPluginManager.Tray: {
+                    removeDockPluginSurface(dockCompositor.trayPluginSurfaces, dockPluginSurface)
+                    break
+                }
+                case DockPluginManager.Fixed: {
+                    removeDockPluginSurface(dockCompositor.fixedPluginSurfaces, dockPluginSurface)
+                    break
+                }
+                case DockPluginManager.System: {
+                    removeDockPluginSurface(dockCompositor.systemPluginSurfaces, dockPluginSurface)
+                    break
+                }
+                case DockPluginManager.Tool: {
+                    removeDockPluginSurface(dockCompositor.toolPluginSurfaces, dockPluginSurface)
+                    break
+                }
+                case DockPluginManager.Quick: {
+                    removeDockPluginSurface(dockCompositor.quickPluginSurfaces, dockPluginSurface)
+                    break
+                }
+                case DockPluginManager.SlidingPanel: {
+                    removeDockPluginSurface(dockCompositor.slidingPanelPluginSurfaces, dockPluginSurface)
+                    break
+                }
                 }
             }
         }

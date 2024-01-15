@@ -226,4 +226,18 @@ Window {
         value: DockCompositor.compositor.created
         when: DockCompositor.compositor.created
     }
+
+    Component.onCompleted: {
+        DockCompositor.dockPosition = Qt.binding(function() {
+            return Panel.position
+        })
+
+        DockCompositor.dockDisplayMode = Qt.binding(function(){
+            return Panel.displayMode
+        })
+
+        DockCompositor.dockColorTheme = Qt.binding(function(){
+            return Panel.colorTheme
+        })
+    }
 }

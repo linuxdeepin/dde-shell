@@ -20,6 +20,7 @@ class DockPluginManager : public QWaylandCompositorExtensionTemplate<DockPluginM
 
     Q_PROPERTY(uint32_t dockPosition READ dockPosition WRITE setDockPosition)
     Q_PROPERTY(uint32_t dockDisplayMode READ dockDisplayMode WRITE setDockDisplayMode)
+    Q_PROPERTY(uint32_t dockColorTheme READ dockColorTheme WRITE setDockColorTheme)
 
 public:
     enum SurfaceType {
@@ -43,15 +44,20 @@ public:
     uint32_t dockDisplayMode() const;
     void setDockDisplayMode(uint32_t dockDisplayMode);
 
+    uint32_t dockColorTheme() const;
+    void setDockColorTheme(uint32_t type);
+
 Q_SIGNALS:
     void pluginSurfaceCreated(PluginSurface*);
-    void pluginSurfaceDestoried(PluginSurface*);
+    void pluginSurfaceDestroyed(PluginSurface*);
 
 protected:
     void dock_plugin_manager_v1_create_plugin_surface(Resource *resource, const QString &pluginId, const QString &itemKey, uint32_t surfaceType, struct ::wl_resource *surface, uint32_t id) override;
 
 private:
+    QList<QWaylandSurface*> m_pluginSurfaces;
     uint32_t m_dockPosition;
+    uint32_t m_dockColorTheme;
     uint32_t m_dockDisplayMode;
 };
 

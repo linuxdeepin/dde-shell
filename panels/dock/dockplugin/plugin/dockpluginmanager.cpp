@@ -29,15 +29,15 @@ void DockPluginManager::dock_plugin_manager_v1_display_mode_changed(uint32_t doc
 {
     if (dockDisplayMode != m_dockDisplayMode) {
         m_dockDisplayMode = dockDisplayMode;
-        Q_EMIT dockDisplayModeChnaged(m_dockDisplayMode);
+        Q_EMIT dockDisplayModeChanged(m_dockDisplayMode);
     }
 }
 
-void DockPluginManager::dock_plugin_manager_v1_hide_state_changed(uint32_t dockHideState)
+void DockPluginManager::dock_plugin_manager_v1_color_theme_changed(uint32_t dockColorType)
 {
-    if (dockHideState != m_dockHideState) {
-        m_dockHideState = dockHideState;
-        Q_EMIT dockHideStateChanged(m_dockHideState);
+    if (dockColorType != m_dockColorType) {
+        m_dockColorType = dockColorType;
+        Q_EMIT dockColorThemeChanged(m_dockColorType);
     }
 }
 

@@ -49,8 +49,8 @@
       <arg name="dock_display_mode" type="uint"/>
     </event>
 
-    <event name="hide_state_changed">
-      <arg name="dock_hide_state" type="uint"/>
+    <event name="color_theme_changed">
+      <arg name="dock_color_theme" type="uint"/>
     </event>
 
     <request name="create_plugin_surface">
