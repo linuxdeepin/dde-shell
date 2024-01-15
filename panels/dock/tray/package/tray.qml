@@ -41,6 +41,14 @@ AppletItem {
         }
     }
 
+    Timer {
+        id: tooltipTimer
+        interval: 300
+        running: false
+        repeat: false
+        onTriggered: tooltip.open()
+    }
+
     OverflowContainer {
         id: trayContainter
         anchors.centerIn: parent
@@ -76,7 +84,7 @@ AppletItem {
                             var itemPos = tray.getItemPopupPosition(pluginItem, tooltip)
                             tooltip.x = itemPos.x
                             tooltip.y = itemPos.y
-                            tooltip.open()
+                            tooltipTimer.restart()
                         }
                     }
 
@@ -96,7 +104,11 @@ AppletItem {
                     }
 
                     onExited: {
-                        tooltip.close()
+                        if (tooltipTimer.running) {
+                            tooltipTimer.stop()
+                        } else {
+                            tooltip.close()
+                        }
                     }
                 }
             }
