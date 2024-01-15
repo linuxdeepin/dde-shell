@@ -19,6 +19,10 @@ PluginSurface::PluginSurface(DockPluginManager* manager, const QString& pluginId
     init(resource.resource());
     setExtensionContainer(surface);
     QWaylandCompositorExtension::initialize();
+
+    connect(m_surface, &QWaylandSurface::surfaceDestroyed, this, [this, manager](){
+        Q_EMIT manager->pluginSurfaceDestroyed(this);
+    });
 }
 
 QWaylandQuickShellIntegration* PluginSurface::createIntegration(QWaylandQuickShellSurfaceItem *item)
@@ -112,7 +116,13 @@ void DockPluginManager::setDockPosition(uint32_t position)
     if (m_dockPosition == position)
         return;
     m_dockPosition = position;
-    send_position_changed(m_dockPosition);
+
+    foreach (QWaylandSurface* surface, m_pluginSurfaces) {
+        Resource *target = resourceMap().value(surface->waylandClient());
+        if (target) {
+            send_position_changed(target->handle, m_dockPosition);
+        }
+    }
 }
 
 uint32_t DockPluginManager::dockDisplayMode() const
@@ -125,16 +135,49 @@ void DockPluginManager::setDockDisplayMode(uint32_t displayMode)
     if (m_dockDisplayMode == displayMode)
         return;
     m_dockDisplayMode = displayMode;
-    send_display_mode_changed(m_dockDisplayMode);
+
+    foreach (QWaylandSurface* surface, m_pluginSurfaces) {
+        Resource *target = resourceMap().value(surface->waylandClient());
+        if (target) {
+            send_display_mode_changed(target->handle, m_dockDisplayMode);
+        }
+    }
+}
+
+uint32_t DockPluginManager::dockColorTheme() const
+{
+    return m_dockColorTheme;
+}
+
+void DockPluginManager::setDockColorTheme(uint32_t type)
+{
+    if (type == m_dockColorTheme)
+        return;
+    m_dockColorTheme = type;
+
+    foreach (QWaylandSurface* surface, m_pluginSurfaces) {
+        Resource *target = resourceMap().value(surface->waylandClient());
+        if (target) {
+            send_color_theme_changed(target->handle, m_dockColorTheme);
+        }
+    }
 }
 
 void DockPluginManager::dock_plugin_manager_v1_create_plugin_surface(Resource *resource, const QString &pluginId, const QString &itemKey, uint32_t surfaceType, struct ::wl_resource *surface, uint32_t id)
 {
-    Q_UNUSED(resource);
     QWaylandSurface *qwaylandSurface = QWaylandSurface::fromResource(surface);
+    m_pluginSurfaces << qwaylandSurface;
+
+    connect(qwaylandSurface, &QWaylandSurface::surfaceDestroyed, this, [this, qwaylandSurface](){
+        m_pluginSurfaces.removeAll(qwaylandSurface);
+    });
 
     QWaylandResource shellSurfaceResource(wl_resource_create(resource->client(), &::dock_plugin_surface_interface,
                                                            wl_resource_get_version(resource->handle), id));
+
+    send_position_changed(resource->handle, m_dockPosition);
+    send_color_theme_changed(resource->handle, m_dockColorTheme);
+    send_display_mode_changed(resource->handle, m_dockDisplayMode);
 
     auto plugin = new PluginSurface(this, pluginId, itemKey, static_cast<SurfaceType>(surfaceType), qwaylandSurface, shellSurfaceResource);
     Q_EMIT pluginSurfaceCreated(plugin);

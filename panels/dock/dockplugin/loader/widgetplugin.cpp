@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "widgetplugin.h"
+#include "constants.h"
 #include "dockplugin.h"
+#include "widgetplugin.h"
 #include "pluginsiteminterface.h"
 
 #include <QPainter>
@@ -251,7 +252,26 @@ DockPlugin* WidgetPlugin::getPlugin(QWidget* widget)
 {
     widget->setParent(nullptr);
     widget->winId();
-    return DockPlugin::get(widget->windowHandle());
+    auto plugin = DockPlugin::get(widget->windowHandle());
+    if (plugin) {
+        connect(plugin, &DockPlugin::dockColorThemeChanged, this, [](uint32_t type){
+            DGuiApplicationHelper::instance()->setPaletteType(type == 0 ?
+                DGuiApplicationHelper::ColorType::LightType : DGuiApplicationHelper::ColorType::DarkType
+            );
+        }, Qt::UniqueConnection);
+
+        connect(plugin, &DockPlugin::dockPositionChanged, this, [this](uint32_t position){
+            qApp->setProperty(PROP_POSITION, position);
+            m_pluginItem->positionChanged(static_cast<Dock::Position>(position));
+        }, Qt::UniqueConnection);
+
+        connect(plugin, &DockPlugin::dockDisplayModeChanged, this, [this](uint32_t displayMode){
+            qApp->setProperty(PROP_DISPLAY_MODE, displayMode);
+            m_pluginItem->displayModeChanged(static_cast<Dock::DisplayMode>(displayMode));
+        }, Qt::UniqueConnection);
+    }
+
+    return plugin;
 }
 
 TrayIconWidget::TrayIconWidget(std::function<QPixmap()> trayIconCallback, QWidget* parent)

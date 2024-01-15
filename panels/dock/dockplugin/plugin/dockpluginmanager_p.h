@@ -25,17 +25,17 @@ public:
 
 Q_SIGNALS:
     void dockPositionChnaged(uint32_t position);
-    void dockDisplayModeChnaged(uint32_t displayMode);
-    void dockHideStateChanged(uint32_t hideState);
+    void dockDisplayModeChanged(uint32_t displayMode);
+    void dockColorThemeChanged(uint32_t colorType);
 
 protected:
     void dock_plugin_manager_v1_position_changed(uint32_t dockPosition) override;
     void dock_plugin_manager_v1_display_mode_changed(uint32_t dockDisplayMode) override;
-    void dock_plugin_manager_v1_hide_state_changed(uint32_t dockHideState) override;
+    void dock_plugin_manager_v1_color_theme_changed(uint32_t dockColorType) override;
 
 private:
     uint32_t m_dockPosition;
     uint32_t m_dockDisplayMode;
-    uint32_t m_dockHideState;
+    uint32_t m_dockColorType;
 };
 }

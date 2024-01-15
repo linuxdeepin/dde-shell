@@ -15,6 +15,9 @@ DockPluginSurface::DockPluginSurface(DockPluginManager *manager, QtWaylandClient
     , m_plugin(DockPlugin::get(window->window()))
 {
     init(manager->create_plugin_surface(m_plugin->pluginId(), m_plugin->itemKey(), m_plugin->pluginType(), window->wlSurface()));
+    connect(manager, &DockPluginManager::dockPositionChnaged, m_plugin, &DockPlugin::dockPositionChanged);
+    connect(manager, &DockPluginManager::dockColorThemeChanged, m_plugin, &DockPlugin::dockColorThemeChanged);
+    connect(manager, &DockPluginManager::dockDisplayModeChanged, m_plugin, &DockPlugin::dockDisplayModeChanged);
 }
 
 DockPluginSurface::~DockPluginSurface()

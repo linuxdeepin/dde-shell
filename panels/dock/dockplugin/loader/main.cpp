@@ -51,7 +51,7 @@ int main(int argc, char *argv[], char *envp[])
 #endif
 
     init_setproctitle(argv, envp);
-    qputenv("DSG_APP_ID", "deepin-terminal");
+    qputenv("DSG_APP_ID", "dde-dock");
     qputenv("WAYLAND_DISPLAY", "dockplugin");
     qputenv("QT_WAYLAND_SHELL_INTEGRATION", "dockplugin-shell");
 
