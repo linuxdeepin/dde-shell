@@ -21,8 +21,8 @@ Window {
 
     width: Applet.position % 2 ? Applet.dockSize :  Applet.dockSize
     height: Applet.position % 2 ? Applet.dockSize :  Applet.dockSize
+    color: "transparent"
 
-    D.DWindow.enabled: true
     DLayerShellWindow.anchors: position2Anchors(Applet.position)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Applet.dockSize
@@ -30,6 +30,32 @@ Window {
     DLayerShellWindow.rightMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - gridLayout.implicitWidth) / 2
     DLayerShellWindow.topMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - gridLayout.implicitHeight) / 2
     DLayerShellWindow.bottomMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - gridLayout.implicitHeight) / 2
+
+    D.DWindow.enabled: true
+
+    // TODO: wait BehindWindowblur support setting radius for special corners
+
+    D.RoundRectangle {
+        anchors.fill: parent
+        radius: Applet.dockSize / 2
+        color: Applet.colorTheme == Dock.Light ? ivory : darkgrey
+        opacity: 0.3
+        corners: {
+            if (Panel.displayMode == Dock.Efficient)
+                return D.RoundRectangle.NoneCorner
+
+            switch (Panel.position) {
+            case Dock.Top:
+                return D.RoundRectangle.BottomCorner
+            case Dock.Right:
+                return D.RoundRectangle.LeftCorner
+            case Dock.Bottom:
+                return D.RoundRectangle.TopCorner
+            case Dock.Left:
+                return D.RoundRectangle.RightCorner
+            }
+        }
+    }
 
     component EnumPropertyMenuItem: LP.MenuItem {
         required property string name
