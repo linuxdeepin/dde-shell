@@ -175,9 +175,11 @@ void DockPluginManager::dock_plugin_manager_v1_create_plugin_surface(Resource *r
     QWaylandResource shellSurfaceResource(wl_resource_create(resource->client(), &::dock_plugin_surface_interface,
                                                            wl_resource_get_version(resource->handle), id));
 
-    send_position_changed(resource->handle, m_dockPosition);
-    send_color_theme_changed(resource->handle, m_dockColorTheme);
-    send_display_mode_changed(resource->handle, m_dockDisplayMode);
+    QMetaObject::invokeMethod(this, [this, resource](){
+        send_position_changed(resource->handle, m_dockPosition);
+        send_color_theme_changed(resource->handle, m_dockColorTheme);
+        send_display_mode_changed(resource->handle, m_dockDisplayMode);
+    }, Qt::QueuedConnection);
 
     auto plugin = new PluginSurface(this, pluginId, itemKey, static_cast<SurfaceType>(surfaceType), qwaylandSurface, shellSurfaceResource);
     Q_EMIT pluginSurfaceCreated(plugin);
