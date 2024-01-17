@@ -221,7 +221,7 @@ void DockPanel::callShow()
 
 bool DockPanel::debugMode() const
 {
-#ifdef NDEBUG
+#ifndef QT_DEBUG
     return false;
 #else
     return true;
