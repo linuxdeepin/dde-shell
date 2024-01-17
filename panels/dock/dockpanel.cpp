@@ -219,6 +219,15 @@ void DockPanel::callShow()
 // TODO: implement this function
 }
 
+bool DockPanel::debugMode() const
+{
+#ifdef NDEBUG
+    return false;
+#else
+    return true;
+#endif
+}
+
 void DockPanel::loadDockPlugins()
 {
     if(!m_compositorReady) return;
