@@ -257,7 +257,8 @@ QWidget* WidgetPlugin::getQucikPluginTrayWidget()
             auto trayIcon = m_pluginItem->icon(DockPart::QuickShow);
             // NOTE: icon same as TrayIconWidget size, otherwise there will be white space
             // FIXME: trayIcon size may min than PLUGIN_ICON_MIN_SIZE (such as sound plugin)
-            auto pixmap = trayIcon.pixmap(PLUGIN_ICON_MIN_SIZE * 2, PLUGIN_ICON_MIN_SIZE * 2);
+            auto scale = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? 1 : qApp->devicePixelRatio();
+            auto pixmap = trayIcon.pixmap(PLUGIN_ICON_MIN_SIZE * scale, PLUGIN_ICON_MIN_SIZE * scale);
             pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
             return pixmap;
         };
@@ -303,7 +304,8 @@ TrayIconWidget::TrayIconWidget(std::function<QPixmap()> trayIconCallback, QWidge
     : QWidget(parent)
     , m_callBack(trayIconCallback)
 {
-    setFixedSize(PLUGIN_ICON_MIN_SIZE * 2, PLUGIN_ICON_MIN_SIZE * 2);
+    auto scale = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? 1 : qApp->devicePixelRatio();
+    setFixedSize(PLUGIN_ICON_MIN_SIZE * scale, PLUGIN_ICON_MIN_SIZE * scale);
 }
 
 TrayIconWidget::~TrayIconWidget()
@@ -313,8 +315,9 @@ void TrayIconWidget::paintEvent(QPaintEvent *event)
 {
     auto pixmap = m_callBack();
     QPainter painter(this);
+    auto scale = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? 1 : qApp->devicePixelRatio();
     QSize size = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? pixmap.size() / qApp->devicePixelRatio() : pixmap.size();
-    QRect pixmapRect = QRect(QPoint((rect().width() - size.width()) / 2, (rect().height() - size.height()) / 2), size);
+    QRect pixmapRect = QRect(QPoint(0, 0), QSize(PLUGIN_ICON_MIN_SIZE * scale, PLUGIN_ICON_MIN_SIZE * scale));
     painter.drawPixmap(pixmapRect, pixmap);
 }
 }

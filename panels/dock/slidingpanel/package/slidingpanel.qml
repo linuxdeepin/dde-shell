@@ -47,6 +47,7 @@ AppletItem {
             implicitWidth: slidingpanel.useColumnLayout ? dockSize - 10 : timedate.implicitWidth
             implicitHeight: slidingpanel.useColumnLayout ? timedate.implicitHeight : dockSize - 10
             radius: (dockSize - 30) / 2
+            color: "transparent"
 
             Column {
                 id: timedate
