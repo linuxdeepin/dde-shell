@@ -54,18 +54,18 @@ AppletItem {
         anchors.centerIn: parent
         useColumnLayout: tray.useColumnLayout
         model: DockCompositor.trayPluginSurfaces
-        spacing: 5
+        spacing: 10
         delegate: Item {
             id: pluginItem
             property var plugin: modelData
             property var popupShow: false
-            implicitHeight: 20
-            implicitWidth: 20
+            implicitHeight: 16
+            implicitWidth: 16
 
             ShellSurfaceItem {
                 anchors.centerIn: parent
-                width: 20
-                height: 20
+                width: 16
+                height: 16
                 shellSurface: plugin
 
                 MouseArea {
