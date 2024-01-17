@@ -255,8 +255,9 @@ QWidget* WidgetPlugin::getQucikPluginTrayWidget()
     if (m_widget.isNull()) {
         auto func = [this]() -> QPixmap {
             auto trayIcon = m_pluginItem->icon(DockPart::QuickShow);
-            QSize size = trayIcon.availableSizes().size() > 0 ? trayIcon.availableSizes().last() : QSize(18, 18) * qApp->devicePixelRatio();
-            auto pixmap = trayIcon.pixmap(24, 24);
+            // NOTE: icon same as TrayIconWidget size, otherwise there will be white space
+            // FIXME: trayIcon size may min than PLUGIN_ICON_MIN_SIZE (such as sound plugin)
+            auto pixmap = trayIcon.pixmap(PLUGIN_ICON_MIN_SIZE * 2, PLUGIN_ICON_MIN_SIZE * 2);
             pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
             return pixmap;
         };
@@ -302,7 +303,7 @@ TrayIconWidget::TrayIconWidget(std::function<QPixmap()> trayIconCallback, QWidge
     : QWidget(parent)
     , m_callBack(trayIconCallback)
 {
-    setFixedSize(48, 48);
+    setFixedSize(PLUGIN_ICON_MIN_SIZE * 2, PLUGIN_ICON_MIN_SIZE * 2);
 }
 
 TrayIconWidget::~TrayIconWidget()
