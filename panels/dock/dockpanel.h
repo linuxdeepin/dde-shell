@@ -32,7 +32,7 @@ class DockPanel : public DPanel, public QDBusContext
     Q_PROPERTY(ColorTheme colorTheme READ colorTheme WRITE setColorTheme NOTIFY colorThemeChanged FINAL)
     Q_PROPERTY(uint dockSize READ dockSize WRITE setDockSize NOTIFY dockSizeChanged FINAL)
     Q_PROPERTY(bool compositorReady READ compositorReady WRITE setCompositorReady NOTIFY compositorReadyChanged FINAL)
-    Q_PROPERTY(bool debugMode READ debugMode)
+    Q_PROPERTY(bool debugMode READ debugMode FINAL CONSTANT)
 
 public:
     explicit DockPanel(QObject *parent = nullptr);
