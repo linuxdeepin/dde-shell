@@ -39,7 +39,7 @@ Window {
     D.RoundRectangle {
         anchors.fill: parent
         radius: (Applet.dockSize - 20) / 2
-        color: Applet.colorTheme == Dock.Light ? ivory : darkgrey
+        color: Applet.colorTheme == Dock.Light ? "ivory" : "darkgrey"
         corners: {
             if (Panel.displayMode == Dock.Efficient)
                 return D.RoundRectangle.NoneCorner
