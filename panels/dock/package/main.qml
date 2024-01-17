@@ -32,14 +32,14 @@ Window {
     DLayerShellWindow.bottomMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - gridLayout.implicitHeight) / 2
 
     D.DWindow.enabled: true
+    D.DWindow.windowRadius: 0
 
     // TODO: wait BehindWindowblur support setting radius for special corners
 
     D.RoundRectangle {
         anchors.fill: parent
-        radius: Applet.dockSize / 2
+        radius: (Applet.dockSize - 20) / 2
         color: Applet.colorTheme == Dock.Light ? ivory : darkgrey
-        opacity: 0.3
         corners: {
             if (Panel.displayMode == Dock.Efficient)
                 return D.RoundRectangle.NoneCorner
