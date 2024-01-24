@@ -111,10 +111,14 @@ target_link_libraries(dock-plugin PUBLIC
     Qt${QT_VERSION_MAJOR}::Qml
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::WaylandCompositor
-    dde-shell-frame
 PRIVATE
     PkgConfig::WaylandClient
     Qt${QT_VERSION_MAJOR}::WaylandCompositorPrivate
+)
+
+target_include_directories(dock-plugin
+    PUBLIC
+    $<TARGET_PROPERTY:dde-shell-frame,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 install(DIRECTORY "${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/" DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/")
