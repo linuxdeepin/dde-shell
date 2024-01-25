@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS DBus WaylandClient)
+find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS DBus WaylandClient)
+find_package(yaml-cpp REQUIRED)
 
 set_source_files_properties(
     ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ApplicationManager1.Application.xml
@@ -67,8 +68,6 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     waylandwindowmonitor.h
     taskmanagersettings.cpp
     taskmanagersettings.h
-    desktopfileamparsersettings.h
-    desktopfileamparsersettings.cpp
 )
 
 qt_generate_wayland_protocol_client_sources(dock-taskmanager
@@ -80,6 +79,7 @@ qt_generate_wayland_protocol_client_sources(dock-taskmanager
 target_link_libraries(dock-taskmanager PRIVATE
     dde-shell-frame
     Qt${QT_VERSION_MAJOR}::WaylandClientPrivate
+    yaml-cpp
     PkgConfig::WaylandClient
 )
 

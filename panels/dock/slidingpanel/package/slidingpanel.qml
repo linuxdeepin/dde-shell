@@ -22,7 +22,7 @@ AppletItem {
     Control {
         id: content
         anchors.fill: parent
-        
+
         leftPadding: {
             if (Panel.displayMode === Dock.Efficient) return 2
             return slidingpanel.useColumnLayout ? 4 : 10

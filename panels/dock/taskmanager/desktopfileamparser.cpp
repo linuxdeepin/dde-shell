@@ -6,7 +6,6 @@
 #include "abstractwindow.h"
 #include "desktopfileamparser.h"
 #include "desktopfileabstractparser.h"
-#include "desktopfileamparsersettings.h"
 
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -104,9 +103,9 @@ QString DesktopFileAMParser::genericName()
     return m_genericName;
 }
 
-bool DesktopFileAMParser::isValied()
+std::pair<bool, QString> DesktopFileAMParser::isValied()
 {
-    return true;
+    return std::make_pair(true, "has am as backend");
 }
 
 QList<QPair<QString, QString>> DesktopFileAMParser::actions()
@@ -161,9 +160,14 @@ QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
     return QString();
 }
 
-QStringList DesktopFileAMParser::loadDockedDesktopfile()
+QString DesktopFileAMParser::type()
 {
-    return DesktopFileAMParserSettings::instance()->dockedAMDektopfileIds();
+    return "am";
+}
+
+QString DesktopFileAMParser::appType()
+{
+    return type();
 }
 
 void DesktopFileAMParser::launch()
@@ -191,22 +195,6 @@ void DesktopFileAMParser::connectToAmDBusSignal(const QString& signalName, std::
         this,
         SLOT(handler)
     );
-}
-
-bool DesktopFileAMParser::isDocked()
-{
-    return m_appitems.size() <= 1 && DesktopFileAMParserSettings::instance()->dockedAMDektopfileIds().contains(id());
-}
-
-void DesktopFileAMParser::setDocked(bool docked)
-{
-    auto dockedAppItemIds = DesktopFileAMParserSettings::instance()->dockedAMDektopfileIds();
-    if (docked) {
-        dockedAppItemIds.append(id());
-    } else {
-        dockedAppItemIds.removeAll(id());
-    }
-    DesktopFileAMParserSettings::instance()->setDockedAMDektopfileIds(dockedAppItemIds);
 }
 }
 DS_END_NAMESPACE

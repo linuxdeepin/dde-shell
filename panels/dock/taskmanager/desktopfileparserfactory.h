@@ -15,8 +15,32 @@ DS_BEGIN_NAMESPACE
 namespace dock {
 class DesktopfileAbstractParser;
 
-template<typename T>
-class DesktopfileParserFactory
+template<typename... Args>
+class DesktopfileParserFactory;
+
+template <typename First, typename... Rest>
+class DesktopfileParserFactory<First, Rest...>
+{
+public:
+    [[nodiscard]] static QSharedPointer<DesktopfileAbstractParser> createByWindow(QPointer<AbstractWindow> window)
+    {
+        auto desktopFileParser = DesktopfileParserFactory<First>::createByWindow(window);
+        return desktopFileParser.isNull() ?
+            DesktopfileParserFactory<Rest...>::createByWindow(window) : desktopFileParser;
+    }
+
+    [[nodiscard]] static QSharedPointer<DesktopfileAbstractParser> createById(const QString& id, const QString& type)
+    {
+        if (type == First::type()) {
+            return DesktopfileParserFactory<First>::createById(id);
+        }
+
+        return DesktopfileParserFactory<Rest...>::createById(id, type);
+    }
+};
+
+template <typename T>
+class DesktopfileParserFactory<T>
 {
     static_assert(std::is_base_of<DesktopfileAbstractParser, T>::value, "T must be a subclass of DesktopfileAbstractParser");
 
@@ -28,8 +52,9 @@ public:
         return createById(id);
     }
 
-    [[nodiscard]] static QSharedPointer<DesktopfileAbstractParser> createById(const QString& id)
+    [[nodiscard]] static QSharedPointer<DesktopfileAbstractParser> createById(const QString& id, const QString& type = "")
     {
+        Q_UNUSED(type)
         auto desktopFileParser = m_desktopFileParsers.value(id, QWeakPointer<T>(nullptr)).toStrongRef();
         if (desktopFileParser.isNull()) {
             desktopFileParser = QSharedPointer<T>(new T(id));
@@ -39,7 +64,7 @@ public:
     }
 
 private:
-    static QString identifyWindow(QPointer<AbstractWindow> window)
+    static inline QString identifyWindow(QPointer<AbstractWindow> window)
     {
         return T::identifyWindow(window);
     }

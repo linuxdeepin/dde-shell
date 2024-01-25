@@ -66,8 +66,10 @@ QVariant AppItemModel::data(const QModelIndex &index, int role) const
 
 void AppItemModel::moveTo(const QString &id, int dIndex)
 {
-    auto item = getAppItemById(id);
-    int sIndex = m_appItems.indexOf(item);
+    auto sItem = getAppItemById(id);
+    auto dItem = m_appItems.at(dIndex);
+
+    int sIndex = m_appItems.indexOf(sItem);
     if (sIndex == dIndex) {
         return;
     }
@@ -79,6 +81,10 @@ void AppItemModel::moveTo(const QString &id, int dIndex)
     beginMoveRows(QModelIndex(), sIndex, sIndex, QModelIndex(), dIndex);
     m_appItems.move(sIndex, dIndex);
     endMoveRows();
+
+    if (sItem->isDocked() || dItem->isDocked()) {
+        Q_EMIT dockedItemSequenceChanged();
+    }
 }
 
 QPointer<AppItem> AppItemModel::getAppItemById(const QString& id) const
@@ -95,12 +101,12 @@ void AppItemModel::addAppItem(QPointer<AppItem> item)
     if (m_appItems.contains(item)) return;
 
     connect(item.get(), &AppItem::destroyed, this, &AppItemModel::onAppItemDestroyed, Qt::UniqueConnection);
-    connect(item.get(), &AppItem::nameChanged, this, &AppItemModel::onAppItemChanged, Qt::QueuedConnection);
-    connect(item.get(), &AppItem::iconChanged, this, &AppItemModel::onAppItemChanged, Qt::QueuedConnection);
-    connect(item.get(), &AppItem::activeChanged, this, &AppItemModel::onAppItemChanged, Qt::QueuedConnection);
-    connect(item.get(), &AppItem::menusChanged, this, &AppItemModel::onAppItemChanged, Qt::QueuedConnection);
-    connect(item.get(), &AppItem::dockedChanged, this, &AppItemModel::onAppItemChanged, Qt::QueuedConnection);
-    connect(item.get(), &AppItem::itemWindowCountChanged, this, &AppItemModel::onAppItemChanged, Qt::QueuedConnection);
+    connect(item.get(), &AppItem::nameChanged, this, &AppItemModel::onAppItemChanged, Qt::UniqueConnection);
+    connect(item.get(), &AppItem::iconChanged, this, &AppItemModel::onAppItemChanged, Qt::UniqueConnection);
+    connect(item.get(), &AppItem::activeChanged, this, &AppItemModel::onAppItemChanged, Qt::UniqueConnection);
+    connect(item.get(), &AppItem::menusChanged, this, &AppItemModel::onAppItemChanged, Qt::UniqueConnection);
+    connect(item.get(), &AppItem::dockedChanged, this, &AppItemModel::onAppItemChanged, Qt::UniqueConnection);
+    connect(item.get(), &AppItem::itemWindowCountChanged, this, &AppItemModel::onAppItemChanged, Qt::UniqueConnection);
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_appItems.append(item);

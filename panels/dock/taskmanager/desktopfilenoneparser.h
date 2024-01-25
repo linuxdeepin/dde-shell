@@ -30,9 +30,9 @@ public:
     virtual QList<QPair<QString, QString>> actions() override;
     virtual QString desktopIcon() override;
     virtual QString genericName() override;
-    virtual bool isDocked() override;
-    virtual bool isValied() override;
-    virtual void setDocked(bool docked) override;
+    virtual std::pair<bool, QString> isValied() override;
+    virtual QString appType() override;
+    static QString type();
 
 private:
     friend class DesktopfileParserFactory<DesktopFileNoneParser>;

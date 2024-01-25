@@ -12,6 +12,7 @@
 
 #include <QLoggingCategory>
 #include <QCryptographicHash>
+#include <utility>
 
 Q_LOGGING_CATEGORY(nonedesktopfileLog, "dde.shell.dock.nonedesktopfile")
 
@@ -92,19 +93,19 @@ QString DesktopFileNoneParser::identifyWindow(QPointer<AbstractWindow> window)
     return res;
 }
 
-void DesktopFileNoneParser::setDocked(bool docked)
+QString DesktopFileNoneParser::type()
 {
-    
+    return "none";
 }
 
-bool DesktopFileNoneParser::isDocked()
+QString DesktopFileNoneParser::appType()
 {
-    return false;
+    return type();
 }
 
-bool DesktopFileNoneParser::isValied()
+std::pair<bool, QString> DesktopFileNoneParser::isValied()
 {
-    return false;
+    return std::make_pair(false, "no desktopfile backend");
 }
 
 }
