@@ -9,6 +9,8 @@ find_package(ECM REQUIRED MO_MODULE)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${ECM_MODULE_PATH}")
 find_package(QtWaylandScanner)
 
+include(KDEInstallDirs)
+
 add_library(dockpluginmanager-interface SHARED
     dockplugin.h
     dockplugin.cpp
@@ -65,4 +67,4 @@ set_target_properties(dockpluginmanager-interface PROPERTIES
 
 # Do not install .so development library for we don't want others to link to it.
 install(TARGETS dockpluginmanager-interface LIBRARY NAMELINK_SKIP DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS dockpluginmanager DESTINATION ${CMAKE_INSTALL_LIBDIR}/qt5/plugins/wayland-shell-integration)
+install(TARGETS dockpluginmanager DESTINATION ${KDE_INSTALL_QTPLUGINDIR}/wayland-shell-integration)
