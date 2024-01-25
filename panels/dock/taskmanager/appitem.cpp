@@ -63,7 +63,7 @@ QString AppItem::name() const
 
 QString AppItem::menus() const
 {
-    bool isDesltopfileParserAvaliable = m_desktopfileParser && !m_desktopfileParser.isNull() && m_desktopfileParser->isValied();
+    bool isDesltopfileParserAvaliable = m_desktopfileParser && !m_desktopfileParser.isNull() && m_desktopfileParser->isValied().first;
     QJsonArray array;
     QJsonObject launchMenu;
 

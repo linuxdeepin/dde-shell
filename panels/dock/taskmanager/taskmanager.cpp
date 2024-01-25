@@ -28,6 +28,10 @@
 Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtInfoMsg)
 
 #define Settings TaskManagerSettings::instance()
+#define DESKTOPFILEFACTORY DesktopfileParserFactory<    \
+                            DesktopFileAMParser,        \
+                            DesktopFileNoneParser       \
+                        >
 
 DS_BEGIN_NAMESPACE
 namespace dock {
@@ -92,8 +96,7 @@ AppItemModel* TaskManager::dataModel()
 void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
 {
     if (!window || window->shouldSkip() || window->getAppItem() != nullptr) return;
-    auto desktopfile = DesktopfileParserFactory<DesktopFileAMParser>::createByWindow(window);
-    if(!desktopfile) desktopfile = DesktopfileParserFactory<DesktopFileNoneParser>::createByWindow(window);
+    auto desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
 
     auto appitem = desktopfile->getAppItem();
 
@@ -154,9 +157,13 @@ void TaskManager::hideWindowsPreview()
 
 void TaskManager::loadDockedAppItems()
 {
-    for (auto id : DesktopFileAMParser::loadDockedDesktopfile()) {
-        auto desktopfile = DesktopfileParserFactory<DesktopFileAMParser>::createById(id);
-        auto appitem = new AppItem(id);
+    for (const auto& appValueRef : TaskManagerSettings::instance()->dockedDesktopFiles()) {
+        auto app = appValueRef.toObject();
+        auto appid = app.value("id").toString();
+        auto type = app.value("type").toString();
+        auto desktopfile = DESKTOPFILEFACTORY::createById(appid, type);
+
+        auto appitem = new AppItem(appid);
         appitem->setDesktopFileParser(desktopfile);
         AppItemModel::instance()->addAppItem(appitem);
     }

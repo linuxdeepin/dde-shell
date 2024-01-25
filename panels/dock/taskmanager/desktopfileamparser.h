@@ -31,17 +31,17 @@ public:
     virtual QString desktopIcon() override;
     virtual QList<QPair<QString, QString>> actions() override;
     virtual QString genericName() override;
-    virtual bool isDocked() override;
-    virtual bool isValied() override;
+    virtual QString appType() override;
 
-    virtual void setDocked(bool docked) override;
+    virtual std::pair<bool, QString> isValied() override;
 
-    static QStringList loadDockedDesktopfile();
-    static QString identifyWindow(QPointer<AbstractWindow> window);
+    static QString type();
 
 private:
     friend class DesktopfileParserFactory<DesktopFileAMParser>;
     DesktopFileAMParser(QString id, QObject *parent = nullptr);
+
+    static QString identifyWindow(QPointer<AbstractWindow> window);
 
 private:
     QString id2dbusPath(const QString& id);

@@ -17,6 +17,7 @@ depends=('dtk6declarative-git'
          'qt6-declarative'
          'dtkgui-git'
          'dtkwidget-git'
+         'yaml-cpp'
 )
 makedepends=('git'
              'qt6-tools'

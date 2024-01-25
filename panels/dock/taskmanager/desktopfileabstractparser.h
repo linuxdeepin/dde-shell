@@ -9,6 +9,7 @@
 #include <QList>
 #include <QObject>
 #include <QPointer>
+#include <utility>
 
 DS_BEGIN_NAMESPACE
 
@@ -34,16 +35,20 @@ public:
     virtual QList<QPair<QString, QString>> actions() = 0;
     virtual QString genericName() = 0;
     virtual QString desktopIcon() = 0;
-    virtual bool isDocked() = 0;
-    virtual bool isValied() = 0;
+    
+    virtual std::pair<bool, QString> isValied() = 0;
 
     virtual void launch() = 0;
     virtual void launchWithAction(const QString& action) = 0;
     virtual void requestQuit() = 0;
-    virtual void setDocked(bool docked) = 0;
+    virtual QString appType() = 0;
 
-    void addAppItem(QPointer<AppItem> item);
-    QPointer<AppItem> getAppItem();
+    // State in dock
+    virtual bool isDocked() final;
+    virtual void setDocked(bool docked) final;
+
+    virtual void addAppItem(QPointer<AppItem> item) final;
+    virtual QPointer<AppItem> getAppItem() final;
 
 Q_SIGNALS:
     void nameChanged();

@@ -21,6 +21,16 @@
 			"description": "is window split",
 			"permissions": "readwrite",
 			"visibility": "private"
+		},
+		"Docked_Apps": {
+			"value": ["{type: am, id: dde-file-manager}", "{type: am, id: dde-control-center}"],
+			"serial": 0,
+			"flags": [],
+			"name": "Docked_Apps",
+			"name[zh_CN]": "已固定应用",
+			"description": "The default apps which is docked when dock is started.",
+			"permissions": "readwrite",
+			"visibility": "private"
 		}
 	}
 }

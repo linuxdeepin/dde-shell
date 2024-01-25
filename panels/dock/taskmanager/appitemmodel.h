@@ -43,6 +43,7 @@ public:
 Q_SIGNALS:
     void appItemAdded();
     void appItemRemoved();
+    void dockedItemSequenceChanged();
 
 private Q_SLOTS:
     void onAppItemDestroyed();

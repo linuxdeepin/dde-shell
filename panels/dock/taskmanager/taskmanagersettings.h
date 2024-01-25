@@ -9,6 +9,7 @@
 #include <QObject>
 #include <DConfig>
 #include <QScopedPointer>
+#include <QJsonArray>
 
 DCORE_USE_NAMESPACE
 
@@ -29,18 +30,27 @@ public:
     bool isWindowSplit();
     void setWindowSplit(bool split);
 
+    void setDockedDesktopFiles(QJsonArray desktopfiles);
+    void appnedDockedDesktopfiles(QJsonObject desktopfile);
+    void removeDockedDesktopfile(QJsonObject desktopfile);
+    QJsonArray dockedDesktopFiles();
+
 private:
     explicit TaskManagerSettings(QObject *parent = nullptr);
+    inline void dockedDesktopFilesPersisted();
+    inline void loadDockedDesktopFiles();
 
 Q_SIGNALS:
     void allowedForceQuitChanged();
     void windowSplitChanged();
+    void dockedDesktopFilesChanged();
 
 private:
     DConfig* m_taskManagerDconfig;
 
     bool m_allowForceQuit;
     bool m_windowSplit;
+    QJsonArray m_dockedApps;
 };
 }
 DS_END_NAMESPACE
