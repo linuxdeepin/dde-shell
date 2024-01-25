@@ -243,7 +243,7 @@ void DockPanel::loadDockPlugins()
 #ifdef QT_DEBUG
             QProcess::startDetached(QString("%1/../panels/dock/dockplugin/loader/dockplugin-loader").arg(qApp->applicationDirPath()), {"-p", plugin, "-platform", "wayland",});
 #else
-            QProcess::startDetached(QString("%1/%2/dockplugin-loader").arg(CMAKE_INSTALL_PREFIX).arg(CMAKE_INSTALL_LIBEXECDIR), {"-p", plugin, "-platform", "wayland"});
+            QProcess::startDetached(QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR), {"-p", plugin, "-platform", "wayland"});
 #endif
         }
     }
