@@ -3,16 +3,104 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "dsglobal.h"
-#include "appitem.h"
-#include "desktopfileabstractparser.h"
 #include "taskmanagersettings.h"
+#include "desktopfileabstractparser.h"
 
 #include <QPointer>
 #include <QJsonObject>
+#include <QLoggingCategory>
+
+#include <fstream>
+
+Q_LOGGING_CATEGORY(abstractdesktopfileLog, "dde.shell.dock.abstractdesktopfile")
 
 DS_BEGIN_NAMESPACE
 
 namespace dock {
+
+DesktopfileAbstractParser::DesktopfileAbstractParser(QString id, QObject* parent)
+    : QObject(parent)
+    , m_id(id)
+{
+}
+
+DesktopfileAbstractParser::~DesktopfileAbstractParser()
+{
+}
+
+void DesktopfileAbstractParser::launch()
+{
+
+}
+
+void DesktopfileAbstractParser::launchWithAction(const QString& action)
+{
+
+}
+
+void DesktopfileAbstractParser::requestQuit()
+{
+
+}
+
+
+QString DesktopfileAbstractParser::id()
+{
+    return m_id;
+}
+
+QString DesktopfileAbstractParser::name()
+{
+    return "";
+}
+
+QString DesktopfileAbstractParser::desktopIcon()
+{
+    return "application-default-icon";
+}
+
+QList<QPair<QString, QString>> DesktopfileAbstractParser::actions()
+{
+    return QList<QPair<QString, QString>>();
+}
+
+QString DesktopfileAbstractParser::genericName()
+{
+    return "";
+}
+
+QString DesktopfileAbstractParser::identifyWindow(QPointer<AbstractWindow> window)
+{
+    QString res;
+    do {
+        if (window->pid() == 0) break;
+
+        auto filePath = QStringLiteral("/proc/%1/cmdline").arg(QString::number(window->pid()));
+        std::ifstream fs(filePath.toStdString());
+        if (!fs.is_open()) break;
+        std::string tmp;
+        while (std::getline(fs, tmp, '\0')) {
+            res.append(QString::fromStdString(tmp));
+        }
+    } while(false);
+
+    return res;
+}
+
+QString DesktopfileAbstractParser::identifyType()
+{
+    return QStringLiteral("asbtractAPP");
+}
+
+QString DesktopfileAbstractParser::type()
+{
+    return identifyType();
+}
+
+std::pair<bool, QString> DesktopfileAbstractParser::isValied()
+{
+    return std::make_pair(false, QStringLiteral("abstractdesktopfile has no desktopfile backend"));
+}
 
 void DesktopfileAbstractParser::addAppItem(QPointer<AppItem> item)
 {
@@ -39,21 +127,20 @@ bool DesktopfileAbstractParser::isDocked()
     }
 
     QJsonObject desktopfile;
-    desktopfile["type"] = appType();
+    desktopfile["type"] = type();
     desktopfile["id"] = id();
     return TaskManagerSettings::instance()->dockedDesktopFiles().contains(desktopfile);
 }
 
 void DesktopfileAbstractParser::setDocked(bool docked)
 {
-    qDebug() << isValied() << docked;
     if (!isValied().first) {
         qDebug() << isValied().second;
         return;
     }
 
     QJsonObject desktopfile;
-    desktopfile["type"] = appType();
+    desktopfile["type"] = type();
     desktopfile["id"] = id();
 
     if (docked) {
@@ -61,6 +148,8 @@ void DesktopfileAbstractParser::setDocked(bool docked)
     } else {
         TaskManagerSettings::instance()->removeDockedDesktopfile(desktopfile);
     }
+
+    Q_EMIT dockedChanged();
 }
 
 }

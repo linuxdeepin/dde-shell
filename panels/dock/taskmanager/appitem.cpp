@@ -5,14 +5,16 @@
 #include "globals.h"
 #include "appitem.h"
 #include "dsglobal.h"
-#include "appitemadaptor.h"
+#include "abstractitem.h"
 #include "abstractwindow.h"
 #include "desktopfileabstractparser.h"
+#include "taskmanagersettings.h"
 
 #include <QPointer>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QStringLiteral>
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(appitemLog, "dde.shell.dock.taskmanger.appitem")
@@ -20,15 +22,13 @@ Q_LOGGING_CATEGORY(appitemLog, "dde.shell.dock.taskmanger.appitem")
 DS_BEGIN_NAMESPACE
 namespace dock {
 AppItem::AppItem(QString id, QObject *parent)
-    : QObject(parent)
+    : AbstractItem(QStringLiteral("AppItem/%1").arg(escapeToObjectPath(id)), parent)
     , m_id(id)
 {
-    auto *tmp = new AppItemAdaptor(this);
-    QDBusConnection::sessionBus().registerService("org.deepin.ds.Dock.TaskManager.Item");
-    QDBusConnection::sessionBus().registerObject(QStringLiteral("/org/deepin/ds/Dock/TaskManager/Item/") + escapeToObjectPath(m_id), "org.deepin.ds.Dock.TaskManager.Item", this);
-    
-    connect(this, &AppItem::dockedChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
-    connect(this, &AppItem::itemWindowCountChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
+    connect(this, &AbstractItem::dockedChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
+    connect(this, &AbstractItem::windowsChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
+
+    connect(this, &AppItem::currentActiveWindowChanged, this, &AbstractItem::iconChanged);
 }
 
 AppItem::~AppItem()
@@ -36,9 +36,20 @@ AppItem::~AppItem()
     qCDebug(appitemLog()) << "destory appitem: " << m_id;
 }
 
+AbstractItem::ItemType AppItem::itemType() const
+{
+    return AbstractItem::AppType;
+}
+
 QString AppItem::id() const
 {
     return m_id;
+}
+
+QString AppItem::type() const
+{
+    return m_desktopfileParser && !m_desktopfileParser.isNull() ?
+        m_desktopfileParser->type() : "none";
 }
 
 QString AppItem::icon() const
@@ -70,7 +81,7 @@ QString AppItem::menus() const
     launchMenu["id"] = DOCK_ACTIN_LAUNCH;
     launchMenu["name"] = hasWindow() ?
                             isDesltopfileParserAvaliable ?  m_desktopfileParser->name() : m_windows.first()->title()
-                        :tr("open");
+                        :tr("Open");
 
     array.append(launchMenu);
 
@@ -99,7 +110,9 @@ QString AppItem::menus() const
         QJsonObject foreceQuit;
         foreceQuit["id"] = DOCK_ACTION_FORCEQUIT;
         foreceQuit["name"] = tr("Force Quit");
-        array.append(foreceQuit);
+        if (TaskManagerSettings::instance()->isAllowedForceQuit()) {
+            array.append(foreceQuit);
+        }
 
         QJsonObject closeAll;
         closeAll["id"] = DOCK_ACTION_CLOSEALL;
@@ -123,7 +136,7 @@ bool AppItem::isActive() const
     return m_currentActiveWindow && m_currentActiveWindow->isActive();
 }
 
-void AppItem::active()
+void AppItem::active() const
 {
     if (m_currentActiveWindow) {
         if (!isActive()) {
@@ -156,7 +169,21 @@ void AppItem::setDocked(bool docked)
     }
 }
 
-QStringList AppItem::windows() const
+void AppItem::handleClick(const QString& clickItem)
+{
+    if (clickItem.isEmpty()) {
+        if (m_windows.size() == 0) {
+            launch();
+        } else {
+            active();
+        }
+    } else {
+        handleMenu(clickItem);
+    }
+
+}
+
+QStringList AppItem::windows()
 {
     QStringList ret;
     for (auto window : m_windows) {
@@ -209,7 +236,7 @@ void AppItem::appendWindow(QPointer<AbstractWindow> window)
 {
     m_windows.append(window);
     window->setAppItem(QPointer<AppItem>(this));
-    Q_EMIT itemWindowCountChanged();
+    Q_EMIT windowsChanged();
 
     if (window->isActive() || m_windows.size() == 1) updateCurrentActiveWindow(window);
     connect(window.get(), &QObject::destroyed, this, &AppItem::onWindowDestroyed, Qt::UniqueConnection);
@@ -223,7 +250,17 @@ void AppItem::appendWindow(QPointer<AbstractWindow> window)
 
 void AppItem::setDesktopFileParser(QSharedPointer<DesktopfileAbstractParser> desktopfile)
 {
+    if (m_desktopfileParser == desktopfile) return;
+
+    if (m_desktopfileParser) disconnect(m_desktopfileParser.get());
+
     m_desktopfileParser = desktopfile;
+    connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::nameChanged, this, &AbstractItem::nameChanged);
+    connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::iconChanged, this, &AbstractItem::iconChanged);
+    connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::actionsChanged, this, &AbstractItem::menusChanged);
+    connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::dockedChanged, this, &AbstractItem::menusChanged);
+    connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::genericNameChanged, this, &AbstractItem::nameChanged);
+
     desktopfile->addAppItem(this);
 }
 
@@ -235,7 +272,7 @@ QPointer<DesktopfileAbstractParser> AppItem::getDesktopFileParser()
 void AppItem::removeWindow(QPointer<AbstractWindow> window)
 {
     m_windows.removeAll(window);
-    Q_EMIT itemWindowCountChanged();
+    Q_EMIT windowsChanged();
 
     if (m_currentActiveWindow.get() == window && m_windows.size() > 0) {
         updateCurrentActiveWindow(m_windows.last().get());
@@ -258,7 +295,6 @@ void AppItem::updateCurrentActiveWindow(QPointer<AbstractWindow> window)
 
     connect(m_currentActiveWindow.get(), &AbstractWindow::iconChanged, this, &AppItem::iconChanged);
 
-    Q_EMIT iconChanged();
     Q_EMIT currentActiveWindowChanged();
 }
 

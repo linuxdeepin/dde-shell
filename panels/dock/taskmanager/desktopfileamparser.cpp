@@ -29,9 +29,25 @@ static int pidfd_open(pid_t pid, uint flags)
 
 DS_BEGIN_NAMESPACE
 namespace dock {
+static QDBusServiceWatcher dbusWatcher(AM_DBUS_PATH, QDBusConnection::sessionBus(),
+                                                QDBusServiceWatcher::WatchForOwnerChange);
+
 DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
     : DesktopfileAbstractParser(id, parent)
 {
+    auto ifc = QDBusConnection::sessionBus().interface();
+    m_amIsAvaliable = ifc->isServiceRegistered(AM_DBUS_PATH);
+
+    connect(&dbusWatcher, &QDBusServiceWatcher::serviceRegistered, this, [this](){
+        m_amIsAvaliable = true;
+        Q_EMIT iconChanged();
+    });
+
+    connect(&dbusWatcher, &QDBusServiceWatcher::serviceUnregistered, this, [this](){
+        m_amIsAvaliable = false;
+        Q_EMIT iconChanged();
+    });
+
     qCDebug(amdesktopfileLog()) << "create a am desktopfile object: " << m_id;
     m_applicationInterface.reset(new Application(AM_DBUS_PATH, id2dbusPath(id), QDBusConnection::sessionBus(), this));
 }
@@ -43,6 +59,8 @@ DesktopFileAMParser::~DesktopFileAMParser()
 
 QString DesktopFileAMParser::id()
 {
+    if (!m_amIsAvaliable) return DesktopfileAbstractParser::id();
+
     if (m_id.isEmpty() && m_applicationInterface) {
         m_id = m_applicationInterface->iD();
     }
@@ -51,19 +69,8 @@ QString DesktopFileAMParser::id()
 
 QString DesktopFileAMParser::name()
 {
-    auto updateLocalName = [this]() {
-        QString currentLanguageCode = QLocale::system().name();
-        auto names = m_applicationInterface->name();
-        auto localeName = names.value(currentLanguageCode);
-        auto fallbackName = names.value(DEFAULT_KEY);
-        m_name = localeName.isEmpty() ? fallbackName : localeName;
-    };
-
+    if (!m_amIsAvaliable) return DesktopfileAbstractParser::name();
     if (m_name.isEmpty() && m_applicationInterface) {
-        connectToAmDBusSignal("nameChanged", [this, updateLocalName](){
-            updateLocalName();
-            Q_EMIT nameChanged();
-        });
         updateLocalName();
     }
     return m_name;
@@ -71,12 +78,10 @@ QString DesktopFileAMParser::name()
 
 QString DesktopFileAMParser::desktopIcon()
 {
+    if (!m_amIsAvaliable) return DesktopfileAbstractParser::desktopIcon();
+
     if(m_icon.isEmpty() && m_applicationInterface) {
-        connectToAmDBusSignal("iconsChanged", [this](){
-            m_icon = m_applicationInterface->icons().value(DESKTOP_ENTRY_ICON_KEY);
-            Q_EMIT iconChanged();
-        });
-        m_icon = m_applicationInterface->icons().value(DESKTOP_ENTRY_ICON_KEY);
+        updateDesktopIcon();
     }
 
     return m_icon;
@@ -84,19 +89,9 @@ QString DesktopFileAMParser::desktopIcon()
 
 QString DesktopFileAMParser::genericName()
 {
-    auto updateLocalGenericName = [this]() {
-        QString currentLanguageCode = QLocale::system().name();
-        auto genericNames = m_applicationInterface->genericName();
-        auto localeGenericName = genericNames.value(currentLanguageCode);
-        auto fallBackGenericName = genericNames.value(DEFAULT_KEY);
-        m_genericName = localeGenericName.isEmpty() ? fallBackGenericName : localeGenericName;
-    };
+    if (!m_amIsAvaliable) return DesktopfileAbstractParser::genericName();
 
     if(m_genericName.isEmpty() && m_applicationInterface) {
-        connectToAmDBusSignal("genericNameChanged",[updateLocalGenericName, this](){
-            updateLocalGenericName();
-            Q_EMIT genericNameChanged();
-        });
         updateLocalGenericName();
     }
 
@@ -110,24 +105,9 @@ std::pair<bool, QString> DesktopFileAMParser::isValied()
 
 QList<QPair<QString, QString>> DesktopFileAMParser::actions()
 {
-    auto updateActions = [this](){
-        QString currentLanguageCode = QLocale::system().name();
-        QList<QPair<QString, QString>> array;
-        auto actions = m_applicationInterface->actions();
-        auto actionNames = m_applicationInterface->actionName();
-        for (auto action : actions) {
-            auto localeName = actionNames.value(action).value(currentLanguageCode);
-            auto fallbackDefaultName = actionNames.value(action).value(DEFAULT_KEY);
-            array.append({action, localeName.isEmpty() ? fallbackDefaultName : localeName});
-        }
-        m_actions = array;
-    };
+    if (!m_amIsAvaliable) return DesktopfileAbstractParser::actions();
 
     if(m_actions.isEmpty() && m_applicationInterface) {
-        connectToAmDBusSignal("actionsChanged",[updateActions, this](){
-            updateActions();
-            Q_EMIT actionsChanged();
-        });
         updateActions();
     }
     return m_actions;
@@ -140,6 +120,8 @@ QString DesktopFileAMParser::id2dbusPath(const QString& id)
 
 QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
 {
+    if (!m_amIsAvaliable) return QString();
+
     auto pidfd = pidfd_open(window->pid(),0);
     auto res = DDBusSender().service("org.desktopspec.ApplicationManager1")
                                          .interface("org.desktopspec.ApplicationManager1")
@@ -160,14 +142,14 @@ QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
     return QString();
 }
 
-QString DesktopFileAMParser::type()
+QString DesktopFileAMParser::identifyType()
 {
-    return "am";
+    return QStringLiteral("amAPP");
 }
 
-QString DesktopFileAMParser::appType()
+QString DesktopFileAMParser::type()
 {
-    return type();
+    return identifyType();
 }
 
 void DesktopFileAMParser::launch()
@@ -185,16 +167,82 @@ void DesktopFileAMParser::requestQuit()
 
 }
 
-void DesktopFileAMParser::connectToAmDBusSignal(const QString& signalName, std::function<void(void)> handler)
+void DesktopFileAMParser::connectToAmDBusSignal(const QString& signalName, const char *slot)
 {
     QDBusConnection::sessionBus().connect(
         m_applicationInterface->service(),
         m_applicationInterface->path(),
-        m_applicationInterface->interface(),
-        signalName,
+        "org.freedesktop.DBus.Properties",
+        "PropertiesChanged",
+        "sa{sv}as",
         this,
-        SLOT(handler)
+        SLOT(onPropertyChanged(const QDBusMessage &))
     );
+}
+
+void DesktopFileAMParser::updateActions()
+{
+    m_actions.clear();
+
+    QString currentLanguageCode = QLocale::system().name();
+    QList<QPair<QString, QString>> array;
+    auto actions = m_applicationInterface->actions();
+    auto actionNames = m_applicationInterface->actionName();
+
+    for (auto action : actions) {
+        auto localeName = actionNames.value(action).value(currentLanguageCode);
+        auto fallbackDefaultName = actionNames.value(action).value(DEFAULT_KEY);
+        m_actions.append({action, localeName.isEmpty() ? fallbackDefaultName : localeName});
+    }
+}
+
+void DesktopFileAMParser::updateLocalName()
+{
+    QString currentLanguageCode = QLocale::system().name();
+    auto names = m_applicationInterface->name();
+    auto localeName = names.value(currentLanguageCode);
+    auto fallbackName = names.value(DEFAULT_KEY);
+    m_name = localeName.isEmpty() ? fallbackName : localeName;
+}
+
+void DesktopFileAMParser::updateDesktopIcon()
+{
+    m_icon = m_applicationInterface->icons().value(DESKTOP_ENTRY_ICON_KEY);
+}
+
+void DesktopFileAMParser::updateLocalGenericName()
+{
+    QString currentLanguageCode = QLocale::system().name();
+    auto genericNames = m_applicationInterface->genericName();
+    auto localeGenericName = genericNames.value(currentLanguageCode);
+    auto fallBackGenericName = genericNames.value(DEFAULT_KEY);
+    m_genericName = localeGenericName.isEmpty() ? fallBackGenericName : localeGenericName;
+}
+
+void DesktopFileAMParser::onPropertyChanged(const QDBusMessage &msg)
+{
+    QList<QVariant> arguments = msg.arguments();
+    if (3 != arguments.count())
+        return;
+
+    QString interfaceName = msg.arguments().at(0).toString();
+    if (interfaceName != QStringLiteral("org.desktopspec.ApplicationManager1.Application"))
+        return;
+
+    QVariantMap changedProps = qdbus_cast<QVariantMap>(arguments.at(1).value<QDBusArgument>());
+    if (changedProps.contains("Name")) {
+        updateLocalName();
+        Q_EMIT nameChanged();
+    } else if (changedProps.contains("Actions")) {
+        updateActions();
+        Q_EMIT actionsChanged();
+    } else if (changedProps.contains("GenericName")) {
+        updateLocalGenericName();
+        Q_EMIT genericNameChanged();
+    } else if (changedProps.contains("Name")) {
+        updateLocalName();
+        Q_EMIT nameChanged();
+    }
 }
 }
 DS_END_NAMESPACE

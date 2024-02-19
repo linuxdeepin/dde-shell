@@ -33,9 +33,9 @@ qt_add_dbus_interfaces(
 qt_add_dbus_adaptor(DBUS_INTERFACES
     ${CMAKE_CURRENT_SOURCE_DIR}/api/dbus/org.deepin.ds.dock.taskmanager.item.xml
     appitem.h
-    ds::dock::AppItem
-    appitemadaptor
-    AppItemAdaptor
+    ds::dock::AbstractItem
+    itemadaptor
+    ItemAdaptor
 )
 
 qt_add_dbus_adaptor(DBUS_INTERFACES
@@ -49,16 +49,16 @@ qt_add_dbus_adaptor(DBUS_INTERFACES
 add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     abstractwindow.h
     abstractwindowmonitor.h
+    abstractitem.h
+    abstractitem.cpp
     appitem.cpp
     appitem.h
-    appitemmodel.cpp
-    appitemmodel.h
+    itemmodel.cpp
+    itemmodel.h
     desktopfileabstractparser.cpp
     desktopfileabstractparser.h
     desktopfileamparser.cpp
     desktopfileamparser.h
-    desktopfilenoneparser.cpp
-    desktopfilenoneparser.h
     desktopfileparserfactory.h
     taskmanager.cpp
     taskmanager.h
@@ -99,4 +99,4 @@ if (BUILD_WITH_X11)
 endif(BUILD_WITH_X11)
 
 ds_install_package(PACKAGE org.deepin.ds.dock.taskmanager TARGET dock-taskmanager)
-dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.taskmanager.json dconfig/org.deepin.ds.dock.taskmanager.am.json)
+dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.taskmanager.json)

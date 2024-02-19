@@ -5,6 +5,7 @@
 #pragma once
 
 #include "dsglobal.h"
+#include "abstractitem.h"
 #include "abstractwindow.h"
 
 #include <QMap>
@@ -16,35 +17,32 @@ namespace dock {
 class TaskManager;
 class DesktopfileAbstractParser;
 
-class AppItem : public QObject
+class AppItem : public AbstractItem
 {
     Q_OBJECT
-    // indetifier
-    Q_PROPERTY(QString id READ id)
-    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
-    Q_PROPERTY(QString menus READ menus NOTIFY menusChanged)
-    Q_PROPERTY(QString icon READ icon NOTIFY iconChanged FINAL)
-    Q_PROPERTY(bool isActive READ isActive NOTIFY activeChanged)
-    Q_PROPERTY(bool isDocked READ isDocked WRITE setDocked NOTIFY dockedChanged)
-    Q_PROPERTY(QStringList windows READ windows NOTIFY itemWindowCountChanged)
 
 public:
     ~AppItem();
 
-    QString id() const;
-    QString icon() const;
-    QString name() const;
-    QString menus() const;
+    ItemType itemType() const override;
+
+    QString id() const override;
+    QString type() const override;
+    QString icon() const override;
+    QString name() const override;
+    QString menus() const override;
 
     QString desktopfileID() const;
 
-    bool isActive() const;
-    void active();
+    bool isActive() const override;
+    void active() const override;
 
-    bool isDocked() const;
-    void setDocked(bool docked);
+    bool isDocked() const override;
+    void setDocked(bool docked) override;
 
-    QStringList windows() const;
+    void handleClick(const QString& clickItem) override;
+
+    QStringList windows() override;
 
     bool hasWindow() const;
 
@@ -63,14 +61,6 @@ protected:
     AppItem(QString id, QObject *parent = nullptr);
 
 Q_SIGNALS:
-    void nameChanged();
-    void iconChanged();
-    void menusChanged();
-    void genericNameChanged();
-
-    void activeChanged();
-    void dockedChanged();
-    void itemWindowCountChanged();
     void currentActiveWindowChanged();
 
 private:

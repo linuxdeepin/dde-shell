@@ -31,7 +31,7 @@ public:
 
     [[nodiscard]] static QSharedPointer<DesktopfileAbstractParser> createById(const QString& id, const QString& type)
     {
-        if (type == First::type()) {
+        if (type == First::identifyType()) {
             return DesktopfileParserFactory<First>::createById(id);
         }
 

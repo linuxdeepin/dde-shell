@@ -22,12 +22,12 @@
 			"permissions": "readwrite",
 			"visibility": "private"
 		},
-		"Docked_Apps": {
-			"value": ["{type: am, id: dde-file-manager}", "{type: am, id: dde-control-center}"],
+		"Docked_Items": {
+			"value": ["id: dde-file-manager,type: amAPP", "id: dde-control-center,type: amAPP"],
 			"serial": 0,
 			"flags": [],
-			"name": "Docked_Apps",
-			"name[zh_CN]": "已固定应用",
+			"name": "Docked_Items",
+			"name[zh_CN]": "已固定项目",
 			"description": "The default apps which is docked when dock is started.",
 			"permissions": "readwrite",
 			"visibility": "private"

@@ -31,11 +31,11 @@ public:
     virtual QString desktopIcon() override;
     virtual QList<QPair<QString, QString>> actions() override;
     virtual QString genericName() override;
-    virtual QString appType() override;
+    virtual QString type() override;
 
     virtual std::pair<bool, QString> isValied() override;
 
-    static QString type();
+    static QString identifyType();
 
 private:
     friend class DesktopfileParserFactory<DesktopFileAMParser>;
@@ -45,10 +45,19 @@ private:
 
 private:
     QString id2dbusPath(const QString& id);
-    void connectToAmDBusSignal(const QString& propertyName, std::function<void(void)> handler);
+    void connectToAmDBusSignal(const QString& propertyName, const char* slot);
+
+private Q_SLOTS:
+    void updateActions();
+    void updateLocalName();
+    void updateDesktopIcon();
+    void updateLocalGenericName();
+
+    void onPropertyChanged(const QDBusMessage &msg);
 
 private:
-    QString m_id;
+    inline static bool m_amIsAvaliable;
+
     QString m_name;
     QString m_icon;
     QString m_genericName;

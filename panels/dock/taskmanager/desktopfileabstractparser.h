@@ -4,7 +4,9 @@
 
 #pragma once
 
+#include "appitem.h"
 #include "dsglobal.h"
+#include "desktopfileparserfactory.h"
 
 #include <QList>
 #include <QObject>
@@ -14,7 +16,8 @@
 DS_BEGIN_NAMESPACE
 
 namespace dock {
-class AppItem;
+class AbstractItem;
+class AbstractWindow;
 
 class DesktopfileAbstractParser : public QObject
 {
@@ -28,20 +31,21 @@ class DesktopfileAbstractParser : public QObject
     Q_PROPERTY(QList<QPair<QString, QString>> actions READ actions NOTIFY actionsChanged)
 
 public:
-    DesktopfileAbstractParser(QString desktopid, QObject* parent = nullptr) : QObject(parent) {};
+    DesktopfileAbstractParser(QString desktopid, QObject* parent = nullptr);
+    ~DesktopfileAbstractParser();
 
-    virtual QString id() = 0;
-    virtual QString name() = 0;
-    virtual QList<QPair<QString, QString>> actions() = 0;
-    virtual QString genericName() = 0;
-    virtual QString desktopIcon() = 0;
+    virtual QString id();
+    virtual QString name();
+    virtual QList<QPair<QString, QString>> actions();
+    virtual QString genericName();
+    virtual QString desktopIcon();
     
-    virtual std::pair<bool, QString> isValied() = 0;
+    virtual std::pair<bool, QString> isValied();
 
-    virtual void launch() = 0;
-    virtual void launchWithAction(const QString& action) = 0;
-    virtual void requestQuit() = 0;
-    virtual QString appType() = 0;
+    virtual void launch();
+    virtual void launchWithAction(const QString& action);
+    virtual void requestQuit();
+    virtual QString type();
 
     // State in dock
     virtual bool isDocked() final;
@@ -49,6 +53,11 @@ public:
 
     virtual void addAppItem(QPointer<AppItem> item) final;
     virtual QPointer<AppItem> getAppItem() final;
+    static QString identifyType();
+
+private:
+    friend class DesktopfileParserFactory<DesktopfileAbstractParser>;
+    static QString identifyWindow(QPointer<AbstractWindow> window);
 
 Q_SIGNALS:
     void nameChanged();
@@ -59,6 +68,7 @@ Q_SIGNALS:
 
 protected:
     QList<QPointer<AppItem>> m_appitems;
+    QString m_id;
 };
 }
 DS_END_NAMESPACE

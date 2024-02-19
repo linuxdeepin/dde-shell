@@ -22,8 +22,7 @@ Item {
     required property list<string> windows
     required property int visualIndex
 
-    signal clickItem(itemId: string)
-    signal clickItemMenu(itemId: string, menuId: string)
+    signal clickItem(itemId: string, menuId: string)
 
     Drag.active: mouseArea.drag.active
     Drag.source: root
@@ -75,7 +74,7 @@ Item {
                 delegate: LP.MenuItem {
                     text: modelData.name
                     onTriggered: {
-                        root.clickItemMenu(root.itemId, modelData.id)
+                        root.clickItem(root.itemId, modelData.id)
                     }
                 }
                 onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
@@ -108,7 +107,7 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 MenuHelper.openMenu(contextMenu)
             } else {
-                root.clickItem(root.itemId)
+                root.clickItem(root.itemId, "")
             }
         }
 
