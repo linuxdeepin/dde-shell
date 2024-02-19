@@ -7,12 +7,13 @@
 #include "dsglobal.h"
 
 #include <QAbstractListModel>
+#include <qjsonarray.h>
 
 DS_BEGIN_NAMESPACE
 namespace dock {
-class AppItem;
+class AbstractItem;
 
-class AppItemModel : public QAbstractListModel
+class ItemModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
@@ -23,37 +24,37 @@ public:
         ActiveRole,
         MenusRole,
         DockedRole,
+        // data type
         WindowsRole,
+        DesktopFilesIconsRole,
+        DockedDirRole,
     };
     Q_ENUM(Roles)
 
-    static AppItemModel* instance();
+    static ItemModel* instance();
     Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
     Q_INVOKABLE QVariant data(const QModelIndex &index, int role = ItemIdRole) const Q_DECL_OVERRIDE;
     Q_INVOKABLE void moveTo(const QString &id, int index);
 
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
-    // for AppItemFactory to get already created AppItem;
-    QPointer<AppItem> getAppItemById(const QString& id) const;
-
-    // for AppItemFactory to add new AppItem
-    void addAppItem(QPointer<AppItem> item);
+    QPointer<AbstractItem> getItemById(const QString& id) const;
+    void addItem(QPointer<AbstractItem> item);
+    QJsonArray dumpDockedItems() const;
 
 Q_SIGNALS:
-    void appItemAdded();
-    void appItemRemoved();
-    void dockedItemSequenceChanged();
+    void itemAdded();
+    void itemRemoved();
 
 private Q_SLOTS:
-    void onAppItemDestroyed();
-    void onAppItemChanged();
+    void onItemDestroyed();
+    void onItemChanged();
 
 private:
-    explicit AppItemModel(QObject* parent = nullptr);
+    explicit ItemModel(QObject* parent = nullptr);
 
     int m_recentSize;
-    QList<QPointer<AppItem>> m_appItems;
+    QList<QPointer<AbstractItem>> m_items;
 };
 }
 DS_END_NAMESPACE

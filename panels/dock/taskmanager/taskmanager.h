@@ -6,7 +6,7 @@
 
 #include "applet.h"
 #include "dsglobal.h"
-#include "appitemmodel.h"
+#include "itemmodel.h"
 #include "abstractwindow.h"
 #include "abstractwindowmonitor.h"
 
@@ -19,7 +19,7 @@ class AppItem;
 class TaskManager : public DApplet
 {
     Q_OBJECT
-    Q_PROPERTY(AppItemModel* dataModel READ dataModel NOTIFY appItemsChanged)
+    Q_PROPERTY(ItemModel* dataModel READ dataModel NOTIFY itemsChanged)
 
     Q_PROPERTY(bool windowSplit READ windowSplit NOTIFY windowSplitChanged)
     Q_PROPERTY(bool allowForceQuit READ allowForceQuit NOTIFY allowedForceQuitChanged)
@@ -29,7 +29,7 @@ public:
 
     QStringList getDockedItems();
 
-    AppItemModel* dataModel();
+    ItemModel* dataModel();
 
     virtual bool init() override;
     virtual bool load() override;
@@ -37,13 +37,12 @@ public:
     bool windowSplit();
     bool allowForceQuit();
 
-    Q_INVOKABLE void clickItem(const QString& itemid);
-    Q_INVOKABLE void clickItemMenu(const QString& itemId, const QString& menuId);
+    Q_INVOKABLE void clickItem(const QString& itemid, const QString& menuId);
     Q_INVOKABLE void showWindowsPreview(QStringList windowStrIds, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
     Q_INVOKABLE void hideWindowsPreview();
 
 Q_SIGNALS:
-    void appItemsChanged();
+    void itemsChanged();
     void windowSplitChanged();
     void allowedForceQuitChanged();
 

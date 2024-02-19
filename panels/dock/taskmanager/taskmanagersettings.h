@@ -37,20 +37,20 @@ public:
 
 private:
     explicit TaskManagerSettings(QObject *parent = nullptr);
-    inline void dockedDesktopFilesPersisted();
-    inline void loadDockedDesktopFiles();
+    inline void dockedItemsPersisted();
+    inline void loadDockedItems();
 
 Q_SIGNALS:
     void allowedForceQuitChanged();
     void windowSplitChanged();
-    void dockedDesktopFilesChanged();
+    void dockedItemsChanged();
 
 private:
     DConfig* m_taskManagerDconfig;
 
     bool m_allowForceQuit;
     bool m_windowSplit;
-    QJsonArray m_dockedApps;
+    QJsonArray m_dockedItems;
 };
 }
 DS_END_NAMESPACE

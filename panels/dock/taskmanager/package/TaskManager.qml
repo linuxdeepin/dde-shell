@@ -67,7 +67,6 @@ AppletItem {
                     visualIndex: delegateRoot.visualIndex
                     Component.onCompleted: {
                         clickItem.connect(taskmanager.Applet.clickItem)
-                        clickItemMenu.connect(taskmanager.Applet.clickItemMenu)
                     }
                     anchors.fill: parent // This is mandatory for draggable item center in drop area
                 }

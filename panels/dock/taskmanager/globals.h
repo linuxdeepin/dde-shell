@@ -20,7 +20,7 @@ static inline const QString DOCK_ACTION_DOCK = "dock-action-dock";
 
 static inline const QString TASKMANAGER_ALLOWFOCEQUIT_KEY = "Allow_Force_Quit";
 static inline const QString TASKMANAGER_WINDOWSPLIT_KEY = "Window_Split";
-static inline const QString TASKMANAGER_DOCKEDAPPIDS_KEY = "Docked_Apps";
+static inline const QString TASKMANAGER_DOCKEDITEMS_KEY = "Docked_Items";
 
 // copy from application-manager
 

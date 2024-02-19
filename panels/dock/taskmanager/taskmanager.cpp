@@ -6,15 +6,14 @@
 
 #include "dsglobal.h"
 #include "globals.h"
+#include "itemmodel.h"
 #include "taskmanager.h"
-#include "appitemmodel.h"
 #include "pluginfactory.h"
 #include "abstractwindow.h"
 #include "taskmanageradaptor.h"
 #include "desktopfileamparser.h"
 #include "taskmanagersettings.h"
 #include "waylandwindowmonitor.h"
-#include "desktopfilenoneparser.h"
 #include "abstractwindowmonitor.h"
 #include "desktopfileparserfactory.h"
 
@@ -28,9 +27,10 @@
 Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtInfoMsg)
 
 #define Settings TaskManagerSettings::instance()
+
 #define DESKTOPFILEFACTORY DesktopfileParserFactory<    \
                             DesktopFileAMParser,        \
-                            DesktopFileNoneParser       \
+                            DesktopfileAbstractParser   \
                         >
 
 DS_BEGIN_NAMESPACE
@@ -49,8 +49,8 @@ TaskManager::TaskManager(QObject* parent)
     qDBusRegisterMetaType<PropMap>();
     qDBusRegisterMetaType<QDBusObjectPath>();
 
-    connect(AppItemModel::instance(), &AppItemModel::appItemAdded, this, &TaskManager::appItemsChanged);
-    connect(AppItemModel::instance(), &AppItemModel::appItemRemoved, this, &TaskManager::appItemsChanged);
+    connect(ItemModel::instance(), &ItemModel::itemAdded, this, &TaskManager::itemsChanged);
+    connect(ItemModel::instance(), &ItemModel::itemRemoved, this, &TaskManager::itemsChanged);
 
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
@@ -81,16 +81,14 @@ bool TaskManager::init()
     QDBusConnection::sessionBus().registerObject("/org/deepin/ds/Dock/TaskManager", "org.deepin.ds.Dock.TaskManager", this);
 
     DApplet::init();
-    connect(AppItemModel::instance(), &AppItemModel::appItemAdded, this, &TaskManager::appItemsChanged);
-    connect(AppItemModel::instance(), &AppItemModel::appItemRemoved, this, &TaskManager::appItemsChanged);
     if (m_windowMonitor)
         m_windowMonitor->start();
     return true;
 }
 
-AppItemModel* TaskManager::dataModel()
+ItemModel* TaskManager::dataModel()
 {
-    return AppItemModel::instance();
+    return ItemModel::instance();
 }
 
 void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
@@ -108,27 +106,17 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     appitem->appendWindow(window);
     appitem->setDesktopFileParser(desktopfile);
 
-    AppItemModel::instance()->addAppItem(appitem);
+    ItemModel::instance()->addItem(appitem);
 }
 
-void TaskManager::clickItem(const QString& itemId)
+void TaskManager::clickItem(const QString& itemId, const QString& menuId)
 {
-    qCInfo(taskManagerLog) << "Item" << itemId << "is clicked.";
-    auto appitem = AppItemModel::instance()->getAppItemById(itemId);
-    if (appitem->hasWindow())
-        appitem->active();
-    else
-        appitem->launch();
-}
+    auto item = ItemModel::instance()->getItemById(itemId);
+    if(!item) return;
 
-void TaskManager::clickItemMenu(const QString& itemId, const QString& menuId)
-{
-    qCInfo(taskManagerLog) << "Item" << itemId << "menu" << menuId << "is clicked.";
-    auto appitem = AppItemModel::instance()->getAppItemById(itemId);
-    if(!appitem) return;
     if (menuId == DOCK_ACTION_ALLWINDOW) {
         QList<uint32_t> windowIds;
-        auto windows = appitem->windows();
+        auto windows = item->windows();
         std::transform(windows.begin(), windows.end(), std::back_inserter(windowIds), [](const QString &windowId) {
             return windowId.toUInt();
         });
@@ -136,7 +124,8 @@ void TaskManager::clickItemMenu(const QString& itemId, const QString& menuId)
         m_windowMonitor->presentWindows(windowIds);
         return;
     }
-    if (appitem) appitem->handleMenu(menuId);
+
+    item->handleClick(menuId);
 }
 
 void TaskManager::showWindowsPreview(QStringList windowStrIds, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
@@ -157,6 +146,7 @@ void TaskManager::hideWindowsPreview()
 
 void TaskManager::loadDockedAppItems()
 {
+    // TODO: add support for group and dir type
     for (const auto& appValueRef : TaskManagerSettings::instance()->dockedDesktopFiles()) {
         auto app = appValueRef.toObject();
         auto appid = app.value("id").toString();
@@ -165,7 +155,7 @@ void TaskManager::loadDockedAppItems()
 
         auto appitem = new AppItem(appid);
         appitem->setDesktopFileParser(desktopfile);
-        AppItemModel::instance()->addAppItem(appitem);
+        ItemModel::instance()->addItem(appitem);
     }
 }
 

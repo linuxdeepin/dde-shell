@@ -14,9 +14,7 @@
 
 #include <string>
 #include <unordered_map>
-#include <yaml-cpp/exceptions.h>
-#include <yaml-cpp/node/node.h>
-#include <yaml-cpp/node/parse.h>
+
 #include <yaml-cpp/yaml.h>
 
 DS_BEGIN_NAMESPACE
@@ -42,7 +40,7 @@ TaskManagerSettings* TaskManagerSettings::instance()
 
 TaskManagerSettings::TaskManagerSettings(QObject *parent)
     : QObject(parent)
-    , m_taskManagerDconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.taskmanager", QString(), this))
+    , m_taskManagerDconfig(DConfig::create(QStringLiteral("org.deepin.ds.dock"), QStringLiteral("org.deepin.ds.dock.taskmanager"), QString(), this))
 {
     connect(m_taskManagerDconfig, &DConfig::valueChanged, this, [this](const QString &key){
         if (TASKMANAGER_ALLOWFOCEQUIT_KEY == key) {
@@ -51,15 +49,15 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
         } else if (TASKMANAGER_WINDOWSPLIT_KEY == key) {
             m_windowSplit = enableStr2Bool(m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toString());
             Q_EMIT windowSplitChanged();
-        } else if (TASKMANAGER_DOCKEDAPPIDS_KEY == key) {
-            loadDockedDesktopFiles();
-            Q_EMIT dockedDesktopFilesChanged();
+        } else if (TASKMANAGER_DOCKEDITEMS_KEY == key) {
+            loadDockedItems();
+            Q_EMIT dockedItemsChanged();
         }
     });
 
     m_allowForceQuit = enableStr2Bool(m_taskManagerDconfig->value(TASKMANAGER_ALLOWFOCEQUIT_KEY).toString());
     m_windowSplit = enableStr2Bool(m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toString());
-    loadDockedDesktopFiles();
+    loadDockedItems();
 }
 
 bool TaskManagerSettings::isAllowedForceQuit()
@@ -84,11 +82,11 @@ void TaskManagerSettings::setWindowSplit(bool split)
     m_taskManagerDconfig->setValue(TASKMANAGER_WINDOWSPLIT_KEY, bool2EnableStr(m_windowSplit));
 }
 
-void TaskManagerSettings::dockedDesktopFilesPersisted()
+void TaskManagerSettings::dockedItemsPersisted()
 {
     QStringList list;
 
-    for (auto dockedDesktopFile : m_dockedApps) {
+    for (auto dockedDesktopFile : m_dockedItems) {
         if (!dockedDesktopFile.isObject()) continue;
         YAML::Node node;
         auto dockedDesktopFileObj = dockedDesktopFile.toObject();
@@ -99,14 +97,14 @@ void TaskManagerSettings::dockedDesktopFilesPersisted()
         list << str.replace("\n",",");
     }
 
-    m_taskManagerDconfig->setValue(TASKMANAGER_DOCKEDAPPIDS_KEY, list);
+    m_taskManagerDconfig->setValue(TASKMANAGER_DOCKEDITEMS_KEY, list);
 }
 
-void TaskManagerSettings::loadDockedDesktopFiles()
+void TaskManagerSettings::loadDockedItems()
 {
-    while (!m_dockedApps.isEmpty()) m_dockedApps.removeLast();
+    while (!m_dockedItems.isEmpty()) m_dockedItems.removeLast();
 
-    auto dcokedDesktopFilesStrList = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDAPPIDS_KEY).toStringList();
+    auto dcokedDesktopFilesStrList = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDITEMS_KEY).toStringList();
     foreach(auto dcokedDesktopFilesStr, dcokedDesktopFilesStrList) {
         YAML::Node node;
         try {
@@ -116,41 +114,42 @@ void TaskManagerSettings::loadDockedDesktopFiles()
         }
 
         if (!node.IsMap()) continue;
-        auto dockedDesktopFile = QJsonObject();
+        auto dockedItem = QJsonObject();
         for (auto it = node.begin(); it != node.end(); ++it) {
             auto key = it->first.as<std::string>();
             auto value = it->second.as<std::string>();
-            dockedDesktopFile[QString::fromStdString(key)] = QString::fromStdString(value);
+            dockedItem[QString::fromStdString(key)] = QString::fromStdString(value);
         }
-        m_dockedApps.append(dockedDesktopFile);
+        m_dockedItems.append(dockedItem);
     }
 }
 
-void TaskManagerSettings::setDockedDesktopFiles(QJsonArray desktopfiles)
+void TaskManagerSettings::setDockedDesktopFiles(QJsonArray items)
 {
-    m_dockedApps = desktopfiles;
-    dockedDesktopFilesPersisted();
+    m_dockedItems = items;
+    dockedItemsPersisted();
 }
 
-void TaskManagerSettings::appnedDockedDesktopfiles(QJsonObject desktopfile)
+void TaskManagerSettings::appnedDockedDesktopfiles(QJsonObject item)
 {
-    m_dockedApps.append(desktopfile);
-    dockedDesktopFilesPersisted();
+    m_dockedItems.append(item);
+    dockedItemsPersisted();
 }
 
 void TaskManagerSettings::removeDockedDesktopfile(QJsonObject desktopfile)
 {
-    for (int i = 0; i < m_dockedApps.count(); i++) {
-        if (m_dockedApps.at(i) == desktopfile) {
-            m_dockedApps.removeAt(i);
+    for (int i = 0; i < m_dockedItems.count(); i++) {
+        if (m_dockedItems.at(i) == desktopfile) {
+            m_dockedItems.removeAt(i);
             return;
         }
     }
+    dockedItemsPersisted();
 }
 
 QJsonArray TaskManagerSettings::dockedDesktopFiles()
 {
-    return m_dockedApps;
+    return m_dockedItems;
 }
 
 }
