@@ -170,6 +170,9 @@ uint DockPanel::dockSize()
 
 void DockPanel::setDockSize(uint size)
 {
+    if (size > MAX_DOCK_SIZE || size < MIN_DOCK_SIZE) {
+        return;
+    }
     switch (displayMode()) {
         case Fashion: {
             DockSettings::instance()->setWindowSizeFashion(size);
