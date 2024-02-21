@@ -234,6 +234,83 @@ Window {
             }
         }
     }
+    MouseArea {
+        property int heightPre: 0;
+        property int widthPre: 0;
+        cursorShape: {
+          if (Panel.position == Dock.Top || Panel.position == Dock.Bottom) {
+              return Qt.SizeVerCursor
+          }
+          return Qt.SizeHorCursor
+        }
+        anchors.top: {
+            if (Panel.position == Dock.Top) {
+                return undefined
+            }
+            return parent.top
+        }
+        anchors.bottom: {
+            if (Panel.position == Dock.Bottom) {
+                return undefined
+            }
+            return parent.bottom
+        }
+        anchors.right: {
+            if (Panel.position == Dock.Right) {
+                return undefined
+            }
+            return parent.right
+        }
+        anchors.left: {
+            if (Panel.position == Dock.Left) {
+                return undefined
+            }
+            return parent.left
+        }
+        height: {
+            if (Panel.position == Dock.Left || Panel.position == Dock.Right) {
+                return undefined
+            }
+            return 5
+        }
+        width: {
+            if (Panel.position == Dock.Top || Panel.position == Dock.Bottom) {
+                return undefined
+            }
+            return 5
+        }
+        onPressed:function(mouse) {
+            heightPre = mouse.y
+            widthPre = mouse.x
+        }
+        onPositionChanged:function(mouse) {
+            var yChange = mouse.y - heightPre
+            var xChange = mouse.x - widthPre
+            if (Panel.position == Dock.Bottom) {
+                Applet.dockSize -= yChange
+            } else if (Panel.position == Dock.Top) {
+                Applet.dockSize += yChange
+            } else if (Panel.position == Dock.Left) {
+                Applet.dockSize += xChange
+            } else {
+                Applet.dockSize -= xChange
+            }
+        }
+        onReleased:function(mouse) {
+            var yChange = mouse.y - mouse_a.heightPre
+            var xChange = mouse.x - mouse_a.widthPre
+            if (Panel.position == Dock.Bottom) {
+                Applet.dockSize -= yChange
+            } else if (Panel.position == Dock.Top) {
+                Applet.dockSize += yChange
+            } else if (Panel.position == Dock.Left) {
+                Applet.dockSize += xChange
+            } else {
+                Applet.dockSize -= xChange
+            }
+        }
+    }
+
 
     function position2Anchors(position) {
         switch (position) {
