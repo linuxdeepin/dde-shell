@@ -31,6 +31,7 @@ AppletItem {
         model: DelegateModel {
             id: visualModel
             model: taskmanager.Applet.dataModel
+            property int tmpIndex: 0
             delegate: DropArea {
                 id: delegateRoot
                 required property bool active
@@ -44,12 +45,19 @@ AppletItem {
                 implicitHeight: dockSize
 
                 onEntered: function(drag) {
+                    visualModel.tmpIndex = app.visualIndex
                     visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)
                 }
 
                 onDropped: function(drop) {
                     drop.accept()
                     taskmanager.Applet.dataModel.moveTo(drop.source.itemId, visualIndex)
+                }
+                onExited : {
+                    if (delegateRoot.containsDrag) {
+                        var drop = delegateRoot.drag
+                        taskmanager.Applet.dataModel.moveTo(drag.source.itemId, visualModel.tmpIndex)
+                    }
                 }
 
                 property int visualIndex: DelegateModel.itemsIndex
