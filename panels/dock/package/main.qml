@@ -264,8 +264,8 @@ Window {
             }
         }
         onReleased:function(mouse) {
-            var yChange = mouse.y - mouse_a.oldMouseY
-            var xChange = mouse.x - mouse_a.oldMouseX
+            var yChange = mouse.y - oldMouseY
+            var xChange = mouse.x - oldMouseX
             if (Panel.position == Dock.Bottom) {
                 Applet.dockSize -= yChange
             } else if (Panel.position == Dock.Top) {
