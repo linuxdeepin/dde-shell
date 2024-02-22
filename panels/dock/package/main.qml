@@ -235,57 +235,24 @@ Window {
         }
     }
     MouseArea {
-        property int heightPre: 0;
-        property int widthPre: 0;
+        id: dragArea
+        property int oldMouseY: 0;
+        property int oldMouseX: 0;
+  
         cursorShape: {
-          if (Panel.position == Dock.Top || Panel.position == Dock.Bottom) {
-              return Qt.SizeVerCursor
-          }
-          return Qt.SizeHorCursor
-        }
-        anchors.top: {
-            if (Panel.position == Dock.Top) {
-                return undefined
-            }
-            return parent.top
-        }
-        anchors.bottom: {
-            if (Panel.position == Dock.Bottom) {
-                return undefined
-            }
-            return parent.bottom
-        }
-        anchors.right: {
-            if (Panel.position == Dock.Right) {
-                return undefined
-            }
-            return parent.right
-        }
-        anchors.left: {
-            if (Panel.position == Dock.Left) {
-                return undefined
-            }
-            return parent.left
-        }
-        height: {
-            if (Panel.position == Dock.Left || Panel.position == Dock.Right) {
-                return undefined
-            }
-            return 5
-        }
-        width: {
             if (Panel.position == Dock.Top || Panel.position == Dock.Bottom) {
-                return undefined
+                return Qt.SizeVerCursor
             }
-            return 5
+            return Qt.SizeHorCursor
         }
+
         onPressed:function(mouse) {
-            heightPre = mouse.y
-            widthPre = mouse.x
+            oldMouseY = mouse.y
+            oldMouseX = mouse.x
         }
         onPositionChanged:function(mouse) {
-            var yChange = mouse.y - heightPre
-            var xChange = mouse.x - widthPre
+            var yChange = mouse.y - oldMouseY
+            var xChange = mouse.x - oldMouseX
             if (Panel.position == Dock.Bottom) {
                 Applet.dockSize -= yChange
             } else if (Panel.position == Dock.Top) {
@@ -297,8 +264,8 @@ Window {
             }
         }
         onReleased:function(mouse) {
-            var yChange = mouse.y - mouse_a.heightPre
-            var xChange = mouse.x - mouse_a.widthPre
+            var yChange = mouse.y - mouse_a.oldMouseY
+            var xChange = mouse.x - mouse_a.oldMouseX
             if (Panel.position == Dock.Bottom) {
                 Applet.dockSize -= yChange
             } else if (Panel.position == Dock.Top) {
@@ -309,8 +276,65 @@ Window {
                 Applet.dockSize -= xChange
             }
         }
+
+        function anchorToTop() {
+            anchors.top = undefined
+            anchors.bottom = parent.bottom
+            anchors.left = parent.left
+            anchors.right = parent.right
+            dragArea.height = 5
+        }
+        function anchorToBottom() {
+            anchors.bottom = undefined
+            anchors.top = parent.top
+            anchors.left = parent.left
+            anchors.right = parent.right
+            dragArea.height = 5
+        }
+        function anchorToLeft() {
+            anchors.left = undefined
+            anchors.right = parent.right
+            anchors.bottom = parent.bottom
+            anchors.top = parent.top
+            dragArea.width = 5
+        }
+        function anchorToRight() {
+            anchors.right = undefined
+            anchors.left = parent.left
+            anchors.bottom = parent.bottom
+            anchors.top = parent.top
+            dragArea.width = 5
+        }
+
     }
 
+    function changeDragAreaAnchor() {
+        switch(Panel.position) {
+        case Dock.Top: {
+            dragArea.anchorToTop()
+            return
+        }
+        case Dock.Bottom: {
+            dragArea.anchorToBottom()
+            return
+        }
+        case Dock.Left: {
+            dragArea.anchorToLeft()
+            return
+        }
+        case Dock.Right:{
+            dragArea.anchorToRight()
+            return
+        }
+        }
+    }
+
+    Connections {
+        function onPositionChanged() {
+            changeDragAreaAnchor()
+        }
+        target: Panel
+    }
 
     function position2Anchors(position) {
         switch (position) {
@@ -346,5 +370,7 @@ Window {
         DockCompositor.dockColorTheme = Qt.binding(function(){
             return Panel.colorTheme
         })
+
+        changeDragAreaAnchor()
     }
 }
