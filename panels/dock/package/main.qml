@@ -19,8 +19,9 @@ Window {
     visible: true
     property bool useColumnLayout: Applet.position % 2
 
-    width: Applet.position % 2 ? Applet.dockSize :  Applet.dockSize
-    height: Applet.position % 2 ? Applet.dockSize :  Applet.dockSize
+    // NOTE: -1 means not set its size, follow the platform size
+    width: Panel.position == Dock.Top || Panel.position == Dock.Bottom ? -1 : Applet.dockSize
+    height: Panel.position == Dock.Left || Panel.position == Dock.Right ? -1 : Applet.dockSize
     color: "transparent"
 
     DLayerShellWindow.anchors: position2Anchors(Applet.position)
