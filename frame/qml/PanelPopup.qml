@@ -10,6 +10,8 @@ Item {
     id: control
     visible: false
     default property alias popupContent: popup.contentChildren
+    Panel.popupWindow.width: control.width
+    Panel.popupWindow.height: control.height
     function open()
     {
         var window = Panel.popupWindow
