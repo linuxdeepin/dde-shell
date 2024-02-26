@@ -11,6 +11,8 @@ Item {
     visible: false
     default property alias toolTipContent: toolTip.contentChildren
     property alias text: toolTip.text
+    Panel.toolTipWindow.width: control.width
+    Panel.toolTipWindow.height: control.height
     onVisibleChanged: {
         if (visible) {
             open()
