@@ -71,6 +71,10 @@ int main(int argc, char *argv[], char *envp[])
 
     QString plugin = parser.value(pluginOption);
 
+    const QDir shellDir(QString("%1/../../../../plugins/").arg(QCoreApplication::applicationDirPath()));
+    if (shellDir.exists()) {
+        QCoreApplication::addLibraryPath(shellDir.absolutePath());
+    }
     QPluginLoader* pluginLoader = new QPluginLoader(plugin, &app);
     const QJsonObject &meta = pluginLoader->metaData().value("MetaData").toObject();
     const QString &pluginApi = meta.value("api").toString();
