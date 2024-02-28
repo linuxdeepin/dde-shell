@@ -5,13 +5,13 @@
 #pragma once
 
 #include "abstractwindow.h"
+#include "appitem.h"
 #include "dsglobal.h"
 #include "x11window.h"
+#include "x11preview.h"
 #include "abstractwindowmonitor.h"
 
-#include <qpointer.h>
-#include <qtmetamacros.h>
-#include <thread>
+#include <cstdint>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
@@ -38,8 +38,10 @@ public:
 
     virtual QPointer<AbstractWindow> getWindowByWindowId(ulong windowId) override;
     virtual void presentWindows(QList<uint32_t> windows) override;
-    virtual void showWindowsPreview(QList<uint32_t> windowsId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
-    virtual void hideWindowsPreview() override;
+    virtual void showItemPreview(const QPointer<AppItem> &item, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
+    virtual void hideItemPreview() override;
+    void previewWindow(uint32_t winId);
+    void cancelPreviewWindow();
 
 Q_SIGNALS:
     void windowMapped(xcb_window_t window);
@@ -59,6 +61,7 @@ private:
 private:
     xcb_window_t m_rootWindow;
     QScopedPointer<XcbEventFilter> m_xcbEventFilter;
+    QScopedPointer<X11WindowPreviewContainer> m_windowPreview;
     QHash<xcb_window_t, QSharedPointer<X11Window>> m_windows;
 };
 }

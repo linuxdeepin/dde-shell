@@ -38,8 +38,8 @@ public:
     bool allowForceQuit();
 
     Q_INVOKABLE void clickItem(const QString& itemid, const QString& menuId);
-    Q_INVOKABLE void showWindowsPreview(QStringList windowStrIds, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
-    Q_INVOKABLE void hideWindowsPreview();
+    Q_INVOKABLE void showItemPreview(const QString& itemId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    Q_INVOKABLE void hideItemPreview();
 
 Q_SIGNALS:
     void itemsChanged();

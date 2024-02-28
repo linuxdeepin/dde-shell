@@ -2,14 +2,17 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "appitem.h"
 #include "dsglobal.h"
 #include "x11utils.h"
 #include "x11window.h"
+#include "x11preview.h"
 #include "abstractwindow.h"
 #include "x11windowmonitor.h"
 #include "abstractwindowmonitor.h"
 
 #include <memory>
+
 #include <thread>
 #include <cstdint>
 #include <iterator>
@@ -20,6 +23,7 @@
 #include <DDBusSender>
 
 #include <QPointer>
+#include <QWindow>
 #include <QGuiApplication>
 #include <QLoggingCategory>
 
@@ -108,17 +112,42 @@ void X11WindowMonitor::presentWindows(QList<uint32_t> windows)
                 .call().waitForFinished();
 }
 
-void X11WindowMonitor::showWindowsPreview(QList<uint32_t> windowsId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+void X11WindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
     // custom created preview popup window and show at (relativePositionItem.x + previewXoffset, relativePositionItem.y + previewYoffset) pos
     // direction is dock current position
 
-    qDebug() << windowsId << relativePositionItem << previewXoffset << previewYoffset << direction;
+    if (m_windowPreview.isNull()) {
+        m_windowPreview.reset(new X11WindowPreviewContainer(this));
+    }
+
+    m_windowPreview->showPreview(item,qobject_cast<QWindow*>(relativePositionItem), previewXoffset, previewYoffset, direction);
+    m_windowPreview->updatePosition();
 }
 
-void X11WindowMonitor::hideWindowsPreview()
+void X11WindowMonitor::hideItemPreview()
 {
-    qDebug() << "hide";
+    if (m_windowPreview.isNull()) return;
+    m_windowPreview->hidePreView();
+}
+
+void X11WindowMonitor::previewWindow(uint32_t winId)
+{
+    DDBusSender().interface("com.deepin.wm")
+            .path("/com/deepin/wm")
+            .service("com.deepin.wm")
+            .method("PreviewWindow")
+            .arg(winId)
+            .call().waitForFinished();
+}
+
+void X11WindowMonitor::cancelPreviewWindow()
+{
+    DDBusSender().interface("com.deepin.wm")
+            .path("/com/deepin/wm")
+            .service("com.deepin.wm")
+            .method("CancelPreviewWindow")
+            .call().waitForFinished();
 }
 
 void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)

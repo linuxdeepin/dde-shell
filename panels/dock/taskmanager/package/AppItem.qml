@@ -115,16 +115,18 @@ Item {
             if (windows.length === 0) return
             var itemPos = root.mapToItem(null, 0, 0)
             if (Panel.position % 2 === 0) {
-                itemPos.x += (root.iconSize / 2)
+                itemPos.x += (root.width / 2)
+                itemPos.y += (Panel.position == 2 ? -10 : Panel.dockSize + 10)
             } else {
-                itemPos.y += (root.iconSize / 2)
+                itemPos.x += (Panel.position == 1 ? -10 : Panel.dockSize + 10)
+                itemPos.y += (root.height / 2)
             }
-            taskmanager.Applet.showWindowsPreview(windows, Panel.rootObject, itemPos.x, itemPos.y, Panel.position)
+            taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, itemPos.x, itemPos.y, Panel.position)
         }
 
         onExited: {
             if (windows.length === 0) return
-            taskmanager.Applet.hideWindowsPreview()
+            taskmanager.Applet.hideItemPreview()
         }
     }
 }

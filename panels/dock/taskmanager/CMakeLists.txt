@@ -86,7 +86,11 @@ target_link_libraries(dock-taskmanager PRIVATE
 if (BUILD_WITH_X11)
     target_compile_definitions(dock-taskmanager PRIVATE BUILD_WITH_X11=)
     pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb xcb-res xcb-ewmh)
+    find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Widget)
     target_sources(dock-taskmanager PRIVATE
+        x11preview.h
+        x11preview.cpp
+        x11preview.qrc
         x11utils.cpp
         x11utils.h
         x11window.cpp
@@ -95,7 +99,11 @@ if (BUILD_WITH_X11)
         x11windowmonitor.h
     )
 
-    target_link_libraries(dock-taskmanager PUBLIC PkgConfig::XCB)
+    target_link_libraries(dock-taskmanager PUBLIC
+        PkgConfig::XCB
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Dtk${DTK_VERSION_MAJOR}::Widget
+    )
 endif(BUILD_WITH_X11)
 
 ds_install_package(PACKAGE org.deepin.ds.dock.taskmanager TARGET dock-taskmanager)

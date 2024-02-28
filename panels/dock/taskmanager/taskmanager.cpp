@@ -128,20 +128,20 @@ void TaskManager::clickItem(const QString& itemId, const QString& menuId)
     item->handleClick(menuId);
 }
 
-void TaskManager::showWindowsPreview(QStringList windowStrIds, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+void TaskManager::showItemPreview(const QString &itemId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
-    if (windowStrIds.size() == 0) return;
-    QList<uint32_t> windowIds;
-    std::transform(windowStrIds.begin(), windowStrIds.end(), std::back_inserter(windowIds), [](const QString &windowStrId) {
-        return windowStrId.toUInt();
-    });
+    auto item = ItemModel::instance()->getItemById(itemId).get();
+    if (!item) return;
 
-    m_windowMonitor->showWindowsPreview(windowIds, relativePositionItem, previewXoffset, previewYoffset, direction);
+    QPointer<AppItem> pItem = reinterpret_cast<AppItem*>(item);
+    if (pItem.isNull()) return;
+
+    m_windowMonitor->showItemPreview(pItem, relativePositionItem, previewXoffset, previewYoffset, direction);
 }
 
-void TaskManager::hideWindowsPreview()
+void TaskManager::hideItemPreview()
 {
-    m_windowMonitor->hideWindowsPreview();
+    m_windowMonitor->hideItemPreview();
 }
 
 void TaskManager::loadDockedAppItems()

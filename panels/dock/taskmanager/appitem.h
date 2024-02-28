@@ -56,12 +56,15 @@ public:
     void requestQuit();
     void handleMenu(const QString& menuId);
 
+    const QList<QPointer<AbstractWindow>>& getAppendWindows();
+
 protected:
     friend class TaskManager;
     AppItem(QString id, QObject *parent = nullptr);
 
 Q_SIGNALS:
     void currentActiveWindowChanged();
+    void appendedWindow(const QPointer<AbstractWindow> &window);
 
 private:
     void updateCurrentActiveWindow(QPointer<AbstractWindow> window);
