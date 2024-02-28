@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "appitem.h"
 #include "dsglobal.h"
 #include "waylandwindow.h"
 #include "abstractwindow.h"
@@ -104,7 +105,7 @@ void WaylandWindowMonitor::presentWindows(QList<uint32_t> windows)
 
 }
 
-void WaylandWindowMonitor::showWindowsPreview(QList<uint32_t> windows, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+void WaylandWindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
     if (m_dockPreview.isNull()) {
         auto window = qobject_cast<QWindow*>(relativePositionItem);
@@ -118,15 +119,15 @@ void WaylandWindowMonitor::showWindowsPreview(QList<uint32_t> windows, QObject* 
 
     QVarLengthArray array = QVarLengthArray<uint32_t>();
 
-    for (auto window : windows) {
-        array.append(window);
-    }
+    std::transform(item->windows().begin(), item->windows().end(), std::back_inserter(array), [](const QString& winId){
+        return winId.toUInt();
+    });
     
     QByteArray windowIds(reinterpret_cast<char*>(array.data()));
     m_dockPreview->showWindowsPreview(windowIds, previewXoffset, previewYoffset, direction);
 }
 
-void WaylandWindowMonitor::hideWindowsPreview()
+void WaylandWindowMonitor::hideItemPreview()
 {
     if (m_dockPreview.isNull()) return;
     m_dockPreview->hideWindowsPreview();

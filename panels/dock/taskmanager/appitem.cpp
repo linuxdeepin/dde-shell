@@ -237,6 +237,7 @@ void AppItem::appendWindow(QPointer<AbstractWindow> window)
     m_windows.append(window);
     window->setAppItem(QPointer<AppItem>(this));
     Q_EMIT windowsChanged();
+    Q_EMIT appendedWindow(window);
 
     if (window->isActive() || m_windows.size() == 1) updateCurrentActiveWindow(window);
     connect(window.get(), &QObject::destroyed, this, &AppItem::onWindowDestroyed, Qt::UniqueConnection);
@@ -277,6 +278,11 @@ void AppItem::removeWindow(QPointer<AbstractWindow> window)
     if (m_currentActiveWindow.get() == window && m_windows.size() > 0) {
         updateCurrentActiveWindow(m_windows.last().get());
     }
+}
+
+const QList<QPointer<AbstractWindow>>& AppItem::getAppendWindows()
+{
+    return m_windows;
 }
 
 void AppItem::updateCurrentActiveWindow(QPointer<AbstractWindow> window)
