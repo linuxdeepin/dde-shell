@@ -35,9 +35,6 @@ static QDBusServiceWatcher dbusWatcher(AM_DBUS_PATH, QDBusConnection::sessionBus
 DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
     : DesktopfileAbstractParser(id, parent)
 {
-    auto ifc = QDBusConnection::sessionBus().interface();
-    m_amIsAvaliable = ifc->isServiceRegistered(AM_DBUS_PATH);
-
     connect(&dbusWatcher, &QDBusServiceWatcher::serviceRegistered, this, [this](){
         m_amIsAvaliable = true;
         Q_EMIT iconChanged();
@@ -120,6 +117,9 @@ QString DesktopFileAMParser::id2dbusPath(const QString& id)
 
 QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
 {
+    if (!m_amIsAvaliable) m_amIsAvaliable = QDBusConnection::sessionBus().
+        interface()->isServiceRegistered(AM_DBUS_PATH);
+
     if (!m_amIsAvaliable) return QString();
 
     auto pidfd = pidfd_open(window->pid(),0);
