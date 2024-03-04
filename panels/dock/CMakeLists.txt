@@ -60,6 +60,8 @@ target_link_libraries(dockpanel PRIVATE
 ds_install_package(PACKAGE org.deepin.ds.dock TARGET dockpanel)
 
 # sub plugins
+add_subdirectory(clipboarditem)
+add_subdirectory(searchitem)
 add_subdirectory(launcherItem)
 add_subdirectory(showdesktop)
 add_subdirectory(slidingpanel)
