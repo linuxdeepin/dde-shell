@@ -72,7 +72,7 @@ bool X11Window::isActive()
 bool X11Window::shouldSkip()
 {
     checkWindowTypes(), checkWindowState();
-    if (hasWmStateSkipTaskBar() || (m_windowStates.empty() && m_windowTypes.empty()))
+    if (hasWmStateSkipTaskBar() || (m_windowStates.isEmpty() && m_windowTypes.isEmpty()))
         return true;
 
     for (auto atom : m_windowTypes) {
