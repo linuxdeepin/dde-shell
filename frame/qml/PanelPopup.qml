@@ -18,8 +18,8 @@ Item {
         if (!window)
             return
 
-        var rect = Qt.rect(control.x, control.y, popup.width, popup.height)
-        window.setGeometry(rect)
+        window.xOffset = control.x
+        window.yOffset = control.y
         window.show()
         popup.open()
     }

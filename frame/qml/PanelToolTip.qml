@@ -11,8 +11,8 @@ Item {
     visible: false
     default property alias toolTipContent: toolTip.contentChildren
     property alias text: toolTip.text
-    Panel.toolTipWindow.width: control.width
-    Panel.toolTipWindow.height: control.height
+    Panel.toolTipWindow.width: control.width + toolTip.leftPadding + toolTip.rightPadding
+    Panel.toolTipWindow.height: control.height + toolTip.topPadding + toolTip.bottomPadding
     onVisibleChanged: {
         if (visible) {
             open()
@@ -27,10 +27,8 @@ Item {
         if (!window)
             return
 
-        var width = toolTip.width + toolTip.leftPadding + toolTip.rightPadding
-        var height = toolTip.height + toolTip.topPadding + toolTip.bottomPadding
-        var rect = Qt.rect(control.x, control.y, width, height)
-        window.setGeometry(rect)
+        window.xOffset = control.x
+        window.yOffset = control.y
         window.show()
         toolTip.open()
     }
