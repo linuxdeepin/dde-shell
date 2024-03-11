@@ -61,6 +61,7 @@ ds_install_package(PACKAGE org.deepin.ds.dock TARGET dockpanel)
 
 # sub plugins
 add_subdirectory(clipboarditem)
+add_subdirectory(workspaceitem)
 add_subdirectory(searchitem)
 add_subdirectory(launcherItem)
 add_subdirectory(showdesktop)
