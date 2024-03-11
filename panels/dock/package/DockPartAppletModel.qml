@@ -16,7 +16,7 @@ D.SortFilterModel {
     model: Applet.appletItems
 
     filterAcceptsItem: function(item) {
-        return item.data.dockOrder > leftDockOrder && item.data.dockOrder <= rightDockOrder
+        return item.data.dockOrder > leftDockOrder && item.data.dockOrder <= rightDockOrder && (item.data.shouldVisible === undefined || item.data.shouldVisible)
     }
     lessThan: function(leftItem, rightItem) {
         return parseInt(leftItem.data.dockOrder) <= parseInt(rightItem.data.dockOrder)

@@ -77,6 +77,13 @@ Window {
         }
     }
 
+    function updateAppItems()
+    {
+        dockLeftPartModel.update()
+        dockCenterPartModel.update()
+        dockRightPartModel.update()
+    }
+
     LP.Menu {
         id: dockMenu
         MutuallyExclusiveMenu {
@@ -156,10 +163,13 @@ Window {
         model: Applet.appletItems
         delegate: Item {
             property var order: model.data.dockOrder
+            property bool itemVisible: model.data.shouldVisible
+
+            onItemVisibleChanged: {
+                updateAppItems()
+            }
             onOrderChanged: {
-                dockLeftPartModel.update()
-                dockCenterPartModel.update()
-                dockRightPartModel.update()
+                updateAppItems()
             }
         }
     }
