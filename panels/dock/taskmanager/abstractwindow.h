@@ -35,6 +35,7 @@ public:
     virtual bool allowClose() = 0;
     virtual bool shouldSkip() = 0;
     virtual bool isMinimized() = 0;
+    virtual bool isAttention() =0;
 
     virtual void close() = 0;
     virtual void activate() = 0;
@@ -74,6 +75,7 @@ Q_SIGNALS:
     void titleChanged();
     void isActiveChanged();
     void shouldSkipChanged();
+    void stateChanged();
 };
 }
 DS_END_NAMESPACE

@@ -153,6 +153,18 @@ void AppItem::active() const
     }
 }
 
+bool AppItem::isAttention() const
+{
+    bool res = false;
+    for (const auto window : m_windows) {
+        if (window->isAttention()) {
+            res = true;
+            break;
+        }
+    }
+    return res;
+}
+
 bool AppItem::isDocked() const
 {
     return m_desktopfileParser &&
@@ -241,11 +253,12 @@ void AppItem::appendWindow(QPointer<AbstractWindow> window)
 
     if (window->isActive() || m_windows.size() == 1) updateCurrentActiveWindow(window);
     connect(window.get(), &QObject::destroyed, this, &AppItem::onWindowDestroyed, Qt::UniqueConnection);
-    connect(window.get(), &AbstractWindow::isActiveChanged, this, [window, this](){
+    connect(window.get(), &AbstractWindow::stateChanged, this, [window, this](){
         if(window->isActive()) {
             updateCurrentActiveWindow(window);
         }
         Q_EMIT activeChanged();
+        Q_EMIT attentionChanged();
     });
 }
 

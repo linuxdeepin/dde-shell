@@ -158,6 +158,11 @@ bool WaylandWindow::allowClose()
     return true;
 }
 
+bool WaylandWindow::isAttention()
+{
+    return false;
+}
+
 void WaylandWindow::close()
 {
     m_foreignToplevelHandle->close();

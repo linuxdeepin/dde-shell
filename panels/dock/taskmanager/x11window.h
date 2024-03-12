@@ -28,6 +28,7 @@ public:
     virtual bool shouldSkip() override;
     virtual bool isMinimized() override;
     virtual bool allowClose() override;
+    virtual bool isAttention() override;
 
     virtual void close() override;
     virtual void activate() override;

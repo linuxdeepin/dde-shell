@@ -15,6 +15,7 @@ Item {
     required property int displayMode
     required property int colorTheme
     required property bool active
+    required property bool attention
     required property string itemId
     required property string name
     required property string iconName
@@ -47,6 +48,7 @@ Item {
         }
 
         StatusIndicator {
+            id: statusIndicator
             palette: itemPalette
             width: root.statusIndicatorSize
             height: root.statusIndicatorSize
@@ -87,6 +89,19 @@ Item {
             name: root.iconName
             sourceSize: Qt.size(iconSize, iconSize)
             anchors.centerIn: parent
+
+            BeatAnimation {
+                target: icon
+                loops: Animation.Infinite
+                running: root.attention
+            }
+
+            LaunchAnimation {
+                id: launchAnimation
+                target: icon
+                loops: 1
+                running: false
+            }
         }
     }
 
@@ -107,6 +122,9 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 MenuHelper.openMenu(contextMenu)
             } else {
+                if (root.windows.length === 0) {
+                    launchAnimation.start()
+                }
                 root.clickItem(root.itemId, "")
             }
         }

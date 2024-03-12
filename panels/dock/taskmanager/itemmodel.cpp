@@ -38,6 +38,7 @@ QHash<int, QByteArray> ItemModel::roleNames() const
         {ItemModel::NameRole, "name"},
         {ItemModel::IconNameRole, "iconName"},
         {ItemModel::ActiveRole, "active"},
+        {ItemModel::AttentionRole, "attention"},
         {ItemModel::MenusRole, "menus"},
         {ItemModel::DockedRole, "docked"},
         {ItemModel::WindowsRole, "windows"},
@@ -63,6 +64,7 @@ QVariant ItemModel::data(const QModelIndex &index, int role) const
         case ItemModel::NameRole: return item->name();
         case ItemModel::IconNameRole: return item->icon();
         case ItemModel::ActiveRole: return item->isActive();
+        case ItemModel::AttentionRole: return item->isAttention();
         case ItemModel::MenusRole: return item->menus();
         case ItemModel::DockedRole: return item->isDocked();
         case ItemModel::WindowsRole: return item->windows();
@@ -129,6 +131,7 @@ void ItemModel::addItem(QPointer<AbstractItem> item)
     connect(item.get(), &AbstractItem::nameChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
     connect(item.get(), &AbstractItem::iconChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
     connect(item.get(), &AbstractItem::activeChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
+    connect(item.get(), &AbstractItem::attentionChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
     connect(item.get(), &AbstractItem::menusChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
     connect(item.get(), &AbstractItem::dockedChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
     connect(item.get(), &AbstractItem::windowsChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);

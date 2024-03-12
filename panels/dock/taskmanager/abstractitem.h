@@ -22,6 +22,7 @@ class AbstractItem : public QObject
     Q_PROPERTY(QString icon READ icon NOTIFY iconChanged FINAL)
 
     Q_PROPERTY(bool isActive READ isActive NOTIFY activeChanged FINAL)
+    Q_PROPERTY(bool isAttention READ isAttention  NOTIFY attentionChanged FINAL)
     Q_PROPERTY(bool isDocked READ isDocked WRITE setDocked NOTIFY dockedChanged FINAL)
 
     Q_PROPERTY(QStringList windows READ windows NOTIFY windowsChanged FINAL)
@@ -52,6 +53,8 @@ public:
     virtual bool isActive() const = 0;
     virtual void active() const = 0;
 
+    virtual bool isAttention() const = 0;
+
     virtual bool isDocked() const = 0;
     virtual void setDocked(bool docked) =0;
 
@@ -77,6 +80,7 @@ Q_SIGNALS:
     void menusChanged();
 
     void activeChanged();
+    void attentionChanged();
     void dockedChanged();
 
     void windowsChanged();
