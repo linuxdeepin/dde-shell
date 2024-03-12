@@ -109,6 +109,11 @@ bool X11Window::allowClose()
     return m_windowAllowedActions.contains(X11->getAtomByName("_NET_WM_ACTION_CLOSE"));
 }
 
+bool X11Window::isAttention()
+{
+    return m_windowStates.contains(X11->getAtomByName("_NET_WM_STATE_DEMANDS_ATTENTION"));
+}
+
 void X11Window::close()
 {
     X11->closeWindow(m_windowID);
@@ -183,7 +188,7 @@ void X11Window::updateWindowState()
 {
     m_windowStates.clear();
     m_windowStates = X11->getWindowState(m_windowID);
-    Q_EMIT isActiveChanged();
+    Q_EMIT stateChanged();
 }
 
 void X11Window::checkWindowState()

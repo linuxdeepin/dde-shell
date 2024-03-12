@@ -81,6 +81,7 @@ public:
     bool shouldSkip() override;
     bool isMinimized() override;
     bool allowClose() override;
+    bool isAttention() override;
 
     void close() override;
     void activate() override;

@@ -22,6 +22,7 @@ public:
         NameRole,
         IconNameRole,
         ActiveRole,
+        AttentionRole,
         MenusRole,
         DockedRole,
         // data type

@@ -34,6 +34,7 @@ AppletItem {
             delegate: DropArea {
                 id: delegateRoot
                 required property bool active
+                required property bool attention
                 required property string itemId
                 required property string name
                 required property string iconName
@@ -59,6 +60,7 @@ AppletItem {
                     displayMode: taskmanager.Applet.parent.displayMode
                     colorTheme: taskmanager.Applet.parent.colorTheme
                     active: delegateRoot.active
+                    attention: delegateRoot.attention
                     itemId: delegateRoot.itemId
                     name: delegateRoot.name
                     iconName: delegateRoot.iconName

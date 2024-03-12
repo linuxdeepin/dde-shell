@@ -37,6 +37,8 @@ public:
     bool isActive() const override;
     void active() const override;
 
+    bool isAttention() const override;
+
     bool isDocked() const override;
     void setDocked(bool docked) override;
 
