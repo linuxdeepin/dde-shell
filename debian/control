@@ -17,6 +17,7 @@ Build-Depends:
  wayland-protocols,
  libdtk6gui-dev,
  libdtk6core-dev,
+ libdtk6widget-dev,
  libdtkcommon-dev,
  libxcb-ewmh-dev,
  libxcb-res0-dev,
