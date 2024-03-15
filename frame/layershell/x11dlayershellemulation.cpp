@@ -92,11 +92,13 @@ void LayerShellEmulation::onPositionChanged()
     auto x = (screen->geometry().right() - m_window->width()) / 2;
     auto y = (screen->geometry().height() - m_window->height()) / 2;
     if (anchors & DLayerShellWindow::AnchorRight) {
-        x = (screen->geometry().right() - m_window->width() - m_dlayerShellWindow->rightMargin());
+        // https://doc.qt.io/qt-6/qrect.html#right
+        x = (screen->geometry().right() + 1 - m_window->width() - m_dlayerShellWindow->rightMargin());
     }
 
     if (anchors & DLayerShellWindow::AnchorBottom) {
-        y = (screen->geometry().bottom() - m_window->height() - m_dlayerShellWindow->bottomMargin());
+        // https://doc.qt.io/qt-6/qrect.html#bottom
+        y = (screen->geometry().bottom() + 1 - m_window->height() - m_dlayerShellWindow->bottomMargin());
     }
     if (anchors & DLayerShellWindow::AnchorLeft) {
         x = (screen->geometry().left() + m_dlayerShellWindow->leftMargin());
