@@ -46,9 +46,9 @@ bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *messag
             Q_EMIT monitor->windowMapped(mE->window);
             break;
         }
-        case XCB_UNMAP_NOTIFY: {
-            auto uE = reinterpret_cast<xcb_unmap_notify_event_t*>(xcb_event);
-            Q_EMIT monitor->windowUnmapped(uE->window);
+        case XCB_DESTROY_NOTIFY: {
+            auto dE = reinterpret_cast<xcb_destroy_notify_event_t*>(xcb_event);
+            Q_EMIT monitor->windowDestoried(dE->window);
             break;
         }
         case XCB_PROPERTY_NOTIFY: {
@@ -65,7 +65,7 @@ X11WindowMonitor::X11WindowMonitor(QObject* parent)
 {
     monitor = this;
     connect(this, &X11WindowMonitor::windowMapped, this, &X11WindowMonitor::onWindowMapped);
-    connect(this, &X11WindowMonitor::windowUnmapped, this, &X11WindowMonitor::onWindowUnMapped);
+    connect(this, &X11WindowMonitor::windowDestoried, this, &X11WindowMonitor::onWindowDestoried);
     connect(this, &X11WindowMonitor::windowPropertyChanged, this, &X11WindowMonitor::onWindowPropertyChanged);
 }
 
@@ -162,7 +162,7 @@ void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)
     Q_EMIT AbstractWindowMonitor::windowAdded(static_cast<QPointer<AbstractWindow>>(window.get()));
 }
 
-void X11WindowMonitor::onWindowUnMapped(xcb_window_t xcb_window)
+void X11WindowMonitor::onWindowDestoried(xcb_window_t xcb_window)
 {
     auto window = m_windows.value(xcb_window, nullptr);
     if (window) {
@@ -216,7 +216,7 @@ void X11WindowMonitor::handleRootWindowClientListChanged()
 
     for (auto alreadyOpenedWindow : m_windows.keys()) {
         if (!currentOpenedWindowList.contains(alreadyOpenedWindow)) {
-            onWindowUnMapped(alreadyOpenedWindow);
+            windowDestoried(alreadyOpenedWindow);
         }
     }
 
