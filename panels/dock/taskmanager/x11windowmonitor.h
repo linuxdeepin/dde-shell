@@ -45,12 +45,12 @@ public:
 
 Q_SIGNALS:
     void windowMapped(xcb_window_t window);
-    void windowUnmapped(xcb_window_t window);
+    void windowDestoried(xcb_window_t window);
     void windowPropertyChanged(xcb_window_t window, xcb_atom_t atom);
 
 private Q_SLOTS:
     void onWindowMapped(xcb_window_t window);
-    void onWindowUnMapped(xcb_window_t window);
+    void onWindowDestoried(xcb_window_t window);
     void onWindowPropertyChanged(xcb_window_t window, xcb_atom_t atom);
 
 private:
