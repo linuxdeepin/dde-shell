@@ -2,11 +2,11 @@
 	"magic": "dsg.config.meta",
 	"version": "1.0",
 	"contents": {
-		"Window_Size_Fashion": {
+		"Dock_Size": {
 			"value": 48,
 			"serial": 0,
 			"flags": [],
-			"name": "Window_Size_Fashion",
+			"name": "Dock_Size",
 			"name[zh_CN]": "*****",
 			"description": "",
 			"permissions": "readwrite",
@@ -32,23 +32,23 @@
 			"permissions": "readwrite",
 			"visibility": "private"
 		},
-		"Window_Size_Efficient": {
-			"value": 40,
+		"Item_Alignment": {
+			"value": "center",
 			"serial": 0,
 			"flags": [],
-			"name": "Window_Size_Efficient",
+			"name": "Item_Alignment",
 			"name[zh_CN]": "*****",
 			"description": "",
 			"permissions": "readwrite",
 			"visibility": "private"
 		},
-		"Display_Mode": {
-			"value": "fashion",
+		"Indicator_Style": {
+			"value": "Fashion",
 			"serial": 0,
 			"flags": [],
-			"name": "Display_Mode",
+			"name": "Indicator_Style",
 			"name[zh_CN]": "*****",
-			"description": "The dock gets different display mode, for instance, dock looks like win7 taskbar on classic mode.",
+			"description": "",
 			"permissions": "readwrite",
 			"visibility": "private"
 		}

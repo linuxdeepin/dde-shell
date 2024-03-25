@@ -13,7 +13,7 @@ import Qt.labs.platform 1.1 as LP
 
 AppletItem {
     id: searchItem
-    property int dockSize: Applet.parent.dockSize
+    property int dockSize: Panel.rootObject.dockSize
     property int dockOrder: 3
     implicitWidth: dockSize
     implicitHeight: dockSize

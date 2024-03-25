@@ -11,7 +11,7 @@ import org.deepin.ds.dock 1.0
 
 AppletItem {
     id: clipboardItem
-    property int dockSize: Applet.parent.dockSize
+    property int dockSize: Panel.rootObject.dockSize
     property int dockOrder: 1
     implicitWidth: dockSize
     implicitHeight: dockSize

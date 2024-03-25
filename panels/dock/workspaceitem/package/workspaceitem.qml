@@ -12,7 +12,7 @@ import org.deepin.ds.dock 1.0
 
 AppletItem {
     id: workspaceitem
-    property int dockSize: Applet.parent.dockSize
+    property int dockSize: Panel.rootObject.dockSize
     property int dockOrder: 2
     property int frameSize: 20
     property int itemSize: 16

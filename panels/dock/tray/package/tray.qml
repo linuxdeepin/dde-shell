@@ -19,8 +19,8 @@ AppletItem {
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 25
 
-    implicitWidth: useColumnLayout ? Panel.dockSize : trayContainter.suggestedImplicitWidth + overflowBtn.implicitWidth * 2
-    implicitHeight: useColumnLayout ? trayContainter.suggestedImplicitHeight + overflowBtn.implicitHeight * 2 : Panel.dockSize
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : trayContainter.suggestedImplicitWidth + overflowBtn.implicitWidth * 2
+    implicitHeight: useColumnLayout ? trayContainter.suggestedImplicitHeight + overflowBtn.implicitHeight * 2 : Panel.rootObject.dockSize
     Behavior on implicitWidth {
         SmoothedAnimation {
             velocity: useColumnLayout ? 100000:  600

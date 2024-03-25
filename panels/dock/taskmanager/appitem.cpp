@@ -26,7 +26,7 @@ AppItem::AppItem(QString id, QObject *parent)
     , m_id(id)
 {
     connect(this, &AbstractItem::dockedChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
-    connect(this, &AbstractItem::windowsChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
+    connect(this, &AbstractItem::dataChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
 
     connect(this, &AppItem::currentActiveWindowChanged, this, &AbstractItem::iconChanged);
 }
@@ -195,7 +195,7 @@ void AppItem::handleClick(const QString& clickItem)
 
 }
 
-QStringList AppItem::windows()
+QVariant AppItem::data()
 {
     QStringList ret;
     for (auto window : m_windows) {
@@ -248,7 +248,7 @@ void AppItem::appendWindow(QPointer<AbstractWindow> window)
 {
     m_windows.append(window);
     window->setAppItem(QPointer<AppItem>(this));
-    Q_EMIT windowsChanged();
+    Q_EMIT AbstractItem::dataChanged();
     Q_EMIT appendedWindow(window);
 
     if (window->isActive() || m_windows.size() == 1) updateCurrentActiveWindow(window);
@@ -286,7 +286,7 @@ QPointer<DesktopfileAbstractParser> AppItem::getDesktopFileParser()
 void AppItem::removeWindow(QPointer<AbstractWindow> window)
 {
     m_windows.removeAll(window);
-    Q_EMIT windowsChanged();
+    Q_EMIT AbstractItem::dataChanged();
 
     if (m_currentActiveWindow.get() == window && m_windows.size() > 0) {
         updateCurrentActiveWindow(m_windows.last().get());

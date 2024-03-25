@@ -10,15 +10,17 @@ import org.deepin.dtk 1.0 as D
 
 AppletItem {
     id: showdesktop
-    property int dockSize: Applet.parent.dockSize
+    property bool useColumnLayout: Panel.position % 2
+    property int dockSize: Panel.rootObject.dockItemMaxSize
     property int dockOrder: 13
-    implicitWidth: dockSize
-    implicitHeight: dockSize
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : dockSize
+    implicitHeight: useColumnLayout ? dockSize : Panel.rootObject.dockSize
 
     D.ActionButton {
-        id: showdesktopButtom
-        anchors.fill: parent
+        anchors.centerIn: parent
         icon.name: Applet.iconName
+        icon.height: dockSize * 9 / 14
+        icon.width: dockSize * 9 / 14
         onClicked: Applet.toggleShowDesktop()
     }
 }

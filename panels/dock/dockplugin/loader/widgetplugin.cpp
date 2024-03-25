@@ -281,9 +281,7 @@ DockPlugin* WidgetPlugin::getPlugin(QWidget* widget)
     auto plugin = DockPlugin::get(widget->windowHandle());
     if (plugin) {
         connect(plugin, &DockPlugin::dockColorThemeChanged, this, [](uint32_t type){
-            DGuiApplicationHelper::instance()->setPaletteType(type == 0 ?
-                DGuiApplicationHelper::ColorType::LightType : DGuiApplicationHelper::ColorType::DarkType
-            );
+            DGuiApplicationHelper::instance()->setPaletteType(static_cast<DGuiApplicationHelper::ColorType>(type));
         }, Qt::UniqueConnection);
 
         connect(plugin, &DockPlugin::dockPositionChanged, this, [this](uint32_t position){

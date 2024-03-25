@@ -37,7 +37,7 @@ DS_BEGIN_NAMESPACE
 namespace dock {
 
 TaskManager::TaskManager(QObject* parent)
-    : DApplet(parent)
+    : DContainment(parent)
 {
     qRegisterMetaType<ObjectInterfaceMap>();
     qDBusRegisterMetaType<ObjectInterfaceMap>();
@@ -116,7 +116,7 @@ void TaskManager::clickItem(const QString& itemId, const QString& menuId)
 
     if (menuId == DOCK_ACTION_ALLWINDOW) {
         QList<uint32_t> windowIds;
-        auto windows = item->windows();
+        auto windows = item->data().toStringList();
         std::transform(windows.begin(), windows.end(), std::back_inserter(windowIds), [](const QString &windowId) {
             return windowId.toUInt();
         });

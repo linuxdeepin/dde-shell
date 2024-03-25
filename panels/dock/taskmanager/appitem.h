@@ -44,7 +44,7 @@ public:
 
     void handleClick(const QString& clickItem) override;
 
-    QStringList windows() override;
+    QVariant data() override;
 
     bool hasWindow() const;
 

@@ -24,14 +24,17 @@ class DockPanel : public DPanel, public QDBusContext
     Q_PROPERTY(QRect geometry READ geometry FINAL)
 
     Q_PROPERTY(QRect frontendWindowRect READ frontendWindowRect NOTIFY frontendWindowRectChanged FINAL)
-    Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged FINAL)
+    Q_PROPERTY(bool compositorReady READ compositorReady WRITE setCompositorReady NOTIFY compositorReadyChanged FINAL)
 
     Q_PROPERTY(HideState hideState READ hideState NOTIFY hideStateChanged FINAL)
-    Q_PROPERTY(HideMode hideMode READ hideMode WRITE setHideMode NOTIFY hideModeChanged FINAL)
-    Q_PROPERTY(DisplayMode displayMode READ displayMode WRITE setDisplayMode NOTIFY displayModeChanged FINAL)
     Q_PROPERTY(ColorTheme colorTheme READ colorTheme WRITE setColorTheme NOTIFY colorThemeChanged FINAL)
+
     Q_PROPERTY(uint dockSize READ dockSize WRITE setDockSize NOTIFY dockSizeChanged FINAL)
-    Q_PROPERTY(bool compositorReady READ compositorReady WRITE setCompositorReady NOTIFY compositorReadyChanged FINAL)
+    Q_PROPERTY(HideMode hideMode READ hideMode WRITE setHideMode NOTIFY hideModeChanged FINAL)
+    Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged FINAL)
+    Q_PROPERTY(ItemAlignment itemAlignment READ itemAlignment WRITE setItemAlignment NOTIFY itemAlignmentChanged FINAL)
+    Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
+
     Q_PROPERTY(bool debugMode READ debugMode FINAL CONSTANT)
 
 public:
@@ -46,22 +49,25 @@ public:
     QRect geometry();
     QRect frontendWindowRect();
 
-    Position position();
-    void setPosition(Position position);
-
-    HideMode hideMode();
-    void setHideMode(HideMode mode);
-
-    DisplayMode displayMode();
-    void setDisplayMode(DisplayMode mode);
-
-    ColorTheme colorTheme();
-    void setColorTheme(ColorTheme theme);
-
     HideState hideState();
 
+    ColorTheme colorTheme();
+    void setColorTheme(const ColorTheme& theme);
+
     uint dockSize();
-    void setDockSize(uint size);
+    void setDockSize(const uint& size);
+
+    HideMode hideMode();
+    void setHideMode(const HideMode& mode);
+
+    Position position();
+    void setPosition(const Position& position);
+
+    ItemAlignment itemAlignment();
+    void setItemAlignment(const ItemAlignment& alignment);
+
+    IndicatorStyle indicatorStyle();
+    void setIndicatorStyle(const IndicatorStyle& style);
 
     bool compositorReady();
     void setCompositorReady(bool ready);
@@ -73,15 +79,17 @@ private Q_SLOTS:
     void loadDockPlugins();
 
 Q_SIGNALS:
-    void frontendWindowRectChanged(QRect frontendWindowRect);
     void geometryChanged(QRect geometry);
-    void positionChanged(Position position);
-    void hideModeChanged(HideMode mode); // not emitted
+    void frontendWindowRectChanged(QRect frontendWindowRect);
     void hideStateChanged(HideState state); // not emitted
-    void displayModeChanged(DisplayMode mode);
-    void dockSizeChanged(uint size); // not emitted
     void colorThemeChanged(ColorTheme theme);
     void compositorReadyChanged();
+
+    void dockSizeChanged(uint size);
+    void hideModeChanged(HideMode mode);
+    void positionChanged(Position position);
+    void itemAlignmentChanged(ItemAlignment alignment);
+    void indicatorStyleChanged(IndicatorStyle style);
 
 private:
     ColorTheme m_theme;

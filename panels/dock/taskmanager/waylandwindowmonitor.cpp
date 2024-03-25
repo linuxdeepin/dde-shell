@@ -119,8 +119,8 @@ void WaylandWindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObjec
 
     QVarLengthArray array = QVarLengthArray<uint32_t>();
 
-    std::transform(item->windows().begin(), item->windows().end(), std::back_inserter(array), [](const QString& winId){
-        return winId.toUInt();
+    std::transform(item->getAppendWindows().begin(), item->getAppendWindows().end(), std::back_inserter(array), [](const QPointer<AbstractWindow>& window){
+        return window->id();
     });
     
     QByteArray windowIds(reinterpret_cast<char*>(array.data()));

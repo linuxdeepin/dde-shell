@@ -2,21 +2,20 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "docksettings.h"
-#include "constants.h"
-#include "dockabstractsettingsconfig.h"
-#include "docksettingsdconfig.h"
 #include "dsglobal.h"
+#include "constants.h"
+#include "docksettings.h"
 
+#include <QTimer>
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(dockSettingsLog, "dde.shell.dock.docksettings")
 
-const static QString keyPosition             = "Position";
-const static QString keyHideMode             = "Hide_Mode";
-const static QString keyDisplayMode          = "Display_Mode";
-const static QString keyWindowSizeFashion    = "Window_Size_Fashion";
-const static QString keyWindowSizeEfficient  = "Window_Size_Efficient";
+const static QString keyPosition                = "Position";
+const static QString keyHideMode                = "Hide_Mode";
+const static QString keyDockSize                = "Dock_Size";
+const static QString keyItemAlignment           = "Item_Alignment";
+const static QString keyIndicatorStyle          = "Indicator_Style";
 
 DS_BEGIN_NAMESPACE
 namespace dock {
@@ -35,34 +34,13 @@ static QString hideMode2String(HideMode mode)
     }
 }
 
-static HideMode String2HideMode(const QString& modeStr)
+static HideMode string2HideMode(const QString& modeStr)
 {
     if ("keep-hidden" == modeStr)
         return HideMode::KeepHidden;
     if ("smart-hide" == modeStr)
         return HideMode::SmartHide;
     return HideMode::KeepShowing;
-}
-
-static QString displayMode2String(DisplayMode mode)
-{
-    switch (mode) {
-    case DisplayMode::Fashion:
-        return "fashion";
-    case DisplayMode::Efficient:
-        return "efficient";
-    default:
-        return "fashion";
-    }
-}
-
-static DisplayMode string2DisplayMode(const QString& modeStr)
-{
-    if ("fashion" == modeStr)
-        return DisplayMode::Fashion;
-    else if ("efficient" == modeStr)
-        return DisplayMode::Efficient;
-    return DisplayMode::Fashion;
 }
 
 static QString position2String(Position position)
@@ -81,13 +59,56 @@ static QString position2String(Position position)
     }
 }
 
-static Position String2Position(const QString& modeStr)
+static Position string2Position(const QString& modeStr)
 {
     if (modeStr == "left") return Position::Left;
     else if (modeStr == "right") return Position::Right;
     else if (modeStr == "top") return Position::Top;
     else if (modeStr == "bottom") return Position::Bottom;
     return Position::Bottom;
+}
+
+static QString itemAlignment2String(const ItemAlignment& alignment)
+{
+    switch (alignment) {
+        case ItemAlignment::LeftAlignment:
+            return "left";
+        case ItemAlignment::CenterAlignment:
+            return "center";
+    }
+
+    return "center";
+}
+
+static ItemAlignment string2ItenAlignment(const QString& alignmentStr)
+{
+    if (alignmentStr == "left")
+        return ItemAlignment::LeftAlignment;
+    else if (alignmentStr == "center")
+        return ItemAlignment::CenterAlignment;
+
+    return ItemAlignment::CenterAlignment;
+}
+
+static QString indicatorStyle2String(IndicatorStyle mode)
+{
+    switch (mode) {
+    case IndicatorStyle::Fashion:
+        return "fashion";
+    case IndicatorStyle::Efficient:
+        return "efficient";
+    default:
+        return "fashion";
+    }
+}
+
+static IndicatorStyle string2IndicatorStyle(const QString& modeStr)
+{
+    if ("fashion" == modeStr)
+        return IndicatorStyle::Fashion;
+    else if ("efficient" == modeStr)
+        return IndicatorStyle::Efficient;
+    return IndicatorStyle::Fashion;
 }
 
 DockSettings* DockSettings::instance()
@@ -102,25 +123,54 @@ DockSettings* DockSettings::instance()
 
 DockSettings::DockSettings(QObject* parent)
     : QObject(parent)
-    , m_dockConfig(new DockDconfig(this))
+    , m_dockConfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock", QString(), this))
+    , m_writeTimer(new QTimer(this))
+    , m_dockSize(dock::DEFAULT_DOCK_SIZE)
+    , m_hideMode(dock::KeepShowing)
+    , m_dockPosition(dock::Bottom)
+    , m_alignment(dock::CenterAlignment)
+    , m_style(dock::Fashion)
 {
+    m_writeTimer->setSingleShot(true);
+    m_writeTimer->setInterval(1000);
     init();
 }
 
 void DockSettings::init()
 {
     if (m_dockConfig && m_dockConfig->isValid()) {
-        connect(m_dockConfig.data(), &DockAbstractConfig::valueChanged, this, [this](const QString& key){
-            if (keyHideMode == key) {
-                Q_EMIT hideModeChanged(hideMode());
-            } else if (keyDisplayMode == key) {
-                Q_EMIT displayModeChanged(displayMode());
+        m_dockSize = m_dockConfig->value(keyDockSize).toUInt();
+        m_hideMode = string2HideMode(m_dockConfig->value(keyHideMode).toString());
+        m_dockPosition = string2Position(m_dockConfig->value(keyPosition).toString());
+        m_alignment = string2ItenAlignment(m_dockConfig->value(keyItemAlignment).toString());
+        m_style = string2IndicatorStyle(m_dockConfig->value(keyIndicatorStyle).toString());
+
+        connect(m_dockConfig.data(), &DConfig::valueChanged, this, [this](const QString& key){
+            if (keyDockSize == key) {
+                auto size = m_dockConfig->value(keyDockSize).toUInt();
+                if (size == m_dockSize || size > dock::MAX_DOCK_SIZE || size < dock::MIN_DOCK_SIZE) return;
+                m_dockSize = size;
+                Q_EMIT dockSizeChanged(m_dockSize);
+            } else if (keyHideMode == key) {
+                auto hidemode = string2HideMode(m_dockConfig->value(keyHideMode).toString());
+                if (hidemode != m_hideMode) return;
+                m_hideMode = hidemode;
+                Q_EMIT hideModeChanged(m_hideMode);
             } else if (keyPosition == key) {
-                Q_EMIT positionChanged(position());
-            } else if (keyWindowSizeFashion == key) {
-                Q_EMIT windowSizeFashionChanged(windowSizeFashion());
-            } else if (keyWindowSizeEfficient == key) {
-                Q_EMIT windowSizeEfficientChanged(windowSizeEfficient());
+                auto position = string2Position(m_dockConfig->value(keyPosition).toString());
+                if (position != m_dockPosition) return;
+                m_dockPosition = position;
+                Q_EMIT positionChanged(m_dockPosition);
+            } else if (keyItemAlignment == key) {
+                auto alignment = string2ItenAlignment(m_dockConfig->value(keyItemAlignment).toString());
+                if (alignment == m_alignment) return;
+                m_alignment = alignment;
+                Q_EMIT itemAlignmentChanged(m_alignment);
+            } else if (keyIndicatorStyle == key) {
+                auto style = string2IndicatorStyle(m_dockConfig->value(keyIndicatorStyle).toString());
+                if (style == m_style) return;
+                m_style = style;
+                Q_EMIT indicatorStyleChanged(m_style);
             }
         });
     } else {
@@ -128,122 +178,133 @@ void DockSettings::init()
     }
 }
 
-HideMode DockSettings::hideMode()
+uint DockSettings::dockSize()
 {
-    if (m_dockConfig && m_dockConfig->isValid()) {
-        return String2HideMode(m_dockConfig->value(keyHideMode).toString());
-    } else {
-        qCCritical(dockSettingsLog()) << "unable get config for hidemode";
-        return HideMode::KeepShowing;
-    }
+    return m_dockSize;
 }
 
-void DockSettings::setHideMode(HideMode mode)
+void DockSettings::setDockSize(const uint& size)
 {
-    if (hideMode() == mode)
-        return;
-    if (m_dockConfig && m_dockConfig->isValid()) {
-        m_dockConfig->setValue(keyHideMode, hideMode2String(mode));
-        Q_EMIT this->hideModeChanged(mode);
-    } else {
-        qCCritical(dockSettingsLog()) << "unable set config for hidemode";
-    }
+    if (size == m_dockSize) return;
+
+    m_dockSize = size;
+    Q_EMIT dockSizeChanged(m_dockSize);
+    addWriteJob(dockSizeJob);
+}
+
+HideMode DockSettings::hideMode()
+{
+    return m_hideMode;
+}
+
+void DockSettings::setHideMode(const HideMode& mode)
+{
+    if (mode == m_hideMode) return;
+
+    m_hideMode = mode;
+    Q_EMIT hideModeChanged(m_hideMode);
+    addWriteJob(hideModeJob);
 }
 
 Position DockSettings::position()
 {
-    if (m_dockConfig && m_dockConfig->isValid()) {
-        return String2Position(m_dockConfig->value(keyPosition).toString());
-    } else {
-        qCCritical(dockSettingsLog()) << "unable get config for hidemode";
-        return Position::Bottom;
-    }
+    return m_dockPosition;
 }
 
-void DockSettings::setPosition(Position position)
+void DockSettings::setPosition(const Position& position)
 {
-    if (this->position() == position)
-        return;
-    if (m_dockConfig && m_dockConfig->isValid()) {
-        m_dockConfig->setValue(keyPosition, position2String(position));
-        Q_EMIT this->positionChanged(position);
-    } else {
-        qCCritical(dockSettingsLog()) << "unable set config for position";
-    }
+    if (position == m_dockPosition) return;
+
+    m_dockPosition = position;
+    Q_EMIT positionChanged(m_dockPosition);
+    addWriteJob(positionJob);
 }
 
-DisplayMode DockSettings::displayMode()
+ItemAlignment DockSettings::itemAlignment()
 {
-    if (m_dockConfig && m_dockConfig->isValid()) {
-        return string2DisplayMode(m_dockConfig->value(keyDisplayMode).toString());
-    } else {
-        qCCritical(dockSettingsLog()) << "unable get config for displaymode";
-        return DisplayMode::Fashion;
-    }
+    return m_alignment;
 }
 
-void DockSettings::setDisplayMode(DisplayMode mode)
+void DockSettings::setItemAlignment(const ItemAlignment& alignment)
 {
-    if (displayMode() == mode)
-        return;
-    if (m_dockConfig && m_dockConfig->isValid()) {
-        m_dockConfig->setValue(keyDisplayMode, displayMode2String(mode));
-        Q_EMIT this->displayModeChanged(mode);
-    } else {
-        qCCritical(dockSettingsLog()) << "unable to set config for displaymode";
-    }
+    if (alignment == m_alignment) return;
+
+    m_alignment = alignment;
+    Q_EMIT itemAlignmentChanged(m_alignment);
+    addWriteJob(itemAlignmentJob);
 }
 
-uint DockSettings::windowSizeFashion()
+IndicatorStyle DockSettings::indicatorStyle()
 {
-    if (m_dockConfig && m_dockConfig->isValid()) {
-        return m_dockConfig->value(keyWindowSizeFashion).toUInt();
-    } else {
-        qCCritical(dockSettingsLog()) << "unable get dconfig for windowSizeFashion";
-        return MIN_DOCK_SIZE;
-    }
+    return m_style;
 }
 
-void DockSettings::setWindowSizeFashion(uint size)
+void DockSettings::setIndicatorStyle(const IndicatorStyle& style)
 {
-    if (windowSizeFashion() == size)
-        return;
-    if(m_dockConfig && m_dockConfig->isValid()) {
-        m_dockConfig->setValue(keyWindowSizeFashion, size);
-        Q_EMIT this->windowSizeFashionChanged(size);
-    } else {
-        qCCritical(dockSettingsLog()) << "unable to set dconfig for windowSizeFashion";
-    }
+    if (style == m_style) return;
+
+    m_style = style;
+    Q_EMIT indicatorStyleChanged(style);
+    addWriteJob(indicatorStyleJob);
 }
 
-uint DockSettings::windowSizeEfficient()
+void DockSettings::addWriteJob(WriteJob job)
 {
-    if (m_dockConfig && m_dockConfig->isValid()) {
-        return m_dockConfig->value(keyWindowSizeEfficient).toUInt();
-    } else {
-        qCCritical(dockSettingsLog()) << "unable get dconfig for windowSizeEfficient";
-        return MIN_DOCK_SIZE;
-    }
+    if (m_writeJob.contains(job)) return;
+
+    m_writeJob.push_back(job);
+    checkWriteJob();
 }
 
-void DockSettings::setWindowSizeEfficient(uint size)
+void DockSettings::checkWriteJob()
 {
-    if (windowSizeEfficient() == size)
-        return;
-    if(m_dockConfig && m_dockConfig->isValid()) {
-        m_dockConfig->setValue(keyWindowSizeEfficient, size);
-        Q_EMIT this->windowSizeEfficientChanged(size);
-    } else {
-        qCCritical(dockSettingsLog()) << "unable to set dconfig for windowSizeEfficient";
+    m_writeTimer->disconnect(this);
+    if (m_writeJob.isEmpty()) return;
+
+    auto job = m_writeJob.front();
+    m_writeJob.pop_front();
+
+    switch (job) {
+    case dockSizeJob: {
+        connect(m_writeTimer, &QTimer::timeout, this, [this](){
+            m_dockConfig->setValue(keyDockSize, m_dockSize);
+            checkWriteJob();
+        });
+        break;
     }
+    case hideModeJob: {
+        connect(m_writeTimer, &QTimer::timeout, this, [this](){
+            m_dockConfig->setValue(keyHideMode, hideMode2String(m_hideMode));
+            checkWriteJob();
+        });
+        break;
+    }
+    case positionJob: {
+        connect(m_writeTimer, &QTimer::timeout, this, [this](){
+            m_dockConfig->setValue(keyPosition, position2String(m_dockPosition));
+            checkWriteJob();
+        });
+        break;
+    }
+    case itemAlignmentJob: {
+        connect(m_writeTimer, &QTimer::timeout, this, [this](){
+            m_dockConfig->setValue(keyItemAlignment, itemAlignment2String(m_alignment));
+            checkWriteJob();
+        });
+        break;
+    }
+    case indicatorStyleJob: {
+        connect(m_writeTimer, &QTimer::timeout, this, [this](){
+            m_dockConfig->setValue(keyIndicatorStyle, indicatorStyle2String(m_style));
+            checkWriteJob();
+        });
+        break;
+    }
+    }
+
+    m_writeTimer->start();
 }
 
-void DockSettings::updateDockSettingsBackend(DockAbstractConfig *backend)
-{
-    if (backend && backend->isValid()) {
-        m_dockConfig.reset(backend);
-    }
-}
 
 }
 DS_END_NAMESPACE

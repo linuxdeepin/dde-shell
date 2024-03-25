@@ -12,117 +12,59 @@ import org.deepin.ds.dock 1.0
 
 AppletItem {
     id: slidingpanel
-    property int dockSize: Panel.dockSize
+    property int dockSize: Panel.rootObject.dockSize
     property bool useColumnLayout: Panel.position % 2
-    property int dockOrder: Panel.displayMode == Dock.Efficient ? 27 : 1
+    property int dockOrder: 27
 
-    implicitWidth: useColumnLayout ? dockSize: content.implicitWidth
-    implicitHeight: useColumnLayout ? content.implicitHeight : dockSize
-
-    Control {
-        id: content
+    implicitWidth: Math.max(dockSize, 70)
+    implicitHeight: dockSize
+    Rectangle {
         anchors.fill: parent
+        implicitWidth: slidingpanel.useColumnLayout ? dockSize - 10 : timedate.implicitWidth
+        implicitHeight: slidingpanel.useColumnLayout ? timedate.implicitHeight : dockSize - 10
+        color: "transparent"
 
-        leftPadding: {
-            if (Panel.displayMode === Dock.Efficient) return 2
-            return slidingpanel.useColumnLayout ? 4 : 10
-        }
-        rightPadding: {
-            if (Panel.displayMode === Dock.Efficient) return 2
-            return slidingpanel.useColumnLayout ? 4 : 0
-        }
+        Column {
+            id: timedate
+            anchors.centerIn: parent
 
-        topPadding: {
-            if (Panel.displayMode === Dock.Efficient) return 2
-            return slidingpanel.useColumnLayout ? 10 : 4
-        }
-        bottomPadding: {
-            if (Panel.displayMode === Dock.Efficient) return 2
-            return slidingpanel.useColumnLayout ? 0 : 4
-        }
+            property var currentTime: new Date()
+            property var weekDay: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
-        contentItem: Rectangle {
-            id: listView
-
-            implicitWidth: slidingpanel.useColumnLayout ? dockSize - 10 : timedate.implicitWidth
-            implicitHeight: slidingpanel.useColumnLayout ? timedate.implicitHeight : dockSize - 10
-            radius: (dockSize - 30) / 2
-            color: "transparent"
-
-            Column {
-                id: timedate
-                anchors.fill: parent
-
-                property var currentTime: new Date()
-                property var weekDay: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-
-                Timer {
-                    interval: 1000
-                    running: true
-                    repeat: true
-                    onTriggered: {
-                        timedate.currentTime = new Date();
-                    }
+            Timer {
+                interval: 1000
+                running: true
+                repeat: true
+                onTriggered: {
+                    timedate.currentTime = new Date();
                 }
+            }
 
-                Text {
-                    id: timeText
-                    anchors.horizontalCenter: parent.horizontalCenter
+            Text {
+                id: timeText
+                anchors.horizontalCenter: parent.horizontalCenter
 
-                    width: slidingpanel.useColumnLayout ? dockSize - 10 : undefined
-                    fontSizeMode: Text.Fit
-                    wrapMode: Text.WordWrap
+                width: slidingpanel.useColumnLayout ? dockSize - 10 : undefined
+                fontSizeMode: Text.Fit
+                wrapMode: Text.WordWrap
 
-                    text: {
-                        "<b>" + Qt.formatTime(timedate.currentTime, "hh:mm") + "</b>"
-                    }
+                text: {
+                    "<b>" + Qt.formatTime(timedate.currentTime, "hh:mm") + "</b>"
                 }
+            }
 
-                Text {
-                    id: dateText
-                    anchors.horizontalCenter: parent.horizontalCenter
+            Text {
+                id: dateText
+                anchors.horizontalCenter: parent.horizontalCenter
 
-                    width: slidingpanel.useColumnLayout ? dockSize - 10 : undefined
-                    fontSizeMode: Text.Fit
-                    wrapMode: Text.WordWrap
+                width: slidingpanel.useColumnLayout ? dockSize - 10 : undefined
+                fontSizeMode: Text.Fit
+                wrapMode: Text.WordWrap
 
-                    text: {
-                        Qt.formatDate(timedate.currentTime, "MM/dd") + " " + timedate.weekDay[timedate.currentTime.getDay()]
-                    }
+                text: {
+                    Qt.formatDate(timedate.currentTime, "MM/dd") + " " + timedate.weekDay[timedate.currentTime.getDay()]
                 }
             }
         }
     }
-
-    // contentItem: SwipeView {
-    //         id: listView
-    //         orientation: useColumnLayout ? ListView.Horizontal : ListView.Vertical
-    //         implicitWidth: useColumnLayout ? dockSize - 10 : 100
-    //         implicitHeight: useColumnLayout ? 100 : dockSize - 10
-    //         clip: true
-
-    //         // test data
-    //         Repeater {
-    //             model: ListModel {
-    //                 ListElement { name: "Element 1" }
-    //                 ListElement { name: "Element 2" }
-    //                 ListElement { name: "Element 3" }
-    //                 ListElement { name: "Element 4" }
-    //             }
-
-    //             delegate: Rectangle {
-    //                 implicitWidth: slidingpanel.useColumnLayout ? dockSize - 10: 100
-    //                 implicitHeight: slidingpanel.useColumnLayout ? 100 : dockSize - 10
-    //                 color: "red"
-    //                 radius: (dockSize / 2.8) - 5
-
-    //                 Text {
-    //                     text: model.name
-    //                     font.pixelSize: 20
-    //                     anchors.centerIn: parent
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 }

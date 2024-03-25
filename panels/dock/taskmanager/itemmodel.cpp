@@ -67,9 +67,9 @@ QVariant ItemModel::data(const QModelIndex &index, int role) const
         case ItemModel::AttentionRole: return item->isAttention();
         case ItemModel::MenusRole: return item->menus();
         case ItemModel::DockedRole: return item->isDocked();
-        case ItemModel::WindowsRole: return item->windows();
-        case ItemModel::DesktopFilesIconsRole: return item->desktopFileIDs();
-        case ItemModel::DockedDirRole: return item->dockedDir();
+        case ItemModel::WindowsRole: return item->data().toStringList();
+        case ItemModel::DesktopFilesIconsRole: return item->data().toStringList();
+        case ItemModel::DockedDirRole: return item->data().toString();
     }
     return QVariant();
 }
@@ -134,9 +134,7 @@ void ItemModel::addItem(QPointer<AbstractItem> item)
     connect(item.get(), &AbstractItem::attentionChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
     connect(item.get(), &AbstractItem::menusChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
     connect(item.get(), &AbstractItem::dockedChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
-    connect(item.get(), &AbstractItem::windowsChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
-    connect(item.get(), &AbstractItem::desktopFileIDsChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
-    connect(item.get(), &AbstractItem::dockedDirChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
+    connect(item.get(), &AbstractItem::dataChanged, this, &ItemModel::onItemChanged, Qt::UniqueConnection);
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_items.append(item);

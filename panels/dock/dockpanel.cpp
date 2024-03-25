@@ -18,6 +18,10 @@
 
 #include <QQuickWindow>
 #include <QLoggingCategory>
+#include <QGuiApplication>
+#include <DGuiApplicationHelper>
+
+#define SETTINGS DockSettings::instance()
 
 Q_LOGGING_CATEGORY(dockLog, "dde.shell.dock")
 
@@ -26,7 +30,7 @@ namespace dock {
 
 DockPanel::DockPanel(QObject * parent)
     : DPanel(parent)
-    , m_theme(ColorTheme::Light)
+    , m_theme(ColorTheme::Dark)
     , m_compositorReady(false)
 {
     connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
@@ -53,17 +57,17 @@ bool DockPanel::init()
     DockDaemonAdaptor* dockDaemonAdaptor = new DockDaemonAdaptor(proxy);
     QDBusConnection::sessionBus().registerService("org.deepin.dde.daemon.Dock1");
     QDBusConnection::sessionBus().registerObject("/org/deepin/dde/daemon/Dock1", "org.deepin.dde.daemon.Dock1", proxy);
-    connect(DockSettings::instance(), &DockSettings::positionChanged, this, [this](){
+    connect(SETTINGS, &DockSettings::positionChanged, this, [this](){
         Q_EMIT positionChanged(position());
         QMetaObject::invokeMethod(this,[this](){
             Q_EMIT onWindowGeometryChanged();
         });
     });
-    connect(this, &DockPanel::displayModeChanged, this, &DockPanel::dockSizeChanged);
-    connect(DockSettings::instance(), &DockSettings::windowSizeFashionChanged, this, &DockPanel::dockSizeChanged);
-    connect(DockSettings::instance(), &DockSettings::windowSizeEfficientChanged, this, &DockPanel::dockSizeChanged);
-    connect(DockSettings::instance(), &DockSettings::displayModeChanged, this, &DockPanel::displayModeChanged);
-    connect(DockSettings::instance(), &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
+
+    connect(SETTINGS, &DockSettings::dockSizeChanged, this, &DockPanel::dockSizeChanged);
+    connect(SETTINGS, &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
+    connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
+    connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
     DPanel::init();
 
     QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
@@ -77,6 +81,17 @@ bool DockPanel::init()
             QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
         }
     });
+
+    m_theme = static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType());
+    auto platformName = QGuiApplication::platformName();
+    if (QStringLiteral("wayland") == platformName) {
+        // TODO: support get color type from wayland
+    } else if (QStringLiteral("xcb") == platformName) {
+        QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
+                            this, [this](){
+            setColorTheme(static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType()));
+        });
+    }
 
     return true;
 }
@@ -113,42 +128,12 @@ QRect DockPanel::frontendWindowRect()
     return QRect(x * ratio, y * ratio, geometry.width() * ratio, geometry.height() * ratio);
 }
 
-Position DockPanel::position()
-{
-    return DockSettings::instance()->position();
-}
-
-void DockPanel::setPosition(Position position)
-{
-    DockSettings::instance()->setPosition(position);
-}
-
-HideMode DockPanel::hideMode()
-{
-    return DockSettings::instance()->hideMode();
-}
-
-void DockPanel::setHideMode(HideMode mode)
-{
-    DockSettings::instance()->setHideMode(mode);
-}
-
-DisplayMode DockPanel::displayMode()
-{
-    return DockSettings::instance()->displayMode();
-}
-
-void DockPanel::setDisplayMode(DisplayMode mode)
-{
-    DockSettings::instance()->setDisplayMode(mode);
-}
-
 ColorTheme DockPanel::colorTheme()
 {
     return m_theme;
 }
 
-void DockPanel::setColorTheme(ColorTheme theme)
+void DockPanel::setColorTheme(const ColorTheme& theme)
 {
     if (theme == m_theme)
         return;
@@ -158,31 +143,56 @@ void DockPanel::setColorTheme(ColorTheme theme)
 
 uint DockPanel::dockSize()
 {
-    switch (displayMode()) {
-    case Fashion:
-        return DockSettings::instance()->windowSizeFashion();
-    case Efficient:
-        return DockSettings::instance()->windowSizeEfficient();
-    }
-    qCWarning(dockLog()) << "unknown display mode return MIN_DOCK_SIZE";
-    return MIN_DOCK_SIZE;
+    return SETTINGS->dockSize();
 }
 
-void DockPanel::setDockSize(uint size)
+void DockPanel::setDockSize(const uint& size)
 {
     if (size > MAX_DOCK_SIZE || size < MIN_DOCK_SIZE) {
         return;
     }
-    switch (displayMode()) {
-        case Fashion: {
-            DockSettings::instance()->setWindowSizeFashion(size);
-            return;
-        }
-        case Efficient: {
-            DockSettings::instance()->setWindowSizeEfficient(size);
-        }
-    }
-    qCWarning(dockLog()) << "unknown display mode not set dock size to dock settings";
+
+    SETTINGS->setDockSize(size);
+}
+
+HideMode DockPanel::hideMode()
+{
+    return SETTINGS->hideMode();
+}
+
+void DockPanel::setHideMode(const HideMode& mode)
+{
+    SETTINGS->setHideMode(mode);
+}
+
+Position DockPanel::position()
+{
+    return SETTINGS->position();
+}
+
+void DockPanel::setPosition(const Position& position)
+{
+    SETTINGS->setPosition(position);
+}
+
+ItemAlignment DockPanel::itemAlignment()
+{
+    return SETTINGS->itemAlignment();
+}
+
+void DockPanel::setItemAlignment(const ItemAlignment& alignment)
+{
+    SETTINGS->setItemAlignment(alignment);
+}
+
+IndicatorStyle DockPanel::indicatorStyle()
+{
+    return SETTINGS->indicatorStyle();
+}
+
+void DockPanel::setIndicatorStyle(const IndicatorStyle& style)
+{
+    SETTINGS->setIndicatorStyle(style);
 }
 
 void DockPanel::onWindowGeometryChanged()
