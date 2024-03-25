@@ -32,8 +32,8 @@ Item {
     Drag.dragType: Drag.Automatic
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId }
 
-    property int statusIndicatorSize: root.width * 0.9
-    property int iconSize: root.width * 0.6
+    property int statusIndicatorSize: root.width * 0.95
+    property int iconSize: root.width * 0.64
 
     Item {
         anchors.fill: parent
@@ -57,15 +57,65 @@ Item {
         }
 
         WindowIndicator {
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                bottom: parent.bottom
-                bottomMargin: 1
-            }
+            id: windowIndicator
+            dotWidth: Panel.position % 2 ? Math.max(root.width * 0.04, 2) : Math.max(root.width * 0.18, 8) 
+            dotHeight: Panel.position % 2 ? Math.max(root.width * 0.18, 8) : Math.max(root.width * 0.04, 2)
             windows: root.windows
             displayMode: root.displayMode
+            useColumnLayout: Panel.position % 2
             palette: itemPalette
             visible: (root.displayMode === Dock.Efficient && root.windows.length > 1) || (root.displayMode === Dock.Fashion && root.windows.length > 0)
+
+            function updateIndicatorAnchors() {
+                windowIndicator.anchors.top = undefined
+                windowIndicator.anchors.topMargin = 0
+                windowIndicator.anchors.bottom = undefined
+                windowIndicator.anchors.bottomMargin = 0
+                windowIndicator.anchors.left = undefined
+                windowIndicator.anchors.leftMargin = 0
+                windowIndicator.anchors.right = undefined
+                windowIndicator.anchors.rightMargin = 0
+                windowIndicator.anchors.horizontalCenter = undefined
+                windowIndicator.anchors.verticalCenter = undefined
+
+                switch(Panel.position) {
+                case Dock.Top: {
+                    windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
+                    windowIndicator.anchors.top = parent.top
+                    windowIndicator.anchors.topMargin = Math.floor(root.width * 0.05) - 1
+                    return
+                }
+                case Dock.Bottom: {
+                    windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
+                    windowIndicator.anchors.bottom = parent.bottom
+                    windowIndicator.anchors.bottomMargin = Math.floor(root.width * 0.05) - 1
+                    return
+                }
+                case Dock.Left: {
+                    windowIndicator.anchors.verticalCenter = parent.verticalCenter
+                    windowIndicator.anchors.left = parent.left
+                    windowIndicator.anchors.leftMargin = Math.floor(root.width * 0.05) - 1
+                    return
+                }
+                case Dock.Right:{
+                    windowIndicator.anchors.verticalCenter = parent.verticalCenter
+                    windowIndicator.anchors.right = parent.right
+                    windowIndicator.anchors.rightMargin = Math.floor(root.width * 0.05) - 1
+                    return
+                }
+                }
+            }
+
+            Component.onCompleted: {
+                windowIndicator.updateIndicatorAnchors()
+            }
+        }
+
+        Connections {
+            function onPositionChanged() {
+                windowIndicator.updateIndicatorAnchors()
+            }
+            target: Panel
         }
 
         LP.Menu {

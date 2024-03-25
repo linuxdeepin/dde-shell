@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "applet.h"
 #include "dsglobal.h"
 #include "itemmodel.h"
+#include "containment.h"
 #include "abstractwindow.h"
 #include "abstractwindowmonitor.h"
 
@@ -16,7 +16,7 @@ DS_BEGIN_NAMESPACE
 namespace dock {
 class AppItem;
 
-class TaskManager : public DApplet
+class TaskManager : public DContainment
 {
     Q_OBJECT
     Q_PROPERTY(ItemModel* dataModel READ dataModel NOTIFY itemsChanged)

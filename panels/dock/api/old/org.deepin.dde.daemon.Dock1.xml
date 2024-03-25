@@ -6,8 +6,8 @@
         <property access="readwrite" type="u" name="WindowSizeFashion"/>
         <property access="readwrite" type="u" name="ShowTimeout"/>
         <property access="readwrite" type="u" name="HideTimeout"/>
-        <property access="readwrite" type="u" name="IconSize"/> -->
-        <property access="readwrite" type="i" name="DisplayMode"/>
+        <property access="readwrite" type="u" name="IconSize"/>
+        <property access="readwrite" type="i" name="DisplayMode"/> -->
         <property access="readwrite" type="i" name="HideMode"/>
         <property access="readwrite" type="i" name="Position"/>
         <property access="read" type="i" name="HideState"/>

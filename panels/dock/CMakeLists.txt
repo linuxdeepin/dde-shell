@@ -20,8 +20,6 @@ file(
     dockpanel.h
     docksettings.cpp
     docksettings.h
-    docksettingsdconfig.cpp
-    docksettingsdconfig.h
 )
 
 # Old dbus interface compatible

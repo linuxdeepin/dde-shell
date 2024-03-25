@@ -25,7 +25,6 @@ class DockDBusProxy final: public QObject, public QDBusContext
 
     Q_PROPERTY(HideMode HideMode READ hideMode WRITE setHideMode NOTIFY hideModeChanged FINAL)
     Q_PROPERTY(HideState HideState READ hideState NOTIFY hideStateChanged FINAL)
-    Q_PROPERTY(DisplayMode DisplayMode READ displayMode WRITE setDisplayMode NOTIFY displayModeChanged FINAL)
 
 public:
     DockDBusProxy(DockPanel* parent = nullptr);
@@ -48,16 +47,12 @@ public:
     HideMode hideMode();
     void setHideMode(HideMode mode);
 
-    DisplayMode displayMode();
-    void setDisplayMode(DisplayMode mode);
-
     HideState hideState();
 
 Q_SIGNALS:
     void geometryChanged();
     void hideModeChanged(HideMode mode);
     void hideStateChanged(HideState state);
-    void displayModeChanged(DisplayMode mode);
 
     void PositionChanged(Position position);
     void FrontendWindowRectChanged(QRect rect);

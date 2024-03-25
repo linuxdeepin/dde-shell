@@ -7,6 +7,8 @@
 #include "abstractwindow.h"
 #include "x11windowmonitor.h"
 
+#include <dguiapplicationhelper.h>
+#include <qt5/QtCore/qnamespace.h>
 #include <unistd.h>
 
 #include <QFile>
@@ -28,6 +30,7 @@
 #include <DStyle>
 
 #include <DWindowManagerHelper>
+#include <DGuiApplicationHelper>
 
 Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPreview")
 
@@ -78,7 +81,6 @@ X11WindowPreviewContent::X11WindowPreviewContent(const QPointer<AbstractWindow> 
 
     connect(WM_HELPER, &DWindowManagerHelper::hasCompositeChanged, this, [this, layout](){
         if (WM_HELPER->hasComposite()) {
-            m_timer->start();
             setFixedSize(PREVIEW_CONTENT_WIDTH, PREVIEW_CONTENT_HEIGHT);
             layout->setContentsMargins(5, 5, 5, 5);
         } else {
@@ -90,7 +92,6 @@ X11WindowPreviewContent::X11WindowPreviewContent(const QPointer<AbstractWindow> 
 
     if (WM_HELPER->hasComposite()) {
         setFixedSize(PREVIEW_CONTENT_WIDTH, PREVIEW_CONTENT_HEIGHT);
-        m_timer->start();
     } else {
         setFixedSize(PREVIEW_CONTENT_WIDTH, PREVIEW_TITLE_HEGIHT);
     }
@@ -418,15 +419,19 @@ void X11WindowPreviewContainer::paintEvent(QPaintEvent* event)
     pen.setWidth(PREVIEW_HOVER_BORDER);
     pen.setColor(QColor(0, 0, 0, 255 * 0.3));
     painter.setPen(pen);
-    painter.drawRoundedRect(m_hoverRect, radius * ratio, radius * ratio);
+    if (WM_HELPER->hasComposite()) {
+        painter.drawRoundedRect(m_hoverRect, radius * ratio, radius * ratio);
+    } else {
+        painter.drawRect(m_hoverRect);
+    }
 }
 
 void X11WindowPreviewContainer::clearSpecifiedCountPreviews(int count)
 {
     count = std::min(m_contentLayout->count(), count);
     QLayoutItem *item;
-    while (count > 0) {
-        item = m_contentLayout->takeAt(count--);
+    while (count >= 0) {
+        item = m_contentLayout->takeAt(--count);
         if (item == nullptr) break;
         delete item->widget();
         delete item;
@@ -493,9 +498,17 @@ void X11WindowPreviewContainer::initUI()
 
     m_currentWindowIcon->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_currentWindowTitle->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    QPalette pa = palette();
-    pa.setColor(QPalette::WindowText, QColor("black"));
-    m_currentWindowTitle->setPalette(pa);
+
+    auto updateWindowTitleColorType = [this](){
+        QPalette pa = palette();
+        auto type = DGuiApplicationHelper::instance()->themeType();
+        pa.setColor(QPalette::WindowText, type == DGuiApplicationHelper::ColorType::LightType ? Qt::black : Qt::white);
+        m_currentWindowTitle->setPalette(pa);
+    };
+
+    updateWindowTitleColorType();
+
+    connect(DGuiApplicationHelper::instance(), & DGuiApplicationHelper::themeTypeChanged, this , updateWindowTitleColorType);
 
     titleLayout->addWidget(m_currentWindowIcon);
     titleLayout->addWidget(m_currentWindowTitle);

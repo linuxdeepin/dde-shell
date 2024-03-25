@@ -9,19 +9,19 @@ import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0 as D
 
-AppletItem {
+ContainmentItem {
     id: taskmanager
-    property bool useColumnLayout: Applet.parent.position % 2
-    property int dockSize: Applet.parent.dockSize
+    property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 15
 
-    implicitWidth: useColumnLayout ? dockSize : appContainer.implicitWidth
-    implicitHeight: useColumnLayout ? appContainer.implicitHeight : dockSize
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : appContainer.implicitWidth
+    implicitHeight: useColumnLayout ? appContainer.implicitHeight : Panel.rootObject.dockSize
 
     OverflowContainer {
         id: appContainer
-        anchors.fill: parent
+        anchors.centerIn: parent
         useColumnLayout: taskmanager.useColumnLayout
+        spacing: Panel.rootObject.itemSpacing
         displaced: Transition {
             NumberAnimation {
                 properties: "x,y"
@@ -41,8 +41,9 @@ AppletItem {
                 required property string menus
                 required property list<string> windows
 
-                implicitWidth: dockSize
-                implicitHeight: dockSize
+                // TODO: 临时溢出逻辑，待后面修改
+                implicitWidth: Panel.rootObject.dockItemMaxSize
+                implicitHeight: Panel.rootObject.dockItemMaxSize
 
                 onEntered: function(drag) {
                     visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)
@@ -57,8 +58,8 @@ AppletItem {
 
                 AppItem {
                     id: app
-                    displayMode: taskmanager.Applet.parent.displayMode
-                    colorTheme: taskmanager.Applet.parent.colorTheme
+                    displayMode: Panel.indicatorStyle
+                    colorTheme: Panel.colorTheme
                     active: delegateRoot.active
                     attention: delegateRoot.attention
                     itemId: delegateRoot.itemId
@@ -74,5 +75,11 @@ AppletItem {
                 }
             }
         }
+    }
+
+    Component.onCompleted: {
+        Panel.rootObject.dockItemMaxSize = Qt.binding(function(){
+            return Math.min(Panel.rootObject.dockSize, 6 * Panel.rootObject.dockLeftSpaceForCenter / (7 * (Panel.rootObject.dockCenterPartCount - 1 + taskmanager.Applet.dataModel.rowCount())))
+        })
     }
 }

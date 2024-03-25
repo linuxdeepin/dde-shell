@@ -18,43 +18,39 @@ Window {
     id: dock
     visible: true
     property bool useColumnLayout: Applet.position % 2
+    // TODO: 临时溢出逻辑，待后面修改
+    property int dockLeftSpaceForCenter: useColumnLayout ? 
+        (Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight) :
+        (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth)
+
+    property int dockCenterPartCount: dockCenterPartModel.count
+
+    property int dockSize: Applet.dockSize
+    property int dockItemMaxSize: dockSize
+    property int itemSpacing: dockItemMaxSize / 20
 
     // NOTE: -1 means not set its size, follow the platform size
-    width: Panel.position == Dock.Top || Panel.position == Dock.Bottom ? -1 : Applet.dockSize
-    height: Panel.position == Dock.Left || Panel.position == Dock.Right ? -1 : Applet.dockSize
+    width: Panel.position == Dock.Top || Panel.position == Dock.Bottom ? -1 : dockSize
+    height: Panel.position == Dock.Left || Panel.position == Dock.Right ? -1 : dockSize
     color: "transparent"
 
     DLayerShellWindow.anchors: position2Anchors(Applet.position)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Applet.dockSize
-    DLayerShellWindow.leftMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - gridLayout.implicitWidth) / 2
-    DLayerShellWindow.rightMargin: (useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.width - gridLayout.implicitWidth) / 2
-    DLayerShellWindow.topMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - gridLayout.implicitHeight) / 2
-    DLayerShellWindow.bottomMargin: (!useColumnLayout || Applet.displayMode === Dock.Efficient) ? 0 : (Screen.height - gridLayout.implicitHeight) / 2
 
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
-
-    // TODO: wait BehindWindowblur support setting radius for special corners
-
-    D.RoundRectangle {
+    D.DWindow.enableBlurWindow: true
+    D.BehindWindowBlur {
         anchors.fill: parent
-        radius: (Applet.dockSize - 20) / 2
-        color: Applet.colorTheme == Dock.Light ? "ivory" : "darkgrey"
-        corners: {
-            if (Panel.displayMode == Dock.Efficient)
-                return D.RoundRectangle.NoneCorner
+        blendColor: Applet.colorTheme == Dock.Light ? Qt.rgba(1, 1, 1, 0.6) : Qt.rgba(0, 0, 0, 0.3)
+    }
 
-            switch (Panel.position) {
-            case Dock.Top:
-                return D.RoundRectangle.BottomCorner
-            case Dock.Right:
-                return D.RoundRectangle.LeftCorner
-            case Dock.Bottom:
-                return D.RoundRectangle.TopCorner
-            case Dock.Left:
-                return D.RoundRectangle.RightCorner
-            }
+    onDockSizeChanged: {
+        if (dock.dockSize === Dock.MIN_DOCK_SIZE) {
+            Panel.indicatorStyle = Dock.Efficient
+        } else {
+            Panel.indicatorStyle = Dock.Fashion
         }
     }
 
@@ -87,20 +83,35 @@ Window {
     LP.Menu {
         id: dockMenu
         MutuallyExclusiveMenu {
-            title: qsTr("Mode")
+            visible: Panel.debugMode
+            title: qsTr("Indicator Style")
             EnumPropertyMenuItem {
                 name: qsTr("Fashion Mode")
-                prop: "displayMode"
+                prop: "indicatorStyle"
                 value: Dock.Fashion
             }
             EnumPropertyMenuItem {
                 name: qsTr("Efficient Mode")
-                prop: "displayMode"
+                prop: "indicatorStyle"
                 value: Dock.Efficient
             }
         }
         MutuallyExclusiveMenu {
+            title: qsTr("Item Alignment")
+            EnumPropertyMenuItem {
+                name: qsTr("Left")
+                prop: "itemAlignment"
+                value: Dock.LeftAlignment
+            }
+            EnumPropertyMenuItem {
+                name: qsTr("Center")
+                prop: "itemAlignment"
+                value: Dock.CenterAlignment
+            }
+        }
+        MutuallyExclusiveMenu {
             title: qsTr("Position")
+            visible: Panel.debugMode
             EnumPropertyMenuItem {
                 enabled: Panel.debugMode
                 name: qsTr("Top")
@@ -126,7 +137,7 @@ Window {
             }
         }
         MutuallyExclusiveMenu {
-            enabled: Panel.debugMode
+            visible: Panel.debugMode
             title: qsTr("Status")
             EnumPropertyMenuItem {
                 name: qsTr("Keep Shown")
@@ -180,6 +191,8 @@ Window {
         columns: 1
         rows: 1
         flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
+        columnSpacing: 0
+        rowSpacing: 0
 
         Item {
             id: dockLeftPart
@@ -197,42 +210,46 @@ Window {
             }
         }
 
-        Rectangle {
-            visible: (Applet.displayMode === Dock.Fashion && leftLoader.model.count !== 0)
-            implicitWidth: Applet.dockSize * 0.6 + (dock.useColumnLayout ? 0 : 22)
-            implicitHeight: Applet.dockSize * 0.6 + (dock.useColumnLayout ? 22 : 0)
-            color: "transparent"
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.horizontalStretchFactor: Panel.itemAlignment
         }
 
         Item {
             id: dockCenterPart
             implicitWidth: centerLoader.implicitWidth
             implicitHeight: centerLoader.implicitHeight
-            Layout.fillWidth: true
-            Layout.fillHeight: true
             OverflowContainer {
                 id: centerLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
+                spacing: dock.itemSpacing
                 model: DockPartAppletModel {
                     id: dockCenterPartModel
                     leftDockOrder: 10
                     rightDockOrder: 20
                 }
             }
+            Behavior on x {
+                NumberAnimation { duration: 500 }
+            }
+            Behavior on y {
+                NumberAnimation { duration: 500 }
+            }
         }
 
-        Rectangle {
-            visible: (Applet.displayMode === Dock.Fashion && rightLoader.model.count !== 0)
-            implicitWidth: Applet.dockSize * 0.6 + (dock.useColumnLayout ? 0 : 22)
-            implicitHeight: Applet.dockSize * 0.6 + (dock.useColumnLayout ? 22 : 0)
-            color: "transparent"
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.horizontalStretchFactor: Dock.CenterAlignment
         }
 
         Item {
             id: dockRightPart
             implicitWidth: rightLoader.implicitWidth
             implicitHeight: rightLoader.implicitHeight
+            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
             OverflowContainer {
                 id: rightLoader
                 anchors.fill: parent
@@ -245,6 +262,7 @@ Window {
             }
         }
     }
+
     MouseArea {
         id: dragArea
         property int oldMouseY: 0;
@@ -257,35 +275,27 @@ Window {
             return Qt.SizeHorCursor
         }
 
-        onPressed:function(mouse) {
+        onPressed: function(mouse) {
             oldMouseY = mouse.y
             oldMouseX = mouse.x
         }
-        onPositionChanged:function(mouse) {
+
+        onPositionChanged: function(mouse) {
             var yChange = mouse.y - oldMouseY
             var xChange = mouse.x - oldMouseX
             if (Panel.position == Dock.Bottom) {
-                Applet.dockSize -= yChange
+                dockSize = Math.min(Math.max(dockSize - yChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
             } else if (Panel.position == Dock.Top) {
-                Applet.dockSize += yChange
+                dockSize = Math.min(Math.max(dockSize + yChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
             } else if (Panel.position == Dock.Left) {
-                Applet.dockSize += xChange
+                dockSize = Math.min(Math.max(dockSize + xChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
             } else {
-                Applet.dockSize -= xChange
+                dockSize = Math.min(Math.max(dockSize - xChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
             }
         }
-        onReleased:function(mouse) {
-            var yChange = mouse.y - oldMouseY
-            var xChange = mouse.x - oldMouseX
-            if (Panel.position == Dock.Bottom) {
-                Applet.dockSize -= yChange
-            } else if (Panel.position == Dock.Top) {
-                Applet.dockSize += yChange
-            } else if (Panel.position == Dock.Left) {
-                Applet.dockSize += xChange
-            } else {
-                Applet.dockSize -= xChange
-            }
+
+        onReleased: function(mouse) {
+            Applet.dockSize = dockSize
         }
 
         function anchorToTop() {
@@ -295,6 +305,7 @@ Window {
             anchors.right = parent.right
             dragArea.height = 5
         }
+
         function anchorToBottom() {
             anchors.bottom = undefined
             anchors.top = parent.top
@@ -344,6 +355,9 @@ Window {
         function onPositionChanged() {
             changeDragAreaAnchor()
         }
+        function onDockSizeChanged() {
+            dock.dockSize = Panel.dockSize
+        }
         target: Panel
     }
 
@@ -372,10 +386,6 @@ Window {
     Component.onCompleted: {
         DockCompositor.dockPosition = Qt.binding(function() {
             return Panel.position
-        })
-
-        DockCompositor.dockDisplayMode = Qt.binding(function(){
-            return Panel.displayMode
         })
 
         DockCompositor.dockColorTheme = Qt.binding(function(){

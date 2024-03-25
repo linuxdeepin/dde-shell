@@ -11,12 +11,13 @@ import org.deepin.ds.dock 1.0
 Item {
     required property list<string> windows
     required property int displayMode
+    required property bool useColumnLayout
     required property AppItemPalette palette
+    required property int dotWidth
+    required property int dotHeight
 
     property int borderWidth: (displayMode === Dock.Fashion) ? 1 : 0
     property int radius: 1
-    property int dotWidth: 10 + 2 * borderWidth
-    property int dotHeight: 2 + 2 * borderWidth
 
     width: indicatorLoader.width
     height: indicatorLoader.height
@@ -32,8 +33,8 @@ Item {
         Rectangle {
             border.width: borderWidth
             border.color: palette.dotIndicatorBorder
-            width: dotWidth
-            height: dotHeight
+            width: dotWidth + 2 * borderWidth
+            height: dotHeight + 2 * borderWidth
             color: palette.dotIndicator
             radius: radius
         }
@@ -41,7 +42,10 @@ Item {
 
     Component {
         id: multipleWindows
-        Row {
+        Grid {
+            columns: useColumnLayout ?  1 : 2
+            rows: useColumnLayout ? 2 : 1
+            flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
             spacing: 2
             Loader { sourceComponent: dot }
             Loader { sourceComponent: dot }

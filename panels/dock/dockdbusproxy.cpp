@@ -17,7 +17,6 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
     connect(parent, &DockPanel::geometryChanged, this, &DockDBusProxy::FrontendWindowRectChanged);
     connect(parent, &DockPanel::positionChanged, this, &DockDBusProxy::PositionChanged);
     connect(parent, &DockPanel::hideModeChanged, this, &DockDBusProxy::hideModeChanged);
-    connect(parent, &DockPanel::displayModeChanged, this, &DockDBusProxy::displayModeChanged);
 }
 
 DockPanel* DockDBusProxy::parent() const
@@ -53,16 +52,6 @@ HideMode DockDBusProxy::hideMode()
 void DockDBusProxy::setHideMode(HideMode mode)
 {
     parent()->setHideMode(mode);
-}
-
-DisplayMode DockDBusProxy::displayMode()
-{
-    return parent()->displayMode();
-}
-
-void DockDBusProxy::setDisplayMode(DisplayMode mode)
-{
-    parent()->setDisplayMode(mode);
 }
 
 HideState DockDBusProxy::hideState()

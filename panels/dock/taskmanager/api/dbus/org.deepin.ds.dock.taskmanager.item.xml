@@ -9,9 +9,9 @@
         <property name="icon" type="s" access="read"/>
         <property name="menus" type="s" access="read"/>
 
-        <property name="dir" type="s" access="read"/>
-        <property name="windows" type="as" access="read"/>
-        <property name="desktopfileIDs" type="as" access="read"/>
+        <!-- <method name="data">
+            <arg type="i" name="type" direction="in" />
+        </method> -->
 
         <method name="setDocked">
             <arg type="b" name="docked" direction="in" />

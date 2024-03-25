@@ -7,6 +7,7 @@
 #include "dsglobal.h"
 
 #include <QObject>
+#include <QVariant>
 
 DS_BEGIN_NAMESPACE
 namespace dock {
@@ -24,16 +25,13 @@ class AbstractItem : public QObject
     Q_PROPERTY(bool isActive READ isActive NOTIFY activeChanged FINAL)
     Q_PROPERTY(bool isAttention READ isAttention  NOTIFY attentionChanged FINAL)
     Q_PROPERTY(bool isDocked READ isDocked WRITE setDocked NOTIFY dockedChanged FINAL)
-
-    Q_PROPERTY(QStringList windows READ windows NOTIFY windowsChanged FINAL)
-    Q_PROPERTY(QStringList desktopFileIDs READ desktopFileIDs NOTIFY desktopFileIDsChanged FINAL)
-    Q_PROPERTY(QString dockedDir READ dockedDir NOTIFY dockedDirChanged FINAL)
+    Q_PROPERTY(QVariant data READ data NOTIFY dataChanged FINAL)
 
 public:
     enum ItemType {
-        AppType,
-        GroupType,
-        FloderType,
+        AppType = 1,
+        GroupType = 2,
+        FloderType = 3,
         /* if treat belows as appitem
         ShowDesktopType,
         WorkSpacePreviewType,
@@ -61,15 +59,7 @@ public:
     virtual void handleClick(const QString& clickItem) = 0;
 
     // three type data
-
-    // app item
-    virtual QStringList windows() {return QStringList();};
-
-    // appgroup item
-    virtual QStringList desktopFileIDs() {return QStringList();};
-
-    // floder item
-    virtual QString dockedDir() {return QString();};
+    virtual QVariant data() = 0;
 
 protected:
     AbstractItem(const QString& id, QObject *parent = nullptr);
@@ -83,9 +73,7 @@ Q_SIGNALS:
     void attentionChanged();
     void dockedChanged();
 
-    void windowsChanged();
-    void desktopFileIDsChanged();
-    void dockedDirChanged();
+    void dataChanged();
 
 };
 }

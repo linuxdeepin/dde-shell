@@ -11,6 +11,7 @@
 
 #include <QtCore>
 #include <QQmlEngine>
+#include <DGuiApplicationHelper>
 
 DS_BEGIN_NAMESPACE
 namespace dock {
@@ -18,29 +19,30 @@ namespace dock {
 Q_NAMESPACE
 QML_NAMED_ELEMENT(Dock)
 
-constexpr uint MIN_DOCK_SIZE = 40;
-constexpr uint MAX_DOCK_SIZE = 100;
+// dock keep 10:36:10
+enum SIZE {
+    MIN_DOCK_SIZE = 37,
+    DEFAULT_DOCK_SIZE = 56,
+    MAX_DOCK_SIZE = 100,
+    MIN_DOCK_TASKMANAGER_ICON_SIZE = 24,
+    MAX_DOCK_TASKMANAGER_ICON_SIZE = 64
+};
 
-///
-/// \brief The DisplayMode enum
-/// spec dock display mode
-///
-enum DisplayMode {
+enum IndicatorStyle {
     Fashion     = 0,
     Efficient   = 1,
-    // deprecreated
-//    Classic     = 2,
+};
+
+enum ItemAlignment {
+    LeftAlignment        = 0,
+    CenterAlignment      = 1,
 };
 
 enum ColorTheme {
-    Light = 0,
-    Dark  = 1,
+    Light = Dtk::Gui::DGuiApplicationHelper::ColorType::LightType,
+    Dark  = Dtk::Gui::DGuiApplicationHelper::ColorType::DarkType,
 };
 
-///
-/// \brief The HideMode enum
-/// spec dock hide behavior
-///
 enum HideMode {
     KeepShowing     = 0,
     KeepHidden      = 1,
@@ -51,14 +53,9 @@ enum Position {
     Top     = 0,
     Right   = 1,
     Bottom  = 2,
-    Left    = 3
+    Left    = 3,
 };
 
-///
-/// \brief The HideState enum
-/// spec current dock should hide or shown.
-/// this argument works only HideMode is SmartHide
-///
 enum HideState {
     Unknown     = 0,
     Show        = 1,
@@ -70,7 +67,9 @@ enum AniAction {
     AA_Hide
 };
 
-Q_ENUM_NS(DisplayMode)
+Q_ENUM_NS(SIZE)
+Q_ENUM_NS(IndicatorStyle)
+Q_ENUM_NS(ItemAlignment)
 Q_ENUM_NS(ColorTheme)
 Q_ENUM_NS(HideMode)
 Q_ENUM_NS(Position)
@@ -80,7 +79,9 @@ Q_ENUM_NS(AniAction)
 
 DS_END_NAMESPACE
 
-Q_DECLARE_METATYPE(DS_NAMESPACE::dock::DisplayMode)
+Q_DECLARE_METATYPE(DS_NAMESPACE::dock::SIZE)
+Q_DECLARE_METATYPE(DS_NAMESPACE::dock::IndicatorStyle)
+Q_DECLARE_METATYPE(DS_NAMESPACE::dock::ItemAlignment)
 Q_DECLARE_METATYPE(DS_NAMESPACE::dock::ColorTheme)
 Q_DECLARE_METATYPE(DS_NAMESPACE::dock::HideMode)
 Q_DECLARE_METATYPE(DS_NAMESPACE::dock::HideState)
