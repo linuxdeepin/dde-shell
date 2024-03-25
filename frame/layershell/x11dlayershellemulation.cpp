@@ -107,18 +107,21 @@ void LayerShellEmulation::onPositionChanged()
         y = (screen->geometry().top() + m_dlayerShellWindow->topMargin());
     }
 
-    const bool horizontallyConstrained =(anchors & (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight);
-    const bool verticallyConstrained = (anchors & (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom);
+    QRect rect(x, y, m_window->width(), m_window->height());
+
+    const bool horizontallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorLeft, DLayerShellWindow::AnchorRight});
+    const bool verticallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorTop, DLayerShellWindow::AnchorBottom});
 
     if (horizontallyConstrained) {
-        x = (screen->geometry().left() + m_dlayerShellWindow->leftMargin());
-        m_window->setWidth(screen->geometry().width() - m_dlayerShellWindow->leftMargin() - m_dlayerShellWindow->rightMargin());
+        rect.setX(screen->geometry().left() + m_dlayerShellWindow->leftMargin());
+        rect.setWidth(screen->geometry().width() - m_dlayerShellWindow->leftMargin() - m_dlayerShellWindow->rightMargin());
     }
     if (verticallyConstrained) {
-        y = (screen->geometry().top() + m_dlayerShellWindow->topMargin());
-        m_window->setHeight(screen->geometry().height() - m_dlayerShellWindow->topMargin() - m_dlayerShellWindow->bottomMargin());
+        rect.setY(screen->geometry().top() + m_dlayerShellWindow->topMargin());
+        rect.setHeight(screen->geometry().height() - m_dlayerShellWindow->topMargin() - m_dlayerShellWindow->bottomMargin());
     }
-    m_window->setX(x), m_window->setY(y);
+
+    m_window->setGeometry(rect);
 }
 
 /**
