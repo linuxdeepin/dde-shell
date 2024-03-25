@@ -46,6 +46,7 @@ private:
 private:
     QString id2dbusPath(const QString& id);
     void connectToAmDBusSignal(const QString& propertyName, const char* slot);
+    void launchByAMTool(const QString &action = QString());
 
 private Q_SLOTS:
     void updateActions();
