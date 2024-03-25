@@ -154,12 +154,12 @@ QString DesktopFileAMParser::type()
 
 void DesktopFileAMParser::launch()
 {
-    m_applicationInterface->Launch(QString(), QStringList(), QVariantMap());
+    return launchByAMTool();
 }
 
 void DesktopFileAMParser::launchWithAction(const QString& action)
 {
-    m_applicationInterface->Launch(action, QStringList(), QVariantMap());
+    return launchByAMTool(action);
 }
 
 void DesktopFileAMParser::requestQuit()
@@ -178,6 +178,22 @@ void DesktopFileAMParser::connectToAmDBusSignal(const QString& signalName, const
         this,
         SLOT(onPropertyChanged(const QDBusMessage &))
     );
+}
+
+void DesktopFileAMParser::launchByAMTool(const QString &action)
+{
+    QProcess process;
+    const auto path = m_applicationInterface->path();
+    process.setProcessChannelMode(QProcess::MergedChannels);
+    process.start("dde-am", {"--by-user", path});
+    if (!process.waitForFinished()) {
+        qWarning() << "Failed to launch the path:" << path << process.errorString();
+        return;
+    } else if (process.exitCode() != 0) {
+        qWarning() << "Failed to launch the path:" << path << process.readAll();
+        return;
+    }
+    qDebug() << "Launch the application path:" << path;
 }
 
 void DesktopFileAMParser::updateActions()
