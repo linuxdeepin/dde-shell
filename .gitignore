@@ -6,5 +6,7 @@ build*/
 .vscode/settings.json
 *.user
 .cache/
-
+panels/dock/tray/frame/dbusinterface/generation_dbus_interface/
+panels/dock/tray/plugins/sound/dbusinterface/generation_dbus_interface/
+panels/dock/tray/plugins/bluetooth/dbusinterface/generation_dbus_interface/
 */utils/dbus/xml2cpp/*_interface.*

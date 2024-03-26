@@ -41,10 +41,6 @@ Window {
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
     D.DWindow.enableBlurWindow: true
-    D.BehindWindowBlur {
-        anchors.fill: parent
-        blendColor: Applet.colorTheme == Dock.Light ? Qt.rgba(1, 1, 1, 0.6) : Qt.rgba(0, 0, 0, 0.3)
-    }
 
     onDockSizeChanged: {
         if (dock.dockSize === Dock.MIN_DOCK_SIZE) {

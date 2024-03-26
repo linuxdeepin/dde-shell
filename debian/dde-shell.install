@@ -12,3 +12,5 @@ usr/libexec/dockplugin-loader
 usr/lib/*/qt5/plugins/wayland-shell-integration
 usr/lib/*/libdde-dockplugin-interface.so.*
 usr/share/dsg/configs/org.deepin.ds.dock/
+usr/lib/dde-dock/plugins/tmp
+usr/lib/dde-dock/plugins/tmp/quick-trays

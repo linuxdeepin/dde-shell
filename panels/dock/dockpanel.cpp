@@ -33,7 +33,7 @@ DockPanel::DockPanel(QObject * parent)
     , m_theme(ColorTheme::Dark)
     , m_compositorReady(false)
 {
-    connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
+    // connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
 }
 
 bool DockPanel::load()
