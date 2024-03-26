@@ -41,9 +41,14 @@ public:
     void init()
     {
         D_Q(DPluginLoader);
-        for (const auto &item : builtinPluginPaths()) {
-            q->addPluginDir(item);
+        auto dirs = q->pluginDirs();
+        // high priority for builtin plugin.
+        auto builtinDirs = builtinPluginPaths();
+        std::reverse(builtinDirs.begin(), builtinDirs.end());
+        for (const auto &item : builtinDirs) {
+            dirs.prepend(item);
         }
+        q->setPluginDirs(dirs);
 
         if (m_loadMetaDatas.isRunning())
             m_loadMetaDatas.cancel();
@@ -269,6 +274,11 @@ void DPluginLoader::addPluginDir(const QString &dir)
 QStringList DPluginLoader::pluginDirs() const
 {
     return QCoreApplication::libraryPaths();
+}
+
+void DPluginLoader::setPluginDirs(const QStringList &dirs)
+{
+    QCoreApplication::setLibraryPaths(dirs);
 }
 
 QStringList DPluginLoader::disabledApplets() const

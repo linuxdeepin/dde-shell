@@ -36,9 +36,15 @@ public:
         static QQmlEngine *s_engine = nullptr;
         if (!s_engine) {
             s_engine = new QQmlEngine();
+            auto paths = s_engine->importPathList();
+            // high priority for builtin plugin.
+            paths.prepend(DDE_SHELL_QML_INSTALL_DIR);
             const QString rootDir = QCoreApplication::applicationDirPath();
-            s_engine->addImportPath(rootDir + "/../plugins");
-            s_engine->addImportPath(DDE_SHELL_QML_INSTALL_DIR);
+            QDir pluginDir(rootDir);
+            if (pluginDir.cd("../plugins")) {
+                paths.prepend(pluginDir.absolutePath());
+            }
+            s_engine->setImportPathList(paths);
             qCDebug(dsLog()) << "Engine importPaths" << s_engine->importPathList();
         }
         return s_engine;
