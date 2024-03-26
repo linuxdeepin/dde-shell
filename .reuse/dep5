@@ -70,3 +70,8 @@ License: CC0-1.0
 Files: misc/*.service
 Copyright: None
 License: CC0-1.0
+
+# tray
+Files: panels/dock/tray/*
+Copyright: UnionTech Software Technology Co., Ltd.
+License: GPL-3.0-or-later
