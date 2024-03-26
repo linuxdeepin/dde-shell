@@ -63,7 +63,6 @@ add_subdirectory(workspaceitem)
 add_subdirectory(searchitem)
 add_subdirectory(launcherItem)
 add_subdirectory(showdesktop)
-add_subdirectory(slidingpanel)
 add_subdirectory(taskmanager)
 add_subdirectory(tray)
 
