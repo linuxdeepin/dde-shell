@@ -8,6 +8,7 @@
 #include "containmentitem.h"
 #include "panel.h"
 #include "dstypes.h"
+#include "private/dsqmlglobal_p.h"
 #include "layershell/dlayershellwindow.h"
 
 #include <qqml.h>
@@ -37,6 +38,7 @@ void QmlpluginPlugin::registerTypes(const char *uri)
     qmlRegisterType<DContainmentItem>(uri, 1, 0, "ContainmentItem");
     qmlRegisterUncreatableType<DContainmentItem>(uri, 1, 0, "Containment", "Containment Attached");
     qmlRegisterUncreatableType<DPanel>(uri, 1, 0, "Panel", "Panel Attached");
+    qmlRegisterSingletonInstance(uri, 1, 0, "DS", DQmlGlobal::instance());
     qmlRegisterType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow");
     qmlRegisterUncreatableType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow","LayerShell Attached");
 

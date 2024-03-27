@@ -109,21 +109,51 @@ DPluginMetaData DPluginMetaData::fromJsonFile(const QString &file)
         qCWarning(dsLog) << "Couldn't open" << file;
         return DPluginMetaData();
     }
+
+    DPluginMetaData result = fromJsonString(f.readAll());
+    if (!result.isValid()) {
+        qCWarning(dsLog) << "error parsing" << file;
+        return DPluginMetaData();
+    }
+    result.d->m_pluginDir = QFileInfo(f).absoluteDir().path();
+    return result;
+}
+
+DPluginMetaData DPluginMetaData::fromJsonString(const QByteArray &data)
+{
     QJsonParseError error;
-    const QJsonObject metaData = QJsonDocument::fromJson(f.readAll(), &error).object();
+    const QJsonObject metaData = QJsonDocument::fromJson(data).object();
     if (error.error) {
-        qCWarning(dsLog) << "error parsing" << file << error.errorString();
+        qCWarning(dsLog) << "error parsing json data"  << error.errorString();
         return DPluginMetaData();
     }
 
     DPluginMetaData result;
     result.d->m_metaData = metaData.toVariantMap();
-    result.d->m_pluginDir = QFileInfo(f).absoluteDir().path();
     auto root = result.d->rootObject();
     if (root.contains("Id")) {
         result.d->m_pluginId = root["Id"].toString();
     }
     return result;
+}
+
+DPluginMetaData DPluginMetaData::rootPluginMetaData()
+{
+    static DPluginMetaData applet = fromJsonString(R"delimiter(
+        {
+            "Plugin": {
+                "Version": "1.0",
+                "Id": "org.deepin.ds.root",
+                "ContainmentType": "Root"
+            }
+        }
+        )delimiter");
+    return applet;
+}
+
+bool DPluginMetaData::isRootPlugin(const QString &pluginId)
+{
+    return rootPluginMetaData().pluginId() == pluginId;
 }
 
 DS_END_NAMESPACE
