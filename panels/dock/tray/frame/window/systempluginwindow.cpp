@@ -217,12 +217,9 @@ StretchPluginsItem::StretchPluginsItem(PluginsItemInterface * const pluginInter,
     , m_displayMode(Dock::DisplayMode::Efficient)
     , m_windowSizeFashion(DockSettings::instance()->getWindowSizeFashion())
 {
-
     connect(DockSettings::instance(), &DockSettings::windowSizeFashionChanged, this, [=](uint size) {
         m_windowSizeFashion = size;
     });
-
-    this->setStyleSheet("background-color:red");
 }
 
 StretchPluginsItem::~StretchPluginsItem()

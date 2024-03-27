@@ -9,4 +9,7 @@ build*/
 panels/dock/tray/frame/dbusinterface/generation_dbus_interface/
 panels/dock/tray/plugins/sound/dbusinterface/generation_dbus_interface/
 panels/dock/tray/plugins/bluetooth/dbusinterface/generation_dbus_interface/
+panels/dock/tray/translations/
+obj-x86_64-linux-gnu/
+*.autosave
 */utils/dbus/xml2cpp/*_interface.*

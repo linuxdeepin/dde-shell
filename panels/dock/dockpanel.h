@@ -13,9 +13,9 @@
 DS_BEGIN_NAMESPACE
 namespace dock {
 const QStringList pluginDirs = {
-    "/usr/lib/dde-dock/plugins/tmp/",
-    "/usr/lib/dde-dock/plugins/tmp/quick-trays/",
-    "/usr/lib/dde-dock/plugins/tmp/system-trays/"
+    "/usr/lib/dde-dock/tmp/plugins/",
+    "/usr/lib/dde-dock/tmp/plugins/quick-trays/",
+    "/usr/lib/dde-dock/tmp/plugins/system-trays/"
 };
 
 class DockPanel : public DPanel, public QDBusContext

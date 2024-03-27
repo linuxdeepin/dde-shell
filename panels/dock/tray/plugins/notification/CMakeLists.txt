@@ -27,4 +27,4 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     Dtk6::Gui
 )
 
-install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-dock/plugins/tmp)
+install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-dock/tmp/plugins)

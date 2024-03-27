@@ -19,15 +19,15 @@ AppletItem {
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 25
     property var position: Panel.position
-    property var dockSize: Panel.dockSize
     property var dockWidth: Applet.dockWidth
     property var dockHeight: Applet.dockHeight
 
     function updatePanelGeometry() {
-        Applet.setPanelSize(Panel.dockSize)
         if (useColumnLayout) {
+            Applet.setPanelSize(Window.width)
             Applet.setPanelPosition(0, Window.height - dockHeight)
         } else {
+            Applet.setPanelSize(Window.height)
             Applet.setPanelPosition(Window.width - dockWidth, 0)
         }
     }
@@ -40,7 +40,6 @@ AppletItem {
     Window.onWidthChanged: updatePanelGeometry()
     Window.onHeightChanged: updatePanelGeometry()
     onPositionChanged: Applet.setDockPosition(Panel.position)
-    onDockSizeChanged: updatePanelGeometry()
     onDockWidthChanged: updatePanelGeometry()
     onDockHeightChanged: updatePanelGeometry()
 

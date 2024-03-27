@@ -25,7 +25,7 @@
 
 DWIDGET_USE_NAMESPACE
 
-struct QuickDragInfo {
+    struct QuickDragInfo {
     QPoint dragPosition;
     QWidget *dragItem = nullptr;
     PluginsItemInterface *pluginInter = nullptr;
@@ -63,6 +63,14 @@ QuickSettingContainer::QuickSettingContainer(DockPluginController *pluginControl
     m_childPage->installEventFilter(this);
     // installEventFilter(this);
     setMouseTracking(true);
+
+    // FIXME: Make sure the panel is always refreshed at 60 frames to prevent it from not refreshing in qml
+    QTimer *updateTimer = new QTimer(this);
+    updateTimer->setInterval(1000 / 60);
+    connect(updateTimer, &QTimer::timeout, this, [ = ] {
+        this->update();
+    });
+    updateTimer->start();
 }
 
 QuickSettingContainer::~QuickSettingContainer()
@@ -190,7 +198,7 @@ void QuickSettingContainer::mouseMoveEvent(QMouseEvent *event)
 
     QPoint pointCurrent = event->pos();
     if (qAbs(m_dragInfo->dragPosition.x() - pointCurrent.x()) > 5
-            || qAbs(m_dragInfo->dragPosition.y() - pointCurrent.y()) > 5) {
+        || qAbs(m_dragInfo->dragPosition.y() - pointCurrent.y()) > 5) {
         QuickSettingItem *moveItem = qobject_cast<QuickSettingItem *>(m_dragInfo->dragItem);
         QuickIconDrag *drag = new QuickIconDrag(this, moveItem->dragPixmap());
         QuickPluginMimeData *mimedata = new QuickPluginMimeData(m_dragInfo->pluginInter, drag);
@@ -322,7 +330,7 @@ void QuickSettingContainer::initUi()
     // 加载所有的可以在快捷面板显示的插件
     QList<PluginsItemInterface *> plugins = m_pluginController->currentPlugins();
     for (PluginsItemInterface *plugin : plugins) {
-         appendPlugin(plugin, m_pluginController->itemKey(plugin), false);
+        appendPlugin(plugin, m_pluginController->itemKey(plugin), false);
     }
 
     m_switchLayout->addWidget(m_mainWidget);
@@ -332,14 +340,14 @@ void QuickSettingContainer::initUi()
     setAcceptDrops(true);
 
     QMetaObject::invokeMethod(this, [ = ] {
-        if (plugins.size() > 0) {
-            updateItemLayout();
-            updateFullItemLayout();
-        }
-        // 设置当前窗口的大小
-        onResizeView();
-        setFixedWidth(ITEMWIDTH * 4 + (ITEMSPACE * 5));
-    }, Qt::QueuedConnection);
+            if (plugins.size() > 0) {
+                updateItemLayout();
+                updateFullItemLayout();
+            }
+            // 设置当前窗口的大小
+            onResizeView();
+            setFixedWidth(ITEMWIDTH * 4 + (ITEMSPACE * 5));
+        }, Qt::QueuedConnection);
 }
 
 void QuickSettingContainer::initConnection()

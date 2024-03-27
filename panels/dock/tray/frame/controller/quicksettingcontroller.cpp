@@ -41,7 +41,7 @@ void QuickSettingController::startLoader()
 #ifdef QT_DEBUG
     AbstractPluginsController::startLoader(new PluginLoader(QString("%1/%2").arg(qApp->applicationDirPath()).arg("/../panels/dock/tray/plugins/loader"), this));
 #else
-    AbstractPluginsController::startLoader(new PluginLoader("/usr/lib/dde-dock/plugins/tmp/loader", this));
+    AbstractPluginsController::startLoader(new PluginLoader("/usr/lib/dde-dock/tmp/plugins/loader", this));
 #endif
 }
 
