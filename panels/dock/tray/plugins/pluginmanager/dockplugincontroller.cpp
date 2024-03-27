@@ -72,7 +72,7 @@ QList<PluginsItemInterface *> DockPluginController::plugins() const
 QList<PluginsItemInterface *> DockPluginController::pluginsInSetting() const
 {
     // 插件有三种状态
-    // 1、所有的插件，不管这个插件是否调用itemAdded方法，只要是通过dock加载的插件（换句话说，也就是在/lib/dde-dock/plugins/tmp目录下的插件）
+    // 1、所有的插件，不管这个插件是否调用itemAdded方法，只要是通过dock加载的插件（换句话说，也就是在/lib/dde-dock/tmp/plugins目录下的插件）
     // 2、在1的基础上，插件自身调用了itemAdded方法的插件，例如机器上没有蓝牙设备，那么蓝牙插件就不会调用itemAdded方法，这时候就不算
     // 3、在2的基础上，由控制中心来决定那些插件是否在任务栏显示的插件
     // 此处返回的是第二种插件

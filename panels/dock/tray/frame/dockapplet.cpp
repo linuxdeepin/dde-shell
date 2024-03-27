@@ -9,10 +9,13 @@
 
 #include "docktraywindow.h"
 
-#include <QWindow>
-#include <QQuickWindow>
+#include <QApplication>
 #include <QDebug>
+#include <QQuickWindow>
+#include <QLocale>
 #include <QTimer>
+#include <QTranslator>
+#include <QWindow>
 
 DS_BEGIN_NAMESPACE
     namespace dock {
@@ -79,6 +82,10 @@ void DockApplet::initDock()
         m_window->windowHandle()->setParent(appletItem->window());
         m_window->setFixedSize(m_window->suitableSize());
         m_window->show();
+
+        QTranslator *tl = new QTranslator(this);
+        tl->load(QString("/usr/share/dde-dock/tmp/translations/dde-dock_%1.qm").arg(QLocale().name()));
+        qApp->installTranslator(tl);
 
         connect(m_window, &DockTrayWindow::sizeChanged, this, [ = ] (const QSize &size) {
             setDockWidth(size.width());

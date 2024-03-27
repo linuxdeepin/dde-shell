@@ -49,4 +49,4 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
   Qt6::DBus
   Qt6::Svg)
 
-install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-dock/plugins/tmp/quick-trays)
+install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-dock/tmp/plugins/quick-trays)

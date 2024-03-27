@@ -48,7 +48,7 @@ if (NOT (${CMAKE_BUILD_TYPE} MATCHES "Debug"))
 
     # generate qm
     execute_process(COMMAND bash "translate_generation.sh"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif ()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_DEBUG")

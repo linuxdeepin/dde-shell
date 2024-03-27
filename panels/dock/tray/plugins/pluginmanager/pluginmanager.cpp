@@ -150,9 +150,9 @@ QStringList PluginManager::getPluginPaths() const
                 << QString("%1%2%3").arg(qApp->applicationDirPath()).arg("/../panels/dock/tray").arg(PLUGIN_PATH)
                 << QString("%1%2%3").arg(qApp->applicationDirPath()).arg("/../panels/dock/tray").arg(TRAY_PATH);
 #else
-    pluginPaths << QString("/usr/lib/dde-dock%1").arg(QUICK_PATH)
-                << QString("/usr/lib/dde-dock%1").arg(PLUGIN_PATH)
-                << QString("/usr/lib/dde-dock%1").arg(TRAY_PATH);
+    pluginPaths << QString("/usr/lib/dde-dock/tmp%1").arg(QUICK_PATH)
+                << QString("/usr/lib/dde-dock/tmp%1").arg(PLUGIN_PATH)
+                << QString("/usr/lib/dde-dock/tmp%1").arg(TRAY_PATH);
 
     const QStringList pluginsDirs = (getPathFromConf("PATH") << getPathFromConf("SYSTEM_TRAY_PATH"));
     if (!pluginsDirs.isEmpty())
