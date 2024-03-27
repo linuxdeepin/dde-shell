@@ -37,6 +37,7 @@ public:
     void setDisabledApplets(const QStringList &pluginIds);
 
     DApplet *loadApplet(const DAppletData &data);
+    DApplet *rootApplet() const;
 
     QList<DPluginMetaData> childrenPlugin(const QString &pluginId) const;
     DPluginMetaData parentPlugin(const QString &pluginId) const;

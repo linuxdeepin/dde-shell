@@ -13,6 +13,7 @@
 #include <iostream>
 
 #include "applet.h"
+#include "containment.h"
 #include "pluginloader.h"
 #include "appletloader.h"
 
@@ -27,7 +28,7 @@ void outputPluginTreeStruct(const DPluginMetaData &plugin, int level)
 {
     const QString separator(level * 4, ' ');
     std::cout << qPrintable(separator + plugin.pluginId()) << std::endl;
-    for (auto item : DPluginLoader::instance()->childrenPlugin(plugin.pluginId())) {
+    for (const auto &item : DPluginLoader::instance()->childrenPlugin(plugin.pluginId())) {
         outputPluginTreeStruct(item, level + 1);
     }
 }
@@ -41,9 +42,18 @@ static void exitApp(int signal)
 class AppletManager
 {
 public:
-    explicit AppletManager(const QList<DApplet *> &applets)
+    explicit AppletManager(const QStringList &pluginIds)
     {
-        for (auto applet : std::as_const(applets)) {
+        auto rootApplet = qobject_cast<DContainment *>(DPluginLoader::instance()->rootApplet());
+        Q_ASSERT(rootApplet);
+
+        for (const auto &pluginId : pluginIds) {
+            auto applet = rootApplet->createApplet(DAppletData{pluginId});
+            if (!applet) {
+                qCWarning(dsLog) << "Loading plugin failed:" << pluginId;
+                continue;
+            }
+
             auto loader = new DAppletLoader(applet);
             m_loaders << loader;
 
@@ -62,10 +72,7 @@ public:
     void quit()
     {
         for (auto item : std::as_const(m_loaders)) {
-            if (auto applet = item->applet()) {
-                applet->deleteLater();
-                item->deleteLater();
-            }
+            item->deleteLater();
         }
     }
     QList<DAppletLoader *> m_loaders;
@@ -89,20 +96,16 @@ int main(int argc, char *argv[])
     parser.addOption(testOption);
     QCommandLineOption disableAppletOption("d", "disabled applet.", "disable-applet", QString());
     parser.addOption(disableAppletOption);
-    parser.addPositionalArgument("list", "list all applet.");
+    QCommandLineOption listOption("list", "List all applets.", QString());
+    parser.addOption(listOption);
 
     parser.process(a);
 
-    const auto positions = parser.positionalArguments();
-
-    if (positions.size() >= 1) {
-        const auto subcommand = positions[0];
-        if (subcommand == "list") {
-            for (auto item : DPluginLoader::instance()->rootPlugins()) {
-                outputPluginTreeStruct(item, 0);
-            }
-            return 0;
+    if (parser.isSet(listOption)) {
+        for (const auto &item : DPluginLoader::instance()->rootPlugins()) {
+            outputPluginTreeStruct(item, 0);
         }
+        return 0;
     }
 
     Dtk::Core::DLogManager::registerConsoleAppender();
@@ -143,17 +146,7 @@ int main(int argc, char *argv[])
         DPluginLoader::instance()->setDisabledApplets(disabledApplets);
     }
 
-    qCInfo(dsLog) << "Loading plugin id" << pluginIds;
-    for (const auto &pluginId : pluginIds) {
-        auto applet = DPluginLoader::instance()->loadApplet(DAppletData{pluginId});
-        if (!applet) {
-            qCWarning(dsLog) << "Loading plugin failed:" << pluginId;
-            continue;
-        }
-        applets << applet;
-    }
-
-    AppletManager manager(applets);
+    AppletManager manager(pluginIds);
     manager.exec();
 
     QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [&manager]() {

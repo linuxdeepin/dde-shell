@@ -73,7 +73,7 @@ public:
 
     void createChildren(DApplet *applet);
 
-    DApplet *m_applet = nullptr;
+    QPointer<DApplet> m_applet = nullptr;
 
     D_DECLARE_PUBLIC(DAppletLoader);
 };

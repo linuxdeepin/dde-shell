@@ -20,6 +20,7 @@ set(PRIVATE_HEADERS
     private/containment_p.h
     private/panel_p.h
     private/appletitem_p.h
+    private/dsqmlglobal_p.h
     layershell/qwaylandlayershellsurface_p.h
     layershell/qwaylandlayershellintegration_p.h
 )
@@ -41,6 +42,7 @@ add_library(dde-shell-frame SHARED
     qmlengine.cpp
     appletitemmodel.h
     appletitemmodel.cpp
+    dsqmlglobal.cpp
     layershell/dlayershellwindow.cpp
     layershell/qwaylandlayershellsurface.cpp
     layershell/qwaylandlayershellintegration.cpp

@@ -34,6 +34,9 @@ public:
     QString url() const;
 
     static DPluginMetaData fromJsonFile(const QString &file);
+    static DPluginMetaData fromJsonString(const QByteArray &data);
+    static DPluginMetaData rootPluginMetaData();
+    static bool isRootPlugin(const QString &pluginId);
 
 private:
     QExplicitlySharedDataPointer<DPluginMetaDataPrivate> d;

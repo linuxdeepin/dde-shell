@@ -75,6 +75,9 @@ AppletItem {
             text: "Panel " + String(Panel.id).slice(0, 5)
         }
         LP.MenuItem {
+            text: "DS.applet " + String(DS.applet("org.deepin.ds.example").id).slice(0, 5)
+        }
+        LP.MenuItem {
             text: "Popup"
             onTriggered: {
                 popup.open()
