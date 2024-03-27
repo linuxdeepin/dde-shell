@@ -30,6 +30,8 @@ static const QString PluginSuffix{".so"};
 
 Q_DECLARE_LOGGING_CATEGORY(dsLog)
 
+Q_APPLICATION_STATIC(DPluginLoader, g_instance)
+
 class DPluginLoaderPrivate : public DObjectPrivate
 {
 public:
@@ -183,8 +185,11 @@ public:
     DPluginMetaData pluginMetaData(const QString &pluginId) const
     {
         const auto it = m_plugins.constFind(pluginId);
-        if (it == m_plugins.constEnd())
+        if (it == m_plugins.constEnd()) {
+            if (DPluginMetaData::isRootPlugin(pluginId))
+                return DPluginMetaData::rootPluginMetaData();
             return DPluginMetaData();
+        }
         return it.value();
     }
 
@@ -208,6 +213,7 @@ public:
     QMap<QString, DPluginMetaData> m_plugins;
     QStringList m_disabledPlugins;
     QFuture<void> m_loadMetaDatas;
+    QScopedPointer<DApplet> m_rootApplet;
 
     D_DECLARE_PUBLIC(DPluginLoader)
 };
@@ -226,8 +232,7 @@ DPluginLoader::~DPluginLoader()
 
 DPluginLoader *DPluginLoader::instance()
 {
-    static DPluginLoader g_instance;
-    return &g_instance;
+    return g_instance;
 }
 
 QList<DPluginMetaData> DPluginLoader::plugins() const
@@ -339,6 +344,17 @@ DApplet *DPluginLoader::loadApplet(const DAppletData &data)
     return applet;
 }
 
+DApplet *DPluginLoader::rootApplet() const
+{
+    D_DC(DPluginLoader);
+    if (!d->m_rootApplet) {
+        const auto data = DAppletData::fromPluginMetaData(DPluginMetaData::rootPluginMetaData());
+        const_cast<DPluginLoaderPrivate *>(d)->m_rootApplet.reset(const_cast<DPluginLoader *>(this)->loadApplet(data));
+    }
+
+    return d->m_rootApplet.data();
+}
+
 QList<DPluginMetaData> DPluginLoader::childrenPlugin(const QString &pluginId) const
 {
     D_DC(DPluginLoader);
@@ -346,6 +362,9 @@ QList<DPluginMetaData> DPluginLoader::childrenPlugin(const QString &pluginId) co
     DPluginMetaData metaData = d->pluginMetaData(pluginId);
     if (!metaData.isValid())
         return {};
+
+    if (DPluginMetaData::isRootPlugin(pluginId))
+        return rootPlugins();
 
     const DPluginMetaData target(metaData);
     QList<DPluginMetaData> result;

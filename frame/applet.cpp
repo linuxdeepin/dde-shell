@@ -40,7 +40,7 @@ DApplet::DApplet(DAppletPrivate &dd, QObject *parent)
 
 DApplet::~DApplet()
 {
-
+    qDebug(dsLog) << "Destroyed applet:" << pluginId() << id();
 }
 
 QString DApplet::id() const
