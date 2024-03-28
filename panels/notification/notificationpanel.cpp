@@ -33,7 +33,11 @@ NotificationPanel::~NotificationPanel()
 
 bool NotificationPanel::load()
 {
+#ifndef QT_DEBUG
+    return false;
+#else
     return DPanel::load();
+#endif
 }
 
 bool NotificationPanel::init()
