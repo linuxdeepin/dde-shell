@@ -47,8 +47,10 @@ Window {
     onDockSizeChanged: {
         if (dock.dockSize === Dock.MIN_DOCK_SIZE) {
             Panel.indicatorStyle = Dock.Efficient
+            Panel.itemAlignment = Dock.LeftAlignment
         } else {
             Panel.indicatorStyle = Dock.Fashion
+            Panel.itemAlignment = Dock.CenterAlignment
         }
     }
 
@@ -121,6 +123,7 @@ Window {
         }
         MutuallyExclusiveMenu {
             title: qsTr("Item Alignment")
+            visible: Panel.debugMode
             EnumPropertyMenuItem {
                 name: qsTr("Left")
                 prop: "itemAlignment"
