@@ -87,7 +87,7 @@ endif()
 
 configure_file(dbusmenu_version.h.in dbusmenu_version.h  @ONLY)
 
-add_library(dbusmenu-${QT_SUFFIX} SHARED ${dbusmenu_qt_SRCS})
+add_library(dbusmenu-${QT_SUFFIX} STATIC ${dbusmenu_qt_SRCS})
 set_target_properties(dbusmenu-${QT_SUFFIX} PROPERTIES
     VERSION ${dbusmenu_qt_lib_VERSION}
     SOVERSION ${dbusmenu_qt_lib_SOVERSION}
