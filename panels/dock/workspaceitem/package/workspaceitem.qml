@@ -47,6 +47,7 @@ AppletItem {
             implicitWidth: frameSize
             implicitHeight: isCurrent ? itemSize + 4 : itemSize
             color: Qt.rgba(0, 0, 0, 0.1)
+            radius: 2
             Image {
                 anchors.fill: parent
                 anchors.margins: 1
