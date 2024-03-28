@@ -120,7 +120,8 @@ QRect DockPanel::geometry()
 
 QRect DockPanel::frontendWindowRect()
 {
-    Q_ASSERT(window());
+    if(!window()) return QRect();
+
     auto ratio = window()->devicePixelRatio();
     auto screenGeometry = window()->screen()->geometry();
     auto geometry = window()->geometry();
