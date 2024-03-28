@@ -5,7 +5,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 set(CMAKE_CXX_STANDARD 17)
 
 # Build options
-option(WITH_DOC "Build documentation (requires Doxygen)" ON)
+option(WITH_DOC "Build documentation (requires Doxygen)" OFF)
 
 # Versions
 ## Package version

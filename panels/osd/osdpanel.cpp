@@ -22,11 +22,15 @@ OsdPanel::OsdPanel(QObject *parent)
 
 bool OsdPanel::load()
 {
+#ifndef QT_DEBUG
+    return false;
+#else
     QDBusConnection bus = QDBusConnection::sessionBus();
     // TODO
     bus.registerService("org.deepin.dde.Shell");
 
     return DPanel::load();
+#endif
 }
 
 bool OsdPanel::init()
