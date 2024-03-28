@@ -22,6 +22,12 @@ target_link_libraries(dde-shell PRIVATE
     Dtk${DTK_VERSION_MAJOR}::Gui
 )
 
+# We use BUILD_INTERFACE of dde-shell-frame when building
+# but also need INSTALL_INTERFACE to change rpath after installed
+target_link_directories(dde-shell PRIVATE
+    ${LIB_INSTALL_FULL_DIR}
+)
+
 configure_file(${CMAKE_SOURCE_DIR}/misc/dde-shell-plugin@.service.in
     ${CMAKE_CURRENT_BINARY_DIR}/dde-shell-plugin@.service
     @ONLY)
