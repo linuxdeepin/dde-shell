@@ -147,7 +147,10 @@ int main(int argc, char *argv[])
     }
 
     AppletManager manager(pluginIds);
-    manager.exec();
+
+    QMetaObject::invokeMethod(&a, [&manager](){
+        manager.exec();
+    }, Qt::QueuedConnection);
 
     QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [&manager]() {
         qCInfo(dsLog) << "Exit dde-shell.";

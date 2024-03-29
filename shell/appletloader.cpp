@@ -14,9 +14,11 @@
 #include <QMap>
 #include <QLoggingCategory>
 #include <QElapsedTimer>
+#include <DWindowManagerHelper>
 
 DS_BEGIN_NAMESPACE
 DCORE_USE_NAMESPACE;
+DGUI_USE_NAMESPACE
 
 Q_LOGGING_CATEGORY(dsLoaderLog, "dde.shell.loader")
 
@@ -126,8 +128,20 @@ void DAppletLoaderPrivate::doCreateRootObject(DApplet *applet)
             Q_EMIT q->failed();
         }
     });
-    if (!engine->create()) {
-        engine->deleteLater();
+
+    // FIXME: kwin load slowly make blur or other effets not ready, should in dtk to ensure effects loaded
+    if (DWindowManagerHelper::instance()->hasNoTitlebar()) {
+        if (!engine->create()) {
+            engine->deleteLater();
+        }
+    } else {
+        QObject::connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasNoTitlebarChanged, applet, [engine, applet] () {
+            if (DWindowManagerHelper::instance()->hasNoTitlebar()) {
+                if (!engine->create()) {
+                    engine->deleteLater();
+                }
+            }
+        });
     }
 }
 
