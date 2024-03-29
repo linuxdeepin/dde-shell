@@ -23,7 +23,6 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     , m_window(window)
     , m_dlayerShellWindow(DLayerShellWindow::get(m_window))
 {
-    m_window->setFlag(Qt::FramelessWindowHint);
     onLayerChanged();
     connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, &LayerShellEmulation::onLayerChanged);
 
@@ -59,7 +58,6 @@ void LayerShellEmulation::onLayerChanged()
     auto xcbWindow = dynamic_cast<QNativeInterface::Private::QXcbWindow*>(m_window->handle());
     switch (m_dlayerShellWindow->layer()) {
         case DLayerShellWindow::LayerBackground: {
-            m_window->setFlags(m_window->flags() & ~Qt::WindowStaysOnBottomHint);
             xcbWindow->setWindowType(QNativeInterface::Private::QXcbWindow::Desktop);
             break;
         }
@@ -70,7 +68,6 @@ void LayerShellEmulation::onLayerChanged()
             break;
         }
         case DLayerShellWindow::LayerTop: {
-            m_window->setFlags(m_window->flags() & ~Qt::WindowStaysOnBottomHint);
             xcbWindow->setWindowType(QNativeInterface::Private::QXcbWindow::Dock);
             break;
         }
@@ -78,7 +75,6 @@ void LayerShellEmulation::onLayerChanged()
             // on deepin Notification will be influenced by exclusionZone,
             // while plasma works all right, maybe deepin kwin bug?
             // FIXME: fix above
-            m_window->setFlags(m_window->flags() & ~Qt::WindowStaysOnBottomHint);
             xcbWindow->setWindowType(QNativeInterface::Private::QXcbWindow::Notification);
             break;
         }
