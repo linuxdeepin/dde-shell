@@ -17,6 +17,30 @@ AppletItem {
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : dockSize
     implicitHeight: useColumnLayout ? dockSize : Panel.rootObject.dockSize
 
+    onXChanged: updateLaunchpadPos()
+    onYChanged: updateLaunchpadPos()
+    Connections {
+        target: Panel.rootObject
+        function onDockCenterPartPosChanged()
+        {
+            updateLaunchpadPos()
+        }
+    }
+
+    function updateLaunchpadPos()
+    {
+        var launchpad = DS.applet("org.deepin.ds.launchpad")
+        if (!launchpad)
+            return
+
+        var lX = launcher.mapToGlobal(launcher.x + launcher.width / 2, 0).x
+        var lY = Panel.rootObject.y
+        launchpad.rootObject.windowedPos = Qt.point(lX, lY)
+    }
+    Component.onCompleted: {
+        updateLaunchpadPos()
+    }
+
     D.ActionButton {
         anchors.centerIn: parent
         icon.name: Applet.iconName
