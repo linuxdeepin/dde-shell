@@ -68,6 +68,8 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     waylandwindowmonitor.h
     taskmanagersettings.cpp
     taskmanagersettings.h
+    processinfo.cpp
+    processinfo.h
 )
 
 qt_generate_wayland_protocol_client_sources(dock-taskmanager

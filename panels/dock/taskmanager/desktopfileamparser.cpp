@@ -6,6 +6,7 @@
 #include "abstractwindow.h"
 #include "desktopfileamparser.h"
 #include "desktopfileabstractparser.h"
+#include "processinfo.h"
 
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -30,6 +31,11 @@ static int pidfd_open(pid_t pid, uint flags)
 namespace dock {
 static QDBusServiceWatcher dbusWatcher(AM_DBUS_PATH, QDBusConnection::sessionBus(),
                                                 QDBusServiceWatcher::WatchForOwnerChange);
+
+QList<QPair<QString, IdentifyFunc>> DesktopFileAMParser::m_identifyWindowFuns = {
+    {"PidEnv", &DesktopFileAMParser::identifyWindowPidEnv},
+    {"AM", &DesktopFileAMParser::identifyWindowAM},
+};
 
 DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
     : DesktopfileAbstractParser(id, parent)
@@ -135,6 +141,44 @@ QString DesktopFileAMParser::id2dbusPath(const QString& id)
 
 QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
 {
+    for (auto iter = m_identifyWindowFuns.begin(); iter != m_identifyWindowFuns.end(); iter++) {
+        QString name = iter->first;
+        IdentifyFunc func = iter->second;
+        qInfo() << "identifyWindow: try " << name;
+        QString appId = func(window);
+        if (!appId.isEmpty()) {
+            return appId;
+        }
+    }
+
+    return "";
+}
+
+QString DesktopFileAMParser::identifyWindowPidEnv(QPointer<AbstractWindow> window)
+{
+    ProcessInfo process(window->pid());
+    QString launchedDesktopFile = process.getEnv("GIO_LAUNCHED_DESKTOP_FILE");
+    QString launchedDesktopFilePidStr = process.getEnv("GIO_LAUNCHED_DESKTOP_FILE_PID");
+    if (launchedDesktopFile.isEmpty()) {
+        return "";
+    }
+
+    int launchedDesktopFilePid = launchedDesktopFilePidStr.toInt();
+    int ppid = process.getPpid();
+    if (launchedDesktopFilePid != ppid && !isLinglongApp(process)) {
+        return "";
+    }
+
+    if (!isApplicationDesktop(launchedDesktopFile)) {
+        return "";
+    }
+
+    QFileInfo fileinfo(launchedDesktopFile);
+    return fileinfo.completeBaseName();
+}
+
+QString DesktopFileAMParser::identifyWindowAM(QPointer<AbstractWindow> window)
+{
     if (!m_amIsAvaliable) m_amIsAvaliable = QDBusConnection::sessionBus().
         interface()->isServiceRegistered(AM_DBUS_PATH);
 
@@ -158,6 +202,34 @@ QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
     qCDebug(amdesktopfileLog()) << "AM failed to identify, reason is: " << res.error().message();
 
     return QString();
+}
+
+bool DesktopFileAMParser::isApplicationDesktop(const QString &path) {
+    for (auto dir : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation)) {
+        if (path.startsWith(dir + QDir::separator())) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool DesktopFileAMParser::isLinglongApp(ProcessInfo &process)
+{
+    for (ProcessInfo p(process.getPpid()); p.getPid() != 0; p = ProcessInfo(p.getPpid())) {
+        auto cmdline = p.getCmdLine();
+        if (cmdline.isEmpty()){
+            qWarning() << "Failed to get command line of" << p.getPid() << " SKIP it.";
+            continue;
+        }
+        if (p.getCmdLine()[0].indexOf("ll-box") != -1) {
+            qDebug() << "process ID" << process.getPid() << "is in linglong container,"
+                        << "ll-box PID" << p.getPid();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 QString DesktopFileAMParser::identifyType()

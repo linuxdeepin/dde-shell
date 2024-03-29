@@ -14,6 +14,9 @@
 
 namespace dock {
 class AbstractWindow;
+class ProcessInfo;
+
+typedef std::function<QString (QPointer<AbstractWindow>)> IdentifyFunc;
 
 class DesktopFileAMParser : public DesktopfileAbstractParser
 {
@@ -42,6 +45,10 @@ private:
     DesktopFileAMParser(QString id, QObject *parent = nullptr);
 
     static QString identifyWindow(QPointer<AbstractWindow> window);
+    static QString identifyWindowPidEnv(QPointer<AbstractWindow> window);
+    static QString identifyWindowAM(QPointer<AbstractWindow> window);
+    static bool isApplicationDesktop(const QString &path);
+    static bool isLinglongApp(ProcessInfo &process);
 
 private:
     QString id2dbusPath(const QString& id);
@@ -58,6 +65,7 @@ private Q_SLOTS:
 
 private:
     inline static bool m_amIsAvaliable;
+    static QList<QPair<QString, IdentifyFunc>> m_identifyWindowFuns;
 
     QString m_name;
     QString m_icon;
