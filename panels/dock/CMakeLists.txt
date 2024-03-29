@@ -20,6 +20,10 @@ file(
     dockpanel.h
     docksettings.cpp
     docksettings.h
+    dockhelper.h
+    dockhelper.cpp
+    waylanddockhelper.h
+    waylanddockhelper.cpp
 )
 
 # Old dbus interface compatible
@@ -54,6 +58,19 @@ target_link_libraries(dockpanel PRIVATE
     PkgConfig::WaylandClient
     dde-shell-frame
 )
+
+if (BUILD_WITH_X11)
+    target_compile_definitions(dockpanel PRIVATE BUILD_WITH_X11=)
+    pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb xcb-res xcb-ewmh)
+    target_sources(dockpanel PRIVATE
+        x11dockhelper.h
+        x11dockhelper.cpp
+    )
+
+    target_link_libraries(dockpanel PUBLIC
+        PkgConfig::XCB
+    )
+endif(BUILD_WITH_X11)
 
 ds_install_package(PACKAGE org.deepin.ds.dock TARGET dockpanel)
 

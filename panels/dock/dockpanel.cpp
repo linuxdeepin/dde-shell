@@ -10,6 +10,8 @@
 #include "environments.h"
 #include "docksettings.h"
 #include "pluginfactory.h"
+#include "x11dockhelper.h"
+#include "waylanddockhelper.h"
 
 // for old api compatible
 #include "dockdbusproxy.h"
@@ -31,6 +33,7 @@ namespace dock {
 DockPanel::DockPanel(QObject * parent)
     : DPanel(parent)
     , m_theme(ColorTheme::Dark)
+    , m_hideState(Show)
     , m_compositorReady(false)
 {
     // connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
@@ -86,13 +89,26 @@ bool DockPanel::init()
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
         // TODO: support get color type from wayland
+        m_helper = new WaylandDockHelper(this);
     } else if (QStringLiteral("xcb") == platformName) {
         QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
                             this, [this](){
             setColorTheme(static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType()));
         });
+        m_helper = new X11DockHelper(this);
     }
 
+
+    connect(m_helper, &DockHelper::mouseInDockAreaChanged, this, [this](){
+        if (hideMode() == KeepShowing) return;
+        if (m_helper->mouseInDockArea()) {
+            m_hideState = Show;
+            Q_EMIT hideStateChanged(m_hideState);
+        } else {
+            m_hideState = Hide;
+            Q_EMIT hideStateChanged(m_hideState);
+        }
+    });
     return true;
 }
 
@@ -218,8 +234,9 @@ void DockPanel::setCompositorReady(bool ready)
 
 HideState DockPanel::hideState()
 {
-// TODO: implement this function
-    return HideState::Unknown;
+    if (hideMode() == KeepShowing)
+        return Show;
+    return m_hideState;
 }
 
 void DockPanel::ReloadPlugins()
