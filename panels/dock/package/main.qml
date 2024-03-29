@@ -16,7 +16,7 @@ import org.deepin.dtk 1.0 as D
 
 Window {
     id: dock
-    visible: Panel.hideState === Dock.Hide
+    visible: Panel.hideState != Dock.Hide
     property bool useColumnLayout: Applet.position % 2
     // TODO: 临时溢出逻辑，待后面修改
     property int dockLeftSpaceForCenter: useColumnLayout ? 
