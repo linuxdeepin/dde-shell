@@ -67,9 +67,9 @@ public:
     void doCreateRootObject(DApplet *applet);
     bool doInit(DApplet *applet);
 
-    void load(DApplet *applet);
+    bool load(DApplet *applet);
     void createRootObject(DApplet *applet);
-    void init(DApplet *applet);
+    bool init(DApplet *applet);
 
     void createChildren(DApplet *applet);
 
@@ -95,11 +95,13 @@ void DAppletLoader::exec()
 {
     D_D(DAppletLoader);
 
-    d->load(d->m_applet);
+    if (!d->load(d->m_applet))
+        return;
 
     d->createRootObject(d->m_applet);
 
-    d->init(d->m_applet);
+    if (!d->init(d->m_applet))
+        return;
 }
 
 DApplet *DAppletLoader::applet() const
@@ -176,10 +178,10 @@ void DAppletLoaderPrivate::createChildren(DApplet *applet)
     }
 }
 
-void DAppletLoaderPrivate::load(DApplet *applet)
+bool DAppletLoaderPrivate::load(DApplet *applet)
 {
     if (!doLoad(applet)) {
-        return;
+        return false;
     }
 
     createChildren(applet);
@@ -191,6 +193,7 @@ void DAppletLoaderPrivate::load(DApplet *applet)
             load(child);
         }
     }
+    return true;
 }
 
 void DAppletLoaderPrivate::createRootObject(DApplet *applet)
@@ -205,10 +208,10 @@ void DAppletLoaderPrivate::createRootObject(DApplet *applet)
     }
 }
 
-void DAppletLoaderPrivate::init(DApplet *applet)
+bool DAppletLoaderPrivate::init(DApplet *applet)
 {
     if (!doInit(applet))
-        return;
+        return false;
 
     if (auto containment = qobject_cast<DContainment *>(applet)) {
         QList<DApplet *> applets = containment->applets();
@@ -216,6 +219,7 @@ void DAppletLoaderPrivate::init(DApplet *applet)
             init(child);
         }
     }
+    return true;
 }
 
 DS_END_NAMESPACE
