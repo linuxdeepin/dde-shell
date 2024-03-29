@@ -154,11 +154,13 @@ void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)
 {
     auto window = m_windows.value(xcb_window, nullptr);
     if (window) return;
+    window = QSharedPointer<X11Window>{new X11Window(xcb_window, this)};
+    m_windows.insert(xcb_window, window);
+
+    if (window->pid() == qApp->applicationPid()) return;
 
     uint32_t value_list[] = { XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_VISIBILITY_CHANGE};
     xcb_change_window_attributes(X11->getXcbConnection(), xcb_window, XCB_CW_EVENT_MASK, value_list);
-    window = QSharedPointer<X11Window>{new X11Window(xcb_window, this)};
-    m_windows.insert(xcb_window, window);
     Q_EMIT AbstractWindowMonitor::windowAdded(static_cast<QPointer<AbstractWindow>>(window.get()));
 }
 
