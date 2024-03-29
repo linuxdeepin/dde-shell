@@ -33,7 +33,7 @@ namespace dock {
 DockPanel::DockPanel(QObject * parent)
     : DPanel(parent)
     , m_theme(ColorTheme::Dark)
-    , m_hideState(Show)
+    , m_hideState(Hide)
     , m_compositorReady(false)
 {
     // connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
