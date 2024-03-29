@@ -1,3 +1,17 @@
+dde-shell (0.0.6) unstable; urgency=medium
+
+  * new dock ui
+  * dock x11 preview
+  * dock tmp tray
+  * add clipboard/workspace/search applet for dock
+  * feat: support to get other root applet
+  * refact: launching app by dde-am tool
+  * feat: add AM applet to reset appsLaunchedTimes
+  * fix: can't filter root applet when loaded failed
+  * chore: disable notification and osd in release
+
+ -- tsic404 <liuheng@deepin.org>  Tue, 26 Mar 2024 17:46:41 +0800
+
 dde-shell (0.0.5) unstable; urgency=medium
 
   * feat: add application preview in dock
