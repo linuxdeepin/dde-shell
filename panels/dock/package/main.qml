@@ -22,6 +22,8 @@ Window {
     property int dockLeftSpaceForCenter: useColumnLayout ? 
         (Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight) :
         (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth)
+    // TODO
+    signal dockCenterPartPosChanged()
 
     property int dockCenterPartCount: dockCenterPartModel.count
 
@@ -251,6 +253,9 @@ Window {
             id: dockCenterPart
             implicitWidth: centerLoader.implicitWidth
             implicitHeight: centerLoader.implicitHeight
+            onXChanged: dockCenterPartPosChanged()
+            onYChanged: dockCenterPartPosChanged()
+
             OverflowContainer {
                 id: centerLoader
                 anchors.fill: parent
