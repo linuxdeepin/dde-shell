@@ -16,7 +16,7 @@ import org.deepin.dtk 1.0 as D
 
 Window {
     id: dock
-    visible: true
+    visible: Panel.hideState === Dock.Hide
     property bool useColumnLayout: Applet.position % 2
     // TODO: 临时溢出逻辑，待后面修改
     property int dockLeftSpaceForCenter: useColumnLayout ? 
@@ -28,6 +28,8 @@ Window {
     property int dockSize: Applet.dockSize
     property int dockItemMaxSize: dockSize
     property int itemSpacing: dockItemMaxSize / 20
+
+    property bool isDragging: false
 
     // NOTE: -1 means not set its size, follow the platform size
     width: Panel.position == Dock.Top || Panel.position == Dock.Bottom ? -1 : dockSize
@@ -51,6 +53,31 @@ Window {
             Panel.indicatorStyle = Dock.Efficient
         } else {
             Panel.indicatorStyle = Dock.Fashion
+        }
+    }
+
+    PropertyAnimation {
+        id: hideShowAnimation;
+        target: dock;
+        property: useColumnLayout ? "width" : "height";
+        to: Panel.hideState != Dock.Hide ? Panel.dockSize : 0;
+        duration: 500
+        onStarted: {
+            dock.visible = true
+        }
+        onStopped: {
+            dock.visible = (useColumnLayout ? dock.width : dock.height != 0)
+        }
+    }
+
+    Timer {
+        id: hideTimer
+        interval: 500
+        running: false
+        repeat: false
+        onTriggered: {
+            if (!dock.isDragging)
+                hideShowAnimation.start()
         }
     }
 
@@ -137,7 +164,6 @@ Window {
             }
         }
         MutuallyExclusiveMenu {
-            visible: Panel.debugMode
             title: qsTr("Status")
             EnumPropertyMenuItem {
                 name: qsTr("Keep Shown")
@@ -150,6 +176,7 @@ Window {
                 value: Dock.KeepHidden
             }
             EnumPropertyMenuItem {
+                visible: Panel.debugMode
                 name: qsTr("Smart Hide")
                 prop: "hideMode"
                 value: Dock.SmartHide
@@ -276,6 +303,7 @@ Window {
         }
 
         onPressed: function(mouse) {
+            dock.isDragging = true
             oldMouseY = mouse.y
             oldMouseX = mouse.x
         }
@@ -295,6 +323,7 @@ Window {
         }
 
         onReleased: function(mouse) {
+            dock.isDragging = false
             Applet.dockSize = dockSize
         }
 
@@ -357,6 +386,14 @@ Window {
         }
         function onDockSizeChanged() {
             dock.dockSize = Panel.dockSize
+        }
+
+        function onHideStateChanged() {
+            if (Panel.hideState === Dock.Hide) {
+                hideTimer.running = true
+            } else {
+                hideShowAnimation.running = true
+            }
         }
         target: Panel
     }

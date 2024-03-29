@@ -12,6 +12,7 @@
 
 DS_BEGIN_NAMESPACE
 namespace dock {
+class DockHelper;
 const QStringList pluginDirs = {
     "/usr/lib/dde-dock/plugins/",
     "/usr/lib/dde-dock/plugins/quick-trays/",
@@ -93,6 +94,8 @@ Q_SIGNALS:
 
 private:
     ColorTheme m_theme;
+    HideState m_hideState;
+    DockHelper* m_helper;
     bool m_compositorReady;
 };
 
