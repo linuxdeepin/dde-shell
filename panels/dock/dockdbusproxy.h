@@ -7,9 +7,11 @@
 #include "dsglobal.h"
 #include "dockpanel.h"
 #include "constants.h"
+#include "dockiteminfo.h"
 
 #include <QObject>
 #include <QDBusContext>
+#include <QDBusArgument>
 
 /** this class used for old dock api compatible
   * it will forward old dbus call to new implementation
@@ -35,6 +37,7 @@ public:
     QString getPluginKey(const QString &pluginName);
     void resizeDock(int offset, bool dragging);
     QStringList GetLoadedPlugins();
+    DockItemInfos plugins();
     void ReloadPlugins();
     void callShow();
 
@@ -59,6 +62,10 @@ Q_SIGNALS:
 
 private:
     DockPanel* parent() const;
+
+    DApplet *m_oldDockApplet;
+    DApplet *m_clipboardApplet;
+    DApplet *m_searchApplet;
 };
 }
 

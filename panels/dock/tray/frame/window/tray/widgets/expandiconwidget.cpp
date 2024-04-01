@@ -220,26 +220,30 @@ void TrayGridWidget::resetPosition()
     m_trayGridView->setFixedSize(m_trayGridView->suitableSize());
     setFixedSize(m_trayGridView->size() + QSize(ITEM_SPACING * 2, ITEM_SPACING * 2));
 
-    QWidget *topWidget = expWidget->topLevelWidget();
-    QPoint ptPos = expWidget->mapToGlobal(QPoint(0, 0));
+    auto view = expWidget->parentWidget();
+    if (!view)
+        return;
+
+    QPoint ptPos = view->mapToGlobal(QPoint(0, 0));
     switch (m_position) {
     case Dock::Position::Bottom: {
-        ptPos.setY(topWidget->y() - height());
+        ptPos.setY(ptPos.y() - height() - ITEM_SPACING * 2);
         break;
     }
     case Dock::Position::Top: {
-        ptPos.setY(topWidget->y() + topWidget->height());
+        ptPos.setY(ptPos.y() + height() + ITEM_SPACING * 2);
         break;
     }
     case Dock::Position::Left: {
-        ptPos.setX(topWidget->x() + topWidget->width());
+        ptPos.setX(ptPos.x() + width() + ITEM_SPACING * 2);
         break;
     }
     case Dock::Position::Right: {
-        ptPos.setX(topWidget->x() - width());
+        ptPos.setX(ptPos.x() - width() - ITEM_SPACING * 2);
         break;
     }
     }
+
     move(ptPos);
 }
 

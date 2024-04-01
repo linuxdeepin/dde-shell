@@ -124,44 +124,42 @@ void TrayModel::setDragDropIndex(const QModelIndex index)
 
 void TrayModel::setExpandVisible(bool visible, bool openExpand)
 {
-    return;
+    // 如果是托盘，不支持展开图标
+    if (m_isTrayIcon)
+        return;
 
-    // // 如果是托盘，不支持展开图标
-    // if (m_isTrayIcon)
-    //     return;
+    if (visible) {
+        // 如果展开图标已经存在，则不添加,
+        for (WinInfo &winInfo : m_winInfos) {
+            if (winInfo.type == TrayIconType::ExpandIcon) {
+                winInfo.expand = openExpand;
+                return;
+            }
+        }
+        // 如果是任务栏图标，则添加托盘展开图标
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
+        WinInfo info;
+        info.type = TrayIconType::ExpandIcon;
+        info.expand = openExpand;
+        m_winInfos.insert(0, info);  // 展开图标始终显示在第一个
+        endInsertRows();
 
-    // if (visible) {
-    //     // 如果展开图标已经存在，则不添加,
-    //     for (WinInfo &winInfo : m_winInfos) {
-    //         if (winInfo.type == TrayIconType::ExpandIcon) {
-    //             winInfo.expand = openExpand;
-    //             return;
-    //         }
-    //     }
-    //     // 如果是任务栏图标，则添加托盘展开图标
-    //     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    //     WinInfo info;
-    //     info.type = TrayIconType::ExpandIcon;
-    //     info.expand = openExpand;
-    //     m_winInfos.insert(0, info);  // 展开图标始终显示在第一个
-    //     endInsertRows();
-
-    //     Q_EMIT requestRefreshEditor();
-    //     Q_EMIT rowCountChanged();
-    // } else {
-    //     // 如果隐藏，则直接从列表中移除
-    //     bool rowChanged = false;
-    //     beginResetModel();
-    //     for (const WinInfo &winInfo : m_winInfos) {
-    //         if (winInfo.type == TrayIconType::ExpandIcon) {
-    //             m_winInfos.removeOne(winInfo);
-    //             rowChanged = true;
-    //         }
-    //     }
-    //     endResetModel();
-    //     if (rowChanged)
-    //         Q_EMIT rowCountChanged();
-    // }
+        Q_EMIT requestRefreshEditor();
+        Q_EMIT rowCountChanged();
+    } else {
+        // 如果隐藏，则直接从列表中移除
+        bool rowChanged = false;
+        beginResetModel();
+        for (const WinInfo &winInfo : m_winInfos) {
+            if (winInfo.type == TrayIconType::ExpandIcon) {
+                m_winInfos.removeOne(winInfo);
+                rowChanged = true;
+            }
+        }
+        endResetModel();
+        if (rowChanged)
+            Q_EMIT rowCountChanged();
+    }
 }
 
 void TrayModel::updateOpenExpand(bool openExpand)
@@ -347,8 +345,8 @@ WinInfo TrayModel::getWinInfo(const QModelIndex &index)
 
 void TrayModel::onXEmbedTrayAdded(quint32 winId)
 {
-    // if (!xembedCanExport(winId))
-    //     return;
+    if (!xembedCanExport(winId))
+        return;
 
     for (const WinInfo &info : m_winInfos) {
         if (info.winId == winId)
@@ -546,8 +544,8 @@ void TrayModel::sortItems()
 
 void TrayModel::onSniTrayAdded(const QString &servicePath)
 {
-    // if (!sniCanExport(servicePath))
-    //     return;
+    if (!sniCanExport(servicePath))
+        return;
 
     for (const WinInfo &winInfo : m_winInfos) {
         if (winInfo.servicePath == servicePath)
@@ -624,8 +622,8 @@ void TrayModel::onIndicatorFounded(const QString &indicatorName)
 
 void TrayModel::onIndicatorAdded(const QString &indicatorName)
 {
-    // if (!indicatorCanExport(indicatorName))
-    //     return;
+    if (!indicatorCanExport(indicatorName))
+        return;
 
     const QString &itemKey = IndicatorTrayItem::toIndicatorKey(indicatorName);
     for (const WinInfo &info : m_winInfos) {
@@ -654,8 +652,8 @@ void TrayModel::onIndicatorRemoved(const QString &indicatorName)
 
 void TrayModel::onSystemTrayAdded(PluginsItemInterface *itemInter)
 {
-    // if (!systemItemCanExport(itemInter->pluginName()))
-    //     return;
+    if (!systemItemCanExport(itemInter->pluginName()))
+        return;
 
     for (const WinInfo &info : m_winInfos) {
         if (info.pluginInter == itemInter)

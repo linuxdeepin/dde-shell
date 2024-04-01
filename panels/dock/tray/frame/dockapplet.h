@@ -6,6 +6,7 @@
 
 #include "applet.h"
 #include "dsglobal.h"
+#include "dbusdockadaptors.h"
 
 #include <QSize>
 
@@ -31,7 +32,14 @@ public:
     Q_INVOKABLE void setPanelPosition(int x, int y) const;
     Q_INVOKABLE void setDockPosition(int pos) const;
     Q_INVOKABLE void setPanelSize(int size) const;
+    Q_INVOKABLE void setDisplayMode(int displayMode) const;
+
     Q_INVOKABLE void initDock();
+
+
+    // ------------ old dbus data for other module ----------------//
+    Q_INVOKABLE DockItemInfos plugins();
+    Q_INVOKABLE void setItemOnDock(const QString settingKey, const QString &itemKey, bool visible);
 
 Q_SIGNALS:
     void dockWidthChanged(int);
@@ -39,6 +47,7 @@ Q_SIGNALS:
 
 private:
     DockTrayWindow *m_window;
+    OldDBusDock *m_dockAdapter;
     int m_dockWidth;
     int m_dockHeight;
 };

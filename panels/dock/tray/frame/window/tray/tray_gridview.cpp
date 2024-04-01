@@ -97,6 +97,7 @@ QSize TrayGridView::suitableSize(const Dock::Position &position) const
             width = spacing() * 2 + 30;
             height = spacing() * 2 + 30;
         }
+
         return QSize(width, height);
     }
 
@@ -316,46 +317,17 @@ void TrayGridView::mouseReleaseEvent(QMouseEvent *e)
 
 void TrayGridView::dragEnterEvent(QDragEnterEvent *e)
 {
-    const QModelIndex index = indexAt(e->pos());
-
-    if (model()->canDropMimeData(e->mimeData(), e->dropAction(), index.row(),
-                                 index.column(), index))
-        e->accept();
-    else
-        e->ignore();
-
-    // Q_EMIT dragEntered();
+    handleDragEnterEvent(e);
 }
 
 void TrayGridView::dragLeaveEvent(QDragLeaveEvent *e)
 {
-    m_aniStartTime->stop();
-    e->accept();
-    // Q_EMIT dragLeaved();
+    handleDragLeaveEvent(e);
 }
 
 void TrayGridView::dragMoveEvent(QDragMoveEvent *e)
 {
-    m_aniStartTime->stop();
-    if (m_aniRunning)
-        return;
-
-    QModelIndex index = indexAt(e->pos());
-    if (!model()->canDropMimeData(e->mimeData(), e->dropAction(), index.row(),
-                                 index.column(), index))
-        return;
-
-    setState(QAbstractItemView::DraggingState);
-
-    if (index.isValid()) {
-        if (m_dropPos != indexRect(index).center()) {
-            qDebug() << "update drop position: " << index.row();
-            m_dropPos = indexRect(index).center();
-        }
-    }
-
-    if (m_pressed)
-        m_aniStartTime->start();
+    handleDragMoveEvent(e);
 }
 
 const QModelIndex TrayGridView::getIndexFromPos(QPoint currentPoint) const
@@ -414,6 +386,49 @@ bool TrayGridView::mouseInDock()
     }
     }
     return false;
+}
+void TrayGridView::handleDragEnterEvent(QDragEnterEvent *e)
+{
+    const QModelIndex index = indexAt(e->pos());
+
+    if (model()->canDropMimeData(e->mimeData(), e->dropAction(), index.row(),
+                                 index.column(), index))
+        e->accept();
+    else
+        e->ignore();
+
+    Q_EMIT dragEntered();
+}
+
+void TrayGridView::handleDragLeaveEvent(QDragLeaveEvent *e)
+{
+    m_aniStartTime->stop();
+    e->accept();
+    Q_EMIT dragLeaved();
+}
+
+void TrayGridView::handleDragMoveEvent(QDragMoveEvent *e)
+{
+    m_aniStartTime->stop();
+    if (m_aniRunning)
+        return;
+
+    QModelIndex index = indexAt(e->pos());
+    if (!model()->canDropMimeData(e->mimeData(), e->dropAction(), index.row(),
+                                  index.column(), index))
+        return;
+
+    setState(QAbstractItemView::DraggingState);
+
+    if (index.isValid()) {
+        if (m_dropPos != indexRect(index).center()) {
+            qDebug() << "update drop position: " << index.row();
+            m_dropPos = indexRect(index).center();
+        }
+    }
+
+    if (m_pressed)
+        m_aniStartTime->start();
 }
 
 void TrayGridView::handleDropEvent(QDropEvent *e)
@@ -556,7 +571,7 @@ bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
                 m_dragPos = QPoint();
 
                 onUpdateEditorView();
-                // Q_EMIT dragFinished();
+                Q_EMIT dragFinished();
             });
             // 拖拽完成后，将当前拖拽的item从原来的列表中移除，后来会根据实际情况将item插入到特定的列表中
             posAni->setEasingCurve(QEasingCurve::Linear);
@@ -566,7 +581,7 @@ bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
             pixLabel->show();
             posAni->start(QAbstractAnimation::DeleteWhenStopped);
 
-            // Q_EMIT dragFinished();
+            Q_EMIT dragFinished();
         } else {
             listModel->setDragKey(QString());
             clearDragModelIndex();
@@ -581,7 +596,7 @@ bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
 
             m_dragPos = QPoint();
             m_dropPos = QPoint();
-            // Q_EMIT dragFinished();
+            Q_EMIT dragFinished();
         }
     } else {
         // 拖拽完成后，将当前拖拽的item从原来的列表中移除，后来会根据实际情况将item插入到特定的列表中
@@ -600,7 +615,7 @@ bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
 
         m_dropPos = QPoint();
         m_dragPos = QPoint();
-        // Q_EMIT dragFinished();
+        Q_EMIT dragFinished();
     }
 
     return true;

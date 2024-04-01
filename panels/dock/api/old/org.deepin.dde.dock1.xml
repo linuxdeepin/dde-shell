@@ -12,11 +12,11 @@
         <method name="GetLoadedPlugins">
             <arg name="list" type="as" direction="out"/>
         </method>
-        <!-- <method name="plugins">
+        <method name="plugins">
             <arg type="a(sssssb)" direction="out"/>
-            <annotation value="PluginInfos"
+            <annotation value="DockItemInfos"
                         name="org.qtproject.QtDBus.QtTypeName.Out0"/>
-        </method> -->
+        </method>
         <method name="resizeDock">
             <arg name="offset" type="i" direction="in"/>
             <arg name="dragging" type="b" direction="in"/>

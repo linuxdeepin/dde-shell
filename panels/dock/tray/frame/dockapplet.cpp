@@ -6,7 +6,9 @@
 #include "appletitem.h"
 #include "dockapplet.h"
 #include "pluginfactory.h"
-
+#include "dbusdockadaptors.h"
+#include "dockdaemonadaptors.h"
+#include "windowmanager.h"
 #include "docktraywindow.h"
 
 #include <QApplication>
@@ -25,6 +27,7 @@ DS_BEGIN_NAMESPACE
                    , m_window(new DockTrayWindow)
                    , m_dockWidth(0)
                    , m_dockHeight(0)
+                   , m_dockAdapter(nullptr)
                    {
 
                    }
@@ -70,6 +73,11 @@ void DockApplet::setPanelSize(int size) const
     m_window->setDockSize(size);
 }
 
+void DockApplet::setDisplayMode(int displayMode) const
+{
+    m_window->setDisplayMode(Dock::DisplayMode(displayMode));
+}
+
 void DockApplet::initDock()
 {
     static bool init = false;
@@ -83,6 +91,10 @@ void DockApplet::initDock()
         m_window->setFixedSize(m_window->suitableSize());
         m_window->show();
 
+        // Make drop event of qml can delivery to qwidget
+        appletItem->window()->setObjectName("_ds_drop_delivery_internal");
+        appletItem->window()->installEventFilter(m_window);
+
         QTranslator *tl = new QTranslator(this);
         tl->load(QString("/usr/share/dde-dock/tmp/translations/dde-dock_%1.qm").arg(QLocale().name()));
         qApp->installTranslator(tl);
@@ -91,6 +103,25 @@ void DockApplet::initDock()
             setDockWidth(size.width());
             setDockHeight(size.height());
         });
+
+        // manage dbus data
+        m_dockAdapter = new OldDBusDock;
+    }
+}
+
+DockItemInfos DockApplet::plugins()
+{
+    if (m_dockAdapter) {
+        return m_dockAdapter->plugins();
+    }
+
+    return DockItemInfos();
+}
+
+void DockApplet::setItemOnDock(const QString settingKey, const QString &itemKey, bool visible)
+{
+    if (m_dockAdapter) {
+        return m_dockAdapter->setItemOnDock(settingKey, itemKey, visible);
     }
 }
 

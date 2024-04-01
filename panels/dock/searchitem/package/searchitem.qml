@@ -17,6 +17,7 @@ AppletItem {
     property int dockOrder: 3
     implicitWidth: dockSize
     implicitHeight: dockSize
+    property bool shouldVisible: Applet.visible
 
     D.ActionButton {
         anchors.fill: parent

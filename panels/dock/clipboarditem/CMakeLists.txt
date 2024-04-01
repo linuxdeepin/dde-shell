@@ -5,6 +5,8 @@
 add_library(dock-clipboarditem SHARED
     clipboarditem.cpp
     clipboarditem.h
+    ../dockiteminfo.cpp
+    ../dockiteminfo.h
 )
 
 target_link_libraries(dock-clipboarditem PRIVATE
