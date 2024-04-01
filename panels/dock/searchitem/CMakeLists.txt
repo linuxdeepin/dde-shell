@@ -5,6 +5,8 @@
 add_library(dock-searchitem SHARED
     searchitem.cpp
     searchitem.h
+    ../dockiteminfo.cpp
+    ../dockiteminfo.h
 )
 
 target_link_libraries(dock-searchitem PRIVATE

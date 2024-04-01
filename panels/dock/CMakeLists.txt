@@ -16,6 +16,8 @@ file(
     dockabstractsettingsconfig.h
     dockdbusproxy.cpp
     dockdbusproxy.h
+    dockiteminfo.cpp
+    dockiteminfo.h
     dockpanel.cpp
     dockpanel.h
     docksettings.cpp
@@ -41,6 +43,7 @@ qt_add_dbus_adaptor(dock_panel_sources
     dockdaemonadaptor
     DockDaemonAdaptor
 )
+
 # dock dbus api
 qt_add_dbus_adaptor(dock_panel_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/api/dbus/org.deepin.ds.dock.xml

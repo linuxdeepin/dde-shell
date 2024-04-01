@@ -7,7 +7,12 @@
 #include "pluginfactory.h"
 
 #include <DDBusSender>
+#include <DDciIcon>
 
+#include <QGuiApplication>
+#include <QBuffer>
+
+DGUI_USE_NAMESPACE
 DS_BEGIN_NAMESPACE
 namespace dock {
 
@@ -20,6 +25,7 @@ static DDBusSender clipboardDbus()
 
 ClipboardItem::ClipboardItem(QObject *parent)
     : DApplet(parent)
+    , m_visible(true)
 {
 
 }
@@ -27,6 +33,41 @@ ClipboardItem::ClipboardItem(QObject *parent)
 void ClipboardItem::toggleClipboard()
 {
     clipboardDbus().method("Toggle").call();
+}
+
+DockItemInfo ClipboardItem::dockItemInfo()
+{
+    DockItemInfo info;
+    info.name = "clipboard";
+    info.displayName = tr("Clipboard");
+    info.itemKey = "clipboard";
+    info.settingKey = "clipboard";
+    info.visible = m_visible;
+    {
+        auto lightPixmap = DDciIcon::fromTheme("clipboard").pixmap(qApp->devicePixelRatio(), 30, DDciIcon::Light);
+        QBuffer buffer(&info.iconLight);
+        if (buffer.open(QIODevice::WriteOnly)) {
+            lightPixmap.save(&buffer, "png");
+        }
+    }
+    {
+        auto darkPixmap = DDciIcon::fromTheme("clipboard").pixmap(qApp->devicePixelRatio(), 30, DDciIcon::Dark);
+        QBuffer buffer(&info.iconDark);
+        if (buffer.open(QIODevice::WriteOnly)) {
+            darkPixmap.save(&buffer, "png");
+        }
+    }
+
+    return info;
+}
+
+void ClipboardItem::setVisible(bool visible)
+{
+    if (m_visible != visible) {
+        m_visible = visible;
+
+        Q_EMIT visibleChanged(visible);
+    }
 }
 
 D_APPLET_CLASS(ClipboardItem)

@@ -19,8 +19,14 @@ AppletItem {
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 25
     property var position: Panel.position
+    property var indicatorStyle: Panel.indicatorStyle
     property var dockWidth: Applet.dockWidth
     property var dockHeight: Applet.dockHeight
+
+    // Make sure we can accept drop event, and then send it to dock widget
+    DropArea {
+        anchors.fill: parent
+    }
 
     function updatePanelGeometry() {
         if (useColumnLayout) {
@@ -35,11 +41,13 @@ AppletItem {
     Window.onWindowChanged: {
         Applet.initDock()
         Applet.setDockPosition(Panel.position)
+        Applet.setDisplayMode(Panel.indicatorStyle)
         updatePanelGeometry()
     }
     Window.onWidthChanged: updatePanelGeometry()
     Window.onHeightChanged: updatePanelGeometry()
     onPositionChanged: Applet.setDockPosition(Panel.position)
+    onIndicatorStyleChanged: Applet.setDisplayMode(Panel.indicatorStyle)
     onDockWidthChanged: updatePanelGeometry()
     onDockHeightChanged: updatePanelGeometry()
 

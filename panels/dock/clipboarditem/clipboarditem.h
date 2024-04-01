@@ -6,6 +6,7 @@
 
 #include "applet.h"
 #include "dsglobal.h"
+#include "../dockiteminfo.h"
 
 DS_BEGIN_NAMESPACE
 namespace dock {
@@ -13,10 +14,23 @@ namespace dock {
 class ClipboardItem : public DApplet
 {
     Q_OBJECT
+    Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
     explicit ClipboardItem(QObject *parent = nullptr);
 
     Q_INVOKABLE void toggleClipboard();
+
+    Q_INVOKABLE DockItemInfo dockItemInfo();
+
+    inline bool visible() const { return m_visible;}
+    Q_INVOKABLE void setVisible(bool visible);
+
+
+Q_SIGNALS:
+    void visibleChanged(bool);
+
+private:
+    bool m_visible;
 };
 
 }

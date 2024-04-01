@@ -31,6 +31,9 @@ public:
     const QModelIndex modelIndex(const int index) const;
     const QRect indexRect(const QModelIndex &index) const;
 
+    void handleDragEnterEvent(QDragEnterEvent *e);
+    void handleDragLeaveEvent(QDragLeaveEvent *e);
+    void handleDragMoveEvent(QDragMoveEvent *e);
     void handleDropEvent(QDropEvent *e);
 
 public Q_SLOTS:

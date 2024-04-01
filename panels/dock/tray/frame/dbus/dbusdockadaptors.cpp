@@ -70,14 +70,14 @@ void registerPluginInfoMetaType()
     qDBusRegisterMetaType<DockItemInfos>();
 }
 
-DBusDockAdaptors::DBusDockAdaptors(WindowManager* parent)
-    : QDBusAbstractAdaptor(parent)
+OldDBusDock::OldDBusDock(/*WindowManager* parent*/)
+    : QObject(nullptr)
     , m_gsettings(Utils::SettingsPtr("com.deepin.dde.dock.mainwindow", QByteArray(), this))
-    , m_windowManager(parent)
+    // , m_windowManager(parent)
 {
-    connect(parent, &WindowManager::panelGeometryChanged, this, [ = ] {
-        emit DBusDockAdaptors::geometryChanged(geometry());
-    });
+    // connect(parent, &WindowManager::panelGeometryChanged, this, [ = ] {
+    //     emit OldDBusDock::geometryChanged(geometry());
+    // });
 
     if (m_gsettings) {
         connect(m_gsettings, &QGSettings::changed, this, [ = ] (const QString &key) {
@@ -116,17 +116,17 @@ DBusDockAdaptors::DBusDockAdaptors(WindowManager* parent)
     registerPluginInfoMetaType();
 }
 
-DBusDockAdaptors::~DBusDockAdaptors()
+OldDBusDock::~OldDBusDock()
 {
 
 }
 
-void DBusDockAdaptors::callShow()
+void OldDBusDock::callShow()
 {
-    m_windowManager->callShow();
+    // m_windowManager->callShow();
 }
 
-void DBusDockAdaptors::ReloadPlugins()
+void OldDBusDock::ReloadPlugins()
 {
     if (qApp->property("PLUGINSLOADED").toBool())
         return;
@@ -140,7 +140,7 @@ void DBusDockAdaptors::ReloadPlugins()
     qApp->setProperty("safeMode", false);
 }
 
-QStringList DBusDockAdaptors::GetLoadedPlugins()
+QStringList OldDBusDock::GetLoadedPlugins()
 {
     QList<PluginsItemInterface *> allPlugin = localPlugins();
     QStringList nameList;
@@ -169,7 +169,7 @@ QStringList DBusDockAdaptors::GetLoadedPlugins()
     return newList;
 }
 
-DockItemInfos DBusDockAdaptors::plugins()
+DockItemInfos OldDBusDock::plugins()
 {
 #define DOCK_QUICK_PLUGINS "Dock_Quick_Plugins"
     // 获取本地加载的插件
@@ -206,13 +206,13 @@ DockItemInfos DBusDockAdaptors::plugins()
     return pluginInfos;
 }
 
-void DBusDockAdaptors::resizeDock(int offset, bool dragging)
+void OldDBusDock::resizeDock(int offset, bool dragging)
 {
-    m_windowManager->resizeDock(offset, dragging);
+    // m_windowManager->resizeDock(offset, dragging);
 }
 
 // 返回每个插件的识别Key(所以此值应始终不变)，供个性化插件根据key去匹配每个插件对应的图标
-QString DBusDockAdaptors::getPluginKey(const QString &pluginName)
+QString OldDBusDock::getPluginKey(const QString &pluginName)
 {
     QList<PluginsItemInterface *> allPlugin = localPlugins();
     for (auto plugin : allPlugin) {
@@ -223,7 +223,7 @@ QString DBusDockAdaptors::getPluginKey(const QString &pluginName)
     return QString();
 }
 
-bool DBusDockAdaptors::getPluginVisible(const QString &pluginName)
+bool OldDBusDock::getPluginVisible(const QString &pluginName)
 {
     QList<PluginsItemInterface *> allPlugin = localPlugins();
     for (auto *p : allPlugin) {
@@ -245,7 +245,7 @@ bool DBusDockAdaptors::getPluginVisible(const QString &pluginName)
     return false;
 }
 
-void DBusDockAdaptors::setPluginVisible(const QString &pluginName, bool visible)
+void OldDBusDock::setPluginVisible(const QString &pluginName, bool visible)
 {
     QList<PluginsItemInterface *> allPlugin = localPlugins();
     for (auto *p : allPlugin) {
@@ -270,7 +270,7 @@ void DBusDockAdaptors::setPluginVisible(const QString &pluginName, bool visible)
     qInfo() << "Unable to set information for this plugin";
 }
 
-void DBusDockAdaptors::setItemOnDock(const QString settingKey, const QString &itemKey, bool visible)
+void OldDBusDock::setItemOnDock(const QString settingKey, const QString &itemKey, bool visible)
 {
     DockSettings *settings = DockSettings::instance();
     if ( keyQuickTrayName == settingKey) {
@@ -280,17 +280,18 @@ void DBusDockAdaptors::setItemOnDock(const QString settingKey, const QString &it
     }
 }
 
-QRect DBusDockAdaptors::geometry() const
+QRect OldDBusDock::geometry() const
 {
-    return m_windowManager->geometry();
+    return QRect();
+    // return m_windowManager->geometry();
 }
 
-bool DBusDockAdaptors::showInPrimary() const
+bool OldDBusDock::showInPrimary() const
 {
     return Utils::SettingValue("com.deepin.dde.dock.mainwindow", QByteArray(), "onlyShowPrimary", false).toBool();
 }
 
-void DBusDockAdaptors::setShowInPrimary(bool showInPrimary)
+void OldDBusDock::setShowInPrimary(bool showInPrimary)
 {
     if (this->showInPrimary() == showInPrimary)
         return;
@@ -300,7 +301,7 @@ void DBusDockAdaptors::setShowInPrimary(bool showInPrimary)
     }
 }
 
-bool DBusDockAdaptors::isPluginValid(const QString &name)
+bool OldDBusDock::isPluginValid(const QString &name)
 {
     // 插件被全局禁用时，理应获取不到此插件的任何信息
     if (!Utils::SettingValue("com.deepin.dde.dock.module." + name, QByteArray(), "enable", true).toBool())
@@ -317,12 +318,12 @@ bool DBusDockAdaptors::isPluginValid(const QString &name)
     return true;
 }
 
-QList<PluginsItemInterface *> DBusDockAdaptors::localPlugins() const
+QList<PluginsItemInterface *> OldDBusDock::localPlugins() const
 {
     return QuickSettingController::instance()->pluginInSettings();
 }
 
-QIcon DBusDockAdaptors::getSettingIcon(PluginsItemInterface *plugin, QSize &pixmapSize, DGuiApplicationHelper::ColorType colorType) const
+QIcon OldDBusDock::getSettingIcon(PluginsItemInterface *plugin, QSize &pixmapSize, DGuiApplicationHelper::ColorType colorType) const
 {
     auto iconSize = [](const QIcon &icon) {
         QList<QSize> iconSizes = icon.availableSizes();
