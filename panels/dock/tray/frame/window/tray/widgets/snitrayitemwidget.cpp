@@ -718,26 +718,30 @@ const QPoint SNITrayItemWidget::topleftPoint() const
 
 const QPoint SNITrayItemWidget::popupMarkPoint() const
 {
-    QPoint p(topleftPoint());
+    // find top widget
+    QSize topSize;
+    const QWidget *topW = this;
+    do {
+        topSize = topW->size();
+        topW = qobject_cast<QWidget *>(topW->parent());
+    } while (topW);
 
+    QPoint p = mapToGlobal(QPoint(0, 0));
     const QRect r = rect();
-    const QRect wr = window()->rect();
-
     switch (DockPosition) {
-    case Dock::Position::Top:
-        p += QPoint(r.width() / 2, r.height() + (wr.height() - r.height()) / 2);
+    case Top:
+        p += QPoint(r.width() / 2, topSize.height() + POPUP_PADDING);
         break;
-    case Dock::Position::Bottom:
-        p += QPoint(r.width() / 2, 0 - (wr.height() - r.height()) / 2);
+    case Bottom:
+        p += QPoint(r.width() / 2, -((topSize.height() - r.height()) / 2 + POPUP_PADDING));
         break;
-    case Dock::Position::Left:
-        p += QPoint(r.width() + (wr.width() - r.width()) / 2, r.height() / 2);
+    case Left:
+        p += QPoint(topSize.width() + POPUP_PADDING, r.height() / 2);
         break;
-    case Dock::Position::Right:
-        p += QPoint(0 - (wr.width() - r.width()) / 2, r.height() / 2);
+    case Right:
+        p += QPoint(-(topSize.width() + POPUP_PADDING), r.height() / 2);
         break;
     }
-
     return p;
 }
 
