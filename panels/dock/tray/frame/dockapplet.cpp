@@ -91,7 +91,7 @@ void DockApplet::initDock()
         m_window->setFixedSize(m_window->suitableSize());
         m_window->show();
 
-        // Make drop event of qml can delivery to qwidget
+        // Make drop event of qml can v                                                                                                                                                                                                                                                                                                     delivery to qwidget
         appletItem->window()->setObjectName("_ds_drop_delivery_internal");
         appletItem->window()->installEventFilter(m_window);
 

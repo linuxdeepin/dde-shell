@@ -46,7 +46,7 @@ void BrightnessAdjWidget::loadBrightnessItem()
         // 需求要求调节范围是10%-100%,且调节幅度为1%
         sliderContainer->setRange(10, 100);
         sliderContainer->setPageStep(1);
-        sliderContainer->setFixedWidth(310);
+        // sliderContainer->setFixedWidth(310);
         sliderContainer->setFixedHeight(itemHeight);
         sliderContainer->updateSliderValue(monitor->brightness());
 
