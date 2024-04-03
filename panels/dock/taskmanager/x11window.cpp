@@ -72,7 +72,7 @@ bool X11Window::isActive()
 bool X11Window::shouldSkip()
 {
     checkWindowTypes(), checkWindowState();
-    if (hasWmStateSkipTaskBar() || (m_windowStates.isEmpty() && m_windowTypes.isEmpty()))
+    if (hasWmStateSkipTaskBar())
         return true;
 
     for (auto atom : m_windowTypes) {
@@ -106,6 +106,10 @@ bool X11Window::isMinimized()
 bool X11Window::allowClose()
 {
     checkWindowAllowedActions();
+    if ((m_motifWmHints.flags & MotifHintFunctions) == 0
+        || (m_motifWmHints.functions & MotifFunctionAll) != 0
+        || (m_motifWmHints.functions & MotifFunctionClose) != 0)
+        return true;
     return m_windowAllowedActions.contains(X11->getAtomByName("_NET_WM_ACTION_CLOSE"));
 }
 
@@ -184,6 +188,11 @@ void X11Window::updateIsMinimized()
     updateWindowState();
 }
 
+void X11Window::updateMotifWmHints()
+{
+    m_motifWmHints = X11->getWindowMotifWMHints(m_windowID);
+}
+
 void X11Window::updateWindowState()
 {
     m_windowStates.clear();
@@ -207,6 +216,7 @@ void X11Window::updateWindowAllowedActions()
 void X11Window::checkWindowAllowedActions()
 {
     std::call_once(m_windowAllowedActionsFlag, [this](){
+        updateMotifWmHints();
         updateWindowAllowedActions();
     });
 }

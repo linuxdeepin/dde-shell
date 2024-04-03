@@ -6,6 +6,7 @@
 
 #include "dsglobal.h"
 
+#include <cstdint>
 #include <sys/types.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -17,6 +18,27 @@
 
 DS_BEGIN_NAMESPACE
 namespace dock {
+const int MotifHintStatus               = 8;
+const int MotifHintFunctions            = 1;
+const int MotifHintInputMode            = 4;
+const int MotifHintDecorations          = 2;
+
+const int MotifFunctionNone             = 0;
+const int MotifFunctionAll              = 1;
+const int MotifFunctionMove             = 4;
+const int MotifFunctionClose            = 32;
+const int MotifFunctionResize           = 2;
+const int MotifFunctionMinimize         = 8;
+const int MotifFunctionMaximize         = 16;
+
+typedef struct {
+    uint32_t flags;
+    uint32_t functions;
+    uint32_t decorations;
+    int32_t inputMode;
+    uint32_t status;
+} MotifWMHints;
+
 class X11Utils
 {
 public:
@@ -35,6 +57,7 @@ public:
     QList<xcb_atom_t> getWindowTypes(const xcb_window_t& window);
     QList<xcb_window_t> getWindowClientList(const xcb_window_t& window);
     QList<xcb_atom_t> getWindowAllowedActions(const xcb_window_t& window);
+    MotifWMHints getWindowMotifWMHints(const xcb_window_t& window);
 
     void minimizeWindow(const xcb_window_t& window);
     void maxmizeWindow(const xcb_window_t& window);

@@ -12,7 +12,7 @@
 
 DS_BEGIN_NAMESPACE
 namespace dock {
-class AbstractItem;
+class AppItem;
 
 class AbstractWindow : public QObject
 {
@@ -43,8 +43,8 @@ public:
     virtual void minimize() = 0;
     virtual void killClient() = 0;
 
-    void setAppItem(QPointer<AbstractItem> item) {m_appitem = item;}
-    QPointer<AbstractItem> getAppItem() {return m_appitem;}
+    void setAppItem(QPointer<AppItem> item) {m_appitem = item;}
+    QPointer<AppItem> getAppItem() {return m_appitem;}
 
 protected:
     /** only windowmonitor can call updateXXX(func) to update window data
@@ -58,7 +58,7 @@ protected:
     AbstractWindow(QObject *parent = nullptr) : QObject(parent) {}
 
 private:
-    QPointer<AbstractItem> m_appitem;
+    QPointer<AppItem> m_appitem;
 
 private:
     virtual void updatePid() = 0;
