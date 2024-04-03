@@ -15,7 +15,7 @@ import org.deepin.ds.dock 1.0
 AppletItem {
     id: tray
     visible: true
-
+    readonly property int showDesktopWidth: 10
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 25
     property var position: Panel.position
@@ -31,10 +31,10 @@ AppletItem {
     function updatePanelGeometry() {
         if (useColumnLayout) {
             Applet.setPanelSize(Window.width)
-            Applet.setPanelPosition(0, Window.height - dockHeight)
+            Applet.setPanelPosition(0, Window.height - dockHeight - showDesktopWidth)
         } else {
             Applet.setPanelSize(Window.height)
-            Applet.setPanelPosition(Window.width - dockWidth, 0)
+            Applet.setPanelPosition(Window.width - dockWidth - showDesktopWidth, 0)
         }
     }
 
