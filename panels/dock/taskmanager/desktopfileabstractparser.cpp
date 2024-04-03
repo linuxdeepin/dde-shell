@@ -59,6 +59,11 @@ QString DesktopfileAbstractParser::desktopIcon()
     return "application-default-icon";
 }
 
+QString DesktopfileAbstractParser::xDeepinVendor()
+{
+    return "";
+}
+
 QList<QPair<QString, QString>> DesktopfileAbstractParser::actions()
 {
     return QList<QPair<QString, QString>>();
