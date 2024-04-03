@@ -141,7 +141,7 @@ void TaskManagerSettings::removeDockedDesktopfile(QJsonObject desktopfile)
     for (int i = 0; i < m_dockedItems.count(); i++) {
         if (m_dockedItems.at(i) == desktopfile) {
             m_dockedItems.removeAt(i);
-            return;
+            break;
         }
     }
     dockedItemsPersisted();
