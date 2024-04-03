@@ -41,16 +41,6 @@ bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *messag
 
     auto xcb_event = reinterpret_cast<xcb_generic_event_t*>(message);
     switch (xcb_event->response_type) {
-        case XCB_MAP_NOTIFY: {
-            auto mE = reinterpret_cast<xcb_map_notify_event_t*>(xcb_event);
-            Q_EMIT monitor->windowMapped(mE->window);
-            break;
-        }
-        case XCB_DESTROY_NOTIFY: {
-            auto dE = reinterpret_cast<xcb_destroy_notify_event_t*>(xcb_event);
-            Q_EMIT monitor->windowDestoried(dE->window);
-            break;
-        }
         case XCB_PROPERTY_NOTIFY: {
             auto pE = reinterpret_cast<xcb_property_notify_event_t*>(xcb_event);
             Q_EMIT monitor->windowPropertyChanged(pE->window, pE->atom);
@@ -77,7 +67,7 @@ void X11WindowMonitor::start()
     m_rootWindow = screen->root;
 
     uint32_t value_list[] = {
-            0                                   | XCB_EVENT_MASK_PROPERTY_CHANGE        |
+            0                               | XCB_EVENT_MASK_PROPERTY_CHANGE        |
             XCB_EVENT_MASK_VISIBILITY_CHANGE    | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY    |
             XCB_EVENT_MASK_STRUCTURE_NOTIFY     | XCB_EVENT_MASK_FOCUS_CHANGE           
     };
@@ -194,8 +184,15 @@ void X11WindowMonitor::onWindowPropertyChanged(xcb_window_t window, xcb_atom_t a
         x11Window->updateIcon();
     } else if (atom == X11->getAtomByName("_NET_WM_ALLOWED_ACTIONS")) {
         x11Window->updateWindowAllowedActions();
-    }else if (atom == X11->getAtomByName("_NET_WM_WINDOW_TYPE")) {
+    } else if (atom == X11->getAtomByName("_NET_WM_WINDOW_TYPE")) {
         x11Window->updateWindowTypes();
+    } else if (atom == X11->getAtomByName("_MOTIF_WM_HINTS")) {
+        x11Window->updateMotifWmHints();
+    }
+
+    auto appitem = x11Window->getAppItem();
+    if (x11Window->shouldSkip() && appitem) {
+        appitem->removeWindow(x11Window.data());
     }
 }
 

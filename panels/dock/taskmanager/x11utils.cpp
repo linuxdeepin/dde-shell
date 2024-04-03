@@ -241,6 +241,24 @@ QList<xcb_atom_t> X11Utils::getWindowAllowedActions(const xcb_window_t &window)
     return ret;
 }
 
+MotifWMHints X11Utils::getWindowMotifWMHints(const xcb_window_t& window)
+{
+    xcb_atom_t atomWmHints = getAtomByName("_MOTIF_WM_HINTS");
+    xcb_get_property_cookie_t cookie = xcb_get_property(m_connection, false, window, atomWmHints, atomWmHints, 0, 5);
+    std::unique_ptr<xcb_get_property_reply_t> reply(xcb_get_property_reply(m_connection, cookie, nullptr));
+    if (!reply || reply->format != 32 || reply->value_len != 5)
+        return MotifWMHints{0, 0, 0, 0, 0};
+
+    uint32_t *data = static_cast<uint32_t *>(xcb_get_property_value(reply.get()));
+    MotifWMHints ret;
+    ret.flags = data[0];
+    ret.functions = data[1];
+    ret.decorations = data[2];
+    ret.inputMode = data[3];
+    ret.status = data[4];
+    return ret;
+}
+
 QList<xcb_atom_t> X11Utils::getWindowTypes(const xcb_window_t &window)
 {
     QList<xcb_atom_t> ret;

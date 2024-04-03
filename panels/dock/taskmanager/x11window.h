@@ -5,6 +5,7 @@
 #pragma once
 
 #include "dsglobal.h"
+#include "x11utils.h"
 #include "abstractwindow.h"
 
 #include <mutex>
@@ -49,6 +50,8 @@ private:
     virtual void updateAllowClose() override;
     virtual void updateIsMinimized() override;
 
+    void updateMotifWmHints();
+
     void updateWindowState();
     inline void checkWindowState();
 
@@ -71,6 +74,7 @@ private:
     QList<xcb_atom_t> m_windowStates;
     QList<xcb_atom_t> m_windowTypes;
     QList<xcb_atom_t> m_windowAllowedActions;
+    MotifWMHints m_motifWmHints;
 
     std::once_flag m_windowTypeFlag;
     std::once_flag m_windowStateFlag;
