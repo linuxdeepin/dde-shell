@@ -18,11 +18,11 @@ DisplaySettingWidget::DisplaySettingWidget(BrightnessModel *model, QWidget *pare
     , m_settingBtn(new QPushButton(tr("Display Settings"), this))
 {
     initUI();
-        connect(m_settingBtn, &QPushButton::clicked, this, [ this ](){
+    connect(m_settingBtn, &QPushButton::clicked, this, [ this ](){
         DDBusSender().service("org.deepin.dde.ControlCenter1")
-                .path("/org/deepin/dde/ControlCenter1")
-                .interface("org.deepin.dde.ControlCenter1")
-                .method("ShowPage").arg(QString("display")).call();
+            .path("/org/deepin/dde/ControlCenter1")
+            .interface("org.deepin.dde.ControlCenter1")
+            .method("ShowPage").arg(QString("display")).call();
         Q_EMIT requestHide();
     });
 }
@@ -31,7 +31,7 @@ void DisplaySettingWidget::initUI()
 {
     setContentsMargins(0, 10, 0, 30);
     QVBoxLayout *mainLayout = new QVBoxLayout();
-    // mainLayout->setMargin(0);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(ItemSpacing);
 
     mainLayout->addWidget(m_brightnessAdjWidget);

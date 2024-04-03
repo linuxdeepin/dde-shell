@@ -206,6 +206,7 @@ void DockItemManager::appItemAdded(const Entry *entry, const int index)
     connect(item, &AppItem::windowCountChanged, this, &DockItemManager::onAppWindowCountChanged);
     connect(this, &DockItemManager::requestUpdateDockItem, item, &AppItem::requestUpdateEntryGeometries);
 
+    insertIndex = qMin(insertIndex, m_itemList.size());
     m_itemList.insert(insertIndex, item);
     m_appIDist.append(item->appId());
 
