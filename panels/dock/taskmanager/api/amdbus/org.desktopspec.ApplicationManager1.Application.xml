@@ -2,19 +2,25 @@
 <node>
     <interface name="org.desktopspec.ApplicationManager1.Application">
         <annotation
-                name="org.freedesktop.DBus.Description"
-                value="This interface is designed to provide a dbus interface of desktop file. Missing fields will be added later."
+            name="org.freedesktop.DBus.Description"
+            value="This interface is designed to provide a dbus interface of desktop file. Missing fields will be added later."
         />
-        
-        <property name="Categories" type="as" access="read"/>
-        <property name="X_linglong" type="b" access="read"/>
-        <property name="X_Flatpak" type="b" access="read"/>
-        <property name="installedTime" type="t" access="read"/>
-        <property name="NoDisplay" type="b" access="read"/>
-        <property name="MimeTypes" type="as" access="readwrite"/>
+
+        <property name="Categories" type="as" access="read" />
+        <property name="X_linglong" type="b" access="read" />
+        <property name="X_Flatpak" type="b" access="read" />
+        <property name="X_Deepin_Vendor" type="s" access="read">
+            <annotation name="org.freedesktop.DBus.Description"
+                value="Whem this property is 'deepin', display name of the application
+                              should use GenericName."
+            />
+        </property>
+
+        <property name="NoDisplay" type="b" access="read" />
+        <property name="MimeTypes" type="as" access="readwrite" />
 
         <property name="Actions" type="as" access="read">
-           <annotation
+            <annotation
                 name="org.freedesktop.DBus.Description"
                 value="Names of all action identifiers of this application.
                        Check https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#extra-actions
@@ -22,8 +28,30 @@
             />
         </property>
 
-        <property name="AutoStart" type="b" access="readwrite"/>
-        <property name="LastLaunchedTime" type="t" access="read"/>
+        <property name="AutoStart" type="b" access="readwrite" />
+        <property name="LastLaunchedTime" type="x" access="read">
+            <annotation
+                name="org.freedesktop.DBus.Description"
+                value="Set the value of this property to -1 to
+                       indicates that some errors has occured."
+            />
+        </property>
+
+        <property name="LaunchedTimes" type="x" access="read">
+            <annotation
+                name="org.freedesktop.DBus.Description"
+                value="Set the value of this property to -1 to
+                       indicates that some errors has occured."
+            />
+        </property>
+
+        <property name="InstalledTime" type="x" access="read">
+            <annotation
+                name="org.freedesktop.DBus.Description"
+                value="Set the value of this property to -1 to
+                   indicates that some errors has occured."
+            />
+        </property>
 
         <property name="Instances" type="ao" access="read">
             <annotation
@@ -42,17 +70,18 @@
         </property>
 
         <property name="Terminal" type="b" access="read">
-            <annotation 
+            <annotation
                 name="org.freedesktop.DBus.Description"
                 value="Indicate this application should launch by terminal or not."
             />
         </property>
 
-        <property name="ScaleFactor" type="d" access="readwrite">
-            <annotation 
-                name="org.freedesktop.DBus.Description" 
-                value="Indicate the scale factor of application's instance.
-                       Note: Set `0` to use global scaleFactor" 
+        <property name="Environ" type="s" access="readwrite">
+            <annotation
+                name="org.freedesktop.DBus.Description"
+                value="Indicate the environment of application's instance.
+                       passing some specific environment variables to Launch
+                       this application, eg. 'LANG=en_US;PATH=xxx:yyy;'"
             />
         </property>
 
@@ -114,7 +143,7 @@
                           this application, eg. 'LANG=en_US;PATH=xxx:yyy;'
                        3. `path` (type s):
                           set this application's working directory, please pass
-                          absoult directory path.
+                          absolute directory path.
                        NOTE:
                        When application launched with `uid` option,
                        `env` option will not take effect at all."

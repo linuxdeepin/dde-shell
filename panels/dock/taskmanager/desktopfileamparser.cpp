@@ -84,6 +84,17 @@ QString DesktopFileAMParser::desktopIcon()
     return m_icon;
 }
 
+QString DesktopFileAMParser::xDeepinVendor()
+{
+    if (!m_amIsAvaliable) return DesktopfileAbstractParser::xDeepinVendor();
+
+    if (m_xDeepinVendor.isEmpty() && m_applicationInterface) {
+       m_xDeepinVendor = m_applicationInterface->x_Deepin_Vendor();
+    }
+
+    return m_xDeepinVendor;
+}
+
 QString DesktopFileAMParser::genericName()
 {
     if (!m_amIsAvaliable) return DesktopfileAbstractParser::genericName();
@@ -258,6 +269,9 @@ void DesktopFileAMParser::onPropertyChanged(const QDBusMessage &msg)
     } else if (changedProps.contains("Name")) {
         updateLocalName();
         Q_EMIT nameChanged();
+    } else if (changedProps.contains("X_Deepin_Vendor")) {
+        m_xDeepinVendor = m_applicationInterface->x_Deepin_Vendor();
+        Q_EMIT xDeepinVendorChanged();
     }
 }
 }

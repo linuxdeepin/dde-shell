@@ -29,6 +29,7 @@ public:
     virtual QString id() override;
     virtual QString name() override;
     virtual QString desktopIcon() override;
+    virtual QString xDeepinVendor() override;
     virtual QList<QPair<QString, QString>> actions() override;
     virtual QString genericName() override;
     virtual QString type() override;
@@ -62,6 +63,7 @@ private:
     QString m_name;
     QString m_icon;
     QString m_genericName;
+    QString m_xDeepinVendor;
     QList<QPair<QString, QString>>  m_actions;
     using Application = org::desktopspec::ApplicationManager1::Application;
     QScopedPointer<Application> m_applicationInterface;

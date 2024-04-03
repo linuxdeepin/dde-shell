@@ -29,6 +29,7 @@ class DesktopfileAbstractParser : public QObject
     Q_PROPERTY(bool isDocked READ isDocked WRITE setDocked NOTIFY dockedChanged)
     Q_PROPERTY(QString genericName READ genericName NOTIFY genericNameChanged)
     Q_PROPERTY(QList<QPair<QString, QString>> actions READ actions NOTIFY actionsChanged)
+    Q_PROPERTY(QString xDeepinVendor READ xDeepinVendor NOTIFY xDeepinVendorChanged)
 
 public:
     DesktopfileAbstractParser(QString desktopid, QObject* parent = nullptr);
@@ -39,6 +40,7 @@ public:
     virtual QList<QPair<QString, QString>> actions();
     virtual QString genericName();
     virtual QString desktopIcon();
+    virtual QString xDeepinVendor();
     
     virtual std::pair<bool, QString> isValied();
 
@@ -65,6 +67,7 @@ Q_SIGNALS:
     void actionsChanged();
     void genericNameChanged();
     void dockedChanged();
+    void xDeepinVendorChanged();
 
 protected:
     QList<QPointer<AppItem>> m_appitems;

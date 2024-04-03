@@ -68,7 +68,7 @@ QString AppItem::icon() const
 QString AppItem::name() const
 {
     if (m_desktopfileParser && !m_desktopfileParser.isNull())
-        return m_desktopfileParser->name();
+        return (m_desktopfileParser->xDeepinVendor() == QStringLiteral("deepin")) ? m_desktopfileParser->genericName() : m_desktopfileParser->name();
     return "";
 }
 
@@ -80,7 +80,7 @@ QString AppItem::menus() const
 
     launchMenu["id"] = DOCK_ACTIN_LAUNCH;
     launchMenu["name"] = hasWindow() ?
-                            isDesltopfileParserAvaliable ?  m_desktopfileParser->name() : m_windows.first()->title()
+                            isDesltopfileParserAvaliable ? name() : m_windows.first()->title()
                         :tr("Open");
 
     array.append(launchMenu);
