@@ -74,6 +74,10 @@ DateTimeDisplayer::DateTimeDisplayer(bool showMultiRow, QWidget *parent)
 
     m_locale = QLocale::system();
     initDConfig();
+
+    connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, [ = ]{
+            update();
+    }, Qt::UniqueConnection);
 }
 
 void DateTimeDisplayer::initDConfig()
@@ -326,12 +330,13 @@ void DateTimeDisplayer::paintEvent(QPaintEvent *e)
         dateAlignFlag = Qt::AlignHCenter | Qt::AlignTop;
     }
 
+    QColor color = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType ? Qt::black : Qt::white;
     painter.setFont(m_timeFont);
-    painter.setPen(QPen(palette().brightText(), 2));
+    painter.setPen(QPen(color, 2));
     painter.drawText(textRect(info.m_timeRect), timeAlignFlag, info.m_time);
 
     painter.setFont(m_dateFont);
-    painter.setPen(QPen(palette().brightText(), 1));
+    painter.setPen(QPen(color, 1));
     painter.drawText(textRect(info.m_dateRect), dateAlignFlag, info.m_date);
 
     updateLastData(info);
