@@ -82,6 +82,8 @@ void DockApplet::initDock()
     if (init) return;
     init = !init;
 
+    DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
+
     auto appletItem = qobject_cast<DAppletItem *>(rootObject());
     if (appletItem) {
         m_window->winId();
