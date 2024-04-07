@@ -180,6 +180,7 @@ HideMode DockPanel::hideMode()
 void DockPanel::setHideMode(const HideMode& mode)
 {
     SETTINGS->setHideMode(mode);
+    Q_EMIT hideStateChanged(hideState());
 }
 
 Position DockPanel::position()
