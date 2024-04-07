@@ -6,17 +6,12 @@
 #ifndef DOCKITEMMANAGER_H
 #define DOCKITEMMANAGER_H
 
-#include "pluginsiteminterface.h"
 #include "dockitem.h"
-#include "appitem.h"
-#include "placeholderitem.h"
-#include "dbusutil.h"
-#include "taskmanager/taskmanager.h"
-#include "taskmanager/windowinfobase.h"
+#include "pluginsiteminterface.h"
 
 #include <QObject>
+#include <QGSettings>
 
-class AppMultiItem;
 class PluginsItem;
 
 /**
@@ -31,7 +26,6 @@ public:
     static DockItemManager *instance(QObject *parent = nullptr);
 
     const QList<QPointer<DockItem> > itemList() const;
-    bool appIsOnDock(const QString &appDesktop) const;
 
 signals:
     void itemInserted(const int index, DockItem *item) const;
@@ -46,33 +40,19 @@ signals:
 public slots:
     void refreshItemsIcon();
     void itemMoved(DockItem *const sourceItem, DockItem *const targetItem);
-    void itemAdded(const QString &appDesktop, int idx);
 
 private Q_SLOTS:
     void onPluginLoadFinished();
     void onPluginItemRemoved(PluginsItemInterface *itemInter);
     void onPluginUpdate(PluginsItemInterface *itemInter);
 
-    void onAppWindowCountChanged();
-    void onShowMultiWindowChanged();
-
 private:
     explicit DockItemManager(QObject *parent = nullptr);
-    void appItemAdded(const Entry *entry, const int index);
-    void appItemRemoved(const QString &appId);
-    void appItemRemoved(AppItem *appItem);
     void updatePluginsItemOrderKey();
-    void reloadAppItems();
     void manageItem(DockItem *item);
     void pluginItemInserted(PluginsItem *item);
 
-    void updateMultiItems(AppItem *appItem, bool emitSignal = false);
-    bool multiWindowExist(quint32 winId) const;
-    bool needRemoveMultiWindow(AppMultiItem *multiItem) const;
-
 private:
-    TaskManager *m_taskmanager;
-
     static DockItemManager *INSTANCE;
 
     QList<QPointer<DockItem>> m_itemList;

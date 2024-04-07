@@ -14,20 +14,21 @@
 #include "pluginsitem.h"
 #include "expandiconwidget.h"
 #include "quickdragcore.h"
-#include "desktop_widget.h"
 
 #include <DGuiApplicationHelper>
 
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPainter>
+#include <dblureffectwidget.h>
+#include <qcolor.h>
 
 #define FRONTSPACING 18
 #define SPLITERSIZE 2
 #define SPLITESPACE 5
 
 DockTrayWindow::DockTrayWindow(QWidget *parent)
-    : QWidget(parent)
+    : DBlurEffectWidget(parent)
     , m_position(Dock::Position::Bottom)
     , m_displayMode(Dock::DisplayMode::Efficient)
     , m_mainBoxLayout(new QBoxLayout(QBoxLayout::Direction::RightToLeft, this))
@@ -352,6 +353,7 @@ void DockTrayWindow::updateToolWidget()
 
 void DockTrayWindow::initUi()
 {
+    setMaskColor(QColor(235, 235, 235, 255 * 0.6));
     m_toolLayout->setContentsMargins(0, 0, 0, 0);
     m_toolLayout->setSpacing(0);
 
@@ -422,7 +424,7 @@ void DockTrayWindow::initAttribute()
 {
     setAcceptDrops(true);
     setMouseTracking(true);
-    setAttribute(Qt::WA_TranslucentBackground);
+    // setAttribute(Qt::WA_TranslucentBackground);
 
     m_trayView->setModel(m_model);
     m_trayView->setItemDelegate(m_delegate);

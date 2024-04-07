@@ -22,7 +22,6 @@
 #include "dbusdockadaptors.h"
 #include "utils.h"
 #include "dockitemmanager.h"
-#include "windowmanager.h"
 #include "quicksettingcontroller.h"
 #include "pluginsitem.h"
 #include "docksettings.h"

@@ -2,13 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 set(BIN_NAME dde-dock)
 
-configure_file(environments.h.in environments.h @ONLY)
-
-# if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-#     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fsanitize=address -O0")
-#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fsanitize=address -O0")
-# endif()
-
 generation_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/dbusinterface/xml ${CMAKE_CURRENT_SOURCE_DIR}/dbusinterface/generation_dbus_interface)
 
 # Sources files
@@ -47,7 +40,7 @@ add_library(${BIN_NAME} SHARED
     ${SRCS}
     ${INTERFACES}
     ${SRC_PATH}
-    item/item.qrc)
+)
 
 target_include_directories(${BIN_NAME} PUBLIC
     ${DtkWidget_INCLUDE_DIRS}
@@ -120,10 +113,5 @@ endif()
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
     target_compile_definitions(${BIN_NAME} PUBLIC DISABLE_SHOW_ANIMATION)
 endif()
-
-# bin
-# install(TARGETS ${BIN_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
-# window_patterns
-install(FILES taskmanager/window_patterns.json DESTINATION ${CMAKE_INSTALL_DATADIR}/dde-dock/)
 
 ds_install_package(PACKAGE org.deepin.ds.dock.tray TARGET ${BIN_NAME})

@@ -53,13 +53,6 @@ endif ()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_DEBUG")
 
-# Test architecture
-if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "sw_64")
-    # add compiler flags -mieee for mathmatic
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mieee")
-    add_definitions(-DDISABLE_SHOW_ANIMATION)
-endif()
-
 function(generation_dbus_interface xmldir outdir)
     IF(EXISTS ${outdir})
         file(REMOVE_RECURSE ${outdir})
@@ -138,7 +131,6 @@ file(GLOB SRC_PATH
 
 add_subdirectory("frame")
 add_subdirectory("plugins")
-#add_subdirectory("tests")
 add_subdirectory("libdbusmenu-qt")
 ## qm files
 file(GLOB QM_FILES "translations/*.qm")
@@ -148,22 +140,3 @@ install(FILES ${QM_FILES}
 ## dev files
 install(FILES ${INTERFACES}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dde-dock)
-
-configure_file(dde-dock.pc.in dde-dock.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/panels/dock/tray/dde-dock.pc
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DdeDock/DdeDockConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/DdeDockConfig.cmake
-    @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/DdeDockConfig.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/DdeDock)
-
-install(FILES gschema/com.deepin.dde.dock.module.gschema.xml
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/glib-2.0/schemas)
-
-#dconfig
-file(GLOB DCONFIG_FILES "configs/*.json")
-install(FILES ${DCONFIG_FILES} DESTINATION ${CMAKE_INSTALL_DATADIR}/dsg/configs/dde-dock/)
-

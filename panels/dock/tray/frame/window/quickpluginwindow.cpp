@@ -6,13 +6,16 @@
 #include "quickpluginwindow.h"
 #include "quicksettingcontroller.h"
 #include "pluginsiteminterface.h"
-#include "appdrag.h"
 #include "quickpluginmodel.h"
 #include "quickdragcore.h"
+#include "constants.h"
+#include "dockpopupwindow.h"
+#include "utils.h"
 
 #include <DStyleOption>
 #include <DStandardItem>
 #include <DGuiApplicationHelper>
+#include <QPainterPath>
 
 #include <QDrag>
 #include <QScrollBar>
@@ -31,6 +34,8 @@
 #define ITEMSPACE 0
 #define ICONWIDTH 20
 #define ICONHEIGHT 16
+
+using namespace Dock;
 
 typedef struct DragInfo{
     QPoint dragPoint;
@@ -461,7 +466,6 @@ void QuickPluginWindow::startDrag()
         return;
 
     PluginsItemInterface *moveItem = m_dragInfo->dockItem->pluginItem();
-    //AppDrag *drag = new AppDrag(this, new QuickDragWidget);
     QDrag *drag = new QDrag(this);
     QuickPluginMimeData *mimedata = new QuickPluginMimeData(moveItem, drag);
     drag->setMimeData(mimedata);

@@ -1,7 +1,4 @@
 project(dbusmenu-qt)
-cmake_minimum_required(VERSION 2.8.11)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
-
 set(CMAKE_CXX_STANDARD 17)
 
 # Build options
@@ -124,39 +121,3 @@ add_dependencies(distcheck dist)
 #     )
 
 add_subdirectory(src)
-# add_subdirectory(tests)
-add_subdirectory(tools)
-
-if(WITH_DOC)
-    configure_file(Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
-
-    add_custom_target(doc ALL doxygen
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        )
-
-    install(DIRECTORY ${CMAKE_BINARY_DIR}/html/
-        DESTINATION share/doc/libdbusmenu-${QT_SUFFIX}-doc
-        )
-endif(WITH_DOC)
-
-# Generate dbusmenu-qt-config* files
-configure_package_config_file(
-    dbusmenu-qt-config.cmake.in
-    ${CMAKE_BINARY_DIR}/dbusmenu-${QT_SUFFIX}-config.cmake
-    INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR}
-    PATH_VARS INCLUDE_INSTALL_DIR
-    )
-
-write_basic_package_version_file(
-    ${CMAKE_BINARY_DIR}/dbusmenu-${QT_SUFFIX}-config-version.cmake
-    VERSION ${dbusmenu_qt_VERSION}
-    COMPATIBILITY SameMajorVersion
-    )
-
-# # Install dbusmenu-qt-config* files
-# install(FILES
-#     ${CMAKE_BINARY_DIR}/dbusmenu-${QT_SUFFIX}-config.cmake
-#     ${CMAKE_BINARY_DIR}/dbusmenu-${QT_SUFFIX}-config-version.cmake
-#     DESTINATION "${CMAKECONFIG_INSTALL_DIR}"
-#     COMPONENT Devel
-#     )
