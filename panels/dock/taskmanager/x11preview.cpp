@@ -7,8 +7,6 @@
 #include "abstractwindow.h"
 #include "x11windowmonitor.h"
 
-#include <dguiapplicationhelper.h>
-#include <qt5/QtCore/qnamespace.h>
 #include <unistd.h>
 
 #include <QFile>
@@ -17,6 +15,7 @@
 #include <QWindow>
 #include <QPixmap>
 #include <QLayout>
+#include <QScreen>
 #include <QPainter>
 #include <QBoxLayout>
 #include <QByteArray>
@@ -237,6 +236,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
     , m_contentLayout(nullptr)
     , m_direction(0)
     , m_x11Monitor(monitor)
+    , m_isPreviewEntered(false)
     , m_isDockPreviewCount(0)
 {
     m_hideTimer = new QTimer(this);
@@ -440,6 +440,7 @@ void X11WindowPreviewContainer::clearSpecifiedCountPreviews(int count)
 
 void X11WindowPreviewContainer::updatePosition()
 {
+    auto screenRect = screen()->geometry();
     auto dockWindowPosition = m_baseWindow->position();
     int xPosition = dockWindowPosition.x() + m_previewXoffset;
     int yPosition = dockWindowPosition.y() + m_previewYoffset;
@@ -467,6 +468,12 @@ void X11WindowPreviewContainer::updatePosition()
             break;
         }
     }
+
+    xPosition = std::max(xPosition, screenRect.x() + 10);
+    xPosition = std::min(xPosition, screenRect.x() + screenRect.width() - width() - 10);
+
+    yPosition = std::max(yPosition, screenRect.y() + 10);
+    yPosition = std::min(yPosition, screenRect.y() + screenRect.height() - height() - 10);
 
     move(xPosition, yPosition);
 }
