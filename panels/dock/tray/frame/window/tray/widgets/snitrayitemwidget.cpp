@@ -534,11 +534,6 @@ QPixmap SNITrayItemWidget::newIconPixmap(IconType iconType)
         }
     } while (false);
 
-//    QLabel *l = new QLabel;
-//    l->setPixmap(pixmap);
-//    l->setFixedSize(100, 100);
-//    l->show();
-
     return pixmap;
 }
 
@@ -576,7 +571,7 @@ void SNITrayItemWidget::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    QWidget::mousePressEvent(event);
+    BaseTrayWidget::mousePressEvent(event);
 }
 
 void SNITrayItemWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -587,8 +582,6 @@ void SNITrayItemWidget::mouseReleaseEvent(QMouseEvent *e)
     // 使用了 setX11PassMouseEvent, 而每次调用 setX11PassMouseEvent 时都会导致产生 mousePress 和 mouseRelease 事件
     // 因此如果直接在这里处理事件会导致一些问题, 所以使用 Timer 来延迟处理 100 毫秒内的最后一个事件
     setMouseData(e);
-
-    QWidget::mouseReleaseEvent(e);
 }
 
 void SNITrayItemWidget::handleMouseRelease()
@@ -674,7 +667,6 @@ void SNITrayItemWidget::showHoverTips()
 
         m_tipsLabel->setAccessibleName(itemKeyForConfig().replace("sni:",""));
 
-
         showPopupWindow(m_tipsLabel);
     }
 }
@@ -703,46 +695,30 @@ void SNITrayItemWidget::hidePopup()
     emit PopupWindow->accept();
     emit requestWindowAutoHide(true);
 }
-// 获取在最外层的窗口(MainWindow)中的位置
-const QPoint SNITrayItemWidget::topleftPoint() const
-{
-    QPoint p;
-    const QWidget *w = this;
-    do {
-        p += w->pos();
-        w = qobject_cast<QWidget *>(w->parent());
-    } while (w);
-
-    return p;
-}
 
 const QPoint SNITrayItemWidget::popupMarkPoint() const
 {
-    // find top widget
-    QSize topSize;
-    const QWidget *topW = this;
-    do {
-        topSize = topW->size();
-        topW = qobject_cast<QWidget *>(topW->parent());
-    } while (topW);
-
-    QPoint p = mapToGlobal(QPoint(0, 0));
+    QPoint p = mapToGlobal(rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->mapToGlobal(topLevelWidget()->rect().topLeft()) : mapToGlobal(rect().topLeft());
     const QRect r = rect();
+    const QRect topR = topLevelWidget() ? topLevelWidget()->rect() : rect();
+
+    QPoint popupPoint;
     switch (DockPosition) {
     case Top:
-        p += QPoint(r.width() / 2, topSize.height() + POPUP_PADDING);
+        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
         break;
     case Bottom:
-        p += QPoint(r.width() / 2, -((topSize.height() - r.height()) / 2 + POPUP_PADDING));
+        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() - POPUP_PADDING);
         break;
     case Left:
-        p += QPoint(topSize.width() + POPUP_PADDING, r.height() / 2);
+        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, p.y() + r.height() / 2);
         break;
     case Right:
-        p += QPoint(-(topSize.width() + POPUP_PADDING), r.height() / 2);
+        popupPoint = QPoint(topP.x() - POPUP_PADDING, p.y() + r.height() / 2);
         break;
     }
-    return p;
+    return popupPoint;
 }
 
 QPixmap SNITrayItemWidget::icon()

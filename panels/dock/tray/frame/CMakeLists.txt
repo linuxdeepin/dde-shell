@@ -11,6 +11,7 @@ file(GLOB_RECURSE SRCS "*.h" "*.cpp" "../widgets/*.h" "../widgets/*.cpp" "../int
 find_package(PkgConfig REQUIRED)
 find_package(Qt6Widgets REQUIRED)
 find_package(Qt6Gui REQUIRED)
+find_package(Qt6Core REQUIRED)
 find_package(Qt6Concurrent REQUIRED)
 # find_package(Qt6X11Extras REQUIRED)
 find_package(Qt6DBus REQUIRED)
@@ -87,8 +88,12 @@ target_link_libraries(${BIN_NAME} PRIVATE
     Dtk6::Widget
     Qt6::Widgets
     Qt6::Gui
+    Qt6::Core
     Qt6::Quick
     Qt6::Concurrent
+    Qt6::GuiPrivate
+    Qt6::WidgetsPrivate
+    Qt6::QuickPrivate
     # Qt6::X11Extras
     Qt6::DBus
     Qt6::Svg

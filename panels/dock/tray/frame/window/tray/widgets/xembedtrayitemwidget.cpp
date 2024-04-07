@@ -92,6 +92,9 @@ XEmbedTrayItemWidget::XEmbedTrayItemWidget(quint32 winId, xcb_connection_t *cnn,
     connect(m_sendHoverEvent, &QTimer::timeout, this, &XEmbedTrayItemWidget::sendHoverEvent);
 
     m_updateTimer->start();
+
+    // FIXME: wine:weixinwork not show icon when first startup,so force refresh icon
+    QMetaObject::invokeMethod(this, &XEmbedTrayItemWidget::refershIconImage, Qt::QueuedConnection);
 }
 
 XEmbedTrayItemWidget::~XEmbedTrayItemWidget()
@@ -131,10 +134,6 @@ void XEmbedTrayItemWidget::paintEvent(QPaintEvent *e)
     QPainter painter;
     painter.begin(this);
     painter.setRenderHint(QPainter::Antialiasing);
-
-//#ifdef QT_DEBUG
-//    painter.fillRect(rect(), Qt::red);
-//#endif
 
     const QRectF &rf = QRectF(rect());
     const QRectF &rfp = QRectF(m_image.rect());

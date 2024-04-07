@@ -45,7 +45,7 @@ public:
 Q_SIGNALS:
     void requestUpdate();
 
-    void sizeChanged(const QSize &);
+    void sizeChanged();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

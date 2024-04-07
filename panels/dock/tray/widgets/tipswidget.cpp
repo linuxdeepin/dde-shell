@@ -9,6 +9,10 @@
 #include <QTextDocument>
 #include <QGuiApplication>
 
+#include <DGuiApplicationHelper>
+
+DGUI_USE_NAMESPACE
+
 namespace Dock{
 TipsWidget::TipsWidget(QWidget *parent)
     : QFrame(parent)
@@ -18,6 +22,8 @@ TipsWidget::TipsWidget(QWidget *parent)
         setFont(qApp->font());
     });
     setFont(qApp->font());
+
+    connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, [ = ] {update();});
 }
 
 void TipsWidget::setText(const QString &text)
@@ -79,7 +85,10 @@ void TipsWidget::paintEvent(QPaintEvent *event)
     QFrame::paintEvent(event);
 
     QPainter painter(this);
-    painter.setPen(QPen(palette().brightText(), 1));
+
+    QColor color = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType ? Qt::black : Qt::white;
+
+    painter.setPen(QPen(color, 1));
 
     QTextOption option;
     option.setAlignment(Qt::AlignCenter);

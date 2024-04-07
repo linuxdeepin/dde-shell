@@ -79,16 +79,6 @@ void DockTrayWindow::setDisplayMode(const Dock::DisplayMode &displayMode)
     moveToolPlugin();
     updateToolWidget();
     ExpandIconWidget::popupTrayView()->setReferGridView(m_trayView);
-    // 如果当前模式为高效模式，则设置当前的trayView为其计算位置的参照
-    if (displayMode == Dock::DisplayMode::Efficient) {
-        // TODO: reuse QuickPluginWindow, SystemPluginWindow
-        auto stretch = m_mainBoxLayout->takeAt(m_mainBoxLayout->count()-1);
-        m_mainBoxLayout->addWidget(m_trayView, 0, Qt::AlignCenter);
-        m_mainBoxLayout->addItem(stretch);
-    } else {
-        m_mainBoxLayout->removeWidget(m_trayView);
-    }
-
 }
 
 QSize DockTrayWindow::suitableSize(const Dock::Position &position, const int &, const double &) const
@@ -145,10 +135,12 @@ void DockTrayWindow::setDockSize(int dockSize)
         m_dockSize = dockSize;
 
         if (m_position % 2) {
-            setFixedHeight(dockSize);
-        } else {
             setFixedWidth(dockSize);
+        } else {
+            setFixedHeight(dockSize);
         }
+
+        Q_EMIT sizeChanged();
     }
 }
 
@@ -187,36 +179,6 @@ void DockTrayWindow::paintEvent(QPaintEvent *event)
 
 bool DockTrayWindow::eventFilter(QObject *watched, QEvent *event)
 {
-    // 处理由qml组件触发的drop事件，将widget嵌入qml中后，很多qt内部事件需要中转后才能接收
-    if (watched->objectName() == "_ds_drop_delivery_internal") {
-        switch (event->type()) {
-        case QEvent::Drop: {
-            QDropEvent *dropEvent = static_cast<QDropEvent *>(event);
-            onDropIcon(dropEvent);
-            break;
-        }
-        case QEvent::DragEnter: {
-            QDragEnterEvent *dragEnterEvent = static_cast<QDragEnterEvent *>(event);
-            dragEnterEvent->setDropAction(Qt::CopyAction);
-            m_trayView->handleDragEnterEvent(dragEnterEvent);
-            return true;
-        }
-        case QEvent::DragMove: {
-            QDragMoveEvent *dragMoveEvent = static_cast<QDragMoveEvent *>(event);
-            dragMoveEvent->setDropAction(Qt::CopyAction);
-            m_trayView->handleDragMoveEvent(dragMoveEvent);
-            return true;
-        }
-        case QEvent::DragLeave: {
-            QDragLeaveEvent *dragLeaveEvent = static_cast<QDragLeaveEvent *>(event);
-            m_trayView->handleDragLeaveEvent(dragLeaveEvent);
-            break;
-        }
-        default:
-            break;
-        }
-    }
-
     if (watched == this || watched == m_toolWidget || watched == m_dateTimeWidget
         || watched == m_trayView) {
         switch (event->type()) {
@@ -360,30 +322,15 @@ void DockTrayWindow::initUi()
     m_systemPuginWidget->setDisplayMode(Dock::DisplayMode::Efficient);
     m_mainBoxLayout->setContentsMargins(0, 0, 0, 0);
     m_mainBoxLayout->setSpacing(0);
-    // m_mainBoxLayout->addWidget(m_showDesktopWidget);
-    // m_mainBoxLayout->addWidget(m_toolFrontSpaceWidget);
 
+    // TODO remove
     m_mainBoxLayout->addWidget(m_toolWidget, 0, Qt::AlignCenter);
 
-    // m_mainBoxLayout->addWidget(m_toolBackSpaceWidget);
-    // m_mainBoxLayout->addWidget(m_toolLineLabel);
-
     m_mainBoxLayout->addWidget(m_dateTimeSpaceWidget, 0, Qt::AlignCenter);
-
-    // 时间区域
     m_mainBoxLayout->addWidget(m_dateTimeWidget, 0, Qt::AlignCenter);
-
-    // 插件图标区域
     m_mainBoxLayout->addWidget(m_systemPuginWidget, 0, Qt::AlignCenter);
-
-    // 暂不确定
     m_mainBoxLayout->addWidget(m_quickIconWidget, 0, Qt::AlignCenter);
-
-    // 托盘图标
     m_mainBoxLayout->addWidget(m_trayView, 0, Qt::AlignCenter);
-    // m_mainBoxLayout->setAlignment(m_toolLineLabel, Qt::AlignCenter);
-
-    // m_toolLineLabel->setFixedSize(0, 0);
 
     m_mainBoxLayout->addStretch();
     updateToolWidget();
@@ -441,45 +388,40 @@ void DockTrayWindow::initAttribute()
 
 void DockTrayWindow::onUpdateComponentSize()
 {
-    QSize size;
     switch (m_position) {
     case Dock::Position::Left:
     case Dock::Position::Right:
         // m_toolLineLabel->setFixedSize(width() * 0.6, SPLITERSIZE);
         // m_showDesktopWidget->setFixedSize(QWIDGETSIZE_MAX, FRONTSPACING);
-        m_dateTimeWidget->setFixedSize(m_dockSize, m_dateTimeWidget->suitableSize().height());
-        m_systemPuginWidget->setFixedSize(m_dockSize, m_systemPuginWidget->suitableSize().height());
-        m_quickIconWidget->setFixedSize(m_dockSize, m_quickIconWidget->suitableSize().height());
+        m_dateTimeWidget->setFixedSize(40, m_dateTimeWidget->suitableSize().height());
+        m_systemPuginWidget->setFixedSize(40, m_systemPuginWidget->suitableSize().height());
+        m_quickIconWidget->setFixedSize(40, m_quickIconWidget->suitableSize().height());
         m_trayView->setFixedSize(m_dockSize, m_trayView->suitableSize().height());
         m_toolFrontSpaceWidget->setFixedSize(m_dockSize, SPLITESPACE);
         m_toolBackSpaceWidget->setFixedSize(m_dockSize, SPLITESPACE);
         m_dateTimeSpaceWidget->setFixedSize(m_dockSize, SPLITESPACE);
 
-        size.setHeight(m_model->rowCount() * 30 + m_dateTimeWidget->suitableSize().height() + m_quickIconWidget->suitableSize().height() + m_systemPuginWidget->suitableSize().height());
-        size.setWidth(m_dockSize);
+        setFixedHeight(m_model->rowCount() * 30 + m_dateTimeWidget->suitableSize().height() + m_quickIconWidget->suitableSize().height() + m_systemPuginWidget->suitableSize().height());
         break;
     case Dock::Position::Top:
     case Dock::Position::Bottom:
         // m_toolLineLabel->setFixedSize(SPLITERSIZE, height() * 0.6);
         // m_showDesktopWidget->setFixedSize(FRONTSPACING, QWIDGETSIZE_MAX);
         // FIXME: in some cases, m_dateTimeWidget QWIDGETSIZE_MAX get a huge height.
-        m_dateTimeWidget->setFixedSize(m_dateTimeWidget->suitableSize().width(), qMin(m_dockSize, this->height()));
-        m_systemPuginWidget->setFixedSize(m_systemPuginWidget->suitableSize().width(), m_dockSize);
-        m_quickIconWidget->setFixedSize(m_quickIconWidget->suitableSize().width(), m_dockSize);
+        m_dateTimeWidget->setFixedSize(m_dateTimeWidget->suitableSize().width(), qMin(40, this->height()));
+        m_systemPuginWidget->setFixedSize(m_systemPuginWidget->suitableSize().width(), 40);
+        m_quickIconWidget->setFixedSize(m_quickIconWidget->suitableSize().width(), 40);
         m_trayView->setFixedSize(m_trayView->suitableSize().width(), m_dockSize);
         m_toolFrontSpaceWidget->setFixedSize(SPLITESPACE, m_dockSize);
         m_toolBackSpaceWidget->setFixedSize(SPLITESPACE, m_dockSize);
         m_dateTimeSpaceWidget->setFixedSize(SPLITESPACE, m_dockSize);
 
-        size.setWidth(m_model->rowCount() * 30 + m_dateTimeWidget->suitableSize().width() + m_quickIconWidget->suitableSize().width() + m_systemPuginWidget->suitableSize().width());
-        size.setHeight(m_dockSize);
-
+        setFixedWidth(m_model->rowCount() * 30 + m_dateTimeWidget->suitableSize().width() + m_quickIconWidget->suitableSize().width() + m_systemPuginWidget->suitableSize().width());
         break;
     }
     Q_EMIT requestUpdate();
 
-    this->setFixedSize(size);
-    Q_EMIT sizeChanged(size);
+    Q_EMIT sizeChanged();
 }
 
 void DockTrayWindow::onItemAdded(PluginsItemInterface *itemInter)

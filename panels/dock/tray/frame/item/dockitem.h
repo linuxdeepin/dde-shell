@@ -72,8 +72,7 @@ protected:
     void leaveEvent(QEvent *e) override;
 
     const QRect perfectIconRect() const;
-    const QPoint popupMarkPoint() ;
-    const QPoint topleftPoint() const;
+    const QPoint popupMarkPoint();
 
     void hideNonModel();
     void popupWindowAccept();

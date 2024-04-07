@@ -11,7 +11,7 @@
 #include <QSize>
 
 class DockTrayWindow;
-
+class QuickProxyWidget;
 namespace dock {
 
 class DockApplet : public DS_NAMESPACE::DApplet
@@ -36,6 +36,8 @@ public:
 
     Q_INVOKABLE void initDock();
 
+    virtual bool init() override;
+
 
     // ------------ old dbus data for other module ----------------//
     Q_INVOKABLE DockItemInfos plugins();
@@ -48,6 +50,7 @@ Q_SIGNALS:
 private:
     DockTrayWindow *m_window;
     OldDBusDock *m_dockAdapter;
+    QuickProxyWidget *m_widgetProxy;
     int m_dockWidth;
     int m_dockHeight;
 };

@@ -8,6 +8,7 @@
 #include "pluginfactory.h"
 #include "dbusdockadaptors.h"
 #include "docktraywindow.h"
+#include "quickproxywidget.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -22,9 +23,10 @@
                    DockApplet::DockApplet(QObject *parent)
                    : DApplet(parent)
                    , m_window(new DockTrayWindow)
+                   , m_dockAdapter(nullptr)
+                   , m_widgetProxy(nullptr)
                    , m_dockWidth(0)
                    , m_dockHeight(0)
-                   , m_dockAdapter(nullptr)
                    {
 
                    }
@@ -33,6 +35,9 @@
                    {
                     if (m_dockWidth != width) {
                                               m_dockWidth = width;
+if (m_widgetProxy) {
+    m_widgetProxy->setImplicitWidth(width);
+}
 Q_EMIT dockWidthChanged(width);
 }
 }
@@ -46,6 +51,9 @@ void DockApplet::setDockHeight(int height)
 {
     if (m_dockHeight != height) {
         m_dockHeight = height;
+        if (m_widgetProxy) {
+            m_widgetProxy->setImplicitHeight(height);
+        }
         Q_EMIT dockHeightChanged(height);
     }
 }
@@ -85,27 +93,32 @@ void DockApplet::initDock()
 
     auto appletItem = qobject_cast<DS_NAMESPACE::DAppletItem *>(rootObject());
     if (appletItem) {
-        m_window->winId();
-        m_window->windowHandle()->setParent(appletItem->window());
-        m_window->setFixedSize(m_window->suitableSize());
-        m_window->show();
-
-        // Make drop event of qml can v                                                                                                                                                                                                                                                                                                     delivery to qwidget
-        appletItem->window()->setObjectName("_ds_drop_delivery_internal");
-        appletItem->window()->installEventFilter(m_window);
+        m_widgetProxy = rootObject()->findChild<QuickProxyWidget*>();
+        if (!m_widgetProxy) {
+            qWarning() << "failed to insert dock widget to qml";
+            return;
+        }
+        m_widgetProxy->setWidget(m_window);
 
         QTranslator *tl = new QTranslator(this);
         tl->load(QString("/usr/share/dde-dock/tmp/translations/dde-dock_%1.qm").arg(QLocale().name()));
         qApp->installTranslator(tl);
 
-        connect(m_window, &DockTrayWindow::sizeChanged, this, [ = ] (const QSize &size) {
-            setDockWidth(size.width());
-            setDockHeight(size.height());
+        connect(m_window, &DockTrayWindow::sizeChanged, this, [ = ] {
+            setDockWidth(m_window->width());
+            setDockHeight(m_window->height());
         });
 
         // manage dbus data
         m_dockAdapter = new OldDBusDock;
     }
+}
+
+bool DockApplet::init()
+{
+    DApplet::init();
+    qmlRegisterType<QuickProxyWidget>("WidgetProxy", 1, 0, "WidgetProxy");
+    return true;
 }
 
 DockItemInfos DockApplet::plugins()

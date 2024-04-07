@@ -223,18 +223,23 @@ void TrayGridWidget::resetPosition()
     if (!view)
         return;
 
-    QPoint ptPos = view->mapToGlobal(QPoint(0, 0));
+    QPoint p = (view->rect().topLeft());
+    QPoint topP = view->topLevelWidget() ? view->topLevelWidget()->mapToGlobal(view->topLevelWidget()->rect().topLeft()) : view->mapToGlobal(view->rect().topLeft());
+    const QRect r = view->rect();
+    const QRect topR = view->topLevelWidget() ? view->topLevelWidget()->rect() : view->rect();
+
+    QPoint ptPos = topP;
     switch (m_position) {
     case Dock::Position::Bottom: {
         ptPos.setY(ptPos.y() - height() - ITEM_SPACING * 2);
         break;
     }
     case Dock::Position::Top: {
-        ptPos.setY(ptPos.y() + height() + ITEM_SPACING * 2);
+        ptPos.setY(ptPos.y() + topR.height() + ITEM_SPACING * 2);
         break;
     }
     case Dock::Position::Left: {
-        ptPos.setX(ptPos.x() + width() + ITEM_SPACING * 2);
+        ptPos.setX(ptPos.x() + topR.width() + ITEM_SPACING * 2);
         break;
     }
     case Dock::Position::Right: {

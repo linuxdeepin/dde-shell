@@ -346,48 +346,26 @@ bool DockItem::checkAndResetTapHoldGestureState()
 const QPoint DockItem::popupMarkPoint()
 {
     QPoint p = mapToGlobal(rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->mapToGlobal(topLevelWidget()->rect().topLeft()) : mapToGlobal(rect().topLeft());
     const QRect r = rect();
-    switch (DockPosition) {
-    case Top:
-        p += QPoint(r.width() / 2, r.height() + POPUP_PADDING);
-        break;
-    case Bottom:
-        p += QPoint(r.width() / 2, -POPUP_PADDING);
-        break;
-    case Left:
-        p += QPoint(r.width() + POPUP_PADDING, r.height() / 2);
-        break;
-    case Right:
-        p += QPoint(-POPUP_PADDING, r.height() / 2);
-        break;
-    }
-    return p;
-}
+    const QRect topR = topLevelWidget() ? topLevelWidget()->rect() : rect();
 
-const QPoint DockItem::topleftPoint() const
-{
-    QPoint p = this->pos();
-    /* 由于点击范围的问题，在图标的外面加了一层布局，这个布局的边距需要考虑 */
+    QPoint popupPoint;
     switch (DockPosition) {
     case Top:
-        p.setY(p.y() * 2);
+        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
         break;
     case Bottom:
-        p.setY(0);
+        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() - POPUP_PADDING);
         break;
     case Left:
-        p.setX(p.x() * 2);
+        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, p.y() + r.height() / 2);
         break;
     case Right:
-        p.setX(0);
+        popupPoint = QPoint(topP.x() - POPUP_PADDING, p.y() + r.height() / 2);
         break;
     }
-    const QWidget *w = qobject_cast<QWidget *>(this->parent());
-    while (w) {
-        p += w->pos();
-        w = qobject_cast<QWidget *>(w->parent());
-    }
-    return p;
+    return popupPoint;
 }
 
 void DockItem::hidePopup()
