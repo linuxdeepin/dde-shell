@@ -8,13 +8,16 @@
 
 #include <QProcess>
 #include <QGuiApplication>
+#include <QDBusInterface>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(showDesktop, "dde.shell.dock.showdesktop")
 
 DS_BEGIN_NAMESPACE
 namespace dock {
 
 ShowDesktop::ShowDesktop(QObject *parent)
     : DApplet(parent)
-    , m_iconName("deepin-toggle-desktop")
 {
 
 }
@@ -35,17 +38,17 @@ void ShowDesktop::toggleShowDesktop()
     QProcess::startDetached("/usr/lib/deepin-daemon/desktop-toggle", QStringList());
 }
 
-QString ShowDesktop::iconName() const
+bool ShowDesktop::checkNeedShowDesktop()
 {
-    return m_iconName;
-}
-
-void ShowDesktop::setIconName(const QString& iconName)
-{
-    if (iconName != m_iconName) {
-        m_iconName = iconName;
-        Q_EMIT iconNameChanged();
+    QDBusInterface wmInter("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm");
+    QList<QVariant> argumentList;
+    QDBusMessage reply = wmInter.callWithArgumentList(QDBus::Block, QStringLiteral("GetIsShowDesktop"), argumentList);
+    if (reply.type() == QDBusMessage::ReplyMessage && reply.arguments().count() == 1) {
+        return !reply.arguments().at(0).toBool();
     }
+
+    qCWarning(showDesktop) << "wm call GetIsShowDesktop fail, res:" << reply.type();
+    return false;
 }
 
 D_APPLET_CLASS(ShowDesktop)
