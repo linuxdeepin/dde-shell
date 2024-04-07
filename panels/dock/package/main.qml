@@ -237,9 +237,9 @@ Window {
         }
 
         Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.horizontalStretchFactor: Panel.itemAlignment
+            Layout.fillWidth: Panel.itemAlignment
+            Layout.fillHeight: Panel.itemAlignment
+            Layout.horizontalStretchFactor: Panel.itemAlignment ? 1 : -1
         }
 
         Item {
@@ -268,7 +268,7 @@ Window {
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.horizontalStretchFactor: Dock.CenterAlignment
+            Layout.horizontalStretchFactor: 1
         }
 
         Item {
