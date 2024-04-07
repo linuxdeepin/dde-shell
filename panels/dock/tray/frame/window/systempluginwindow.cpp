@@ -162,6 +162,7 @@ StretchPluginsItem *SystemPluginWindow::findPluginItemWidget(PluginsItemInterfac
 void SystemPluginWindow::pluginAdded(PluginsItemInterface *plugin)
 {
     StretchPluginsItem *item = new StretchPluginsItem(plugin, QuickSettingController::instance()->itemKey(plugin));
+    item->setFixedSize(30, 30);
     item->setDisplayMode(m_displayMode);
     item->setPosition(m_position);
     item->installEventFilter(this);
@@ -374,10 +375,8 @@ void StretchPluginsItem::mousePressEvent(QMouseEvent *e)
 
     m_popupTipsDelayTimer->stop();
     hideNonModel();
-
-    if (e->button() == Qt::RightButton
-        && perfectIconRect().contains(e->pos()))
-            return showContextMenu();
+    if (e->button() == Qt::RightButton /*&& perfectIconRect().contains(e->pos())*/)
+        return showContextMenu();
 
     DockItem::mousePressEvent(e);
 }

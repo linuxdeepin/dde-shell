@@ -170,8 +170,9 @@ QSize QuickPluginWindow::suitableSize(const Dock::Position &position) const
         int itemWidth = STARTSPACE;
         for (int i = 0; i < m_mainLayout->count(); i++) {
             QWidget *itemWidget = m_mainLayout->itemAt(i)->widget();
-            if (itemWidget)
+            if (itemWidget) {
                 itemWidth += itemWidget->width() + ITEMSPACE;
+            }
         }
         itemWidth += ITEMSPACE;
 
@@ -246,6 +247,7 @@ bool QuickPluginWindow::eventFilter(QObject *watched, QEvent *event)
         if (contentWidget > maxWidth || contentWidget <= 0)
             getPopWindow()->getContent()->setFixedWidth(maxWidth);
     }
+
     switch (event->type()) {
     case QEvent::MouseButtonPress: {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
@@ -283,6 +285,7 @@ bool QuickPluginWindow::eventFilter(QObject *watched, QEvent *event)
             break;
 
         QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+
         if (m_dragInfo->canDrag(mouseEvent->pos()) && m_dragInfo->dockItem->canMove())
             startDrag();
 
@@ -409,30 +412,35 @@ QPoint QuickPluginWindow::popupPoint(QWidget *widget) const
     if (!itemWidget)
         return QPoint();
 
-    QPoint pointCurrent = itemWidget->mapToGlobal(QPoint(0, 0));
+    QPoint p = itemWidget->mapToGlobal(itemWidget->rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->mapToGlobal(topLevelWidget()->rect().topLeft()) : p;
+    QRect r = itemWidget->rect();
+    QRect topR = topLevelWidget() ? topLevelWidget()->rect() : r;
+
+    QPoint pointCurrent;
     switch (m_position) {
     case Dock::Position::Bottom: {
         // 在下方的时候，Y坐标设置在顶层窗口的y值，保证下方对齐
-        pointCurrent.setX(pointCurrent.x() + itemWidget->width() / 2);
-        pointCurrent.setY(pointCurrent.y() - POPUP_PADDING);
+        pointCurrent.setX(p.x() + itemWidget->width() / 2);
+        pointCurrent.setY(topP.y() - POPUP_PADDING);
         break;
     }
     case Dock::Position::Top: {
         // 在上面的时候，Y坐标设置为任务栏的下方，保证上方对齐
-        pointCurrent.setX(pointCurrent.x() + itemWidget->width() / 2);
-        pointCurrent.setY(pointCurrent.y() + this->height() + POPUP_PADDING);
+        pointCurrent.setX(p.x() + itemWidget->width() / 2);
+        pointCurrent.setY(topP.y() + topR.height() + POPUP_PADDING);
         break;
     }
     case Dock::Position::Left: {
         // 在左边的时候，X坐标设置在顶层窗口的最右侧，保证左对齐
-        pointCurrent.setX(pointCurrent.x() + this->width() + POPUP_PADDING);
-        pointCurrent.setY(pointCurrent.y() - itemWidget->height() / 2);
+        pointCurrent.setX(topP.x() + topR.width() + POPUP_PADDING);
+        pointCurrent.setY(p.y() - itemWidget->height() / 2);
         break;
     }
     case Dock::Position::Right: {
         // 在右边的时候，X坐标设置在顶层窗口的最左侧，保证右对齐
-        pointCurrent.setX(pointCurrent.x() -this->width() - POPUP_PADDING);
-        pointCurrent.setY(pointCurrent.y() - itemWidget->height() / 2);
+        pointCurrent.setX(topP.x() - POPUP_PADDING);
+        pointCurrent.setY(p.y() - itemWidget->height() / 2);
     }
     }
     return pointCurrent;
@@ -517,7 +525,7 @@ QuickDockItem *QuickPluginWindow::getActiveDockItem(QPoint point) const
 
 void QuickPluginWindow::showPopup(QuickDockItem *item, PluginsItemInterface *itemInter, QWidget *childPage, bool isClicked)
 {
-    if (!isVisible() || !item)
+    if (/*!isVisible() || */!item)
         return;
 
     if (!childPage) {
@@ -597,10 +605,14 @@ DockPopupWindow *QuickPluginWindow::getPopWindow() const
 
 void QuickPluginWindow::updateDockItemSize(QuickDockItem *dockItem)
 {
-    if (m_position == Dock::Position::Top || m_position == Dock::Position::Bottom) {
-        dockItem->setFixedSize(dockItem->suitableSize().width(), height());
+    if (dockItem->pluginItem() && dockItem->pluginItem()->pluginName() == "deepin-screen-recorder-plugin") {
+        if (m_position == Dock::Position::Top || m_position == Dock::Position::Bottom) {
+            dockItem->setFixedSize(dockItem->suitableSize().width(), height());
+        } else {
+            dockItem->setFixedSize(width(), dockItem->suitableSize().height());
+        }
     } else {
-        dockItem->setFixedSize(width(), dockItem->suitableSize().height());
+        dockItem->setFixedSize(30, 30);
     }
 }
 
@@ -842,8 +854,17 @@ void QuickDockItem::paintEvent(QPaintEvent *event)
 
 void QuickDockItem::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() != Qt::RightButton)
+    if (event->source() == Qt::MouseEventSynthesizedByApplication) {
+        QWidget *itemWidget = m_pluginItem->itemWidget(m_itemKey);
+        if (itemWidget && m_mainLayout && m_mainLayout->indexOf(itemWidget) < 0) {
+            QCoreApplication::sendEvent(itemWidget, event);
+            return;
+        }
+    }
+
+    if (event->button() != Qt::RightButton) {
         return QWidget::mousePressEvent(event);
+    }
 
     if (m_contextMenu->actions().isEmpty()) {
         updateContextMenu();
@@ -852,6 +873,8 @@ void QuickDockItem::mousePressEvent(QMouseEvent *event)
     if (!m_contextMenu->actions().isEmpty()) {
         m_contextMenu->exec(QCursor::pos());
     }
+
+    return QWidget::mousePressEvent(event);
 }
 
 void QuickDockItem::enterEvent(QEnterEvent *event)
@@ -895,11 +918,11 @@ void QuickDockItem::showEvent(QShowEvent *event)
         itemWidget->show();
         auto size= suitableSize();
         if (pluginItem()->pluginName() == QStringLiteral("uosai")) {
-                auto minSize = std::min(size.height(), size.width());
-                size = QSize(minSize, minSize);
-            }
-            itemWidget->setFixedSize(size);
+            auto minSize = std::min(size.height(), size.width());
+            size = QSize(minSize, minSize);
+        }
         itemWidget->setFixedSize(size);
+        this->setFixedSize(size);
         m_mainLayout->addWidget(itemWidget);
     }
 }
@@ -920,8 +943,9 @@ void QuickDockItem::hideEvent(QHideEvent *event)
 bool QuickDockItem::eventFilter(QObject *watched, QEvent *event)
 {
     // 让插件来处理当前插件的事件
-    if (watched == this)
+    if (watched == this) {
         return m_pluginItem->eventHandler(event);
+    }
 
     return QWidget::eventFilter(watched, event);
 }
@@ -967,6 +991,18 @@ void QuickDockItem::initUi()
     if (itemWidget) {
         m_dockItemParent = itemWidget->parentWidget();
         itemWidget->installEventFilter(this);
+    }
+
+    if (itemWidget && m_mainLayout->indexOf(itemWidget) < 0) {
+        itemWidget->show();
+        auto size= suitableSize();
+        if (pluginItem()->pluginName() == QStringLiteral("uosai")) {
+            auto minSize = std::min(size.height(), size.width());
+            size = QSize(minSize, minSize);
+        }
+        itemWidget->setFixedSize(size);
+        this->setFixedSize(size);
+        m_mainLayout->addWidget(itemWidget);
     }
 }
 
@@ -1080,22 +1116,26 @@ QPoint QuickDockItem::topleftPoint() const
 QPoint QuickDockItem::popupMarkPoint() const
 {
     QPoint p = mapToGlobal(rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->mapToGlobal(topLevelWidget()->rect().topLeft()) : mapToGlobal(rect().topLeft());
     const QRect r = rect();
+    const QRect topR = topLevelWidget() ? topLevelWidget()->rect() : rect();
+
+    QPoint popupPoint;
     switch (m_position) {
     case Top:
-        p += QPoint(r.width() / 2, r.height() + POPUP_PADDING);
+        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
         break;
     case Bottom:
-        p += QPoint(r.width() / 2, -POPUP_PADDING);
+        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() - POPUP_PADDING);
         break;
     case Left:
-        p += QPoint(r.width() + POPUP_PADDING, r.height() / 2);
+        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, p.y() + r.height() / 2);
         break;
     case Right:
-        p += QPoint(-POPUP_PADDING, r.height() / 2);
+        popupPoint = QPoint(topP.x() - POPUP_PADDING, p.y() + r.height() / 2);
         break;
     }
-    return p;
+    return popupPoint;
 }
 
 void QuickDockItem::onMenuActionClicked(QAction *action)

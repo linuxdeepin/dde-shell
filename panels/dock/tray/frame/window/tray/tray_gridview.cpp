@@ -390,13 +390,14 @@ bool TrayGridView::mouseInDock()
 }
 void TrayGridView::handleDragEnterEvent(QDragEnterEvent *e)
 {
-    const QModelIndex index = indexAt(e->pos());
+    const QModelIndex index = indexAt(e->position().toPoint());
 
     if (model()->canDropMimeData(e->mimeData(), e->dropAction(), index.row(),
-                                 index.column(), index))
+                                 index.column(), index)) {
         e->accept();
-    else
+    } else {
         e->ignore();
+    }
 
     Q_EMIT dragEntered();
 }
@@ -524,6 +525,7 @@ bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
     QLabel *pixLabel = new QLabel(this);
     pixLabel->setPixmap(pixmap);
     pixLabel->setFixedSize(indexRect(modelIndex).size() / ratio);
+    pixLabel->hide();
 
     QDrag *drag = new QDrag(this);
     pixmap.scaled(pixmap.size() * ratio, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -540,6 +542,9 @@ bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
     listModel->setDragingIndex(modelIndex);
     // 删除当前的图标
     WinInfo winInfo = listModel->getWinInfo(modelIndex);
+
+    // 触发TrayGridWidget的自动显示
+    Q_EMIT dragLeaved();
 
     Qt::DropAction dropAct = drag->exec(supportedActions);
 
@@ -591,6 +596,7 @@ bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
 
             m_dragPos = QPoint();
             m_dropPos = QPoint();
+            pixLabel->deleteLater();
             Q_EMIT dragFinished();
         }
     } else {
@@ -607,9 +613,9 @@ bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
             if (!hasIcon)
                 ExpandIconWidget::popupTrayView()->hide();
         }
-
         m_dropPos = QPoint();
         m_dragPos = QPoint();
+        pixLabel->deleteLater();
         Q_EMIT dragFinished();
     }
 

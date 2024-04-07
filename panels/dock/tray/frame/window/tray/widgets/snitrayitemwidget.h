@@ -53,7 +53,6 @@ public:
     static uint servicePID(const QString &servicePath);
 
     void showHoverTips();
-    const QPoint topleftPoint() const;
     void showPopupWindow(QWidget *const content, const bool model = false);
     const QPoint popupMarkPoint() const;
 

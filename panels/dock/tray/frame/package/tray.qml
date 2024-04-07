@@ -12,6 +12,8 @@ import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
 import org.deepin.ds.dock 1.0
 
+import WidgetProxy 1.0
+
 AppletItem {
     id: tray
     visible: true
@@ -23,23 +25,23 @@ AppletItem {
     property var dockWidth: Applet.dockWidth
     property var dockHeight: Applet.dockHeight
 
-    // Make sure we can accept drop event, and then send it to dock widget
-    DropArea {
-        anchors.fill: parent
+    WidgetProxy {
+        anchors.centerIn: parent
+        Component.onCompleted: Applet.initDock()
     }
 
     function updatePanelGeometry() {
+        var topLeft = this.mapToGlobal(Qt.point(0, 0))
         if (useColumnLayout) {
             Applet.setPanelSize(Window.width)
-            Applet.setPanelPosition(0, Window.height - dockHeight - showDesktopWidth)
+            Applet.setPanelPosition(topLeft.x, Window.height - dockHeight - showDesktopWidth)
         } else {
             Applet.setPanelSize(Window.height)
-            Applet.setPanelPosition(Window.width - dockWidth - showDesktopWidth, 0)
+            Applet.setPanelPosition(Window.width - dockWidth - showDesktopWidth, topLeft.y)
         }
     }
 
     Window.onWindowChanged: {
-        Applet.initDock()
         Applet.setDockPosition(Panel.position)
         Applet.setDisplayMode(Panel.indicatorStyle)
         updatePanelGeometry()
@@ -51,8 +53,8 @@ AppletItem {
     onDockWidthChanged: updatePanelGeometry()
     onDockHeightChanged: updatePanelGeometry()
 
-    implicitWidth: useColumnLayout ? 40 : dockWidth /*useColumnLayout ? Panel.dockSize : trayContainter.suggestedImplicitWidth + overflowBtn.implicitWidth * 2*/
-    implicitHeight: useColumnLayout ? dockHeight : 40 /*useColumnLayout ? trayContainter.suggestedImplicitHeight + overflowBtn.implicitHeight * 2 : Panel.dockSize*/
+    implicitWidth: dockWidth /*useColumnLayout ? Panel.dockSize : trayContainter.suggestedImplicitWidth + overflowBtn.implicitWidth * 2*/
+    implicitHeight: dockHeight /*useColumnLayout ? trayContainter.suggestedImplicitHeight + overflowBtn.implicitHeight * 2 : Panel.dockSize*/
     Behavior on implicitWidth {
         SmoothedAnimation {
             velocity: useColumnLayout ? 100000:  600
