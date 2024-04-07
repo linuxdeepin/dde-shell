@@ -4,16 +4,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "dockpopupwindow.h"
-#include "imageutil.h"
 #include "utils.h"
 #include "dbusutil.h"
 #include "dockscreen.h"
 #include "displaymanager.h"
-#include "taskmanager/taskmanager.h"
 
 #include <QScreen>
 #include <QApplication>
-// #include <QDesktopWidget>
 #include <QAccessible>
 #include <QAccessibleEvent>
 #include <QCursor>
@@ -173,14 +170,12 @@ void DockPopupWindow::showEvent(QShowEvent *e)
         Utils::updateCursor(this);
     }
 
-    TaskManager::instance()->setPopupVisible(true);
     QTimer::singleShot(1, this, &DockPopupWindow::ensureRaised);
 }
 
 void DockPopupWindow::hideEvent(QHideEvent *event)
 {
     m_extendWidget = nullptr;
-    TaskManager::instance()->setPopupVisible(false);
     Dtk::Widget::DBlurEffectWidget::hideEvent(event);
 }
 

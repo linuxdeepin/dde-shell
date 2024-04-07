@@ -22,10 +22,9 @@
 #ifndef DBUSDOCKADAPTORS_H
 #define DBUSDOCKADAPTORS_H
 
-#include "mainwindow.h"
-
 #include <QtDBus/QtDBus>
 #include <QDBusArgument>
+#include <DGuiApplicationHelper>
 
 /*
  * Adaptor class for interface org.deepin.dde.Dock1
@@ -33,6 +32,8 @@
 class QGSettings;
 class WindowManager;
 class PluginsItemInterface;
+
+DGUI_USE_NAMESPACE
 
 struct DockItemInfo
 {

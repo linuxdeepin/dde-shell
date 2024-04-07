@@ -7,8 +7,6 @@
 #include "dockapplet.h"
 #include "pluginfactory.h"
 #include "dbusdockadaptors.h"
-#include "dockdaemonadaptors.h"
-#include "windowmanager.h"
 #include "docktraywindow.h"
 
 #include <QApplication>

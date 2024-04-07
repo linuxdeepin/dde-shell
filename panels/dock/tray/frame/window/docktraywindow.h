@@ -7,9 +7,9 @@
 #define DOCKTRAYWINDOW_H
 
 #include "constants.h"
-#include "dbusutil.h"
 
 #include <QWidget>
+#include <DBlurEffectWidget>
 
 class QBoxLayout;
 class SystemPluginWindow;
@@ -23,7 +23,7 @@ class PluginsItemInterface;
 class QLabel;
 
 // 托盘图标区域（SNI、XEmbed...）
-class DockTrayWindow : public QWidget
+class DockTrayWindow : public Dtk::Widget::DBlurEffectWidget
 {
     Q_OBJECT
 
@@ -72,7 +72,7 @@ private:
     Dock::Position m_position;
     Dock::DisplayMode m_displayMode;
     QBoxLayout *m_mainBoxLayout;
-    // QWidget *m_showDesktopWidget;
+    QWidget *m_showDesktopWidget;
     QWidget *m_toolWidget;
     QBoxLayout *m_toolLayout;
     // QLabel *m_toolLineLabel;
