@@ -1,3 +1,20 @@
+dde-shell (0.0.7) unstable; urgency=medium
+
+  * fix: dock menu not shown
+  * fix: dock not show while HideMode changed in hiden
+  * fix: dock centerAlignment not work on left/right
+  * fix: x11 preview not auto hide
+  * fix: undocked item still existed when restart dock
+  * fix: show window even is bypassWM
+  * fix: show deepin application with deepin prefix
+  * fix: dock tray tips position error
+  * fix: brightness widget display is incomplete
+  * fix: Show desktop item is not displayed in the bottom right corner
+  * fix: repair the time display is not clear
+  * feat: we can hide dock plugin in dde-control-center
+
+ -- tsic404 <liuheng@deepin.org>  Mon, 08 Apr 2024 18:56:30 +0800
+
 dde-shell (0.0.6) unstable; urgency=medium
 
   * new dock ui
