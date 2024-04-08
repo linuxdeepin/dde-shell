@@ -96,6 +96,7 @@ QuickPluginModel::QuickPluginModel(QObject *parent)
 
 void QuickPluginModel::onPluginRemoved(PluginsItemInterface *itemInter)
 {
+    qWarning() << __FUNCTION__ << __FILE__ << __LINE__ << "######";
     // 如果插件移除，无需移除下方的排序设置，因为下次插件插入的时候还会插入到下方任务栏
     // 因此，此处只需要从列表中移除当前插件
     if (m_dockedPluginsItems.contains(itemInter))
@@ -108,6 +109,7 @@ void QuickPluginModel::initConnection()
 {
     QuickSettingController *quickController = QuickSettingController::instance();
     connect(quickController, &QuickSettingController::pluginInserted, this, [ this, quickController ](PluginsItemInterface *itemInter, const QuickSettingController::PluginAttribute plugAttr) {
+        qWarning() << __FUNCTION__ << __FILE__ << __LINE__ << "######";
         if (plugAttr != QuickSettingController::PluginAttribute::Quick)
             return;
 

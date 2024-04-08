@@ -19,6 +19,13 @@
 #include <QTranslator>
 #include <QWindow>
 
+#include <QGroupBox>
+#include <QLineEdit>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QHBoxLayout>
+#include <QLabel>
+
 DS_BEGIN_NAMESPACE
     namespace dock {
 
@@ -29,7 +36,6 @@ DS_BEGIN_NAMESPACE
                    , m_dockHeight(0)
                    , m_dockAdapter(nullptr)
                    {
-
                    }
 
                    void DockApplet::setDockWidth(int width)

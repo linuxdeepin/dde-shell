@@ -166,7 +166,7 @@ QSize QuickPluginWindow::suitableSize(const Dock::Position &position) const
         for (int i = 0; i < m_mainLayout->count(); i++) {
             QWidget *itemWidget = m_mainLayout->itemAt(i)->widget();
             if (itemWidget)
-                itemWidth += /*itemWidget->width()*/30 + ITEMSPACE;
+                itemWidth += itemWidget->width() + ITEMSPACE;
         }
         itemWidth += ITEMSPACE;
 
@@ -177,7 +177,7 @@ QSize QuickPluginWindow::suitableSize(const Dock::Position &position) const
     for (int i = 0; i < m_mainLayout->count(); i++) {
         QWidget *itemWidget = m_mainLayout->itemAt(i)->widget();
         if (itemWidget)
-            itemHeight += /*itemWidget->height()*/30 + ITEMSPACE;
+            itemHeight += itemWidget->height() + ITEMSPACE;
     }
     itemHeight += ITEMSPACE;
 

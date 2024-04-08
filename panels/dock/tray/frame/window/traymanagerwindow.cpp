@@ -317,6 +317,7 @@ void TrayManagerWindow::initConnection()
     connect(m_model, &TrayModel::rowCountChanged, m_trayView, &TrayGridView::onUpdateEditorView);
     connect(m_model, &TrayModel::requestRefreshEditor, m_trayView, &TrayGridView::onUpdateEditorView);
     connect(m_quickIconWidget, &QuickPluginWindow::itemCountChanged, this, [ this ] {
+        qWarning() << __FUNCTION__ << __FILE__ << __LINE__ << "######";
         // 当插件数量发生变化的时候，需要调整尺寸
         m_quickIconWidget->setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
         if (m_position == Dock::Position::Top || m_position == Dock::Position::Bottom)
