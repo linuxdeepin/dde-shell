@@ -75,6 +75,8 @@ public:
 
     bool debugMode() const;
 
+    Q_INVOKABLE void openDockSettings() const;
+
 private Q_SLOTS:
     void onWindowGeometryChanged();
     void loadDockPlugins();

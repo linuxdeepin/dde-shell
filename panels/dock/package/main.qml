@@ -47,10 +47,8 @@ Window {
     onDockSizeChanged: {
         if (dock.dockSize === Dock.MIN_DOCK_SIZE) {
             Panel.indicatorStyle = Dock.Efficient
-            Panel.itemAlignment = Dock.LeftAlignment
         } else {
             Panel.indicatorStyle = Dock.Fashion
-            Panel.itemAlignment = Dock.CenterAlignment
         }
     }
 
@@ -121,16 +119,16 @@ Window {
                 value: Dock.Efficient
             }
         }
+        // TODO: Mode-> Alignment, Fashion -> Center, Efficient -> left
         MutuallyExclusiveMenu {
-            title: qsTr("Item Alignment")
-            visible: Panel.debugMode
+            title: qsTr("Mode")
             EnumPropertyMenuItem {
-                name: qsTr("Left")
+                name: qsTr("Efficient Mode")
                 prop: "itemAlignment"
                 value: Dock.LeftAlignment
             }
             EnumPropertyMenuItem {
-                name: qsTr("Center")
+                name: qsTr("Fashion Mode")
                 prop: "itemAlignment"
                 value: Dock.CenterAlignment
             }
@@ -179,6 +177,13 @@ Window {
                 name: qsTr("Smart Hide")
                 prop: "hideMode"
                 value: Dock.SmartHide
+            }
+        }
+
+        LP.MenuItem {
+            text: qsTr("Dock Settings")
+            onTriggered: {
+                Panel.openDockSettings()
             }
         }
     }
