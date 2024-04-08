@@ -136,7 +136,3 @@ add_subdirectory("libdbusmenu-qt")
 file(GLOB QM_FILES "translations/*.qm")
 install(FILES ${QM_FILES}
     DESTINATION share/dde-dock/tmp/translations)
-
-## dev files
-install(FILES ${INTERFACES}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dde-dock)

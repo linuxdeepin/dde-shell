@@ -40,6 +40,7 @@ add_library(${BIN_NAME} SHARED
     ${SRCS}
     ${INTERFACES}
     ${SRC_PATH}
+    item.qrc
 )
 
 target_include_directories(${BIN_NAME} PUBLIC
