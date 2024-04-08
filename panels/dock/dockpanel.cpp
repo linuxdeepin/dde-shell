@@ -18,6 +18,7 @@
 #include "dockfrontadaptor.h"
 #include "dockdaemonadaptor.h"
 
+#include <DDBusSender>
 #include <QQuickWindow>
 #include <QLoggingCategory>
 #include <QGuiApplication>
@@ -257,6 +258,17 @@ bool DockPanel::debugMode() const
 #else
     return true;
 #endif
+}
+
+void DockPanel::openDockSettings() const
+{
+    DDBusSender()
+        .service(QStringLiteral("org.deepin.dde.ControlCenter1"))
+        .path(QStringLiteral("/org/deepin/dde/ControlCenter1"))
+        .interface(QStringLiteral("org.deepin.dde.ControlCenter1"))
+        .method(QStringLiteral("ShowPage"))
+        .arg(QStringLiteral("personalization/desktop/dock"))
+        .call();
 }
 
 void DockPanel::loadDockPlugins()
