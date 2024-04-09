@@ -1,4 +1,5 @@
 add_subdirectory("shutdown")
+add_subdirectory("system-monitor")
 add_subdirectory("power")
 add_subdirectory("sound")
 add_subdirectory("display")
