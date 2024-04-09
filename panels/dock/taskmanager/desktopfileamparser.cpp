@@ -108,7 +108,12 @@ QString DesktopFileAMParser::genericName()
 
 std::pair<bool, QString> DesktopFileAMParser::isValied()
 {
-    return std::make_pair(true, "has am as backend");
+    // TODO:    1. am service may be unavailable and get dbus timeout
+    //          2. show call path existed not id equeals
+
+    if (!(m_applicationInterface && m_applicationInterface->iD() == id()))
+        return std::make_pair(false, QStringLiteral("am do not contains app %1").arg(id()));
+    return std::make_pair(true, QStringLiteral("has am as desktopfileparser backend"));
 }
 
 QList<QPair<QString, QString>> DesktopFileAMParser::actions()
