@@ -25,7 +25,6 @@ find_package(DtkCMake REQUIRED)
 # find_package(dbusmenu-qt6 REQUIRED)
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
-find_package(DWayland REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -94,7 +93,6 @@ target_link_libraries(${BIN_NAME} PRIVATE
     Qt6::Svg
     Qt6::WaylandClient
     # Qt6::XkbCommonSupport
-    DWaylandClient
     Threads::Threads
     dde-shell-frame
     dbusmenu-qt6
