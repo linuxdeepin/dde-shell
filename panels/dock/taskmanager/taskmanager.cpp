@@ -152,8 +152,18 @@ void TaskManager::loadDockedAppItems()
         auto appid = app.value("id").toString();
         auto type = app.value("type").toString();
         auto desktopfile = DESKTOPFILEFACTORY::createById(appid, type);
+        auto valid = desktopfile->isValied();
 
-        auto appitem = new AppItem(appid);
+        if (!valid.first) {
+            qInfo(taskManagerLog()) << "failed to load " << appid << " beacause " << valid.second;
+            continue;
+        }
+
+        auto appitem = desktopfile->getAppItem();
+        if (appitem.isNull()) {
+            appitem = new AppItem(appid);
+        }
+    
         appitem->setDesktopFileParser(desktopfile);
         ItemModel::instance()->addItem(appitem);
     }
