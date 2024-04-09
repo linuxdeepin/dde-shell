@@ -33,6 +33,7 @@ target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
     ../../interfaces
     ../../widgets
     ../../frame
+    ../../frame/util
     ../../frame/accessible
     ../../frame/qtdbusextended
     )

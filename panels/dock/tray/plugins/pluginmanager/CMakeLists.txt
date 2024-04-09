@@ -28,6 +28,7 @@ add_library(${PLUGIN_NAME} SHARED ${SRCS})
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ../loader/)
 target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
                                                  ./pluginadapter
+                                                 ../../frame/util
                                                  ../../frame/drag
                                                  ../../frame/dbusinterface
                                                  ../../frame/dbusinterface/generation_dbus_interface/

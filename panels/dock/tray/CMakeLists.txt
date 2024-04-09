@@ -74,28 +74,6 @@ endfunction(generation_dbus_interface)
 
 file(GLOB INTERFACES "interfaces/*.h")
 add_definitions(-DCVERSION="${VERSION}")
-#因为单元测试需要直接测试源代码，而主程序代码中include的单元使用了相对路径
-#单元测试的CMakeLists和主程序的CMakeLists路径不同，编译单元测试时会提示找不到文件
-#因此设置搜索路径
-include_directories(
-    frame/accessible
-    frame/controller
-    frame/dbus
-    frame/dbus/sni
-    frame/display
-    frame/item
-    frame/item/components
-    frame/item/resources
-    frame/model
-    frame/util
-    frame/window
-    frame/window/components
-    frame/window/tray
-    frame/window/tray/widgets
-    frame/xcb
-    ../widgets
-    ../interfaces
-    )
 aux_source_directory(frame/accessible ACCESSIBLE)
 aux_source_directory(frame/controller CONTROLLER)
 aux_source_directory(frame/dbus DBUS)
@@ -132,6 +110,30 @@ file(GLOB SRC_PATH
 add_subdirectory("frame")
 add_subdirectory("plugins")
 add_subdirectory("libdbusmenu-qt")
+
+#因为单元测试需要直接测试源代码，而主程序代码中include的单元使用了相对路径
+#单元测试的CMakeLists和主程序的CMakeLists路径不同，编译单元测试时会提示找不到文件
+#因此设置搜索路径
+# include_directories(
+#     frame/accessible
+#     frame/controller
+#     frame/dbus
+#     frame/dbus/sni
+#     frame/display
+#     frame/item
+#     frame/item/components
+#     frame/item/resources
+#     frame/model
+#     frame/util
+#     frame/window
+#     frame/window/components
+#     frame/window/tray
+#     frame/window/tray/widgets
+#     frame/xcb
+#     ../widgets
+#     ../interfaces
+#     )
+
 ## qm files
 file(GLOB QM_FILES "translations/*.qm")
 install(FILES ${QM_FILES}
