@@ -43,6 +43,7 @@ set(DDE_SHELL_PLUGIN_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/dde-shell CACHE STRING 
 set(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/dde-shell" CACHE STRING "Headers install path")
 set(CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/DDEShell" CACHE STRING "CMake config file install directory")
 set(QML_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/qt${QT_VERSION_MAJOR}/qml" CACHE STRING "Qml plugin install directory")
+set(DDE_SHELL_TRANSLATION_INSTALL_DIR "${CMAKE_INSTALL_DATADIR}/dde-shell" CACHE STRING "Translation install directory")
 # avoid warning when `D_APPLET_CLASS` used in .cpp
 set(CMAKE_AUTOMOC_MACRO_NAMES "D_APPLET_CLASS")
 
@@ -50,7 +51,7 @@ find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH};${ECM_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake")
 include(DDEShellPackageMacros)
 
-find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick WaylandClient DBus)
+find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick WaylandClient DBus LinguistTools)
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui)
 find_package(WaylandProtocols REQUIRED)
 find_package(PkgConfig REQUIRED)
