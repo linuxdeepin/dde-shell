@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "iconwidget.h"
-#include "dde-dock/constants.h"
+#include "constants.h"
 
 #include <DGuiApplicationHelper>
 #include <DStyle>

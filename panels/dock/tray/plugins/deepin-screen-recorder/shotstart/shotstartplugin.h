@@ -9,7 +9,7 @@
 #include "iconwidget.h"
 #include "tipswidget.h"
 #include <QtDBus/QtDBus>
-#include <dde-dock/pluginsiteminterface.h>
+#include "pluginsiteminterface.h"
 
 class ShotStartPlugin : public QObject, PluginsItemInterface
 {
