@@ -14,3 +14,4 @@ target_link_libraries(dock-clipboarditem PRIVATE
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.clipboarditem TARGET dock-clipboarditem)
+ds_handle_package_translation(PACKAGE org.deepin.ds.dock.clipboarditem)

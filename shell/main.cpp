@@ -57,9 +57,11 @@ public:
             auto loader = new DAppletLoader(applet);
             m_loaders << loader;
 
-            QObject::connect(loader, &DAppletLoader::failed, qApp, [this, loader]() {
-                m_loaders.removeOne(loader);
-                loader->deleteLater();
+            QObject::connect(loader, &DAppletLoader::failed, qApp, [this, loader, pluginIds](const QString &pluginId) {
+                if (pluginIds.contains(pluginId)) {
+                    m_loaders.removeOne(loader);
+                    loader->deleteLater();
+                }
             });
         }
     }

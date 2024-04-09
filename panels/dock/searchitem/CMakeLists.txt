@@ -14,3 +14,4 @@ target_link_libraries(dock-searchitem PRIVATE
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.searchitem TARGET dock-searchitem)
+ds_handle_package_translation(PACKAGE org.deepin.ds.dock.searchitem)

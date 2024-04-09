@@ -13,3 +13,4 @@ target_link_libraries(osd-displaymode PRIVATE
 )
 
 ds_install_package(PACKAGE org.deepin.ds.osd.displaymode TARGET osd-displaymode)
+ds_handle_package_translation(PACKAGE org.deepin.ds.osd.displaymode)

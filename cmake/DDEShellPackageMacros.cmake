@@ -34,3 +34,54 @@ function(ds_install_package)
         install(TARGETS ${_config_TARGET} DESTINATION ${DDE_SHELL_PLUGIN_INSTALL_DIR}/)
     endif()
 endfunction()
+
+function(ds_handle_package_translation)
+    set(oneValueArgs PACKAGE)
+    set(multiValueArgs QML_FILES SOURCE_FILES )
+    cmake_parse_arguments(_config "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if(NOT _config_QML_FILES)
+        file(GLOB_RECURSE _config_QML_FILES ${CMAKE_CURRENT_SOURCE_DIR}/package/*.qml)
+        file(GLOB additional_QML_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qml)
+        list(APPEND _config_QML_FILES ${additional_QML_FILES})
+    endif()
+
+    if(NOT _config_SOURCE_FILES)
+        file(GLOB _config_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+    endif()
+
+    set(TRANSLATION_FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_az.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_bo.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_ca.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_es.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_fi.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_fr.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_hu.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_it.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_ja.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_ko.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_nb_NO.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_pl.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_pt_BR.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_ru.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_uk.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_zh_CN.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_zh_HK.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_zh_TW.ts
+    )
+
+    add_custom_target(${_config_PACKAGE}_translation ALL
+        SOURCES ${TRANSLATION_FILES}
+    )
+
+    qt_add_translations(${_config_PACKAGE}_translation
+        TS_FILES ${TRANSLATION_FILES}
+        SOURCES ${_config_QML_FILES} ${_config_SOURCE_FILES}
+        QM_FILES_OUTPUT_VARIABLE TRANSLATED_FILES
+    )
+
+    # /usr/share/dde-shell/org.deepin.xxx/translations/org.deepin.xxx.qm
+    install(FILES ${TRANSLATED_FILES} DESTINATION ${DDE_SHELL_TRANSLATION_INSTALL_DIR}/${_config_PACKAGE}/translations)
+endfunction()
