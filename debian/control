@@ -42,6 +42,7 @@ Build-Depends:
  libxres-dev,
  libxtst-dev,
  libdframeworkdbus-dev,
+ libkf6networkmanagerqt-dev,
 Standards-Version: 3.9.8
 Homepage: http://www.deepin.org
 

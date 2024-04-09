@@ -43,10 +43,10 @@ QVariant DCCDBusInterfacePrivate::demarshall(const QMetaProperty &metaProperty, 
     if (value.userType() == metaProperty.userType())
         return value;
 
-    QVariant result = QVariant(metaProperty.userType(), nullptr);
+    QVariant result = QVariant(metaProperty.metaType(), nullptr);
     if (value.userType() == qMetaTypeId<QDBusArgument>()) {
         QDBusArgument dbusArg = value.value<QDBusArgument>();
-        QDBusMetaType::demarshall(dbusArg, metaProperty.userType(), result.data());
+        QDBusMetaType::demarshall(dbusArg, metaProperty.metaType(), result.data());
     }
 
     return result;

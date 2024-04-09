@@ -41,6 +41,7 @@ makedepends=('git'
              'ninja'
              'extra-cmake-modules'
              'wayland-protocols'
+             'networkmanager-qt'
 )
 conflicts=('dde-shell')
 provides=('dde-shell')

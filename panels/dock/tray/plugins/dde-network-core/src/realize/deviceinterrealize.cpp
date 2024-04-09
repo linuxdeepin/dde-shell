@@ -133,8 +133,8 @@ bool DeviceInterRealize::isIpv4Address(const QString &ip) const
         return false;
     }
 
-    QRegExp regExpIP("((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])[\\.]){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])");
-    return regExpIP.exactMatch(ip);
+    QRegularExpression regExpIP("((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])[\\.]){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])");
+    return regExpIP.match(ip).hasMatch();
 }
 
 void DeviceInterRealize::setEnabled(bool enabled)

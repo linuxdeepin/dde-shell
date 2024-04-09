@@ -126,7 +126,7 @@ void QuickPanel::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void QuickPanel::enterEvent(QEvent *event)
+void QuickPanel::enterEvent(QEnterEvent *event)
 {
     setHover(true);
 }
