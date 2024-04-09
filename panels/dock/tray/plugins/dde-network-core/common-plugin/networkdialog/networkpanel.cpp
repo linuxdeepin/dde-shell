@@ -11,7 +11,6 @@
 #include <NetworkManagerQt/WirelessDevice>
 
 #include <DIcon>
-#include <DApplicationHelper>
 #include <DDBusSender>
 #include <DGuiApplicationHelper>
 #include <DSwitchButton>
@@ -191,14 +190,14 @@ void NetworkPanel::initConnection()
 
     int wirelessScanInterval = Utils::SettingValue("com.deepin.dde.dock", QByteArray(), "wireless-scan-interval", 10).toInt() * 1000;
     m_wirelessScanTimer->setInterval(wirelessScanInterval);
-    const QGSettings *gsetting = Utils::SettingsPtr("com.deepin.dde.dock", QByteArray(), this);
-    if (gsetting)
-        connect(gsetting, &QGSettings::changed, [ & ](const QString &key) {
-            if (key == "wireless-scan-interval") {
-                int interval = gsetting->get("wireless-scan-interval").toInt() * 1000;
-                m_wirelessScanTimer->setInterval(interval);
-            }
-        });
+    // const QGSettings *gsetting = Utils::SettingsPtr("com.deepin.dde.dock", QByteArray(), this);
+    // if (gsetting)
+    //     connect(gsetting, &QGSettings::changed, [ & ](const QString &key) {
+    //         if (key == "wireless-scan-interval") {
+    //             int interval = gsetting->get("wireless-scan-interval").toInt() * 1000;
+    //             m_wirelessScanTimer->setInterval(interval);
+    //         }
+    //     });
     connect(m_wirelessScanTimer, &QTimer::timeout, [ & ] {
         QList<NetworkDeviceBase *> devices = NetworkController::instance()->devices();
         for (NetworkDeviceBase *device : devices) {

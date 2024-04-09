@@ -8,7 +8,6 @@
 #include <QImageReader>
 #include <QApplication>
 #include <QScreen>
-#include <QGSettings>
 #include <QDebug>
 
 #include "plugin_global.h"
@@ -17,32 +16,32 @@ namespace Utils {
 
 #define ICBC_CONF_FILE "/etc/deepin/icbc.conf"
 
-/**
- * @brief SettingsPtr 根据给定信息返回一个QGSettings指针
- * @param schema_id The id of the schema
- * @param path If non-empty, specifies the path for a relocatable schema
- * @param parent 创建指针的付对象
- * @return
- */
-inline const QGSettings *SettingsPtr(const QString &schema_id, const QByteArray &path = QByteArray(), QObject *parent = nullptr) {
-    if (QGSettings::isSchemaInstalled(schema_id.toUtf8())) {
-        QGSettings *settings = new QGSettings(schema_id.toUtf8(), path, parent);
-        return settings;
-    }
-    qDebug() << "Cannot find gsettings, schema_id:" << schema_id;
-    return nullptr;
-}
+// /**
+//  * @brief SettingsPtr 根据给定信息返回一个QGSettings指针
+//  * @param schema_id The id of the schema
+//  * @param path If non-empty, specifies the path for a relocatable schema
+//  * @param parent 创建指针的付对象
+//  * @return
+//  */
+// inline const QGSettings *SettingsPtr(const QString &schema_id, const QByteArray &path = QByteArray(), QObject *parent = nullptr) {
+//     if (QGSettings::isSchemaInstalled(schema_id.toUtf8())) {
+//         QGSettings *settings = new QGSettings(schema_id.toUtf8(), path, parent);
+//         return settings;
+//     }
+//     qDebug() << "Cannot find gsettings, schema_id:" << schema_id;
+//     return nullptr;
+// }
 
-/**
- * @brief SettingsPtr 根据给定信息返回一个QGSettings指针
- * @param module 传入QGSettings构造函数时，会添加"com.deepin.dde.dock.module."前缀
- * @param path If non-empty, specifies the path for a relocatable schema
- * @param parent 创建指针的付对象
- * @return
- */
-inline const QGSettings *ModuleSettingsPtr(const QString &module, const QByteArray &path = QByteArray(), QObject *parent = nullptr) {
-    return SettingsPtr("com.deepin.dde.dock.module." + module, path, parent);
-}
+// /**
+//  * @brief SettingsPtr 根据给定信息返回一个QGSettings指针
+//  * @param module 传入QGSettings构造函数时，会添加"com.deepin.dde.dock.module."前缀
+//  * @param path If non-empty, specifies the path for a relocatable schema
+//  * @param parent 创建指针的付对象
+//  * @return
+//  */
+// inline const QGSettings *ModuleSettingsPtr(const QString &module, const QByteArray &path = QByteArray(), QObject *parent = nullptr) {
+//     return SettingsPtr("com.deepin.dde.dock.module." + module, path, parent);
+// }
 
 /* convert 'some-key' to 'someKey' or 'SomeKey'.
  * the second form is needed for appending to 'set' for 'setSomeKey'
@@ -77,18 +76,19 @@ inline QString qtify_name(const char *name)
  * @return
  */
 inline const QVariant SettingValue(const QString &schema_id, const QByteArray &path = QByteArray(), const QString &key = QString(), const QVariant &fallback = QVariant()){
-    const QGSettings *settings = SettingsPtr(schema_id, path);
+    // const QGSettings *settings = SettingsPtr(schema_id, path);
 
-    if (settings && ((settings->keys().contains(key)) || settings->keys().contains(qtify_name(key.toUtf8().data())))) {
-        QVariant v = settings->get(key);
-        delete settings;
-        return v;
-    } else{
-        qDebug() << "Cannot find gsettings, schema_id:" << schema_id
-                 << " path:" << path << " key:" << key
-                 << "Use fallback value:" << fallback;
-        return fallback;
-    }
+    // if (settings && ((settings->keys().contains(key)) || settings->keys().contains(qtify_name(key.toUtf8().data())))) {
+    //     QVariant v = settings->get(key);
+    //     delete settings;
+    //     return v;
+    // } else{
+    //     qDebug() << "Cannot find gsettings, schema_id:" << schema_id
+    //              << " path:" << path << " key:" << key
+    //              << "Use fallback value:" << fallback;
+    //     return fallback;
+    // }
+    return fallback;
 }
 
 inline QPixmap renderSVG(const QString &path, const QSize &size, const qreal devicePixelRatio) {
@@ -133,15 +133,16 @@ inline QScreen *screenAtByScaled(const QPoint &point) {
 }
 
 inline bool isSettingConfigured(const QString& id, const QString& path, const QString& keyName) {
-    if (!QGSettings::isSchemaInstalled(id.toUtf8())) {
-        return false;
-    }
-    QGSettings setting(id.toUtf8(), path.toUtf8());
-    QVariant v = setting.get(keyName);
-    if (!v.isValid()) {
-        return false;
-    }
-    return v.toBool();
+    // if (!QGSettings::isSchemaInstalled(id.toUtf8())) {
+    //     return false;
+    // }
+    // QGSettings setting(id.toUtf8(), path.toUtf8());
+    // QVariant v = setting.get(keyName);
+    // if (!v.isValid()) {
+    //     return false;
+    // }
+    // return v.toBool();
+    return false;
 }
 
 /**

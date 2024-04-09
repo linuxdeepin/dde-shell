@@ -9,7 +9,6 @@
 #include "networkdialog.h"
 
 #include <DHiDPIHelper>
-#include <DApplicationHelper>
 #include <DMenu>
 
 #include <QTimer>
