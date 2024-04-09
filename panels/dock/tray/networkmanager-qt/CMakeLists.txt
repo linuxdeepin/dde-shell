@@ -82,19 +82,19 @@ configure_package_config_file(
   INSTALL_DESTINATION  ${CMAKECONFIG_INSTALL_DIR}
 )
 
-install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/KF5NetworkManagerQtConfig.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/KF5NetworkManagerQtConfigVersion.cmake"
-  DESTINATION "${CMAKECONFIG_INSTALL_DIR}"
-  COMPONENT Devel
-)
+# install(FILES
+#   "${CMAKE_CURRENT_BINARY_DIR}/KF5NetworkManagerQtConfig.cmake"
+#   "${CMAKE_CURRENT_BINARY_DIR}/KF5NetworkManagerQtConfigVersion.cmake"
+#   DESTINATION "${CMAKECONFIG_INSTALL_DIR}"
+#   COMPONENT Devel
+# )
 
-install(EXPORT KF5NetworkManagerQtTargets DESTINATION "${CMAKECONFIG_INSTALL_DIR}" FILE KF5NetworkManagerQtTargets.cmake NAMESPACE KF5:: )
+# install(EXPORT KF5NetworkManagerQtTargets DESTINATION "${CMAKECONFIG_INSTALL_DIR}" FILE KF5NetworkManagerQtTargets.cmake NAMESPACE KF5:: )
 
-install(FILES
-   ${CMAKE_CURRENT_BINARY_DIR}/networkmanagerqt_version.h
-  DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF}/NetworkManagerQt COMPONENT Devel
-)
+# install(FILES
+#    ${CMAKE_CURRENT_BINARY_DIR}/networkmanagerqt_version.h
+#   DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF}/NetworkManagerQt COMPONENT Devel
+# )
 
 feature_summary(WHAT ALL   FATAL_ON_MISSING_REQUIRED_PACKAGES)
 

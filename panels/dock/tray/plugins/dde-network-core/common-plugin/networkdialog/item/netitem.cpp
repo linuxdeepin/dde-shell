@@ -7,7 +7,6 @@
 #include "../thememanager.h"
 #include "../networkpanel.h"
 
-#include <DApplicationHelper>
 #include <DHiDPIHelper>
 #include <DListView>
 #include <dloadingindicator.h>

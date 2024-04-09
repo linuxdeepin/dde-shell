@@ -32,7 +32,7 @@ NetworkPlugin::NetworkPlugin(QObject *parent)
     NetworkController::setIPConflictCheck(true);
     QTranslator *translator = new QTranslator(this);
     QString languagePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
-                                                  QString("dock-network-plugin/translations"),
+                                                  QString("dock-network-plugin/tmp/translations"),
                                                   QStandardPaths::LocateDirectory);
     translator->load(QString(languagePath+"/dock-network-plugin_%1.qm").arg(QLocale::system().name()));
     QCoreApplication::installTranslator(translator);

@@ -164,6 +164,7 @@ set_target_properties(KF5NetworkManagerQt PROPERTIES VERSION ${NETWORKMANAGERQT_
 ########### static lib for tests  ###############
 add_library(KF5NetworkManagerQt_static STATIC ${NetworkManagerQt_PART_SRCS} ${NetworkManagerQt_SETTINGS_SRCS} ${DBUS_INTERFACE_SRCS})
 set_target_properties(KF5NetworkManagerQt_static PROPERTIES COMPILE_FLAGS -DNMQT_STATIC=1)
+set_target_properties(KF5NetworkManagerQt_static PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(KF5NetworkManagerQt_static PUBLIC Qt${QT_MAJOR_VERSION}::Core Qt${QT_MAJOR_VERSION}::Network Qt${QT_MAJOR_VERSION}::DBus PkgConfig::NetworkManager PkgConfig::Gio)
 target_include_directories(KF5NetworkManagerQt_static PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..;${CMAKE_CURRENT_SOURCE_DIR}/dbus;${CMAKE_CURRENT_SOURCE_DIR}/settings>")
@@ -251,26 +252,26 @@ ecm_generate_headers(NetworkManagerQt_SETTINGS_CamelCase_HEADERS
   PREFIX NetworkManagerQt
 )
 
-install(TARGETS KF5NetworkManagerQt EXPORT KF5NetworkManagerQtTargets ${KF_INSTALL_TARGETS_DEFAULT_ARGS})
+# install(TARGETS KF5NetworkManagerQt EXPORT KF5NetworkManagerQtTargets ${KF_INSTALL_TARGETS_DEFAULT_ARGS})
 
-install(FILES
-  ${NetworkManagerQt_CamelCase_HEADERS}
-  ${NetworkManagerQt_SETTINGS_CamelCase_HEADERS}
-  DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF}/NetworkManagerQt/NetworkManagerQt COMPONENT Devel
-)
+# install(FILES
+#   ${NetworkManagerQt_CamelCase_HEADERS}
+#   ${NetworkManagerQt_SETTINGS_CamelCase_HEADERS}
+#   DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF}/NetworkManagerQt/NetworkManagerQt COMPONENT Devel
+# )
 
-install(FILES
-  ${NetworkManagerQt_BINARY_DIR}/networkmanagerqt/networkmanagerqt_export.h
-  ${NetworkManagerQt_HEADERS}
-  ${NetworkManagerQt_SETTINGS_HEADERS}
-  DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF}/NetworkManagerQt/networkmanagerqt COMPONENT Devel
-)
+# install(FILES
+#   ${NetworkManagerQt_BINARY_DIR}/networkmanagerqt/networkmanagerqt_export.h
+#   ${NetworkManagerQt_HEADERS}
+#   ${NetworkManagerQt_SETTINGS_HEADERS}
+#   DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF}/NetworkManagerQt/networkmanagerqt COMPONENT Devel
+# )
 
-ecm_qt_install_logging_categories(
-    EXPORT NETWORMANAGERQT
-    FILE networkmanagerqt.categories
-    DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR}
-)
+# ecm_qt_install_logging_categories(
+#     EXPORT NETWORMANAGERQT
+#     FILE networkmanagerqt.categories
+#     DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR}
+# )
 
 if(BUILD_QCH)
     ecm_add_qch(
