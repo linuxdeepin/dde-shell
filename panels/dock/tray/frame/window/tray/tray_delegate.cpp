@@ -67,42 +67,39 @@ QWidget *TrayDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem 
 {
     Q_UNUSED(option);
 
-    TrayIconType type = index.data(TrayModel::TypeRole).value<TrayIconType>();
-    QString key = index.data(TrayModel::KeyRole).value<QString>();
-    QString servicePath = index.data(TrayModel::ServiceRole).value<QString>();
-    quint32 winId = index.data(TrayModel::WinIdRole).value<quint32>();
+    auto *model = static_cast<TrayModel*>(m_listView->model());
+    const WinInfo info = index.data(TrayModel::InfoRole).value<WinInfo>();;
 
     BaseTrayWidget *trayWidget = nullptr;
-    if(type == TrayIconType::XEmbed) {
+    if(info.type == TrayIconType::XEmbed) {
         if (Utils::IS_WAYLAND_DISPLAY) {
             static Display *display = XOpenDisplay(nullptr);
             static int screenp = 0;
             static xcb_connection_t *xcb_connection = xcb_connect(qgetenv("DISPLAY"), &screenp);
-            trayWidget = new XEmbedTrayItemWidget(winId, xcb_connection, display, parent);
+            trayWidget = new XEmbedTrayItemWidget(info.winId, xcb_connection, display, parent);
         } else {
-            trayWidget = new XEmbedTrayItemWidget(winId, nullptr, nullptr, parent);
+            trayWidget = new XEmbedTrayItemWidget(info.winId, nullptr, nullptr, parent);
         }
         const TrayModel *model = qobject_cast<const TrayModel *>(index.model());
         if (model)
             connect(model, &TrayModel::requestUpdateIcon, trayWidget, &BaseTrayWidget::updateIcon);
-    } else if (type == TrayIconType::Sni) {
-        trayWidget = new SNITrayItemWidget(servicePath, parent);
-    } else if (type == TrayIconType::ExpandIcon) {
+    } else if (info.type == TrayIconType::Sni) {
+        trayWidget = new SNITrayItemWidget(info.servicePath, parent);
+    } else if (info.type == TrayIconType::ExpandIcon) {
         ExpandIconWidget *expandWidget = new ExpandIconWidget(parent);
         expandWidget->setPositon(m_position);
-        bool openExpand = index.data(TrayModel::ExpandRole).toBool();
-        if (openExpand)
+        if (info.expand)
             expandWidget->setTrayPanelVisible(true);
 
         trayWidget = expandWidget;
-    } else if (type == TrayIconType::Incicator) {
-        QString indicateName = key;
+    } else if (info.type == TrayIconType::Incicator) {
+        QString indicateName = info.key;
         int flagIndex = indicateName.indexOf("indicator:");
         if (flagIndex >= 0)
             indicateName = indicateName.right(indicateName.length() - QString("indicator:").length());
         IndicatorTrayItem *indicatorWidget = new IndicatorTrayItem(indicateName, parent);
         TrayModel *dataModel = qobject_cast<TrayModel *>(m_listView->model());
-        if (IndicatorTrayItem *sourceIndicatorWidget = dataModel->indicatorWidget(key)) {
+        if (IndicatorTrayItem *sourceIndicatorWidget = dataModel->indicatorWidget(info.key)) {
             connect(indicatorWidget, &IndicatorTrayItem::clicked, sourceIndicatorWidget, &IndicatorTrayItem::clicked);
             connect(sourceIndicatorWidget, &IndicatorTrayItem::textChanged, indicatorWidget, &IndicatorTrayItem::setText);
             const QByteArray pixmapData = sourceIndicatorWidget->pixmapData();
@@ -113,14 +110,11 @@ QWidget *TrayDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem 
                 indicatorWidget->setText(text);
         }
         trayWidget = indicatorWidget;
-    } else if (type == TrayIconType::SystemItem) {
-        PluginsItemInterface *pluginInter = (PluginsItemInterface *)(index.data(TrayModel::PluginInterfaceRole).toULongLong());
-        if (pluginInter) {
-            const QString itemKey = QuickSettingController::instance()->itemKey(pluginInter);
-            SystemPluginItem *trayItem = new SystemPluginItem(pluginInter, itemKey, parent);
-            connect(trayItem, &SystemPluginItem::execActionFinished, this, &TrayDelegate::requestHide);
-            trayWidget = trayItem;
-        }
+    } else if (info.type == TrayIconType::SystemItem) {
+        const QString itemKey = QuickSettingController::instance()->itemKey(info.pluginInter);
+        SystemPluginItem *trayItem = new SystemPluginItem(info.pluginInter, itemKey, parent);
+        connect(trayItem, &SystemPluginItem::execActionFinished, this, &TrayDelegate::requestHide);
+        trayWidget = trayItem;
     }
 
     if (trayWidget)

@@ -177,7 +177,7 @@ void TrayModel::setDragKey(const QString &key)
 
 bool TrayModel::indexDragging(const QModelIndex &index) const
 {
-    if (index.isValid() && index.data(Role::KeyRole).toString() == m_dragKey)
+    if (index.isValid() && index.data(Role::InfoRole).value<WinInfo>().key == m_dragKey)
         return true;
 
     if (!m_dragModelIndex.isValid() || !m_dropModelIndex.isValid())
@@ -236,20 +236,8 @@ QVariant TrayModel::data(const QModelIndex &index, int role) const
     const WinInfo &info = m_winInfos[itemIndex];
 
     switch (role) {
-    case Role::TypeRole:
-        return info.type;
-    case Role::KeyRole:
-        return info.key;
-    case Role::WinIdRole:
-        return info.winId;
-    case Role::ServiceRole:
-        return info.servicePath;
-    case Role::PluginInterfaceRole:
-        return (qulonglong)(info.pluginInter);
-    case Role::ExpandRole:
-        return info.expand;
-    case Role::ItemKeyRole:
-        return info.itemKey;
+    case Role::InfoRole:
+        return QVariant::fromValue(info);
     case Role::Blank:
         return indexDragging(index);
     default:
@@ -279,7 +267,7 @@ bool TrayModel::canDropMimeData(const QMimeData *data, Qt::DropAction action, in
     Q_UNUSED(row)
     Q_UNUSED(column)
 
-    TrayIconType iconType = parent.data(TrayModel::Role::TypeRole).value<TrayIconType>();
+    TrayIconType iconType = parent.data(TrayModel::Role::InfoRole).value<WinInfo>().type;
     if (iconType == TrayIconType::ExpandIcon)
         return false;
 
@@ -341,6 +329,19 @@ WinInfo TrayModel::getWinInfo(const QModelIndex &index)
         return WinInfo();
 
     return m_winInfos[row];
+}
+
+WinInfo TrayModel::getWinInfo(const QString &itemKey)
+{
+    auto find = std::find_if(m_winInfos.begin(), m_winInfos.end(), [itemKey](const WinInfo &info) {
+      return info.itemKey == itemKey;
+    });
+
+    if (find != m_winInfos.end()) {
+        return *find;
+    }
+
+    Q_UNREACHABLE();
 }
 
 void TrayModel::onXEmbedTrayAdded(quint32 winId)
@@ -633,6 +634,7 @@ void TrayModel::onIndicatorAdded(const QString &indicatorName)
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     WinInfo info;
+    info.key = "indicator:" + itemKey;
     info.type = Incicator;
     info.key = itemKey;
     info.itemKey = itemKey;
@@ -663,6 +665,7 @@ void TrayModel::onSystemTrayAdded(PluginsItemInterface *itemInter)
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
     WinInfo info;
+    info.key = "systemTray:" + itemInter->pluginName();
     info.type = SystemItem;
     info.pluginInter = itemInter;
     info.itemKey = systemItemKey(itemInter->pluginName());
