@@ -25,6 +25,7 @@ target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
                                                  ../../interfaces
                                                  ./dbusinterface
                                                  ./dbusinterface/generation_dbus_interface
+                                                 ../../frame/util
                                                  ../../frame/qtdbusextended)
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE

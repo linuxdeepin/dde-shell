@@ -34,6 +34,7 @@ set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ../quic
 target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
   ../../interfaces
   ../../frame
+  ../../frame/util
   ../../frame/qtdbusextended
   ./dbusinterface/generation_dbus_interface
   componments)

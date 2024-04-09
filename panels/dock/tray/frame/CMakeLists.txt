@@ -53,6 +53,7 @@ target_include_directories(${BIN_NAME} PUBLIC
     accessible
     controller
     dbus
+    dbus/sni
     display
     item
     item/components
