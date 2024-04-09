@@ -20,7 +20,6 @@ find_package(Dtk6Gui REQUIRED)
 #if (${CMAKE_SYSTEM_PROCESSOR}  STREQUAL "aarch64")
 #    add_definitions("-DDISABLE_POWER_OPTIONS")
 #endif()
-pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
 pkg_check_modules(XCB_EWMH REQUIRED IMPORTED_TARGET x11 xcb xcb-icccm xcb-image xcb-ewmh xcb-composite xtst xext xcursor xkbcommon xres)
 
 add_definitions("${QT_DEFINITIONS} -DQT_PLUGIN")
@@ -31,7 +30,6 @@ target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
                                                  ../../widgets)
 target_link_libraries(${PLUGIN_NAME} PRIVATE
     ${Dtk6Widget_LIBRARIES}
-    PkgConfig::QGSettings
     Qt6::Widgets
     Qt6::DBus
     Qt6::Svg

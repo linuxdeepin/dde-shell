@@ -16,7 +16,6 @@ class DBusPowerManager;
 namespace Dock {
 class TipsWidget;
 }
-class QGSettings;
 class ShutdownPlugin : public QObject, PluginsItemInterface
 {
     Q_OBJECT
@@ -98,8 +97,6 @@ private:
     QScopedPointer<ShutdownWidget> m_shutdownWidget;
     QScopedPointer<Dock::TipsWidget> m_tipsLabel;
     DBusPowerManager* m_powerManagerInter;
-    const QGSettings *m_gsettings;
-    const QGSettings *m_sessionShellGsettings;
 };
 
 #endif // SHUTDOWNPLUGIN_H

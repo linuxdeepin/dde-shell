@@ -27,7 +27,6 @@ SystemPluginItem::SystemPluginItem(PluginsItemInterface *const pluginInter, cons
     , m_popupTipsDelayTimer(new QTimer(this))
     , m_popupAdjustDelayTimer(new QTimer(this))
     , m_itemKey(itemKey)
-    , m_gsettings(Utils::ModuleSettingsPtr(pluginInter->pluginName(), QByteArray(), this))
 {
     qDebug() << "load tray plugins item: " << m_pluginInter->pluginName() << itemKey << m_centralWidget;
 
@@ -82,9 +81,6 @@ SystemPluginItem::SystemPluginItem(PluginsItemInterface *const pluginInter, cons
     connect(m_popupTipsDelayTimer, &QTimer::timeout, this, &SystemPluginItem::showHoverTips);
     connect(m_popupAdjustDelayTimer, &QTimer::timeout, this, &SystemPluginItem::updatePopupPosition, Qt::QueuedConnection);
     connect(m_contextMenu, &QMenu::triggered, this, &SystemPluginItem::menuActionClicked);
-
-    if (m_gsettings)
-        connect(m_gsettings, &QGSettings::changed, this, &SystemPluginItem::onGSettingsChanged);
 
     grabGesture(Qt::TapAndHoldGesture);
 }
@@ -192,12 +188,6 @@ bool SystemPluginItem::eventFilter(QObject *watched, QEvent *event)
 
 void SystemPluginItem::enterEvent(QEnterEvent *event)
 {
-    if (checkGSettingsControl()) {
-        //网络需要显示Tips，需要特殊处理。
-        if (m_pluginInter->pluginName() != "network")
-            return;
-    }
-
     // 触屏不显示hover效果
     if (!qApp->property(IS_TOUCH_STATE).toBool()) {
         m_popupTipsDelayTimer->start();
@@ -222,16 +212,12 @@ void SystemPluginItem::leaveEvent(QEvent *event)
 
 void SystemPluginItem::mousePressEvent(QMouseEvent *event)
 {
-    if (checkGSettingsControl()) {
-        return;
-    }
-
     m_popupTipsDelayTimer->stop();
     hideNonModel();
 
     if (event->button() == Qt::RightButton
             && perfectIconRect().contains(event->pos(), true)) {
-        return (m_gsettings && (!m_gsettings->keys().contains("menuEnable") || m_gsettings->get("menuEnable").toBool())) ? showContextMenu() : void();
+        return showContextMenu();
     }
 
     BaseTrayWidget::mousePressEvent(event);
@@ -239,10 +225,6 @@ void SystemPluginItem::mousePressEvent(QMouseEvent *event)
 
 void SystemPluginItem::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (checkGSettingsControl()) {
-        return;
-    }
-
     if (event->button() != Qt::LeftButton) {
         return;
     }
@@ -265,10 +247,6 @@ void SystemPluginItem::mouseReleaseEvent(QMouseEvent *event)
 
 void SystemPluginItem::showEvent(QShowEvent *event)
 {
-    QTimer::singleShot(0, this, [ = ] {
-        onGSettingsChanged("enable");
-    });
-
     return BaseTrayWidget::showEvent(event);
 }
 
@@ -546,25 +524,6 @@ void SystemPluginItem::updatePopupPosition()
 
     const QPoint p = popupMarkPoint();
     PopupWindow->show(p, PopupWindow->model());
-}
-
-void SystemPluginItem::onGSettingsChanged(const QString &key) {
-    if (key != "enable") {
-        return;
-    }
-
-    if (m_gsettings && m_gsettings->keys().contains("enable")) {
-        const bool visible = m_gsettings->get("enable").toBool();
-        setVisible(visible);
-        emit itemVisibleChanged(visible);
-    }
-}
-
-bool SystemPluginItem::checkGSettingsControl() const
-{
-    // 优先判断com.deepin.dde.dock.module.systemtray的control值是否为true（优先级更高），如果不为true，再判断每一个托盘对应的gsetting配置的control值
-    bool isEnable = Utils::SettingValue("com.deepin.dde.dock.module.systemtray", QByteArray(), "control", false).toBool();
-    return (isEnable || (m_gsettings && m_gsettings->get("control").toBool()));
 }
 
 QPixmap SystemPluginItem::icon()

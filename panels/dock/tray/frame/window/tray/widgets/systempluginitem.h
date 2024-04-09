@@ -12,7 +12,6 @@
 
 #include <QGestureEvent>
 
-class QGSettings;
 class QMenu;
 class DockPopupWindow;
 class QHBoxLayout;
@@ -81,8 +80,6 @@ protected Q_SLOTS:
 
 private:
     void updatePopupPosition();
-    void onGSettingsChanged(const QString &key);
-    bool checkGSettingsControl() const;
     void menuActionClicked(QAction *action);
     void showCentralWidget();
 
@@ -102,7 +99,6 @@ private:
 
     static Dock::Position DockPosition;
     static QPointer<DockPopupWindow> PopupWindow;
-    const QGSettings* m_gsettings;
 };
 
 #endif // SYSTEMTRAYITEM_H

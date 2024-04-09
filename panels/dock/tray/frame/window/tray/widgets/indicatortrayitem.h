@@ -11,8 +11,6 @@
 
 #include "basetraywidget.h"
 
-class QGSettings;
-
 class IndicatorTrayItem: public BaseTrayWidget
 {
     Q_OBJECT

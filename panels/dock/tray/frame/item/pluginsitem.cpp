@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "constants.h"
 #include "pluginsitem.h"
 #include "pluginsiteminterface.h"
 #include "utils.h"
@@ -15,7 +14,6 @@
 #include <QMouseEvent>
 #include <QDrag>
 #include <QMimeData>
-#include <QGSettings>
 
 #define PLUGIN_ITEM_DRAG_THRESHOLD      20
 
@@ -28,7 +26,6 @@ PluginsItem::PluginsItem(PluginsItemInterface *const pluginInter, const QString 
     , m_jsonData(jsonData)
     , m_itemKey(itemKey)
     , m_dragging(false)
-    , m_gsettings(Utils::ModuleSettingsPtr(pluginInter->pluginName(), QByteArray(), this))
 {
     qDebug() << "load plugins item: " << pluginInter->pluginName() << itemKey << m_centralWidget;
 
@@ -47,9 +44,6 @@ PluginsItem::PluginsItem(PluginsItemInterface *const pluginInter, const QString 
     }
     setAccessibleName(pluginInter->pluginName());
     setAttribute(Qt::WA_TranslucentBackground);
-
-    if (m_gsettings)
-        connect(m_gsettings, &QGSettings::changed, this, &PluginsItem::onGSettingsChanged);
 }
 
 PluginsItem::~PluginsItem()
@@ -107,17 +101,6 @@ void PluginsItem::refreshIcon()
     m_pluginInter->refreshIcon(m_itemKey);
 }
 
-void PluginsItem::onGSettingsChanged(const QString &key)
-{
-    if (key != "enable") {
-        return;
-    }
-
-    if (m_gsettings && m_gsettings->keys().contains("enable")) {
-        setVisible(m_gsettings->get("enable").toBool());
-    }
-}
-
 QWidget *PluginsItem::centralWidget() const
 {
     return m_centralWidget;
@@ -125,10 +108,6 @@ QWidget *PluginsItem::centralWidget() const
 
 void PluginsItem::mousePressEvent(QMouseEvent *e)
 {
-    if (checkGSettingsControl()) {
-        return;
-    }
-
     m_hover = false;
     update();
 
@@ -144,7 +123,7 @@ void PluginsItem::mousePressEvent(QMouseEvent *e)
 
     if (e->button() == Qt::RightButton) {
         if (perfectIconRect().contains(e->pos())) {
-            return (m_gsettings && (!m_gsettings->keys().contains("menuEnable") || m_gsettings->get("menuEnable").toBool())) ? showContextMenu() : void();
+            showContextMenu();
         }
     }
 
@@ -154,10 +133,6 @@ void PluginsItem::mousePressEvent(QMouseEvent *e)
 
 void PluginsItem::mouseMoveEvent(QMouseEvent *e)
 {
-    if (checkGSettingsControl()) {
-        return;
-    }
-
     if (e->buttons() != Qt::LeftButton)
         return DockItem::mouseMoveEvent(e);
 
@@ -170,10 +145,6 @@ void PluginsItem::mouseMoveEvent(QMouseEvent *e)
 
 void PluginsItem::mouseReleaseEvent(QMouseEvent *e)
 {
-    if (checkGSettingsControl()) {
-        return;
-    }
-
     DockItem::mouseReleaseEvent(e);
 
     if (e->button() != Qt::LeftButton)
@@ -193,10 +164,6 @@ void PluginsItem::mouseReleaseEvent(QMouseEvent *e)
 
 void PluginsItem::enterEvent(QEnterEvent *event)
 {
-    if (checkGSettingsControl()) {
-        return;
-    }
-
     m_hover = true;
     update();
 
@@ -217,10 +184,6 @@ void PluginsItem::leaveEvent(QEvent *event)
 
 void PluginsItem::showEvent(QShowEvent *event)
 {
-    QTimer::singleShot(0, this, [ = ] {
-        onGSettingsChanged("enable");
-    });
-
     return DockItem::showEvent(event);
 }
 
@@ -229,9 +192,6 @@ bool PluginsItem::eventFilter(QObject *watched, QEvent *event)
     if (watched == m_centralWidget) {
         if (event->type() == QEvent::MouseButtonPress ||
                 event->type() == QEvent::MouseButtonRelease) {
-            if (checkGSettingsControl()) {
-                return true;
-            }
         }
         if (event->type() == QEvent::MouseButtonRelease) {
             m_hover = false;
@@ -259,10 +219,6 @@ const QString PluginsItem::contextMenu() const
 
 QWidget *PluginsItem::popupTips()
 {
-    if (checkGSettingsControl()) {
-        return nullptr;
-    }
-
     return m_pluginInter->itemTipsWidget(m_itemKey);
 }
 
@@ -287,11 +243,6 @@ void PluginsItem::mouseClicked()
     // request popup applet
     if (QWidget *w = m_pluginInter->itemPopupApplet(m_itemKey))
         showPopupApplet(w);
-}
-
-bool PluginsItem::checkGSettingsControl() const
-{
-    return m_gsettings ? m_gsettings->keys().contains("control") && m_gsettings->get("control").toBool() : false;
 }
 
 QString PluginsItem::pluginApi() const

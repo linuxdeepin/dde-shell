@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "displaymanager.h"
-#include "utils.h"
 
 #include <QScreen>
 #include <QApplication>
@@ -13,17 +12,11 @@
 
 DisplayManager::DisplayManager(QObject *parent)
     : QObject(parent)
-    , m_gsettings(Utils::SettingsPtr("com.deepin.dde.dock.mainwindow", "/com/deepin/dde/dock/mainwindow/", this))
-    , m_onlyInPrimary(Utils::SettingValue("com.deepin.dde.dock.mainwindow", "/com/deepin/dde/dock/mainwindow/", "onlyShowPrimary", false).toBool())
 {
     connect(qApp, &QApplication::primaryScreenChanged, this, &DisplayManager::primaryScreenChanged);
     connect(qApp, &QApplication::primaryScreenChanged, this, &DisplayManager::dockInfoChanged);
     connect(qApp, &QGuiApplication::screenAdded, this, &DisplayManager::screenCountChanged);
     connect(qApp, &QGuiApplication::screenRemoved, this, &DisplayManager::screenCountChanged);
-
-    if (m_gsettings)
-        connect(m_gsettings, &QGSettings::changed, this, &DisplayManager::onGSettingsChanged);
-
     screenCountChanged();
 
     QTimer::singleShot(0, this, &DisplayManager::screenInfoChanged);
@@ -315,18 +308,4 @@ void DisplayManager::dockInfoChanged()
 #endif
 
     Q_EMIT screenInfoChanged();
-}
-
-/**
- * @brief DisplayManager::onGSettingsChanged
- * @param key
- * 监听onlyShowPrimary配置的变化，此时有变化时应该刷新一下任务栏的显示信息
- */
-void DisplayManager::onGSettingsChanged(const QString &key)
-{
-    if (key == "onlyShowPrimary") {
-        m_onlyInPrimary = Utils::SettingValue("com.deepin.dde.dock.mainwindow", "/com/deepin/dde/dock/mainwindow/", "onlyShowPrimary", false).toBool();
-
-        dockInfoChanged();
-    }
 }

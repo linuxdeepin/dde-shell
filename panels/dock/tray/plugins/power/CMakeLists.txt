@@ -20,8 +20,6 @@ find_package(Qt6DBus REQUIRED)
 find_package(Dtk6Widget REQUIRED)
 find_package(Dtk6Gui REQUIRED)
 
-pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
-
 add_definitions("${QT_DEFINITIONS} -DQT_PLUGIN")
 add_library(${PLUGIN_NAME} SHARED ${SRCS} power.qrc)
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ../quick-trays)
@@ -32,7 +30,6 @@ target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE
     ${Dtk6Widget_LIBRARIES}
-    PkgConfig::QGSettings
     Qt6::Widgets
     Dtk6::Gui
     Dtk6::Widget

@@ -4,19 +4,15 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "powerplugin.h"
-#include "dbus/dbusaccount.h"
 #include "../widgets/tipswidget.h"
-#include "../frame/util/utils.h"
 
 #include <QIcon>
-#include <QGSettings>
 #include <QHBoxLayout>
 
 #include <DFontSizeManager>
 #include <DDBusSender>
 #include <DConfig>
 
-#define PLUGIN_STATE_KEY    "enable"
 #define DELAYTIME           (20 * 1000)
 
 DCORE_USE_NAMESPACE

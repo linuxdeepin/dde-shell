@@ -31,7 +31,6 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 pkg_check_modules(XCB_EWMH REQUIRED IMPORTED_TARGET x11 xcb xcb-icccm xcb-image xcb-ewmh xcb-composite xtst #[[dbusmenu-qt6]] xext xcursor xkbcommon xres)
-pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
 pkg_check_modules(WAYLAND REQUIRED IMPORTED_TARGET wayland-client wayland-cursor wayland-egl)
 
 # driver-manager
@@ -81,7 +80,6 @@ target_include_directories(${BIN_NAME} PUBLIC
 
 target_link_libraries(${BIN_NAME} PRIVATE
     ${Dtk6Widget_LIBRARIES}
-    PkgConfig::QGSettings
     PkgConfig::XCB_EWMH
     PkgConfig::WAYLAND
     Dtk6::Gui

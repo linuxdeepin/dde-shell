@@ -14,7 +14,6 @@
 #include <QAccessible>
 #include <QAccessibleEvent>
 #include <QCursor>
-#include <QGSettings>
 
 DWIDGET_USE_NAMESPACE
 
@@ -166,9 +165,6 @@ void DockPopupWindow::hide()
 void DockPopupWindow::showEvent(QShowEvent *e)
 {
     DBlurEffectWidget::showEvent(e);
-    if (Utils::IS_WAYLAND_DISPLAY) {
-        Utils::updateCursor(this);
-    }
 
     QTimer::singleShot(1, this, &DockPopupWindow::ensureRaised);
 }
@@ -182,9 +178,6 @@ void DockPopupWindow::hideEvent(QHideEvent *event)
 void DockPopupWindow::enterEvent(QEnterEvent *e)
 {
     DBlurEffectWidget::enterEvent(e);
-    if (Utils::IS_WAYLAND_DISPLAY) {
-        Utils::updateCursor(this);
-    }
 
     QTimer::singleShot(1, this, &DockPopupWindow::ensureRaised);
 }

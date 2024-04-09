@@ -17,7 +17,6 @@ using namespace Dock;
 
 class QScreen;
 class QTimer;
-class QGSettings;
 class DisplayManager: public QObject, public Singleton<DisplayManager>
 {
     Q_OBJECT
@@ -41,7 +40,6 @@ private:
 private Q_SLOTS:
     void screenCountChanged();
     void dockInfoChanged();
-    void onGSettingsChanged(const QString &key);
 
 Q_SIGNALS:
     void primaryScreenChanged();
@@ -50,7 +48,6 @@ Q_SIGNALS:
 private:
     QList<QScreen *> m_screens;
     QMap<QScreen *, QMap<Position, bool>> m_screenPositionMap;
-    const QGSettings *m_gsettings;              // 多屏配置控制
     bool m_onlyInPrimary;
 };
 
