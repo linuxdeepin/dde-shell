@@ -20,7 +20,6 @@
  */
 
 #include "dbusdockadaptors.h"
-#include "utils.h"
 #include "dockitemmanager.h"
 #include "quicksettingcontroller.h"
 #include "pluginsitem.h"
@@ -32,7 +31,6 @@
 
 #include <QScreen>
 #include <QDebug>
-#include <QGSettings>
 #include <QDBusMetaType>
 
 const QSize defaultIconSize = QSize(20, 20);
@@ -71,20 +69,7 @@ void registerPluginInfoMetaType()
 
 OldDBusDock::OldDBusDock(/*WindowManager* parent*/)
     : QObject(nullptr)
-    , m_gsettings(Utils::SettingsPtr("com.deepin.dde.dock.mainwindow", QByteArray(), this))
-    // , m_windowManager(parent)
 {
-    // connect(parent, &WindowManager::panelGeometryChanged, this, [ = ] {
-    //     emit OldDBusDock::geometryChanged(geometry());
-    // });
-
-    if (m_gsettings) {
-        connect(m_gsettings, &QGSettings::changed, this, [ = ] (const QString &key) {
-            if (key == "onlyShowPrimary") {
-                Q_EMIT showInPrimaryChanged(m_gsettings->get(key).toBool());
-            }
-        });
-    }
 
     QList<PluginsItemInterface *> allPlugin = localPlugins();
     connect(DockItemManager::instance(), &DockItemManager::itemInserted, this, [ = ] (const int index, DockItem *item) {
@@ -287,25 +272,17 @@ QRect OldDBusDock::geometry() const
 
 bool OldDBusDock::showInPrimary() const
 {
-    return Utils::SettingValue("com.deepin.dde.dock.mainwindow", QByteArray(), "onlyShowPrimary", false).toBool();
+    return false;
 }
 
 void OldDBusDock::setShowInPrimary(bool showInPrimary)
 {
     if (this->showInPrimary() == showInPrimary)
         return;
-
-    if (Utils::SettingSaveValue("com.deepin.dde.dock.mainwindow", QByteArray(), "onlyShowPrimary", showInPrimary)) {
-        Q_EMIT showInPrimaryChanged(showInPrimary);
-    }
 }
 
 bool OldDBusDock::isPluginValid(const QString &name)
 {
-    // 插件被全局禁用时，理应获取不到此插件的任何信息
-    if (!Utils::SettingValue("com.deepin.dde.dock.module." + name, QByteArray(), "enable", true).toBool())
-        return false;
-
     // 未开启窗口特效时，不显示多任务视图插件
     if (name == "multitasking" && !DWindowManagerHelper::instance()->hasComposite())
         return false;

@@ -5,7 +5,6 @@
 
 #include "abstractpluginscontroller.h"
 #include "pluginsiteminterface.h"
-#include "utils.h"
 #include "pluginmanagerinterface.h"
 
 #include <DNotifySender>
@@ -52,8 +51,7 @@ void AbstractPluginsController::startLoader(PluginLoader *loader)
     });
     connect(loader, &PluginLoader::pluginFound, this, &AbstractPluginsController::loadPlugin, Qt::QueuedConnection);
 
-    int delay = Utils::SettingValue("com.deepin.dde.dock", "/com/deepin/dde/dock/", "delay-plugins-time", 0).toInt();
-    QTimer::singleShot(delay, loader, [ = ] { loader->start(QThread::LowestPriority); });
+    QTimer::singleShot(0, loader, [ = ] { loader->start(QThread::LowestPriority); });
 }
 
 void AbstractPluginsController::displayModeChanged()

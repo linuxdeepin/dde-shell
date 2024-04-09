@@ -9,8 +9,6 @@
 #include "dockitem.h"
 #include "pluginsiteminterface.h"
 
-class QGSettings;
-
 class PluginsItem : public DockItem
 {
     Q_OBJECT
@@ -45,9 +43,6 @@ public slots:
 protected:
     explicit PluginsItem(PluginsItemInterface *const pluginInter, const QString &itemKey, const QJsonObject &jsonData, QWidget *parent = nullptr);
 
-private slots:
-    void onGSettingsChanged(const QString &key);
-
 protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
@@ -66,7 +61,6 @@ protected:
 private:
     void startDrag();
     void mouseClicked();
-    bool checkGSettingsControl() const;
     QString pluginApi() const;
 
 private:
@@ -78,7 +72,6 @@ private:
     bool m_dragging;
 
     static QPoint MousePressPoint;
-    const QGSettings *m_gsettings;
 };
 
 #endif // PLUGINSITEM_H

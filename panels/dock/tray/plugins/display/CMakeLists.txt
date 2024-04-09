@@ -26,7 +26,6 @@ find_package(Dtk6Widget REQUIRED)
 find_package(Dtk6Gui REQUIRED)
 
 pkg_check_modules(XCB_LIBS REQUIRED IMPORTED_TARGET xcursor)
-pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
 
 add_definitions("${QT_DEFINITIONS} -DQT_PLUGIN")
 add_library(${PLUGIN_NAME} SHARED ${SRCS} ./resource/display.qrc)
@@ -41,7 +40,6 @@ target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE
   ${Dtk6Widget_LIBRARIES}
-  PkgConfig::QGSettings
   PkgConfig::XCB_LIBS
   Qt6::Widgets
   Dtk6::Widget

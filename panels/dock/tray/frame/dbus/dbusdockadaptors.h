@@ -29,7 +29,6 @@
 /*
  * Adaptor class for interface org.deepin.dde.Dock1
  */
-class QGSettings;
 class WindowManager;
 class PluginsItemInterface;
 
@@ -98,10 +97,6 @@ private:
     bool isPluginValid(const QString &name);
     QList<PluginsItemInterface *> localPlugins() const;
     QIcon getSettingIcon(PluginsItemInterface *plugin, QSize &pixmapSize, DGuiApplicationHelper::ColorType colorType) const;
-
-private:
-    QGSettings *m_gsettings;
-    // WindowManager *m_windowManager;
 };
 
 #endif //DBUSDOCKADAPTORS

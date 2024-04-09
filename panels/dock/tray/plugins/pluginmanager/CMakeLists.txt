@@ -24,8 +24,6 @@ find_package(Dtk6Widget REQUIRED)
 find_package(Dtk6Gui REQUIRED)
 find_package(Dtk6Core REQUIRED)
 
-pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
-
 add_library(${PLUGIN_NAME} SHARED ${SRCS})
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ../loader/)
 target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
@@ -38,7 +36,6 @@ target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
 
 target_link_libraries(${PLUGIN_NAME} PRIVATE
     ${Dtk6Widget_LIBRARIES}
-    PkgConfig::QGSettings
     Qt6::Widgets
     Qt6::DBus
     Qt6::Svg

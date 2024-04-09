@@ -5,19 +5,13 @@
 
 #include "dockitemmanager.h"
 #include "pluginsitem.h"
-#include "utils.h"
 #include "quicksettingcontroller.h"
 
 #include <QDebug>
-#include <QGSettings>
 
 #include <DApplication>
 
 DockItemManager *DockItemManager::INSTANCE = nullptr;
-const QGSettings *DockItemManager::m_appSettings = Utils::ModuleSettingsPtr("app");
-const QGSettings *DockItemManager::m_activeSettings = Utils::ModuleSettingsPtr("activeapp");
-const QGSettings *DockItemManager::m_dockedSettings = Utils::ModuleSettingsPtr("dockapp");
-
 DockItemManager::DockItemManager(QObject *parent)
     : QObject(parent)
     , m_loadFinished(false)
@@ -188,11 +182,7 @@ void DockItemManager::pluginItemInserted(PluginsItem *item)
     if(pluginType == DockItem::FixedPlugin)
         insertIndex ++;
 
-    if (!Utils::SettingValue(QString("com.deepin.dde.dock.module.") + item->pluginName(), QByteArray(), "enable", true).toBool())
-        item->setVisible(false);
-    else
-        item->setVisible(true);
-
+    item->setVisible(true);
     emit itemInserted(insertIndex - firstPluginPosition, item);
 }
 

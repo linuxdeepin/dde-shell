@@ -41,7 +41,6 @@ Build-Depends:
  libxdamage-dev,
  libxres-dev,
  libxtst-dev,
- libgsettings-qt-dev,
  libdframeworkdbus-dev,
 Standards-Version: 3.9.8
 Homepage: http://www.deepin.org

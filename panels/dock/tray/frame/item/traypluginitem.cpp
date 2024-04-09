@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "traypluginitem.h"
-#include "utils.h"
 
 #include <QEvent>
 
@@ -36,15 +35,6 @@ bool TrayPluginItem::eventFilter(QObject *watched, QEvent *e)
     // 时尚模式下
     // 监听插件Widget的"FashionTraySize"属性
     // 当接收到这个属性变化的事件后，重新计算和设置dock的大小
-
-    if (watched == centralWidget()) {
-        if (e->type() == QEvent::MouseButtonPress || e->type() == QEvent::MouseButtonRelease) {
-            const QGSettings *settings = Utils::ModuleSettingsPtr("systemtray", QByteArray(), this);
-            if (settings && settings->keys().contains("control") && settings->get("control").toBool()) {
-                return true;
-            }
-        }
-    }
 
     if (watched == centralWidget() && e->type() == QEvent::DynamicPropertyChange) {
         const QString &propertyName = static_cast<QDynamicPropertyChangeEvent *>(e)->propertyName();

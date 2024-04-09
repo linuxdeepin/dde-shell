@@ -10,10 +10,7 @@
 #include <QImageReader>
 #include <QApplication>
 #include <QScreen>
-#include <QGSettings>
 #include <QDebug>
-
-#include "imageutil.h"
 
 namespace Utils {
 
@@ -32,35 +29,6 @@ inline bool isDraging()
 inline void setIsDraging(bool isDraging)
 {
     qApp->setProperty("isDraging", isDraging);
-}
-
-/**
- * @brief SettingsPtr 根据给定信息返回一个QGSettings指针
- * @param schema_id The id of the schema
- * @param path If non-empty, specifies the path for a relocatable schema
- * @param parent 创建指针的付对象
- * @return
- */
-inline QGSettings *SettingsPtr(const QString &schema_id, const QByteArray &path = QByteArray(), QObject *parent = nullptr)
-{
-    // if (QGSettings::isSchemaInstalled(schema_id.toUtf8())) {
-    //     QGSettings *settings = new QGSettings(schema_id.toUtf8(), path, parent);
-    //     return settings;
-    // }
-    qDebug() << "Cannot find gsettings, schema_id:" << schema_id;
-    return nullptr;
-}
-
-/**
- * @brief SettingsPtr 根据给定信息返回一个QGSettings指针
- * @param module 传入QGSettings构造函数时，会添加"com.deepin.dde.dock.module."前缀
- * @param path If non-empty, specifies the path for a relocatable schema
- * @param parent 创建指针的付对象
- * @return
- */
-inline const QGSettings *ModuleSettingsPtr(const QString &module, const QByteArray &path = QByteArray(), QObject *parent = nullptr)
-{
-    return SettingsPtr("com.deepin.dde.dock.module." + module, path, parent);
 }
 
 /* convert 'some-key' to 'someKey' or 'SomeKey'.
@@ -85,52 +53,6 @@ inline QString qtify_name(const char *name)
     }
 
     return result;
-}
-
-/**
- * @brief SettingValue 根据给定信息返回获取的值
- * @param schema_id The id of the schema
- * @param path If non-empty, specifies the path for a relocatable schema
- * @param key 对应信息的key值
- * @param fallback 如果找不到信息，返回此默认值
- * @return
- */
-inline const QVariant SettingValue(const QString &schema_id, const QByteArray &path = QByteArray(), const QString &key = QString(), const QVariant &fallback = QVariant())
-{
-    const QGSettings *settings = SettingsPtr(schema_id, path);
-
-    if (settings && ((settings->keys().contains(key)) || settings->keys().contains(qtify_name(key.toUtf8().data())))) {
-        QVariant v = settings->get(key);
-        delete settings;
-        return v;
-    } else{
-        qDebug() << "Cannot find gsettings, schema_id:" << schema_id
-                 << " path:" << path << " key:" << key
-                 << "Use fallback value:" << fallback;
-        // 如果settings->keys()不包含key则会存在内存泄露，所以需要释放
-        if (settings)
-            delete settings;
-
-        return fallback;
-    }
-}
-
-inline bool SettingSaveValue(const QString &schema_id, const QByteArray &path, const QString &key, const QVariant &value)
-{
-    QGSettings *settings = SettingsPtr(schema_id, path);
-
-    if (settings && ((settings->keys().contains(key)) || settings->keys().contains(qtify_name(key.toUtf8().data())))) {
-        settings->set(key, value);
-        delete settings;
-        return true;
-    } else{
-        qDebug() << "Cannot find gsettings, schema_id:" << schema_id
-                 << " path:" << path << " key:" << key;
-        if (settings)
-            delete settings;
-
-        return false;
-    }
 }
 
 inline QPixmap renderSVG(const QString &path, const QSize &size, const qreal devicePixelRatio)
@@ -214,27 +136,6 @@ inline int comparePluginApi(const QString &pluginApi1, const QString &pluginApi2
         return 1;
     } else {
         return -1;
-    }
-}
-
-inline void updateCursor(QWidget *w)
-{
-    static QString lastCursorTheme;
-    static int lastCursorSize = 0;
-    QString theme = Utils::SettingValue("com.deepin.xsettings", "/com/deepin/xsettings/", "gtk-cursor-theme-name", "bloom").toString();
-    int cursorSize = Utils::SettingValue("com.deepin.xsettings", "/com/deepin/xsettings/", "gtk-cursor-theme-size", 24).toInt();
-    if (theme != lastCursorTheme || cursorSize != lastCursorSize) {
-        QCursor *cursor = ImageUtil::loadQCursorFromX11Cursor(theme.toStdString().c_str(), "left_ptr", cursorSize);
-        if (!cursor)
-            return;
-        lastCursorTheme = theme;
-        lastCursorSize = cursorSize;
-        w->setCursor(*cursor);
-        static QCursor *lastArrowCursor = nullptr;
-        if (lastArrowCursor)
-            delete lastArrowCursor;
-
-        lastArrowCursor = cursor;
     }
 }
 

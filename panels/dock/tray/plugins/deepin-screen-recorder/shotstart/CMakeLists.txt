@@ -17,7 +17,6 @@ find_package(Qt6DBus REQUIRED)
 find_package(Dtk6Widget REQUIRED)
 
 pkg_check_modules(DFrameworkDBus REQUIRED dframeworkdbus)
-pkg_check_modules(QGSettings REQUIRED gsettings-qt)
 
 add_definitions("${QT_DEFINITIONS} -DQT_PLUGIN")
 add_library(${PLUGIN_NAME} SHARED ${SRCS} res.qrc)
@@ -26,8 +25,7 @@ target_include_directories(${PLUGIN_NAME} PUBLIC
     ${Dtk6Widget_INCLUDE_DIRS}
     ${Dtk6Gui_INCLUDE_DIRS}
     ${DFrameworkDBus_INCLUDE_DIRS}
-    ${QGSettings_INCLUDE_DIRS}
-    ../../interfaces
+    ../../../interfaces
     )
 target_link_libraries(${PLUGIN_NAME} PRIVATE
     ${Qt6DBus_LIBRARIES}
@@ -36,7 +34,6 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     ${Qt6Widgets_LIBRARIES}
     ${Qt6Svg_LIBRARIES}
     ${DFrameworkDBus_LIBRARIES}
-    ${QGSettings_LIBRARIES}
     )
 
 set(CMAKE_INSTALL_PREFIX "/usr")
