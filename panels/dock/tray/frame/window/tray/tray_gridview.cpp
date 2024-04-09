@@ -24,7 +24,7 @@ TrayGridView *TrayGridView::getDockTrayGridView(QWidget *parent)
 {
     static TrayGridView *view = nullptr;
     if (!view)
-        view = new TrayGridView(parent);
+        view = new TrayGridView(TrayGridView::Type::DockTray, parent);
     return view;
 }
 
@@ -32,12 +32,13 @@ TrayGridView *TrayGridView::getIconTrayGridView(QWidget *parent)
 {
     static TrayGridView *view = nullptr;
     if (!view)
-        view = new TrayGridView(parent);
+        view = new TrayGridView(TrayGridView::Type::IconTray, parent);
     return view;
 }
 
-TrayGridView::TrayGridView(QWidget *parent)
+TrayGridView::TrayGridView(TrayGridView::Type type, QWidget *parent)
     : DListView(parent)
+    , m_type(type)
     , m_aniCurveType(QEasingCurve::Linear)
     , m_aniDuringTime(250)
     , m_dragDistance(15)
@@ -297,7 +298,7 @@ void TrayGridView::mouseMoveEvent(QMouseEvent *e)
         return DListView::mouseMoveEvent(e);
 
     // 如果当前拖动的位置是托盘展开按钮，则不让其拖动
-    TrayIconType iconType = index.data(TrayModel::Role::TypeRole).value<TrayIconType>();
+    TrayIconType iconType = index.data(TrayModel::Role::InfoRole).value<WinInfo>().type;
     if (iconType == TrayIconType::ExpandIcon)
         return DListView::mouseMoveEvent(e);
 
@@ -443,30 +444,24 @@ void TrayGridView::handleDropEvent(QDropEvent *e)
         e->setDropAction(Qt::CopyAction);
         e->accept();
 
-        TrayModel *dataModel = qobject_cast<TrayModel *>(model());
-        if (dataModel) {
-            WinInfo info;
-            info.type = static_cast<TrayIconType>(e->mimeData()->data("type").toInt());
-            info.key = static_cast<QString>(e->mimeData()->data("key"));
-            info.winId = static_cast<quint32>(e->mimeData()->data("winId").toInt());
-            info.servicePath = static_cast<QString>(e->mimeData()->data("servicePath"));
-            info.itemKey = static_cast<QString>(e->mimeData()->data("itemKey"));
-            info.isTypeWriting = (static_cast<QString>(e->mimeData()->data("isTypeWritting")) == "1");
-            info.expand = (static_cast<QString>(e->mimeData()->data("expand")) == "1");
-            info.pluginInter = (PluginsItemInterface *)(e->mimeData()->imageData().value<qulonglong>());
-            QModelIndex targetIndex = getIndexFromPos(e->pos());
-            int index = -1;
-            if (targetIndex.isValid() && targetIndex.row() < dataModel->rowCount()) {
-                // 如果拖动的位置是合法的位置，则让其插入到当前的位置
-                index = targetIndex.row();
-                dataModel->insertRow(index, info);
-            } else {
-                // 在其他的情况下，让其插入到最后
-                dataModel->addRow(info);
-            }
+        TrayModel *dockModel = TrayModel::getDockModel();
+        TrayModel *iconModel = TrayModel::getIconModel();
+        TrayModel *model = static_cast<TrayModel*>(QListView::model());
+        const auto itemKey = static_cast<QString>(e->mimeData()->data("itemKey"));
+        WinInfo info = m_type == Type::DockTray ? iconModel->getWinInfo(itemKey) : dockModel->getWinInfo(itemKey);
 
-            dataModel->saveConfig(index, info);
+        QModelIndex targetIndex = getIndexFromPos(e->pos());
+        int index = -1;
+        if (targetIndex.isValid() && targetIndex.row() < model->rowCount()) {
+            // 如果拖动的位置是合法的位置，则让其插入到当前的位置
+            index = targetIndex.row();
+            model->insertRow(index, info);
+        } else {
+            // 在其他的情况下，让其插入到最后
+            model->addRow(info);
         }
+
+        model->saveConfig(index, info);
     } else {
         e->ignore();
         DListView::dropEvent(e);
@@ -503,7 +498,7 @@ void TrayGridView::onUpdateEditorView()
 bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
 {
     QModelIndex modelIndex = indexAt(m_dragPos);
-    TrayIconType trayType = modelIndex.data(TrayModel::Role::TypeRole).value<TrayIconType>();
+    TrayIconType trayType = modelIndex.data(TrayModel::Role::InfoRole).value<WinInfo>().type;
     // 展开图标不能移动
     if (trayType == TrayIconType::ExpandIcon)
         return false;
@@ -541,7 +536,7 @@ bool TrayGridView::beginDrag(Qt::DropActions supportedActions)
 
     setState(DraggingState);
 
-    listModel->setDragKey(modelIndex.data(TrayModel::Role::KeyRole).toString());
+    listModel->setDragKey(modelIndex.data(TrayModel::Role::InfoRole).value<WinInfo>().key);
     listModel->setDragingIndex(modelIndex);
     // 删除当前的图标
     WinInfo winInfo = listModel->getWinInfo(modelIndex);

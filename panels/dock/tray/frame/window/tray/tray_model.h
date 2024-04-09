@@ -67,13 +67,7 @@ class TrayModel : public QAbstractListModel
 
 public:
     enum Role {
-        TypeRole = Qt::UserRole + 1,
-        KeyRole,
-        WinIdRole,
-        ServiceRole,
-        PluginInterfaceRole,
-        ExpandRole,
-        ItemKeyRole,
+        InfoRole = Qt::UserRole + 1,
         Blank
     };
 
@@ -103,6 +97,7 @@ public:
 
     void clear();
     WinInfo getWinInfo(const QModelIndex &index);
+    WinInfo getWinInfo(const QString &itemKey);
     void saveConfig(int index, const WinInfo &winInfo);
     void removeWinInfo(WinInfo winInfo);
 

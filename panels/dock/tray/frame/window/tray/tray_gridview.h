@@ -19,6 +19,11 @@ class TrayGridView : public DListView
     Q_OBJECT
 
 public:
+    enum class Type {
+      DockTray,
+      IconTray,
+    };
+
     static TrayGridView *getDockTrayGridView(QWidget *parent = Q_NULLPTR);
     static TrayGridView *getIconTrayGridView(QWidget *parent = Q_NULLPTR);
     
@@ -64,7 +69,7 @@ protected:
     bool beginDrag(Qt::DropActions supportedActions);
 
 private:
-    explicit TrayGridView(QWidget *parent = Q_NULLPTR);
+    explicit TrayGridView(Type type, QWidget *parent = Q_NULLPTR);
 
     void initUi();
     void createAnimation(const int pos, const bool moveNext, const bool isLastAni);
@@ -72,6 +77,7 @@ private:
     bool mouseInDock();
 
 private:
+    Type m_type;
     QEasingCurve::Type m_aniCurveType;
     int m_aniDuringTime;
 
