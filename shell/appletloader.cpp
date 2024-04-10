@@ -144,19 +144,8 @@ void DAppletLoaderPrivate::doCreateRootObject(DApplet *applet)
         }
     });
 
-    // FIXME: kwin load slowly make blur or other effets not ready, should in dtk to ensure effects loaded
-    if (DWindowManagerHelper::instance()->hasNoTitlebar()) {
-        if (!engine->create()) {
-            engine->deleteLater();
-        }
-    } else {
-        QObject::connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasNoTitlebarChanged, applet, [engine, applet] () {
-            if (DWindowManagerHelper::instance()->hasNoTitlebar()) {
-                if (!engine->create()) {
-                    engine->deleteLater();
-                }
-            }
-        });
+    if (!engine->create()) {
+        engine->deleteLater();
     }
 }
 

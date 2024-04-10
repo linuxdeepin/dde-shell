@@ -13,6 +13,7 @@ import Qt.labs.platform as LP
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0 as D
+import org.deepin.dtk.style 1.0 as DStyle
 
 Window {
     id: dock
@@ -51,6 +52,30 @@ Window {
             Panel.indicatorStyle = Dock.Efficient
         } else {
             Panel.indicatorStyle = Dock.Fashion
+        }
+    }
+
+    // only add blendColor effect when DWindow.enableBlurWindow is true,
+    // avoid to updating blur area frequently.
+    D.StyledBehindWindowBlur {
+        control: parent
+        anchors.fill: parent
+
+        function blendColorAlpha(fallback) {
+            var appearance = DS.applet("org.deepin.ds.dde-appearance")
+            if (!appearance || appearance.opacity < 0)
+                return fallback
+            return appearance.opacity
+        }
+        blendColor: {
+            if (valid) {
+                return DStyle.Style.control.selectColor(undefined,
+                                                    Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, blendColorAlpha(0.6)),
+                                                    Qt.rgba(0, 0, 0, blendColorAlpha(85 / 255)))
+            }
+            return DStyle.Style.control.selectColor(undefined,
+                                                DStyle.Style.behindWindowBlur.lightNoBlurColor,
+                                                DStyle.Style.behindWindowBlur.darkNoBlurColor)
         }
     }
 
