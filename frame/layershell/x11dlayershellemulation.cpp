@@ -41,6 +41,16 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     connect(m_window, &QWindow::heightChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
     connect(m_window, &QWindow::heightChanged, this, &LayerShellEmulation::onPositionChanged);
 
+    auto screen = m_window->screen();
+    connect(screen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
+    connect(m_window, &QWindow::screenChanged, this, [this](QScreen *nowScreen){
+        for (auto screen : qApp->screens()) {
+            screen->disconnect(this);
+        }
+
+        connect(nowScreen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
+    });
+
     // connect(m_dlayerShellWindow, &DS_NAMESPACE::DLayerShellWindow::keyboardInteractivityChanged, this, &LayerShellEmulation::onKeyboardInteractivityChanged);
 }
 
