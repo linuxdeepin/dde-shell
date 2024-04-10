@@ -38,6 +38,8 @@ AppletItem {
 
     Component.onCompleted: {
         console.log("test before onCompleted", Applet.userData, root.applet)
+        var appearance = DS.applet("org.deepin.ds.dde-appearance")
+        console.log(appearance, appearance.opacity)
     }
 
     PanelPopup {
