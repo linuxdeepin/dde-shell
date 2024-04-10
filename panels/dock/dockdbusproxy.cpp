@@ -7,7 +7,7 @@
 #include "dockpanel.h"
 #include "dockdbusproxy.h"
 
-#include "private/dsqmlglobal_p.h"
+#include "pluginloader.h"
 
 #include <QObject>
 DS_BEGIN_NAMESPACE
@@ -26,13 +26,13 @@ DS_BEGIN_NAMESPACE
 
         // Communicate with the other module
         auto getOtherApplet = [ = ] {
-            QList<DApplet *> list = DQmlGlobal::instance()->appletList("org.deepin.ds.dock.tray");
+            QList<DApplet *> list = appletList("org.deepin.ds.dock.tray");
             if (!list.isEmpty()) m_oldDockApplet = list.first();
 
-            list = DQmlGlobal::instance()->appletList("org.deepin.ds.dock.clipboarditem");
+            list = appletList("org.deepin.ds.dock.clipboarditem");
             if (!list.isEmpty()) m_clipboardApplet = list.first();
 
-            list = DQmlGlobal::instance()->appletList("org.deepin.ds.dock.searchitem");
+            list = appletList("org.deepin.ds.dock.searchitem");
             if (!list.isEmpty()) m_searchApplet = list.first();
 
             return m_oldDockApplet && m_clipboardApplet && m_searchApplet;
@@ -53,6 +53,41 @@ DS_BEGIN_NAMESPACE
     DockPanel* DockDBusProxy::parent() const
     {
         return static_cast<DockPanel*>(QObject::parent());
+    }
+
+    QString DockDBusProxy::getAppID(const QString &desktopfile)
+    {
+        const QString desktopLeft = "/applications/";
+        const QString desktopSuffix = ".desktop";
+        return desktopfile.mid(desktopfile.lastIndexOf(desktopLeft) + desktopLeft.size(), desktopfile.lastIndexOf(desktopSuffix) - desktopfile.lastIndexOf(desktopLeft) - desktopLeft.size());
+    }
+
+    QList<DApplet *> DockDBusProxy::appletList(const QString &pluginId) const
+    {
+        QList<DApplet *> ret;
+        auto root = qobject_cast<DContainment *>(DPluginLoader::instance()->rootApplet());
+
+        QQueue<DContainment *> containments;
+        containments.enqueue(root);
+        while (!containments.isEmpty()) {
+            DContainment *containment = containments.dequeue();
+            for (const auto applet : containment->applets()) {
+                if (auto item = qobject_cast<DContainment *>(applet)) {
+                    containments.enqueue(item);
+                }
+                if (applet->pluginId() == pluginId)
+                    ret << applet;
+            }
+        }
+        return ret;
+    }
+
+    DApplet *DockDBusProxy::applet(const QString &pluginId) const
+    {
+        const auto list = appletList(pluginId);
+        if (!list.isEmpty())
+            return list.first();
+        return nullptr;
     }
 
     QRect DockDBusProxy::geometry()
@@ -88,6 +123,39 @@ DS_BEGIN_NAMESPACE
     HideState DockDBusProxy::hideState()
     {
         return parent()->hideState();
+    }
+
+    bool DockDBusProxy::RequestDock(const QString &desktopFile, int index) {
+        Q_UNUSED(index);
+        QString id = getAppID(desktopFile);
+        auto appletItem = applet("org.deepin.ds.dock.taskmanager");
+        if (nullptr == appletItem)
+            return false;
+        bool res = true;
+        QMetaObject::invokeMethod(appletItem, "RequestDock", Qt::DirectConnection, Q_RETURN_ARG(bool, res), Q_ARG(QString, id));
+        return res;
+    }
+
+    bool DockDBusProxy::IsDocked(const QString &desktopFile)
+    {
+        QString id = getAppID(desktopFile);
+        auto appletItem = applet("org.deepin.ds.dock.taskmanager");
+        if (nullptr == appletItem)
+            return false;
+        bool res = true;
+        QMetaObject::invokeMethod(appletItem, "IsDocked", Qt::DirectConnection, Q_RETURN_ARG(bool, res), Q_ARG(QString, id));
+        return res;
+    }
+
+    bool DockDBusProxy::RequestUndock(const QString &desktopFile)
+    {
+        QString id = getAppID(desktopFile);
+        auto appletItem = applet("org.deepin.ds.dock.taskmanager");
+        if (nullptr == appletItem)
+            return false;
+        bool res = true;
+        QMetaObject::invokeMethod(appletItem, "RequestUndock", Qt::DirectConnection, Q_RETURN_ARG(bool, res), Q_ARG(QString, id));
+        return res;
     }
 
     QStringList DockDBusProxy::GetLoadedPlugins()

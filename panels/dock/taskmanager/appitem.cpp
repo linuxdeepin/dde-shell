@@ -177,7 +177,6 @@ void AppItem::setDocked(bool docked)
     if (docked == isDocked()) return;
     if (m_desktopfileParser && !m_desktopfileParser.isNull()) {
         m_desktopfileParser->setDocked(docked);
-        Q_EMIT dockedChanged();
     }
 }
 
@@ -273,6 +272,7 @@ void AppItem::setDesktopFileParser(QSharedPointer<DesktopfileAbstractParser> des
     connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::iconChanged, this, &AbstractItem::iconChanged);
     connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::actionsChanged, this, &AbstractItem::menusChanged);
     connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::dockedChanged, this, &AbstractItem::menusChanged);
+    connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::dockedChanged, this, &AbstractItem::dockedChanged);
     connect(m_desktopfileParser.get(), &DesktopfileAbstractParser::genericNameChanged, this, &AbstractItem::nameChanged);
 
     desktopfile->addAppItem(this);

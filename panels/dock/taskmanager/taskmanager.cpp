@@ -174,6 +174,59 @@ bool TaskManager::allowForceQuit()
     return Settings->isAllowedForceQuit();
 }
 
+bool TaskManager::RequestDock(QString appID)
+{
+    auto desktopfileParser = DESKTOPFILEFACTORY::createById(appID, "amAPP");
+
+    auto res = desktopfileParser->isValied();
+    if (!res.first) {
+        qCWarning(taskManagerLog) << res.second;
+        return false;
+    }
+
+    QPointer<AppItem> appitem = desktopfileParser->getAppItem();
+    if (appitem.isNull()) {
+        appitem = new AppItem(appID);
+        appitem->setDesktopFileParser(desktopfileParser);
+        ItemModel::instance()->addItem(appitem);
+    }
+    appitem->setDocked(true);
+    return true;
+}
+
+bool TaskManager::IsDocked(QString appID)
+{
+    auto desktopfileParser = DESKTOPFILEFACTORY::createById(appID, "amAPP");
+
+    auto res = desktopfileParser->isValied();
+    if (!res.first) {
+        qCWarning(taskManagerLog) << res.second;
+        return false;
+    }
+
+    QPointer<AppItem> appitem = desktopfileParser->getAppItem();
+    if (appitem.isNull()) {
+        return false;
+    }
+    return appitem->isDocked();
+}
+
+bool TaskManager::RequestUndock(QString appID)
+{
+    auto desktopfileParser = DESKTOPFILEFACTORY::createById(appID, "amAPP");
+    auto res = desktopfileParser->isValied();
+    if (!res.first) {
+        qCWarning(taskManagerLog) << res.second;
+        return false;
+    }
+    QPointer<AppItem> appitem = desktopfileParser->getAppItem();
+    if (appitem.isNull()) {
+        return false;
+    }
+    appitem->setDocked(false);
+    return true;
+}
+
 bool TaskManager::windowSplit()
 {
     return Settings->isWindowSplit();
