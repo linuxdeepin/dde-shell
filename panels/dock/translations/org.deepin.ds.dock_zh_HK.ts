@@ -9,30 +9,32 @@
         <translation>指示器樣式</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="114"/>
+        <location filename="../package/main.qml" line="133"/>
         <source>Fashion Mode</source>
         <translation>時尚模式</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="119"/>
+        <location filename="../package/main.qml" line="128"/>
         <source>Efficient Mode</source>
         <translation>高效模式</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="125"/>
         <source>Item Alignment</source>
-        <translation>對齊方式</translation>
+        <translation type="vanished">對齊方式</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="128"/>
         <location filename="../package/main.qml" line="154"/>
         <source>Left</source>
         <translation>左</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="133"/>
         <source>Center</source>
-        <translation>居中</translation>
+        <translation type="vanished">居中</translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="126"/>
+        <source>Mode</source>
+        <translation>模式</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="139"/>
@@ -73,6 +75,11 @@
         <location filename="../package/main.qml" line="179"/>
         <source>Smart Hide</source>
         <translation>智能隱藏</translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="186"/>
+        <source>Dock Settings</source>
+        <translation>任務欄設置</translation>
     </message>
 </context>
 </TS>

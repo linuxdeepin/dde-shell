@@ -9,4 +9,12 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>searchitem</name>
+    <message>
+        <location filename="../package/searchitem.qml" line="38"/>
+        <source>SearchConfig</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

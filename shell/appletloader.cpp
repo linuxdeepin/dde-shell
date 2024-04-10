@@ -262,6 +262,7 @@ void DAppletLoaderPrivate::loadTranslation(const DPluginMetaData &pluginData)
         if (translator->load(pluginTransFilePath)) {
             m_pluginTranslators[pluginId] = translator;
             qApp->installTranslator(translator);
+            qInfo(dsLoaderLog) << "Loaded translation:" << pluginTransFilePath;
         } else {
             qCWarning(dsLoaderLog) << "Failed to load translation:" << pluginTransFilePath;
             translator->deleteLater();
