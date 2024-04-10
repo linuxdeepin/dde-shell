@@ -72,6 +72,11 @@ function(ds_handle_package_translation)
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_zh_TW.ts
     )
 
+    set(package_dirs ${PROJECT_BINARY_DIR}/packages/${_config_PACKAGE}/)
+    set_source_files_properties(${TRANSLATION_FILES}
+        PROPERTIES OUTPUT_LOCATION "${package_dirs}/translations"
+    )
+
     add_custom_target(${_config_PACKAGE}_translation ALL
         SOURCES ${TRANSLATION_FILES}
     )

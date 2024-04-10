@@ -35,7 +35,7 @@ AppletItem {
     LP.Menu {
         id: platformMenu
         LP.MenuItem {
-            text: "SearchConfig"
+            text: qsTr("SearchConfig")
             onTriggered: {
                 Applet.toggleGrandSearchConfig()
             }

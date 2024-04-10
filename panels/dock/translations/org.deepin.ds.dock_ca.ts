@@ -9,29 +9,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="114"/>
+        <location filename="../package/main.qml" line="133"/>
         <source>Fashion Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="119"/>
+        <location filename="../package/main.qml" line="128"/>
         <source>Efficient Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="125"/>
-        <source>Item Alignment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../package/main.qml" line="128"/>
         <location filename="../package/main.qml" line="154"/>
         <source>Left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="133"/>
-        <source>Center</source>
+        <location filename="../package/main.qml" line="126"/>
+        <source>Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -72,6 +66,11 @@
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Smart Hide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="186"/>
+        <source>Dock Settings</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
