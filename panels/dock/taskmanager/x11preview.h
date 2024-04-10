@@ -6,12 +6,12 @@
 
 #include "appitem.h"
 #include "dsglobal.h"
-#include "abstractwindow.h"
 
 #include <cstdint>
 
 #include <QLabel>
 #include <QWidget>
+#include <DListView>
 #include <DIconButton>
 #include <QVBoxLayout>
 #include <DBlurEffectWidget>
@@ -20,39 +20,8 @@ DWIDGET_USE_NAMESPACE
 
 namespace dock {
 class X11WindowMonitor;
-class X11WindowPreviewContent : public QWidget
-{
-    Q_OBJECT
-
-public:
-    X11WindowPreviewContent(const QPointer<AbstractWindow> &window, QWidget* parent = nullptr);
-    void setPrewviewContentWindow(const QPointer<AbstractWindow> &window);
-
-protected:
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void enterEvent(QEnterEvent *event) override;
-    void leaveEvent(QEvent *event) override;
-    void paintEvent(QPaintEvent *event) override;
-
-Q_SIGNALS:
-    void entered(const QPointer<AbstractWindow> &window);
-    void exited();
-    void windowDestoried(X11WindowPreviewContent* widnow);
-
-private:
-    void fetchWindowPreview();
-
-private:
-    bool m_isHovered;
-    bool m_isMinimized;
-
-    QLabel* m_previewLabel;
-    DIconButton* m_closeButton;
-    QPixmap m_pixmap;
-    QTimer *m_timer;
-
-    QPointer<AbstractWindow> m_window;
-};
+class AppItemWindowModel;
+class AppItemWindowDeletegate;
 
 class X11WindowPreviewContainer: public DBlurEffectWidget
 {
@@ -64,41 +33,39 @@ public:
     void hidePreView();
 
 protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
     void enterEvent(QEnterEvent *event) override;
     void leaveEvent(QEvent *event) override;
     void showEvent(QShowEvent *event) override;
     void hideEvent(QHideEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
-    void paintEvent(QPaintEvent* event) override;
 
 private:
-    inline void clearSpecifiedCountPreviews(int count);
-    inline void updateCurrentHoveredTitle();
+    inline void updatePreviewTitle(const QString& title);
     inline void initUI();
+    inline void updateSize();
 
 public Q_SLOTS:
     void updatePosition();
 
 private Q_SLOTS:
-    void addNeedPreviewWindow(const QPointer<AbstractWindow> &window);
-    void updateHoveredWindow(AbstractWindow *window);
-    void updateLayout();
+    void updateOrientation();
     void callHide();
 
 private:
     bool m_isPreviewEntered;
     int32_t m_isDockPreviewCount;
 
-    X11WindowMonitor* m_x11Monitor;
-    QVBoxLayout* m_mainLayout;
-    QBoxLayout* m_contentLayout;
-    QLabel* m_currentWindowIcon;
-    QLabel* m_currentWindowTitle;
-    DIconButton* m_closeAllButton;
-    QTimer* m_hideTimer;
-    QTimer* m_exitTimer;
+    X11WindowMonitor* m_monitor;
 
-    QRect m_hoverRect;
+    AppItemWindowModel* m_model;
+    QListView* m_view;
+
+    QLabel* m_previewIcon;
+    QLabel* m_previewTitle;
+    DIconButton* m_closeAllButton;
+
+    QTimer* m_hideTimer;
 
     int32_t m_previewXoffset;
     int32_t m_previewYoffset;
@@ -106,9 +73,8 @@ private:
 
     QPointer<QWindow> m_baseWindow;
     QPointer<AppItem> m_previewItem;
-    QPointer<AbstractWindow> m_hoveredWindow;
 
-    QString m_currentWindowTitleStr;
+    QString m_previewTitleStr;
 };
 
 }
