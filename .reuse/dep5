@@ -75,3 +75,8 @@ License: CC0-1.0
 Files: panels/dock/tray/*
 Copyright: UnionTech Software Technology Co., Ltd.
 License: GPL-3.0-or-later
+
+# translations
+Files: translations/*.ts
+Copyright: UnionTech Software Technology Co., Ltd.
+License: GPL-3.0-or-later
