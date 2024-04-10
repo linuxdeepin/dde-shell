@@ -14,6 +14,9 @@
 #include <QMap>
 #include <QLoggingCategory>
 #include <QElapsedTimer>
+#include <QTranslator>
+#include <QApplication>
+#include <QFile>
 #include <DWindowManagerHelper>
 
 DS_BEGIN_NAMESPACE
@@ -65,6 +68,13 @@ public:
         return groups;
     }
 
+    ~DAppletLoaderPrivate()
+    {
+        for (const auto &tl : std::as_const(m_pluginTranslators)) {
+            tl->deleteLater();
+        }
+    }
+
     bool doLoad(DApplet *applet);
     void doCreateRootObject(DApplet *applet);
     bool doInit(DApplet *applet);
@@ -75,7 +85,11 @@ public:
 
     void createChildren(DApplet *applet);
 
+    void loadTranslation(const DPluginMetaData &pluginData);
+    void removeTranslation(const QString &pluginId);
+
     QPointer<DApplet> m_applet = nullptr;
+    QMap<QString, QTranslator *> m_pluginTranslators;
 
     D_DECLARE_PUBLIC(DAppletLoader);
 };
@@ -96,6 +110,7 @@ DAppletLoader::~DAppletLoader()
 void DAppletLoader::exec()
 {
     D_D(DAppletLoader);
+    d->loadTranslation(d->m_applet->pluginMetaData());
 
     if (!d->load(d->m_applet))
         return;
@@ -125,7 +140,7 @@ void DAppletLoaderPrivate::doCreateRootObject(DApplet *applet)
         if (!rootObject) {
             D_Q(DAppletLoader);
             qCWarning(dsLoaderLog) << "Create root failed:" << applet->pluginId();
-            Q_EMIT q->failed();
+            Q_EMIT q->failed(applet->pluginId());
         }
     });
 
@@ -155,7 +170,7 @@ bool DAppletLoaderPrivate::doLoad(DApplet *applet)
         if (auto containment = qobject_cast<DContainment *>(applet->parentApplet())) {
             containment->removeApplet(applet);
         }
-        Q_EMIT q->failed();
+        Q_EMIT q->failed(applet->pluginId());
         return false;
     }
     return true;
@@ -171,7 +186,7 @@ bool DAppletLoaderPrivate::doInit(DApplet *applet)
         if (auto containment = qobject_cast<DContainment *>(applet->parentApplet())) {
             containment->removeApplet(applet);
         }
-        Q_EMIT q->failed();
+        Q_EMIT q->failed(applet->pluginId());
         return false;
     }
     return true;
@@ -234,6 +249,38 @@ bool DAppletLoaderPrivate::init(DApplet *applet)
         }
     }
     return true;
+}
+
+void DAppletLoaderPrivate::loadTranslation(const DPluginMetaData &pluginData)
+{
+    const QString baseDir = pluginData.pluginDir();
+    const QString pluginId = pluginData.pluginId();
+
+    QString pluginTransFilePath = QString(baseDir + "/translations/" + pluginId + "_%1.qm").arg(QLocale::system().name());
+    if (QFile::exists(pluginTransFilePath)) {
+        auto translator = new QTranslator(qApp);
+        if (translator->load(pluginTransFilePath)) {
+            m_pluginTranslators[pluginId] = translator;
+            qApp->installTranslator(translator);
+        } else {
+            qCWarning(dsLoaderLog) << "Failed to load translation:" << pluginTransFilePath;
+            translator->deleteLater();
+        }
+    }
+
+    const auto children = DPluginLoader::instance()->childrenPlugin(pluginId);
+    for (const auto &childPluginData : children) {
+        loadTranslation(childPluginData);
+    }
+}
+
+void DAppletLoaderPrivate::removeTranslation(const QString &pluginId)
+{
+    if (m_pluginTranslators.contains(pluginId)) {
+        qApp->removeTranslator(m_pluginTranslators.value(pluginId));
+        m_pluginTranslators.value(pluginId)->deleteLater();
+        m_pluginTranslators.remove(pluginId);
+    }
 }
 
 DS_END_NAMESPACE

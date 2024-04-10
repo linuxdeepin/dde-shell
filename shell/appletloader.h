@@ -25,7 +25,7 @@ public:
     DApplet *applet() const;
 
 Q_SIGNALS:
-    void failed();
+    void failed(const QString &pluginId);
 };
 
 DS_END_NAMESPACE

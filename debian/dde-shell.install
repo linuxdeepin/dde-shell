@@ -15,3 +15,4 @@ usr/share/dsg/configs/org.deepin.ds.dock/
 usr/lib/dde-dock/tmp/plugins
 usr/lib/dde-dock/tmp/plugins/quick-trays
 usr/share/dde-dock/tmp/translations
+usr/share/dde-shell/*/translations
