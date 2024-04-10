@@ -51,6 +51,9 @@ public:
     void setHideMode(HideMode mode);
 
     HideState hideState();
+    bool RequestDock(const QString &desktopFile, int index);
+    bool IsDocked(const QString &desktopFile);
+    bool RequestUndock(const QString &desktopFile);
 
 Q_SIGNALS:
     void geometryChanged();
@@ -62,6 +65,9 @@ Q_SIGNALS:
 
 private:
     DockPanel* parent() const;
+    QString getAppID(const QString &desktopfile);
+    QList<DApplet *> appletList(const QString &pluginId) const;
+    DApplet *applet(const QString &pluginId) const;
 
     DApplet *m_oldDockApplet;
     DApplet *m_clipboardApplet;
