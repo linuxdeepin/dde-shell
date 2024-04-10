@@ -12,7 +12,6 @@
 #include <QObject>
 #include <QPointer>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class TaskManager;
 class DesktopfileAbstractParser;
@@ -83,4 +82,3 @@ private:
 
 };
 }
-DS_END_NAMESPACE

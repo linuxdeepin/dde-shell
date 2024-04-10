@@ -11,7 +11,6 @@
 
 #include <QObject>
 
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 class AppItem;
@@ -36,4 +35,3 @@ Q_SIGNALS:
     void WindowMonitorShutdown();
 };
 }
-DS_END_NAMESPACE

@@ -13,7 +13,6 @@
 
 DCORE_USE_NAMESPACE
 
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 
@@ -53,4 +52,3 @@ private:
     QJsonArray m_dockedItems;
 };
 }
-DS_END_NAMESPACE

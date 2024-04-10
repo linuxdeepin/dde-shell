@@ -11,10 +11,10 @@
 #include <QSize>
 
 class DockTrayWindow;
-DS_BEGIN_NAMESPACE
+
 namespace dock {
 
-class DockApplet : public DApplet
+class DockApplet : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
     Q_PROPERTY(int dockWidth READ dockWidth WRITE setDockWidth NOTIFY dockWidthChanged)
@@ -53,4 +53,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

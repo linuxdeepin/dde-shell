@@ -17,7 +17,6 @@
 
 #include <yaml-cpp/yaml.h>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 static inline QString bool2EnableStr(bool enable)
 {
@@ -154,4 +153,3 @@ QJsonArray TaskManagerSettings::dockedDesktopFiles()
 
 }
 
-DS_END_NAMESPACE

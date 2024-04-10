@@ -8,10 +8,9 @@
 #include "dsglobal.h"
 #include "../dockiteminfo.h"
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
-class SearchItem : public DApplet
+class SearchItem : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
     Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
@@ -34,4 +33,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

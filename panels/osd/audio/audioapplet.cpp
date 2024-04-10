@@ -12,7 +12,6 @@
 
 #include <DDBusSender>
 
-DS_BEGIN_NAMESPACE
 namespace osd {
 
 static DDBusSender audioInter()
@@ -140,6 +139,5 @@ void AudioApplet::setVolumeValue(double newVolumeValue)
 D_APPLET_CLASS(AudioApplet)
 
 }
-DS_END_NAMESPACE
 
 #include "audioapplet.moc"

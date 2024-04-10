@@ -6,7 +6,6 @@
 #include "dsglobal.h"
 #include <xcb/xproto.h>
 
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 class X11DockHelper : public DockHelper
@@ -30,4 +29,3 @@ private:
 };
 }
 
-DS_END_NAMESPACE

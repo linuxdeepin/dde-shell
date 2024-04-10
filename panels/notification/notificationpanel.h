@@ -7,13 +7,12 @@
 #include "panel.h"
 #include <QQuickItem>
 
-DS_BEGIN_NAMESPACE
 namespace notification {
 
 class BubbleItem;
 class BubbleModel;
 class NotificationProxy;
-class NotificationPanel : public DPanel
+class NotificationPanel : public DS_NAMESPACE::DPanel
 {
     Q_OBJECT
     Q_PROPERTY(bool visible READ visible NOTIFY visibleChanged FINAL)
@@ -57,4 +56,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

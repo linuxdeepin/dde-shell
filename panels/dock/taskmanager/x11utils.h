@@ -16,7 +16,6 @@
 #include <QObject>
 #include <QSharedPointer>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 const int MotifHintStatus               = 8;
 const int MotifHintFunctions            = 1;
@@ -77,4 +76,3 @@ private:
     xcb_connection_t* m_connection;
 };
 }
-DS_END_NAMESPACE

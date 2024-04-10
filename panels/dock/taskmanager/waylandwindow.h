@@ -14,7 +14,6 @@
 #include <QScopedPointer>
 #include <QtWaylandClient/QWaylandClientExtension>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class ForeignToplevelHandle : public QWaylandClientExtensionTemplate<ForeignToplevelHandle>, public QtWayland::ztreeland_foreign_toplevel_handle_v1
 {
@@ -113,4 +112,3 @@ private:
     QScopedPointer<ForeignToplevelHandle> m_foreignToplevelHandle;
 };
 }
-DS_END_NAMESPACE

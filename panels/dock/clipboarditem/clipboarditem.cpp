@@ -13,7 +13,7 @@
 #include <QBuffer>
 
 DGUI_USE_NAMESPACE
-DS_BEGIN_NAMESPACE
+
 namespace dock {
 
 static DDBusSender clipboardDbus()
@@ -73,6 +73,5 @@ void ClipboardItem::setVisible(bool visible)
 D_APPLET_CLASS(ClipboardItem)
 }
 
-DS_END_NAMESPACE
 
 #include "clipboarditem.moc"

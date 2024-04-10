@@ -8,7 +8,6 @@
 
 #include <DDBusSender>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 WorkspaceItem::WorkspaceItem(QObject *parent)
@@ -25,6 +24,5 @@ WorkspaceModel *WorkspaceItem::dataModel() const
 D_APPLET_CLASS(WorkspaceItem)
 }
 
-DS_END_NAMESPACE
 
 #include "workspaceitem.moc"

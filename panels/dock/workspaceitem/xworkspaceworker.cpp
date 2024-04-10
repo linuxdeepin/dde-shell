@@ -14,7 +14,6 @@
 
 Q_LOGGING_CATEGORY(workspaceItem, "dde.shell.dock.workspaceItem")
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 XWorkspaceWorker::XWorkspaceWorker(WorkspaceModel *model)
@@ -83,4 +82,3 @@ void XWorkspaceWorker::updateData()
     }
 }
 }
-DS_END_NAMESPACE

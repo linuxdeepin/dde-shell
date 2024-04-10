@@ -9,7 +9,6 @@
 #include <QString>
 #include <QRegularExpression>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 static inline const QString DOCK_ACTION_ALLWINDOW = "dock-action-allWindow";
@@ -57,4 +56,3 @@ inline static QString unescapeFromObjectPath(const QString &str)
     return ret;
 }
 }
-DS_END_NAMESPACE

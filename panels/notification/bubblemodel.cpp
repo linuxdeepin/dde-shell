@@ -17,7 +17,6 @@
 #include <QLoggingCategory>
 #include <DIconTheme>
 
-DS_BEGIN_NAMESPACE
 namespace notification {
 
 Q_DECLARE_LOGGING_CATEGORY(notificationLog)
@@ -521,4 +520,3 @@ void BubbleModel::updateLevel()
 }
 
 }
-DS_END_NAMESPACE

@@ -33,7 +33,7 @@ qt_add_dbus_interfaces(
 qt_add_dbus_adaptor(DBUS_INTERFACES
     ${CMAKE_CURRENT_SOURCE_DIR}/api/dbus/org.deepin.ds.dock.taskmanager.item.xml
     appitem.h
-    ds::dock::AbstractItem
+    dock::AbstractItem
     itemadaptor
     ItemAdaptor
 )
@@ -41,7 +41,7 @@ qt_add_dbus_adaptor(DBUS_INTERFACES
 qt_add_dbus_adaptor(DBUS_INTERFACES
     ${CMAKE_CURRENT_SOURCE_DIR}/api/dbus/org.deepin.ds.dock.taskmanager.xml
     taskmanager.h
-    ds::dock::TaskManager
+    dock::TaskManager
     taskmanageradaptor
     TaskManagerAdaptor
 )

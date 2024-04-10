@@ -13,7 +13,6 @@
 
 #include <DDBusSender>
 
-DS_BEGIN_NAMESPACE
 namespace osd {
 
 Q_LOGGING_CATEGORY(osdKBLog, "dde.shell.osd.kblayout")
@@ -136,6 +135,5 @@ void KBLayoutApplet::next()
 D_APPLET_CLASS(KBLayoutApplet)
 
 }
-DS_END_NAMESPACE
 
 #include "kblayoutapplet.moc"

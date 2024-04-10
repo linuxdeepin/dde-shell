@@ -8,7 +8,6 @@
 #include <QDir>
 #include <QList>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 // for Floer docked on dock
 class FloderItem : public AbstractItem
@@ -58,4 +57,3 @@ private:
     QDir* m_dir;
 };
 }
-DS_END_NAMESPACE

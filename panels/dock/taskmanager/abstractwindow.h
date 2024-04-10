@@ -10,7 +10,6 @@
 #include <QObject>
 #include <QPointer>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class AppItem;
 
@@ -78,4 +77,3 @@ Q_SIGNALS:
     void stateChanged();
 };
 }
-DS_END_NAMESPACE

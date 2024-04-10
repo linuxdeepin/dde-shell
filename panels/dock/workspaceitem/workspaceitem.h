@@ -8,10 +8,9 @@
 #include "workspacemodel.h"
 #include "dsglobal.h"
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
-class WorkspaceItem : public DApplet
+class WorkspaceItem : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
     Q_PROPERTY(WorkspaceModel* dataModel READ dataModel NOTIFY modelChanged FINAL)
@@ -26,4 +25,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

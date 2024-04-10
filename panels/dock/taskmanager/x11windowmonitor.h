@@ -19,7 +19,6 @@
 #include <QScopedPointer>
 #include <QAbstractNativeEventFilter>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class XcbEventFilter: public QAbstractNativeEventFilter
 {
@@ -65,4 +64,3 @@ private:
     QHash<xcb_window_t, QSharedPointer<X11Window>> m_windows;
 };
 }
-DS_END_NAMESPACE

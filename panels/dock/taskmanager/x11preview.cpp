@@ -40,7 +40,6 @@ Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPrevie
 #define WM_HELPER DWindowManagerHelper::instance()
 
 DGUI_USE_NAMESPACE
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 
@@ -571,4 +570,3 @@ void X11WindowPreviewContainer::updateHoveredWindow(AbstractWindow *window)
 }
 }
 
-DS_END_NAMESPACE

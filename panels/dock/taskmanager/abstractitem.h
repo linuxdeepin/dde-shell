@@ -9,7 +9,6 @@
 #include <QObject>
 #include <QVariant>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class AbstractItem : public QObject
 {
@@ -77,4 +76,3 @@ Q_SIGNALS:
 
 };
 }
-DS_END_NAMESPACE

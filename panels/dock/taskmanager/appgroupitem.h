@@ -8,7 +8,6 @@
 
 #include <QList>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 /// for AppGroup docked on dock
 class AppGroupItem : public AbstractItem
@@ -58,4 +57,3 @@ private:
     QList<QSharedPointer<DesktopfileAbstractParser>> m_desktopfiles;
 };
 }
-DS_END_NAMESPACE

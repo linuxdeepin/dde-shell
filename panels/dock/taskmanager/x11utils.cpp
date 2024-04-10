@@ -23,7 +23,6 @@
 
 Q_LOGGING_CATEGORY(x11UtilsLog, "dde.shell.dock.taskmanager.x11utils")
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 X11Utils* X11Utils::instance()
@@ -316,4 +315,3 @@ void X11Utils::restackWindow(const xcb_window_t& window)
     xcb_ewmh_request_restack_window(&m_ewmh, 0, window, 0, XCB_STACK_MODE_ABOVE);
 }
 }
-DS_END_NAMESPACE

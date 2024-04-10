@@ -10,7 +10,6 @@
 
 #include <QLoggingCategory>
 
-DS_BEGIN_NAMESPACE
 namespace notification {
 
 Q_LOGGING_CATEGORY(notificationLog, "dde.shell.notification")
@@ -181,6 +180,5 @@ void NotificationPanel::onBubbleCountChanged()
 D_APPLET_CLASS(NotificationPanel)
 
 }
-DS_END_NAMESPACE
 
 #include "notificationpanel.moc"

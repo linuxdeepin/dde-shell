@@ -8,7 +8,6 @@
 
 #include <QAbstractListModel>
 #include <QPointer>
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 class WorkSpaceData
@@ -64,5 +63,4 @@ private:
     int m_currentIndex;
 };
 }
-DS_END_NAMESPACE
 #endif // WORKSPACEMODEL_H

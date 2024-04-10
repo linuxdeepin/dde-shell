@@ -8,7 +8,6 @@
 
 #include <QObject>
 #include <QDBusInterface>
-DS_BEGIN_NAMESPACE
 namespace dock {
 class WorkspaceModel;
 class XWorkspaceWorker : public QObject
@@ -27,5 +26,4 @@ private:
     WorkspaceModel *m_model;
 };
 }
-DS_END_NAMESPACE
 #endif // XWORKSPACEWORKER_H

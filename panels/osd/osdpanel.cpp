@@ -12,7 +12,6 @@
 #include <QDBusConnection>
 #include <QDBusError>
 
-DS_BEGIN_NAMESPACE
 namespace osd {
 
 OsdPanel::OsdPanel(QObject *parent)
@@ -102,6 +101,5 @@ void OsdPanel::setOsdType(const QString &osdType)
 D_APPLET_CLASS(OsdPanel)
 
 }
-DS_END_NAMESPACE
 
 #include "osdpanel.moc"

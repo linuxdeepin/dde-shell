@@ -10,7 +10,6 @@
 
 #include <QDBusContext>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class DockHelper;
 const QStringList pluginDirs = {
@@ -19,7 +18,7 @@ const QStringList pluginDirs = {
     "/usr/lib/dde-dock/tmp/plugins/system-trays/"
 };
 
-class DockPanel : public DPanel, public QDBusContext
+class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
 {
     Q_OBJECT
     Q_PROPERTY(QRect geometry READ geometry FINAL)
@@ -102,4 +101,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

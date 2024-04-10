@@ -14,7 +14,6 @@
 #include <QGuiApplication>
 
 DGUI_USE_NAMESPACE
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 static DDBusSender searchDbus()
@@ -79,6 +78,5 @@ void SearchItem::setVisible(bool visible)
 D_APPLET_CLASS(SearchItem)
 }
 
-DS_END_NAMESPACE
 
 #include "searchitem.moc"

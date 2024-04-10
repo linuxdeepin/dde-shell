@@ -12,11 +12,10 @@
 
 #include <QPointer>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class AppItem;
 
-class TaskManager : public DContainment
+class TaskManager : public DS_NAMESPACE::DContainment
 {
     Q_OBJECT
     Q_PROPERTY(ItemModel* dataModel READ dataModel NOTIFY itemsChanged)
@@ -62,5 +61,4 @@ private:
 };
 
 }
-DS_END_NAMESPACE
 

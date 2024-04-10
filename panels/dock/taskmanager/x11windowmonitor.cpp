@@ -31,7 +31,6 @@
 
 Q_LOGGING_CATEGORY(x11Log, "dde.shell.dock.taskmanager.x11windowmonitor")
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 static QPointer<X11WindowMonitor> monitor;
 bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *message, qintptr *)
@@ -221,4 +220,3 @@ void X11WindowMonitor::handleRootWindowClientListChanged()
 
 }
 }
-DS_END_NAMESPACE
