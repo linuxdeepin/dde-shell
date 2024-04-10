@@ -33,7 +33,7 @@ Item {
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId }
 
     property int statusIndicatorSize: root.width * 0.95
-    property int iconSize: root.width * 0.64
+    property int iconSize: Panel.rootObject.itemIconSizeBase * 0.64
 
     Item {
         anchors.fill: parent
@@ -139,7 +139,7 @@ Item {
             name: root.iconName
             sourceSize: Qt.size(iconSize, iconSize)
             anchors.centerIn: parent
-
+            scale: Panel.rootObject.itemScale
             BeatAnimation {
                 target: icon
                 loops: Animation.Infinite
