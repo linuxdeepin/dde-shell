@@ -30,6 +30,9 @@ Window {
 
     property int dockSize: Applet.dockSize
     property int dockItemMaxSize: dockSize
+    property real itemScale: 1.0
+    property real draggingSize: 0.0
+    property int itemIconSizeBase: 0
     property int itemSpacing: dockItemMaxSize / 20
 
     property bool isDragging: false
@@ -340,6 +343,7 @@ Window {
             dock.isDragging = true
             oldMouseY = mouse.y
             oldMouseX = mouse.x
+            draggingSize = dockSize
         }
 
         onPositionChanged: function(mouse) {
@@ -354,11 +358,14 @@ Window {
             } else {
                 dockSize = Math.min(Math.max(dockSize - xChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
             }
+            itemScale = dockSize / draggingSize
         }
 
         onReleased: function(mouse) {
             dock.isDragging = false
             Applet.dockSize = dockSize
+            itemScale = 1.0
+            itemIconSizeBase = dockItemMaxSize
         }
 
         function anchorToTop() {
@@ -462,6 +469,7 @@ Window {
         DockCompositor.dockColorTheme = Qt.binding(function(){
             return Panel.colorTheme
         })
+        dock.itemIconSizeBase = dock.dockItemMaxSize
 
         changeDragAreaAnchor()
     }

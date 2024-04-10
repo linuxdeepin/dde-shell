@@ -12,10 +12,9 @@ import org.deepin.ds.dock 1.0
 AppletItem {
     id: launcher
     property bool useColumnLayout: Panel.position % 2
-    property int dockSize: Panel.rootObject.dockItemMaxSize
     property int dockOrder: 12
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : dockSize
-    implicitHeight: useColumnLayout ? dockSize : Panel.rootObject.dockSize
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : Panel.rootObject.dockItemMaxSize
+    implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize : Panel.rootObject.dockSize
 
     onXChanged: updateLaunchpadPos()
     onYChanged: updateLaunchpadPos()
@@ -44,9 +43,10 @@ AppletItem {
     D.ActionButton {
         anchors.centerIn: parent
         icon.name: Applet.iconName
+        scale: Panel.rootObject.itemScale
         // 10 : 36 : 10
-        icon.height: dockSize * 9 / 14
-        icon.width: dockSize * 9 / 14
+        icon.height: Panel.rootObject.itemIconSizeBase * 0.64
+        icon.width: Panel.rootObject.itemIconSizeBase * 0.64
         onClicked: Applet.toggleLauncher()
     }
 }
