@@ -41,6 +41,7 @@ Window {
     width: Panel.position == Dock.Top || Panel.position == Dock.Bottom ? -1 : dockSize
     height: Panel.position == Dock.Left || Panel.position == Dock.Right ? -1 : dockSize
     color: "transparent"
+    flags: Qt.WindowDoesNotAcceptFocus
 
     DLayerShellWindow.anchors: position2Anchors(Applet.position)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
