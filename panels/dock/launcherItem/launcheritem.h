@@ -7,10 +7,9 @@
 #include "applet.h"
 #include "dsglobal.h"
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
-class LauncherItem : public DApplet
+class LauncherItem : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
     Q_PROPERTY(QString iconName READ iconName WRITE setIconName NOTIFY iconNameChanged FINAL)
@@ -31,4 +30,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

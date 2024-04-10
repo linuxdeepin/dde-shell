@@ -32,14 +32,14 @@ file(
 qt_add_dbus_adaptor(dock_panel_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/api/old/org.deepin.dde.dock1.xml
     dockdbusproxy.h
-    ds::dock::DockDBusProxy
+    dock::DockDBusProxy
     dockfrontadaptor
     DockFrontAdaptor
 )
 qt_add_dbus_adaptor(dock_panel_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/api/old/org.deepin.dde.daemon.Dock1.xml
     dockdbusproxy.h
-    ds::dock::DockDBusProxy
+    dock::DockDBusProxy
     dockdaemonadaptor
     DockDaemonAdaptor
 )
@@ -48,7 +48,7 @@ qt_add_dbus_adaptor(dock_panel_sources
 qt_add_dbus_adaptor(dock_panel_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/api/dbus/org.deepin.ds.dock.xml
     dockpanel.h
-    ds::dock::DockPanel
+    dock::DockPanel
     dockadaptor
     DockAdaptor
 )

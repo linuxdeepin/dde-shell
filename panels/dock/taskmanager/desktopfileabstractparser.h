@@ -13,7 +13,6 @@
 #include <QPointer>
 #include <utility>
 
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 class AbstractItem;
@@ -74,4 +73,3 @@ protected:
     QString m_id;
 };
 }
-DS_END_NAMESPACE

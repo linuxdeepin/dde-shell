@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <iterator>
 
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 ForeignToplevelManager::ForeignToplevelManager(WaylandWindowMonitor* monitor)
@@ -171,4 +170,3 @@ void WaylandWindowMonitor::handleForeignToplevelHandleRemoved()
 }
 }
 
-DS_END_NAMESPACE

@@ -33,7 +33,6 @@ Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtInfoMsg)
                             DesktopfileAbstractParser   \
                         >
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 TaskManager::TaskManager(QObject* parent)
@@ -235,5 +234,4 @@ bool TaskManager::windowSplit()
 D_APPLET_CLASS(TaskManager)
 }
 
-DS_END_NAMESPACE
 #include "taskmanager.moc"

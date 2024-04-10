@@ -15,7 +15,6 @@
 
 Q_LOGGING_CATEGORY(waylandwindowLog, "dde.shell.dock.taskmanager.waylandwindow")
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 ForeignToplevelHandle::ForeignToplevelHandle(struct ::ztreeland_foreign_toplevel_handle_v1 *object)
     : QWaylandClientExtensionTemplate<ForeignToplevelHandle>(1)
@@ -238,4 +237,3 @@ void WaylandWindow::setForeignToplevelHandle(ForeignToplevelHandle* handle)
 }
 
 }
-DS_END_NAMESPACE

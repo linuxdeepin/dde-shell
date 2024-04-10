@@ -6,7 +6,6 @@
 #include "itemadaptor.h"
 #include "abstractitem.h"
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 AbstractItem::AbstractItem(const QString& id, QObject* parent)
     : QObject(parent)
@@ -17,4 +16,3 @@ AbstractItem::AbstractItem(const QString& id, QObject* parent)
 }
 
 }
-DS_END_NAMESPACE

@@ -14,7 +14,6 @@
 
 Q_LOGGING_CATEGORY(abstractdesktopfileLog, "dde.shell.dock.abstractdesktopfile")
 
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 
@@ -158,4 +157,3 @@ void DesktopfileAbstractParser::setDocked(bool docked)
 }
 
 }
-DS_END_NAMESPACE

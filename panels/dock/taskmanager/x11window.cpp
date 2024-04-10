@@ -16,7 +16,6 @@
 
 Q_LOGGING_CATEGORY(x11windowLog, "dde.shell.dock.taskmanager.x11window")
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 X11Window::X11Window(xcb_window_t winid, QObject *parent)
     : AbstractWindow(parent)
@@ -253,4 +252,3 @@ bool X11Window::isActionMinimizeAllowed()
 }
 
 }
-DS_END_NAMESPACE

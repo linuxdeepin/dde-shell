@@ -6,10 +6,9 @@
 
 #include "applet.h"
 
-DS_BEGIN_NAMESPACE
 namespace osd {
 
-class BrightnessApplet : public DApplet
+class BrightnessApplet : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
     Q_PROPERTY(QString iconName READ iconName NOTIFY iconNameChanged FINAL)
@@ -38,4 +37,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

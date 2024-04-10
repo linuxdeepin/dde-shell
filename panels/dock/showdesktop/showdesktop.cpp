@@ -13,7 +13,6 @@
 
 Q_LOGGING_CATEGORY(showDesktop, "dde.shell.dock.showdesktop")
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 ShowDesktop::ShowDesktop(QObject *parent)
@@ -54,6 +53,5 @@ bool ShowDesktop::checkNeedShowDesktop()
 D_APPLET_CLASS(ShowDesktop)
 }
 
-DS_END_NAMESPACE
 
 #include "showdesktop.moc"

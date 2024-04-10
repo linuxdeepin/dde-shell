@@ -17,7 +17,6 @@ const static QString keyDockSize                = "Dock_Size";
 const static QString keyItemAlignment           = "Item_Alignment";
 const static QString keyIndicatorStyle          = "Indicator_Style";
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 static QString hideMode2String(HideMode mode)
@@ -307,4 +306,3 @@ void DockSettings::checkWriteJob()
 
 
 }
-DS_END_NAMESPACE

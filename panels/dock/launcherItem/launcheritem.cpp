@@ -8,7 +8,6 @@
 
 #include <DDBusSender>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 static DDBusSender launcherDbus()
@@ -52,6 +51,5 @@ void LauncherItem::setIconName(const QString& iconName)
 D_APPLET_CLASS(LauncherItem)
 }
 
-DS_END_NAMESPACE
 
 #include "launcheritem.moc"

@@ -8,7 +8,6 @@
 
 #include <QQmlListProperty>
 
-DS_BEGIN_NAMESPACE
 namespace osd {
 
 class DPItem : public QObject
@@ -47,7 +46,7 @@ private:
     int m_mode;
 };
 
-class DisPlayModeApplet : public DApplet
+class DisPlayModeApplet : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
     Q_PROPERTY(int state READ state NOTIFY stateChanged FINAL)
@@ -82,4 +81,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

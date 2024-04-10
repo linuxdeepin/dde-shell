@@ -10,7 +10,7 @@
 #include "pluginloader.h"
 
 #include <QObject>
-DS_BEGIN_NAMESPACE
+
     namespace dock {
     DockDBusProxy::DockDBusProxy(DockPanel* parent)
         : QObject(parent)
@@ -26,7 +26,7 @@ DS_BEGIN_NAMESPACE
 
         // Communicate with the other module
         auto getOtherApplet = [ = ] {
-            QList<DApplet *> list = appletList("org.deepin.ds.dock.tray");
+            QList<DS_NAMESPACE::DApplet *> list = appletList("org.deepin.ds.dock.tray");
             if (!list.isEmpty()) m_oldDockApplet = list.first();
 
             list = appletList("org.deepin.ds.dock.clipboarditem");
@@ -62,17 +62,17 @@ DS_BEGIN_NAMESPACE
         return desktopfile.mid(desktopfile.lastIndexOf(desktopLeft) + desktopLeft.size(), desktopfile.lastIndexOf(desktopSuffix) - desktopfile.lastIndexOf(desktopLeft) - desktopLeft.size());
     }
 
-    QList<DApplet *> DockDBusProxy::appletList(const QString &pluginId) const
+    QList<DS_NAMESPACE::DApplet *> DockDBusProxy::appletList(const QString &pluginId) const
     {
-        QList<DApplet *> ret;
-        auto root = qobject_cast<DContainment *>(DPluginLoader::instance()->rootApplet());
+        QList<DS_NAMESPACE::DApplet *> ret;
+        auto root = qobject_cast<DS_NAMESPACE::DContainment *>(DS_NAMESPACE::DPluginLoader::instance()->rootApplet());
 
-        QQueue<DContainment *> containments;
+        QQueue<DS_NAMESPACE::DContainment *> containments;
         containments.enqueue(root);
         while (!containments.isEmpty()) {
-            DContainment *containment = containments.dequeue();
+            DS_NAMESPACE::DContainment *containment = containments.dequeue();
             for (const auto applet : containment->applets()) {
-                if (auto item = qobject_cast<DContainment *>(applet)) {
+                if (auto item = qobject_cast<DS_NAMESPACE::DContainment *>(applet)) {
                     containments.enqueue(item);
                 }
                 if (applet->pluginId() == pluginId)
@@ -82,7 +82,7 @@ DS_BEGIN_NAMESPACE
         return ret;
     }
 
-    DApplet *DockDBusProxy::applet(const QString &pluginId) const
+    DS_NAMESPACE::DApplet *DockDBusProxy::applet(const QString &pluginId) const
     {
         const auto list = appletList(pluginId);
         if (!list.isEmpty())
@@ -239,4 +239,3 @@ DS_BEGIN_NAMESPACE
 
 }
 
-DS_END_NAMESPACE

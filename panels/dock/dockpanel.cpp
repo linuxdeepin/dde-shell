@@ -28,7 +28,6 @@
 
 Q_LOGGING_CATEGORY(dockLog, "dde.shell.dock")
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 DockPanel::DockPanel(QObject * parent)
@@ -297,5 +296,4 @@ D_APPLET_CLASS(DockPanel)
 
 }
 
-DS_END_NAMESPACE
 #include "dockpanel.moc"

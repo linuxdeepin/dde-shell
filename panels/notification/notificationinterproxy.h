@@ -8,7 +8,6 @@
 
 #include <QObject>
 
-DS_BEGIN_NAMESPACE
 namespace notification {
 
 class NotificationProxy : public QObject
@@ -46,4 +45,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

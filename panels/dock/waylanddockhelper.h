@@ -5,7 +5,6 @@
 #include "dockhelper.h"
 #include "dsglobal.h"
 
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 class WaylandDockHelper : public DockHelper
@@ -21,4 +20,3 @@ public Q_SLOTS:
 };
 }
 
-DS_END_NAMESPACE

@@ -15,7 +15,6 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 ItemModel* ItemModel::instance()
 {
@@ -165,4 +164,3 @@ void ItemModel::onItemChanged()
     Q_EMIT dataChanged(indexes.first(), indexes.last());
 }
 }
-DS_END_NAMESPACE

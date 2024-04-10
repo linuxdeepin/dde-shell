@@ -19,7 +19,6 @@
 
 Q_LOGGING_CATEGORY(appitemLog, "dde.shell.dock.taskmanger.appitem")
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 AppItem::AppItem(QString id, QObject *parent)
     : AbstractItem(QStringLiteral("AppItem/%1").arg(escapeToObjectPath(id)), parent)
@@ -337,4 +336,3 @@ void AppItem::onWindowDestroyed()
 }
 
 }
-DS_END_NAMESPACE

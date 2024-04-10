@@ -13,7 +13,6 @@
 
 DCORE_USE_NAMESPACE
 
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 
@@ -75,4 +74,3 @@ private:
     IndicatorStyle m_style;
 };
 }
-DS_END_NAMESPACE

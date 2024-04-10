@@ -9,7 +9,6 @@
 #include <QAbstractListModel>
 #include <qjsonarray.h>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class AbstractItem;
 
@@ -58,4 +57,3 @@ private:
     QList<QPointer<AbstractItem>> m_items;
 };
 }
-DS_END_NAMESPACE

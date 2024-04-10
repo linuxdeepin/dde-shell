@@ -16,7 +16,6 @@
 #include <QVBoxLayout>
 #include <DBlurEffectWidget>
 
-DS_BEGIN_NAMESPACE
 DWIDGET_USE_NAMESPACE
 
 namespace dock {
@@ -113,4 +112,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

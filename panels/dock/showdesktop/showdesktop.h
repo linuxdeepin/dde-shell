@@ -7,10 +7,9 @@
 #include "applet.h"
 #include "dsglobal.h"
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
-class ShowDesktop : public DApplet
+class ShowDesktop : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
 public:
@@ -23,4 +22,3 @@ public:
 };
 
 }
-DS_END_NAMESPACE

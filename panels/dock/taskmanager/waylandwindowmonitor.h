@@ -16,7 +16,6 @@
 
 #include <QtWaylandClient/QWaylandClientExtension>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class ForeignToplevelManager : public QWaylandClientExtensionTemplate<ForeignToplevelManager>, public QtWayland::ztreeland_foreign_toplevel_manager_v1
 {
@@ -85,4 +84,3 @@ private:
 
 };
 }
-DS_END_NAMESPACE

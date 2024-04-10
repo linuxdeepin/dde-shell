@@ -15,7 +15,6 @@
 #include <QGuiApplication>
 #include <QPointer>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 const uint16_t monitorSize = 15;
 class XcbEventFilter: public QAbstractNativeEventFilter
@@ -144,4 +143,3 @@ bool X11DockHelper::mouseInDockArea()
     return m_isHoverIn;
 }
 }
-DS_END_NAMESPACE

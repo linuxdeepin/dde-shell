@@ -13,7 +13,6 @@
 #include <QQmlEngine>
 #include <DGuiApplicationHelper>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 Q_NAMESPACE
@@ -77,14 +76,12 @@ Q_ENUM_NS(HideState)
 Q_ENUM_NS(AniAction)
 }
 
-DS_END_NAMESPACE
-
-Q_DECLARE_METATYPE(DS_NAMESPACE::dock::SIZE)
-Q_DECLARE_METATYPE(DS_NAMESPACE::dock::IndicatorStyle)
-Q_DECLARE_METATYPE(DS_NAMESPACE::dock::ItemAlignment)
-Q_DECLARE_METATYPE(DS_NAMESPACE::dock::ColorTheme)
-Q_DECLARE_METATYPE(DS_NAMESPACE::dock::HideMode)
-Q_DECLARE_METATYPE(DS_NAMESPACE::dock::HideState)
-Q_DECLARE_METATYPE(DS_NAMESPACE::dock::AniAction)
-Q_DECLARE_METATYPE(DS_NAMESPACE::dock::Position)
+Q_DECLARE_METATYPE(dock::SIZE)
+Q_DECLARE_METATYPE(dock::IndicatorStyle)
+Q_DECLARE_METATYPE(dock::ItemAlignment)
+Q_DECLARE_METATYPE(dock::ColorTheme)
+Q_DECLARE_METATYPE(dock::HideMode)
+Q_DECLARE_METATYPE(dock::HideState)
+Q_DECLARE_METATYPE(dock::AniAction)
+Q_DECLARE_METATYPE(dock::Position)
 

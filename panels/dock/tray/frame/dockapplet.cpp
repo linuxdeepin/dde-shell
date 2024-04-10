@@ -17,7 +17,6 @@
 #include <QTranslator>
 #include <QWindow>
 
-DS_BEGIN_NAMESPACE
     namespace dock {
 
                    DockApplet::DockApplet(QObject *parent)
@@ -84,7 +83,7 @@ void DockApplet::initDock()
 
     DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
 
-    auto appletItem = qobject_cast<DAppletItem *>(rootObject());
+    auto appletItem = qobject_cast<DS_NAMESPACE::DAppletItem *>(rootObject());
     if (appletItem) {
         m_window->winId();
         m_window->windowHandle()->setParent(appletItem->window());
@@ -128,6 +127,5 @@ void DockApplet::setItemOnDock(const QString settingKey, const QString &itemKey,
 D_APPLET_CLASS(DockApplet)
 }
 
-DS_END_NAMESPACE
 
 #include "dockapplet.moc"

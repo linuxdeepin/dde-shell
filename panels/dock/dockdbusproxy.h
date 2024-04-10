@@ -16,7 +16,6 @@
 /** this class used for old dock api compatible
   * it will forward old dbus call to new implementation
   */
-DS_BEGIN_NAMESPACE
 namespace dock {
 class DockDBusProxy final: public QObject, public QDBusContext
 {
@@ -66,13 +65,12 @@ Q_SIGNALS:
 private:
     DockPanel* parent() const;
     QString getAppID(const QString &desktopfile);
-    QList<DApplet *> appletList(const QString &pluginId) const;
-    DApplet *applet(const QString &pluginId) const;
+    QList<DS_NAMESPACE::DApplet *> appletList(const QString &pluginId) const;
+    DS_NAMESPACE::DApplet *applet(const QString &pluginId) const;
 
-    DApplet *m_oldDockApplet;
-    DApplet *m_clipboardApplet;
-    DApplet *m_searchApplet;
+    DS_NAMESPACE::DApplet *m_oldDockApplet;
+    DS_NAMESPACE::DApplet *m_clipboardApplet;
+    DS_NAMESPACE::DApplet *m_searchApplet;
 };
 }
 
-DS_END_NAMESPACE

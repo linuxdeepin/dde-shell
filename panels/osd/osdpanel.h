@@ -7,10 +7,9 @@
 #include "panel.h"
 #include <QQuickItem>
 
-DS_BEGIN_NAMESPACE
 namespace osd {
 
-class OsdPanel : public DPanel
+class OsdPanel : public DS_NAMESPACE::DPanel
 {
     Q_OBJECT
     Q_PROPERTY(bool visible READ visible NOTIFY visibleChanged FINAL)
@@ -46,5 +45,4 @@ private:
     int m_interval {2000};
 };
 
-}
-DS_END_NAMESPACE
+};

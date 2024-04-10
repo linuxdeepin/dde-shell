@@ -27,7 +27,6 @@ static int pidfd_open(pid_t pid, uint flags)
     return syscall(SYS_pidfd_open, pid, flags);
 }
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 static QDBusServiceWatcher dbusWatcher(AM_DBUS_PATH, QDBusConnection::sessionBus(),
                                                 QDBusServiceWatcher::WatchForOwnerChange);
@@ -280,4 +279,3 @@ void DesktopFileAMParser::onPropertyChanged(const QDBusMessage &msg)
     }
 }
 }
-DS_END_NAMESPACE

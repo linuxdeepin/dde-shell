@@ -7,7 +7,6 @@
 #include "dsglobal.h"
 #include <QGuiApplication>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 WorkspaceModel *WorkspaceModel::instance()
@@ -97,4 +96,3 @@ void WorkspaceModel::setCurrentIndex(int newCurrentIndex)
 }
 
 }
-DS_END_NAMESPACE

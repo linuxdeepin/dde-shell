@@ -11,7 +11,6 @@
 #include <QObject>
 #include <QPointer>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class DesktopfileAbstractParser;
 
@@ -73,4 +72,3 @@ private:
     static inline QMap<QString, QWeakPointer<T>> m_desktopFileParsers;
 };
 }
-DS_END_NAMESPACE

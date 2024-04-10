@@ -8,7 +8,6 @@
 
 #include <QAbstractListModel>
 
-DS_BEGIN_NAMESPACE
 namespace notification {
 
 class BubbleItem : public QObject
@@ -118,4 +117,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

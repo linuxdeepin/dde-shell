@@ -9,7 +9,6 @@
 
 #include <QObject>
 
-DS_BEGIN_NAMESPACE
 
 namespace dock {
 class DockHelper : public QObject
@@ -37,4 +36,3 @@ private:
 };
 }
 
-DS_END_NAMESPACE

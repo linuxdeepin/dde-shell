@@ -11,7 +11,6 @@
 
 #include <DDBusSender>
 
-DS_BEGIN_NAMESPACE
 namespace osd {
 
 static DDBusSender displayInter()
@@ -98,6 +97,5 @@ void BrightnessApplet::setBrightness(double newBrightness)
 D_APPLET_CLASS(BrightnessApplet)
 
 }
-DS_END_NAMESPACE
 
 #include "brightnessapplet.moc"

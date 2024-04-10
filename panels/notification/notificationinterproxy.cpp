@@ -8,7 +8,6 @@
 
 #include <DDBusSender>
 
-DS_BEGIN_NAMESPACE
 namespace notification {
 
 static DDBusSender notificationInter()
@@ -65,4 +64,3 @@ void NotificationProxy::handleBubbleEnd(int type, int id, const QVariantMap &bub
 }
 
 }
-DS_END_NAMESPACE

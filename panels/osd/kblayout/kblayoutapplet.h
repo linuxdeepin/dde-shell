@@ -8,7 +8,6 @@
 
 #include <QQmlListProperty>
 
-DS_BEGIN_NAMESPACE
 namespace osd {
 
 class KBLayout : public QObject
@@ -31,7 +30,7 @@ private:
     QString m_text;
 };
 
-class KBLayoutApplet : public DApplet
+class KBLayoutApplet : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
     Q_PROPERTY(QString currentLayout READ currentLayout WRITE setCurrentLayout NOTIFY currentLayoutChanged FINAL)
@@ -61,4 +60,3 @@ private:
 };
 
 }
-DS_END_NAMESPACE

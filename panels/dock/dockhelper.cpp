@@ -8,7 +8,6 @@
 
 #include <QGuiApplication>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 
 DockHelper::DockHelper(DockPanel* parent)
@@ -22,4 +21,3 @@ DockPanel* DockHelper::parent()
     return m_panel;
 }
 }
-DS_END_NAMESPACE

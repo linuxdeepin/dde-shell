@@ -16,7 +16,6 @@
 
 Q_LOGGING_CATEGORY(osdDPLog, "dde.shell.osd.display")
 
-DS_BEGIN_NAMESPACE
 namespace osd {
 
 Q_DECLARE_LOGGING_CATEGORY(osdLog)
@@ -209,6 +208,5 @@ int DisPlayModeApplet::fetchState() const
 D_APPLET_CLASS(DisPlayModeApplet)
 
 }
-DS_END_NAMESPACE
 
 #include "displaymodeapplet.moc"

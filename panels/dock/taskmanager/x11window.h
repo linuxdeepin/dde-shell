@@ -14,7 +14,6 @@
 
 #include <QObject>
 
-DS_BEGIN_NAMESPACE
 namespace dock {
 class X11Window : public AbstractWindow
 {
@@ -81,4 +80,3 @@ private:
     std::once_flag m_windowAllowedActionsFlag;
 };
 }
-DS_END_NAMESPACE
