@@ -14,12 +14,12 @@
     <message>
         <location filename="../appitem.cpp" line="106"/>
         <source>Undock</source>
-        <translation>Від&apos;єднати</translation>
+        <translation>Відшвартувати</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="106"/>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Пришвартувати</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="112"/>
