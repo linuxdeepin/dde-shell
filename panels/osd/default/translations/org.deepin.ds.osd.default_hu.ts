@@ -84,22 +84,22 @@
     <message>
         <location filename="../package/main.qml" line="70"/>
         <source>High performance</source>
-        <translation type="unfinished"/>
+        <translation>Magas teljesítmény </translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="71"/>
         <source>Window effect enabled</source>
-        <translation type="unfinished"/>
+        <translation>Az ablakeffektusok engedélyezve</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="72"/>
         <source>Window effect disabled</source>
-        <translation type="unfinished"/>
+        <translation>Az ablakeffektusok letiltva</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="73"/>
         <source>Failed to enable window effects</source>
-        <translation type="unfinished"/>
+        <translation>Az ablakeffektusok engedélyezése sikertelen</translation>
     </message>
 </context>
 </TS>
