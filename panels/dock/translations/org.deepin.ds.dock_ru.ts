@@ -64,12 +64,12 @@
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Smart Hide</source>
-        <translation type="unfinished"/>
+        <translation>Умное Скрытие</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="186"/>
         <source>Dock Settings</source>
-        <translation type="unfinished"/>
+        <translation>Настройки Dock</translation>
     </message>
 </context>
 </TS>
