@@ -1,3 +1,21 @@
+dde-shell (0.0.8) unstable; urgency=medium
+
+  * fix: dock item get default icon when set auto start
+  * feat: limit opacity from dde-appearance
+  * fix: dock panel never accept focus
+  * chore: change to more common method to insert old dock widget
+  * fix: appitem windows order always changed
+  * fix: x11 preview not fit screen
+  * fix: icon blink when resize
+  * fix: dock get worng positoin when screen size changed
+  * fix: icon missing after drag
+  * feat: add disk-mount plugin
+  * feat: add system-monitor plugin
+  * feat: add dock-network-plugin
+  * feat: add translation of dde-shell plugin
+
+ -- tsic404 <liuheng@deepin.org>  Thu, 11 Apr 2024 21:05:29 +0800
+
 dde-shell (0.0.7) unstable; urgency=medium
 
   * fix: dock menu not shown
