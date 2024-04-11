@@ -19,17 +19,17 @@
     <message>
         <location filename="../appitem.cpp" line="106"/>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Acobla</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="112"/>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>Força&apos;n la sortida</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="119"/>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Tanca-ho tot</translation>
     </message>
 </context>
 </TS>
