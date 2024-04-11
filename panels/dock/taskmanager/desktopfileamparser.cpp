@@ -34,6 +34,9 @@ static QDBusServiceWatcher dbusWatcher(AM_DBUS_PATH, QDBusConnection::sessionBus
 DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
     : DesktopfileAbstractParser(id, parent)
 {
+    if (!m_amIsAvaliable) m_amIsAvaliable = QDBusConnection::sessionBus().
+        interface()->isServiceRegistered(AM_DBUS_PATH);
+
     connect(&dbusWatcher, &QDBusServiceWatcher::serviceRegistered, this, [this](){
         m_amIsAvaliable = true;
         Q_EMIT iconChanged();
