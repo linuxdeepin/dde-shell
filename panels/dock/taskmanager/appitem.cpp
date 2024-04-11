@@ -143,10 +143,13 @@ void AppItem::active() const
         } else if (m_windows.size() == 1) {
             m_currentActiveWindow->minimize();
         } else if (m_windows.size() > 1) {
-            if (m_windows.first() == m_currentActiveWindow) {
-                m_windows.last()->activate();
-            } else {
-                m_windows.first()->activate();
+            auto size = m_windows.size();
+
+            for (int i = 0; i < size; i++) {
+                if (m_windows[i] == m_currentActiveWindow) {
+                    m_windows[(i+1) % size]->activate();
+                    break;
+                }
             }
         }
     }
@@ -306,11 +309,6 @@ void AppItem::updateCurrentActiveWindow(QPointer<AbstractWindow> window)
     }
 
     m_currentActiveWindow = window;
-
-    // make m_windows in active order not create order
-    auto index = m_windows.indexOf(m_currentActiveWindow);
-    m_windows.move(index, m_windows.size() - 1);
-
     connect(m_currentActiveWindow.get(), &AbstractWindow::iconChanged, this, &AppItem::iconChanged);
 
     Q_EMIT currentActiveWindowChanged();
