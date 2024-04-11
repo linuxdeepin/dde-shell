@@ -219,12 +219,10 @@ QIcon MonitorPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::Color
     QIcon icon = QIcon::fromTheme(iconName);
     if (!icon.isNull()) {
         const qreal ratio = m_itemWidget->devicePixelRatioF();
-        QSize pixmapSize = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? size : size * ratio;
-        QPixmap pixmap = icon.pixmap(pixmapSize);
+        QPixmap pixmap = icon.pixmap(size);
         pixmap.setDevicePixelRatio(ratio);
         if (dockPart == DockPart::QuickShow) {
             QPixmap curPixmap(size*ratio);
-            pixmap.setDevicePixelRatio(ratio);
             curPixmap.fill(Qt::transparent);
             QPainter painter;
             painter.begin(&curPixmap);
