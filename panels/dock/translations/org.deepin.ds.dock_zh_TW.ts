@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_TW">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_TW">
 <context>
     <name>main</name>
     <message>
@@ -19,17 +17,9 @@
         <translation>高效模式</translation>
     </message>
     <message>
-        <source>Item Alignment</source>
-        <translation type="vanished">對齊方式</translation>
-    </message>
-    <message>
         <location filename="../package/main.qml" line="154"/>
         <source>Left</source>
         <translation>左</translation>
-    </message>
-    <message>
-        <source>Center</source>
-        <translation type="vanished">居中</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="126"/>
