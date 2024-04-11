@@ -4,7 +4,7 @@
     <message>
         <location filename="../searchitem.cpp" line="48"/>
         <source>GrandSearch</source>
-        <translation>Cerca gran</translation>
+        <translation>Cerca grossa</translation>
     </message>
 </context>
 <context>
