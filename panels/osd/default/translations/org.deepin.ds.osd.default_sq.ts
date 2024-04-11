@@ -24,12 +24,12 @@
     <message>
         <location filename="../package/main.qml" line="58"/>
         <source>Numeric keypad on</source>
-        <translation type="unfinished"/>
+        <translation>Pjesa numerike aktive</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="59"/>
         <source>Numeric keypad off</source>
-        <translation type="unfinished"/>
+        <translation>Pjesa numerike joaktive</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="60"/>
