@@ -49,22 +49,22 @@
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Status</source>
-        <translation type="unfinished"/>
+        <translation>Status</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Keep Shown</source>
-        <translation type="unfinished"/>
+        <translation>Altijd tonen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="173"/>
         <source>Keep Hidden</source>
-        <translation type="unfinished"/>
+        <translation>Altijd verbergen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Smart Hide</source>
-        <translation type="unfinished"/>
+        <translation>Slim verbergen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="186"/>
