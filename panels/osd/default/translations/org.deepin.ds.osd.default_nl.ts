@@ -94,12 +94,12 @@
     <message>
         <location filename="../package/main.qml" line="72"/>
         <source>Window effect disabled</source>
-        <translation type="unfinished"/>
+        <translation>Vensteranimaties uitgeschakeld</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="73"/>
         <source>Failed to enable window effects</source>
-        <translation type="unfinished"/>
+        <translation>Vensteranimaties kunnen niet worden ingeschakeld</translation>
     </message>
 </context>
 </TS>
