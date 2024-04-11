@@ -74,7 +74,7 @@
     <message>
         <location filename="../package/main.qml" line="68"/>
         <source>Balanced power</source>
-        <translation>Балансированный план питания</translation>
+        <translation>Сбалансированный режим</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="69"/>
