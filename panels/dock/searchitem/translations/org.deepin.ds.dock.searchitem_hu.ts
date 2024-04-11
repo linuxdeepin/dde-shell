@@ -4,7 +4,7 @@
     <message>
         <location filename="../searchitem.cpp" line="48"/>
         <source>GrandSearch</source>
-        <translation type="unfinished"/>
+        <translation>Részletes keresés</translation>
     </message>
 </context>
 <context>
