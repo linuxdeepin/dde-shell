@@ -79,17 +79,17 @@
     <message>
         <location filename="../package/main.qml" line="69"/>
         <source>Power saver</source>
-        <translation type="unfinished"/>
+        <translation>Energiebesparing</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="70"/>
         <source>High performance</source>
-        <translation type="unfinished"/>
+        <translation>Hoge prestaties</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="71"/>
         <source>Window effect enabled</source>
-        <translation type="unfinished"/>
+        <translation>Vensteranimaties ingeschakeld</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="72"/>
