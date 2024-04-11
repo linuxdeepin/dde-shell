@@ -12,7 +12,7 @@
     <message>
         <location filename="../package/searchitem.qml" line="38"/>
         <source>SearchConfig</source>
-        <translation type="unfinished"/>
+        <translation>Cerca de configuració</translation>
     </message>
 </context>
 </TS>
