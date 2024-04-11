@@ -59,17 +59,17 @@
     <message>
         <location filename="../package/main.qml" line="65"/>
         <source>Airplane mode off</source>
-        <translation type="unfinished"/>
+        <translation>Режим польоту вимкнено</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation type="unfinished"/>
+        <translation>Вимикання звуку увімкнено</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation type="unfinished"/>
+        <translation>Вимикання звуку вимкнено</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
