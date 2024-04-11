@@ -89,12 +89,12 @@
     <message>
         <location filename="../package/main.qml" line="71"/>
         <source>Window effect enabled</source>
-        <translation type="unfinished"/>
+        <translation>Ефект вікна увімкнений</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="72"/>
         <source>Window effect disabled</source>
-        <translation type="unfinished"/>
+        <translation>Ефект вікна вимкнений</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="73"/>
