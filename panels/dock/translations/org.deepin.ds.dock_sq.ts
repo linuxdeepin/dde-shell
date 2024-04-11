@@ -59,7 +59,7 @@
     <message>
         <location filename="../package/main.qml" line="173"/>
         <source>Keep Hidden</source>
-        <translation type="unfinished"/>
+        <translation>Mbaje të Fshehur</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="179"/>
