@@ -79,7 +79,7 @@
     <message>
         <location filename="../package/main.qml" line="69"/>
         <source>Power saver</source>
-        <translation type="unfinished"/>
+        <translation>Kursyes energjie</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="70"/>
