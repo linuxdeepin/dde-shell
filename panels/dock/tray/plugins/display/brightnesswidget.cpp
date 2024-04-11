@@ -96,8 +96,8 @@ void BrightnessWidget::convertThemePixmap(QPixmap &pixmap)
 
 void BrightnessWidget::onThemeTypeChanged()
 {
-    QPixmap leftPixmap = ImageUtil::loadSvg(":/brightness.svg", QSize(IMAGESIZE, IMAGESIZE));
-    QPixmap rightPixmap = ImageUtil::loadSvg(":/ICON_Device_Laptop.svg", QSize(IMAGESIZE, IMAGESIZE));
+    QPixmap leftPixmap = QIcon::fromTheme("brightnessDecrease").pixmap(16, 16);
+    QPixmap rightPixmap = QIcon::fromTheme("brightnessIncrease").pixmap(16, 16);
     convertThemePixmap(leftPixmap);
     convertThemePixmap(rightPixmap);
     m_sliderContainer->setIcon(SliderContainer::IconPosition::LeftIcon, leftPixmap, QSize(), 10);

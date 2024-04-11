@@ -204,7 +204,7 @@ void LargerQuickItem::initUi()
         expandLayout->setSpacing(0);
         QLabel *expandLabel = new QLabel(expandWidgetParent);
         expandLabel->setObjectName("expandLabel");
-        expandLabel->setPixmap(QPixmap(expandFileName()));
+        expandLabel->setPixmap(QIcon::fromTheme("arrow-right").pixmap(24, 24));
         expandLabel->setFixedSize(expandSize);
         expandLabel->setAutoFillBackground(true);
         expandLabel->installEventFilter(this);
@@ -213,14 +213,6 @@ void LargerQuickItem::initUi()
         expandLabel->setPalette(pe);
         mainLayout->addWidget(expandWidgetParent);
     }
-}
-
-QString LargerQuickItem::expandFileName() const
-{
-    if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
-        return QString(":/icons/resources/arrow-right-dark.svg");
-
-    return QString(":/icons/resources/arrow-right.svg");
 }
 
 /**

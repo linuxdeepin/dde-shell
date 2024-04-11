@@ -32,7 +32,6 @@ protected:
 
 private:
     void initUi();
-    QString expandFileName() const;
 
 private:
     QuickIconWidget *m_iconWidget;

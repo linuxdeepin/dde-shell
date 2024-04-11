@@ -68,13 +68,13 @@ void ExpandIconWidget::setTrayPanelVisible(bool visible)
 
 QPixmap ExpandIconWidget::icon()
 {
-    return QPixmap(dropIconFile());
+    return QIcon::fromTheme(dropIconFile()).pixmap(ICON_SIZE, ICON_SIZE);
 }
 
 void ExpandIconWidget::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    QPixmap pixmap = ImageUtil::loadSvg(dropIconFile(), QSize(ICON_SIZE, ICON_SIZE));
+    QPixmap pixmap = QIcon::fromTheme(dropIconFile()).pixmap(ICON_SIZE, ICON_SIZE);
     QRect rectOfPixmap(rect().x() + (rect().width() - ICON_SIZE) / 2,
                     rect().y() + (rect().height() - ICON_SIZE) / 2,
                     ICON_SIZE, ICON_SIZE);
@@ -115,11 +115,11 @@ const QString ExpandIconWidget::dropIconFile() const
     }
     }
 
-    QString iconFile = QString(":/icons/resources/arrow-%1").arg(arrow);
+    QString iconFile = QString("arrow-%1").arg(arrow);
     if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
         iconFile += QString("-dark");
 
-    return iconFile + ".svg";
+    return iconFile;
 }
 
 TrayGridWidget *ExpandIconWidget::popupTrayView()

@@ -9,6 +9,7 @@
 #include "imageutil.h"
 
 #include <QVBoxLayout>
+#include <qicon.h>
 
 const int ItemSpacing = 5;
 
@@ -39,8 +40,8 @@ void BrightnessAdjWidget::loadBrightnessItem()
         if (monitors.count() > 1)
             sliderContainer->setTitle(monitor->name());
 
-        QPixmap leftPixmap = ImageUtil::loadSvg(":/icons/resources/brightnesslow", QSize(20, 20));
-        QPixmap rightPixmap = ImageUtil::loadSvg(":/icons/resources/brightnesshigh", QSize(20, 20));
+        QPixmap leftPixmap = QIcon::fromTheme("brightnessDecrease").pixmap(16, 16);
+        QPixmap rightPixmap = QIcon::fromTheme("brightnessIncrease").pixmap(16, 16);
         sliderContainer->setIcon(SliderContainer::IconPosition::LeftIcon,leftPixmap, QSize(), 12);
         sliderContainer->setIcon(SliderContainer::IconPosition::RightIcon, rightPixmap, QSize(), 12);
         // 需求要求调节范围是10%-100%,且调节幅度为1%

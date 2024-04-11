@@ -100,14 +100,7 @@ QPixmap PowerStatusWidget::getBatteryIcon(int themeType)
         iconStr.append(PLUGIN_MIN_ICON_NAME);
     }
 
-    const auto ratio = devicePixelRatioF();
-    QSize pixmapSize = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? QSize(20, 20) : (QSize(20, 20) * ratio);
-    QIcon qrcIcon = QIcon(":/batteryicons/resources/batteryicons/" + iconStr + ".svg");
-    QIcon finalIcon = DIconTheme::findQIcon(iconStr, qrcIcon, DIconTheme::IgnoreBuiltinIcons);
-    QPixmap pix = finalIcon.pixmap(pixmapSize);
-    pix.setDevicePixelRatio(ratio);
-
-    return pix;
+    return QIcon::fromTheme(iconStr).pixmap(16, 16);
 }
 
 void PowerStatusWidget::resizeEvent(QResizeEvent *event)

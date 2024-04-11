@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/dsg">
         <file>built-in-icons/dock-control-panel.dci</file>
+        <file>built-in-icons/arrow-right.dci</file>
     </qresource>
 </RCC>

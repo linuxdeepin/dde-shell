@@ -64,7 +64,7 @@ void BluetoothMainWidget::initUi()
     m_iconButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_iconButton->setFocusPolicy(Qt::FocusPolicy::TabFocus);
     m_iconButton->setIconSize({24, 24});
-    m_iconButton->setIcon(QIcon::fromTheme("bluetooth"));
+    m_iconButton->setIcon(QIcon::fromTheme(bluetoothIcon(isOpen())));
     m_iconButton->setCheckable(true);
     m_iconButton->setChecked(isOpen());
     onPaletteChanged();
@@ -152,9 +152,9 @@ bool BluetoothMainWidget::isOpen() const
 QString BluetoothMainWidget::bluetoothIcon(bool isOpen) const
 {
     if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::ColorType::LightType)
-        return isOpen ? ":/bluetooth-active-symbolic-dark.svg" : ":/bluetooth-disable-symbolic-dark.svg";
+        return isOpen ? "bluetooth-active-symbolic-dark" : "bluetooth-disconnect-symbolic-dark";
 
-    return isOpen ? ":/bluetooth-active-symbolic.svg" : ":/bluetooth-disable-symbolic.svg";
+    return isOpen ? "bluetooth-active-symbolic" : "bluetooth-disconnect-symbolic";
 }
 
 void BluetoothMainWidget::onAdapterChanged()
@@ -164,6 +164,7 @@ void BluetoothMainWidget::onAdapterChanged()
     QFontMetrics fmt{m_stateLabel->font()};
     m_stateLabel->setText(fmt.elidedText(text, Qt::TextElideMode::ElideRight,m_stateLabel->width()));
     m_iconButton->setChecked(bluetoothIsOpen);
+    m_iconButton->setIcon(QIcon::fromTheme(bluetoothIcon(isOpen())));
 }
 
 void BluetoothMainWidget::onPaletteChanged()

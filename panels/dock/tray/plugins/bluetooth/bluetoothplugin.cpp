@@ -128,15 +128,15 @@ QIcon BluetoothPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::Col
 {
     QString iconFile;
     if (themeType == DGuiApplicationHelper::ColorType::DarkType)
-        iconFile = ":/bluetooth-active-symbolic.svg";
+        iconFile = "bluetooth-active-symbolic";
     else
-        iconFile = ":/bluetooth-active-symbolic-dark.svg";
+        iconFile = "bluetooth-active-symbolic-dark";
 
     switch (dockPart) {
     case DockPart::DCCSetting:
-        return ImageUtil::loadSvg(iconFile, QSize(18, 18));
+        return QIcon::fromTheme(iconFile).pixmap(16, 16);
     case DockPart::QuickShow:
-        return ImageUtil::loadSvg(iconFile, QSize(18, 16));
+        return QIcon::fromTheme(iconFile).pixmap(18, 16);
     default:
         break;
     }

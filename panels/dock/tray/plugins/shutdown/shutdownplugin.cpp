@@ -272,11 +272,7 @@ QIcon ShutdownPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::Colo
     if (themeType == DGuiApplicationHelper::LightType)
         iconName.append(PLUGIN_MIN_ICON_NAME);
 
-    const auto ratio = qApp->devicePixelRatio();
-    QPixmap pixmap;
-    pixmap = QIcon::fromTheme(iconName, QIcon::fromTheme(":/icons/resources/icons/system-shutdown.svg")).pixmap(QSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE) * ratio);
-    pixmap.setDevicePixelRatio(ratio);
-    return pixmap;
+    return QIcon::fromTheme(iconName).pixmap(QSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE));
 }
 
 PluginFlags ShutdownPlugin::flags() const

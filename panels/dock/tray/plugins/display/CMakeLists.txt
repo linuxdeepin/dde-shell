@@ -28,7 +28,7 @@ find_package(Dtk6Gui REQUIRED)
 pkg_check_modules(XCB_LIBS REQUIRED IMPORTED_TARGET xcursor)
 
 add_definitions("${QT_DEFINITIONS} -DQT_PLUGIN")
-add_library(${PLUGIN_NAME} SHARED ${SRCS} ./resource/display.qrc)
+add_library(${PLUGIN_NAME} SHARED ${SRCS} resource/display.qrc)
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ../quick-trays)
 target_include_directories(${PLUGIN_NAME} PUBLIC ${DtkWidget_INCLUDE_DIRS}
   ../../interfaces

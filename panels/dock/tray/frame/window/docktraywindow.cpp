@@ -22,6 +22,7 @@
 #include <QPainter>
 #include <dblureffectwidget.h>
 #include <qcolor.h>
+#include <qnamespace.h>
 
 #define FRONTSPACING 18
 #define SPLITERSIZE 2

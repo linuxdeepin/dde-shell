@@ -13,6 +13,7 @@
 #include <QPainter>
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
+#include <qicon.h>
 
 #define PLUGIN_STATE_KEY    "enable"
 
@@ -149,10 +150,7 @@ QIcon OnboardPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::Color
     if (dockPart == DockPart::DCCSetting)
         return QIcon(":/icons/icon/dcc_keyboard.svg");
 
-    if (dockPart == DockPart::QuickPanel)
-        return m_onboardItem->iconPixmap(QSize(24, 24), themeType);
-
-    return m_onboardItem->iconPixmap(QSize(18, 16), themeType);
+    return QIcon::fromTheme("onboard").pixmap(24, 24);
 }
 
 PluginsItemInterface::PluginMode OnboardPlugin::status() const
