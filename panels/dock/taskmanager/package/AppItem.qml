@@ -32,7 +32,7 @@ Item {
     Drag.dragType: Drag.Automatic
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId }
 
-    property int statusIndicatorSize: root.width * 0.95
+    property int statusIndicatorSize: root.width * 0.8
     property int iconSize: Panel.rootObject.itemIconSizeBase * 0.64
 
     Item {
@@ -82,25 +82,33 @@ Item {
                 case Dock.Top: {
                     windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
                     windowIndicator.anchors.top = parent.top
-                    windowIndicator.anchors.topMargin = Math.floor(root.width * 0.05) - 1
+                    windowIndicator.anchors.topMargin = Qt.binding(function() {
+                        return Math.floor(root.width * 0.1) - 1
+                    })
                     return
                 }
                 case Dock.Bottom: {
                     windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
                     windowIndicator.anchors.bottom = parent.bottom
-                    windowIndicator.anchors.bottomMargin = Math.floor(root.width * 0.05) - 1
+                    windowIndicator.anchors.bottomMargin = Qt.binding(function() {
+                        return Math.floor(root.width * 0.1) - 1
+                    })
                     return
                 }
                 case Dock.Left: {
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
                     windowIndicator.anchors.left = parent.left
-                    windowIndicator.anchors.leftMargin = Math.floor(root.width * 0.05) - 1
+                    windowIndicator.anchors.leftMargin = Qt.binding(function() {
+                        return Math.floor(root.width * 0.1) - 1
+                    })
                     return
                 }
                 case Dock.Right:{
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
                     windowIndicator.anchors.right = parent.right
-                    windowIndicator.anchors.rightMargin = Math.floor(root.width * 0.05) - 1
+                    windowIndicator.anchors.rightMargin = Qt.binding(function() {
+                        return Math.floor(root.width * 0.1) - 1
+                    })
                     return
                 }
                 }
