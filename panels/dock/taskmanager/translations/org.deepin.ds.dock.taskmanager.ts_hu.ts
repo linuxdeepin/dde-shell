@@ -29,7 +29,7 @@
     <message>
         <location filename="../appitem.cpp" line="119"/>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Összes bezárása</translation>
     </message>
 </context>
 </TS>
