@@ -69,12 +69,12 @@
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation type="unfinished"/>
+        <translation>Dempen uit</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
         <source>Balanced power</source>
-        <translation type="unfinished"/>
+        <translation>Gebalanceerd energieprofiel</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="69"/>
