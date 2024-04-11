@@ -74,12 +74,12 @@
     <message>
         <location filename="../package/main.qml" line="68"/>
         <source>Balanced power</source>
-        <translation type="unfinished"/>
+        <translation>Збалансоване живлення</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="69"/>
         <source>Power saver</source>
-        <translation type="unfinished"/>
+        <translation>Заощадження енергії</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="70"/>
