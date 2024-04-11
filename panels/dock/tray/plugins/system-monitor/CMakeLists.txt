@@ -40,4 +40,4 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE
     USE_MONITOR_POPUP_PLUGIN
 )
 
-INSTALL(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib/dde-dock/plugins/tmp)
+INSTALL(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib/dde-dock/tmp/plugins)
