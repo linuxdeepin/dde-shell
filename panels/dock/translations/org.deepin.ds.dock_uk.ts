@@ -49,12 +49,12 @@
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Status</source>
-        <translation type="unfinished"/>
+        <translation>Стан</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Keep Shown</source>
-        <translation type="unfinished"/>
+        <translation>Показувати постійно</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="173"/>
