@@ -132,6 +132,13 @@ void QuickPluginWindow::setPositon(Position position)
         m_mainLayout->setDirection(QBoxLayout::BottomToTop);
     }
     getPopWindow()->setPosition(m_position);
+
+    // send the dock position to plugin
+    QuickPluginModel *model = QuickPluginModel::instance();
+    QList<PluginsItemInterface *> plugins = model->dockedPluginItems();
+    for (const auto &inter : plugins) {
+        inter->positionChanged(m_position);
+    }
 }
 
 void QuickPluginWindow::dragPlugin(PluginsItemInterface *item)
@@ -394,7 +401,7 @@ void QuickPluginWindow::onRequestUpdate()
             countChanged = true;
         }
         itemWidget->setParent(this);
-        m_mainLayout->addWidget(itemWidget);
+        m_mainLayout->addWidget(itemWidget, 0, Qt::AlignCenter);
     }
 
     if (countChanged) {
@@ -923,7 +930,7 @@ void QuickDockItem::showEvent(QShowEvent *event)
         }
         itemWidget->setFixedSize(size);
         this->setFixedSize(size);
-        m_mainLayout->addWidget(itemWidget);
+        m_mainLayout->addWidget(itemWidget, 0, Qt::AlignCenter);
     }
 }
 
@@ -1002,7 +1009,7 @@ void QuickDockItem::initUi()
         }
         itemWidget->setFixedSize(size);
         this->setFixedSize(size);
-        m_mainLayout->addWidget(itemWidget);
+        m_mainLayout->addWidget(itemWidget, 0, Qt::AlignCenter);
     }
 }
 

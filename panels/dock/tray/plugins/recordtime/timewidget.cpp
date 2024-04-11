@@ -44,7 +44,7 @@ TimeWidget::TimeWidget(QWidget *parent):
     m_shadeIcon(nullptr),
     m_currentIcon(nullptr),
     m_bRefresh(true),
-    m_position(-1),
+    m_position(Dock::Position::Bottom),
     m_hover(false),
     m_pressed(false)
 {
@@ -119,6 +119,8 @@ void TimeWidget::onPositionChanged(int value)
 {
     qInfo() << "(任务栏位置改变)任务栏相对屏幕的位置:" <<  m_position << " To " << value;
     m_position = value;
+
+    update();
 }
 
 void TimeWidget::paintEvent(QPaintEvent *e)

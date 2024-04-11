@@ -12,6 +12,8 @@
 #include <QBoxLayout>
 #include <QLabel>
 
+#include "constants.h"
+
 class TimeWidget : public QWidget
 {
     Q_OBJECT
@@ -83,7 +85,6 @@ private:
     QString m_showTimeStr;
     bool m_bRefresh;
     int m_position;
-    QBoxLayout *centralLayout;
     bool m_hover;
     bool m_pressed;
 };
