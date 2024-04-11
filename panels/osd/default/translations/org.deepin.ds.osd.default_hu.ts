@@ -59,27 +59,27 @@
     <message>
         <location filename="../package/main.qml" line="65"/>
         <source>Airplane mode off</source>
-        <translation type="unfinished"/>
+        <translation>Repülőgép üzemmód kikapcsolva</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation type="unfinished"/>
+        <translation>Némítás bekapcsolva</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation type="unfinished"/>
+        <translation>Némítás kikapcsolva</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
         <source>Balanced power</source>
-        <translation type="unfinished"/>
+        <translation>Kiegyensúlyozott teljesítmény</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="69"/>
         <source>Power saver</source>
-        <translation type="unfinished"/>
+        <translation>Energiatakarékos mód</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="70"/>
