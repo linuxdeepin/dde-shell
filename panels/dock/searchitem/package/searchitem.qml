@@ -15,13 +15,15 @@ AppletItem {
     id: searchItem
     property int dockSize: Panel.rootObject.dockSize
     property int dockOrder: 3
-    implicitWidth: dockSize
-    implicitHeight: dockSize
+    implicitWidth: Panel.rootObject.useColumnLayout ? dockSize : 30 
+    implicitHeight: Panel.rootObject.useColumnLayout ? 30 : dockSize
     property bool shouldVisible: Applet.visible
 
     D.ActionButton {
         anchors.fill: parent
         icon.name: "search"
+        icon.width: 16
+        icon.height: 16
         onClicked: Applet.toggleGrandSearch()
     }
 
