@@ -9,6 +9,4 @@ Rectangle {
     required property AppItemPalette palette
     radius: width * 0.2
     color: palette.rectIndicator
-    border.width: 1
-    border.color: palette.rectIndicatorBorder
 }
