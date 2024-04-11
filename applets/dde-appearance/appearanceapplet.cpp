@@ -39,7 +39,9 @@ qreal AppearanceApplet::opacity() const
 {
     if (!m_interface)
         return -1;
-    return m_interface->opacity();
+
+    // The minimum opacity is 0.2
+    return std::max(0.2, m_interface->opacity());
 }
 
 void AppearanceApplet::initDBusProxy()
