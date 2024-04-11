@@ -96,6 +96,8 @@ void RecordTimePlugin::positionChanged(const Dock::Position position)
 {
     qInfo() << "dock位置改变！！！！！！！！！！！！！" << position;
     positionChange(position);
+    if (m_timeWidget)
+        m_timeWidget->onPositionChanged(position);
 }
 
 void RecordTimePlugin::onStart()
