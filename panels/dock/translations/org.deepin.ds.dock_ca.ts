@@ -44,12 +44,12 @@
     <message>
         <location filename="../package/main.qml" line="160"/>
         <source>Right</source>
-        <translation type="unfinished"/>
+        <translation>A la dreta</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Status</source>
-        <translation type="unfinished"/>
+        <translation>Estat</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
