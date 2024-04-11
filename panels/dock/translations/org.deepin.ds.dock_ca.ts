@@ -59,12 +59,12 @@
     <message>
         <location filename="../package/main.qml" line="173"/>
         <source>Keep Hidden</source>
-        <translation type="unfinished"/>
+        <translation>Mantén-ho amagat</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Smart Hide</source>
-        <translation type="unfinished"/>
+        <translation>Ocultació intel·ligent</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="186"/>
