@@ -19,7 +19,7 @@
     <message>
         <location filename="../appitem.cpp" line="106"/>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Telakka</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="112"/>
