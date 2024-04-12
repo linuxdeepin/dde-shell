@@ -74,7 +74,7 @@
     <message>
         <location filename="../package/main.qml" line="68"/>
         <source>Balanced power</source>
-        <translation type="unfinished"/>
+        <translation>Tasapainoinen teho</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="69"/>
