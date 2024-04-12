@@ -29,7 +29,6 @@ public:
 protected:
     void itemChange(ItemChange, const ItemChangeData &) override;
     void geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry) override;
-    bool event(QEvent *event) override;
     bool eventFilter(QObject *object, QEvent *event) override;
 
 #if QT_CONFIG(draganddrop)    
