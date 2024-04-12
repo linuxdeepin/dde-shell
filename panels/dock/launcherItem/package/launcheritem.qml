@@ -16,8 +16,6 @@ AppletItem {
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : Panel.rootObject.dockItemMaxSize
     implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize : Panel.rootObject.dockSize
 
-    onXChanged: updateLaunchpadPos()
-    onYChanged: updateLaunchpadPos()
     Connections {
         target: Panel.rootObject
         function onDockCenterPartPosChanged()
@@ -32,7 +30,7 @@ AppletItem {
         if (!launchpad)
             return
 
-        var lX = launcher.mapToGlobal(launcher.x + launcher.width / 2, 0).x
+        var lX = action.mapToItem(null, 0, 0).x
         var lY = Panel.rootObject.y
         launchpad.rootObject.windowedPos = Qt.point(lX, lY)
     }
@@ -41,6 +39,7 @@ AppletItem {
     }
 
     D.ActionButton {
+        id: action
         anchors.centerIn: parent
         icon.name: Applet.iconName
         scale: Panel.rootObject.itemScale
@@ -48,5 +47,7 @@ AppletItem {
         icon.height: Panel.rootObject.itemIconSizeBase * 0.64
         icon.width: Panel.rootObject.itemIconSizeBase * 0.64
         onClicked: Applet.toggleLauncher()
+        onXChanged: updateLaunchpadPos()
+        onYChanged: updateLaunchpadPos()
     }
 }
