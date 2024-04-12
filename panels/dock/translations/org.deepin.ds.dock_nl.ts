@@ -1,75 +1,75 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_TW">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="nl">
 <context>
     <name>main</name>
     <message>
         <location filename="../package/main.qml" line="112"/>
         <source>Indicator Style</source>
-        <translation>指示器樣式</translation>
+        <translation>Indicatorstijl</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="133"/>
         <source>Fashion Mode</source>
-        <translation>時尚模式</translation>
+        <translation>Moderne modus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="128"/>
         <source>Efficient Mode</source>
-        <translation>高效模式</translation>
+        <translation>Efficiënte modus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="154"/>
         <source>Left</source>
-        <translation>左</translation>
+        <translation>Links</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="126"/>
         <source>Mode</source>
-        <translation>模式</translation>
+        <translation>Modus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="139"/>
         <source>Position</source>
-        <translation>位置</translation>
+        <translation>Locatie</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="143"/>
         <source>Top</source>
-        <translation>頂部</translation>
+        <translation>Bovenaan</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="148"/>
         <source>Bottom</source>
-        <translation>底部</translation>
+        <translation>Onderaan</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="160"/>
         <source>Right</source>
-        <translation>右</translation>
+        <translation>Rechts</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Status</source>
-        <translation>狀態</translation>
+        <translation>Status</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Keep Shown</source>
-        <translation>壹直顯示</translation>
+        <translation>Altijd tonen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="173"/>
         <source>Keep Hidden</source>
-        <translation>壹直隱藏</translation>
+        <translation>Altijd verbergen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Smart Hide</source>
-        <translation>智能隱藏</translation>
+        <translation>Slim verbergen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="186"/>
         <source>Dock Settings</source>
-        <translation>任務欄設置</translation>
+        <translation>Dockinstellingen</translation>
     </message>
 </context>
 </TS>
