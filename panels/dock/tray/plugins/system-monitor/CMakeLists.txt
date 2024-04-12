@@ -37,7 +37,9 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
 target_compile_definitions(${PLUGIN_NAME} PRIVATE
     USE_API_QUICKPANEL20
     DDE_DOCK_NEW_VERSION
-    USE_MONITOR_POPUP_PLUGIN
+    # https://github.com/linuxdeepin/deepin-system-monitor/pull/329
+    # 暂时屏蔽系统监视器插件
+    #USE_MONITOR_POPUP_PLUGIN:
 )
 
 INSTALL(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib/dde-dock/tmp/plugins)
