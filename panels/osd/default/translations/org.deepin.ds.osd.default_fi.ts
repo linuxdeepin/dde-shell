@@ -94,7 +94,7 @@
     <message>
         <location filename="../package/main.qml" line="72"/>
         <source>Window effect disabled</source>
-        <translation type="unfinished"/>
+        <translation>Ikkunatehosteet poistettu</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="73"/>
