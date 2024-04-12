@@ -202,7 +202,7 @@ void DateTimeDisplayer::mouseReleaseEvent(QMouseEvent *event)
 {
     Q_UNUSED(event);
 
-    if (event->button() != Qt::LeftButton)
+    if (event->button() != Qt::LeftButton || !rect().contains(event->pos()))
         return;
 
     DDBusSender().service("com.deepin.Calendar")
