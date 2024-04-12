@@ -11,7 +11,7 @@
 
 #include <QLabel>
 #include <QWidget>
-#include <DListView>
+#include <QListView>
 #include <DIconButton>
 #include <QVBoxLayout>
 #include <DBlurEffectWidget>
