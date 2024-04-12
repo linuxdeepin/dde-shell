@@ -64,7 +64,7 @@
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation type="unfinished"/>
+        <translation>Mykistys päällä</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
