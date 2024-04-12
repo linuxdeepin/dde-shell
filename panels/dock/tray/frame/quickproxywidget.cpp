@@ -62,7 +62,7 @@ void QuickProxyWidgetPrivate::sendWidgetMouseEvent(QHoverEvent *event)
 
 void QuickProxyWidgetPrivate::sendWidgetMouseEvent(QMouseEvent *event)
 {
-    if (!event || !widget/* || !widget->isVisible()*/)
+    if (!event || !widget || !widget->isVisible())
         return;
 
     Q_Q(QuickProxyWidget);
