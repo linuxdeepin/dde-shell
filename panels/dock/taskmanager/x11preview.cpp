@@ -133,7 +133,6 @@ public:
 
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
-        const auto ratio = m_listView->devicePixelRatio();
         DStyleHelper dstyle(m_listView->style());
         const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
 
@@ -143,7 +142,7 @@ public:
         painter->setPen(pen);
         auto hoverRect = option.rect.marginsAdded(QMargins(-2,-2,-2,-2));
         if (WM_HELPER->hasComposite()) {
-            painter->drawRoundedRect(hoverRect, radius * ratio, radius * ratio);
+            painter->drawRoundedRect(hoverRect, radius, radius);
         } else {
             painter->drawRect(hoverRect);
         }
