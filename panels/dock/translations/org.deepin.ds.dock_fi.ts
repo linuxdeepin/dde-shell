@@ -49,7 +49,7 @@
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Status</source>
-        <translation type="unfinished"/>
+        <translation>Tila</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
