@@ -26,16 +26,15 @@
 const QPixmap ImageUtil::loadSvg(const QString &iconName, const QString &localPath, const int size, const qreal ratio)
 {
     QIcon icon = QIcon::fromTheme(iconName);
-    int pixmapSize = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? size : int(size * ratio);
     if (!icon.isNull()) {
-        QPixmap pixmap = icon.pixmap(pixmapSize);
+        QPixmap pixmap = icon.pixmap(size);
         pixmap.setDevicePixelRatio(ratio);
         if (ratio == 1)
             return pixmap;
         return pixmap.scaled(size * ratio, size * ratio);
     }
 
-    QPixmap pixmap(pixmapSize, pixmapSize);
+    QPixmap pixmap(size, size);
     QString localIcon = QString("%1%2%3").arg(localPath).arg(iconName).arg(iconName.contains(".svg") ? "" : ".svg");
     QSvgRenderer renderer(localIcon);
     pixmap.fill(Qt::transparent);
@@ -56,7 +55,7 @@ const QPixmap ImageUtil::loadSvg(const QString &iconName, const QSize size, cons
 {
     QIcon icon = QIcon::fromTheme(iconName);
     if (!icon.isNull()) {
-        QPixmap pixmap = icon.pixmap(QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? size : QSize(size * ratio));
+        QPixmap pixmap = icon.pixmap(size);
         pixmap.setDevicePixelRatio(ratio);
         if (ratio == 1)
             return pixmap;

@@ -274,8 +274,8 @@ QIcon ShutdownPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::Colo
 
     const auto ratio = qApp->devicePixelRatio();
     QPixmap pixmap;
-    pixmap = QIcon::fromTheme(iconName, QIcon::fromTheme(":/icons/resources/icons/system-shutdown.svg")).pixmap(QSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE) * ratio);
-    pixmap.setDevicePixelRatio(ratio);
+    QString iconFile(":/icons/resources/icons/system-shutdown.svg");
+    pixmap = ImageUtil::loadSvg(iconFile, QSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE), ratio);
     return pixmap;
 }
 
