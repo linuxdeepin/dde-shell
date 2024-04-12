@@ -371,7 +371,6 @@ void DockTrayWindow::initAttribute()
 {
     setAcceptDrops(true);
     setMouseTracking(true);
-    // setAttribute(Qt::WA_TranslucentBackground);
 
     m_trayView->setModel(m_model);
     m_trayView->setItemDelegate(m_delegate);

@@ -63,14 +63,6 @@ QuickSettingContainer::QuickSettingContainer(DockPluginController *pluginControl
     m_childPage->installEventFilter(this);
     // installEventFilter(this);
     setMouseTracking(true);
-
-    // FIXME: Make sure the panel is always refreshed at 60 frames to prevent it from not refreshing in qml
-    QTimer *updateTimer = new QTimer(this);
-    updateTimer->setInterval(1000 / 60);
-    connect(updateTimer, &QTimer::timeout, this, [ = ] {
-        this->update();
-    });
-    updateTimer->start();
 }
 
 QuickSettingContainer::~QuickSettingContainer()

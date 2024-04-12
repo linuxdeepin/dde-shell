@@ -119,7 +119,7 @@ void QuickProxyWidgetPrivate::sendWidgetMouseEvent(QMouseEvent *event)
     QWidget *embeddedMouseGrabberPtr = (QWidget *)embeddedMouseGrabber.data();
     QApplicationPrivate::sendMouseEvent(receiver, &mouseEvent, alienWidget, widget,
                                         &embeddedMouseGrabberPtr, lastWidgetUnderMouse, event->spontaneous());
-     embeddedMouseGrabber = embeddedMouseGrabberPtr;
+    embeddedMouseGrabber = embeddedMouseGrabberPtr;
 
     // Handle enter/leave events when last button is released from mouse
     // grabber child widget.
@@ -197,12 +197,6 @@ QuickProxyWidget::QuickProxyWidget(QQuickItem *parent)
 {
     Q_D(QuickProxyWidget);
     d->init();
-
-    // FIXME: The paint event inside the widget cannot be synchronized to the quickitem temporarily, so it is forced to refresh here.
-    QTimer *timer = new QTimer(this);
-    timer->setInterval(1000 / 60);
-    connect(timer, &QTimer::timeout, this, &QQuickItem::update);
-    timer->start();
 }
 
 QuickProxyWidget::~QuickProxyWidget()
@@ -221,16 +215,6 @@ void QuickProxyWidget::setWidget(QWidget *widget)
     d->setWidget_helper(widget, true);
 }
 
-
-void installEventFilterForAllChild(QObject *watcher, QWidget *widget) {
-    widget->installEventFilter(watcher);
-    for (auto c : widget->children()) {
-        if (c->isWidgetType()) {
-            installEventFilterForAllChild(watcher, qobject_cast<QWidget *>(c));
-        }
-    }
-}
-
 void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow)
 {
     Q_Q(QuickProxyWidget);
@@ -238,7 +222,9 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
         return;
 
     widget = newWidget;
-    installEventFilterForAllChild(q, widget);
+    widget->setAttribute(Qt::WA_DontShowOnScreen);
+    qApp->installEventFilter(q);
+
     //     if (widget) {
     // QObject::disconnect(widget, SIGNAL(destroyed()), q, SLOT(_q_removeWidgetSlot()));
     //         widget->removeEventFilter(q);
@@ -321,18 +307,18 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
     //     posChangeMode = QuickProxyWidgetPrivate::WidgetToProxyMode;
     //     sizeChangeMode = QuickProxyWidgetPrivate::WidgetToProxyMode;
 
-    //     if ((autoShow && !newWidget->testAttribute(Qt::WA_WState_ExplicitShowHide)) || !newWidget->testAttribute(Qt::WA_WState_Hidden)) {
-    //         newWidget->show();
-    //     }
+        if ((autoShow && !newWidget->testAttribute(Qt::WA_WState_ExplicitShowHide)) || !newWidget->testAttribute(Qt::WA_WState_Hidden)) {
+            newWidget->show();
+        }
 
-    //     // Copy the state from the widget onto the proxy.
-    // #ifndef QT_NO_CURSOR
-    //     if (newWidget->testAttribute(Qt::WA_SetCursor))
-    //         q->setCursor(widget->cursor());
-    // #endif
-    //     q->setEnabled(newWidget->isEnabled());
-    //     q->setVisible(newWidget->isVisible());
-    //     q->setLayoutDirection(newWidget->layoutDirection());
+        // Copy the state from the widget onto the proxy.
+    #ifndef QT_NO_CURSOR
+        if (newWidget->testAttribute(Qt::WA_SetCursor))
+            q->setCursor(widget->cursor());
+    #endif
+        q->setEnabled(newWidget->isEnabled());
+        q->setVisible(newWidget->isVisible());
+        // q->setLayoutDirection(newWidget->layoutDirection());
     //     if (newWidget->testAttribute(Qt::WA_SetStyle))
     //         q->setStyle(widget->style());
 
@@ -390,26 +376,16 @@ void QuickProxyWidget::setGeometry(const QRectF &rect)
     }
 }
 
-bool QuickProxyWidget::event(QEvent *event)
-{
-    Q_D(QuickProxyWidget);
-
-    if (d->widget) {
-        // force update the embeded widget
-        update();
-    }
-
-    return QQuickPaintedItem::event(event);
-}
-
 bool QuickProxyWidget::eventFilter(QObject *object, QEvent *event)
 {
     Q_D(QuickProxyWidget);
 
-    if (object == d->widget) {
+    if (object->isWidgetType()
+        && event->type() == QEvent::UpdateRequest
+        && d->widget->isAncestorOf(qobject_cast<QWidget *> (object))) {
         switch (event->type()) {
-        case QEvent::LayoutRequest:
-            // update();
+        case QEvent::UpdateRequest:
+            update();
             break;
         case QEvent::Resize:
             // If the widget resizes itself, we resize the proxy too.
