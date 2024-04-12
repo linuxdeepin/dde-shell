@@ -64,6 +64,7 @@ Window {
     D.StyledBehindWindowBlur {
         control: parent
         anchors.fill: parent
+        cornerRadius: 0
 
         function blendColorAlpha(fallback) {
             var appearance = DS.applet("org.deepin.ds.dde-appearance")
