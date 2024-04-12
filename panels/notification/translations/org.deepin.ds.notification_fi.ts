@@ -1,12 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="fi">
 <context>
     <name>notification::BubbleItem</name>
     <message>
         <location filename="../bubblemodel.cpp" line="328"/>
         <source>1 new message</source>
-        <translation type="unfinished"></translation>
+        <translation>1 uusi viesti</translation>
     </message>
 </context>
 </TS>
