@@ -64,7 +64,7 @@
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Smart Hide</source>
-        <translation type="unfinished"/>
+        <translation>Älykäs piilotus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="186"/>
