@@ -113,7 +113,7 @@ std::pair<bool, QString> DesktopFileAMParser::isValied()
     // TODO:    1. am service may be unavailable and get dbus timeout
     //          2. show call path existed not id equeals
 
-    if (!(m_applicationInterface && m_applicationInterface->iD() == id()))
+    if (id().isEmpty() || !(m_applicationInterface && m_applicationInterface->iD() == id()))
         return std::make_pair(false, QStringLiteral("am do not contains app %1").arg(id()));
     return std::make_pair(true, QStringLiteral("has am as desktopfileparser backend"));
 }

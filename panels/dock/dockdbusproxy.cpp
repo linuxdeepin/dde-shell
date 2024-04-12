@@ -128,6 +128,9 @@
     bool DockDBusProxy::RequestDock(const QString &desktopFile, int index) {
         Q_UNUSED(index);
         QString id = getAppID(desktopFile);
+        if (id.isEmpty())
+            return false;
+
         auto appletItem = applet("org.deepin.ds.dock.taskmanager");
         if (nullptr == appletItem)
             return false;
@@ -139,6 +142,9 @@
     bool DockDBusProxy::IsDocked(const QString &desktopFile)
     {
         QString id = getAppID(desktopFile);
+        if (id.isEmpty())
+            return false;
+
         auto appletItem = applet("org.deepin.ds.dock.taskmanager");
         if (nullptr == appletItem)
             return false;
