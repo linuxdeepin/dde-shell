@@ -28,7 +28,6 @@
 #include <QDBusUnixFileDescriptor>
 
 #include <DStyle>
-#include <DListView>
 
 #include <DWindowManagerHelper>
 #include <DGuiApplicationHelper>
@@ -261,7 +260,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
         }
     });
 
-    connect(m_view, &DListView::entered, this, [this](const QModelIndex &enter){
+    connect(m_view, &QListView::entered, this, [this](const QModelIndex &enter){
         m_closeAllButton->setVisible(false);
         if (WM_HELPER->hasComposite()) {
             m_monitor->previewWindow(enter.data(WindowIdRole).toInt());
@@ -518,7 +517,9 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
         if (mouseEvent->button() != Qt::LeftButton) return false;
 
         auto index = m_view->indexAt(mouseEvent->pos());
-        m_previewItem->getAppendWindows()[index.row()]->activate();
+        if (index.isValid()) {
+            m_previewItem->getAppendWindows()[index.row()]->activate();
+        }
         DBlurEffectWidget::hide();
         break;
     }
