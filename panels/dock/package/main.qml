@@ -59,6 +59,12 @@ Window {
         }
     }
 
+    Binding on itemIconSizeBase {
+        when: !isDragging
+        value: dockItemMaxSize
+        restoreMode: Binding.RestoreNone
+    }
+
     // only add blendColor effect when DWindow.enableBlurWindow is true,
     // avoid to updating blur area frequently.
     D.StyledBehindWindowBlur {
