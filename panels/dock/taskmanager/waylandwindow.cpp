@@ -110,7 +110,7 @@ WaylandWindow::WaylandWindow(uint32_t id, QObject *parent)
 
 WaylandWindow::~WaylandWindow()
 {
-    qCDebug(waylandwindowLog()) << "wayland window destoried";
+    qCDebug(waylandwindowLog()) << "wayland window destoryed";
 }
 
 uint32_t WaylandWindow::id()

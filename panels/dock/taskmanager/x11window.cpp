@@ -27,7 +27,7 @@ X11Window::X11Window(xcb_window_t winid, QObject *parent)
 
 X11Window::~X11Window()
 {
-    qCDebug(x11windowLog()) << "x11 window destoried";
+    qCDebug(x11windowLog()) << "x11 window destroyed";
 }
 
 uint32_t X11Window::id()
