@@ -37,6 +37,7 @@ public:
     Q_INVOKABLE void initDock();
 
     virtual bool init() override;
+    virtual bool load() override;
 
 
     // ------------ old dbus data for other module ----------------//
