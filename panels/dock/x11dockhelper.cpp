@@ -6,8 +6,6 @@
 #include "dockpanel.h"
 #include "x11dockhelper.h"
 
-
-#include <qobjectdefs.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
@@ -53,44 +51,46 @@ private:
 X11DockHelper::X11DockHelper(DockPanel* panel)
     : DockHelper(panel)
 {
-    xcb_screen_t *screen;
-    auto connection = qGuiApp->nativeInterface<QNativeInterface::QX11Application>()->connection();
-    screen = xcb_setup_roots_iterator(xcb_get_setup(connection)).data;
-    m_triggerWindow = xcb_generate_id(connection);
-    uint32_t values_list[] = {1};
-    xcb_create_window(connection, XCB_COPY_FROM_PARENT, m_triggerWindow, screen->root, 0, 0, 1000, 1000, 0, XCB_WINDOW_CLASS_INPUT_ONLY, XCB_COPY_FROM_PARENT, XCB_CW_OVERRIDE_REDIRECT, values_list);
+    m_destoryTimer = new QTimer(this);
+    m_destoryTimer->setSingleShot(true);
+    m_destoryTimer->setInterval(1000);
+
+    m_connection = qGuiApp->nativeInterface<QNativeInterface::QX11Application>()->connection();
+    xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(m_connection)).data;
+    m_rootWindow = screen->root;
+    m_triggerWindow = xcb_generate_id(m_connection);
+    xcb_flush(m_connection);
 
     if (parent()->hideMode() != KeepShowing) {
-        uint32_t values[] = {XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW};
-        xcb_change_window_attributes(connection, m_triggerWindow, XCB_CW_EVENT_MASK, values);
-        xcb_map_window(connection, m_triggerWindow);
+        createdWakeArea();
     }
 
-    xcb_flush(connection);
+    connect(m_destoryTimer, &QTimer::timeout, this, [this](){
+        if (mouseInDockArea()) {
+            destoryWakeArea();
+        }
+    });
 
     connect(panel, &DockPanel::geometryChanged, this, [this](){
         updateDockTriggerArea();
     });
 
-    connect(panel, &DockPanel::hideModeChanged, this, [this, connection](){
+    connect(panel, &DockPanel::hideModeChanged, this, [this](){
         if (parent()->hideMode() == KeepShowing) {
-            xcb_unmap_window(connection, m_triggerWindow);
+            destoryWakeArea();
         } else {
-            uint32_t values[] = {XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW};
-            xcb_change_window_attributes(connection, m_triggerWindow, XCB_CW_EVENT_MASK, values);
-            xcb_map_window(connection, m_triggerWindow);
+            createdWakeArea();
         }
     });
 
-    connect(this, &X11DockHelper::mouseInDockAreaChanged, this, [this, connection](){
+    connect(this, &X11DockHelper::mouseInDockAreaChanged, this, [this](){
+        if (parent()->hideMode() == KeepShowing)
+            return;
+
         if (mouseInDockArea()) {
-            QTimer::singleShot(1000, [this, connection](){
-                if (mouseInDockArea()) {
-                    xcb_unmap_window(connection, m_triggerWindow);
-                }
-            });
+            m_destoryTimer->start();
         } else {
-            xcb_map_window(connection, m_triggerWindow);
+            createdWakeArea();
         }
     });
 
@@ -141,5 +141,19 @@ void X11DockHelper::updateDockTriggerArea()
 bool X11DockHelper::mouseInDockArea()
 {
     return m_isHoverIn;
+}
+
+void X11DockHelper::createdWakeArea()
+{
+    uint32_t values_list[] = {1};
+    xcb_create_window(m_connection, XCB_COPY_FROM_PARENT, m_triggerWindow, m_rootWindow, 0, 0, 1000, 1000, 0, XCB_WINDOW_CLASS_INPUT_ONLY, XCB_COPY_FROM_PARENT, XCB_CW_OVERRIDE_REDIRECT, values_list);
+    uint32_t values[] = {XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW};
+    xcb_change_window_attributes(m_connection, m_triggerWindow, XCB_CW_EVENT_MASK, values);
+    xcb_map_window(m_connection, m_triggerWindow);
+}
+
+void X11DockHelper::destoryWakeArea()
+{
+    xcb_destroy_window(m_connection, m_triggerWindow);
 }
 }
