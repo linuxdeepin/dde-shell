@@ -117,7 +117,14 @@ void DockApplet::initDock()
 bool DockApplet::init()
 {
     DApplet::init();
+
+    return true;
+}
+
+bool DockApplet::load()
+{
     qmlRegisterType<QuickProxyWidget>("WidgetProxy", 1, 0, "WidgetProxy");
+
     return true;
 }
 
