@@ -54,7 +54,7 @@
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Keep Shown</source>
-        <translation type="unfinished"/>
+        <translation>Näytä aina</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="173"/>
