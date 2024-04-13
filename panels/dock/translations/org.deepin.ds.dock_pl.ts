@@ -64,7 +64,7 @@
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Smart Hide</source>
-        <translation type="unfinished"/>
+        <translation>Inteligentne ukrywanie</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="186"/>
