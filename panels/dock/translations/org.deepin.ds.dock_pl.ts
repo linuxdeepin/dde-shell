@@ -39,17 +39,17 @@
     <message>
         <location filename="../package/main.qml" line="148"/>
         <source>Bottom</source>
-        <translation type="unfinished"/>
+        <translation>Dół</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="160"/>
         <source>Right</source>
-        <translation type="unfinished"/>
+        <translation>Prawo</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Status</source>
-        <translation type="unfinished"/>
+        <translation>Status</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
