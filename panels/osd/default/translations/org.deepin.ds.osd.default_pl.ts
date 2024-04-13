@@ -54,17 +54,17 @@
     <message>
         <location filename="../package/main.qml" line="64"/>
         <source>Airplane mode on</source>
-        <translation type="unfinished"/>
+        <translation>Tryb samolotowy włączony</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="65"/>
         <source>Airplane mode off</source>
-        <translation type="unfinished"/>
+        <translation>Tryb samolotowy wyłączony</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation type="unfinished"/>
+        <translation>Wyciszenie włączone</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
