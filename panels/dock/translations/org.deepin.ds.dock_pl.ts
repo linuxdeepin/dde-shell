@@ -54,12 +54,12 @@
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Keep Shown</source>
-        <translation type="unfinished"/>
+        <translation>Zawsze wyświetlaj</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="173"/>
         <source>Keep Hidden</source>
-        <translation type="unfinished"/>
+        <translation>Zawsze ukrywaj</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="179"/>
