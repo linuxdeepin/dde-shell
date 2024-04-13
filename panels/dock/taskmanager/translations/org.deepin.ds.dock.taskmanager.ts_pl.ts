@@ -24,12 +24,12 @@
     <message>
         <location filename="../appitem.cpp" line="112"/>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>Wymuś zakończenie</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="119"/>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Zamknij wszystkie</translation>
     </message>
 </context>
 </TS>
