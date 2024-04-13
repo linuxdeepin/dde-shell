@@ -69,17 +69,17 @@
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation type="unfinished"/>
+        <translation>Wyciszenie wyłączone</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
         <source>Balanced power</source>
-        <translation type="unfinished"/>
+        <translation>Zasilanie zrównoważone</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="69"/>
         <source>Power saver</source>
-        <translation type="unfinished"/>
+        <translation>Oszczędność energii</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="70"/>
