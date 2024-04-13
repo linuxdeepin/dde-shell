@@ -69,7 +69,7 @@
     <message>
         <location filename="../package/main.qml" line="186"/>
         <source>Dock Settings</source>
-        <translation type="unfinished"/>
+        <translation>Ustawienia doku</translation>
     </message>
 </context>
 </TS>
