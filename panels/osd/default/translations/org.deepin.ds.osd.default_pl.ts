@@ -99,7 +99,7 @@
     <message>
         <location filename="../package/main.qml" line="73"/>
         <source>Failed to enable window effects</source>
-        <translation type="unfinished"/>
+        <translation>Nie udało się włączyć niektórych efektów okna</translation>
     </message>
 </context>
 </TS>
