@@ -203,7 +203,7 @@ void DesktopFileAMParser::launchByAMTool(const QString &action)
     QProcess process;
     const auto path = m_applicationInterface->path();
     process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start("dde-am", {"--by-user", path});
+    process.start("dde-am", {"--by-user", path, action});
     if (!process.waitForFinished()) {
         qWarning() << "Failed to launch the path:" << path << process.errorString();
         return;
