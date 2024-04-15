@@ -22,8 +22,9 @@ AppletItem {
     property int dockOrder: 25
     property var position: Panel.position
     property var indicatorStyle: Panel.indicatorStyle
-    property var dockWidth: Applet.dockWidth
-    property var dockHeight: Applet.dockHeight
+    // '12' is the distance between dateTime and showDesktop
+    property var dockWidth: Applet.dockWidth + (useColumnLayout ? 0 : 12)
+    property var dockHeight: Applet.dockHeight + (useColumnLayout ? 12 : 0)
 
     WidgetProxy {
         anchors.centerIn: parent
