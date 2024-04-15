@@ -12,7 +12,7 @@ find_package(Dtk6Widget REQUIRED)
 set(APP_RESOURCES ${CMAKE_CURRENT_LIST_DIR}/asserts/${PLUGIN_NAME}.qrc)
 
 # Sources files
-file(GLOB SRCS "*.h" "*.cpp" "gui/*.h" "gui/*.cpp" "dbus/*.h" "dbus/*.cpp")
+file(GLOB SRCS "*.h" "*.cpp" "gui/*.h" "gui/*.cpp")
 
 add_definitions("${QT_DEFINITIONS} -DQT_PLUGIN")
 add_library(${PLUGIN_NAME} SHARED ${SRCS} ${APP_RESOURCES})
@@ -39,7 +39,7 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE
     DDE_DOCK_NEW_VERSION
     # https://github.com/linuxdeepin/deepin-system-monitor/pull/329
     # 暂时屏蔽系统监视器插件
-    #USE_MONITOR_POPUP_PLUGIN:
+    USE_MONITOR_POPUP_PLUGIN
 )
 
 INSTALL(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib/dde-dock/tmp/plugins)

@@ -26,8 +26,10 @@
 #include <QGuiApplication>
 #include <QMenu>
 #include <QDragLeaveEvent>
-#include <algorithm>
 #include <QSize>
+
+#include <algorithm>
+#include <wordexp.h>
 
 #define ITEMSIZE 22
 #define STARTSPACE 6
@@ -530,6 +532,47 @@ QuickDockItem *QuickPluginWindow::getActiveDockItem(QPoint point) const
     return selectWidget;
 }
 
+static std::optional<QStringList> unescapeExecArgs(const QString &unescapedStr) noexcept
+{
+    auto deleter = [](wordexp_t *word) {
+        wordfree(word);
+        delete word;
+    };
+    std::unique_ptr<wordexp_t, decltype(deleter)> words{new (std::nothrow) wordexp_t{0, nullptr, 0}, deleter};
+
+    if (auto ret = wordexp(unescapedStr.toLocal8Bit(), words.get(), WRDE_SHOWERR); ret != 0) {
+        QString errMessage;
+        switch (ret) {
+        case WRDE_BADCHAR:
+            errMessage = "BADCHAR";
+            break;
+        case WRDE_BADVAL:
+            errMessage = "BADVAL";
+            break;
+        case WRDE_CMDSUB:
+            errMessage = "CMDSUB";
+            break;
+        case WRDE_NOSPACE:
+            errMessage = "NOSPACE";
+            break;
+        case WRDE_SYNTAX:
+            errMessage = "SYNTAX";
+            break;
+        default:
+            errMessage = "unknown";
+        }
+        qWarning() << "wordexp error: " << errMessage;
+        return std::nullopt;
+    }
+
+    QStringList execList;
+    for (std::size_t i = 0; i < words->we_wordc; ++i) {
+        execList.emplaceBack(words->we_wordv[i]);
+    }
+
+    return execList;
+}
+
 void QuickPluginWindow::showPopup(QuickDockItem *item, PluginsItemInterface *itemInter, QWidget *childPage, bool isClicked)
 {
     if (/*!isVisible() || */!item)
@@ -537,12 +580,14 @@ void QuickPluginWindow::showPopup(QuickDockItem *item, PluginsItemInterface *ite
 
     if (!childPage) {
         const QString itemKey = QuickSettingController::instance()->itemKey(itemInter);
-        QStringList commandArgument = itemInter->itemCommand(itemKey).split(" ");
-        if (commandArgument.size() > 0) {
-            QString command = commandArgument.first();
-            commandArgument.removeFirst();
-            QProcess::startDetached(command, commandArgument);
+        const QString commandArgument = itemInter->itemCommand(itemKey);
+        if (!commandArgument.isEmpty()) {
+            if (auto cmdline = unescapeExecArgs(commandArgument); cmdline) {
+                auto cmdArgs = cmdline.value();
+                QProcess::startDetached(cmdArgs.constFirst(), cmdArgs.mid(1));
+            }
         }
+
         return;
     }
 
