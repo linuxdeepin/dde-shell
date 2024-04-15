@@ -54,6 +54,7 @@ AppletItem {
                 id: workspaceImage
                 source: screenImage
                 visible: isCurrent
+                fillMode: Image.PreserveAspectCrop
             }
             MouseArea {
                 anchors.fill: parent
