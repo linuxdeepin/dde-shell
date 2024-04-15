@@ -21,6 +21,7 @@ add_custom_target(language ALL DEPENDS ${QM_FILES})
 
 add_definitions("${QT_DEFINITIONS} -DQT_PLUGIN")
 add_library(${PLUGIN_NAME} SHARED ${SRCS} ../common-plugin/network.qrc)
+set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ../../quick-trays)
 
 target_include_directories(${PLUGIN_NAME} PUBLIC
     ${NETINTERFACEINCLUDE}
