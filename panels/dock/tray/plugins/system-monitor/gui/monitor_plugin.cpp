@@ -136,7 +136,9 @@ const QString MonitorPlugin::itemCommand(const QString &itemKey)
 {
     if (itemKey == "system-monitor") {
 #ifdef USE_MONITOR_POPUP_PLUGIN
-        DBusInterface::getInstance()->showOrHideDeepinSystemMonitorPluginPopupWidget();
+        // 不应该使用 QDBus 直接调用接口, SystemMonitorPluginPopup 需要调用 dock 的 dbus 获取位置大小
+        // 如果此插件和 dock 在同一进程内，会死锁
+        return "gdbus call -e -d com.deepin.SystemMonitorPluginPopup -o /com/deepin/SystemMonitorPluginPopup -m  com.deepin.SystemMonitorPluginPopup.slotShowOrHideSystemMonitorPluginPopupWidget";
 #else
         // Task 30767: 暂时调整为打开系统监视器，隐藏系统监视器插
         openSystemMonitor();

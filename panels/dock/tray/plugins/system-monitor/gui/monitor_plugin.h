@@ -9,7 +9,6 @@
 #include "pluginsiteminterface.h"
 #include "monitorpluginbuttonwidget.h"
 
-#include "dbus/dbusinterface.h"
 #include "systemmonitortipswidget.h"
 #include "quickpanelwidget.h"
 
