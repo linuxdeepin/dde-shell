@@ -205,10 +205,10 @@ void DateTimeDisplayer::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() != Qt::LeftButton || !rect().contains(event->pos()))
         return;
 
-    DDBusSender().service("com.deepin.Calendar")
-            .path("/com/deepin/Calendar")
-            .interface("com.deepin.Calendar")
-            .method("RaiseWindow").call();
+    DDBusSender().service("org.desktopspec.ApplicationManager1")
+            .path("/org/desktopspec/ApplicationManager1/dde_2dcalendar")
+            .interface("org.desktopspec.ApplicationManager1.Application")
+        .method("Launch").arg(QString()).arg(QStringList()).arg(QVariantMap()).call();
 }
 
 QString DateTimeDisplayer::getTimeString(const Dock::Position &position) const
