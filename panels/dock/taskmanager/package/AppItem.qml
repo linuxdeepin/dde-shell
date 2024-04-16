@@ -35,6 +35,18 @@ Item {
     property int statusIndicatorSize: root.width * 0.8
     property int iconSize: Panel.rootObject.itemIconSizeBase * 0.64
 
+    property var iconGlobalPoint: {
+        var a = icon
+        var x = 0, y = 0
+        while(a.parent) {
+            x += a.x
+            y += a.y
+            a = a.parent
+        }
+
+        return Qt.point(x, y)
+    }
+
     Item {
         anchors.fill: parent
         id: appItem
@@ -122,6 +134,7 @@ Item {
         Connections {
             function onPositionChanged() {
                 windowIndicator.updateIndicatorAnchors()
+                updateWindowIconGeometryTimer.start()
             }
             target: Panel
         }
@@ -160,6 +173,17 @@ Item {
                 loops: 1
                 running: false
             }
+        }
+    }
+
+    Timer {
+        id: updateWindowIconGeometryTimer
+        interval: 500
+        running: false
+        repeat: false
+        onTriggered: {
+            taskmanager.Applet.setAppItemWindowIconGeometry(root.itemId, Panel.rootObject, iconGlobalPoint.x, iconGlobalPoint.y,
+                iconGlobalPoint.x + icon.width, iconGlobalPoint.y + icon.height)
         }
     }
 
@@ -205,5 +229,13 @@ Item {
             if (windows.length === 0) return
             taskmanager.Applet.hideItemPreview()
         }
+    }
+
+    onWindowsChanged: {
+        updateWindowIconGeometryTimer.start()
+    }
+
+    onIconGlobalPointChanged: {
+        updateWindowIconGeometryTimer.start()
     }
 }

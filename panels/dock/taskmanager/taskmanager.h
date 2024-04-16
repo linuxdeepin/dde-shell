@@ -44,6 +44,8 @@ public:
     Q_INVOKABLE void showItemPreview(const QString& itemId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
     Q_INVOKABLE void hideItemPreview();
 
+    Q_INVOKABLE void setAppItemWindowIconGeometry(const QString& appid, QObject* relativePositionItem, const int& x1, const int& y1, const int& x2, const int& y2);
+
 Q_SIGNALS:
     void itemsChanged();
     void windowSplitChanged();
