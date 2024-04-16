@@ -18,28 +18,33 @@
 #include <QTranslator>
 #include <QWindow>
 
-    namespace dock {
+namespace dock {
 
-                   DockApplet::DockApplet(QObject *parent)
-                   : DApplet(parent)
-                   , m_window(new DockTrayWindow)
-                   , m_dockAdapter(nullptr)
-                   , m_widgetProxy(nullptr)
-                   , m_dockWidth(0)
-                   , m_dockHeight(0)
-                   {
+DockApplet::DockApplet(QObject *parent)
+    : DApplet(parent)
+    , m_dockAdapter(nullptr)
+    , m_widgetProxy(nullptr)
+    , m_dockWidth(0)
+    , m_dockHeight(0)
+{
 
-                   }
-
-                   void DockApplet::setDockWidth(int width)
-                   {
-                    if (m_dockWidth != width) {
-                                              m_dockWidth = width;
-if (m_widgetProxy) {
-    m_widgetProxy->setImplicitWidth(width);
 }
-Q_EMIT dockWidthChanged(width);
+
+DockApplet::~DockApplet()
+{
+    if (m_window)
+        delete m_window;
 }
+
+void DockApplet::setDockWidth(int width)
+{
+    if (m_dockWidth != width) {
+        m_dockWidth = width;
+        if (m_widgetProxy) {
+            m_widgetProxy->setImplicitWidth(width);
+        }
+        Q_EMIT dockWidthChanged(width);
+    }
 }
 
 int DockApplet::dockWidth() const
@@ -65,22 +70,26 @@ int DockApplet::dockHeight() const
 
 void DockApplet::setPanelPosition(int x, int y) const
 {
-    m_window->move(x, y);
+    if (m_window)
+        m_window->move(x, y);
 }
 
 void DockApplet::setDockPosition(int pos) const
 {
-    m_window->setPositon(Dock::Position(pos));
+    if (m_window)
+        m_window->setPositon(Dock::Position(pos));
 }
 
 void DockApplet::setPanelSize(int size) const
 {
-    m_window->setDockSize(size);
+    if (m_window)
+        m_window->setDockSize(size);
 }
 
 void DockApplet::setDisplayMode(int displayMode) const
 {
-    m_window->setDisplayMode(Dock::DisplayMode(displayMode));
+    if (m_window)
+        m_window->setDisplayMode(Dock::DisplayMode(displayMode));
 }
 
 void DockApplet::initDock()
@@ -88,6 +97,8 @@ void DockApplet::initDock()
     static bool init = false;
     if (init) return;
     init = !init;
+
+    m_window = new DockTrayWindow;
 
     DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
 
@@ -99,10 +110,6 @@ void DockApplet::initDock()
             return;
         }
         m_widgetProxy->setWidget(m_window);
-
-        QTranslator *tl = new QTranslator(this);
-        tl->load(QString("/usr/share/dde-dock/tmp/translations/dde-dock_%1.qm").arg(QLocale().name()));
-        qApp->installTranslator(tl);
 
         connect(m_window, &DockTrayWindow::sizeChanged, this, [ = ] {
             setDockWidth(m_window->width());
@@ -117,6 +124,14 @@ void DockApplet::initDock()
 bool DockApplet::init()
 {
     DApplet::init();
+
+    QTranslator *tl = new QTranslator(this);
+    auto loaded = tl->load(QString("/usr/share/dde-dock/tmp/translations/dde-dock_%1.qm").arg(QLocale().name()));
+    if(!loaded) {
+        qWarning() << "Faield to load translator of dock";
+    } else {
+        qApp->installTranslator(tl);
+    }
 
     return true;
 }

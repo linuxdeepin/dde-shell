@@ -22,6 +22,7 @@ class DockApplet : public DS_NAMESPACE::DApplet
 
 public:
     explicit DockApplet(QObject *parent = nullptr);
+    ~ DockApplet();
 
     void setDockWidth(int width);
     int dockWidth() const;
@@ -49,7 +50,7 @@ Q_SIGNALS:
     void dockHeightChanged(int);
 
 private:
-    DockTrayWindow *m_window;
+    QPointer<DockTrayWindow> m_window;
     OldDBusDock *m_dockAdapter;
     QuickProxyWidget *m_widgetProxy;
     int m_dockWidth;
