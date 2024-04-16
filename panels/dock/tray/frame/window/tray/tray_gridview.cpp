@@ -392,12 +392,12 @@ void TrayGridView::handleDragEnterEvent(QDragEnterEvent *e)
 {
     const QModelIndex index = indexAt(e->position().toPoint());
 
-    if (model()->canDropMimeData(e->mimeData(), e->dropAction(), index.row(),
-                                 index.column(), index)) {
-        e->accept();
-    } else {
+    // if (model()->canDropMimeData(e->mimeData(), e->dropAction(), index.row(),
+    //                              index.column(), index)) {
+    //     e->accept();
+    // } else {
         e->ignore();
-    }
+    // }
 
     Q_EMIT dragEntered();
 }

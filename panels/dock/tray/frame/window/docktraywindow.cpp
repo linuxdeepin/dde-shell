@@ -392,9 +392,9 @@ void DockTrayWindow::onUpdateComponentSize()
     case Dock::Position::Right:
         // m_toolLineLabel->setFixedSize(width() * 0.6, SPLITERSIZE);
         // m_showDesktopWidget->setFixedSize(QWIDGETSIZE_MAX, FRONTSPACING);
-        m_dateTimeWidget->setFixedSize(37, m_dateTimeWidget->suitableSize().height());
-        m_systemPuginWidget->setFixedSize(37, m_systemPuginWidget->suitableSize().height());
-        m_quickIconWidget->setFixedSize(37, m_quickIconWidget->suitableSize().height());
+        m_dateTimeWidget->setFixedSize(m_dockSize, m_dateTimeWidget->suitableSize().height());
+        m_systemPuginWidget->setFixedSize(m_dockSize, m_systemPuginWidget->suitableSize().height());
+        m_quickIconWidget->setFixedSize(m_dockSize, m_quickIconWidget->suitableSize().height());
         m_trayView->setFixedSize(m_dockSize, m_trayView->suitableSize().height());
         m_toolFrontSpaceWidget->setFixedSize(m_dockSize, SPLITESPACE);
         m_toolBackSpaceWidget->setFixedSize(m_dockSize, SPLITESPACE);
@@ -407,9 +407,9 @@ void DockTrayWindow::onUpdateComponentSize()
         // m_toolLineLabel->setFixedSize(SPLITERSIZE, height() * 0.6);
         // m_showDesktopWidget->setFixedSize(FRONTSPACING, QWIDGETSIZE_MAX);
         // FIXME: in some cases, m_dateTimeWidget QWIDGETSIZE_MAX get a huge height.
-        m_dateTimeWidget->setFixedSize(m_dateTimeWidget->suitableSize().width(), qMin(37, this->height()));
-        m_systemPuginWidget->setFixedSize(m_systemPuginWidget->suitableSize().width(), 37);
-        m_quickIconWidget->setFixedSize(m_quickIconWidget->suitableSize().width(), 37);
+        m_dateTimeWidget->setFixedSize(m_dateTimeWidget->suitableSize().width(), qMin(m_dockSize, this->height()));
+        m_systemPuginWidget->setFixedSize(m_systemPuginWidget->suitableSize().width(), m_dockSize);
+        m_quickIconWidget->setFixedSize(m_quickIconWidget->suitableSize().width(), m_dockSize);
         m_trayView->setFixedSize(m_trayView->suitableSize().width(), m_dockSize);
         m_toolFrontSpaceWidget->setFixedSize(SPLITESPACE, m_dockSize);
         m_toolBackSpaceWidget->setFixedSize(SPLITESPACE, m_dockSize);

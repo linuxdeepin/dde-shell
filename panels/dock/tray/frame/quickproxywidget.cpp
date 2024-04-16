@@ -57,7 +57,7 @@ void QuickProxyWidgetPrivate::sendWidgetMouseEvent(QHoverEvent *event)
 {
     QMouseEvent mouseEvent(QEvent::MouseMove, event->position(), event->button(), event->buttons(), event->modifiers());
     sendWidgetMouseEvent(&mouseEvent);
-    // event->setAccepted(mouseEvent.isAccepted());
+    event->setAccepted(mouseEvent.isAccepted());
 }
 
 void QuickProxyWidgetPrivate::sendWidgetMouseEvent(QMouseEvent *event)
@@ -492,7 +492,16 @@ void QuickProxyWidget::dragMoveEvent(QDragMoveEvent *event)
         // Map event position from us to the receiver
         QPoint receiverPos = d->mapToReceiver(p, receiver).toPoint();
         if (receiver != d->dragDropWidget) {
-            // Try to enter before we leave
+            /* Qt will automatically send the leave event to last widget
+             * that received the enter event, instead of the one we manually specified.
+             * So send the leave event first.
+            */
+            if (d->dragDropWidget) {
+                QDragLeaveEvent dragLeave;
+                QCoreApplication::sendEvent(d->dragDropWidget, &dragLeave);
+            }
+            d->dragDropWidget = receiver;
+
             QDragEnterEvent dragEnter(receiverPos, event->possibleActions(), event->mimeData(), event->buttons(), event->modifiers());
             dragEnter.setDropAction(event->proposedAction());
             QCoreApplication::sendEvent(receiver, &dragEnter);
@@ -504,12 +513,6 @@ void QuickProxyWidget::dragMoveEvent(QDragMoveEvent *event)
             }
 
             d->lastDropAction = event->dropAction();
-
-            if (d->dragDropWidget) {
-                QDragLeaveEvent dragLeave;
-                QCoreApplication::sendEvent(d->dragDropWidget, &dragLeave);
-            }
-            d->dragDropWidget = receiver;
         }
 
         QDragMoveEvent dragMove(receiverPos, event->possibleActions(), event->mimeData(), event->buttons(), event->modifiers());
