@@ -86,7 +86,7 @@ void QuickSettingItem::paintEvent(QPaintEvent *e)
 {
     QWidget::paintEvent(e);
     QPainter painter(this);
-    painter.setRenderHint(QPainter::RenderHint::Antialiasing);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     painter.setPen(foregroundColor());
     QPainterPath path;
     path.addRoundedRect(rect(), RADIUS, RADIUS);
@@ -106,7 +106,7 @@ void QuickSettingItem::paintEvent(QPaintEvent *e)
     }
 
     painter.save();
-    painter.setPen(borderColor);
+    painter.setPen(QPen(borderColor, 2));
     painter.drawRoundedRect(rect(), RADIUS, RADIUS);
     painter.restore();
 }

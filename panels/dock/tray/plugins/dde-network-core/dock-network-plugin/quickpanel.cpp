@@ -32,8 +32,6 @@ public:
         if (painter->device() && (!QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps)))
             scale = painter->device()->devicePixelRatioF();
 
-        pixmapSize *= scale;
-
         QPixmap pm = m_icon.pixmap(pixmapSize, mode, state);
         if (pm.isNull())
             return;
