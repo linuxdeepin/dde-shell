@@ -157,10 +157,11 @@ public:
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         auto closeButton = new DIconButton(parent);
+        closeButton->setIconSize(QSize(16, 16));
         closeButton->setFixedSize(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT);
         closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEGIHT + 4, -4));
         closeButton->setVisible(true);
-        closeButton->setIcon(QIcon::fromTheme("close"));
+        closeButton->setIcon(DDciIcon::fromTheme("close"));
         closeButton->setFlat(true);
 
         connect(closeButton, &DIconButton::clicked, this, [this, index](){
@@ -427,11 +428,13 @@ void X11WindowPreviewContainer::initUI()
 
     m_previewIcon = new QLabel;
     m_previewTitle = new QLabel;
+    m_previewTitle->setFixedHeight(PREVIEW_TITLE_HEGIHT);
     m_previewIcon->setFixedSize(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT);
 
-    m_closeAllButton = new DIconButton;
+    m_closeAllButton = new DIconButton(this);
+    m_closeAllButton->setIconSize(QSize(16, 16));
+    m_closeAllButton->setIcon(DDciIcon::fromTheme("close"));
     m_closeAllButton->setFixedSize(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT);
-    m_closeAllButton->setIcon(QIcon::fromTheme("close"));
     m_closeAllButton->setFlat(true);
 
     m_previewIcon->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
