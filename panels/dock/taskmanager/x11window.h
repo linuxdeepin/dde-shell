@@ -35,6 +35,7 @@ public:
     virtual void maxmize() override;
     virtual void minimize() override;
     virtual void killClient() override;
+    virtual void setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry) override;
 
 private:
     friend class X11WindowMonitor;

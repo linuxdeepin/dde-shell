@@ -6,6 +6,7 @@
 
 #include "dsglobal.h"
 
+#include <QWindow>
 #include <QString>
 #include <QObject>
 #include <QPointer>
@@ -41,6 +42,7 @@ public:
     virtual void maxmize() = 0;
     virtual void minimize() = 0;
     virtual void killClient() = 0;
+    virtual void setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry) = 0;
 
     void setAppItem(QPointer<AppItem> item) {m_appitem = item;}
     QPointer<AppItem> getAppItem() {return m_appitem;}

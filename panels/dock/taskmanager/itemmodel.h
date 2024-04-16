@@ -7,7 +7,6 @@
 #include "dsglobal.h"
 
 #include <QAbstractListModel>
-#include <qjsonarray.h>
 
 namespace dock {
 class AbstractItem;

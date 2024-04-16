@@ -9,6 +9,7 @@
 
 #include <mutex>
 
+#include <QRect>
 #include <QObject>
 #include <QLoggingCategory>
 
@@ -140,6 +141,12 @@ void X11Window::minimize()
 void X11Window::killClient()
 {
     X11->killClient(m_windowID);
+}
+
+void X11Window::setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry)
+{
+    auto pos = baseWindow->position() + gemeotry.topLeft();
+    X11->setWindowIconGemeotry(m_windowID, QRect(pos.x(), pos.y(), gemeotry.width(), gemeotry.height()));
 }
 
 void X11Window::updatePid()
