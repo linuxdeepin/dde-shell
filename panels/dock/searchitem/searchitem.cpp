@@ -37,7 +37,7 @@ void SearchItem::toggleGrandSearch()
 
 void SearchItem::toggleGrandSearchConfig()
 {
-    QProcess::startDetached("/usr/bin/dde-grand-search", QStringList() << "--setting");
+    QProcess::startDetached("dde-grand-search", QStringList() << "--setting");
 }
 
 DockItemInfo SearchItem::dockItemInfo()
