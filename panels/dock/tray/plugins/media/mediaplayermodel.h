@@ -130,13 +130,13 @@ public:
     { return qvariant_cast< QString >(property("PlaybackStatus")); }
 
 Q_SIGNALS:
-    void MetadataChanged();
+    void MetadataChanged(QVariantMap value);
     void CanControlChanged(bool  value);
     void CanShowInUIChanged(bool value);
-    void CanGoNextChanged();
-    void CanGoPreviousChanged();
-    void CanPauseChanged();
-    void PlaybackStatusChanged();
+    void CanGoNextChanged(bool value);
+    void CanGoPreviousChanged(bool value);
+    void CanPauseChanged(bool value);
+    void PlaybackStatusChanged(const QString &stat);
 
 private Q_SLOTS:
     void onPropertyChanged(const QDBusMessage &msg);
