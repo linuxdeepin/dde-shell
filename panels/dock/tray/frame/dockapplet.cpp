@@ -133,6 +133,8 @@ bool DockApplet::init()
         qApp->installTranslator(tl);
     }
 
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+
     return true;
 }
 

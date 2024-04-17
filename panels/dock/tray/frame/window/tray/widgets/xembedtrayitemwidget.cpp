@@ -133,7 +133,7 @@ void XEmbedTrayItemWidget::paintEvent(QPaintEvent *e)
 
     QPainter painter;
     painter.begin(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
     const QRectF &rf = QRectF(rect());
     const QRectF &rfp = QRectF(m_image.rect());
@@ -420,7 +420,9 @@ void XEmbedTrayItemWidget::refershIconImage()
     }
 
     m_image = qimage.scaled(iconSize * ratio, iconSize * ratio, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    m_image.setDevicePixelRatio(ratio);
+
+    // FIXME: qimage looks smaller then what it should be
+    // m_image.setDevicePixelRatio(ratio);
 
     update();
     Q_EMIT iconChanged();
