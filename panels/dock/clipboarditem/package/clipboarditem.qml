@@ -17,8 +17,10 @@ AppletItem {
     implicitHeight: Panel.rootObject.useColumnLayout ? 30 : dockSize
     property bool shouldVisible: Applet.visible
 
-    D.ActionButton {
-        anchors.fill: parent
+    D.ToolButton {
+        anchors.centerIn: parent
+        width: 30
+        height: 30
         icon.name: "clipboard"
         icon.width: 16
         icon.height: 16
