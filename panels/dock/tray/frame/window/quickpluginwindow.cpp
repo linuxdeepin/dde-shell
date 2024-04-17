@@ -897,11 +897,12 @@ void QuickDockItem::paintEvent(QPaintEvent *event)
     QPixmap pixmap = iconPixmap();
     if (pixmap.isNull())
         return QWidget::paintEvent(event);
-    // pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
 
-    int iconSize = static_cast<int>(20 / (QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? 1 : qApp->devicePixelRatio()));
-    QRect pixmapRect = QRect(QPoint((rect().width() - iconSize) / 2, (rect().height() - iconSize) / 2), QSize(iconSize, iconSize));
-    painter.drawPixmap(pixmapRect, pixmap);
+    const QRectF &rf = QRect(rect());
+    const QRectF &rfp = QRect(pixmap.rect());
+    const QPointF &p = rf.center() - rfp.center() / pixmap.devicePixelRatioF();
+
+    painter.drawPixmap(p, pixmap);
 }
 
 void QuickDockItem::mousePressEvent(QMouseEvent *event)
@@ -1014,11 +1015,15 @@ QPixmap QuickDockItem::iconPixmap() const
     if (!icon.isNull()) {
         if (icon.availableSizes().size() > 0) {
             QSize size = icon.availableSizes().first();
-            return icon.pixmap(size);
+            auto pix = icon.pixmap(size);
+            pix.setDevicePixelRatio(qApp->devicePixelRatio());
+            return pix;
         }
         int pixmapWidth = static_cast<int>(ICONWIDTH);
         int pixmapHeight = static_cast<int>(ICONHEIGHT);
-        return icon.pixmap(pixmapWidth, pixmapHeight);
+        auto pix = icon.pixmap(pixmapWidth, pixmapHeight);
+        pix.setDevicePixelRatio(qApp->devicePixelRatio());
+        return pix;
     }
 
     return QPixmap();
