@@ -264,6 +264,11 @@ Window {
         rowSpacing: 0
 
         Item {
+            implicitWidth: 10
+            implicitHeight: 10
+        }
+
+        Item {
             id: dockLeftPart
             implicitWidth: leftLoader.implicitWidth
             implicitHeight: leftLoader.implicitHeight
@@ -271,6 +276,7 @@ Window {
                 id: leftLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
+                spacing: 10
                 model: DockPartAppletModel {
                     id: dockLeftPartModel
                     leftDockOrder: 0
