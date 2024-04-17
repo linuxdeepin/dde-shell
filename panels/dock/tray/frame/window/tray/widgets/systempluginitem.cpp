@@ -289,27 +289,27 @@ void SystemPluginItem::paintEvent(QPaintEvent *event)
 
 const QPoint SystemPluginItem::popupMarkPoint() const
 {
-    QPoint p(topleftPoint());
-
+    QPoint p = mapToGlobal(rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->mapToGlobal(topLevelWidget()->rect().topLeft()) : mapToGlobal(rect().topLeft());
     const QRect r = rect();
-    const QRect wr = window()->rect();
+    const QRect topR = topLevelWidget() ? topLevelWidget()->rect() : rect();
 
+    QPoint popupPoint;
     switch (DockPosition) {
-    case Dock::Position::Top:
-        p += QPoint(r.width() / 2, r.height() + (wr.height() - r.height()) / 2);
+    case Dock::Top:
+        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
         break;
-    case Dock::Position::Bottom:
-        p += QPoint(r.width() / 2, 0 - (wr.height() - r.height()) / 2);
+    case Dock::Bottom:
+        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() - POPUP_PADDING);
         break;
-    case Dock::Position::Left:
-        p += QPoint(r.width() + (wr.width() - r.width()) / 2, r.height() / 2);
+    case Dock::Left:
+        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, p.y() + r.height() / 2);
         break;
-    case Dock::Position::Right:
-        p += QPoint(0 - (wr.width() - r.width()) / 2, r.height() / 2);
+    case Dock::Right:
+        popupPoint = QPoint(topP.x() - POPUP_PADDING, p.y() + r.height() / 2);
         break;
     }
-
-    return p;
+    return popupPoint;
 }
 
 // 获取在最外层的窗口(MainWindow)中的位置

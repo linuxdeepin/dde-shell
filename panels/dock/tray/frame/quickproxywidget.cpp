@@ -338,7 +338,7 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
     //     sz = newWidget->maximumSize();
     //     q->setMaximumSize(sz.isNull() ? QSizeF() : QSizeF(sz));
 
-    //     updateProxyGeometryFromWidget();
+        updateProxyGeometryFromWidget();
 
     //     updateProxyInputMethodAcceptanceFromWidget();
 
@@ -346,11 +346,11 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
     //     newWidget->installEventFilter(q);
     // QObject::connect(newWidget, SIGNAL(destroyed()), q, SLOT(_q_removeWidgetSlot()));
 
-    //     // Changes no longer go only from the widget to the proxy.
-    //     enabledChangeMode = QuickProxyWidgetPrivate::NoMode;
-    //     visibleChangeMode = QuickProxyWidgetPrivate::NoMode;
-    //     posChangeMode = QuickProxyWidgetPrivate::NoMode;
-    //     sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
+        // Changes no longer go only from the widget to the proxy.
+        enabledChangeMode = QuickProxyWidgetPrivate::NoMode;
+        visibleChangeMode = QuickProxyWidgetPrivate::NoMode;
+        posChangeMode = QuickProxyWidgetPrivate::NoMode;
+        sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
 }
 
 QWidget *QuickProxyWidget::widget() const
@@ -381,7 +381,6 @@ bool QuickProxyWidget::eventFilter(QObject *object, QEvent *event)
     Q_D(QuickProxyWidget);
 
     if (object->isWidgetType()
-        && event->type() == QEvent::UpdateRequest
         && d->widget->isAncestorOf(qobject_cast<QWidget *> (object))) {
         switch (event->type()) {
         case QEvent::UpdateRequest:
@@ -690,6 +689,13 @@ void QuickProxyWidget::geometryChange(const QRectF &newGeometry, const QRectF &o
     update();
 
     QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
+}
+
+bool QuickProxyWidget::event(QEvent *event)
+{
+    update();
+
+    return QQuickPaintedItem::event(event);
 }
 
 QT_END_NAMESPACE

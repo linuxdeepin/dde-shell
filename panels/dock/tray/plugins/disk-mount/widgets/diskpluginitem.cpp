@@ -54,7 +54,12 @@ void DiskPluginItem::updateIcon()
 
 QIcon DiskPluginItem::getIcon()
 {
-    return QIcon(icon);
+    QString iconName = "drive-removable-dock-symbolic";
+
+    if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
+        iconName.append(PLUGIN_MIN_ICON_NAME);
+
+    return QIcon(QString(":/icons/resources/%1.svg").arg(iconName));
 }
 
 void DiskPluginItem::paintEvent(QPaintEvent *e)
