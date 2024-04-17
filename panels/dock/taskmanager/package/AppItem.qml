@@ -190,14 +190,15 @@ Item {
         onEntered: {
             if (windows.length === 0) return
             var itemPos = root.mapToItem(null, 0, 0)
+            let xOffset, yOffset, interval = 10
             if (Panel.position % 2 === 0) {
-                itemPos.x += (root.width / 2)
-                itemPos.y += (Panel.position == 2 ? -10 : Panel.dockSize + 10)
+                xOffset = itemPos.x + (root.width / 2)
+                yOffset = (Panel.position == 2 ? -interval : interval + Panel.dockSize)
             } else {
-                itemPos.x += (Panel.position == 1 ? -10 : Panel.dockSize + 10)
-                itemPos.y += (root.height / 2)
+                xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
+                yOffset = itemPos.y + (root.height / 2)
             }
-            taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, itemPos.x, itemPos.y, Panel.position)
+            taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, xOffset, yOffset, Panel.position)
         }
 
         onExited: {
