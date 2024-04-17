@@ -52,8 +52,8 @@ void AppearanceApplet::initDBusProxy()
                                                         QDBusConnection::sessionBus(),
                                                         this));
     if (!m_interface->isValid()) {
-        m_interface.reset();
         qWarning() << "Failed to proxy Appearance, error:" << m_interface->lastError();
+        m_interface.reset();
         return;
     }
     QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::OpacityChanged, this, &AppearanceApplet::opacityChanged);
