@@ -34,7 +34,7 @@
 #define ITEMSIZE 22
 #define STARTSPACE 6
 #define ITEMSPACE 0
-#define ICONWIDTH 20
+#define ICONWIDTH 16
 #define ICONHEIGHT 16
 
 using namespace Dock;
@@ -111,8 +111,8 @@ void QuickPluginWindow::initUi()
     m_mainLayout->setContentsMargins(0, 0, 0, 0);
     m_mainLayout->setSpacing(ITEMSPACE);
     // 时尚模式下的插件右侧的区域增加空白的间隔
-    if (m_displayMode == Dock::DisplayMode::Fashion)
-        m_mainLayout->addSpacing(STARTSPACE);
+    // if (m_displayMode == Dock::DisplayMode::Fashion)
+    //     m_mainLayout->addSpacing(STARTSPACE);
 }
 
 void QuickPluginWindow::setPositon(Position position)
@@ -176,7 +176,7 @@ QSize QuickPluginWindow::suitableSize() const
 QSize QuickPluginWindow::suitableSize(const Dock::Position &position) const
 {
     if (position == Dock::Position::Top || position == Dock::Position::Bottom) {
-        int itemWidth = STARTSPACE;
+        int itemWidth = 0/* STARTSPACE*/;
         for (int i = 0; i < m_mainLayout->count(); i++) {
             QWidget *itemWidget = m_mainLayout->itemAt(i)->widget();
             if (itemWidget) {
@@ -188,7 +188,7 @@ QSize QuickPluginWindow::suitableSize(const Dock::Position &position) const
         return QSize(itemWidth, 30);
     }
 
-    int itemHeight = STARTSPACE;
+    int itemHeight = 0/*STARTSPACE*/;
     for (int i = 0; i < m_mainLayout->count(); i++) {
         QWidget *itemWidget = m_mainLayout->itemAt(i)->widget();
         if (itemWidget)
@@ -877,20 +877,7 @@ void QuickDockItem::paintEvent(QPaintEvent *event)
         // 鼠标进入的时候，绘制底色
         QPainterPath path;
         int borderRadius = shadowRadius();
-        QRect rectBackground;
-        if (m_position == Dock::Position::Top || m_position == Dock::Position::Bottom) {
-            int backHeight = qBound(20, height() - 4, 30);
-            rectBackground.setTop((height() - backHeight) / 2);
-            rectBackground.setHeight(backHeight);
-            rectBackground.setWidth(width());
-            path.addRoundedRect(rectBackground, borderRadius, borderRadius);
-        } else {
-            int backWidth = qBound(20, width() - 4, 30);
-            rectBackground.setLeft((width() - backWidth) / 2);
-            rectBackground.setWidth(backWidth);
-            rectBackground.setHeight(height());
-            path.addRoundedRect(rectBackground, borderRadius, borderRadius);
-        }
+        path.addRoundedRect(rect(), borderRadius, borderRadius);
         painter.fillPath(path, backColor);
     }
 
@@ -1012,13 +999,8 @@ void QuickDockItem::resizeEvent(QResizeEvent *event)
 QPixmap QuickDockItem::iconPixmap() const
 {
     QIcon icon = m_pluginItem->icon(DockPart::QuickShow);
+
     if (!icon.isNull()) {
-        if (icon.availableSizes().size() > 0) {
-            QSize size = icon.availableSizes().first();
-            auto pix = icon.pixmap(size);
-            pix.setDevicePixelRatio(qApp->devicePixelRatio());
-            return pix;
-        }
         int pixmapWidth = static_cast<int>(ICONWIDTH);
         int pixmapHeight = static_cast<int>(ICONHEIGHT);
         auto pix = icon.pixmap(pixmapWidth, pixmapHeight);

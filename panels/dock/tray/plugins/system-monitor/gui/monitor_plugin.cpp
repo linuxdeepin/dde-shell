@@ -207,37 +207,12 @@ void MonitorPlugin::invokedMenuItem(const QString &itemKey, const QString &menuI
 #ifdef DDE_DOCK_NEW_VERSION
 QIcon MonitorPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::ColorType themeType)
 {
-    QString iconName = "dsm_pluginicon_light";
+    QString iconName = ":/icons/deepin/builtin/actions/dsm_pluginicon_light_20px.svg";
     if (themeType == DGuiApplicationHelper::LightType) {
         // 最小尺寸时，不画背景，采用深色图标
-        iconName = "dsm_pluginicon_dark";
+        iconName = ":/icons/deepin/builtin/actions/dsm_pluginicon_dark_20px.svg";
     }
-    QSize size = QSize(16,16);
-    if (dockPart == DockPart::DCCSetting) {
-        size = QSize(20,20);
-    } else if (dockPart == DockPart::QuickPanel) {
-        size = QSize(24,24);
-    }
-    QIcon icon = QIcon::fromTheme(iconName);
-    if (!icon.isNull()) {
-        const qreal ratio = m_itemWidget->devicePixelRatioF();
-        QPixmap pixmap = icon.pixmap(size);
-        pixmap.setDevicePixelRatio(ratio);
-        if (dockPart == DockPart::QuickShow) {
-            QPixmap curPixmap(size*ratio);
-            curPixmap.fill(Qt::transparent);
-            QPainter painter;
-            painter.begin(&curPixmap);
-            painter.setRenderHint(QPainter::SmoothPixmapTransform);
-            int pixmapMargin = ceil(1*ratio);
-            painter.drawPixmap(QRect(pixmapMargin, pixmapMargin, curPixmap.width()-pixmapMargin, curPixmap.height()-pixmapMargin), pixmap);
-            painter.end();
-            return QIcon(curPixmap);
-        } else {
-            return QIcon(pixmap);
-        }
-    }
-    return icon;
+    return QIcon(iconName);
 }
 #endif
 

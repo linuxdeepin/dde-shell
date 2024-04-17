@@ -96,15 +96,14 @@ QPixmap PowerStatusWidget::getBatteryIcon(int themeType)
                   .arg(plugged ? "plugged-symbolic" : "symbolic");
     }
 
-    if (themeType == DGuiApplicationHelper::ColorType::DarkType) {
+    if (themeType == DGuiApplicationHelper::ColorType::LightType) {
         iconStr.append(PLUGIN_MIN_ICON_NAME);
     }
 
     const auto ratio = devicePixelRatioF();
     QSize pixmapSize = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? QSize(20, 20) : (QSize(20, 20) * ratio);
     QIcon qrcIcon = QIcon(":/batteryicons/resources/batteryicons/" + iconStr + ".svg");
-    QIcon finalIcon = DIconTheme::findQIcon(iconStr, qrcIcon, DIconTheme::IgnoreBuiltinIcons);
-    QPixmap pix = finalIcon.pixmap(pixmapSize);
+    QPixmap pix = qrcIcon.pixmap(pixmapSize);
     pix.setDevicePixelRatio(ratio);
 
     return pix;

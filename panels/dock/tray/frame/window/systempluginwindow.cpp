@@ -168,7 +168,7 @@ void SystemPluginWindow::pluginAdded(PluginsItemInterface *plugin)
     item->installEventFilter(this);
     item->setParent(this);
     item->show();
-    m_mainLayout->addWidget(item);
+    m_mainLayout->addWidget(item, 0, Qt::AlignCenter);
     Q_EMIT itemChanged();
 }
 
@@ -205,7 +205,7 @@ void SystemPluginWindow::onPluginItemUpdated(PluginsItemInterface *pluginItem)
 }
 
 // 图标的尺寸
-#define ICONSIZE 20
+#define ICONSIZE 16
 #define ICONTEXTSPACE 6
 #define PLUGIN_ITEM_DRAG_THRESHOLD 20
 

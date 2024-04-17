@@ -32,9 +32,11 @@ ShutdownWidget::ShutdownWidget(QWidget *parent)
 
 QPixmap ShutdownWidget::loadPixmap() const
 {
-    const QString iconName = "system-shutdown";
+    const QString iconName = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType ?
+                                 ":/resources/icons/shutdown-symbolic.svg" : ":/icons/resources/icons/shutdown-symbolic-dark.svg";
     const auto ratio = devicePixelRatioF();
-    return QIcon::fromTheme(iconName).pixmap(PLUGIN_ICON_MAX_SIZE * ratio);
+
+    return QIcon(iconName).pixmap(PLUGIN_ICON_MAX_SIZE * ratio);
 }
 
 void ShutdownWidget::paintEvent(QPaintEvent *e)

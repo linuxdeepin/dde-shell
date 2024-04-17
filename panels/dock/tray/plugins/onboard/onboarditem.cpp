@@ -27,15 +27,17 @@ OnboardItem::OnboardItem(QWidget *parent)
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, [ = ] {
         update();
     });
-    m_icon = QIcon::fromTheme(":/icons/icon/deepin-virtualkeyboard.svg");
 }
 
 QPixmap OnboardItem::iconPixmap(QSize size, DGuiApplicationHelper::ColorType themeType) const
 {
-    QString iconName = "deepin-virtualkeyboard";
+    QString iconName;
     if (std::min(width(), height()) <= PLUGIN_BACKGROUND_MIN_SIZE
-            || themeType == DGuiApplicationHelper::LightType)
-            iconName.append(PLUGIN_MIN_ICON_NAME);
+        || themeType == DGuiApplicationHelper::LightType) {
+        iconName = ":/icons/icon/keyboard-symbolic.svg";
+    } else {
+        iconName = ":/icons/icon/keyboard-symbolic-dark.svg";
+    }
 
     return loadSvg(iconName, size);
 }
@@ -96,9 +98,8 @@ void OnboardItem::paintEvent(QPaintEvent *e)
 const QPixmap OnboardItem::loadSvg(const QString &fileName, const QSize &size) const
 {
     const auto ratio = devicePixelRatioF();
-
     QSize pixmapSize = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? size : (size * ratio);
-    QPixmap pixmap = QIcon::fromTheme(fileName, m_icon).pixmap(pixmapSize);
+    QPixmap pixmap = QIcon(fileName).pixmap(pixmapSize);
     pixmap.setDevicePixelRatio(ratio);
     pixmap = pixmap.scaled(size * ratio);
 
