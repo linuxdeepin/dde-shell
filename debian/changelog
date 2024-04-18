@@ -1,3 +1,26 @@
+dde-shell (0.0.9) unstable; urgency=medium
+
+  * fix: not set window icon gemeotry for window
+  * fix: menu invisible
+  * fix: rename mode to Alignment
+  * fix: player icon not update
+  * feat: adjust search and clipboard ui
+  * fix: the distance between the preview window and the dock is not always 10 pixels
+  * fix: the close button of the preview widget has no hover state
+  * fix: unable to launch terminal with quake-mode by dock menu
+  * chore: tiny code format
+  * chore: avoid hardcode path
+  * fix: fix no distance between dateTime and showDesktop
+  * fix: nullptr for dde-appearance
+  * fix: can't show system monitor plugin popup widget
+  * fix: calendar icon error on dock when click datetime plugin
+  * fix: fix translations error
+  * fix: plugin border color not clear when system scaled to 1.25X
+  * fix: fix the problem of drag tray icon into dock invalid
+  * fix: fix quick tray icon not show in vertical center
+
+ -- tsic404 <liuheng@deepin.org>  Thu, 18 Apr 2024 13:30:19 +0800
+
 dde-shell (0.0.8) unstable; urgency=medium
 
   * fix: dock item get default icon when set auto start
