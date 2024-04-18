@@ -224,8 +224,7 @@ void TrayGridWidget::resetPosition()
         return;
 
     QPoint p = (view->rect().topLeft());
-    QPoint topP = view->topLevelWidget() ? view->topLevelWidget()->mapToGlobal(view->topLevelWidget()->rect().topLeft()) : view->mapToGlobal(view->rect().topLeft());
-    const QRect r = view->rect();
+    QPoint topP = view->topLevelWidget() ? view->topLevelWidget()->geometry().topLeft() : view->mapToGlobal(view->rect().topLeft());;
     const QRect topR = view->topLevelWidget() ? view->topLevelWidget()->rect() : view->rect();
 
     QPoint ptPos = topP;

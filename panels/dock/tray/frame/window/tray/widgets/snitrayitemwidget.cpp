@@ -698,24 +698,24 @@ void SNITrayItemWidget::hidePopup()
 
 const QPoint SNITrayItemWidget::popupMarkPoint() const
 {
-    QPoint p = mapToGlobal(rect().topLeft());
-    QPoint topP = topLevelWidget() ? topLevelWidget()->mapToGlobal(topLevelWidget()->rect().topLeft()) : mapToGlobal(rect().topLeft());
+    QPoint offset = mapTo(topLevelWidget(), rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->geometry().topLeft() : mapToGlobal(rect().topLeft());
     const QRect r = rect();
     const QRect topR = topLevelWidget() ? topLevelWidget()->rect() : rect();
 
     QPoint popupPoint;
     switch (DockPosition) {
     case Top:
-        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
+        popupPoint = QPoint(topP.x() + offset.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
         break;
     case Bottom:
-        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() - POPUP_PADDING);
+        popupPoint = QPoint(topP.x() + offset.x() + r.width() / 2, topP.y() - POPUP_PADDING);
         break;
     case Left:
-        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, p.y() + r.height() / 2);
+        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, topP.y() + offset.y() + r.height() / 2);
         break;
     case Right:
-        popupPoint = QPoint(topP.x() - POPUP_PADDING, p.y() + r.height() / 2);
+        popupPoint = QPoint(topP.x() - POPUP_PADDING, topP.y() + offset.y() + r.height() / 2);
         break;
     }
     return popupPoint;

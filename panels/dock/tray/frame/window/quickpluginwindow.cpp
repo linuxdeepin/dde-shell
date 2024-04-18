@@ -421,35 +421,36 @@ QPoint QuickPluginWindow::popupPoint(QWidget *widget) const
     if (!itemWidget)
         return QPoint();
 
-    QPoint p = itemWidget->mapToGlobal(itemWidget->rect().topLeft());
-    QPoint topP = topLevelWidget() ? topLevelWidget()->mapToGlobal(topLevelWidget()->rect().topLeft()) : p;
+    QPoint p = itemWidget->mapTo(topLevelWidget(), itemWidget->rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->geometry().topLeft() : p;
     QRect r = itemWidget->rect();
     QRect topR = topLevelWidget() ? topLevelWidget()->rect() : r;
+
 
     QPoint pointCurrent;
     switch (m_position) {
     case Dock::Position::Bottom: {
         // 在下方的时候，Y坐标设置在顶层窗口的y值，保证下方对齐
-        pointCurrent.setX(p.x() + itemWidget->width() / 2);
+        pointCurrent.setX(topP.x() + p.x() + itemWidget->width() / 2);
         pointCurrent.setY(topP.y() - POPUP_PADDING);
         break;
     }
     case Dock::Position::Top: {
         // 在上面的时候，Y坐标设置为任务栏的下方，保证上方对齐
-        pointCurrent.setX(p.x() + itemWidget->width() / 2);
+        pointCurrent.setX(topP.x() + p.x() + itemWidget->width() / 2);
         pointCurrent.setY(topP.y() + topR.height() + POPUP_PADDING);
         break;
     }
     case Dock::Position::Left: {
         // 在左边的时候，X坐标设置在顶层窗口的最右侧，保证左对齐
         pointCurrent.setX(topP.x() + topR.width() + POPUP_PADDING);
-        pointCurrent.setY(p.y() - itemWidget->height() / 2);
+        pointCurrent.setY(topP.y() + p.y() - itemWidget->height() / 2);
         break;
     }
     case Dock::Position::Right: {
         // 在右边的时候，X坐标设置在顶层窗口的最左侧，保证右对齐
         pointCurrent.setX(topP.x() - POPUP_PADDING);
-        pointCurrent.setY(p.y() - itemWidget->height() / 2);
+        pointCurrent.setY(topP.y() + p.y() - itemWidget->height() / 2);
     }
     }
     return pointCurrent;
@@ -1154,24 +1155,24 @@ QPoint QuickDockItem::topleftPoint() const
 
 QPoint QuickDockItem::popupMarkPoint() const
 {
-    QPoint p = mapToGlobal(rect().topLeft());
-    QPoint topP = topLevelWidget() ? topLevelWidget()->mapToGlobal(topLevelWidget()->rect().topLeft()) : mapToGlobal(rect().topLeft());
+    QPoint offset = mapTo(topLevelWidget(), rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->geometry().topLeft() : mapToGlobal(rect().topLeft());
     const QRect r = rect();
     const QRect topR = topLevelWidget() ? topLevelWidget()->rect() : rect();
 
     QPoint popupPoint;
     switch (m_position) {
     case Top:
-        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
+        popupPoint = QPoint(topP.x() + offset.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
         break;
     case Bottom:
-        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() - POPUP_PADDING);
+        popupPoint = QPoint(topP.x() + offset.x() + r.width() / 2, topP.y() - POPUP_PADDING);
         break;
     case Left:
-        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, p.y() + r.height() / 2);
+        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, topP.y() + offset.y() + r.height() / 2);
         break;
     case Right:
-        popupPoint = QPoint(topP.x() - POPUP_PADDING, p.y() + r.height() / 2);
+        popupPoint = QPoint(topP.x() - POPUP_PADDING, topP.y() + offset.y() + r.height() / 2);
         break;
     }
     return popupPoint;
