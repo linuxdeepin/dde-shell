@@ -4,32 +4,32 @@
 <context>
     <name>dock::AppItem</name>
     <message>
-        <location filename="../appitem.cpp" line="84"/>
+        <location filename="../appitem.cpp" line="83"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="100"/>
+        <location filename="../appitem.cpp" line="99"/>
         <source>All Windows</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="106"/>
+        <location filename="../appitem.cpp" line="105"/>
         <source>Undock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="106"/>
+        <location filename="../appitem.cpp" line="105"/>
         <source>Dock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="112"/>
+        <location filename="../appitem.cpp" line="111"/>
         <source>Force Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="119"/>
+        <location filename="../appitem.cpp" line="118"/>
         <source>Close All</source>
         <translation type="unfinished"></translation>
     </message>
