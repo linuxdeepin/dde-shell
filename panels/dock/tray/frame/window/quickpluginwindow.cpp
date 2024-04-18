@@ -935,7 +935,7 @@ void QuickDockItem::enterEvent(QEnterEvent *event)
 
     m_popupWindow->setPosition(m_position);
     m_popupWindow->resize(tipWidget->sizeHint());
-    m_popupWindow->setContent(tipWidget);
+    m_popupWindow->setContent(tipWidget, 4);
 
     m_popupWindow->show(popupMarkPoint());
 }
