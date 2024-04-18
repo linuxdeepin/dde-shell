@@ -38,6 +38,11 @@ AppletItem {
         updateLaunchpadPos()
     }
 
+    PanelToolTip {
+        id: toolTip
+        text: qsTr("launchpad")
+    }
+
     D.ActionButton {
         id: action
         anchors.centerIn: parent
@@ -46,8 +51,21 @@ AppletItem {
         // 10 : 36 : 10
         icon.height: Panel.rootObject.itemIconSizeBase * 0.64
         icon.width: Panel.rootObject.itemIconSizeBase * 0.64
-        onClicked: Applet.toggleLauncher()
+        onClicked: {
+            Applet.toggleLauncher()
+            toolTip.close()
+        }
         onXChanged: updateLaunchpadPos()
         onYChanged: updateLaunchpadPos()
+        onHoveredChanged: {
+            if (hovered) {
+                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
+                toolTip.toolTipX = point.x
+                toolTip.toolTipY = point.y
+                toolTip.open()
+            } else {
+                toolTip.close()
+            }
+        }
     }
 }
