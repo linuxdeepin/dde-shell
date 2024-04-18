@@ -30,7 +30,7 @@ AppletItem {
         if (!launchpad)
             return
 
-        var lX = action.mapToItem(null, 0, 0).x
+        var lX = action.mapToItem(null, action.width / 2, 0).x
         var lY = Panel.rootObject.y
         launchpad.rootObject.windowedPos = Qt.point(lX, lY)
     }
