@@ -34,12 +34,12 @@
     <message>
         <location filename="../package/main.qml" line="163"/>
         <source>Align Left</source>
-        <translation type="unfinished"/>
+        <translation>Links uitlijnen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Align Center</source>
-        <translation type="unfinished"/>
+        <translation>Rechts uitlijnen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
