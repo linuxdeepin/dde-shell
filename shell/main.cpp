@@ -82,6 +82,7 @@ public:
 
 int main(int argc, char *argv[])
 {
+    DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
     QApplication a(argc, argv);
     a.setOrganizationName("deepin");
     a.setApplicationName("org.deepin.dde-shell");
