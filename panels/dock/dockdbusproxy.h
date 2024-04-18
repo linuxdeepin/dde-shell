@@ -20,12 +20,15 @@ namespace dock {
 class DockDBusProxy final: public QObject, public QDBusContext
 {
     Q_OBJECT
-    Q_PROPERTY(QRect geometry READ geometry NOTIFY geometryChanged FINAL)
-    Q_PROPERTY(QRect FrontendWindowRect READ frontendWindowRect NOTIFY FrontendWindowRectChanged FINAL)
-    Q_PROPERTY(Position Position READ position WRITE setPosition NOTIFY PositionChanged FINAL)
+    Q_PROPERTY(QRect geometry READ geometry FINAL)
+    Q_PROPERTY(QRect FrontendWindowRect READ frontendWindowRect FINAL)
+    Q_PROPERTY(Position Position READ position WRITE setPosition FINAL)
 
-    Q_PROPERTY(HideMode HideMode READ hideMode WRITE setHideMode NOTIFY hideModeChanged FINAL)
-    Q_PROPERTY(HideState HideState READ hideState NOTIFY hideStateChanged FINAL)
+    Q_PROPERTY(HideMode HideMode READ hideMode WRITE setHideMode FINAL)
+    Q_PROPERTY(HideState HideState READ hideState FINAL)
+    Q_PROPERTY(uint WindowSizeEfficient READ windowSizeEfficient WRITE setWindowSizeEfficient)
+    Q_PROPERTY(uint WindowSizeFashion READ windowSizeFashion WRITE setWindowSizeFashion)
+    Q_PROPERTY(int DisplayMode READ displayMode WRITE setDisplayMode FINAL)
 
 public:
     DockDBusProxy(DockPanel* parent = nullptr);
@@ -50,17 +53,19 @@ public:
     void setHideMode(HideMode mode);
 
     HideState hideState();
+
+    uint windowSizeEfficient();
+    void setWindowSizeEfficient(uint size);
+
+    uint windowSizeFashion();
+    void setWindowSizeFashion(uint size);
+
+    int displayMode();
+    void setDisplayMode(int displayMode);
+
     bool RequestDock(const QString &desktopFile, int index);
     bool IsDocked(const QString &desktopFile);
     bool RequestUndock(const QString &desktopFile);
-
-Q_SIGNALS:
-    void geometryChanged();
-    void hideModeChanged(HideMode mode);
-    void hideStateChanged(HideState state);
-
-    void PositionChanged(Position position);
-    void FrontendWindowRectChanged(QRect rect);
 
 private:
     DockPanel* parent() const;

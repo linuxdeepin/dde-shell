@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "panel.h"
-#include "dsglobal.h"
 #include "constants.h"
 #include "dockpanel.h"
 #include "dockadaptor.h"
@@ -60,8 +59,11 @@ bool DockPanel::init()
     DockDaemonAdaptor* dockDaemonAdaptor = new DockDaemonAdaptor(proxy);
     QDBusConnection::sessionBus().registerService("org.deepin.dde.daemon.Dock1");
     QDBusConnection::sessionBus().registerObject("/org/deepin/dde/daemon/Dock1", "org.deepin.dde.daemon.Dock1", proxy);
-    connect(SETTINGS, &DockSettings::positionChanged, this, [this](){
+    connect(SETTINGS, &DockSettings::positionChanged, this, [this, dockDaemonAdaptor](){
         Q_EMIT positionChanged(position());
+        Q_EMIT dockDaemonAdaptor->PositionChanged(position());
+        Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
+
         QMetaObject::invokeMethod(this,[this](){
             Q_EMIT onWindowGeometryChanged();
         });
@@ -71,6 +73,19 @@ bool DockPanel::init()
     connect(SETTINGS, &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
     connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
+
+    connect(SETTINGS, &DockSettings::dockSizeChanged, this, [this, dockDaemonAdaptor](){
+        Q_EMIT dockDaemonAdaptor->WindowSizeEfficientChanged(dockSize());
+        Q_EMIT dockDaemonAdaptor->WindowSizeFashionChanged(dockSize());
+        Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
+    });
+    connect(SETTINGS, &DockSettings::hideModeChanged, this, [this, dockDaemonAdaptor](){
+        Q_EMIT dockDaemonAdaptor->HideModeChanged(hideMode());
+    });
+    connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, [this, dockDaemonAdaptor](){
+        Q_EMIT dockDaemonAdaptor->DisplayModeChanged(itemAlignment());
+    });
+
     DPanel::init();
 
     QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
@@ -109,6 +124,11 @@ bool DockPanel::init()
             Q_EMIT hideStateChanged(m_hideState);
         }
     });
+
+    QMetaObject::invokeMethod(this, [this, dockDaemonAdaptor](){
+        Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
+    });
+
     return true;
 }
 

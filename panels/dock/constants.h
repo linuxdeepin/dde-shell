@@ -33,8 +33,8 @@ enum IndicatorStyle {
 };
 
 enum ItemAlignment {
-    LeftAlignment        = 0,
-    CenterAlignment      = 1,
+    CenterAlignment      = 0,
+    LeftAlignment        = 1,
 };
 
 enum ColorTheme {

@@ -285,9 +285,9 @@ Window {
         }
 
         Item {
-            Layout.fillWidth: Panel.itemAlignment
-            Layout.fillHeight: Panel.itemAlignment
-            Layout.horizontalStretchFactor: Panel.itemAlignment ? 1 : -1
+            Layout.fillWidth: Panel.itemAlignment === Dock.CenterAlignment
+            Layout.fillHeight: Panel.itemAlignment === Dock.CenterAlignment
+            Layout.horizontalStretchFactor: Panel.itemAlignment === Dock.CenterAlignment ? 1 : -1
         }
 
         Item {
