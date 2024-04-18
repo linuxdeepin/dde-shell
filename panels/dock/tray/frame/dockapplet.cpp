@@ -27,7 +27,6 @@ DockApplet::DockApplet(QObject *parent)
     , m_dockWidth(0)
     , m_dockHeight(0)
 {
-
 }
 
 DockApplet::~DockApplet()

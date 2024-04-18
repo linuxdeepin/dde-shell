@@ -289,24 +289,24 @@ void SystemPluginItem::paintEvent(QPaintEvent *event)
 
 const QPoint SystemPluginItem::popupMarkPoint() const
 {
-    QPoint p = mapToGlobal(rect().topLeft());
-    QPoint topP = topLevelWidget() ? topLevelWidget()->mapToGlobal(topLevelWidget()->rect().topLeft()) : mapToGlobal(rect().topLeft());
+    QPoint offset = mapTo(topLevelWidget(), rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->geometry().topLeft() : mapToGlobal(rect().topLeft());
     const QRect r = rect();
     const QRect topR = topLevelWidget() ? topLevelWidget()->rect() : rect();
 
     QPoint popupPoint;
     switch (DockPosition) {
     case Dock::Top:
-        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
+        popupPoint = QPoint(topP.x() + offset.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
         break;
     case Dock::Bottom:
-        popupPoint = QPoint(p.x() + r.width() / 2, topP.y() - POPUP_PADDING);
+        popupPoint = QPoint(topP.x() + offset.x() + r.width() / 2, topP.y() - POPUP_PADDING);
         break;
     case Dock::Left:
-        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, p.y() + r.height() / 2);
+        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, topP.y() + offset.y() + r.height() / 2);
         break;
     case Dock::Right:
-        popupPoint = QPoint(topP.x() - POPUP_PADDING, p.y() + r.height() / 2);
+        popupPoint = QPoint(topP.x() - POPUP_PADDING, topP.y() + offset.y() + r.height() / 2);
         break;
     }
     return popupPoint;
@@ -344,7 +344,7 @@ void SystemPluginItem::hidePopup()
 
 bool SystemPluginItem::containsPoint(const QPoint& pos)
 {
-    QPoint ptGlobal = mapToGlobal(QPoint(0, 0));
+    QPoint ptGlobal = mapToGlobal(rect().topLeft());
     QRect rectGlobal(ptGlobal, this->size());
     if (rectGlobal.contains(pos))
         return true;

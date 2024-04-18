@@ -347,30 +347,27 @@ void DateTimeDisplayer::paintEvent(QPaintEvent *e)
 
 QPoint DateTimeDisplayer::tipsPoint() const
 {
-    QPoint pointInTopWidget = parentWidget()->mapTo(window(), pos());
+    QPoint offset = mapTo(topLevelWidget(), rect().topLeft());
+    QPoint topP = topLevelWidget() ? topLevelWidget()->geometry().topLeft() : mapToGlobal(rect().topLeft());
+    const QRect r = rect();
+    const QRect topR = topLevelWidget() ? topLevelWidget()->rect() : rect();
+
+    QPoint popupPoint;
     switch (m_position) {
-    case Dock::Position::Left: {
-        pointInTopWidget.setX(window()->x() + window()->width());
-        pointInTopWidget.setY(pointInTopWidget.y() + height() / 2);
+    case Dock::Position::Top:
+        popupPoint = QPoint(topP.x() + offset.x() + r.width() / 2, topP.y() + topR.height() + POPUP_PADDING);
+        break;
+    case Dock::Position::Bottom:
+        popupPoint = QPoint(topP.x() + offset.x() + r.width() / 2, topP.y() - POPUP_PADDING);
+        break;
+    case Dock::Position::Left:
+        popupPoint = QPoint(topP.x() + topR.width() + POPUP_PADDING, topP.y() + offset.y() + r.height() / 2);
+        break;
+    case Dock::Position::Right:
+        popupPoint = QPoint(topP.x() - POPUP_PADDING, topP.y() + offset.y() + r.height() / 2);
         break;
     }
-    case Dock::Position::Top: {
-        pointInTopWidget.setY(y() + window()->y() + window()->height());
-        pointInTopWidget.setX(pointInTopWidget.x() + width() / 2);
-        break;
-    }
-    case Dock::Position::Right: {
-        pointInTopWidget.setY(pointInTopWidget.y() + height() / 2);
-        pointInTopWidget.setX(pointInTopWidget.x() - width() / 2);
-        break;
-    }
-    case Dock::Position::Bottom: {
-        pointInTopWidget.setY(-POPUP_PADDING);
-        pointInTopWidget.setX(pointInTopWidget.x() + width() / 2);
-        break;
-    }
-    }
-    return window()->mapToGlobal(pointInTopWidget);
+    return popupPoint;
 }
 
 void DateTimeDisplayer::updateFont() const
