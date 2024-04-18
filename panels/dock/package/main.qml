@@ -157,16 +157,15 @@ Window {
                 value: Dock.Efficient
             }
         }
-        // TODO: Mode-> Alignment, Fashion -> Center, Efficient -> left
         MutuallyExclusiveMenu {
-            title: qsTr("Mode")
+            title: qsTr("Alignment")
             EnumPropertyMenuItem {
-                name: qsTr("Efficient Mode")
+                name: qsTr("Align Left")
                 prop: "itemAlignment"
                 value: Dock.LeftAlignment
             }
             EnumPropertyMenuItem {
-                name: qsTr("Fashion Mode")
+                name: qsTr("Align Center")
                 prop: "itemAlignment"
                 value: Dock.CenterAlignment
             }
