@@ -39,7 +39,7 @@
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Align Center</source>
-        <translation>Ustaw do środk</translation>
+        <translation>Ustaw do środka</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
