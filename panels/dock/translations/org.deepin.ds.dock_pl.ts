@@ -19,7 +19,7 @@
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Alignment</source>
-        <translation>Wyrównanie</translation>
+        <translation>Ustawienie</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="189"/>
@@ -34,12 +34,12 @@
     <message>
         <location filename="../package/main.qml" line="163"/>
         <source>Align Left</source>
-        <translation type="unfinished"/>
+        <translation>Ustaw do lewej</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Align Center</source>
-        <translation type="unfinished"/>
+        <translation>Ustaw do środk</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
