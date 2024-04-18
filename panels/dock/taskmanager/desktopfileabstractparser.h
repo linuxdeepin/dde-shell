@@ -5,7 +5,6 @@
 #pragma once
 
 #include "appitem.h"
-#include "dsglobal.h"
 #include "desktopfileparserfactory.h"
 
 #include <QList>
@@ -67,6 +66,7 @@ Q_SIGNALS:
     void genericNameChanged();
     void dockedChanged();
     void xDeepinVendorChanged();
+    void valiedChanged();
 
 protected:
     QList<QPointer<AppItem>> m_appitems;

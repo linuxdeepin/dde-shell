@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "dsglobal.h"
 #include "applicationinterface.h"
 #include "desktopfileparserfactory.h"
 #include "desktopfileabstractparser.h"
@@ -58,6 +57,7 @@ private Q_SLOTS:
 
 private:
     inline static bool m_amIsAvaliable;
+    bool m_isValid;
 
     QString m_name;
     QString m_icon;
