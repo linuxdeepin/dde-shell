@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="hu">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="hu">
 <context>
     <name>main</name>
     <message>
@@ -21,7 +19,7 @@
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Alignment</source>
-        <translation type="unfinished"></translation>
+        <translation>Igazítás</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="189"/>
@@ -29,23 +27,19 @@
         <translation>Bal</translation>
     </message>
     <message>
-        <source>Mode</source>
-        <translation type="vanished">Mód</translation>
+        <location filename="../package/main.qml" line="174"/>
+        <source>Position</source>
+        <translation>Pozíció</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="163"/>
         <source>Align Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Igazítás Balra</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Align Center</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../package/main.qml" line="174"/>
-        <source>Position</source>
-        <translation>Pozíció</translation>
+        <translation>Igazítás Középre</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
