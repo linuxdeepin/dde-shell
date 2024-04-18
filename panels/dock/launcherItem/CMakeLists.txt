@@ -12,3 +12,4 @@ target_link_libraries(dock-launcheritem PRIVATE
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.launcheritem TARGET dock-launcheritem)
+ds_handle_package_translation(PACKAGE org.deepin.ds.dock.launcheritem)
