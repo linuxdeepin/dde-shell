@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "dsglobal.h"
 #include "itemmodel.h"
 #include "containment.h"
 #include "abstractwindow.h"
@@ -58,7 +57,6 @@ private:
     void loadDockedAppItems();
 
 private:
-    QPointer<AppItem> m_currentActiveItem;                  // currnet activate item
     QScopedPointer<AbstractWindowMonitor> m_windowMonitor;
 };
 

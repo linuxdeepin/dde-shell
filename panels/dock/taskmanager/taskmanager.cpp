@@ -4,7 +4,6 @@
 
 #include "appitem.h"
 
-#include "dsglobal.h"
 #include "globals.h"
 #include "itemmodel.h"
 #include "taskmanager.h"

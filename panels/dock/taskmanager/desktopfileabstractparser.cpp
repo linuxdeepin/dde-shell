@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "dsglobal.h"
 #include "taskmanagersettings.h"
 #include "desktopfileabstractparser.h"
 
@@ -138,7 +137,7 @@ bool DesktopfileAbstractParser::isDocked()
 
 void DesktopfileAbstractParser::setDocked(bool docked)
 {
-    if (!isValied().first) {
+    if (!isValied().first && docked) {
         qDebug() << isValied().second;
         return;
     }

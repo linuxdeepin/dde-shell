@@ -18,16 +18,16 @@ set_source_files_properties(
 )
 
 set_source_files_properties(
-    ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ProcessGuesser1.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ObjectManager1.xml
     PROPERTIES  INCLUDE api/types/am.h
-                CLASSNAME ProcessGuesser
+                CLASSNAME ObjectManager
 )
 
 qt_add_dbus_interfaces(
     DBUS_INTERFACES
     ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ApplicationManager1.Application.xml
     ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ApplicationManager1.xml
-    ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ProcessGuesser1.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ObjectManager1.xml
 )
 
 qt_add_dbus_adaptor(DBUS_INTERFACES

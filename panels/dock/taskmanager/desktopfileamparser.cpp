@@ -6,6 +6,7 @@
 #include "abstractwindow.h"
 #include "desktopfileamparser.h"
 #include "desktopfileabstractparser.h"
+#include "objectmanager1interface.h"
 
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -30,12 +31,21 @@ static int pidfd_open(pid_t pid, uint flags)
 namespace dock {
 static QDBusServiceWatcher dbusWatcher(AM_DBUS_PATH, QDBusConnection::sessionBus(),
                                                 QDBusServiceWatcher::WatchForOwnerChange);
+static ObjectManager desktopobjectManager(AM_DBUS_PATH, "/org/desktopspec/ApplicationManager1", QDBusConnection::sessionBus());
+
 
 DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
     : DesktopfileAbstractParser(id, parent)
 {
     if (!m_amIsAvaliable) m_amIsAvaliable = QDBusConnection::sessionBus().
         interface()->isServiceRegistered(AM_DBUS_PATH);
+    
+    connect(&desktopobjectManager, &ObjectManager::InterfacesRemoved, this, [this] (const QDBusObjectPath& path, const QStringList& interfaces) {
+        if (m_applicationInterface->path() == path.path()) {
+            getAppItem()->setDocked(false);
+            return;
+        }
+    });
 
     connect(&dbusWatcher, &QDBusServiceWatcher::serviceRegistered, this, [this](){
         m_amIsAvaliable = true;
@@ -49,6 +59,7 @@ DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
 
     qCDebug(amdesktopfileLog()) << "create a am desktopfile object: " << m_id;
     m_applicationInterface.reset(new Application(AM_DBUS_PATH, id2dbusPath(id), QDBusConnection::sessionBus(), this));
+    m_isValid = !m_id.isEmpty() && (m_applicationInterface->iD() == m_id);
 }
 
 DesktopFileAMParser::~DesktopFileAMParser()
@@ -112,10 +123,8 @@ std::pair<bool, QString> DesktopFileAMParser::isValied()
 {
     // TODO:    1. am service may be unavailable and get dbus timeout
     //          2. show call path existed not id equeals
-
-    if (id().isEmpty() || !(m_applicationInterface && m_applicationInterface->iD() == id()))
-        return std::make_pair(false, QStringLiteral("am do not contains app %1").arg(id()));
-    return std::make_pair(true, QStringLiteral("has am as desktopfileparser backend"));
+    return m_isValid ? std::make_pair(true, QStringLiteral("has am as desktopfileparser backend")) :
+        std::make_pair(false, QStringLiteral("am do not contains app %1").arg(id()));
 }
 
 QList<QPair<QString, QString>> DesktopFileAMParser::actions()

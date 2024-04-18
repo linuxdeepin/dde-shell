@@ -4,7 +4,6 @@
 
 #include "globals.h"
 #include "appitem.h"
-#include "dsglobal.h"
 #include "abstractitem.h"
 #include "abstractwindow.h"
 #include "desktopfileabstractparser.h"
@@ -53,7 +52,12 @@ QString AppItem::type() const
 
 QString AppItem::icon() const
 {
-    return m_desktopfileParser->desktopIcon();
+    if (m_currentActiveWindow.isNull() || m_desktopfileParser->isValied().first)
+        return m_desktopfileParser->desktopIcon();
+    else {
+        return m_currentActiveWindow->icon();
+    }
+
     // QString icon;
     // if (m_currentActiveWindow) {
     //     icon = m_currentActiveWindow->icon();
@@ -176,7 +180,7 @@ bool AppItem::isDocked() const
 
 void AppItem::setDocked(bool docked)
 {
-    if (docked == isDocked()) return;
+    if (docked && docked == isDocked()) return;
     if (m_desktopfileParser && !m_desktopfileParser.isNull()) {
         m_desktopfileParser->setDocked(docked);
     }
