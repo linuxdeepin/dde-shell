@@ -17,6 +17,10 @@ AppletItem {
     implicitHeight: Panel.rootObject.useColumnLayout ? 30 : dockSize
     property bool shouldVisible: Applet.visible
 
+    PanelToolTip {
+        id: toolTip
+        text: qsTr("Clipboard")
+    }
     D.ToolButton {
         anchors.centerIn: parent
         width: 30
@@ -24,6 +28,19 @@ AppletItem {
         icon.name: "clipboard"
         icon.width: 16
         icon.height: 16
-        onClicked: Applet.toggleClipboard()
+        onClicked: {
+            Applet.toggleClipboard()
+            toolTip.close()
+        }
+        onHoveredChanged: {
+            if (hovered) {
+                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
+                toolTip.toolTipX = point.x
+                toolTip.toolTipY = point.y
+                toolTip.open()
+            } else {
+                toolTip.close()
+            }
+        }
     }
 }

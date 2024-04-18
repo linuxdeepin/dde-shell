@@ -8,13 +8,15 @@ import org.deepin.ds 1.0
 
 Item {
     id: control
-    visible: false
+
     default property alias toolTipContent: toolTip.contentChildren
     property alias text: toolTip.text
-    Panel.toolTipWindow.width: control.width + toolTip.leftPadding + toolTip.rightPadding
-    Panel.toolTipWindow.height: control.height + toolTip.topPadding + toolTip.bottomPadding
-    onVisibleChanged: {
-        if (visible) {
+    property alias toolTipVisible: toolTip.visible
+    property int toolTipX: 0
+    property int toolTipY: 0
+    property int margins: 10
+    onToolTipVisibleChanged: {
+        if (toolTipVisible) {
             open()
         } else {
             close()
@@ -26,9 +28,17 @@ Item {
         var window = Panel.toolTipWindow
         if (!window)
             return
+        window.width = Qt.binding(function() {
+            return toolTip.width + toolTip.leftPadding + toolTip.rightPadding
+        })
+        window.height = Qt.binding(function() {
+            return toolTip.height + toolTip.topPadding + toolTip.bottomPadding
+        })
 
-        window.xOffset = control.x
-        window.yOffset = control.y
+        var pointX = control.toolTipX - window.width / 2
+        var pointY = control.toolTipY - window.height - control.margins
+        window.xOffset = pointX
+        window.yOffset = pointY
         window.show()
         toolTip.open()
     }
@@ -38,8 +48,8 @@ Item {
         if (!window)
             return
 
-        window.close()
         toolTip.close()
+        window.close()
     }
     function hide()
     {
@@ -49,8 +59,7 @@ Item {
     ToolTip {
         id: toolTip
         padding: 0
-        width: control.width
-        height: control.height
+        anchors.centerIn: parent
         parent: Panel.toolTipWindow ? Panel.toolTipWindow.contentItem : undefined
         onParentChanged: function() {
             var window = Panel.toolTipWindow

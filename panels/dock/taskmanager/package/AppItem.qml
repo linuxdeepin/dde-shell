@@ -199,6 +199,7 @@ Item {
                     root.Drag.imageSource = result.url;
                 })
             }
+            toolTip.close()
         }
         onClicked: function (mouse) {
             if (mouse.button === Qt.RightButton) {
@@ -212,7 +213,14 @@ Item {
         }
 
         onEntered: {
-            if (windows.length === 0) return
+            if (windows.length === 0) {
+                var point = root.mapToItem(null, root.width / 2, 0)
+                toolTip.toolTipX = point.x
+                toolTip.toolTipY = point.y
+                toolTip.open()
+                return
+            }
+
             var itemPos = root.mapToItem(null, 0, 0)
             let xOffset, yOffset, interval = 10
             if (Panel.position % 2 === 0) {
@@ -226,8 +234,16 @@ Item {
         }
 
         onExited: {
-            if (windows.length === 0) return
+            if (windows.length === 0) {
+                toolTip.close()
+                return
+            }
             taskmanager.Applet.hideItemPreview()
+        }
+
+        PanelToolTip {
+            id: toolTip
+            text: root.name
         }
     }
 

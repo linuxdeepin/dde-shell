@@ -123,17 +123,15 @@ void DPanelPrivate::ensureToolTipWindow() const
         return;
     }
 
-    QVariantMap properties;
-    properties["flags"] = Qt::ToolTip;
-    auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelPopupWindow.qml"), properties);
-     if (!object)
-         return;
-     const_cast<DPanelPrivate *>(this)->m_toolTipWindow = qobject_cast<QQuickWindow *>(object);
-     if (m_toolTipWindow) {
-         qCDebug(dsLog) << "Create ToolTipWindow successfully.";
-         m_toolTipWindow->setTransientParent(q->window());
-         Q_EMIT const_cast<DPanel *>(q)->toolTipWindowChanged();
-     }
+    auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelPopupWindow.qml"));
+    if (!object)
+        return;
+    const_cast<DPanelPrivate *>(this)->m_toolTipWindow = qobject_cast<QQuickWindow *>(object);
+    if (m_toolTipWindow) {
+        qCDebug(dsLog) << "Create ToolTipWindow successfully.";
+        m_toolTipWindow->setTransientParent(q->window());
+        Q_EMIT const_cast<DPanel *>(q)->toolTipWindowChanged();
+    }
 }
 
 DS_END_NAMESPACE

@@ -19,6 +19,11 @@ AppletItem {
     implicitHeight: Panel.rootObject.useColumnLayout ? 30 : dockSize
     property bool shouldVisible: Applet.visible
 
+    PanelToolTip {
+        id: toolTip
+        text: qsTr("search")
+    }
+
     D.ToolButton {
         anchors.centerIn: parent
         width: 30
@@ -26,14 +31,20 @@ AppletItem {
         icon.name: "search"
         icon.width: 16
         icon.height: 16
-        onClicked: Applet.toggleGrandSearch()
-    }
-
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        acceptedButtons: Qt.RightButton
-        onClicked: platformMenu.open()
+        onClicked: {
+            toolTip.close()
+            Applet.toggleGrandSearch()
+        }
+        onHoveredChanged: {
+            if (hovered) {
+                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
+                toolTip.toolTipX = point.x
+                toolTip.toolTipY = point.y
+                toolTip.open()
+            } else {
+                toolTip.close()
+            }
+        }
     }
 
     LP.Menu {
