@@ -33,7 +33,7 @@ Window {
     property real itemScale: 1.0
     property real draggingSize: 0.0
     property int itemIconSizeBase: 0
-    property int itemSpacing: dockItemMaxSize / 20
+    property int itemSpacing: 0
 
     property bool isDragging: false
 

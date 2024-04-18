@@ -13,8 +13,9 @@ AppletItem {
     id: launcher
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 12
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : Panel.rootObject.dockItemMaxSize
-    implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize : Panel.rootObject.dockSize
+    // 1:4 the distance between app : dock height; get width/height≈0.8
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : Panel.rootObject.dockItemMaxSize * 0.8
+    implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 0.8 : Panel.rootObject.dockSize
 
     Connections {
         target: Panel.rootObject
@@ -43,9 +44,9 @@ AppletItem {
         anchors.centerIn: parent
         icon.name: Applet.iconName
         scale: Panel.rootObject.itemScale
-        // 10 : 36 : 10
-        icon.height: Panel.rootObject.itemIconSizeBase * 0.64
-        icon.width: Panel.rootObject.itemIconSizeBase * 0.64
+        // 9:14 (iconSize/dockHeight)
+        icon.height: Panel.rootObject.itemIconSizeBase * 0.643
+        icon.width: Panel.rootObject.itemIconSizeBase * 0.643
         onClicked: Applet.toggleLauncher()
         onXChanged: updateLaunchpadPos()
         onYChanged: updateLaunchpadPos()
