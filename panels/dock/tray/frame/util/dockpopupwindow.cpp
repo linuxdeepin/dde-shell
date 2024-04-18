@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "dockpopupwindow.h"
+#include <dwindowmanagerhelper.h>
 #include "utils.h"
 #include "dbusutil.h"
 #include "dockscreen.h"
@@ -15,6 +16,8 @@
 #include <QAccessibleEvent>
 #include <QCursor>
 
+#include <DStyleHelper>
+
 DWIDGET_USE_NAMESPACE
 
 #define DOCK_SCREEN DockScreen::instance()
@@ -22,6 +25,7 @@ DWIDGET_USE_NAMESPACE
 
 DockPopupWindow::DockPopupWindow(QWidget *parent)
     : DBlurEffectWidget(parent)
+    , m_radius(-1)
     , m_model(false)
     , m_eventMonitor(new XEventMonitor(xEventMonitorService, xEventMonitorPath, QDBusConnection::sessionBus(), this))
     , m_enableMouseRelease(true)
@@ -30,6 +34,9 @@ DockPopupWindow::DockPopupWindow(QWidget *parent)
 {
     setContentsMargins(0, 0, 0, 0);
     m_wmHelper = DWindowManagerHelper::instance();
+    m_windowHandle = new DPlatformWindowHandle(this);
+
+    connect(m_wmHelper, &DWindowManagerHelper::hasCompositeChanged, this, &DockPopupWindow::updateRadius);
 
     setWindowFlags(Qt::ToolTip | Qt::WindowStaysOnTopHint);
     if (Utils::IS_WAYLAND_DISPLAY) {
@@ -59,8 +66,16 @@ QWidget *DockPopupWindow::getContent()
     return m_lastWidget;
 }
 
-void DockPopupWindow::setContent(QWidget *content)
+void DockPopupWindow::setContent(QWidget *content, int radius)
 {
+    if (radius != -1) {
+        setRadius(radius);
+    }
+    else {
+        DStyleHelper dstyle;
+        setRadius(dstyle.pixelMetric(DStyle::PM_FrameRadius));
+    }
+
     if (m_lastWidget)
         m_lastWidget->removeEventFilter(this);
     content->installEventFilter(this);
@@ -91,6 +106,17 @@ void DockPopupWindow::setPosition(Dock::Position position)
 QWidget *DockPopupWindow::extendWidget() const
 {
     return m_extendWidget;
+}
+
+void DockPopupWindow::setRadius(int radius)
+{
+    if (m_radius == radius) {
+        return;
+    }
+
+    m_radius = radius;
+
+    updateRadius();
 }
 
 void DockPopupWindow::show(const QPoint &pos, const bool model)
@@ -209,6 +235,14 @@ bool DockPopupWindow::eventFilter(QObject *o, QEvent *e)
     }
 
     return false;
+}
+
+void DockPopupWindow::updateRadius()
+{
+    const bool hasComposite = m_wmHelper->hasComposite();
+    m_windowHandle->setEnableBlurWindow(hasComposite);
+    m_windowHandle->setTranslucentBackground(hasComposite);
+    m_windowHandle->setWindowRadius((hasComposite ? m_radius : 0) * devicePixelRatioF());
 }
 
 void DockPopupWindow::ensureRaised()

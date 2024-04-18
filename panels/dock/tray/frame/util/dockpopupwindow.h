@@ -12,6 +12,7 @@
 #include <DBlurEffectWidget>
 #include <dregionmonitor.h>
 #include <DWindowManagerHelper>
+#include <DPlatformWindowHandle>
 
 #include <QVBoxLayout>
 #include <QPainter>
@@ -33,10 +34,11 @@ public:
     bool model() const;
 
     QWidget *getContent();
-    void setContent(QWidget *content);
+    void setContent(QWidget *content, int radius = -1);
     void setExtendWidget(QWidget *widget);
     void setPosition(Dock::Position position);
     QWidget *extendWidget() const;
+    void setRadius(int radius);
 
 public slots:
     void show(const QPoint &pos, const bool model = false);
@@ -61,8 +63,10 @@ protected:
 private slots:
     void ensureRaised();
     void onButtonPress(int type, int x, int y, const QString &key);
+    void updateRadius();
 
 private:
+    int m_radius;
     bool m_model;
     QPoint m_lastPoint;
     Dock::Position m_position;
@@ -70,6 +74,7 @@ private:
     XEventMonitor *m_eventMonitor;
     QString m_eventKey;
     DWindowManagerHelper *m_wmHelper;
+    DPlatformWindowHandle *m_windowHandle;
     bool m_enableMouseRelease;
     QWidget *m_extendWidget;
     QPointer<QWidget> m_lastWidget;
