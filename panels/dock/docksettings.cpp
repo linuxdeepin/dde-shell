@@ -16,6 +16,7 @@ const static QString keyHideMode                = "Hide_Mode";
 const static QString keyDockSize                = "Dock_Size";
 const static QString keyItemAlignment           = "Item_Alignment";
 const static QString keyIndicatorStyle          = "Indicator_Style";
+const static QString keyPluginsVisible           = "Plugins_Visible";
 
 namespace dock {
 
@@ -143,6 +144,7 @@ void DockSettings::init()
         m_dockPosition = string2Position(m_dockConfig->value(keyPosition).toString());
         m_alignment = string2ItenAlignment(m_dockConfig->value(keyItemAlignment).toString());
         m_style = string2IndicatorStyle(m_dockConfig->value(keyIndicatorStyle).toString());
+        m_pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
 
         connect(m_dockConfig.data(), &DConfig::valueChanged, this, [this](const QString& key){
             if (keyDockSize == key) {
@@ -170,6 +172,9 @@ void DockSettings::init()
                 if (style == m_style) return;
                 m_style = style;
                 Q_EMIT indicatorStyleChanged(m_style);
+            } else if (keyPluginsVisible == key) {
+                auto pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
+                setPluginsVisible(pluginsVisible);
             }
         });
     } else {
@@ -245,6 +250,21 @@ void DockSettings::setIndicatorStyle(const IndicatorStyle& style)
     m_style = style;
     Q_EMIT indicatorStyleChanged(style);
     addWriteJob(indicatorStyleJob);
+}
+
+QVariantMap DockSettings::pluginsVisible()
+{
+    return m_pluginsVisible;
+}
+
+void DockSettings::setPluginsVisible(const QVariantMap & pluginsVisible)
+{
+    if (m_pluginsVisible == pluginsVisible) {
+        return; 
+    }
+    m_pluginsVisible = pluginsVisible;
+    m_dockConfig->setValue(keyPluginsVisible, QVariant::fromValue(m_pluginsVisible));
+    Q_EMIT pluginsVisibleChanged(m_pluginsVisible);
 }
 
 void DockSettings::addWriteJob(WriteJob job)

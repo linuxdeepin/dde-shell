@@ -51,6 +51,16 @@
 			"description": "",
 			"permissions": "readwrite",
 			"visibility": "private"
-		}
+		},
+    "Plugins_Visible": {
+			"value": {},
+			"serial": 0,
+			"flags": [],
+			"name": "The visibilities of plugins",
+			"name[zh_CN]": "插件可见性",
+			"description": "The loaded plugin which is visible when dock is started.",
+			"permissions": "readwrite",
+			"visibility": "private"
+    }
 	}
 }

@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "docksettings.h"
 #include "dsglobal.h"
 #include "constants.h"
 #include "dockpanel.h"
@@ -19,6 +20,16 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
     , m_searchApplet(nullptr)
 {
     registerPluginInfoMetaType();
+
+    connect(DockSettings::instance(), &DockSettings::pluginsVisibleChanged, this, [this] (const QVariantMap &pluginsVisible) {
+        setPluginVisible("org.deepin.ds.dock.clipboarditem", pluginsVisible);
+        setPluginVisible("org.deepin.ds.dock.searchitem", pluginsVisible);
+    });
+    connect(parent, &DockPanel::rootObjectChanged, this, [this]() {
+        auto pluginsVisible = DockSettings::instance()->pluginsVisible();
+        setPluginVisible("org.deepin.ds.dock.clipboarditem", pluginsVisible);
+        setPluginVisible("org.deepin.ds.dock.searchitem", pluginsVisible);
+    });
 
     // Communicate with the other module
     auto getOtherApplet = [ = ] {
@@ -89,6 +100,22 @@ DS_NAMESPACE::DApplet *DockDBusProxy::applet(const QString &pluginId) const
 QRect DockDBusProxy::geometry()
 {
     return parent()->window() ? parent()->window()->geometry() : QRect();
+}
+
+void DockDBusProxy::setPluginVisible(const QString &pluginId, const QVariantMap &pluginsVisible)
+{
+    if (auto item = applet(pluginId)) {
+        DockItemInfo itemInfo;
+        QMetaObject::invokeMethod(item, "dockItemInfo", Qt::DirectConnection, qReturnArg(itemInfo));
+        QString itemKey = itemInfo.itemKey;
+        if (pluginsVisible.contains(itemKey)) {
+            QMetaObject::invokeMethod(item, "setVisible", Qt::QueuedConnection, pluginsVisible[itemKey].toBool());
+        } else {
+            auto settingPluginsVisible = DockSettings::instance()->pluginsVisible();
+            settingPluginsVisible[itemKey] = true;
+            DockSettings::instance()->setPluginsVisible(settingPluginsVisible);
+        }
+    }
 }
 
 QRect DockDBusProxy::frontendWindowRect()
@@ -235,8 +262,14 @@ void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &item
 {
     if (itemKey == "clipboard" && m_clipboardApplet) {
         QMetaObject::invokeMethod(m_clipboardApplet, "setVisible", Qt::QueuedConnection, visible);
+        auto pluginsVisible = DockSettings::instance()->pluginsVisible();
+        pluginsVisible[itemKey] = visible;
+        DockSettings::instance()->setPluginsVisible(pluginsVisible);
     } else if(itemKey == "search" && m_searchApplet) {
         QMetaObject::invokeMethod(m_searchApplet, "setVisible", Qt::QueuedConnection, visible);
+        auto pluginsVisible = DockSettings::instance()->pluginsVisible();
+        pluginsVisible[itemKey] = visible;
+        DockSettings::instance()->setPluginsVisible(pluginsVisible);
     } else if (m_oldDockApplet) {
         QMetaObject::invokeMethod(m_oldDockApplet, "setItemOnDock", Qt::QueuedConnection, settingKey, itemKey, visible);
     }

@@ -24,6 +24,7 @@ class DockSettings : public QObject
     Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged FINAL)
     Q_PROPERTY(ItemAlignment itemAlignment READ itemAlignment WRITE setItemAlignment NOTIFY itemAlignmentChanged FINAL)
     Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
+    Q_PROPERTY(QVariantMap pluginsVisible READ pluginsVisible WRITE setPluginsVisible NOTIFY pluginsVisibleChanged FINAL)
 
 public:
     static DockSettings* instance();
@@ -33,12 +34,14 @@ public:
     Position position();
     ItemAlignment itemAlignment();
     IndicatorStyle indicatorStyle();
+    QVariantMap pluginsVisible();
 
     void setDockSize(const uint& size);
     void setHideMode(const HideMode& mode);
     void setPosition(const Position& position);
     void setItemAlignment(const ItemAlignment& alignment);
     void setIndicatorStyle(const IndicatorStyle& style);
+    void setPluginsVisible(const QVariantMap & pluginsVisible);
 
 private:
     enum WriteJob {
@@ -61,6 +64,7 @@ Q_SIGNALS:
     void positionChanged(Position position);
     void itemAlignmentChanged(ItemAlignment alignment);
     void indicatorStyleChanged(IndicatorStyle style);
+    void pluginsVisibleChanged(const QVariantMap &pluginsVisible);
 
 private:
     QScopedPointer<DConfig> m_dockConfig;
@@ -72,5 +76,6 @@ private:
     Position m_dockPosition;
     ItemAlignment m_alignment;
     IndicatorStyle m_style;
+    QVariantMap m_pluginsVisible;
 };
 }

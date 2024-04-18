@@ -72,6 +72,7 @@ private:
     QString getAppID(const QString &desktopfile);
     QList<DS_NAMESPACE::DApplet *> appletList(const QString &pluginId) const;
     DS_NAMESPACE::DApplet *applet(const QString &pluginId) const;
+    void setPluginVisible(const QString &pluginId, const QVariantMap &pluginsVisible);
 
     DS_NAMESPACE::DApplet *m_oldDockApplet;
     DS_NAMESPACE::DApplet *m_clipboardApplet;
