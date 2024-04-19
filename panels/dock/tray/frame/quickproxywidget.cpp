@@ -222,8 +222,16 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
         return;
 
     widget = newWidget;
-    widget->setAttribute(Qt::WA_DontShowOnScreen);
+    widget->setAttribute(Qt::WA_NoSystemBackground);
+    widget->setAttribute(Qt::WA_TranslucentBackground);
+    widget->createWinId();
+    widget->windowHandle()->setMask(QRect(500, 500, 1, 1));
     qApp->installEventFilter(q);
+
+    if (q->window()) {
+        widget->windowHandle()->setParent(q->window());
+        widget->setVisible(q->isVisible());
+    }
 
     //     if (widget) {
     // QObject::disconnect(widget, SIGNAL(destroyed()), q, SLOT(_q_removeWidgetSlot()));
@@ -307,18 +315,19 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
     //     posChangeMode = QuickProxyWidgetPrivate::WidgetToProxyMode;
     //     sizeChangeMode = QuickProxyWidgetPrivate::WidgetToProxyMode;
 
-        if ((autoShow && !newWidget->testAttribute(Qt::WA_WState_ExplicitShowHide)) || !newWidget->testAttribute(Qt::WA_WState_Hidden)) {
-            newWidget->show();
-        }
+    // if ((autoShow && !newWidget->testAttribute(Qt::WA_WState_ExplicitShowHide)) || !newWidget->testAttribute(Qt::WA_WState_Hidden)) {
+    // newWidget->show();
+    // newWidget->setAttribute(Qt::WA_WState_Visible, true);
+    // }
 
-        // Copy the state from the widget onto the proxy.
-    #ifndef QT_NO_CURSOR
-        if (newWidget->testAttribute(Qt::WA_SetCursor))
-            q->setCursor(widget->cursor());
-    #endif
-        q->setEnabled(newWidget->isEnabled());
-        q->setVisible(newWidget->isVisible());
-        // q->setLayoutDirection(newWidget->layoutDirection());
+    // Copy the state from the widget onto the proxy.
+#ifndef QT_NO_CURSOR
+    if (newWidget->testAttribute(Qt::WA_SetCursor))
+        q->setCursor(widget->cursor());
+#endif
+    q->setEnabled(newWidget->isEnabled());
+    // q->setVisible(newWidget->isVisible());
+    // q->setLayoutDirection(newWidget->layoutDirection());
     //     if (newWidget->testAttribute(Qt::WA_SetStyle))
     //         q->setStyle(widget->style());
 
@@ -338,7 +347,7 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
     //     sz = newWidget->maximumSize();
     //     q->setMaximumSize(sz.isNull() ? QSizeF() : QSizeF(sz));
 
-        updateProxyGeometryFromWidget();
+    updateProxyGeometryFromWidget();
 
     //     updateProxyInputMethodAcceptanceFromWidget();
 
@@ -346,11 +355,11 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
     //     newWidget->installEventFilter(q);
     // QObject::connect(newWidget, SIGNAL(destroyed()), q, SLOT(_q_removeWidgetSlot()));
 
-        // Changes no longer go only from the widget to the proxy.
-        enabledChangeMode = QuickProxyWidgetPrivate::NoMode;
-        visibleChangeMode = QuickProxyWidgetPrivate::NoMode;
-        posChangeMode = QuickProxyWidgetPrivate::NoMode;
-        sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
+    // Changes no longer go only from the widget to the proxy.
+    enabledChangeMode = QuickProxyWidgetPrivate::NoMode;
+    visibleChangeMode = QuickProxyWidgetPrivate::NoMode;
+    posChangeMode = QuickProxyWidgetPrivate::NoMode;
+    sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
 }
 
 QWidget *QuickProxyWidget::widget() const
@@ -379,6 +388,9 @@ void QuickProxyWidget::setGeometry(const QRectF &rect)
 bool QuickProxyWidget::eventFilter(QObject *object, QEvent *event)
 {
     Q_D(QuickProxyWidget);
+
+    if (event->type() != QEvent::UpdateRequest && object != d->widget)
+        return QQuickPaintedItem::eventFilter(object, event);
 
     if (object->isWidgetType()
         && d->widget->isAncestorOf(qobject_cast<QWidget *> (object))) {
@@ -674,13 +686,36 @@ void QuickProxyWidget::paint(QPainter *painter)
 {
     Q_D(QuickProxyWidget);
 
-    if(d->widget) {
+    if (d->widget) {
         d->widget->render(painter);
     }
 }
 
-void QuickProxyWidget::itemChange(ItemChange, const ItemChangeData &)
+void QuickProxyWidget::itemChange(ItemChange change, const ItemChangeData &data)
 {
+    if (change == ItemSceneChange) {
+        Q_D(QuickProxyWidget);
+        if (d->widget) {
+            if (data.window) {
+                d->widget->windowHandle()->setParent(data.window);
+                d->widget->setVisible(isVisible());
+            } else {
+                d->widget->hide();
+                d->widget->windowHandle()->setParent(nullptr);
+            }
+        }
+    } else if (change == ItemVisibleHasChanged) {
+        Q_D(QuickProxyWidget);
+        if (d->widget) {
+            if (!this->window())
+                return;
+            auto window = d->widget->windowHandle();
+            Q_ASSERT(window);
+            window->setParent(this->window());
+            window->setVisible(data.boolValue);
+        }
+    }
+
     update();
 }
 
