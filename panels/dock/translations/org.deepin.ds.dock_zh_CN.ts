@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_CN">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_CN">
 <context>
     <name>main</name>
     <message>
@@ -19,7 +21,7 @@
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Alignment</source>
-        <translation type="unfinished"/>
+        <translation>应用布局</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="189"/>
@@ -34,12 +36,12 @@
     <message>
         <location filename="../package/main.qml" line="163"/>
         <source>Align Left</source>
-        <translation type="unfinished"/>
+        <translation>靠左</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Align Center</source>
-        <translation type="unfinished"/>
+        <translation>居中</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
