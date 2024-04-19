@@ -2,7 +2,7 @@
 <context>
     <name>dock::SearchItem</name>
     <message>
-        <location filename="../searchitem.cpp" line="48"/>
+        <location filename="../searchitem.cpp" line="47"/>
         <source>GrandSearch</source>
         <translation>Große Suche</translation>
     </message>
@@ -10,7 +10,12 @@
 <context>
     <name>searchitem</name>
     <message>
-        <location filename="../package/searchitem.qml" line="38"/>
+        <location filename="../package/searchitem.qml" line="24"/>
+        <source>search</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../package/searchitem.qml" line="53"/>
         <source>SearchConfig</source>
         <translation>Such-Einstellungen</translation>
     </message>
