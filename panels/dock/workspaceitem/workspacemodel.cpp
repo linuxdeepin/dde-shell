@@ -31,6 +31,8 @@ QVariant WorkspaceModel::data(const QModelIndex &index, int role) const
 
     auto item = m_items[index.row()];
     switch (role) {
+    case WorkspaceModel::NameRole:
+        return item->name();
     case WorkspaceModel::ImageRole:
         return item->image();
     }
@@ -40,7 +42,8 @@ QVariant WorkspaceModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> WorkspaceModel::roleNames() const
 {
     return {
-        {WorkspaceModel::ImageRole, "screenImage"},
+            {WorkspaceModel::NameRole, "workspaceName"},
+            {WorkspaceModel::ImageRole, "screenImage"},
         };
 }
 

@@ -4,12 +4,6 @@
 #include "xworkspaceworker.h"
 #include "workspacemodel.h"
 
-#include <QDBusReply>
-#include <QGuiApplication>
-#include <QScreen>
-#include <QMetaMethod>
-#include <QDBusConnectionInterface>
-#include <QTimer>
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(workspaceItem, "dde.shell.dock.workspaceItem")
@@ -18,9 +12,12 @@ namespace dock {
 
 XWorkspaceWorker::XWorkspaceWorker(WorkspaceModel *model)
     : QObject(model)
-    , m_inter(new QDBusInterface("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm"))
+    , m_interKwinProp(new QDBusInterface("org.kde.KWin", "/VirtualDesktopManager", "org.freedesktop.DBus.Properties", QDBusConnection::sessionBus(), this))
     , m_model(model)
+    , m_currentIndex(0)
 {
+    qDBusRegisterMetaType<DBusDesktopDataStruct>();
+    qDBusRegisterMetaType<DBusDesktopDataVector>();
     updateData();
 
     QDBusConnection bus = QDBusConnection::sessionBus();
@@ -29,56 +26,62 @@ XWorkspaceWorker::XWorkspaceWorker(WorkspaceModel *model)
         return;
     }
 
-    bus.connect("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", "workspaceCountChanged", this, SLOT(updateData()));
-    bus.connect("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", "WorkspaceSwitched", this, SLOT(updateData()));
-    bus.connect("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", "WorkspaceBackgroundChangedForMonitor", this, SLOT(updateData()));
-    bus.connect("com.deepin.wm", "/com/deepin/wm", "com.deepin.wm", "WorkspaceBackgroundChanged", this, SLOT(updateData()));
+    bus.connect("org.kde.KWin", "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager", "currentChanged", this, SLOT(updateData()));
+    bus.connect("org.kde.KWin", "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager", "desktopsChanged", this, SLOT(updateData()));
+    bus.connect("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1", "org.deepin.dde.Appearance1", "Changed", this, SLOT(appearanceChanged(const QString,const QString)));
     connect(m_model, &WorkspaceModel::currentIndexChanged, this, &XWorkspaceWorker::setIndex);
 }
 
 void XWorkspaceWorker::setIndex(int index)
 {
-    QDBusReply<int> resIndex = m_inter->call("GetCurrentWorkspace");
-    if (resIndex.error().message().isEmpty() && m_model->currentIndex() + 1 != resIndex.value()) {
-        m_inter->call("SetCurrentWorkspace", index + 1);
-    } else {
-        qCWarning(workspaceItem) << "GetCurrentWorkspace failed:" << resIndex.error().message();
-        return;
-    }
+    if (m_desktops.count() > index && m_currentIndex != index)
+        m_interKwinProp->call("Set", "org.kde.KWin.VirtualDesktopManager", "current", QVariant::fromValue(QDBusVariant(m_desktops[index].id)));
+}
+
+void XWorkspaceWorker::appearanceChanged(const QString &changedStr, const QString &value)
+{
+    if ("allwallpaperuris" == changedStr)
+        updateData();
 }
 
 void XWorkspaceWorker::updateData()
 {
-    int count = 0;
-    QDBusReply<int> resCount = m_inter->call("WorkspaceCount");
-    if (resCount.error().message().isEmpty()) {
-        count = resCount.value();
+    QDBusMessage reply = m_interKwinProp->call("Get", "org.kde.KWin.VirtualDesktopManager", "desktops");
+    if (reply.type() == QDBusMessage::ReplyMessage) {
+        QVariant result = reply.arguments().at(0);
+        m_desktops = qdbus_cast<DBusDesktopDataVector>(result.value<QDBusVariant>().variant().value<QDBusArgument>());
     } else {
-        qCWarning(workspaceItem) << "WorkspaceCount failed:" << resCount.error().message();
-        return;
+        qCWarning(workspaceItem) << "Error calling desktops";
     }
 
+    reply = m_interKwinProp->call("Get", "org.kde.KWin.VirtualDesktopManager", "current");
+
+    if (reply.type() == QDBusMessage::ReplyMessage) {
+        QVariant result = reply.arguments().at(0);
+        m_currentId = result.value<QDBusVariant>().variant().toString();
+    } else {
+        qCWarning(workspaceItem) << "Error calling current";
+    }
+
+
+
     QList<WorkSpaceData*> items;
-    for (int i = 1; i <= count; ++i) {
+    for (int i = 0; i < m_desktops.count(); ++i) {
         QString image;
-        QDBusReply<QString> res = m_inter->call("GetWorkspaceBackgroundForMonitor", i, QGuiApplication::primaryScreen()->name());
-        if (res.error().message().isEmpty()) {
-            image = res.value();
-        } else {
-            qCWarning(workspaceItem) << "GetWorkspaceBackgroundForMonitor failed:" << res.error().message();
-            return;
+        if (m_desktops[i].id == m_currentId) {
+            m_currentIndex = i;
+            QDBusReply<QString> res = QDBusInterface("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1", "org.deepin.dde.Appearance1").call("GetCurrentWorkspaceBackground");
+            if (res.error().message().isEmpty()) {
+                image = res.value();
+            } else {
+                qCWarning(workspaceItem) << "GetWorkspaceBackgroundForMonitor failed:" << res.error().message();
+                return;
+            }
         }
-        auto item = new WorkSpaceData(image);
+        auto item = new WorkSpaceData(m_desktops[i].name, image);
         items.append(item);
     }
     m_model->setItems(items);
-    QDBusReply<int> index = m_inter->call("GetCurrentWorkspace");
-    if (index.error().message().isEmpty()) {
-        qWarning() << "m_model->setCurrentIndex(index.value() - 1) " <<  index.value();
-        m_model->setCurrentIndex(index.value() - 1);
-    } else {
-        qCWarning(workspaceItem) << "GetCurrentWorkspace failed:" << index.error().message();
-        return;
-    }
+    m_model->setCurrentIndex(m_currentIndex);
 }
 }
