@@ -921,7 +921,7 @@ void QuickDockItem::mousePressEvent(QMouseEvent *event)
     }
 
     if (!m_contextMenu->actions().isEmpty()) {
-        m_contextMenu->exec(QCursor::pos());
+        m_contextMenu->popup(QCursor::pos());
     }
 
     return QWidget::mousePressEvent(event);
