@@ -42,8 +42,9 @@ ContainmentItem {
                 required property list<string> windows
 
                 // TODO: 临时溢出逻辑，待后面修改
-                implicitWidth: Panel.rootObject.dockItemMaxSize
-                implicitHeight: Panel.rootObject.dockItemMaxSize
+                // 1:4 the distance between app : dock height; get width/height≈0.8
+                implicitWidth: useColumnLayout ? Panel.rootObject.dockItemMaxSize : Panel.rootObject.dockItemMaxSize * 0.8
+                implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 0.8 : Panel.rootObject.dockItemMaxSize
 
                 onEntered: function(drag) {
                     visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)

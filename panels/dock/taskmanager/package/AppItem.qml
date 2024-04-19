@@ -32,8 +32,9 @@ Item {
     Drag.dragType: Drag.Automatic
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId }
 
-    property int statusIndicatorSize: root.width * 0.8
-    property int iconSize: Panel.rootObject.itemIconSizeBase * 0.64
+    property bool useColumnLayout: Panel.position % 2
+    property int statusIndicatorSize: useColumnLayout ? root.width * 0.74 : root.height * 0.74
+    property int iconSize: Panel.rootObject.itemIconSizeBase * 0.643 // 9:14 (iconSize/dockHeight)
 
     property var iconGlobalPoint: {
         var a = icon
@@ -89,38 +90,31 @@ Item {
                 windowIndicator.anchors.rightMargin = 0
                 windowIndicator.anchors.horizontalCenter = undefined
                 windowIndicator.anchors.verticalCenter = undefined
+                let fixedDistance = 2
 
                 switch(Panel.position) {
                 case Dock.Top: {
                     windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
                     windowIndicator.anchors.top = parent.top
-                    windowIndicator.anchors.topMargin = Qt.binding(function() {
-                        return Math.floor(root.width * 0.1) - 1
-                    })
+                    windowIndicator.anchors.topMargin = fixedDistance
                     return
                 }
                 case Dock.Bottom: {
                     windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
                     windowIndicator.anchors.bottom = parent.bottom
-                    windowIndicator.anchors.bottomMargin = Qt.binding(function() {
-                        return Math.floor(root.width * 0.1) - 1
-                    })
+                    windowIndicator.anchors.bottomMargin = fixedDistance
                     return
                 }
                 case Dock.Left: {
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
                     windowIndicator.anchors.left = parent.left
-                    windowIndicator.anchors.leftMargin = Qt.binding(function() {
-                        return Math.floor(root.width * 0.1) - 1
-                    })
+                    windowIndicator.anchors.leftMargin = fixedDistance
                     return
                 }
                 case Dock.Right:{
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
                     windowIndicator.anchors.right = parent.right
-                    windowIndicator.anchors.rightMargin = Qt.binding(function() {
-                        return Math.floor(root.width * 0.1) - 1
-                    })
+                    windowIndicator.anchors.rightMargin = fixedDistance
                     return
                 }
                 }
