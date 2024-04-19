@@ -34,7 +34,7 @@
 
 Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPreview")
 
-#define PREVIEW_TITLE_HEGIHT 20
+#define PREVIEW_TITLE_HEIGHT 20
 #define PREVIEW_CONTENT_HEIGHT 122
 #define PREVIEW_CONTENT_WIDTH 212
 #define PREVIEW_HOVER_BORDER 4
@@ -48,6 +48,42 @@ enum {
     WindowTitleRole,
     WindowIconRole,
     WindowPreviewContentRole,
+};
+
+class PreviewsListView : public QListView
+{
+public:
+    using QListView::QListView;
+
+    QSize viewportSizeHint() const override
+    {
+        QSize size(0, 0);
+        int count = model()->rowCount();
+        for (int row = 0; row < count; row++) {
+            QModelIndex index = model()->index(row, 0);
+
+            QSize s = sizeHintForIndex(index);
+            if (flow() == Flow::LeftToRight) {
+                size.rwidth() += s.width();
+                if (size.height() < s.height()) {
+                    size.setHeight(s.height());
+                }
+            } else {
+                size.rheight() += s.height();
+                if (size.width() < s.width()) {
+                    size.setWidth(s.width());
+                }
+            }
+        }
+
+        if (flow() == Flow::LeftToRight) {
+            size.rwidth() += spacing() * count * 2;
+        } else {
+            size.rheight() += spacing() * count * 2;
+        }
+
+        return size;
+    }
 };
 
 class AppItemWindowModel : public QAbstractListModel
@@ -157,7 +193,9 @@ private:
         QImage image(reinterpret_cast<uchar *>(fileContent.data()), imageWidth, imageHeight, imageStride, qimageFormat);
         // close read
         ::close(fd[0]);
-        return QPixmap::fromImage(image);
+        auto pixmap = QPixmap::fromImage(image);
+
+        return pixmap;
     }
 
 private:
@@ -179,15 +217,25 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
+        QRect hoverRect = option.rect;
         if (WM_HELPER->hasComposite()) {
-            auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>(); 
-            auto size = pixmap.size().scaled(option.rect.size() - QSize(8, 8), Qt::KeepAspectRatio);
-            QRect imageRect((option.rect.left() + (option.rect.width() - size.width()) / 2), (option.rect.top() + (option.rect.height() - size.height()) / 2), size.width(), size.height());
+            auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
+            auto size = calSize(pixmap.size()); 
+
+            QRect imageRect((option.rect.left() + PREVIEW_HOVER_BORDER), (option.rect.top() + PREVIEW_HOVER_BORDER), size.width(), size.height());
             painter->drawPixmap(imageRect, pixmap);
+
+            hoverRect.setSize(QSize(size.width() + PREVIEW_HOVER_BORDER * 2, size.height() + PREVIEW_HOVER_BORDER * 2));
         } else {
-            auto rect = option.rect.marginsAdded(QMargins(-4,-4, 4, 4));
-            auto text = QFontMetrics(m_parent->font()).elidedText(index.data(WindowTitleRole).toString(), Qt::TextElideMode::ElideRight, rect.width() - PREVIEW_TITLE_HEGIHT);
+            auto rect = QRect((option.rect.left()),
+                                    (option.rect.top()),
+                                    PREVIEW_CONTENT_WIDTH + PREVIEW_HOVER_BORDER * 2,
+                                    PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2)
+                                .marginsAdded(QMargins(-PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER));
+            auto text = QFontMetrics(m_parent->font()).elidedText(index.data(WindowTitleRole).toString(), Qt::TextElideMode::ElideRight, rect.width() - PREVIEW_TITLE_HEIGHT);
             painter->drawText(rect, text);
+
+            hoverRect.setSize(QSize(PREVIEW_CONTENT_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2));
         }
 
         if (!option.state.testFlag(QStyle::State_MouseOver)) {
@@ -205,7 +253,7 @@ public:
         pen.setWidth(PREVIEW_HOVER_BORDER);
         pen.setColor(QColor(0, 0, 0, 255 * 0.3));
         painter->setPen(pen);
-        auto hoverRect = option.rect.marginsAdded(QMargins(-2,-2,-2,-2));
+        hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
         if (WM_HELPER->hasComposite()) {
             painter->drawRoundedRect(hoverRect, radius, radius);
         } else {
@@ -216,15 +264,20 @@ public:
 
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        return QSize(PREVIEW_CONTENT_WIDTH, WM_HELPER->hasComposite() ? PREVIEW_CONTENT_HEIGHT : (PREVIEW_TITLE_HEGIHT + 8));
+        if (!WM_HELPER->hasComposite()) {
+            return QSize(PREVIEW_CONTENT_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2);
+        }
+
+        auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
+        return calSize(pixmap.size()) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2); 
     }
 
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         auto closeButton = new DIconButton(parent);
         closeButton->setIconSize(QSize(16, 16));
-        closeButton->setFixedSize(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT);
-        closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEGIHT + 4, -4));
+        closeButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+        closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + 4, -4));
         closeButton->setVisible(true);
         closeButton->setIcon(DDciIcon::fromTheme("close"));
         closeButton->setFlat(true);
@@ -238,6 +291,19 @@ public:
 
         return closeButton;
     }
+
+private:
+    QSize calSize(const QSize &imageSize) const
+    {
+        qreal factor;
+        if (m_listView->flow() == QListView::LeftToRight) {
+            factor = qreal(PREVIEW_CONTENT_HEIGHT) / imageSize.height();
+        } else {
+            factor = qreal(PREVIEW_CONTENT_WIDTH) / imageSize.width();
+        }
+        return imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
+    }
+
 };
 
 X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, QWidget *parent)
@@ -275,13 +341,13 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
 
         if (strs.size() == 2) {
             pix.loadFromData(QByteArray::fromBase64(strs.at(1).toLatin1()));
-            pix = pix.scaled(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT);
+            pix = pix.scaled(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
         }
 
         if (!pix.isNull()) {
             m_previewIcon->setPixmap(pix);
         } else {
-            m_previewIcon->setPixmap(QIcon::fromTheme(m_previewItem->icon()).pixmap(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT));
+            m_previewIcon->setPixmap(QIcon::fromTheme(m_previewItem->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
         }
 
         updatePreviewTitle(enter.data(WindowTitleRole).toString());
@@ -302,7 +368,7 @@ void X11WindowPreviewContainer::showPreview(const QPointer<AppItem> &item, const
     m_direction = direction;
 
     m_isDockPreviewCount += 1;
-    m_previewIcon->setPixmap(QIcon::fromTheme(item->icon()).pixmap(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT));
+    m_previewIcon->setPixmap(QIcon::fromTheme(item->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
     updatePreviewTitle(item->name());
     m_model->setData(item);
 
@@ -324,6 +390,8 @@ void X11WindowPreviewContainer::updateOrientation()
     } else {
         m_view->setFlow(QListView::TopToBottom);
     }
+
+    updateSize();
 }
 
 void X11WindowPreviewContainer::callHide()
@@ -425,20 +493,20 @@ void X11WindowPreviewContainer::updatePreviewTitle(const QString& title)
 
 void X11WindowPreviewContainer::initUI()
 {
-    m_view = new QListView;
+    m_view = new PreviewsListView;
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* titleLayout = new QHBoxLayout;
     titleLayout->setContentsMargins(11, 0, 5, 0);
 
     m_previewIcon = new QLabel;
     m_previewTitle = new QLabel;
-    m_previewTitle->setFixedHeight(PREVIEW_TITLE_HEGIHT);
-    m_previewIcon->setFixedSize(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT);
+    m_previewTitle->setFixedHeight(PREVIEW_TITLE_HEIGHT);
+    m_previewIcon->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
 
     m_closeAllButton = new DIconButton(this);
     m_closeAllButton->setIconSize(QSize(16, 16));
     m_closeAllButton->setIcon(DDciIcon::fromTheme("close"));
-    m_closeAllButton->setFixedSize(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT);
+    m_closeAllButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
     m_closeAllButton->setFlat(true);
 
     m_previewIcon->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -469,6 +537,7 @@ void X11WindowPreviewContainer::initUI()
     m_view->setFrameStyle(QFrame::NoFrame);
     m_view->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
     m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    m_view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
     QPalette pal = m_view->palette();
     pal.setColor(QPalette::Base, Qt::transparent);
@@ -477,6 +546,8 @@ void X11WindowPreviewContainer::initUI()
     mainLayout->addLayout(titleLayout);
     mainLayout->addWidget(m_view);
     setLayout(mainLayout);
+
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
 
 void X11WindowPreviewContainer::updateSize()
@@ -487,23 +558,13 @@ void X11WindowPreviewContainer::updateSize()
     }
 
     auto screenSize = screen()->size();
-    int height = 0, width = 0;
+    screenSize -= QSize(m_direction % 2 == 0 ? 0 : m_baseWindow->width() + 20, m_direction % 2 == 0 ? m_baseWindow->height() + 20 : 0);
 
-    if (WM_HELPER->hasComposite()) {
-        if (m_direction % 2 == 0) {
-            width = (PREVIEW_CONTENT_WIDTH + 2) * m_previewItem->getAppendWindows().size() + 20;
-            height = 168;
-        } else {
-            width = 260;
-            height = (PREVIEW_CONTENT_HEIGHT + 2) * m_previewItem->getAppendWindows().size() + 25 + PREVIEW_TITLE_HEGIHT;
-        }
-    } else {
-        height = (PREVIEW_TITLE_HEGIHT + 10) * m_previewItem->getAppendWindows().size() + 25 + PREVIEW_TITLE_HEGIHT;
-        width = 260;
-    }
+    setMaximumSize(screenSize);
+    setMinimumSize(0, 0);
 
-    screenSize -= QSize(m_direction % 2 == 0 ? 0 : m_baseWindow->width(), m_direction % 2 == 0 ? m_baseWindow->height() : 0);
-    setFixedSize(std::min(width, screenSize.width() - 20), std::min(height, screenSize.height() - 20));
+    m_view->updateGeometry();
+    adjustSize();
 }
 
 bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
@@ -519,7 +580,7 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
         m_closeAllButton->setVisible(true);
         if (m_previewItem.isNull()) return false;
 
-        m_previewIcon->setPixmap(QIcon::fromTheme(m_previewItem->icon()).pixmap(PREVIEW_TITLE_HEGIHT, PREVIEW_TITLE_HEGIHT));
+        m_previewIcon->setPixmap(QIcon::fromTheme(m_previewItem->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
         updatePreviewTitle(m_previewItem->name());
         break;
     }

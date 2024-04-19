@@ -22,6 +22,7 @@ namespace dock {
 class X11WindowMonitor;
 class AppItemWindowModel;
 class AppItemWindowDeletegate;
+class PreviewsListView;
 
 class X11WindowPreviewContainer: public DBlurEffectWidget
 {
@@ -59,7 +60,7 @@ private:
     X11WindowMonitor* m_monitor;
 
     AppItemWindowModel* m_model;
-    QListView* m_view;
+    PreviewsListView* m_view;
 
     QLabel* m_previewIcon;
     QLabel* m_previewTitle;
