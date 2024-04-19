@@ -220,12 +220,12 @@ void PowerPlugin::refreshTipsData()
 
     if (batteryState == BatteryState::DIS_CHARGING || batteryState == BatteryState::NOT_CHARGED || batteryState == BatteryState::UNKNOWN) {
         QString tips;
-        // qulonglong timeToEmpty = m_systemPowerInter->batteryTimeToEmpty();
-        QDateTime time/* = QDateTime::fromTime_t(timeToEmpty).toUTC()*/; //TODO
-        uint hour = time.toString("hh").toUInt();
-        uint min = time.toString("mm").toUInt();
-        uint sencond = time.toString("ss").toInt();
-        if (sencond > 0)
+        qulonglong timeToEmpty = m_systemPowerInter->batteryTimeToEmpty();
+        uint hour = timeToEmpty / 3600;
+        uint remainingSeconds = timeToEmpty % 3600;
+        uint min = remainingSeconds / 60;
+        uint second = remainingSeconds % 60;
+        if (second > 0)
             min += 1;
         if (!m_showTimeToFull) {
             tips = tr("Capacity %1").arg(value);
@@ -241,9 +241,8 @@ void PowerPlugin::refreshTipsData()
         m_tipsLabel->setText(tr("Capacity %1, fully charged").arg(value));
     } else {
         qulonglong timeToFull = m_systemPowerInter->batteryTimeToFull();
-        QDateTime time;/* = QDateTime::fromTime_t(timeToFull).toUTC()*/ // TODO;
-        uint hour = time.toString("hh").toUInt();
-        uint min = time.toString("mm").toUInt();
+        uint hour = timeToFull / 3600;
+        uint min = timeToFull % 3600 / 60;
         QString tips;
         if (!m_showTimeToFull) {
             tips = tr("Charging %1").arg(value);

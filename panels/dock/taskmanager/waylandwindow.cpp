@@ -191,6 +191,11 @@ void WaylandWindow::killClient()
     m_foreignToplevelHandle->close();
 }
 
+void WaylandWindow::setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry)
+{
+
+}
+
 void WaylandWindow::updatePid()
 {
 

@@ -143,6 +143,16 @@ void TaskManager::hideItemPreview()
     m_windowMonitor->hideItemPreview();
 }
 
+void TaskManager::setAppItemWindowIconGeometry(const QString& appid, QObject* relativePositionItem, const int& x1, const int& y1, const int& x2, const int& y2)
+{
+    QPointer<AppItem> item = static_cast<AppItem*>(ItemModel::instance()->getItemById(appid).get());
+    if (item.isNull()) return;
+
+    for (auto window : item->getAppendWindows()) {
+        window->setWindowIconGeometry(qobject_cast<QWindow*>(relativePositionItem), QRect(QPoint(x1, y1),QPoint(x2, y2)));
+    }
+}
+
 void TaskManager::loadDockedAppItems()
 {
     // TODO: add support for group and dir type

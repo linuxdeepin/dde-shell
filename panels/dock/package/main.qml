@@ -157,16 +157,15 @@ Window {
                 value: Dock.Efficient
             }
         }
-        // TODO: Mode-> Alignment, Fashion -> Center, Efficient -> left
         MutuallyExclusiveMenu {
-            title: qsTr("Mode")
+            title: qsTr("Alignment")
             EnumPropertyMenuItem {
-                name: qsTr("Efficient Mode")
+                name: qsTr("Align Left")
                 prop: "itemAlignment"
                 value: Dock.LeftAlignment
             }
             EnumPropertyMenuItem {
-                name: qsTr("Fashion Mode")
+                name: qsTr("Align Center")
                 prop: "itemAlignment"
                 value: Dock.CenterAlignment
             }
@@ -211,7 +210,7 @@ Window {
                 value: Dock.KeepHidden
             }
             EnumPropertyMenuItem {
-                visible: Panel.debugMode
+                enabled: Panel.debugMode
                 name: qsTr("Smart Hide")
                 prop: "hideMode"
                 value: Dock.SmartHide
@@ -264,6 +263,11 @@ Window {
         rowSpacing: 0
 
         Item {
+            implicitWidth: 10
+            implicitHeight: 10
+        }
+
+        Item {
             id: dockLeftPart
             implicitWidth: leftLoader.implicitWidth
             implicitHeight: leftLoader.implicitHeight
@@ -271,6 +275,7 @@ Window {
                 id: leftLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
+                spacing: 10
                 model: DockPartAppletModel {
                     id: dockLeftPartModel
                     leftDockOrder: 0

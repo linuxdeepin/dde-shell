@@ -64,6 +64,7 @@ public:
     void killClient(const xcb_window_t& window);
     void setActiveWindow(const xcb_window_t& window);
     void restackWindow(const xcb_window_t& window);
+    void setWindowIconGemeotry(const xcb_window_t& window, const QRect& geometry);
 
 private:
     X11Utils();

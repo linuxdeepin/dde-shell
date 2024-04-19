@@ -87,6 +87,7 @@ public:
     void maxmize() override;
     void minimize() override;
     void killClient() override;
+    void setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry) override;
 
 private:
     void updatePid() override;

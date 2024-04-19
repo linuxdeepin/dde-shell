@@ -4,7 +4,7 @@
 <context>
     <name>notification::BubbleItem</name>
     <message>
-        <location filename="../bubblemodel.cpp" line="328"/>
+        <location filename="../bubblemodel.cpp" line="327"/>
         <source>1 new message</source>
         <translation type="unfinished"></translation>
     </message>

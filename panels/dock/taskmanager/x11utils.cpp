@@ -6,7 +6,6 @@
 #include "dsglobal.h"
 
 #include <cstddef>
-#include <qloggingcategory.h>
 #include <unistd.h>
 #include <xcb/xcb.h>
 #include <xcb/res.h>
@@ -314,4 +313,11 @@ void X11Utils::restackWindow(const xcb_window_t& window)
 {
     xcb_ewmh_request_restack_window(&m_ewmh, 0, window, 0, XCB_STACK_MODE_ABOVE);
 }
+
+void X11Utils::setWindowIconGemeotry(const xcb_window_t& window, const QRect& geometry)
+{
+    const auto ratio = qApp->devicePixelRatio();
+    xcb_ewmh_set_wm_icon_geometry(&m_ewmh, window, geometry.x() * ratio, geometry.y() * ratio, geometry.width() * ratio, geometry.height() * ratio);
+}
+
 }

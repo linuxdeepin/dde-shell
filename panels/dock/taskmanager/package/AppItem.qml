@@ -36,6 +36,18 @@ Item {
     property int statusIndicatorSize: useColumnLayout ? root.width * 0.74 : root.height * 0.74
     property int iconSize: Panel.rootObject.itemIconSizeBase * 0.643 // 9:14 (iconSize/dockHeight)
 
+    property var iconGlobalPoint: {
+        var a = icon
+        var x = 0, y = 0
+        while(a.parent) {
+            x += a.x
+            y += a.y
+            a = a.parent
+        }
+
+        return Qt.point(x, y)
+    }
+
     Item {
         anchors.fill: parent
         id: appItem
@@ -116,6 +128,7 @@ Item {
         Connections {
             function onPositionChanged() {
                 windowIndicator.updateIndicatorAnchors()
+                updateWindowIconGeometryTimer.start()
             }
             target: Panel
         }
@@ -157,6 +170,17 @@ Item {
         }
     }
 
+    Timer {
+        id: updateWindowIconGeometryTimer
+        interval: 500
+        running: false
+        repeat: false
+        onTriggered: {
+            taskmanager.Applet.setAppItemWindowIconGeometry(root.itemId, Panel.rootObject, iconGlobalPoint.x, iconGlobalPoint.y,
+                iconGlobalPoint.x + icon.width, iconGlobalPoint.y + icon.height)
+        }
+    }
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
@@ -169,6 +193,7 @@ Item {
                     root.Drag.imageSource = result.url;
                 })
             }
+            toolTip.close()
         }
         onClicked: function (mouse) {
             if (mouse.button === Qt.RightButton) {
@@ -182,7 +207,14 @@ Item {
         }
 
         onEntered: {
-            if (windows.length === 0) return
+            if (windows.length === 0) {
+                var point = root.mapToItem(null, root.width / 2, 0)
+                toolTip.toolTipX = point.x
+                toolTip.toolTipY = point.y
+                toolTip.open()
+                return
+            }
+
             var itemPos = root.mapToItem(null, 0, 0)
             let xOffset, yOffset, interval = 10
             if (Panel.position % 2 === 0) {
@@ -196,8 +228,24 @@ Item {
         }
 
         onExited: {
-            if (windows.length === 0) return
+            if (windows.length === 0) {
+                toolTip.close()
+                return
+            }
             taskmanager.Applet.hideItemPreview()
         }
+
+        PanelToolTip {
+            id: toolTip
+            text: root.name
+        }
+    }
+
+    onWindowsChanged: {
+        updateWindowIconGeometryTimer.start()
+    }
+
+    onIconGlobalPointChanged: {
+        updateWindowIconGeometryTimer.start()
     }
 }
