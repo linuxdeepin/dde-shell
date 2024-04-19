@@ -9,6 +9,8 @@ add_library(dock-workspaceitem SHARED
     workspacemodel.cpp
     xworkspaceworker.h
     xworkspaceworker.cpp
+    desktops.h
+    desktops.cpp
 )
 
 target_link_libraries(dock-workspaceitem PRIVATE

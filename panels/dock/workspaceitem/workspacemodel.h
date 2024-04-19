@@ -4,8 +4,6 @@
 #ifndef WORKSPACEMODEL_H
 #define WORKSPACEMODEL_H
 
-#include "dsglobal.h"
-
 #include <QAbstractListModel>
 #include <QPointer>
 namespace dock {
@@ -13,15 +11,20 @@ namespace dock {
 class WorkSpaceData
 {
 public:
-    WorkSpaceData(QString image)
-        : m_image(image)
+    WorkSpaceData(QString name, QString image)
+        : m_name(name)
+        , m_image(image)
     {
         
+    }
+    QString name() {
+        return m_name;
     }
     QString image() {
         return m_image;
     }
 private:
+    QString m_name;
     QString m_image;
 };
 
@@ -30,7 +33,8 @@ class WorkspaceModel : public QAbstractListModel
     Q_OBJECT
 public:
     enum Roles {
-        ImageRole = Qt::UserRole + 1,
+        NameRole = Qt::UserRole + 1,
+        ImageRole,
     };
     Q_ENUM(Roles)
 

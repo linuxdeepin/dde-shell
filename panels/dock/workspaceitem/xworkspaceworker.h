@@ -4,10 +4,9 @@
 #ifndef XWORKSPACEWORKER_H
 #define XWORKSPACEWORKER_H
 
-#include "dsglobal.h"
+#include "desktops.h"
 
 #include <QObject>
-#include <QDBusInterface>
 namespace dock {
 class WorkspaceModel;
 class XWorkspaceWorker : public QObject
@@ -19,11 +18,16 @@ public:
 public slots:
     void updateData();
     void setIndex(int index);
+    void appearanceChanged(const QString &changedStr, const QString &value);
 signals:
 
 private:
-    QDBusInterface *m_inter;
+    QDBusInterface *m_interKwinProp;
     WorkspaceModel *m_model;
+
+    DBusDesktopDataVector m_desktops;
+    QString m_currentId;
+    int m_currentIndex;
 };
 }
 #endif // XWORKSPACEWORKER_H

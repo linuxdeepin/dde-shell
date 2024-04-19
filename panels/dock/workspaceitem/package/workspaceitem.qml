@@ -34,6 +34,7 @@ AppletItem {
     component WorkspaceDelegate: Item {
         id: content
         required property int index
+        required property string workspaceName
         required property string screenImage
         property bool isCurrent: content.ListView.view.currentIndex === content.index
 
@@ -57,11 +58,27 @@ AppletItem {
             }
             MouseArea {
                 anchors.fill: parent
+                hoverEnabled: true
                 onClicked: {
                     Applet.dataModel.currentIndex =  content.index
                 }
+                onEntered: {
+                    var point = content.mapToItem(null, content.width / 2, 0)
+                    toolTip.toolTipX = point.x
+                    toolTip.toolTipY = point.y
+                    toolTip.text = workspaceName
+                    toolTip.open()
+                }
+
+                onExited: {
+                    toolTip.close()
+                }
             }
         }
+    }
+
+    PanelToolTip {
+        id: toolTip
     }
 
     Rectangle {
