@@ -366,6 +366,11 @@ Window {
         }
 
         onPressed: function(mouse) {
+            var launcheritem = DS.applet("org.deepin.ds.launchpad")
+            if (!launcheritem) {
+                return
+            }
+            launcheritem.rootObject.hide()
             dock.isDragging = true
             oldMouseY = mouse.y
             oldMouseX = mouse.x
