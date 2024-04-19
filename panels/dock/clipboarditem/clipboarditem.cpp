@@ -8,6 +8,7 @@
 
 #include <DDBusSender>
 #include <DDciIcon>
+#include <DGuiApplicationHelper>
 
 #include <QGuiApplication>
 #include <QBuffer>
@@ -44,14 +45,28 @@ DockItemInfo ClipboardItem::dockItemInfo()
     info.settingKey = "clipboard";
     info.visible = m_visible;
     {
-        auto lightPixmap = DDciIcon::fromTheme("clipboard").pixmap(qApp->devicePixelRatio(), 30, DDciIcon::Light);
+        const auto lightPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::LightType);
+        auto lightPixmap = DDciIcon::fromTheme("clipboard").pixmap(
+            qApp->devicePixelRatio(),
+            30,
+            DDciIcon::Light,
+            DDciIcon::Normal,
+            DDciIconPalette::fromQPalette(lightPalette)
+            );
         QBuffer buffer(&info.iconLight);
         if (buffer.open(QIODevice::WriteOnly)) {
             lightPixmap.save(&buffer, "png");
         }
     }
     {
-        auto darkPixmap = DDciIcon::fromTheme("clipboard").pixmap(qApp->devicePixelRatio(), 30, DDciIcon::Dark);
+        const auto darkPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::DarkType);
+        auto darkPixmap = DDciIcon::fromTheme("clipboard").pixmap(
+            qApp->devicePixelRatio(),
+            30,
+            DDciIcon::Dark,
+            DDciIcon::Normal,
+            DDciIconPalette::fromQPalette(darkPalette)
+            );
         QBuffer buffer(&info.iconDark);
         if (buffer.open(QIODevice::WriteOnly)) {
             darkPixmap.save(&buffer, "png");
