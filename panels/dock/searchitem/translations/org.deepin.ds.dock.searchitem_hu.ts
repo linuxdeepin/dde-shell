@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="hu">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="hu">
 <context>
     <name>dock::SearchItem</name>
     <message>
@@ -12,13 +10,9 @@
 <context>
     <name>searchitem</name>
     <message>
-        <source>search</source>
-        <translation type="vanished">Keresés</translation>
-    </message>
-    <message>
         <location filename="../package/searchitem.qml" line="24"/>
         <source>GrandSearch</source>
-        <translation type="unfinished">Részletes keresés</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../package/searchitem.qml" line="53"/>
