@@ -12,9 +12,13 @@
 <context>
     <name>searchitem</name>
     <message>
-        <location filename="../package/searchitem.qml" line="24"/>
         <source>search</source>
-        <translation>launcheritem</translation>
+        <translation type="vanished">launcheritem</translation>
+    </message>
+    <message>
+        <location filename="../package/searchitem.qml" line="24"/>
+        <source>GrandSearch</source>
+        <translation>全局搜索</translation>
     </message>
     <message>
         <location filename="../package/searchitem.qml" line="53"/>

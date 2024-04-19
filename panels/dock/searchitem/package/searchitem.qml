@@ -21,7 +21,7 @@ AppletItem {
 
     PanelToolTip {
         id: toolTip
-        text: qsTr("search")
+        text: qsTr("GrandSearch")
     }
 
     D.ToolButton {

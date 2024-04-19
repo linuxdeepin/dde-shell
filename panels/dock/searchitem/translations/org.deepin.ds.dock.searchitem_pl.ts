@@ -13,8 +13,8 @@
     <name>searchitem</name>
     <message>
         <location filename="../package/searchitem.qml" line="24"/>
-        <source>search</source>
-        <translation type="unfinished"></translation>
+        <source>GrandSearch</source>
+        <translation type="unfinished">Wyszukiwarka</translation>
     </message>
     <message>
         <location filename="../package/searchitem.qml" line="53"/>
