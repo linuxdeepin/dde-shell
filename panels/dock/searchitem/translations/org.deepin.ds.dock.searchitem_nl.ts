@@ -11,8 +11,8 @@
     <name>searchitem</name>
     <message>
         <location filename="../package/searchitem.qml" line="24"/>
-        <source>search</source>
-        <translation>Zoeken</translation>
+        <source>GrandSearch</source>
+        <translation>Globaal zoeken</translation>
     </message>
     <message>
         <location filename="../package/searchitem.qml" line="53"/>
