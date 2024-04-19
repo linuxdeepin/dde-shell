@@ -1,12 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="hu">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="hu">
 <context>
     <name>clipboarditem</name>
     <message>
         <location filename="../package/clipboarditem.qml" line="22"/>
         <source>Clipboard</source>
-        <translation type="unfinished">Vágólap</translation>
+        <translation>Vágólap</translation>
     </message>
 </context>
 <context>
