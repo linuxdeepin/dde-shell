@@ -1,3 +1,35 @@
+dde-shell (0.0.10) unstable; urgency=medium
+
+  * fix: x11 preview show without content
+  * fix: appitem not remove when uninstalled
+  * fix: fix popup position error
+  * fix: fix some icon not clear when system scaled to 1.25X
+  * fix: dde-control-center unable to set dockSize
+  * fix: modify the distance between app icons and indicator margins
+  * fix: workspace item not preserving aspect ratio
+  * fix: launchpad's left align
+  * fix: battery plugin tooltips show remaining time info
+  * feat: add tooltip for dock
+  * chore: update icon
+  * fix: don't save the visibility
+  * fix: workspace can interactive
+  * fix: dock centerPart not screen center
+  * fix: no icon when desktopfile no icon defined
+  * fix: not set themeType to DWindow
+  * fix: dock height change causes the app icon to be blurred
+  * fix: Task Manager preview size is not correct
+  * fix: null rootObject of launchpad
+  * chore: update tray tips radius
+  * fix: datetime plugin not update
+  * fix: error palette when get pixmap form dci
+  * fix: adjust indicator palette
+  * fix: not show search menu
+  * fix: GrandSearch without translate
+  * fix: Alignment without translate
+  * fix: app icon not centered
+
+ -- tsic404 <liuheng@deepin.org>  Fri, 19 Apr 2024 15:09:33 +0800
+
 dde-shell (0.0.9) unstable; urgency=medium
 
   * fix: not set window icon gemeotry for window
