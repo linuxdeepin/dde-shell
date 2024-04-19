@@ -24,7 +24,6 @@ public:
     inline bool visible() const { return m_visible;}
     Q_INVOKABLE void setVisible(bool visible);
 
-
 Q_SIGNALS:
     void visibleChanged(bool);
 
