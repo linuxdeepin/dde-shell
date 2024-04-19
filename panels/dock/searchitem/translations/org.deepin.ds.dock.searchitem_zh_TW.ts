@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_TW">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_TW">
 <context>
     <name>dock::SearchItem</name>
     <message>
@@ -14,7 +12,7 @@
     <message>
         <location filename="../package/searchitem.qml" line="24"/>
         <source>GrandSearch</source>
-        <translation>全局搜索</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../package/searchitem.qml" line="53"/>
