@@ -57,7 +57,7 @@ Item {
             displayMode: root.displayMode
             colorTheme: root.colorTheme
             active: root.active
-            backgroundColor: "orange"
+            backgroundColor: D.DTK.palette.highlight
         }
 
         StatusIndicator {
