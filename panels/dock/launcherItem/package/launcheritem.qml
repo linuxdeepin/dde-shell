@@ -25,15 +25,29 @@ AppletItem {
         }
     }
 
-    function updateLaunchpadPos()
-    {
-        var launchpad = DS.applet("org.deepin.ds.launchpad")
-        if (!launchpad)
-            return
+    Connections {
+        target: DS.applet("org.deepin.ds.launchpad")
+        enabled: target
+        function onRootObjectChanged() {
+            updateLaunchpadPos()
+        }
+    }
 
+    property point itemPos: Qt.point(0, 0)
+    function updateItemPos()
+    {
         var lX = action.mapToItem(null, action.width / 2, 0).x
         var lY = Panel.rootObject.y
-        launchpad.rootObject.windowedPos = Qt.point(lX, lY)
+        launcher.itemPos = Qt.point(lX, lY)
+    }
+    function updateLaunchpadPos()
+    {
+        updateItemPos()
+        var launchpad = DS.applet("org.deepin.ds.launchpad")
+        if (!launchpad || !launchpad.rootObject)
+            return
+
+        launchpad.rootObject.windowedPos = launcher.itemPos
     }
     Component.onCompleted: {
         updateLaunchpadPos()
