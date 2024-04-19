@@ -47,6 +47,7 @@ enum {
     WindowIdRole = Qt::UserRole + 1,
     WindowTitleRole,
     WindowIconRole,
+    WindowPreviewContentRole,
 };
 
 class AppItemWindowModel : public QAbstractListModel
@@ -74,6 +75,9 @@ public:
             case WindowIconRole: {
                 return m_item->getAppendWindows()[index.row()]->icon();
             }
+            case WindowPreviewContentRole: {
+                return fetchWindowPreview(m_item->getAppendWindows()[index.row()]->id());
+            }
         }
 
         return QVariant();
@@ -96,6 +100,67 @@ public:
     }
 
 private:
+    QPixmap fetchWindowPreview(const uint32_t& winId) const
+    {
+        // TODO: check kwin is load screenshot plugin
+        if (!WM_HELPER->hasComposite()) return QPixmap();
+
+        // pipe read write fd
+        int fd[2];
+
+        if (pipe(fd) < 0) {
+            qDebug() << "failed to create pipe";
+            return QPixmap();
+        }
+
+        QDBusInterface interface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/ScreenShot2"), QStringLiteral("org.kde.KWin.ScreenShot2"));
+        // 第一个参数，winID或者UUID
+        QList<QVariant> args;
+        args << QVariant::fromValue(QString::number(winId));
+        // 第二个参数，需要截图的选项
+        QVariantMap option;
+        option["include-decoration"] = true;
+        option["include-cursor"] = false;
+        option["native-resolution"] = true;
+        args << QVariant::fromValue(option);
+        // 第三个参数，文件描述符
+        args << QVariant::fromValue(QDBusUnixFileDescriptor(fd[1]));
+
+        QDBusReply<QVariantMap> reply = interface.callWithArgumentList(QDBus::Block, QStringLiteral("CaptureWindow"), args);
+
+        // close write
+        ::close(fd[1]);
+
+        if (!reply.isValid()) {
+            ::close(fd[0]);
+            qDebug() << "get current workspace background error: "<< reply.error().message();
+            return QPixmap();
+        }
+
+        QVariantMap imageInfo = reply.value();
+        int imageWidth = imageInfo.value("width").toUInt();
+        int imageHeight = imageInfo.value("height").toUInt();
+        int imageStride = imageInfo.value("stride").toUInt();
+        int imageFormat = imageInfo.value("format").toUInt();
+
+        QFile file;
+        if (!file.open(fd[0], QIODevice::ReadOnly)) {
+            file.close();
+            ::close(fd[0]);
+            return QPixmap();
+        }
+
+        QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
+        int bitsCountPerPixel = QImage::toPixelFormat(qimageFormat).bitsPerPixel();
+
+        QByteArray fileContent = file.read(imageHeight * imageWidth * bitsCountPerPixel / 8);
+        QImage image(reinterpret_cast<uchar *>(fileContent.data()), imageWidth, imageHeight, imageStride, qimageFormat);
+        // close read
+        ::close(fd[0]);
+        return QPixmap::fromImage(image);
+    }
+
+private:
     QPointer<AppItem> m_item;
 };
 
@@ -115,7 +180,7 @@ public:
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         if (WM_HELPER->hasComposite()) {
-            auto pixmap = fetchWindowPreview(index.data(WindowIdRole).toUInt()); 
+            auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>(); 
             auto size = pixmap.size().scaled(option.rect.size() - QSize(8, 8), Qt::KeepAspectRatio);
             QRect imageRect((option.rect.left() + (option.rect.width() - size.width()) / 2), (option.rect.top() + (option.rect.height() - size.height()) / 2), size.width(), size.height());
             painter->drawPixmap(imageRect, pixmap);
@@ -173,67 +238,6 @@ public:
 
         return closeButton;
     }
-
-private:
-    QPixmap fetchWindowPreview(const uint32_t& winId) const
-    {
-        // TODO: check kwin is load screenshot plugin
-        if (!WM_HELPER->hasComposite()) return QPixmap();
-
-        // pipe read write fd
-        int fd[2];
-
-        if (pipe(fd) < 0) {
-            qDebug() << "failed to create pipe";
-            return QPixmap();
-        }
-
-        QDBusInterface interface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/ScreenShot2"), QStringLiteral("org.kde.KWin.ScreenShot2"));
-        // 第一个参数，winID或者UUID
-        QList<QVariant> args;
-        args << QVariant::fromValue(QString::number(winId));
-        // 第二个参数，需要截图的选项
-        QVariantMap option;
-        option["include-decoration"] = true;
-        option["include-cursor"] = false;
-        option["native-resolution"] = true;
-        args << QVariant::fromValue(option);
-        // 第三个参数，文件描述符
-        args << QVariant::fromValue(QDBusUnixFileDescriptor(fd[1]));
-
-        QDBusReply<QVariantMap> reply = interface.callWithArgumentList(QDBus::Block, QStringLiteral("CaptureWindow"), args);
-        if(!reply.isValid()) {
-            ::close(fd[1]);
-            ::close(fd[0]);
-            qDebug() << "get current workspace background error: "<< reply.error().message();
-            return QPixmap();
-        }
-
-        // close write
-        ::close(fd[1]);
-
-        QVariantMap imageInfo = reply.value();
-        int imageWidth = imageInfo.value("width").toUInt();
-        int imageHeight = imageInfo.value("height").toUInt();
-        int imageStride = imageInfo.value("stride").toUInt();
-        int imageFormat = imageInfo.value("format").toUInt();
-
-        QFile file;
-        if (!file.open(fd[0], QIODevice::ReadOnly)) {
-            file.close();
-            ::close(fd[0]);
-            return QPixmap();
-        }
-
-        QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
-        int bitsCountPerPixel = QImage::toPixelFormat(qimageFormat).bitsPerPixel();
-
-        QByteArray fileContent = file.read(imageHeight * imageWidth * bitsCountPerPixel / 8);
-        QImage image(reinterpret_cast<uchar *>(fileContent.data()), imageWidth, imageHeight, imageStride, qimageFormat);
-        // close read
-        ::close(fd[0]);
-        return QPixmap::fromImage(image);
-    }
 };
 
 X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, QWidget *parent)
@@ -245,7 +249,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
 {
     m_hideTimer = new QTimer(this);
     m_hideTimer->setSingleShot(true);
-    m_hideTimer->setInterval(300);
+    m_hideTimer->setInterval(500);
 
     setWindowFlags(Qt::ToolTip | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus | Qt::FramelessWindowHint);
     setMouseTracking(true);
@@ -477,6 +481,11 @@ void X11WindowPreviewContainer::initUI()
 
 void X11WindowPreviewContainer::updateSize()
 {
+    if (m_previewItem->getAppendWindows().size() == 0) {
+        DBlurEffectWidget::hide();
+        return;
+    }
+
     auto screenSize = screen()->size();
     int height = 0, width = 0;
 
