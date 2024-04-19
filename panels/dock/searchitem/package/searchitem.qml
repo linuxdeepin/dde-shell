@@ -47,6 +47,13 @@ AppletItem {
         }
     }
 
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onClicked: platformMenu.open()
+    }
+
     LP.Menu {
         id: platformMenu
         LP.MenuItem {
