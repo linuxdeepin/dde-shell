@@ -181,6 +181,18 @@ Item {
         }
     }
 
+    Timer {
+        id: previewTimer
+        interval: 500
+        running: false
+        repeat: false
+        property int xOffset: 0
+        property int yOffset: 0
+        onTriggered: {
+            taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, xOffset, yOffset, Panel.position)
+        }
+    }
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
@@ -194,6 +206,7 @@ Item {
                 })
             }
             toolTip.close()
+            closeItemPreview()
         }
         onClicked: function (mouse) {
             if (mouse.button === Qt.RightButton) {
@@ -224,7 +237,9 @@ Item {
                 xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
                 yOffset = itemPos.y + (root.height / 2)
             }
-            taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, xOffset, yOffset, Panel.position)
+            previewTimer.xOffset = xOffset
+            previewTimer.yOffset = yOffset
+            previewTimer.start()
         }
 
         onExited: {
@@ -232,12 +247,20 @@ Item {
                 toolTip.close()
                 return
             }
-            taskmanager.Applet.hideItemPreview()
+            closeItemPreview()
         }
 
         PanelToolTip {
             id: toolTip
             text: root.name
+        }
+
+        function closeItemPreview() {
+            if (previewTimer.running) {
+                previewTimer.stop()
+            } else {
+                taskmanager.Applet.hideItemPreview()
+            }
         }
     }
 
