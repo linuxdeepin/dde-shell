@@ -27,7 +27,7 @@ public:
     virtual void paint(QPainter* painter) override;
 
 protected:
-    void itemChange(ItemChange, const ItemChangeData &) override;
+    void itemChange(ItemChange change, const ItemChangeData &data) override;
     void geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry) override;
     bool event(QEvent *event) override;
     bool eventFilter(QObject *object, QEvent *event) override;

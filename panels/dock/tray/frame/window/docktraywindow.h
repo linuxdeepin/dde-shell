@@ -23,7 +23,7 @@ class PluginsItemInterface;
 class QLabel;
 
 // 托盘图标区域（SNI、XEmbed...）
-class DockTrayWindow : public Dtk::Widget::DBlurEffectWidget
+class DockTrayWindow : public QWidget
 {
     Q_OBJECT
 

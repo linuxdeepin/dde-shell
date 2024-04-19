@@ -28,7 +28,7 @@
 #define SPLITESPACE 5
 
 DockTrayWindow::DockTrayWindow(QWidget *parent)
-    : DBlurEffectWidget(parent)
+    : QWidget(parent)
     , m_position(Dock::Position::Bottom)
     , m_displayMode(Dock::DisplayMode::Efficient)
     , m_mainBoxLayout(new QBoxLayout(QBoxLayout::Direction::RightToLeft, this))
@@ -315,7 +315,6 @@ void DockTrayWindow::updateToolWidget()
 
 void DockTrayWindow::initUi()
 {
-    setMaskColor(QColor(235, 235, 235, 255 * 0.6));
     m_toolLayout->setContentsMargins(0, 0, 0, 0);
     m_toolLayout->setSpacing(0);
 
