@@ -79,7 +79,7 @@
     <message>
         <location filename="../package/main.qml" line="221"/>
         <source>Dock Settings</source>
-        <translation type="unfinished"/>
+        <translation>Dock-Einstellungen</translation>
     </message>
 </context>
 </TS>
