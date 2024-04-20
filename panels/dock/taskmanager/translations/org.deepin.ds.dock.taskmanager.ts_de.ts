@@ -4,7 +4,7 @@
     <message>
         <location filename="../appitem.cpp" line="83"/>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Öffnen</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="99"/>
