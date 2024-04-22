@@ -23,7 +23,15 @@ Item {
         }
     }
 
-    function open()
+    Timer {
+        id: toolTipShowTimer
+        interval: 50
+        onTriggered: {
+            showToolTip()
+        }
+    }
+
+    function showToolTip()
     {
         var window = Panel.toolTipWindow
         if (!window)
@@ -42,8 +50,18 @@ Item {
         window.show()
         toolTip.open()
     }
+
+    function open()
+    {
+        toolTipShowTimer.start();
+    }
+    
     function close()
     {
+        if (toolTipShowTimer.running) {
+            toolTipShowTimer.stop()
+        }
+
         var window = Panel.toolTipWindow
         if (!window)
             return
