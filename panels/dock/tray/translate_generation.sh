@@ -7,5 +7,12 @@ ts_list=(`ls translations/*.ts`)
 for ts in "${ts_list[@]}"
 do
     printf "\nprocess ${ts}\n"
-    /usr/lib/qt6/bin/lrelease "${ts}"
+    if [ -f /usr/lib/qt6/bin/lrelease ]; then
+        /usr/lib/qt6/bin/lrelease "${ts}"
+    elif [ -f /usr/lib64/qt6/bin/lrelease ]; then
+        /usr/lib64/qt6/bin/lrelease "${ts}"
+    else
+        printf "Qt6 lrelease is not installed\n"
+        exit 1
+    fi 
 done
