@@ -33,8 +33,8 @@ Item {
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId }
 
     property bool useColumnLayout: Panel.position % 2
-    property int statusIndicatorSize: useColumnLayout ? root.width * 0.74 : root.height * 0.74
-    property int iconSize: Panel.rootObject.itemIconSizeBase * 0.643 // 9:14 (iconSize/dockHeight)
+    property int statusIndicatorSize: useColumnLayout ? root.width * 0.72 : root.height * 0.72
+    property real iconScale: Panel.rootObject.dockItemMaxSize * 9 / 14 / Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
 
     property var iconGlobalPoint: {
         var a = icon
@@ -154,12 +154,14 @@ Item {
         D.DciIcon {
             id: icon
             name: root.iconName
-            sourceSize: Qt.size(iconSize, iconSize)
+            sourceSize: Qt.size(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE, Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE)
             anchors.centerIn: parent
             anchors.alignWhenCentered: false
-            scale: Panel.rootObject.itemScale
+            scale: iconScale
             BeatAnimation {
+                id: beatAnimation
                 target: icon
+                baseScale: iconScale
                 loops: Animation.Infinite
                 running: root.attention
             }
@@ -169,6 +171,20 @@ Item {
                 target: icon
                 loops: 1
                 running: false
+            }
+
+            Connections {
+                target: Panel.rootObject
+                function onPressedAndDragging(isDragging) {
+                    if (isDragging) {
+                        beatAnimation.stop()
+                        icon.scale = root.iconScale
+                    } else {
+                        beatAnimation.running = Qt.binding(function() {
+                            return root.attention
+                        })
+                    }
+                }
             }
         }
     }
