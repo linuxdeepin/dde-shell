@@ -78,6 +78,7 @@ AppletItem {
 
             model: Applet.dataModel
             currentIndex: Applet.dataModel.currentIndex
+            interactive: false
         }
     }
 }
