@@ -25,13 +25,12 @@ Window {
         (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth)
     // TODO
     signal dockCenterPartPosChanged()
+    signal pressedAndDragging(bool isDragging)
 
     property int dockCenterPartCount: dockCenterPartModel.count
 
     property int dockSize: Applet.dockSize
     property int dockItemMaxSize: dockSize
-    property real itemScale: 1.0
-    property real draggingSize: 0.0
     property int itemIconSizeBase: 0
     property int itemSpacing: 0
 
@@ -356,7 +355,6 @@ Window {
             dock.isDragging = true
             oldMouseY = mouse.y
             oldMouseX = mouse.x
-            draggingSize = dockSize
         }
 
         onPositionChanged: function(mouse) {
@@ -371,14 +369,15 @@ Window {
             } else {
                 dockSize = Math.min(Math.max(dockSize - xChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
             }
-            itemScale = dockSize / draggingSize
+
+            pressedAndDragging(true)
         }
 
         onReleased: function(mouse) {
             dock.isDragging = false
             Applet.dockSize = dockSize
-            itemScale = 1.0
             itemIconSizeBase = dockItemMaxSize
+            pressedAndDragging(false)
         }
 
         function anchorToTop() {
