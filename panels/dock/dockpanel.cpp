@@ -69,6 +69,7 @@ bool DockPanel::init()
         });
     });
 
+    connect(this, &DockPanel::frontendWindowRectChanged, dockDaemonAdaptor, &DockDaemonAdaptor::FrontendWindowRectChanged);
     connect(SETTINGS, &DockSettings::dockSizeChanged, this, &DockPanel::dockSizeChanged);
     connect(SETTINGS, &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
