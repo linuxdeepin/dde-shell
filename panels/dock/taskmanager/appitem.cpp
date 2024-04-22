@@ -304,6 +304,11 @@ const QList<QPointer<AbstractWindow>>& AppItem::getAppendWindows()
     return m_windows;
 }
 
+QString AppItem::getCurrentActiveWindowName() const
+{
+    return m_currentActiveWindow->title();
+}
+
 void AppItem::updateCurrentActiveWindow(QPointer<AbstractWindow> window)
 {
     Q_ASSERT(m_windows.contains(window));

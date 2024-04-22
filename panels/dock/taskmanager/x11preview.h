@@ -12,7 +12,7 @@
 #include <QLabel>
 #include <QWidget>
 #include <QListView>
-#include <DIconButton>
+#include <DToolButton>
 #include <QVBoxLayout>
 #include <DBlurEffectWidget>
 
@@ -64,7 +64,7 @@ private:
 
     QLabel* m_previewIcon;
     QLabel* m_previewTitle;
-    DIconButton* m_closeAllButton;
+    DToolButton* m_closeAllButton;
 
     QTimer* m_hideTimer;
 
