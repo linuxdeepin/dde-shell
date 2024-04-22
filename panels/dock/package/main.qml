@@ -49,6 +49,7 @@ Window {
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
     D.DWindow.enableBlurWindow: true
+    D.DWindow.themeType: Panel.colorTheme
 
     onDockSizeChanged: {
         if (dock.dockSize === Dock.MIN_DOCK_SIZE) {
@@ -481,6 +482,15 @@ Window {
         DockCompositor.dockColorTheme = Qt.binding(function(){
             return Panel.colorTheme
         })
+
+        Panel.toolTipWindow.D.DWindow.themeType = Qt.binding(function(){
+            return Panel.colorTheme
+        })
+
+        Panel.popupWindow.D.DWindow.themeType = Qt.binding(function(){
+            return Panel.colorTheme
+        })
+
         dock.itemIconSizeBase = dock.dockItemMaxSize
 
         changeDragAreaAnchor()
