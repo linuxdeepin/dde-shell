@@ -94,6 +94,8 @@ QString DesktopFileAMParser::desktopIcon()
         updateDesktopIcon();
     }
 
+    if (m_icon.isEmpty()) return DesktopfileAbstractParser::desktopIcon();
+
     return m_icon;
 }
 
