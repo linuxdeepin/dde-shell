@@ -141,9 +141,12 @@ void DAppletLoaderPrivate::doCreateRootObject(DApplet *applet)
             D_Q(DAppletLoader);
             qCWarning(dsLoaderLog) << "Create root failed:" << applet->pluginId();
             Q_EMIT q->failed(applet->pluginId());
+        } else {
+            qCDebug(dsLoaderLog) << "Created rootObject for the applet:" << applet->pluginId();
         }
     });
 
+    qCDebug(dsLoaderLog) << "Begin to create rootObject the applet:" << applet->pluginId();
     if (!engine->create()) {
         engine->deleteLater();
     }
