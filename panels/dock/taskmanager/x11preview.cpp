@@ -21,7 +21,6 @@
 #include <QPainter>
 #include <QByteArray>
 #include <QDBusReply>
-#include <QPushButton>
 #include <QMouseEvent>
 #include <QDBusInterface>
 #include <QLoggingCategory>
@@ -274,15 +273,14 @@ public:
 
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        auto closeButton = new DIconButton(parent);
+        auto closeButton = new DToolButton(parent);
         closeButton->setIconSize(QSize(16, 16));
         closeButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
         closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + 4, -4));
         closeButton->setVisible(true);
-        closeButton->setIcon(DDciIcon::fromTheme("close"));
-        closeButton->setFlat(true);
+        closeButton->setIcon(QIcon::fromTheme("close"));
 
-        connect(closeButton, &DIconButton::clicked, this, [this, index](){
+        connect(closeButton, &DToolButton::clicked, this, [this, index](){
             X11Utils::instance()->closeWindow(index.data(WindowIdRole).toInt());
             if (m_listView->model()->rowCount() == 1) {
                 m_parent->hide();
@@ -323,7 +321,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
 
     connect(m_hideTimer, &QTimer::timeout, this, &X11WindowPreviewContainer::callHide);
 
-    connect(m_closeAllButton, &DIconButton::clicked, this, [this](){
+    connect(m_closeAllButton, &DToolButton::clicked, this, [this](){
         if (m_previewItem.isNull()) return;
         for (auto window : m_previewItem->getAppendWindows()) {
             window->close();
@@ -369,7 +367,7 @@ void X11WindowPreviewContainer::showPreview(const QPointer<AppItem> &item, const
 
     m_isDockPreviewCount += 1;
     m_previewIcon->setPixmap(QIcon::fromTheme(item->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
-    updatePreviewTitle(item->name());
+    updatePreviewTitle(item->getCurrentActiveWindowName());
     m_model->setData(item);
 
     updateSize();
@@ -503,11 +501,10 @@ void X11WindowPreviewContainer::initUI()
     m_previewTitle->setFixedHeight(PREVIEW_TITLE_HEIGHT);
     m_previewIcon->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
 
-    m_closeAllButton = new DIconButton(this);
+    m_closeAllButton = new DToolButton(this);
     m_closeAllButton->setIconSize(QSize(16, 16));
-    m_closeAllButton->setIcon(DDciIcon::fromTheme("close"));
+    m_closeAllButton->setIcon(QIcon::fromTheme("close"));
     m_closeAllButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
-    m_closeAllButton->setFlat(true);
 
     m_previewIcon->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_previewTitle->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -581,7 +578,7 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
         if (m_previewItem.isNull()) return false;
 
         m_previewIcon->setPixmap(QIcon::fromTheme(m_previewItem->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
-        updatePreviewTitle(m_previewItem->name());
+        updatePreviewTitle(m_previewItem->getCurrentActiveWindowName());
         break;
     }
     case QEvent::QEvent::MouseButtonRelease: {
