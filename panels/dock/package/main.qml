@@ -50,6 +50,7 @@ Window {
     D.DWindow.windowRadius: 0
     D.DWindow.enableBlurWindow: true
     D.DWindow.themeType: Panel.colorTheme
+    D.ColorSelector.family: D.Palette.CrystalColor
 
     onDockSizeChanged: {
         if (dock.dockSize === Dock.MIN_DOCK_SIZE) {
