@@ -1,3 +1,9 @@
+dde-shell (0.0.11) unstable; urgency=medium
+
+  * fix: don't emit FrontendWindowRectChanged signal
+
+ -- Wang Fei <wangfei@deepin.org>  Tue, 23 Apr 2024 14:24:08 +0800
+
 dde-shell (0.0.10) unstable; urgency=medium
 
   * fix: x11 preview show without content
