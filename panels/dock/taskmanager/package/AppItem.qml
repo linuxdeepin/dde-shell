@@ -65,9 +65,8 @@ Item {
             palette: itemPalette
             width: root.statusIndicatorSize
             height: root.statusIndicatorSize
-            anchors.centerIn: parent
+            anchors.centerIn: icon
             visible: root.displayMode === Dock.Efficient && root.windows.length > 0
-            anchors.alignWhenCentered: false
         }
 
         WindowIndicator {
@@ -79,7 +78,6 @@ Item {
             useColumnLayout: Panel.position % 2
             palette: itemPalette
             visible: (root.displayMode === Dock.Efficient && root.windows.length > 1) || (root.displayMode === Dock.Fashion && root.windows.length > 0)
-            anchors.alignWhenCentered: false
 
             function updateIndicatorAnchors() {
                 windowIndicator.anchors.top = undefined
@@ -156,7 +154,6 @@ Item {
             name: root.iconName
             sourceSize: Qt.size(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE, Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE)
             anchors.centerIn: parent
-            anchors.alignWhenCentered: false
             scale: iconScale
             BeatAnimation {
                 id: beatAnimation
