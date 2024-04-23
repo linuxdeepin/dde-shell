@@ -86,6 +86,7 @@ add_subdirectory(launcherItem)
 add_subdirectory(showdesktop)
 add_subdirectory(taskmanager)
 add_subdirectory(tray)
+add_subdirectory(multitaskview)
 
 # dock plugin load program
 add_subdirectory(dockplugin)
