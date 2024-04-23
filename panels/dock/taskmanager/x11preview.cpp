@@ -435,7 +435,10 @@ void X11WindowPreviewContainer::hideEvent(QHideEvent*)
 void X11WindowPreviewContainer::resizeEvent(QResizeEvent *event)
 {
     m_previewTitle->setText(
-        QFontMetrics(m_previewTitle->font()).elidedText(m_previewTitleStr, Qt::TextElideMode::ElideRight, width() - m_previewIcon->width() - m_closeAllButton->width() - 25)
+        QFontMetrics(m_previewTitle->font())
+            .elidedText(m_previewTitleStr,
+                        Qt::TextElideMode::ElideRight,
+                        width() - m_previewTitle->geometry().left() - (width() - m_closeAllButton->geometry().left()) - 1)
     );
 
     updatePosition();
@@ -485,7 +488,10 @@ void X11WindowPreviewContainer::updatePreviewTitle(const QString& title)
 {
     m_previewTitleStr = title;
     m_previewTitle->setText(
-        QFontMetrics(m_previewTitle->font()).elidedText(m_previewTitleStr, Qt::TextElideMode::ElideRight, width() - m_previewIcon->width() - m_closeAllButton->width() - 25)
+        QFontMetrics(m_previewTitle->font())
+            .elidedText(m_previewTitleStr,
+                        Qt::TextElideMode::ElideRight,
+                        width() - m_previewTitle->geometry().left() - (width() - m_closeAllButton->geometry().left()) - 1)
     );
 }
 
