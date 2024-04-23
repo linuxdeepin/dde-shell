@@ -77,6 +77,8 @@ Item {
     ToolTip {
         id: toolTip
         padding: 0
+        // TODO it's a bug for qt, ToolTip's text color can't change with window's palette changed.
+        palette.toolTipText: Panel.toolTipWindow ? Panel.toolTipWindow.palette.toolTipText : undefined
         anchors.centerIn: parent
         parent: Panel.toolTipWindow ? Panel.toolTipWindow.contentItem : undefined
         onParentChanged: function() {
