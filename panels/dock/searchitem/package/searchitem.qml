@@ -7,6 +7,8 @@ import QtQuick.Controls 2.15
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
+import org.deepin.dtk.style 1.0 as DStyle
+import org.deepin.dtk.private 1.0 as DP
 import org.deepin.ds.dock 1.0
 
 import Qt.labs.platform 1.1 as LP
@@ -19,12 +21,26 @@ AppletItem {
     implicitHeight: Panel.rootObject.useColumnLayout ? 30 : dockSize
     property bool shouldVisible: Applet.visible
 
+    property D.Palette toolButtonColor: DockPalette.toolButtonColor
+    property D.Palette toolButtonBorderColor: DockPalette.toolButtonBorderColor
+
+
+    property D.Palette backgroundColor: D.Palette {
+        normal {
+            common: Qt.rgba(1, 1, 1, 0.4)
+        }
+        normalDark{
+            common: Qt.rgba(1, 1, 1, 0.2)
+        }
+    }
+
     PanelToolTip {
         id: toolTip
         text: qsTr("GrandSearch")
     }
 
     D.ToolButton {
+        id: button
         anchors.centerIn: parent
         width: 30
         height: 30
@@ -44,6 +60,14 @@ AppletItem {
             } else {
                 toolTip.close()
             }
+        }
+
+        // TODO: get style from Dtk
+        background: DP.ButtonPanel {
+            button: button
+            color1: searchItem.toolButtonColor
+            color2: searchItem.toolButtonColor
+            outsideBorderColor: searchItem.toolButtonBorderColor
         }
     }
 

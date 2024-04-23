@@ -5,6 +5,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
+import Qt5Compat.GraphicalEffects
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
@@ -19,6 +20,7 @@ AppletItem {
     property int space: 4
     // todo: visible property to be set
     property bool shouldVisible: listView.count > 1
+
     // visible:listView.count > 1
     implicitWidth: Panel.position === Dock.Top || Panel.position === Dock.Bottom ? listView.count * frameSize + space * listView.count : dockSize
     implicitHeight: Panel.position === Dock.Left || Panel.position === Dock.Right ? listView.count * frameSize + space * listView.count : dockSize
@@ -31,7 +33,7 @@ AppletItem {
         }
     }
 
-    component WorkspaceDelegate: Item {
+    component WorkspaceDelegate: Control {
         id: content
         required property int index
         required property string workspaceName
@@ -42,21 +44,38 @@ AppletItem {
         implicitHeight: Panel.position === Dock.Left || Panel.position === Dock.Right ? frameSize : dockSize
 
         Rectangle {
+            id: workspaceRectangle
+            property D.Palette backgroundColor: DockPalette.workspaceRectangleColor
+            property D.Palette unSelectedBorderColor: DockPalette.workspaceUnselectedBorderColor
+            property D.Palette selectedBorderColor: DockPalette.workspaceSelectedBorderColor
+
             anchors.centerIn: parent
             border.width: 1
-            border.color: isCurrent ? "black" : Qt.rgba(0, 0, 0, 0.5)
+            border.color: isCurrent ? D.ColorSelector.selectedBorderColor : D.ColorSelector.unSelectedBorderColor
             implicitWidth: frameSize
             implicitHeight: isCurrent ? itemSize + 4 : itemSize
-            color: Qt.rgba(0, 0, 0, 0.1)
-            radius: 2
+            color: D.ColorSelector.backgroundColor
+            radius: 3
             Image {
                 anchors.fill: parent
                 anchors.margins: 1
                 id: workspaceImage
                 source: screenImage
-                visible: isCurrent
+                visible: false
                 fillMode: Image.PreserveAspectCrop
             }
+
+            OpacityMask {
+                anchors.fill: workspaceImage
+                source: workspaceImage
+                maskSource: Rectangle {
+                    implicitWidth: workspaceRectangle.implicitWidth
+                    implicitHeight: workspaceRectangle.implicitHeight
+                    radius: workspaceRectangle.radius
+                }
+                visible: isCurrent
+            }
+
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true

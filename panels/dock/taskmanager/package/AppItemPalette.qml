@@ -33,7 +33,7 @@ Item {
 
     // Actually only in fashion mode will dot indicator have border
     property color dotIndicatorBorder: {
-        return colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.2) : Qt.rgba(0, 0, 0, 0.2)
+        return colorTheme === Dock.Dark ? Qt.rgba(0, 0, 0, 0.2) : Qt.rgba(1, 1, 1, 0.2)
     }
 
     property color rectIndicator: {
