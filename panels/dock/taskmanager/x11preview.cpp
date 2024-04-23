@@ -25,6 +25,7 @@
 #include <QDBusInterface>
 #include <QLoggingCategory>
 #include <QDBusUnixFileDescriptor>
+#include <QPainterPath>
 
 #include <DStyle>
 
@@ -34,9 +35,13 @@
 Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPreview")
 
 #define PREVIEW_TITLE_HEIGHT 20
-#define PREVIEW_CONTENT_HEIGHT 122
-#define PREVIEW_CONTENT_WIDTH 212
+#define PREVIEW_CONTENT_HEIGHT 118
+#define PREVIEW_CONTENT_WIDTH 208
 #define PREVIEW_HOVER_BORDER 4
+#define PREVIEW_HOVER_BORDER_COLOR QColor(0, 0, 0, 255 * 0.2)
+#define PREVIEW_HOVER_BORDER_COLOR_DARK_MODE QColor(255, 255, 255, 255 * 0.2)
+#define PREVIEW_BACKGROUND_COLOR QColor(0, 0, 0, 255 * 0.05)
+#define PREVIEW_BACKGROUND_COLOR_DARK_MODE QColor(255, 255, 255, 255 * 0.05)
 #define WM_HELPER DWindowManagerHelper::instance()
 
 DGUI_USE_NAMESPACE
@@ -216,15 +221,41 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
+        auto themeType = DGuiApplicationHelper::instance()->themeType();
+
         QRect hoverRect = option.rect;
+
+        QPen pen;
+        pen.setWidth(PREVIEW_HOVER_BORDER);
+        pen.setColor(themeType == DGuiApplicationHelper::DarkType ? PREVIEW_HOVER_BORDER_COLOR_DARK_MODE : PREVIEW_HOVER_BORDER_COLOR);
+
+        QPainterPath path;
+
         if (WM_HELPER->hasComposite()) {
             auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
             auto size = calSize(pixmap.size()); 
+            auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio);
 
-            QRect imageRect((option.rect.left() + PREVIEW_HOVER_BORDER), (option.rect.top() + PREVIEW_HOVER_BORDER), size.width(), size.height());
-            painter->drawPixmap(imageRect, pixmap);
+            hoverRect.setSize(size + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2));
+            hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
+            DStyleHelper dstyle(m_listView->style());
+            const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
+            path.addRoundedRect(hoverRect, radius, radius);
 
-            hoverRect.setSize(QSize(size.width() + PREVIEW_HOVER_BORDER * 2, size.height() + PREVIEW_HOVER_BORDER * 2));
+            painter->save();
+            painter->setRenderHint(QPainter::Antialiasing);
+            painter->setPen(pen);
+            painter->fillPath(path, themeType == DGuiApplicationHelper::DarkType ? PREVIEW_BACKGROUND_COLOR_DARK_MODE : PREVIEW_BACKGROUND_COLOR);
+            QRect imageRect(
+                (option.rect.left() + ((option.rect.width() - scaledPixmap.width()) / 2)),
+                (option.rect.top() + ((option.rect.height() - scaledPixmap.height()) / 2)),
+                scaledPixmap.width(),
+                scaledPixmap.height());
+            painter->drawPixmap(imageRect, pixmap.scaled(size, Qt::KeepAspectRatio));
+            if (option.state.testFlag(QStyle::State_MouseOver)) {
+                painter->drawPath(path);
+            }
+            painter->restore();
         } else {
             auto rect = QRect((option.rect.left()),
                                     (option.rect.top()),
@@ -234,7 +265,16 @@ public:
             auto text = QFontMetrics(m_parent->font()).elidedText(index.data(WindowTitleRole).toString(), Qt::TextElideMode::ElideRight, rect.width() - PREVIEW_TITLE_HEIGHT);
             painter->drawText(rect, text);
 
-            hoverRect.setSize(QSize(PREVIEW_CONTENT_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2));
+            if (option.state.testFlag(QStyle::State_MouseOver)) {
+                hoverRect.setSize(QSize(PREVIEW_CONTENT_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2));
+                hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
+
+                painter->save();
+                painter->setRenderHint(QPainter::Antialiasing);
+                painter->setPen(pen);
+                painter->drawRect(hoverRect);
+                painter->restore();
+            }
         }
 
         if (!option.state.testFlag(QStyle::State_MouseOver)) {
@@ -242,23 +282,6 @@ public:
             return;
         }
         m_listView->openPersistentEditor(index);
-
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-        DStyleHelper dstyle(m_listView->style());
-        const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
-
-        QPen pen;
-        pen.setWidth(PREVIEW_HOVER_BORDER);
-        pen.setColor(QColor(0, 0, 0, 255 * 0.3));
-        painter->setPen(pen);
-        hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
-        if (WM_HELPER->hasComposite()) {
-            painter->drawRoundedRect(hoverRect, radius, radius);
-        } else {
-            painter->drawRect(hoverRect);
-        }
-        painter->restore();
     }
 
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
@@ -296,10 +319,19 @@ private:
         qreal factor;
         if (m_listView->flow() == QListView::LeftToRight) {
             factor = qreal(PREVIEW_CONTENT_HEIGHT) / imageSize.height();
+            auto scaled = imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
+            if (scaled.width() <= PREVIEW_CONTENT_WIDTH) {
+                return scaled;
+            }
         } else {
             factor = qreal(PREVIEW_CONTENT_WIDTH) / imageSize.width();
+            auto scaled = imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
+            if (scaled.height() <= PREVIEW_CONTENT_HEIGHT) {
+                return scaled;
+            }
         }
-        return imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
+
+        return {PREVIEW_CONTENT_WIDTH, PREVIEW_CONTENT_HEIGHT};
     }
 
 };
