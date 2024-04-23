@@ -41,10 +41,12 @@ void IconManager::setDisplayMode(Dock::DisplayMode displayMode)
     m_displayMode = displayMode;
 }
 
-QPixmap IconManager::pixmap(DGuiApplicationHelper::ColorType colorType) const
+QIcon IconManager::pixmap(DGuiApplicationHelper::ColorType themeType) const
 {
-    // 缺省图标
-    return QIcon::fromTheme("dock-control-panel").pixmap(ITEMSIZE, ITEMSIZE);
+    const QString iconName = themeType == DGuiApplicationHelper::LightType ?
+                             ":/dsg/built-in-icons/dock-control-panel-dark.svg" : ":/dsg/built-in-icons/dock-control-panel.svg";
+
+    return QIcon(iconName);
 }
 
 PluginsItemInterface *IconManager::findPlugin(const QString &pluginName) const

@@ -22,7 +22,7 @@ public:
     explicit IconManager(DockPluginController *pluginController, QObject *parent = nullptr);
     void setPosition(Dock::Position position);
     void setDisplayMode(Dock::DisplayMode displayMode);
-    QPixmap pixmap(DGuiApplicationHelper::ColorType colorType) const;
+    QIcon pixmap(DGuiApplicationHelper::ColorType colorType) const;
 
 private:
     PluginsItemInterface *findPlugin(const QString &pluginName) const;
