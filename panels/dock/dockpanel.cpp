@@ -21,6 +21,7 @@
 #include <QQuickWindow>
 #include <QLoggingCategory>
 #include <QGuiApplication>
+#include <QQuickItem>
 #include <DGuiApplicationHelper>
 
 #define SETTINGS DockSettings::instance()
@@ -311,6 +312,16 @@ void DockPanel::loadDockPlugins()
 #endif
         }
     }
+}
+
+void DockPanel::setMouseGrabEnabled(QQuickItem *item, bool enabled)
+{
+    if (!item) return;
+
+    auto window = item->window();
+    if (!window) return;
+
+    window->setMouseGrabEnabled(enabled);
 }
 
 D_APPLET_CLASS(DockPanel)

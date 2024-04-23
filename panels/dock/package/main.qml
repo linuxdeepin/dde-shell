@@ -355,8 +355,10 @@ Window {
 
     MouseArea {
         id: dragArea
-        property int oldMouseY: 0;
-        property int oldMouseX: 0;
+        property point oldMousePos: Qt.point(0, 0)
+        property int oldDockSize: 0
+        property list<int> recentDeltas: []
+        property int averageCount: 5
   
         cursorShape: {
             if (Panel.position == Dock.Top || Panel.position == Dock.Bottom) {
@@ -366,27 +368,47 @@ Window {
         }
 
         onPressed: function(mouse) {
-            var launcheritem = DS.applet("org.deepin.ds.launchpad")
-            if (!launcheritem) {
-                return
+            var launcherItem = DS.applet("org.deepin.ds.launchpad")
+            if (launcherItem) {
+                launcherItem.rootObject.hide()
             }
-            launcheritem.rootObject.hide()
             dock.isDragging = true
-            oldMouseY = mouse.y
-            oldMouseX = mouse.x
+            oldMousePos = mapToGlobal(mouse.x, mouse.y)
+            oldDockSize = dockSize
+            recentDeltas = []
+            Panel.setMouseGrabEnabled(dragArea, true);
         }
 
         onPositionChanged: function(mouse) {
-            var yChange = mouse.y - oldMouseY
-            var xChange = mouse.x - oldMouseX
-            if (Panel.position == Dock.Bottom) {
-                dockSize = Math.min(Math.max(dockSize - yChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
-            } else if (Panel.position == Dock.Top) {
-                dockSize = Math.min(Math.max(dockSize + yChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
-            } else if (Panel.position == Dock.Left) {
-                dockSize = Math.min(Math.max(dockSize + xChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
+            var newPos = mapToGlobal(mouse.x, mouse.y)
+            var xChange = newPos.x - oldMousePos.x
+            var yChange = newPos.y - oldMousePos.y
+
+            if (Panel.position === Dock.Bottom || Panel.position === Dock.Top) {
+                recentDeltas.push(yChange)
             } else {
-                dockSize = Math.min(Math.max(dockSize - xChange, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
+                recentDeltas.push(xChange)
+            }
+
+            if (recentDeltas.length > averageCount) {
+                recentDeltas.shift()
+            }
+            // Taking the average makes the data smooth without jumps
+            var changeAverage = recentDeltas.reduce(function(acc, val) { return acc + val; }, 0) / recentDeltas.length;
+
+            var newDockSize = 0
+            if (Panel.position == Dock.Bottom) {
+                newDockSize = Math.min(Math.max(oldDockSize - changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
+            } else if (Panel.position == Dock.Top) {
+                newDockSize = Math.min(Math.max(oldDockSize + changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
+            } else if (Panel.position == Dock.Left) {
+                newDockSize = Math.min(Math.max(oldDockSize + changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
+            } else {
+                newDockSize = Math.min(Math.max(oldDockSize - changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
+            }
+
+            if (newDockSize !== dockSize) {
+                dockSize = newDockSize
             }
 
             pressedAndDragging(true)
@@ -397,6 +419,7 @@ Window {
             Applet.dockSize = dockSize
             itemIconSizeBase = dockItemMaxSize
             pressedAndDragging(false)
+            Panel.setMouseGrabEnabled(dragArea, false);
         }
 
         function anchorToTop() {
