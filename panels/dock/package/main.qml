@@ -83,7 +83,7 @@ Window {
             if (valid) {
                 return DStyle.Style.control.selectColor(undefined,
                                                     Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, blendColorAlpha(0.6)),
-                                                    Qt.rgba(0, 0, 0, blendColorAlpha(85 / 255)))
+                                                    Qt.rgba(10 / 255, 10 / 255, 10 /255, blendColorAlpha(85 / 255)))
             }
             return DStyle.Style.control.selectColor(undefined,
                                                 DStyle.Style.behindWindowBlur.lightNoBlurColor,
@@ -173,7 +173,6 @@ Window {
         }
         MutuallyExclusiveMenu {
             title: qsTr("Position")
-            visible: Panel.debugMode
             EnumPropertyMenuItem {
                 enabled: Panel.debugMode
                 name: qsTr("Top")
