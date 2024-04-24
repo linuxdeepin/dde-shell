@@ -64,7 +64,7 @@ void BluetoothMainWidget::initUi()
     m_iconButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_iconButton->setFocusPolicy(Qt::FocusPolicy::TabFocus);
     m_iconButton->setIconSize({24, 24});
-    m_iconButton->setIcon(QIcon::fromTheme("bluetooth"));
+    m_iconButton->setIcon(QIcon(bluetoothIcon(true)));
     m_iconButton->setCheckable(true);
     m_iconButton->setChecked(isOpen());
     onPaletteChanged();
@@ -127,6 +127,10 @@ void BluetoothMainWidget::initConnection()
         bool status = !(isOpen());
         for (const Adapter *adapter : m_adapterManager->adapters())
             m_adapterManager->setAdapterPowered(adapter, status);
+    });
+
+    connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, [ = ] {
+        m_iconButton->setIcon(QIcon(bluetoothIcon(true)));
     });
 
     onAdapterChanged();

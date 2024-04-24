@@ -511,7 +511,7 @@ void SoundDevicesWidget::refreshTips(const int volume, const bool force)
     m_tipsLabel->setText(QString(tr("Volume %1").arg(QString::number(volume) + '%')));
 }
 
-QPixmap SoundDevicesWidget::pixmap(DGuiApplicationHelper::ColorType colorType, int iconWidth, int iconHeight) const
+QIcon SoundDevicesWidget::pixmap(DGuiApplicationHelper::ColorType colorType, int iconWidth, int iconHeight) const
 {
     const double volmue = m_sinkInter->volume();
     const bool mute = m_sinkInter->mute();
@@ -532,13 +532,9 @@ QPixmap SoundDevicesWidget::pixmap(DGuiApplicationHelper::ColorType colorType, i
     else
         volumeString = "low";
 
-    auto pixmap = QIcon::fromTheme(QString("audio-volume-%1-symbolic").arg(volumeString)).pixmap(iconWidth, iconHeight);
-
+    auto iconName = QString("audio-volume-%1-symbolic").arg(volumeString);
     if (colorType == DGuiApplicationHelper::ColorType::LightType)
-        return pixmap;
+        iconName.append("-dark");
 
-    QPainter pa(&pixmap);
-    pa.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    pa.fillRect(pixmap.rect(), Qt::white);
-    return pixmap;
+    return QIcon::fromTheme(iconName);
 }
