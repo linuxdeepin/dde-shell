@@ -47,12 +47,16 @@ ContainmentItem {
                 implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 0.8 : Panel.rootObject.dockItemMaxSize
 
                 onEntered: function(drag) {
-                    visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)
+                    if (drag.keys.includes("text/x-dde-dock-dnd-appid")) {
+                        visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)
+                    }
                 }
 
                 onDropped: function(drop) {
-                    drop.accept()
-                    taskmanager.Applet.dataModel.moveTo(drop.source.itemId, visualIndex)
+                    if (drop.keys.includes("text/x-dde-dock-dnd-appid")) {
+                        drop.accept()
+                        taskmanager.Applet.dataModel.moveTo(drop.source.itemId, visualIndex)
+                    }
                 }
 
                 property int visualIndex: DelegateModel.itemsIndex
