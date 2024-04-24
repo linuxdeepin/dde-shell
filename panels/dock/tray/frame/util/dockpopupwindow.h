@@ -12,7 +12,6 @@
 #include <DBlurEffectWidget>
 #include <dregionmonitor.h>
 #include <DWindowManagerHelper>
-#include <DPlatformWindowHandle>
 
 #include <QVBoxLayout>
 #include <QPainter>
@@ -74,7 +73,6 @@ private:
     XEventMonitor *m_eventMonitor;
     QString m_eventKey;
     DWindowManagerHelper *m_wmHelper;
-    DPlatformWindowHandle *m_windowHandle;
     bool m_enableMouseRelease;
     QWidget *m_extendWidget;
     QPointer<QWidget> m_lastWidget;
