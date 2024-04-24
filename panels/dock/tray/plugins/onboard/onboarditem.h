@@ -21,7 +21,7 @@ class OnboardItem : public QWidget
 
 public:
     explicit OnboardItem(QWidget *parent = nullptr);
-    QPixmap iconPixmap(QSize size, DGuiApplicationHelper::ColorType themeType) const;
+    QIcon iconPixmap(QSize size, DGuiApplicationHelper::ColorType themeType) const;
 
 protected:
     void paintEvent(QPaintEvent *e) override;

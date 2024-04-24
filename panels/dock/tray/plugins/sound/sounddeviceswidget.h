@@ -42,8 +42,7 @@ public:
     ~SoundDevicesWidget() override;
 
     QWidget* tipsWidget();
-    QPixmap pixmap() const;
-    QPixmap pixmap(DGuiApplicationHelper::ColorType colorType, int iconWidth, int iconHeight) const;
+    QIcon pixmap(DGuiApplicationHelper::ColorType colorType, int iconWidth, int iconHeight) const;
 
 Q_SIGNALS:
     void enableChanged(bool);
