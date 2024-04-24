@@ -54,7 +54,7 @@
     <message>
         <location filename="../package/main.qml" line="195"/>
         <source>Right</source>
-        <translation>echts</translation>
+        <translation>Rechts</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="201"/>
