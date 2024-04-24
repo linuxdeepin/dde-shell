@@ -1,3 +1,18 @@
+dde-shell (0.0.12) unstable; urgency=medium
+
+  * fix: popup window cannot show on first run
+  * chore: add open workspace item
+  * fix: After logging out, the workspace icons are not displayed
+  * fix: some icon not clear
+  * refact: update ColorSelector family for dock panel
+  * fix: solve the problem of blurry icons in the tray area
+  * fix: preview title not elided
+  * fix: icon blurry
+  * fix: text color of ToolTip doesn't change with theme
+  * fix: solve the problem of the dock jumping when the height changes
+
+ -- tsic404 <liuheng@deepin.org>  Wed, 24 Apr 2024 15:30:04 +0800
+
 dde-shell (0.0.11) unstable; urgency=medium
 
   * fix: don't emit FrontendWindowRectChanged signal
