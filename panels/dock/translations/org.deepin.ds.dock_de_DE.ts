@@ -69,12 +69,12 @@
     <message>
         <location filename="../package/main.qml" line="208"/>
         <source>Keep Hidden</source>
-        <translation type="unfinished"/>
+        <translation>Immer ausblenden</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="214"/>
         <source>Smart Hide</source>
-        <translation type="unfinished"/>
+        <translation>Schlaues Ausblenden</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="221"/>
