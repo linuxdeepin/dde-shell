@@ -265,8 +265,12 @@ void DockPopupWindow::onButtonPress(int type, int x, int y, const QString &key)
         return;
 
     if (m_extendWidget) {
+        QPoint offset = m_extendWidget->mapTo(m_extendWidget->topLevelWidget(), rect().topLeft());
+        auto topW = m_extendWidget->topLevelWidget();
+
         // 计算额外添加的区域，如果鼠标的点击点在额外的区域内，也无需隐藏
-        QPoint extendPoint = m_extendWidget->mapToGlobal(QPoint(0, 0));
+        QPoint extendPoint = topW->geometry().topLeft() + offset;
+        auto p = m_extendWidget->mapToGlobal(QPoint(0, 0));
         QRect extendRect(((extendPoint - screenRect.topLeft()) * qApp->devicePixelRatio() + screenRect.topLeft()), m_extendWidget->size() * qApp->devicePixelRatio());
         if (extendRect.contains(QPoint(x, y)))
             return;
