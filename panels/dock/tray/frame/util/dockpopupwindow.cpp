@@ -17,6 +17,7 @@
 #include <QCursor>
 
 #include <DStyleHelper>
+#include <DPlatformWindowHandle>
 
 DWIDGET_USE_NAMESPACE
 
@@ -34,7 +35,6 @@ DockPopupWindow::DockPopupWindow(QWidget *parent)
 {
     setContentsMargins(0, 0, 0, 0);
     m_wmHelper = DWindowManagerHelper::instance();
-    m_windowHandle = new DPlatformWindowHandle(this);
 
     connect(m_wmHelper, &DWindowManagerHelper::hasCompositeChanged, this, &DockPopupWindow::updateRadius);
 
@@ -240,9 +240,10 @@ bool DockPopupWindow::eventFilter(QObject *o, QEvent *e)
 void DockPopupWindow::updateRadius()
 {
     const bool hasComposite = m_wmHelper->hasComposite();
-    m_windowHandle->setEnableBlurWindow(hasComposite);
-    m_windowHandle->setTranslucentBackground(hasComposite);
-    m_windowHandle->setWindowRadius((hasComposite ? m_radius : 0) * devicePixelRatioF());
+    DPlatformWindowHandle handle(this);
+    handle.setEnableBlurWindow(hasComposite);
+    handle.setTranslucentBackground(hasComposite);
+    handle.setWindowRadius((hasComposite ? m_radius : 0) * devicePixelRatioF());
 }
 
 void DockPopupWindow::ensureRaised()
