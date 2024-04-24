@@ -29,7 +29,7 @@ OnboardItem::OnboardItem(QWidget *parent)
     });
 }
 
-QPixmap OnboardItem::iconPixmap(QSize size, DGuiApplicationHelper::ColorType themeType) const
+QIcon OnboardItem::iconPixmap(QSize size, DGuiApplicationHelper::ColorType themeType) const
 {
     QString iconName;
     if (std::min(width(), height()) <= PLUGIN_BACKGROUND_MIN_SIZE
@@ -39,7 +39,7 @@ QPixmap OnboardItem::iconPixmap(QSize size, DGuiApplicationHelper::ColorType the
         iconName = ":/icons/icon/keyboard-symbolic-dark.svg";
     }
 
-    return loadSvg(iconName, size);
+    return QIcon(iconName);
 }
 
 void OnboardItem::paintEvent(QPaintEvent *e)
@@ -88,7 +88,15 @@ void OnboardItem::paintEvent(QPaintEvent *e)
         painter.fillPath(path, color);
     }
 
-    QPixmap pixmap = iconPixmap(QSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE), DGuiApplicationHelper::instance()->themeType());
+    QString iconName;
+    if (std::min(width(), height()) <= PLUGIN_BACKGROUND_MIN_SIZE
+        || DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType) {
+        iconName = ":/icons/icon/keyboard-symbolic.svg";
+    } else {
+        iconName = ":/icons/icon/keyboard-symbolic-dark.svg";
+    }
+
+    const QPixmap &pixmap = loadSvg(iconName, QSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE));
     painter.setOpacity(1);
     const QRectF &rf = QRectF(rect());
     const QRectF &rfp = QRectF(pixmap.rect());
@@ -101,7 +109,6 @@ const QPixmap OnboardItem::loadSvg(const QString &fileName, const QSize &size) c
     QSize pixmapSize = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? size : (size * ratio);
     QPixmap pixmap = QIcon(fileName).pixmap(pixmapSize);
     pixmap.setDevicePixelRatio(ratio);
-    pixmap = pixmap.scaled(size * ratio);
 
     return pixmap;
 }
