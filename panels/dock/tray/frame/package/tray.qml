@@ -27,6 +27,9 @@ AppletItem {
     property var dockHeight: Applet.dockHeight + (useColumnLayout ? 12 : 0)
 
     WidgetProxy {
+        HoverHandler {
+            cursorShape: Qt.ArrowCursor
+        }
         anchors.centerIn: parent
         Component.onCompleted: Applet.initDock()
     }
