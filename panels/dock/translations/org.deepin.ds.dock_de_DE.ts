@@ -59,7 +59,7 @@
     <message>
         <location filename="../package/main.qml" line="201"/>
         <source>Status</source>
-        <translation type="unfinished"/>
+        <translation>Status</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="203"/>
