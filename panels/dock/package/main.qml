@@ -237,6 +237,10 @@ Window {
         }
     }
 
+    HoverHandler {
+        cursorShape: Qt.ArrowCursor
+    }
+
     // TODO missing property binding to update ProxyModel's filter and sort opearation.
     Repeater {
         model: Applet.appletItems
