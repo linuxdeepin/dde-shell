@@ -44,17 +44,17 @@
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Top</source>
-        <translation type="unfinished"/>
+        <translation>Oben</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="183"/>
         <source>Bottom</source>
-        <translation type="unfinished"/>
+        <translation>Unten</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="195"/>
         <source>Right</source>
-        <translation type="unfinished"/>
+        <translation>echts</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="201"/>
