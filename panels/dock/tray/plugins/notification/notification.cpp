@@ -29,6 +29,7 @@ Notification::Notification(QWidget *parent)
 {
     setMinimumSize(PLUGIN_BACKGROUND_MIN_SIZE, PLUGIN_BACKGROUND_MIN_SIZE);
     connect(this, &Notification::dndModeChanged, this, &Notification::refreshIcon);
+    connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, &Notification::refreshIcon);
     QtConcurrent::run([this](){
         m_dbus.reset(new QDBusInterface("org.deepin.dde.Notification1", "/org/deepin/dde/Notification1", "org.deepin.dde.Notification1"));
         // Refresh icon for the first time, cause org.deepin.dde.Notification1 might depend on dock's DBus,
@@ -71,7 +72,18 @@ QIcon Notification::icon() const
 
 void Notification::refreshIcon()
 {
-    m_icon = QIcon::fromTheme(dndMode() ? "notification-off" : "notification");
+    //m_icon = QIcon::fromTheme(dndMode() ? "notification-off" : "notification");
+
+    QString iconName;
+    if (dndMode()) {
+        iconName = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType ?
+                ":/dsg/built-in-icons/notification-off-dark.svg" : ":/dsg/built-in-icons/notification-off.svg";
+    } else {
+        iconName = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType ?
+                ":/dsg/built-in-icons/notification-dark.svg" : ":/dsg/built-in-icons/notification.svg";
+    }
+
+    m_icon = QIcon(iconName);
     Q_EMIT iconRefreshed();
 }
 

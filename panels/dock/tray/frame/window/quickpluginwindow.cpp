@@ -1004,8 +1004,7 @@ QPixmap QuickDockItem::iconPixmap() const
     if (!icon.isNull()) {
         int pixmapWidth = static_cast<int>(ICONWIDTH);
         int pixmapHeight = static_cast<int>(ICONHEIGHT);
-        auto pix = icon.pixmap(pixmapWidth, pixmapHeight);
-        pix.setDevicePixelRatio(qApp->devicePixelRatio());
+        auto pix = icon.pixmap(QSize(pixmapWidth, pixmapHeight), qApp->devicePixelRatio());
         return pix;
     }
 
