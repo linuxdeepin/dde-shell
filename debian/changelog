@@ -1,3 +1,36 @@
+dde-shell (0.0.13) unstable; urgency=medium
+
+  * chore: adjust radius for ToolTips
+  * fix: unable to connect to wifi with password for the first time(Issue: https://github.com/linuxdeepin/developer-center/issues/7966)
+  * fix: multitaskview not scale realtime
+    Thanks to justforlxz
+  * fix: When the dock is hidden, the system tray expansion box is not hidden.(issue: 8153)
+  * fix: set cursor shape for dock and tray(Issue: https://github.com/linuxdeepin/developer-center/issues/8181)
+  * fix: transparent windows cannot be blurred(Issue: https://github.com/linuxdeepin/developer-center/issues/8211)
+  * feat: adjust ui
+  * fix: deepin-launcher icon incorrect on bloom theme(Issue: https://github.com/linuxdeepin/developer-center/issues/8206)
+  * fix: The dock cannot record the tray icon dragged to the dock plug-in area.(issue: 8189)(Influence: tray icons display)
+  * fix: Clicking the collapse button does not collapse the tray view.(issue: 8175)
+  * fix: multitaskview ts
+    Thanks to justforlxz(Issue: https://github.com/linuxdeepin/developer-center/issues/8225)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 25 Apr 2024 21:28:43 +0800
+
+dde-shell (0.0.13) unstable; urgency=medium
+
+  * chore: adjust radius for ToolTips
+  * fix: unable to connect to wifi with password for the first time(Issue: https://github.com/linuxdeepin/developer-center/issues/7966)
+  * fix: multitaskview not scale realtime
+    Thanks to justforlxz
+  * fix: When the dock is hidden, the system tray expansion box is not hidden.(issue: 8153)
+  * fix: set cursor shape for dock and tray(Issue: https://github.com/linuxdeepin/developer-center/issues/8181)
+  * fix: transparent windows cannot be blurred(Issue: https://github.com/linuxdeepin/developer-center/issues/8211)
+  * feat: adjust ui
+  * fix: deepin-launcher icon incorrect on bloom theme(Issue: https://github.com/linuxdeepin/developer-center/issues/8206)
+  * fix: The dock cannot record the tray icon dragged to the dock plug-in area.(issue: 8189)(Influence: tray icons display)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 25 Apr 2024 18:41:42 +0800
+
 dde-shell (0.0.12) unstable; urgency=medium
 
   * fix: popup window cannot show on first run
