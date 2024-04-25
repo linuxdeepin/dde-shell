@@ -12,7 +12,7 @@ add_library(${PLUGIN_NAME} SHARED
     notification.qrc
 )
 target_compile_definitions(${PLUGIN_NAME} PRIVATE QT_PLUGIN)
-set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/plugins)
+set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ..)
 
 target_include_directories(${PLUGIN_NAME} PRIVATE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../interfaces>
