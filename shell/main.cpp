@@ -16,6 +16,7 @@
 #include "containment.h"
 #include "pluginloader.h"
 #include "appletloader.h"
+#include "shell.h"
 
 DS_USE_NAMESPACE
 DGUI_USE_NAMESPACE
@@ -148,6 +149,9 @@ int main(int argc, char *argv[])
         const auto disabledApplets = parser.values(disableAppletOption);
         DPluginLoader::instance()->setDisabledApplets(disabledApplets);
     }
+
+    Shell shell;
+    shell.installDtkInterceptor();
 
     AppletManager manager(pluginIds);
 
