@@ -84,7 +84,8 @@ ContainmentItem {
 
     Component.onCompleted: {
         Panel.rootObject.dockItemMaxSize = Qt.binding(function(){
-            return Math.min(Panel.rootObject.dockSize, 6 * Panel.rootObject.dockLeftSpaceForCenter / (7 * (Panel.rootObject.dockCenterPartCount - 1 + taskmanager.Applet.dataModel.rowCount())))
+            console.log(Panel.rootObject.dockSize, Panel.rootObject.dockLeftSpaceForCenter, Panel.rootObject.dockCenterPartCount - 1 + taskmanager.Applet.dataModel.rowCount())
+            return Math.min(Panel.rootObject.dockSize, Panel.rootObject.dockLeftSpaceForCenter * 1.2 / (Panel.rootObject.dockCenterPartCount - 1 + taskmanager.Applet.dataModel.rowCount()) - 2)
         })
     }
 }

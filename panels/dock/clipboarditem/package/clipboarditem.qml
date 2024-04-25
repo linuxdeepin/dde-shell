@@ -55,6 +55,7 @@ AppletItem {
             color1: clipboardItem.toolButtonColor
             color2: clipboardItem.toolButtonColor
             outsideBorderColor: clipboardItem.toolButtonBorderColor
+            insideBorderColor: null
         }
     }
 }

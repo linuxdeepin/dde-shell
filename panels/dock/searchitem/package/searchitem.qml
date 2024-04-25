@@ -68,6 +68,7 @@ AppletItem {
             color1: searchItem.toolButtonColor
             color2: searchItem.toolButtonColor
             outsideBorderColor: searchItem.toolButtonBorderColor
+            insideBorderColor: null
         }
     }
 

@@ -28,6 +28,7 @@
 #include <QPainterPath>
 
 #include <DStyle>
+#include <DPlatformHandle>
 
 #include <DWindowManagerHelper>
 #include <DGuiApplicationHelper>
@@ -39,7 +40,7 @@ Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPrevie
 #define PREVIEW_CONTENT_WIDTH 208
 #define PREVIEW_HOVER_BORDER 4
 #define PREVIEW_HOVER_BORDER_COLOR QColor(0, 0, 0, 255 * 0.2)
-#define PREVIEW_HOVER_BORDER_COLOR_DARK_MODE QColor(255, 255, 255, 255 * 0.2)
+#define PREVIEW_HOVER_BORDER_COLOR_DARK_MODE QColor(255, 255, 255, 255 * 0.3)
 #define PREVIEW_BACKGROUND_COLOR QColor(0, 0, 0, 255 * 0.05)
 #define PREVIEW_BACKGROUND_COLOR_DARK_MODE QColor(255, 255, 255, 255 * 0.05)
 #define WM_HELPER DWindowManagerHelper::instance()
@@ -70,7 +71,7 @@ public:
             if (flow() == Flow::LeftToRight) {
                 size.rwidth() += s.width();
                 if (size.height() < s.height()) {
-                    size.setHeight(s.height());
+                    size.setHeight(s.height() + 1);
                 }
             } else {
                 size.rheight() += s.height();
@@ -226,11 +227,6 @@ public:
         QRect hoverRect = option.rect;
 
         QPen pen;
-        pen.setWidth(PREVIEW_HOVER_BORDER);
-        pen.setColor(themeType == DGuiApplicationHelper::DarkType ? PREVIEW_HOVER_BORDER_COLOR_DARK_MODE : PREVIEW_HOVER_BORDER_COLOR);
-
-        QPainterPath path;
-
         if (WM_HELPER->hasComposite()) {
             auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
             auto size = calSize(pixmap.size()); 
@@ -240,19 +236,29 @@ public:
             hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
             DStyleHelper dstyle(m_listView->style());
             const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
-            path.addRoundedRect(hoverRect, radius, radius);
 
             painter->save();
             painter->setRenderHint(QPainter::Antialiasing);
+            pen.setWidth(1);
+            pen.setColor(themeType == DGuiApplicationHelper::DarkType ? QColor(255, 255, 255, 255 * 0.1) : QColor(0, 0, 0, 255 * 0.1));
             painter->setPen(pen);
-            painter->fillPath(path, themeType == DGuiApplicationHelper::DarkType ? PREVIEW_BACKGROUND_COLOR_DARK_MODE : PREVIEW_BACKGROUND_COLOR);
             QRect imageRect(
                 (option.rect.left() + ((option.rect.width() - scaledPixmap.width()) / 2)),
-                (option.rect.top() + ((option.rect.height() - scaledPixmap.height()) / 2)),
+                (option.rect.top() + ((option.rect.height() - scaledPixmap.height()) / 2)) + 1,
                 scaledPixmap.width(),
                 scaledPixmap.height());
+            QPainterPath clipPath;
+            clipPath.addRoundedRect(imageRect, radius, radius);
+            painter->setClipPath(clipPath);
             painter->drawPixmap(imageRect, pixmap.scaled(size, Qt::KeepAspectRatio));
+            painter->setClipping(false);
+            painter->drawRoundedRect(imageRect, radius, radius);
             if (option.state.testFlag(QStyle::State_MouseOver)) {
+                QPainterPath path;
+                path.addRoundedRect(hoverRect, radius + 2, radius + 2);
+                pen.setWidth(PREVIEW_HOVER_BORDER);
+                pen.setColor(themeType == DGuiApplicationHelper::DarkType ? PREVIEW_HOVER_BORDER_COLOR_DARK_MODE : PREVIEW_HOVER_BORDER_COLOR);
+                painter->setPen(pen);
                 painter->drawPath(path);
             }
             painter->restore();
@@ -532,7 +538,7 @@ void X11WindowPreviewContainer::initUI()
     m_view = new PreviewsListView;
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* titleLayout = new QHBoxLayout;
-    titleLayout->setContentsMargins(11, 0, 5, 0);
+    titleLayout->setContentsMargins(5, 0, 5, 0);
 
     m_previewIcon = new QLabel;
     m_previewTitle = new QLabel;
@@ -580,9 +586,15 @@ void X11WindowPreviewContainer::initUI()
 
     mainLayout->addLayout(titleLayout);
     mainLayout->addWidget(m_view);
+    mainLayout->setAlignment(m_view, Qt::AlignCenter);
     setLayout(mainLayout);
 
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    winId();
+    DPlatformHandle handler(this->windowHandle());
+    handler.setShadowRadius(12 * qApp->devicePixelRatio());
+    handler.setShadowColor(QColor(0, 0, 0, 0.6 * 255));
+    handler.setShadowOffset(QPoint(0, 4 * qApp->devicePixelRatio()));
 }
 
 void X11WindowPreviewContainer::updateSize()

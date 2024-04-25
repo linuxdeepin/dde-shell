@@ -27,6 +27,8 @@ Window {
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 4 * Screen.devicePixelRatio
     D.DWindow.enableBlurWindow: true
+    D.DWindow.shadowRadius: 8
+
     color: "transparent"
     D.StyledBehindWindowBlur {
         control: parent

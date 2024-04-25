@@ -263,13 +263,13 @@ Window {
         columns: 1
         rows: 1
         flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
-        columnSpacing: 0
-        rowSpacing: 0
+        columnSpacing: 10
+        rowSpacing: 10
 
         Item {
             id: leftMargin
-            implicitWidth: 10
-            implicitHeight: 10
+            implicitWidth: 0
+            implicitHeight: 0
         }
 
         Item {
@@ -293,11 +293,11 @@ Window {
             Layout.fillWidth: Panel.itemAlignment === Dock.CenterAlignment
             Layout.fillHeight: Panel.itemAlignment === Dock.CenterAlignment
             Layout.horizontalStretchFactor: {
-                return (Panel.itemAlignment === Dock.CenterAlignment && !dock.useColumnLayout) ? (dock.width - dockCenterPart.implicitWidth) / 2 - dockLeftPart.implicitWidth - leftMargin.implicitWidth : -1
+                return (Panel.itemAlignment === Dock.CenterAlignment && !dock.useColumnLayout) ? (dock.width - dockCenterPart.implicitWidth) / 2 - dockLeftPart.implicitWidth - 10: -1
             }
 
             Layout.verticalStretchFactor: {
-                return (Panel.itemAlignment === Dock.CenterAlignment && dock.useColumnLayout) ? (dock.height - dockCenterPart.implicitHeight) / 2 - dockLeftPart.implicitHeight - leftMargin.implicitHeight : -1
+                return (Panel.itemAlignment === Dock.CenterAlignment && dock.useColumnLayout) ? (dock.height - dockCenterPart.implicitHeight) / 2 - dockLeftPart.implicitHeight - 10 : -1
             }
         }
 
@@ -307,7 +307,6 @@ Window {
             implicitHeight: centerLoader.implicitHeight
             onXChanged: dockCenterPartPosChanged()
             onYChanged: dockCenterPartPosChanged()
-
             OverflowContainer {
                 id: centerLoader
                 anchors.fill: parent
@@ -331,11 +330,11 @@ Window {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.horizontalStretchFactor: {
-                return (Panel.itemAlignment === Dock.CenterAlignment && !dock.useColumnLayout) ? ( dock.width - dockCenterPart.implicitWidth ) / 2 - dockRightPart.implicitWidth : 1
+                return (Panel.itemAlignment === Dock.CenterAlignment && !dock.useColumnLayout) ? ( dock.width - dockCenterPart.implicitWidth ) / 2 - dockRightPart.implicitWidth - 10 : 1
             }
 
             Layout.verticalStretchFactor: {
-                return (Panel.itemAlignment === Dock.CenterAlignment && dock.useColumnLayout) ? ( dock.height - dockCenterPart.implicitHeight ) / 2 - dockRightPart.implicitHeight : 1
+                return (Panel.itemAlignment === Dock.CenterAlignment && dock.useColumnLayout) ? ( dock.height - dockCenterPart.implicitHeight ) / 2 - dockRightPart.implicitHeight - 10 : 1
             }
         }
 

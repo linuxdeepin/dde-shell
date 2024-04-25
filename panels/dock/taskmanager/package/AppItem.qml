@@ -71,11 +71,11 @@ Item {
 
         WindowIndicator {
             id: windowIndicator
-            dotWidth: Panel.position % 2 ? Math.max(root.width * 0.04, 2) : Math.max(root.width * 0.18, 8) 
-            dotHeight: Panel.position % 2 ? Math.max(root.width * 0.18, 8) : Math.max(root.width * 0.04, 2)
+            dotWidth: root.useColumnLayout  ? Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 16, 2) : Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 3, 2) 
+            dotHeight: root.useColumnLayout ? Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 3, 2) : Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 16, 2)
             windows: root.windows
             displayMode: root.displayMode
-            useColumnLayout: Panel.position % 2
+            useColumnLayout: root.useColumnLayout
             palette: itemPalette
             visible: (root.displayMode === Dock.Efficient && root.windows.length > 1) || (root.displayMode === Dock.Fashion && root.windows.length > 0)
 

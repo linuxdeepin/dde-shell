@@ -76,7 +76,7 @@ Item {
         }
     }
 
-    implicitWidth: root.suggestedImplicitWidth
-
-    implicitHeight: root.suggestedImplicitHeight
+    // FIXME: find 2 * root.spacing comes from where
+    implicitWidth: root.suggestedImplicitWidth - (useColumnLayout ? 0 : 2 * root.spacing)
+    implicitHeight: root.suggestedImplicitHeight - (useColumnLayout ? 2 * root.spacing : 0)
 }
