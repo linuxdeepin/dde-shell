@@ -19,7 +19,7 @@ AppletItem {
 
     PanelToolTip {
         id: toolTip
-        text: qsTr("Open Workspace")
+        text: qsTr("Multitasking View")
     }
 
     D.ActionButton {
