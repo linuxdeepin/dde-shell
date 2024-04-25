@@ -26,10 +26,10 @@ AppletItem {
         id: action
         anchors.centerIn: parent
         icon.name: Applet.iconName
-        scale: Panel.rootObject.itemScale
+        scale: Panel.rootObject.dockItemMaxSize * 9 / 14 / Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
         // 9:14 (iconSize/dockHeight)
-        icon.height: Panel.rootObject.itemIconSizeBase * 0.643
-        icon.width: Panel.rootObject.itemIconSizeBase * 0.643
+        icon.height: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
+        icon.width: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
         onClicked: {
             Applet.openWorkspace()
             toolTip.close()
