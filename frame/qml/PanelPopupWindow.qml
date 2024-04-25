@@ -25,7 +25,7 @@ Window {
     }
     flags: Qt.Popup
     D.DWindow.enabled: true
-    D.DWindow.windowRadius: DStyle.Style.control.radius
+    D.DWindow.windowRadius: 4 * Screen.devicePixelRatio
     D.DWindow.enableBlurWindow: true
     color: "transparent"
     D.StyledBehindWindowBlur {
