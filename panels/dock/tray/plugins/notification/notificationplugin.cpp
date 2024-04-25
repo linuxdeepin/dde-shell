@@ -126,8 +126,13 @@ void NotificationPlugin::pluginSettingsChanged()
 QIcon NotificationPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::ColorType themeType)
 {
     Q_UNUSED(themeType)
-    if (dockPart == DockPart::DCCSetting)
-        return QIcon::fromTheme("notification");
+    if (dockPart == DockPart::DCCSetting) {
+        if (themeType == DGuiApplicationHelper::LightType) {
+            return QIcon(":/dsg/built-in-icons/notification-dark.svg");
+        } else {
+            return QIcon(":/dsg/built-in-icons/notification.svg");
+        }
+    }
     return m_notification->icon();
 }
 
