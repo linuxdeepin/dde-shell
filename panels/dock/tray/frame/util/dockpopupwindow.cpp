@@ -155,7 +155,15 @@ void DockPopupWindow::show(const int x, const int y)
             break;
     }
     blockButtonRelease();
-    QScreen *screen = DIS_INS->screen(DOCK_SCREEN->current());
+
+    // find the screen where dock onto
+    QScreen *screen = nullptr;
+    for (auto tw : qApp->topLevelWidgets()) {
+        if (QString(tw->metaObject()->className()) == "DockTrayWindow") {
+            screen = tw->screen();
+            break;
+        }
+    };
     if (!screen)
         return;
     QRect screenRect = screen->geometry();
