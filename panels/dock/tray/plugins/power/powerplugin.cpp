@@ -26,7 +26,7 @@ PowerPlugin::PowerPlugin(QObject *parent)
     , m_tipsLabel(new TipsWidget)
     , m_systemPowerInter(nullptr)
     , m_powerInter(nullptr)
-    , m_dconfig(new DConfig(QString("org.deepin.dde.dock.power"), QString()))
+    , m_dconfig(DConfig::create(QLatin1String("org.deepin.ds.dock"), QLatin1String("org.deepin.ds.dock.power"), QString(), this))
     , m_preChargeTimer(new QTimer(this))
     , m_quickPanel(nullptr)
 {
