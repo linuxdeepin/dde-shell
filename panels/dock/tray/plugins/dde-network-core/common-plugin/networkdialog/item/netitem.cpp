@@ -615,6 +615,7 @@ void WirelessItem::connectNetwork()
 void WirelessItem::onConnectNetwork()
 {
     QString password = m_passwdEdit->text();
+    qDebug() << "connect to Network, sender:" << sender();
     // 输入无效在checkInputValid里已判断
     if (m_wirelessConnect->passwordIsValid(password)) {
         if (m_accessPoint) {
