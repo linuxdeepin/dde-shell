@@ -85,11 +85,11 @@ void ExpandIconWidget::paintEvent(QPaintEvent *event)
 void ExpandIconWidget::moveEvent(QMoveEvent *event)
 {
     BaseTrayWidget::moveEvent(event);
-    // 当前展开按钮位置发生变化的时候，需要同时改变托盘的位置
+    // 当前展开按钮位置发生变化的时候，需要关掉托盘面板
     QMetaObject::invokeMethod(this, [] {
         TrayGridWidget *gridView = popupTrayView();
         if (gridView->isVisible())
-            gridView->resetPosition();
+            gridView->hide();
     }, Qt::QueuedConnection);
 }
 
