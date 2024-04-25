@@ -32,7 +32,7 @@ DockApplet::DockApplet(QObject *parent)
 DockApplet::~DockApplet()
 {
     if (m_window)
-        delete m_window;
+        m_window->deleteLater();
 }
 
 void DockApplet::setDockWidth(int width)
