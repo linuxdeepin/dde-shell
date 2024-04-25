@@ -98,12 +98,12 @@ public:
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override
     {
-        return m_item->getAppendWindows().size();
+        return m_item.isNull() ? 0 : m_item->getAppendWindows().size();
     }
 
     QVariant data(const QModelIndex& index, int role = WindowIdRole) const override
     {
-        if (!index.isValid() || index.row() >= rowCount())
+        if (!index.isValid() || index.row() >= rowCount() || m_item.isNull())
             return QVariant();
         
         switch (role) {
@@ -117,7 +117,11 @@ public:
                 return m_item->getAppendWindows()[index.row()]->icon();
             }
             case WindowPreviewContentRole: {
-                return fetchWindowPreview(m_item->getAppendWindows()[index.row()]->id());
+                if (index.row() >= m_previewPixmaps.size()) {
+                    return fetchWindowPreview(m_item->getAppendWindows()[index.row()]->id());
+                } else {
+                    return m_previewPixmaps.value(m_item->getAppendWindows()[index.row()]->id());
+                }
             }
         }
 
@@ -132,15 +136,29 @@ public:
 
         beginResetModel();
         m_item = item;
+        resetPreviewPixmap();
         endResetModel();
 
-        connect(item, &AppItem::dataChanged, this, [this](){
-            beginResetModel();
-            endResetModel();
-        });
+        if (!item.isNull()) {
+            connect(item, &AppItem::dataChanged, this, [this](){
+                beginResetModel();
+                resetPreviewPixmap();
+                endResetModel();
+            });
+        }
     }
 
 private:
+    void resetPreviewPixmap()
+    {
+        m_previewPixmaps.clear();
+        if (!m_item.isNull()) {
+            for (const auto &window : m_item->getAppendWindows()) {
+                auto previewPixmap = fetchWindowPreview(window->id());
+                m_previewPixmaps.insert(window->id(), previewPixmap);
+            }
+        }
+    }
     QPixmap fetchWindowPreview(const uint32_t& winId) const
     {
         // TODO: check kwin is load screenshot plugin
@@ -205,6 +223,7 @@ private:
 
 private:
     QPointer<AppItem> m_item;
+    QHash<uint32_t, QPixmap> m_previewPixmaps;
 };
 
 class AppItemWindowDeletegate : public QAbstractItemDelegate
@@ -468,6 +487,7 @@ void X11WindowPreviewContainer::hideEvent(QHideEvent*)
 {
     m_previewItem->disconnect(this);
     m_previewItem = QPointer<AppItem>(nullptr);
+    m_model->setData(nullptr);
 }
 
 void X11WindowPreviewContainer::resizeEvent(QResizeEvent *event)
