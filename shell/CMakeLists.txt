@@ -13,6 +13,9 @@ add_executable(dde-shell
     main.cpp
     appletloader.h
     appletloader.cpp
+    shell.h
+    shell.cpp
+    override_dtkdeclarative_qml.qrc
 )
 
 target_link_libraries(dde-shell PRIVATE
