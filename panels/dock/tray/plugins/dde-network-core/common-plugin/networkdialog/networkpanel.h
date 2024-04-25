@@ -95,7 +95,7 @@ private:
     QSet<QString> m_wirelessDevicePath;
     QString m_reconnectDev;
     QString m_reconnectSsid;
-    bool m_waitPassword;
+    bool m_waitPassword = false;
     NetworkDBusProxy *m_airplaneMode;
     QTimer *m_updateTimer;
 };
