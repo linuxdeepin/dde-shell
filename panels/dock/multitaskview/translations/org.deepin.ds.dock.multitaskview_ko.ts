@@ -5,7 +5,7 @@
     <name>multitaskview</name>
     <message>
         <location filename="../package/multitaskview.qml" line="22"/>
-        <source>Open Workspace</source>
+        <source>Multitasking View</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
