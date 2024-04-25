@@ -22,8 +22,8 @@ AppletItem {
     property bool shouldVisible: listView.count > 1
 
     // visible:listView.count > 1
-    implicitWidth: Panel.position === Dock.Top || Panel.position === Dock.Bottom ? listView.count * frameSize + space * listView.count : dockSize
-    implicitHeight: Panel.position === Dock.Left || Panel.position === Dock.Right ? listView.count * frameSize + space * listView.count : dockSize
+    implicitWidth: Panel.position === Dock.Top || Panel.position === Dock.Bottom ? listView.count * frameSize + space * (listView.count - 1) : dockSize
+    implicitHeight: Panel.position === Dock.Left || Panel.position === Dock.Right ? listView.count * frameSize + space * (listView.count - 1) : dockSize
 
     MouseArea {
         anchors.fill: parent

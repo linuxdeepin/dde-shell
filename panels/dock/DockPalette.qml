@@ -10,6 +10,7 @@ import org.deepin.ds.dock 1.0
 import org.deepin.dtk as D
 
 Item {
+    // clipboardItem and searchItem toolbutton background color
     property D.Palette toolButtonColor: D.Palette {
         normal {
             common: Qt.rgba(1, 1, 1, 0.4)
@@ -19,6 +20,7 @@ Item {
         }
     }
 
+    // clipboardItem and searchItem toolbutton background border color
     property D.Palette toolButtonBorderColor: D.Palette {
         normal {
             common: Qt.rgba(0, 0, 0, 0.1)
@@ -28,11 +30,11 @@ Item {
         }
     }
 
+    // workspace rectangle filled color
     property D.Palette workspaceRectangleColor: D.Palette {
         normal {
             common: Qt.rgba(0, 0, 0, 0.1)
         }
-
         normalDark {
             common: Qt.rgba(1, 1, 1, 0.1)
         }
@@ -40,12 +42,12 @@ Item {
         hovered {
             common: Qt.rgba(0, 0, 0, 0.2)
         }
-
         hoveredDark {
             common: Qt.rgba(0, 0, 0, 0.3)
         }
     }
 
+    // workspace current workspace border color
     property D.Palette workspaceSelectedBorderColor: D.Palette {
         normal {
             common: Qt.rgba(0, 0, 0, 1)
@@ -55,6 +57,7 @@ Item {
         }
     }
 
+    // workspace not current workspace border color
     property D.Palette workspaceUnselectedBorderColor: D.Palette {
         normal {
             common: Qt.rgba(0, 0, 0, 0.5)
@@ -62,30 +65,60 @@ Item {
         normalDark {
             common: Qt.rgba(1, 1, 1, 0.5)
         }
-
         hovered {
             common: Qt.rgba(0, 0, 0, 0.6)
         }
-
         hoveredDark{
             common: Qt.rgba(1, 1, 1, 0.6)
         }
     }
 
+    // taskmanager
     property D.Palette taskmanagerStatusIndicatorColor: D.Palette {
-
+        normal {
+            common: Qt.rgba(0, 0, 0)
+        }
+        normalDark {
+            common: Qt.rgba(1, 1, 1)
+        }
     }
 
     property D.Palette taskmanagerStatusIndicatorBorderColor: D.Palette {
+        normal {
+            common: Qt.rgba(1, 1, 1, 0.2)
+        }
+        normalDark {
+            common: Qt.rgba(0, 0, 0, 0.2)
+        }
+    }
 
+    property D.Palette taskmanagerStatusIndicatorActiveColor: D.Palette {
+        normal {
+            common: Qt.rgba(1, 1, 1, 0.2)
+        }
+        normalDark {
+            common: Qt.rgba(0, 0, 0, 0.35)
+        }
     }
 
     property D.Palette taskmanagerWindowIndicatorColor: D.Palette {
-
+        normal {
+            common: Qt.rgba(0, 0, 0, 0.3)
+        }
+        normalDark {
+            common:  Qt.rgba(1, 1, 1, 0.3)
+        }
     }
 
     property D.Palette taskmanagerWindowIndicatorBoderColor: D.Palette {
-
+        normal {
+            common: Qt.rgba(1, 1, 1, 0.2)
+        }
+        normalDark {
+            common: Qt.rgba(0, 0, 0, 0.35)
+        }
     }
+
+    property D.Palette taskmanagerWindowIndicatorActiveColor: D.DTK.palette.highlight
 
 }

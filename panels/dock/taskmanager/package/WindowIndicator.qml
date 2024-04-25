@@ -9,6 +9,7 @@ import QtQuick.Layouts 2.15
 import org.deepin.ds.dock 1.0
 
 Item {
+    id: root
     required property list<string> windows
     required property int displayMode
     required property bool useColumnLayout
@@ -33,8 +34,8 @@ Item {
         Rectangle {
             border.width: borderWidth
             border.color: palette.dotIndicatorBorder
-            width: dotWidth + 2 * borderWidth
-            height: dotHeight + 2 * borderWidth
+            width: ((root.displayMode === Dock.Fashion || useColumnLayout) ? dotWidth : dotWidth / 2 - 1) + 2 * borderWidth
+            height: ((root.displayMode === Dock.Fashion || !useColumnLayout) ? dotHeight : dotHeight / 2 - 1) +  2 * borderWidth
             color: palette.dotIndicator
             radius: radius
         }
