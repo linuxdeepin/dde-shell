@@ -288,8 +288,7 @@ void TrayGridWidget::initMember()
                 if (!widget)
                     continue;
 
-                QRect rectExpandWidget(widget->mapToGlobal(QPoint(0, 0)), widget->size());
-                if (rectExpandWidget.contains(mousePos))
+                if (widget->underMouse())
                     return;
             }
         }
