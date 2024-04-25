@@ -477,8 +477,23 @@ QString TrayModel::sniItemKey(const QString &servicePath) const
     if (isTypeWriting(servicePath))
         return "fcitx";
 
+    auto getProcessName = [](const QString &fileName) -> QString {
+        int lastSlashIndex = fileName.lastIndexOf('/');
+        if (lastSlashIndex == -1) {
+            return QString();
+        }
+
+        QString midStr = fileName.mid(lastSlashIndex + 1);
+        int nullIndex = midStr.indexOf('\u0000');
+        if (nullIndex != -1) {
+            // 截取到第一个空字符之前的内容
+            midStr = midStr.left(nullIndex);
+        }
+        return midStr;
+    };
+
     QString fileName = fileNameByServiceName(servicePath);
-    return QString("sni:%1").arg(fileName.mid(fileName.lastIndexOf("/") + 1));
+    return QString("sni:%1").arg(getProcessName(fileName));
 }
 
 bool TrayModel::sniCanExport(const QString &servicePath) const
