@@ -9,12 +9,12 @@
     <message>
         <location filename="../package/main.qml" line="150"/>
         <source>Fashion Mode</source>
-        <translation type="unfinished"/>
+        <translation>Fashion</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="155"/>
         <source>Efficient Mode</source>
-        <translation type="unfinished"/>
+        <translation>Eficiente</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="161"/>
