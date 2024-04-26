@@ -92,9 +92,6 @@ XEmbedTrayItemWidget::XEmbedTrayItemWidget(quint32 winId, xcb_connection_t *cnn,
     connect(m_sendHoverEvent, &QTimer::timeout, this, &XEmbedTrayItemWidget::sendHoverEvent);
 
     m_updateTimer->start();
-
-    // FIXME: wine:weixinwork not show icon when first startup,so force refresh icon
-    QMetaObject::invokeMethod(this, &XEmbedTrayItemWidget::refershIconImage, Qt::QueuedConnection);
 }
 
 XEmbedTrayItemWidget::~XEmbedTrayItemWidget()
@@ -127,9 +124,11 @@ void XEmbedTrayItemWidget::paintEvent(QPaintEvent *e)
     if (!needShow()) {
         return;
     }
-
-    if (m_image.isNull())
-        return m_updateTimer->start();
+    if (m_image.isNull()) {
+        // NOTE: widget which insert onto qml will rendered in other thread, timer cannot be started, just refreshIcon instead.
+        // return m_updateTimer->start();
+        return;
+    }
 
     QPainter painter;
     painter.begin(this);
