@@ -19,7 +19,7 @@
     <message>
         <location filename="../package/main.qml" line="57"/>
         <source>Caps Lock off</source>
-        <translation type="unfinished"/>
+        <translation>Caps Lock desativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="58"/>
