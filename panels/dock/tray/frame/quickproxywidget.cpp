@@ -205,7 +205,6 @@ QuickProxyWidget::~QuickProxyWidget()
     if (d->widget) {
         d->widget->removeEventFilter(this);
         // QObject::disconnect(d->widget, SIGNAL(destroyed()), this, SLOT(_q_removeWidgetSlot()));
-        delete d->widget;
     }
 }
 

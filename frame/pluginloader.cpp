@@ -52,8 +52,10 @@ public:
         }
         q->setPluginDirs(dirs);
 
-        if (m_loadMetaDatas.isRunning())
+        if (m_loadMetaDatas.isRunning()) {
             m_loadMetaDatas.cancel();
+            m_loadMetaDatas.waitForFinished();
+        }
 
         m_plugins.clear();
         m_loadMetaDatas = QtConcurrent::run(std::bind(&DPluginLoaderPrivate::initPlugins, this));
