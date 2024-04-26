@@ -1,12 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pt_BR">
 <context>
     <name>clipboarditem</name>
     <message>
         <location filename="../package/clipboarditem.qml" line="22"/>
         <source>Clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Área de transferência</translation>
     </message>
 </context>
 <context>
@@ -14,7 +12,7 @@
     <message>
         <location filename="../clipboarditem.cpp" line="42"/>
         <source>Clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Área de transferência</translation>
     </message>
 </context>
 </TS>
