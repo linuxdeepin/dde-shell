@@ -87,6 +87,9 @@ QString DesktopfileAbstractParser::identifyWindow(QPointer<AbstractWindow> windo
         }
     } while(false);
 
+    if (res.isEmpty())
+        return QStringLiteral("EmptyCmdline");
+
     return res;
 }
 

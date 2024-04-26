@@ -130,6 +130,13 @@ BluetoothApplet::BluetoothApplet(AdaptersManager *adapterManager, QWidget *paren
     QScroller::scroller(m_scroarea)->setScrollerProperties(propertiesOne);
 }
 
+BluetoothApplet::~BluetoothApplet()
+{
+    // TODO  why crashed during m_scroarea deconstruction when using QScroller.
+    m_scroarea->setParent(nullptr);
+    m_scroarea->deleteLater();
+}
+
 bool BluetoothApplet::poweredInitState()
 {
     foreach (const auto adapter, m_adapterItems) {

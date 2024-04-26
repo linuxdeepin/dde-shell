@@ -76,15 +76,22 @@ AppletItem {
         id: mouseArea
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
-        onClicked: platformMenu.open()
+        onClicked: {
+            platformMenuLoader.active = true
+            platformMenuLoader.item.open()
+        }
     }
 
-    LP.Menu {
-        id: platformMenu
-        LP.MenuItem {
-            text: qsTr("SearchConfig")
-            onTriggered: {
-                Applet.toggleGrandSearchConfig()
+    Loader {
+        id: platformMenuLoader
+        active: false
+        sourceComponent: LP.Menu {
+            id: platformMenu
+            LP.MenuItem {
+                text: qsTr("SearchConfig")
+                onTriggered: {
+                    Applet.toggleGrandSearchConfig()
+                }
             }
         }
     }

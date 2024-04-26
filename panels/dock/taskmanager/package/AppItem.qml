@@ -133,19 +133,23 @@ Item {
             target: Panel
         }
 
-        LP.Menu {
-            id: contextMenu
-            Instantiator {
-                id: menuItemInstantiator
-                model: JSON.parse(menus)
-                delegate: LP.MenuItem {
-                    text: modelData.name
-                    onTriggered: {
-                        root.clickItem(root.itemId, modelData.id)
+        Loader {
+            id: contextMenuLoader
+            active: false
+            sourceComponent: LP.Menu {
+                id: contextMenu
+                Instantiator {
+                    id: menuItemInstantiator
+                    model: JSON.parse(menus)
+                    delegate: LP.MenuItem {
+                        text: modelData.name
+                        onTriggered: {
+                            root.clickItem(root.itemId, modelData.id)
+                        }
                     }
+                    onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
+                    onObjectRemoved: (index, object) => contextMenu.removeItem(object)
                 }
-                onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
-                onObjectRemoved: (index, object) => contextMenu.removeItem(object)
             }
         }
 
@@ -226,7 +230,8 @@ Item {
         }
         onClicked: function (mouse) {
             if (mouse.button === Qt.RightButton) {
-                MenuHelper.openMenu(contextMenu)
+                contextMenuLoader.active = true
+                MenuHelper.openMenu(contextMenuLoader.item)
             } else {
                 if (root.windows.length === 0) {
                     launchAnimation.start()
