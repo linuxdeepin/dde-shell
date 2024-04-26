@@ -29,7 +29,7 @@
     <message>
         <location filename="../package/main.qml" line="59"/>
         <source>Numeric keypad off</source>
-        <translation type="unfinished"/>
+        <translation>Teclado numérico desativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="60"/>
