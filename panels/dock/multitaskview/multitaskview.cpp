@@ -7,6 +7,9 @@
 #include "pluginfactory.h"
 
 #include <DDBusSender>
+#include <DWindowManagerHelper>
+
+DGUI_USE_NAMESPACE
 
 namespace dock {
 
@@ -14,7 +17,7 @@ MultiTaskView::MultiTaskView(QObject *parent)
     : DApplet(parent)
     , m_iconName("deepin-multitasking-view")
 {
-
+    connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, &MultiTaskView::compositeStateChanged);
 }
 
 bool MultiTaskView::init()
@@ -44,6 +47,11 @@ void MultiTaskView::setIconName(const QString& iconName)
         m_iconName = iconName;
         Q_EMIT iconNameChanged();
     }
+}
+
+bool MultiTaskView::hasComposite()
+{
+    return DWindowManagerHelper::instance()->hasComposite();
 }
 
 D_APPLET_CLASS(MultiTaskView)
