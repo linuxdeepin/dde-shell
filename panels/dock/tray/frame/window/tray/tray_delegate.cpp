@@ -237,26 +237,33 @@ void TrayDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, 
             rectBackground.setTop(option.rect.top() + (option.rect.height() - backHeight) / 2);
             rectBackground.setHeight(backHeight);
             rectBackground.setWidth(option.rect.width());
-            path.addRoundedRect(rectBackground, borderRadius, borderRadius);
+            path.addRoundedRect(rectBackground.marginsRemoved({1, 1, 1, 1}), borderRadius, borderRadius);
         } else {
             int backWidth = qBound(20, option.rect.width() - 4, 30);
             rectBackground.setLeft(option.rect.left() + (option.rect.width() - backWidth) / 2);
             rectBackground.setTop(option.rect.top());
             rectBackground.setWidth(backWidth);
             rectBackground.setHeight(option.rect.height());
-            path.addRoundedRect(rectBackground, borderRadius, borderRadius);
+            path.addRoundedRect(rectBackground.marginsRemoved({1, 1, 1, 1}), borderRadius, borderRadius);
         }
         QColor backColor;
+        QColor borderColor;
         if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType) {
             // 白色主题的情况下
             backColor = Qt::white;
-            backColor.setAlphaF(0.2);
+            backColor.setAlphaF(0.4);
+            borderColor = Qt::black;
+            borderColor.setAlphaF(0.1);
         } else {
-            backColor = QColor(20, 20, 20);
-            backColor.setAlphaF(0.2);
+            backColor = Qt::white;
+            backColor.setAlphaF(0.1);
+            borderColor = Qt::white;
+            borderColor.setAlphaF(0.2);
         }
 
         painter->fillPath(path, backColor);
+        painter->setPen(QPen(borderColor, 1));
+        painter->drawPath(path);
     }
 
     painter->restore();
