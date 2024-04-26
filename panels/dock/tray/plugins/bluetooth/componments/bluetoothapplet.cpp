@@ -156,7 +156,7 @@ bool BluetoothApplet::hasAadapter()
 void BluetoothApplet::setAdapterRefresh()
 {
     for (BluetoothAdapterItem *adapterItem : m_adapterItems) {
-        if (adapterItem->adapter()->discover())
+        // if (adapterItem->adapter()->discover())
             m_adaptersManager->adapterRefresh(adapterItem->adapter());
     }
     updateSize();
