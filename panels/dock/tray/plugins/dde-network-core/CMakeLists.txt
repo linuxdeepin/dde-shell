@@ -18,6 +18,7 @@ option(ENABLE_DEEPIN_NMQT "enable nmqt patch on deepin" OFF)
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core)
 set(QT_MAJOR_VERSION 6)
 find_package(Qt6 COMPONENTS Core Widgets DBus Network LinguistTools REQUIRED)
+find_package(KF6NetworkManagerQt REQUIRED)
 
 if (ENABLE_DEEPIN_NMQT)
     add_definitions(-DUSE_DEEPIN_NMQT)
