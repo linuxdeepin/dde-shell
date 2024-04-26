@@ -142,85 +142,89 @@ Window {
         dockRightPartModel.update()
     }
 
-    LP.Menu {
-        id: dockMenu
-        MutuallyExclusiveMenu {
-            visible: Panel.debugMode
-            title: qsTr("Indicator Style")
-            EnumPropertyMenuItem {
-                name: qsTr("Fashion Mode")
-                prop: "indicatorStyle"
-                value: Dock.Fashion
+    Loader {
+        id: dockMenuLoader
+        active: false
+        sourceComponent: LP.Menu {
+            id: dockMenu
+            MutuallyExclusiveMenu {
+                visible: Panel.debugMode
+                title: qsTr("Indicator Style")
+                EnumPropertyMenuItem {
+                    name: qsTr("Fashion Mode")
+                    prop: "indicatorStyle"
+                    value: Dock.Fashion
+                }
+                EnumPropertyMenuItem {
+                    name: qsTr("Efficient Mode")
+                    prop: "indicatorStyle"
+                    value: Dock.Efficient
+                }
             }
-            EnumPropertyMenuItem {
-                name: qsTr("Efficient Mode")
-                prop: "indicatorStyle"
-                value: Dock.Efficient
+            MutuallyExclusiveMenu {
+                title: qsTr("Alignment")
+                EnumPropertyMenuItem {
+                    name: qsTr("Align Left")
+                    prop: "itemAlignment"
+                    value: Dock.LeftAlignment
+                }
+                EnumPropertyMenuItem {
+                    name: qsTr("Align Center")
+                    prop: "itemAlignment"
+                    value: Dock.CenterAlignment
+                }
             }
-        }
-        MutuallyExclusiveMenu {
-            title: qsTr("Alignment")
-            EnumPropertyMenuItem {
-                name: qsTr("Align Left")
-                prop: "itemAlignment"
-                value: Dock.LeftAlignment
+            MutuallyExclusiveMenu {
+                title: qsTr("Position")
+                EnumPropertyMenuItem {
+                    enabled: Panel.debugMode
+                    name: qsTr("Top")
+                    prop: "position"
+                    value: Dock.Top
+                }
+                EnumPropertyMenuItem {
+                    name: qsTr("Bottom")
+                    prop: "position"
+                    value: Dock.Bottom
+                }
+                EnumPropertyMenuItem {
+                    enabled: Panel.debugMode
+                    name: qsTr("Left")
+                    prop: "position"
+                    value: Dock.Left
+                }
+                EnumPropertyMenuItem {
+                    enabled: Panel.debugMode
+                    name: qsTr("Right")
+                    prop: "position"
+                    value: Dock.Right
+                }
             }
-            EnumPropertyMenuItem {
-                name: qsTr("Align Center")
-                prop: "itemAlignment"
-                value: Dock.CenterAlignment
+            MutuallyExclusiveMenu {
+                title: qsTr("Status")
+                EnumPropertyMenuItem {
+                    name: qsTr("Keep Shown")
+                    prop: "hideMode"
+                    value: Dock.KeepShowing
+                }
+                EnumPropertyMenuItem {
+                    name: qsTr("Keep Hidden")
+                    prop: "hideMode"
+                    value: Dock.KeepHidden
+                }
+                EnumPropertyMenuItem {
+                    enabled: Panel.debugMode
+                    name: qsTr("Smart Hide")
+                    prop: "hideMode"
+                    value: Dock.SmartHide
+                }
             }
-        }
-        MutuallyExclusiveMenu {
-            title: qsTr("Position")
-            EnumPropertyMenuItem {
-                enabled: Panel.debugMode
-                name: qsTr("Top")
-                prop: "position"
-                value: Dock.Top
-            }
-            EnumPropertyMenuItem {
-                name: qsTr("Bottom")
-                prop: "position"
-                value: Dock.Bottom
-            }
-            EnumPropertyMenuItem {
-                enabled: Panel.debugMode
-                name: qsTr("Left")
-                prop: "position"
-                value: Dock.Left
-            }
-            EnumPropertyMenuItem {
-                enabled: Panel.debugMode
-                name: qsTr("Right")
-                prop: "position"
-                value: Dock.Right
-            }
-        }
-        MutuallyExclusiveMenu {
-            title: qsTr("Status")
-            EnumPropertyMenuItem {
-                name: qsTr("Keep Shown")
-                prop: "hideMode"
-                value: Dock.KeepShowing
-            }
-            EnumPropertyMenuItem {
-                name: qsTr("Keep Hidden")
-                prop: "hideMode"
-                value: Dock.KeepHidden
-            }
-            EnumPropertyMenuItem {
-                enabled: Panel.debugMode
-                name: qsTr("Smart Hide")
-                prop: "hideMode"
-                value: Dock.SmartHide
-            }
-        }
 
-        LP.MenuItem {
-            text: qsTr("Dock Settings")
-            onTriggered: {
-                Panel.openDockSettings()
+            LP.MenuItem {
+                text: qsTr("Dock Settings")
+                onTriggered: {
+                    Panel.openDockSettings()
+                }
             }
         }
     }
@@ -231,8 +235,9 @@ Window {
         onTapped: function(eventPoint, button) {
             let lastActive = MenuHelper.activeMenu
             MenuHelper.closeCurrent()
-            if (button === Qt.RightButton && lastActive !== dockMenu) {
-                MenuHelper.openMenu(dockMenu)
+            dockMenuLoader.active = true
+            if (button === Qt.RightButton && lastActive !== dockMenuLoader.item) {
+                MenuHelper.openMenu(dockMenuLoader.item)
             }
         }
     }
