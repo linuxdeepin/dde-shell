@@ -9,7 +9,7 @@
     <message>
         <location filename="../appitem.cpp" line="99"/>
         <source>All Windows</source>
-        <translation type="unfinished"/>
+        <translation>Todas as janelas</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="105"/>
