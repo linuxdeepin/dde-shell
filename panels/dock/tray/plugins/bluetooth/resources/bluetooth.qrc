@@ -20,6 +20,20 @@
         <file>disconnect_dark.svg</file>
         <file>dark/buletooth_other_dark.svg</file>
         <file>light/buletooth_other_light.svg</file>
+        <file>dsg/computer.dci</file>
+        <file>dsg/headphone.dci</file>
+        <file>dsg/input-keyboard.dci</file>
+        <file>dsg/input-mouse.dci</file>
+        <file>dsg/multimedia-player.dci</file>
+        <file>dsg/input-tablet.dci</file>
+        <file>dsg/phone.dci</file>
+        <file>dsg/printer.dci</file>
+        <file>dsg/camera-photo.dci</file>
+        <file>dsg/camera-video.dci</file>
+        <file>dsg/bluetooth.dci</file>
+        <file>dsg/input-gaming.dci</file>
+        <file>dsg/network-wireless.dci</file>
+        <file>dsg/scanner.dci</file>
     </qresource>
     <qresource prefix="/icons/deepin/builtin">
         <file>dark/icons/battery-000-symbolic_20px.svg</file>

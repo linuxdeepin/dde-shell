@@ -50,6 +50,23 @@ BluetoothDeviceItem::~BluetoothDeviceItem()
     }
 }
 
+static DDciIcon getDeviceIcon(const QString &deviceType)
+{
+    static const QString IconPath(":/dsg/%1.dci");
+    QString iconName(deviceType);
+    if (deviceType.isEmpty()
+        || deviceType == "unknown"
+        || deviceType == "modem"
+        || deviceType == "video-display"
+        || deviceType == "audio-card"
+        ) {
+        iconName = "bluetooth";
+    } else if (deviceType == "audio-headset" || deviceType == "audio-headphones") {
+        iconName = "headphone";
+    }
+    return DDciIcon(IconPath.arg(iconName));
+}
+
 void BluetoothDeviceItem::initActionList()
 {
     m_labelAction = new DViewItemAction(Qt::AlignLeft | Qt::AlignVCenter, QSize(), QSize(), false);
@@ -77,7 +94,7 @@ void BluetoothDeviceItem::initActionList()
 
     //蓝牙列表可用蓝牙设备信息文字显示高亮
     m_labelAction->setTextColorRole(DPalette::BrightText);
-    m_labelAction->setText(m_device->alias());
+    m_labelAction->setDciIcon(getDeviceIcon(m_device->deviceType()));
     updateDeviceState(m_device->state());
 
     m_batteryAction->setIcon(getBatteryIcon(m_device->battery()));
@@ -135,14 +152,6 @@ void BluetoothDeviceItem::initConnect()
 
 void BluetoothDeviceItem::updateIconTheme(DGuiApplicationHelper::ColorType type)
 {
-    if (!m_device->deviceType().isEmpty()) {
-        m_deviceIcon = m_device->deviceType();
-        m_labelAction->setIcon(QIcon::fromTheme(m_deviceIcon));
-        return;
-    }
-    m_deviceIcon = type == DGuiApplicationHelper::LightType ? LightString.arg("other") : DarkString.arg("other");
-    m_labelAction->setIcon(QIcon::fromTheme(m_deviceIcon));
-
     m_batteryAction->setIcon(getBatteryIcon(m_device->battery()));
 }
 
