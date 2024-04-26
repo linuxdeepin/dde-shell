@@ -4,7 +4,7 @@
     <message>
         <location filename="../package/main.qml" line="148"/>
         <source>Indicator Style</source>
-        <translation type="unfinished"/>
+        <translation>Estilo do indicador</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="150"/>
