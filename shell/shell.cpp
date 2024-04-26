@@ -44,4 +44,10 @@ void Shell::installDtkInterceptor()
     engine->addUrlInterceptor(new DtkInterceptor(this));
 }
 
+void Shell::disableQmlCache()
+{
+    if (qEnvironmentVariableIsEmpty("QML_DISABLE_DISK_CACHE"))
+        qputenv("QML_DISABLE_DISK_CACHE", "1");
+}
+
 DS_END_NAMESPACE
