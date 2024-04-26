@@ -33,7 +33,7 @@ AppletItem {
         }
     }
 
-    component WorkspaceDelegate: Control {
+    component WorkspaceDelegate: Item {
         id: content
         required property int index
         required property string workspaceName
@@ -43,39 +43,44 @@ AppletItem {
         implicitWidth: Panel.position === Dock.Top || Panel.position === Dock.Bottom ? frameSize : dockSize
         implicitHeight: Panel.position === Dock.Left || Panel.position === Dock.Right ? frameSize : dockSize
 
-        Rectangle {
-            id: workspaceRectangle
-            property D.Palette backgroundColor: DockPalette.workspaceRectangleColor
-            property D.Palette unSelectedBorderColor: DockPalette.workspaceUnselectedBorderColor
-            property D.Palette selectedBorderColor: DockPalette.workspaceSelectedBorderColor
-
+        Control {
             anchors.centerIn: parent
-            border.width: 1
-            border.color: isCurrent ? D.ColorSelector.selectedBorderColor : D.ColorSelector.unSelectedBorderColor
-            implicitWidth: frameSize
-            implicitHeight: isCurrent ? itemSize + 4 : itemSize
-            color: D.ColorSelector.backgroundColor
-            radius: 3
-            Image {
-                anchors.fill: parent
-                anchors.margins: 1
-                id: workspaceImage
-                source: screenImage
-                visible: false
-                fillMode: Image.PreserveAspectCrop
-            }
+            implicitWidth: frameSize + 4
+            implicitHeight: itemSize + 4        
+    
+            Rectangle {
+                id: workspaceRectangle
+                property D.Palette backgroundColor: DockPalette.workspaceRectangleColor
+                property D.Palette unSelectedBorderColor: DockPalette.workspaceUnselectedBorderColor
+                property D.Palette selectedBorderColor: DockPalette.workspaceSelectedBorderColor
 
-            OpacityMask {
-                anchors.fill: workspaceImage
-                source: workspaceImage
-                maskSource: Rectangle {
-                    implicitWidth: workspaceRectangle.implicitWidth
-                    implicitHeight: workspaceRectangle.implicitHeight
-                    radius: workspaceRectangle.radius
+                anchors.centerIn: parent
+                border.width: 1
+                border.color: isCurrent ? D.ColorSelector.selectedBorderColor : D.ColorSelector.unSelectedBorderColor
+                implicitWidth: frameSize
+                implicitHeight: isCurrent ? itemSize + 4 : itemSize
+                color: D.ColorSelector.backgroundColor
+                radius: 3
+                Image {
+                    anchors.fill: parent
+                    anchors.margins: 1
+                    id: workspaceImage
+                    source: screenImage
+                    visible: false
+                    fillMode: Image.PreserveAspectCrop
                 }
-                visible: isCurrent
-            }
 
+                OpacityMask {
+                    anchors.fill: workspaceImage
+                    source: workspaceImage
+                    maskSource: Rectangle {
+                        implicitWidth: workspaceRectangle.implicitWidth
+                        implicitHeight: workspaceRectangle.implicitHeight
+                        radius: workspaceRectangle.radius
+                    }
+                    visible: isCurrent
+                }
+            }
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true

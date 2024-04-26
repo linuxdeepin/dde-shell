@@ -78,7 +78,9 @@ void XWorkspaceWorker::updateData()
                 return;
             }
         }
-        auto item = new WorkSpaceData(m_desktops[i].name, image);
+        // kwin workspace name (m_desktops[i].name) no gui to set, so hardcode workspace name for x11
+
+        auto item = new WorkSpaceData(tr("Workspace").append(" " + QString::number(i + 1)), image);
         items.append(item);
     }
     m_model->setItems(items);

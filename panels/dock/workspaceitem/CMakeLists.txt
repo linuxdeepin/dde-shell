@@ -18,3 +18,4 @@ target_link_libraries(dock-workspaceitem PRIVATE
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.workspaceitem TARGET dock-workspaceitem)
+ds_handle_package_translation(PACKAGE org.deepin.ds.dock.workspaceitem)
