@@ -24,7 +24,7 @@
     <message>
         <location filename="../package/main.qml" line="189"/>
         <source>Left</source>
-        <translation type="unfinished"/>
+        <translation>Esquerda</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="174"/>
