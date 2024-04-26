@@ -19,7 +19,7 @@
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Alignment</source>
-        <translation type="unfinished"/>
+        <translation>Vendosje</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="189"/>
@@ -34,7 +34,7 @@
     <message>
         <location filename="../package/main.qml" line="163"/>
         <source>Align Left</source>
-        <translation type="unfinished"/>
+        <translation>Vendose Majtas</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
