@@ -871,15 +871,30 @@ void QuickDockItem::paintEvent(QPaintEvent *event)
         return QWidget::paintEvent(event);
 
     QPainter painter(this);
-    painter.setRenderHints(QPainter::SmoothPixmapTransform | QPainter::Antialiasing);
-    QColor backColor = DGuiApplicationHelper::ColorType::DarkType == DGuiApplicationHelper::instance()->themeType() ? QColor(20, 20, 20) : Qt::white;
-    backColor.setAlphaF(0.2);
+    painter.setRenderHints(QPainter::Antialiasing);
+    QColor backColor;
+    QColor borderColor;
+    if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType) {
+        // 白色主题的情况下
+        backColor = Qt::white;
+        backColor.setAlphaF(0.4);
+        borderColor = Qt::black;
+        borderColor.setAlphaF(0.1);
+    } else {
+        backColor = Qt::white;
+        backColor.setAlphaF(0.1);
+        borderColor = Qt::white;
+        borderColor.setAlphaF(0.2);
+    }
+
     if (m_isEnter) {
         // 鼠标进入的时候，绘制底色
         QPainterPath path;
         int borderRadius = shadowRadius();
-        path.addRoundedRect(rect(), borderRadius, borderRadius);
+        path.addRoundedRect(rect().marginsRemoved({1, 1, 1, 1}), borderRadius, borderRadius);
+        painter.setPen(QPen(borderColor, 1));
         painter.fillPath(path, backColor);
+        painter.drawPath(path);
     }
 
     QPixmap pixmap = iconPixmap();
