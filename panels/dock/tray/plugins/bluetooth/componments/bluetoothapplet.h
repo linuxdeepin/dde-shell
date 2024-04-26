@@ -66,6 +66,7 @@ class BluetoothApplet : public QWidget
     Q_OBJECT
 public:
     explicit BluetoothApplet(AdaptersManager *adapterManager, QWidget *parent = nullptr);
+    ~BluetoothApplet() override;
     bool poweredInitState();
     // 当前是否有蓝牙适配器
     bool hasAadapter();
