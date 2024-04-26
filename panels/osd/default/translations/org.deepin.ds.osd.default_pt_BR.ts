@@ -9,7 +9,7 @@
     <message>
         <location filename="../package/main.qml" line="55"/>
         <source>WLAN off</source>
-        <translation type="unfinished"/>
+        <translation>WLAN desligada</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="56"/>
