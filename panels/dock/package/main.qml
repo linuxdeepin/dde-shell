@@ -367,7 +367,9 @@ Window {
         property int oldDockSize: 0
         property list<int> recentDeltas: []
         property int averageCount: 5
-  
+        hoverEnabled: true
+        propagateComposedEvents: true
+
         cursorShape: {
             if (Panel.position == Dock.Top || Panel.position == Dock.Bottom) {
                 return Qt.SizeVerCursor
@@ -388,6 +390,7 @@ Window {
         }
 
         onPositionChanged: function(mouse) {
+            if (!dock.isDragging) return
             var newPos = mapToGlobal(mouse.x, mouse.y)
             var xChange = newPos.x - oldMousePos.x
             var yChange = newPos.y - oldMousePos.y
