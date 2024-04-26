@@ -24,7 +24,7 @@
     <message>
         <location filename="../package/main.qml" line="58"/>
         <source>Numeric keypad on</source>
-        <translation type="unfinished"/>
+        <translation>Teclado numérico ligado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="59"/>
