@@ -22,7 +22,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Dtk6::Core
     Dtk6::Gui
     Dtk6::Widget
-    KF5NetworkManagerQt_static
+    KF6::NetworkManagerQt
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -41,7 +41,7 @@ target_link_libraries(${PROJECT_NAME}_static PUBLIC
     Dtk6::Core
     Dtk6::Gui
     Dtk6::Widget
-    KF5NetworkManagerQt_static
+    KF6::NetworkManagerQt
 )
 target_include_directories(${PROJECT_NAME}_static PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/realize>"
