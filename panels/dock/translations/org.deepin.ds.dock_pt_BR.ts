@@ -19,7 +19,7 @@
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Alignment</source>
-        <translation type="unfinished"/>
+        <translation>Alinhamento</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="189"/>
