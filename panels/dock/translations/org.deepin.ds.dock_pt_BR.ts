@@ -29,7 +29,7 @@
     <message>
         <location filename="../package/main.qml" line="174"/>
         <source>Position</source>
-        <translation type="unfinished"/>
+        <translation>Posição</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="163"/>
