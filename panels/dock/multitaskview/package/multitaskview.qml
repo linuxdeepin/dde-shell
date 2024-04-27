@@ -31,17 +31,28 @@ AppletItem {
         // 9:14 (iconSize/dockHeight)
         icon.height: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
         icon.width: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
+        Timer {
+            id: toolTipShowTimer
+            interval: 50
+            onTriggered: {
+                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
+                toolTip.toolTipX = point.x
+                toolTip.toolTipY = point.y
+                toolTip.open()
+            }
+        }
         onClicked: {
             Applet.openWorkspace()
             toolTip.close()
         }
         onHoveredChanged: {
             if (hovered) {
-                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
-                toolTip.toolTipX = point.x
-                toolTip.toolTipY = point.y
-                toolTip.open()
+                toolTipShowTimer.start()
             } else {
+                if (toolTipShowTimer.running) {
+                    toolTipShowTimer.stop()
+                }
+
                 toolTip.close()
             }
         }

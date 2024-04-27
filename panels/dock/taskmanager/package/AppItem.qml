@@ -242,10 +242,7 @@ Item {
 
         onEntered: {
             if (windows.length === 0) {
-                var point = root.mapToItem(null, root.width / 2, 0)
-                toolTip.toolTipX = point.x
-                toolTip.toolTipY = point.y
-                toolTip.open()
+                toolTipShowTimer.start()
                 return
             }
 
@@ -264,6 +261,10 @@ Item {
         }
 
         onExited: {
+            if (toolTipShowTimer.running) {
+                toolTipShowTimer.stop()
+            }
+
             if (windows.length === 0) {
                 toolTip.close()
                 return
@@ -274,6 +275,17 @@ Item {
         PanelToolTip {
             id: toolTip
             text: root.name
+        }
+
+        Timer {
+            id: toolTipShowTimer
+            interval: 50
+            onTriggered: {
+                var point = root.mapToItem(null, root.width / 2, 0)
+                toolTip.toolTipX = point.x
+                toolTip.toolTipY = point.y
+                toolTip.open()
+            }
         }
 
         function closeItemPreview() {
