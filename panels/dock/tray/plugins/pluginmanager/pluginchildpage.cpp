@@ -62,7 +62,7 @@ void PluginChildPage::initUi()
     m_back->setFlat(true);
     m_title->setAlignment(Qt::AlignCenter);
     QHBoxLayout *headerLayout = new QHBoxLayout(m_headerWidget);
-    headerLayout->setContentsMargins(11, 12, 24 + 11, 12);
+    headerLayout->setContentsMargins(11, 12, 11, 12);
     headerLayout->setSpacing(0);
     headerLayout->addWidget(m_back);
     headerLayout->addWidget(m_title);
@@ -74,7 +74,7 @@ void PluginChildPage::initUi()
 
     mainLayout->addWidget(m_headerWidget);
     mainLayout->addWidget(m_container);
-    m_containerLayout->setContentsMargins(11, 0, 11, 0);
+    m_containerLayout->setContentsMargins(0, 0, 0, 0);
     m_containerLayout->setSpacing(0);
 }
 
