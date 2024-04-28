@@ -764,10 +764,6 @@ QuickDockItem::QuickDockItem(PluginsItemInterface *pluginItem, const QString &it
 
 QuickDockItem::~QuickDockItem()
 {
-    QWidget *tipWidget = m_pluginItem->itemTipsWidget(m_itemKey);
-    if (tipWidget && (tipWidget->parentWidget() == m_popupWindow || tipWidget->parentWidget() == this))
-        tipWidget->setParent(m_tipParent);
-
     QWidget *itemWidget = m_pluginItem->itemWidget(m_itemKey);
     if (itemWidget) {
         itemWidget->setParent(nullptr);
@@ -959,6 +955,11 @@ void QuickDockItem::leaveEvent(QEvent *event)
 {
     m_isEnter = false;
     update();
+
+    if (QWidget *tipWidget = m_pluginItem->itemTipsWidget(m_itemKey)) {
+        if (m_tipParent != tipWidget->parentWidget())
+            tipWidget->setParent(m_tipParent);
+    }
 
     QWidget::leaveEvent(event);
     m_popupWindow->hide();
