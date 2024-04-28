@@ -358,7 +358,7 @@ void BluetoothAdapterItem::initUi()
     m_adapterStateBtn->setChecked(m_adapter->powered());
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    // mainLayout->setMargin(0);
+    mainLayout->setContentsMargins(QMargins(0, 0, 0, 0));
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 

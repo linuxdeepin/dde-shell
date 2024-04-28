@@ -17,7 +17,7 @@ BrightnessAdjWidget::BrightnessAdjWidget(BrightnessModel *model, QWidget *parent
     , m_mainLayout(new QVBoxLayout(this))
     , m_brightnessModel(model)
 {
-    // m_mainLayout->setMargin(0);
+    m_mainLayout->setContentsMargins(QMargins(0, 0, 0, 0));
     m_mainLayout->setSpacing(ItemSpacing);
     connect(m_brightnessModel, &BrightnessModel::monitorChanged, this, &BrightnessAdjWidget::loadBrightnessItem);
 

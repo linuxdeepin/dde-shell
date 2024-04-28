@@ -32,7 +32,7 @@ SettingLabel::SettingLabel(QString text, QWidget *parent)
 {
     setAccessibleName("BluetoothSettingLabel");
     setContentsMargins(0, 0, 0, 0);
-    // m_layout->setMargin(0);
+    m_layout->setContentsMargins(QMargins(0, 0, 0, 0));
     m_layout->setSpacing(4);
     m_layout->setContentsMargins(20, 0, 6, 0);
     m_layout->addWidget(m_label, 0, Qt::AlignLeft | Qt::AlignHCenter);
@@ -252,7 +252,7 @@ void BluetoothApplet::initUi()
     m_settingLabel->setFixedHeight(DeviceItemHeight);
     DFontSizeManager::instance()->bind(m_settingLabel->label(), DFontSizeManager::T7);
 
-    // m_contentLayout->setMargin(0);
+    m_contentLayout->setContentsMargins(QMargins(0, 0, 0, 0));
     m_contentLayout->setSpacing(0);
     m_contentLayout->setContentsMargins(0, 0, 0, 0);
     m_contentLayout->addWidget(m_seperator);
@@ -270,7 +270,7 @@ void BluetoothApplet::initUi()
 
     updateIconTheme();
 
-    // m_mainLayout->setMargin(0);
+    m_mainLayout->setContentsMargins(QMargins(0, 0, 0, 0));
     m_mainLayout->setSpacing(0);
     m_mainLayout->setContentsMargins(0, 0, 0, 0);
     m_mainLayout->addWidget(m_scroarea);

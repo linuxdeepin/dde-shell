@@ -36,7 +36,7 @@ SystemPluginItem::SystemPluginItem(PluginsItemInterface *const pluginInter, cons
             // 此处先创建一个Layout，在该窗体show的时候将m_centralWidget添加到layout上面
             QBoxLayout *hLayout = new QHBoxLayout(this);
             hLayout->setSpacing(0);
-            // hLayout->setMargin(0);
+            hLayout->setContentsMargins(QMargins(0, 0, 0, 0));
             setLayout(hLayout);
             m_centralWidget->installEventFilter(this);
         } else {
