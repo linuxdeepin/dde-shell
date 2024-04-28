@@ -124,7 +124,13 @@ QIcon SoundPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::ColorTy
     case DockPart::QuickShow:
         return m_soundDeviceWidget->pixmap(themeType, 18, 16);
     case DockPart::DCCSetting:
-        return m_soundDeviceWidget->pixmap(themeType, 18, 18);
+    {
+        auto iconName = QString("audio-volume-high-symbolic");
+        if (themeType == DGuiApplicationHelper::ColorType::LightType)
+            iconName.append("-dark");
+
+        return QIcon::fromTheme(iconName);
+    }
     default:
         break;
     }

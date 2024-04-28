@@ -125,11 +125,8 @@ void PowerPlugin::setSortKey(const QString &itemKey, const int order)
 
 QIcon PowerPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::ColorType themeType)
 {
-    const QPixmap pixmap = m_powerStatusWidget->getBatteryIcon(themeType);
-    static QIcon batteryIcon;
-    batteryIcon.detach();
-    batteryIcon.addPixmap(pixmap);
-    return batteryIcon;
+    return QIcon::fromTheme(themeType == DGuiApplicationHelper::DarkType ? ":/batteryicons/resources/batteryicons/battery-100-symbolic.svg"
+                                                                          : ":/batteryicons/resources/batteryicons/battery-100-symbolic-dark.svg");
 }
 
 PluginFlags PowerPlugin::flags() const
