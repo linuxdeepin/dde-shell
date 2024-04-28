@@ -268,7 +268,7 @@ void BluetoothApplet::initUi()
     m_scroarea->setContentsMargins(0, 0, 0, 0);
     m_scroarea->setWidget(m_contentWidget);
 
-    updateIconTheme();
+    // updateIconTheme();
 
     m_mainLayout->setContentsMargins(QMargins(0, 0, 0, 0));
     m_mainLayout->setSpacing(0);
@@ -294,29 +294,29 @@ void BluetoothApplet::initConnect()
         .call();
         emit requestHide();
     });
-    connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, &BluetoothApplet::updateIconTheme);
+    // connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, &BluetoothApplet::updateIconTheme);
     connect(m_airPlaneModeInter, &DBusAirplaneMode::EnabledChanged, this, &BluetoothApplet::setAirplaneModeEnabled);
     connect(m_airPlaneModeInter, &DBusAirplaneMode::EnabledChanged, this, &BluetoothApplet::setDisabled);
 }
 
-/**
- * @brief BluetoothApplet::updateIconTheme 根据主题颜色设置蓝牙界面控件背景色
- */
-void BluetoothApplet::updateIconTheme()
-{
-    QPalette widgetBackgroud;
-    QPalette scroareaBackgroud;
-    if(DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
-        widgetBackgroud.setColor(QPalette::Window, QColor(255, 255, 255, 0.03 * 255));
-    else
-        widgetBackgroud.setColor(QPalette::Window, QColor(0, 0, 0, 0.03 * 255));
+// /**
+//  * @brief BluetoothApplet::updateIconTheme 根据主题颜色设置蓝牙界面控件背景色
+//  */
+// void BluetoothApplet::updateIconTheme()
+// {
+//     QPalette widgetBackgroud;
+//     QPalette scroareaBackgroud;
+//     if(DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
+//         widgetBackgroud.setColor(QPalette::Window, QColor(255, 255, 255, 0.03 * 255));
+//     else
+//         widgetBackgroud.setColor(QPalette::Window, QColor(0, 0, 0, 0.03 * 255));
 
-    m_contentWidget->setAutoFillBackground(true);
-    m_contentWidget->setPalette(widgetBackgroud);
-    scroareaBackgroud.setColor(QPalette::Window, Qt::transparent);
-    m_scroarea->setAutoFillBackground(true);
-    m_scroarea->setPalette(scroareaBackgroud);
-}
+//     m_contentWidget->setAutoFillBackground(true);
+//     m_contentWidget->setPalette(widgetBackgroud);
+//     scroareaBackgroud.setColor(QPalette::Window, Qt::transparent);
+//     m_scroarea->setAutoFillBackground(true);
+//     m_scroarea->setPalette(scroareaBackgroud);
+// }
 
 void BluetoothApplet::initAdapters()
 {

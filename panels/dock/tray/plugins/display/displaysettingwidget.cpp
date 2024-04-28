@@ -29,7 +29,7 @@ DisplaySettingWidget::DisplaySettingWidget(BrightnessModel *model, QWidget *pare
 
 void DisplaySettingWidget::initUI()
 {
-    setContentsMargins(0, 10, 0, 30);
+    setContentsMargins(10, 10, 10, 10);
     QVBoxLayout *mainLayout = new QVBoxLayout();
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(ItemSpacing);

@@ -91,11 +91,12 @@ bool SoundDevicesWidget::eventFilter(QObject *watcher, QEvent *event)
 
 void SoundDevicesWidget::initUi()
 {
+    setContentsMargins(0, 0, 0, 0);
     m_tipsLabel->setAccessibleName("soundtips");
     m_tipsLabel->setVisible(false);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(10, 0, 10, 0);
+    layout->setContentsMargins(10, 10, 10, 10);
 
     QPixmap leftPixmap = QIcon::fromTheme(QString("audio-volume-%1-symbolic").arg(m_sinkInter->mute() ? "muted" : "off")).pixmap(18, 18);
     m_sliderContainer->setIcon(SliderContainer::IconPosition::LeftIcon, leftPixmap, QSize(), 5);

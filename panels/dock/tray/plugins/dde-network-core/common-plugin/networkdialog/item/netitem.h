@@ -58,7 +58,7 @@ enum NetItemRole {
     sortRole
 };
 
-#define PANELWIDTH 300
+#define PANELWIDTH 330
 
 enum NetItemType {
     DeviceControllViewItem = 0, // 总控开关
