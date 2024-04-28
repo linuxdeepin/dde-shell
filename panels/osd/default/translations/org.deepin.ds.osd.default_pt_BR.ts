@@ -69,7 +69,7 @@
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation type="unfinished"/>
+        <translation>Desativar mudo</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
