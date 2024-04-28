@@ -45,9 +45,9 @@ AppletItem {
 
         Control {
             anchors.centerIn: parent
-            implicitWidth: frameSize + 4
-            implicitHeight: itemSize + 4        
-    
+            implicitWidth: frameSize
+            implicitHeight: frameSize
+
             Rectangle {
                 id: workspaceRectangle
                 property D.Palette backgroundColor: DockPalette.workspaceRectangleColor
