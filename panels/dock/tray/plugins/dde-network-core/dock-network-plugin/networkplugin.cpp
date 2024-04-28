@@ -305,6 +305,10 @@ QIcon NetworkPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::Color
 {
     switch(dockPart) {
     case DockPart::DCCSetting:
+    {
+        QString localPath = (themeType == DGuiApplicationHelper::ColorType::DarkType ? ":/dark/" : ":/light/");
+        return QIcon::fromTheme(localPath + "wireless-80-symbolic");
+    }
     case DockPart::QuickShow:
         return m_networkHelper->icon(themeType);
     default:

@@ -261,11 +261,6 @@ void ShutdownPlugin::setSortKey(const QString &itemKey, const int order)
 
 QIcon ShutdownPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::ColorType themeType)
 {
-    if (dockPart == DockPart::DCCSetting) {
-        return QIcon(":/icons/resources/icons/shutdown-symbolic-dark.svg");
-    }
-
-    const auto ratio = qApp->devicePixelRatio();
     QPixmap pixmap;
     QString iconFile(":/resources/icons/shutdown-symbolic-dark.svg");
     if (themeType == DGuiApplicationHelper::LightType)
