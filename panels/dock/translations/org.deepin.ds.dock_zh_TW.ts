@@ -46,12 +46,12 @@
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Top</source>
-        <translation>頂部</translation>
+        <translation>上</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="183"/>
         <source>Bottom</source>
-        <translation>底部</translation>
+        <translation>下</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="195"/>
