@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/icons/deepin/builtin/uos-ai-assistant.svg</file>
+        <file>assets/icons/deepin/builtin/uosai.svg</file>
+        <file>assets/icons/deepin/builtin/uosai_dark.svg</file>
+    </qresource>
+</RCC>
