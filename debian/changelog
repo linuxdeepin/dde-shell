@@ -1,3 +1,35 @@
+dde-shell (0.0.14) unstable; urgency=medium
+
+  * fix: crashed when open dock's menu(Issue: https://github.com/linuxdeepin/developer-center/issues/8243)
+  * fix: double release pointer
+  * fix: invalid fallback for DesktopfileAbstractParser
+  * fix: crashed when load plugins in sometimes
+  * fix: crashed when QScrollArea during deconstruction
+  * fix: "showtimetofull" option didn't work(Issue: https://github.com/linuxdeepin/developer-center/issues/8144)
+  * fix: application preview stuttering.
+    Thanks to zhangkun(Issue: https://github.com/linuxdeepin/developer-center/issues/8095)
+  * chore: missing lincense
+  * fix: incorrect resources for device icon(Issue: https://github.com/linuxdeepin/developer-center/issues/8238)
+  * chore: modify ts file (#281)
+    Thanks to ZhaoYingZhen(issue: 8270)(Influence: translation display)
+  * fix: crashed by qmlcache(Issue: https://github.com/linuxdeepin/developer-center/issues/8289)
+  * fix: quick panel popup has focus (#293)
+    Thanks to ZhaoYingZhen(Influence: quick panel popup has no focus)
+  * chore: add uos-ai tray plugin (#283)
+    Thanks to ZhaoYingZhen(issue: 8247)(Influence: uos-ai tray plugin icon display)
+  * fix: modify plugin hover style
+  * fix: workspace not localize(issue: 8223, 8278)
+  * feat: Hide multitask button when composition is disabled(Issue: https://github.com/linuxdeepin/developer-center/issues/8224)
+  * fix: crashed by tipWidget when exit
+  * fix: fix `mapToGlobal` error
+  * fix: notification plugin not generated in correct location in debug mode(issue: 8245)
+  * fix: tips position error(issue: 8197)
+  * fix: some widget layout margin incorrect(issue: 7704)
+  * [dde-shell] Updates for project Deepin Desktop Environment (#277)
+    Thanks to transifex-integration[bot]
+
+ -- Deepin Packages Builder <packages@deepin.org>  Sun, 28 Apr 2024 13:14:13 +0800
+
 dde-shell (0.0.13) unstable; urgency=medium
 
   * chore: adjust radius for ToolTips
