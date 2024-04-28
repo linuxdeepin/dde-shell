@@ -168,6 +168,7 @@ void QuickPanel::initUi()
 
     // 图标
     m_iconButton->setEnabledCircle(true);
+    m_iconButton->setFocusPolicy(Qt::NoFocus);
     m_iconButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_iconButton->setIconSize(IconSize);
     m_iconButton->installEventFilter(this);

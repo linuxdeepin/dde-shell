@@ -67,6 +67,7 @@ void BluetoothMainWidget::initUi()
     m_iconButton->setIcon(QIcon(bluetoothIcon(true)));
     m_iconButton->setCheckable(true);
     m_iconButton->setChecked(isOpen());
+    m_iconButton->setFocusPolicy(Qt::NoFocus);
     onPaletteChanged();
 
     // 添加中间的文本

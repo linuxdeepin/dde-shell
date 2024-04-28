@@ -104,6 +104,7 @@ SliderContainer::SliderContainer(QWidget *parent)
     , m_spaceLeftWidget(new QWidget(this))
     , m_spaceRightWidget(new QWidget(this))
 {
+    m_slider->setFocusPolicy(Qt::NoFocus);
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
