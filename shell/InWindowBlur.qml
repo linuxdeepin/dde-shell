@@ -24,8 +24,8 @@ Item {
             anchors.fill: parent
             visible: blitter.blitterEnabled && !control.offscreen
             property D.Palette overlay: D.Palette {
-                normal: ("#333333")
-                normalDark: ("#eeeeee")
+                normal: ("#eeeeee")
+                normalDark: ("#333333")
             }
             color: Window.window && Window.window.color.a < 1 ? D.ColorSelector.overlay : "transparent"
 
