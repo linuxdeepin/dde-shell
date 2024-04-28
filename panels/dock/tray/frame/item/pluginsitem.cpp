@@ -38,7 +38,7 @@ PluginsItem::PluginsItem(PluginsItemInterface *const pluginInter, const QString 
         QBoxLayout *hLayout = new QHBoxLayout;
         hLayout->addWidget(m_centralWidget);
         hLayout->setSpacing(0);
-        // hLayout->setMargin(0);
+        hLayout->setContentsMargins(QMargins(0, 0, 0, 0));
 
         setLayout(hLayout);
     }
