@@ -28,6 +28,8 @@ Window {
     D.DWindow.windowRadius: 4 * Screen.devicePixelRatio
     D.DWindow.enableBlurWindow: true
     D.DWindow.shadowRadius: 8
+    // TODO set shadowOffset maunally.
+    D.DWindow.shadowOffset: Qt.point(0, 10)
 
     color: "transparent"
     D.StyledBehindWindowBlur {
