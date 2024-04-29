@@ -2,9 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1">
 <context>
+    <name>dock::MultiTaskView</name>
+    <message>
+        <location filename="../multitaskview.cpp" line="65"/>
+        <source>Multitasking View</source>
+        <translation>多任务视图</translation>
+    </message>
+</context>
+<context>
     <name>multitaskview</name>
     <message>
-        <location filename="../package/multitaskview.qml" line="22"/>
+        <location filename="../package/multitaskview.qml" line="23"/>
         <source>Multitasking View</source>
         <translation>多任务视图</translation>
     </message>

@@ -77,6 +77,7 @@ private:
     DS_NAMESPACE::DApplet *m_oldDockApplet;
     DS_NAMESPACE::DApplet *m_clipboardApplet;
     DS_NAMESPACE::DApplet *m_searchApplet;
+    DS_NAMESPACE::DApplet *m_multitaskviewApplet;
 };
 }
 

@@ -5,6 +5,8 @@
 add_library(dock-multitaskview SHARED
     multitaskview.cpp
     multitaskview.h
+    ../dockiteminfo.cpp
+    ../dockiteminfo.h
 )
 
 target_link_libraries(dock-multitaskview PRIVATE
