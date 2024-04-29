@@ -555,13 +555,13 @@ void X11WindowPreviewContainer::updatePreviewTitle(const QString& title)
 
 void X11WindowPreviewContainer::initUI()
 {
-    m_view = new PreviewsListView;
+    m_view = new PreviewsListView(this);
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* titleLayout = new QHBoxLayout;
     titleLayout->setContentsMargins(5, 0, 5, 0);
 
-    m_previewIcon = new QLabel;
-    m_previewTitle = new QLabel;
+    m_previewIcon = new QLabel(this);
+    m_previewTitle = new QLabel(this);
     m_previewTitle->setFixedHeight(PREVIEW_TITLE_HEIGHT);
     m_previewIcon->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
 
@@ -624,14 +624,19 @@ void X11WindowPreviewContainer::updateSize()
         return;
     }
 
+    m_view->adjustSize();
+    m_view->updateGeometry();
+
     auto screenSize = screen()->size();
     screenSize -= QSize(m_direction % 2 == 0 ? 0 : m_baseWindow->width() + 20, m_direction % 2 == 0 ? m_baseWindow->height() + 20 : 0);
 
     setMaximumSize(screenSize);
     setMinimumSize(0, 0);
 
-    m_view->updateGeometry();
-    adjustSize();
+    m_view->setMaximumHeight(m_view->viewportSizeHint().height());
+    m_previewTitle->setMaximumWidth(m_view->width() - m_previewIcon->width() - m_closeAllButton->width() - 20);
+
+    QTimer::singleShot(0, this, &X11WindowPreviewContainer::adjustSize);
 }
 
 bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
