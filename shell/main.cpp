@@ -151,7 +151,6 @@ int main(int argc, char *argv[])
     }
 
     Shell shell;
-    shell.installDtkInterceptor();
     // TODO disable qml's cache avoid to parsing error for ExecutionEngine.
     shell.disableQmlCache();
 
