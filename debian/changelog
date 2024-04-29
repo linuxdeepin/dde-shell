@@ -1,3 +1,21 @@
+dde-shell (0.0.15) unstable; urgency=medium
+
+  * fix: plugin icons should not changed in dcc(issue: 8245)
+  * fix: Solve the problem of small plugin icon in the quick panel popup under high zoom (#299)
+    Thanks to ZhaoYingZhen(issue: 8111)(Influence: quick panel plugin icons size)
+  * feat: Move tooltipShowTimer to Item
+    Thanks to zhangkun
+  * fix: bluetooth and network plugin applet layout error when clicked by icon on quick panel(issue: 7704)
+  * chore: update icon such as weixin(wine)(issue: 8280)
+  * fix: tooltip shown when drag dock(issue: 8287)
+  * chore: make multitaskview can set invisible by dcc(issue: 8312)
+  * fix: window display abnormality for PanelToolTip(Issue: https://github.com/linuxdeepin/developer-center/issues/8071)
+  * fix: dock crash when get currenActiveWindow is Null
+  * fix: fix preview widget display abnormally(issue: 8311)(Influence: preview display)
+  * fix: When dragging the tray application, tray expansion box is hidden.(issue: 8315)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Mon, 29 Apr 2024 15:43:53 +0800
+
 dde-shell (0.0.14) unstable; urgency=medium
 
   * fix: crashed when open dock's menu(Issue: https://github.com/linuxdeepin/developer-center/issues/8243)
@@ -47,21 +65,6 @@ dde-shell (0.0.13) unstable; urgency=medium
     Thanks to justforlxz(Issue: https://github.com/linuxdeepin/developer-center/issues/8225)
 
  -- Deepin Packages Builder <packages@deepin.org>  Thu, 25 Apr 2024 21:28:43 +0800
-
-dde-shell (0.0.13) unstable; urgency=medium
-
-  * chore: adjust radius for ToolTips
-  * fix: unable to connect to wifi with password for the first time(Issue: https://github.com/linuxdeepin/developer-center/issues/7966)
-  * fix: multitaskview not scale realtime
-    Thanks to justforlxz
-  * fix: When the dock is hidden, the system tray expansion box is not hidden.(issue: 8153)
-  * fix: set cursor shape for dock and tray(Issue: https://github.com/linuxdeepin/developer-center/issues/8181)
-  * fix: transparent windows cannot be blurred(Issue: https://github.com/linuxdeepin/developer-center/issues/8211)
-  * feat: adjust ui
-  * fix: deepin-launcher icon incorrect on bloom theme(Issue: https://github.com/linuxdeepin/developer-center/issues/8206)
-  * fix: The dock cannot record the tray icon dragged to the dock plug-in area.(issue: 8189)(Influence: tray icons display)
-
- -- Deepin Packages Builder <packages@deepin.org>  Thu, 25 Apr 2024 18:41:42 +0800
 
 dde-shell (0.0.12) unstable; urgency=medium
 
