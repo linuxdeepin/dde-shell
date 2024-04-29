@@ -120,6 +120,12 @@ void DockApplet::initDock()
     }
 }
 
+void DockApplet::collapseExpandedPanel()
+{
+    if (m_window)
+        m_window->collapseExpandedPanel();
+}
+
 bool DockApplet::init()
 {
     DApplet::init();

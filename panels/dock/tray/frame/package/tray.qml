@@ -50,8 +50,15 @@ AppletItem {
         Applet.setDisplayMode(Panel.indicatorStyle)
         updatePanelGeometry()
     }
-    Window.onWidthChanged: updatePanelGeometry()
-    Window.onHeightChanged: updatePanelGeometry()
+    Window.onWidthChanged: {
+        Applet.collapseExpandedPanel()
+        updatePanelGeometry()
+    }
+    Window.onHeightChanged: {
+        Applet.collapseExpandedPanel()
+        updatePanelGeometry()
+    }
+
     onPositionChanged: Applet.setDockPosition(Panel.position)
     onIndicatorStyleChanged: Applet.setDisplayMode(Panel.indicatorStyle)
     onDockWidthChanged: updatePanelGeometry()

@@ -149,6 +149,12 @@ void DockTrayWindow::layoutWidget()
     resizeTool();
 }
 
+void DockTrayWindow::collapseExpandedPanel()
+{
+    if (ExpandIconWidget::popupTrayView()->isVisible())
+        ExpandIconWidget::popupTrayView()->hide();
+}
+
 void DockTrayWindow::resizeEvent(QResizeEvent *event)
 {
     // 当尺寸发生变化的时候，通知托盘区域刷新尺寸，让托盘图标始终保持居中显示

@@ -36,6 +36,7 @@ public:
     Q_INVOKABLE void setDisplayMode(int displayMode) const;
 
     Q_INVOKABLE void initDock();
+    Q_INVOKABLE void collapseExpandedPanel();
 
     virtual bool init() override;
     virtual bool load() override;
