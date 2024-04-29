@@ -306,7 +306,7 @@ const QList<QPointer<AbstractWindow>>& AppItem::getAppendWindows()
 
 QString AppItem::getCurrentActiveWindowName() const
 {
-    return m_currentActiveWindow->title();
+    return m_currentActiveWindow.isNull() ? this->name() : m_currentActiveWindow->title();
 }
 
 void AppItem::updateCurrentActiveWindow(QPointer<AbstractWindow> window)

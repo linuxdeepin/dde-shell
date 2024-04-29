@@ -7,6 +7,7 @@
 
 #include <QPointer>
 #include <QJsonObject>
+#include <QStringLiteral>
 #include <QLoggingCategory>
 
 #include <fstream>
@@ -74,7 +75,7 @@ QString DesktopfileAbstractParser::genericName()
 
 QString DesktopfileAbstractParser::identifyWindow(QPointer<AbstractWindow> window)
 {
-    QString res;
+    QString res = QStringLiteral("asbtractAPP:://");
     do {
         if (window->pid() == 0) break;
 
@@ -86,9 +87,6 @@ QString DesktopfileAbstractParser::identifyWindow(QPointer<AbstractWindow> windo
             res.append(QString::fromStdString(tmp));
         }
     } while(false);
-
-    if (res.isEmpty())
-        return QStringLiteral("EmptyCmdline");
 
     return res;
 }
