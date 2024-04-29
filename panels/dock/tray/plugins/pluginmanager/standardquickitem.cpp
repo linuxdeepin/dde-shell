@@ -174,16 +174,8 @@ QPixmap StandardQuickItem::pixmap() const
 
     int pixmapWidth = ICONWIDTH;
     int pixmapHeight = ICONHEIGHT;
-    QList<QSize> iconSizes = icon.availableSizes();
-    if (iconSizes.size() > 0) {
-        QSize size = iconSizes[0];
-        if (size.isValid() && !size.isEmpty() && !size.isNull()) {
-            pixmapWidth = size.width();
-            pixmapHeight = size.height();
-        }
-    }
 
-    return icon.pixmap(pixmapWidth / qApp->devicePixelRatio(), pixmapHeight / qApp->devicePixelRatio());
+    return icon.pixmap(QSize(pixmapWidth, pixmapHeight), qApp->devicePixelRatio());
 }
 
 QLabel *StandardQuickItem::findChildLabel(QWidget *parent, const QString &childObjectName) const
