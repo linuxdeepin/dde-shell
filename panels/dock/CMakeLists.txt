@@ -93,14 +93,20 @@ add_subdirectory(dockplugin)
 
 # dock qml element(include Dock.xx defines and DockCompositor)
 file(
-    GLOB dock_plugin_sources
+    GLOB dock_plugin_headers
     constants.h
+    ddockapplet.h
+)
+file(
+    GLOB dock_plugin_sources
     # dockfilterproxymodel.cpp
     # dockfilterproxymodel.h
     dockpluginmanagerextension_p.h
     dockpluginmanagerextension.cpp
     dockpluginmanagerintegration_p.h
     dockpluginmanagerintegration.cpp
+    private/ddockapplet_p.h
+    ddockapplet.cpp
 )
 
 set_source_files_properties(DockCompositor.qml PROPERTIES
@@ -117,13 +123,20 @@ set_source_files_properties(DockPalette.qml PROPERTIES
 
 qt_policy(SET QTP0001 OLD)
 qt_add_qml_module(dock-plugin
-    PLUGIN_TARGET dock-plugin
+    PLUGIN_TARGET dock-qml-plugin
     URI "org.deepin.ds.dock"
     VERSION "1.0"
     SHARED
-    SOURCES ${dock_plugin_sources}
-    QML_FILES DockCompositor.qml OverflowContainer.qml MenuHelper.qml DockPalette.qml
+    SOURCES ${dock_plugin_headers} ${dock_plugin_sources}
+    QML_FILES DockCompositor.qml OverflowContainer.qml MenuHelper.qml DockPalette.qml DockItem.qml
     OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/
+)
+
+set_target_properties(dock-plugin PROPERTIES
+    VERSION ${CMAKE_PROJECT_VERSION}
+    SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR}
+    OUTPUT_NAME dock-plugin
+    EXPORT_NAME DockShell
 )
 
 qt_generate_wayland_protocol_server_sources(dock-plugin
@@ -137,6 +150,7 @@ target_link_libraries(dock-plugin PUBLIC
     Qt${QT_VERSION_MAJOR}::Qml
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::WaylandCompositor
+    dde-shell-frame
 PRIVATE
     PkgConfig::WaylandClient
     Qt${QT_VERSION_MAJOR}::WaylandCompositorPrivate
@@ -147,6 +161,19 @@ target_include_directories(dock-plugin
     $<TARGET_PROPERTY:dde-shell-frame,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
+target_include_directories(dock-plugin INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+    $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/dockshell>
+)
+
+target_link_directories(dock-plugin INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/>
+    $<INSTALL_INTERFACE:${LIB_INSTALL_DIR}>
+)
+
+install(FILES ${dock_plugin_headers} DESTINATION "${INCLUDE_INSTALL_DIR}/dockshell")
+install(TARGETS dock-plugin DESTINATION "${LIB_INSTALL_DIR}")
 install(DIRECTORY "${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/" DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/")
 dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.json)
 dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.power.json)
