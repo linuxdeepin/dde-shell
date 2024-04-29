@@ -42,6 +42,8 @@ public:
 
     void layoutWidget();
 
+    void collapseExpandedPanel();
+
 Q_SIGNALS:
     void requestUpdate();
 
