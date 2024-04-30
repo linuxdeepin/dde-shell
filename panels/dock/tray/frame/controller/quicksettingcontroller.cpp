@@ -128,8 +128,14 @@ QString QuickSettingController::itemKey(PluginsItemInterface *pluginItem) const
 
 QuickSettingController *QuickSettingController::instance()
 {
-    static QuickSettingController instance;
-    return &instance;
+    static QuickSettingController *g_instance = nullptr;
+    if (!g_instance) {
+        g_instance = new QuickSettingController();
+        QObject::connect(qGuiApp, &QGuiApplication::aboutToQuit, g_instance, [] () {
+            g_instance->deleteLater();
+        });
+    }
+    return g_instance;
 }
 
 QList<PluginsItemInterface *> QuickSettingController::pluginItems(const PluginAttribute &pluginClass) const
