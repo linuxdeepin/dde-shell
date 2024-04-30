@@ -8,8 +8,6 @@
 #include "dockpanel.h"
 #include "dockdbusproxy.h"
 
-#include "pluginloader.h"
-
 #include <QObject>
 
 #include <DWindowManagerHelper>
@@ -82,7 +80,7 @@ QString DockDBusProxy::getAppID(const QString &desktopfile)
 QList<DS_NAMESPACE::DApplet *> DockDBusProxy::appletList(const QString &pluginId) const
 {
     QList<DS_NAMESPACE::DApplet *> ret;
-    auto root = qobject_cast<DS_NAMESPACE::DContainment *>(DS_NAMESPACE::DPluginLoader::instance()->rootApplet());
+    auto root = qobject_cast<DS_NAMESPACE::DContainment *>(parent());
 
     QQueue<DS_NAMESPACE::DContainment *> containments;
     containments.enqueue(root);
