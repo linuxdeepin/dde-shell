@@ -162,6 +162,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [&manager]() {
         qCInfo(dsLog) << "Exit dde-shell.";
+        DPluginLoader::instance()->destroy();
         manager.quit();
     });
 
