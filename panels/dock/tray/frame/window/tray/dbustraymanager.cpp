@@ -20,6 +20,6 @@ DBusTrayManager::DBusTrayManager(QObject *parent)
 
 DBusTrayManager::~DBusTrayManager()
 {
-    QDBusConnection::sessionBus().disconnect(service(), path(), "org.freedesktop.DBus.Properties",  "PropertiesChanged",  "sa{sv}as", this, SLOT(propertyChanged(QDBusMessage)));
+    QDBusConnection::sessionBus().disconnect(service(), path(), "org.freedesktop.DBus.Properties",  "PropertiesChanged",  "sa{sv}as", this, SLOT(__propertyChanged__(QDBusMessage)));
 }
 
