@@ -94,7 +94,7 @@
     <message>
         <location filename="../package/main.qml" line="72"/>
         <source>Window effect disabled</source>
-        <translation>Efeitos de janela desativado</translation>
+        <translation>Efeitos visuais desativados</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="73"/>
