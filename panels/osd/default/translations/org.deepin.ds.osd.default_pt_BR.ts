@@ -89,7 +89,7 @@
     <message>
         <location filename="../package/main.qml" line="71"/>
         <source>Window effect enabled</source>
-        <translation>Efeito de janela ativado</translation>
+        <translation>Efeitos visuais ativados</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="72"/>
