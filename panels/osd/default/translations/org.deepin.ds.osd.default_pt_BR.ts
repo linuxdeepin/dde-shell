@@ -99,7 +99,7 @@
     <message>
         <location filename="../package/main.qml" line="73"/>
         <source>Failed to enable window effects</source>
-        <translation>Falha ao ativar os efeitos de janela</translation>
+        <translation>Falha ao ativar os efeitos visuais</translation>
     </message>
 </context>
 </TS>
