@@ -69,7 +69,7 @@
     <message>
         <location filename="../package/main.qml" line="208"/>
         <source>Keep Hidden</source>
-        <translation>Manter oculto</translation>
+        <translation>Sempre ocultar</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="214"/>
