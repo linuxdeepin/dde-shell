@@ -36,7 +36,7 @@ AppletItem {
     property point itemPos: Qt.point(0, 0)
     function updateItemPos()
     {
-        var lX = action.mapToItem(null, action.width / 2, 0).x
+        var lX = icon.mapToItem(null, icon.width / 2, 0).x
         var lY = Panel.rootObject.y
         launcher.itemPos = Qt.point(lX, lY)
     }
@@ -58,14 +58,15 @@ AppletItem {
         text: qsTr("launchpad")
     }
 
-    D.ActionButton {
-        id: action
+    D.DciIcon {
+        id: icon
         anchors.centerIn: parent
-        icon.name: Applet.iconName
+        name: Applet.iconName
         scale: Panel.rootObject.dockItemMaxSize * 9 / 14 / Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
         // 9:14 (iconSize/dockHeight)
-        icon.height: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
-        icon.width: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
+        sourceSize: Qt.size(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE, Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE)
+        onXChanged: updateLaunchpadPos()
+        onYChanged: updateLaunchpadPos()
         Timer {
             id: toolTipShowTimer
             interval: 50
@@ -76,21 +77,24 @@ AppletItem {
                 toolTip.open()
             }
         }
-        onClicked: {
-            Applet.toggleLauncher()
-            toolTip.close()
-        }
-        onXChanged: updateLaunchpadPos()
-        onYChanged: updateLaunchpadPos()
-        onHoveredChanged: {
-            if (hovered) {
-                toolTipShowTimer.start()
-            } else {
-                if (toolTipShowTimer.running) {
-                    toolTipShowTimer.stop()
-                }
-
+        TapHandler {
+            acceptedButtons: Qt.LeftButton
+            onTapped: {
+                Applet.toggleLauncher()
                 toolTip.close()
+            }
+        }
+        HoverHandler {
+            onHoveredChanged: {
+                if (hovered) {
+                    toolTipShowTimer.start()
+                } else {
+                    if (toolTipShowTimer.running) {
+                        toolTipShowTimer.stop()
+                    }
+
+                    toolTip.close()
+                }
             }
         }
     }
