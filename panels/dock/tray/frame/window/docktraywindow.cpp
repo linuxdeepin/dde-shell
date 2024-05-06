@@ -196,7 +196,11 @@ bool DockTrayWindow::eventFilter(QObject *watched, QEvent *event)
         case QEvent::DragEnter: {
             QDragEnterEvent *dragEnterEvent = static_cast<QDragEnterEvent *>(event);
             dragEnterEvent->setDropAction(Qt::CopyAction);
-            dragEnterEvent->accept();
+            if (dragEnterEvent->mimeData()->formats().contains("quick_drag") || dragEnterEvent->mimeData()->formats().contains("tray_drag")) {
+                dragEnterEvent->accept();
+            } else {
+                dragEnterEvent->ignore();
+            }
             return true;
         }
         case QEvent::DragMove: {

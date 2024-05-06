@@ -487,6 +487,7 @@ void QuickPluginWindow::startDrag()
     PluginsItemInterface *moveItem = m_dragInfo->dockItem->pluginItem();
     QDrag *drag = new QDrag(this);
     QuickPluginMimeData *mimedata = new QuickPluginMimeData(moveItem, drag);
+    mimedata->setData("quick_drag", "");
     drag->setMimeData(mimedata);
     QPixmap dragPixmap = m_dragInfo->dragPixmap();
     drag->setPixmap(dragPixmap);
