@@ -23,7 +23,7 @@ public:
     void setWidget(QWidget *widget);
     QWidget *widget() const;
 
-    void setGeometry(const QRectF &rect);
+    // void setGeometry(const QRectF &rect);
     virtual void paint(QPainter* painter) override;
 
 protected:
