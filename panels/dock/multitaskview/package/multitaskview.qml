@@ -23,14 +23,13 @@ AppletItem {
         text: qsTr("Multitasking View")
     }
 
-    D.ActionButton {
-        id: action
+    D.DciIcon {
+        id: icon
         anchors.centerIn: parent
-        icon.name: Applet.iconName
+        name: Applet.iconName
         scale: Panel.rootObject.dockItemMaxSize * 9 / 14 / Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
         // 9:14 (iconSize/dockHeight)
-        icon.height: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
-        icon.width: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
+        sourceSize: Qt.size(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE, Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE)
         Timer {
             id: toolTipShowTimer
             interval: 50
@@ -41,19 +40,24 @@ AppletItem {
                 toolTip.open()
             }
         }
-        onClicked: {
-            Applet.openWorkspace()
-            toolTip.close()
-        }
-        onHoveredChanged: {
-            if (hovered) {
-                toolTipShowTimer.start()
-            } else {
-                if (toolTipShowTimer.running) {
-                    toolTipShowTimer.stop()
-                }
-
+        TapHandler {
+            acceptedButtons: Qt.LeftButton
+            onTapped: {
+                Applet.openWorkspace()
                 toolTip.close()
+            }
+        }
+        HoverHandler {
+            onHoveredChanged: {
+                if (hovered) {
+                    toolTipShowTimer.start()
+                } else {
+                    if (toolTipShowTimer.running) {
+                        toolTipShowTimer.stop()
+                    }
+
+                    toolTip.close()
+                }
             }
         }
     }
