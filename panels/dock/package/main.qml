@@ -273,12 +273,14 @@ Window {
 
         Item {
             id: leftMargin
+            visible: dockLeftPartModel.count > 0
             implicitWidth: 0
             implicitHeight: 0
         }
 
         Item {
             id: dockLeftPart
+            visible: dockLeftPartModel.count > 0
             implicitWidth: leftLoader.implicitWidth
             implicitHeight: leftLoader.implicitHeight
             OverflowContainer {
@@ -295,23 +297,16 @@ Window {
         }
 
         Item {
-            Layout.fillWidth: Panel.itemAlignment === Dock.CenterAlignment
-            Layout.fillHeight: Panel.itemAlignment === Dock.CenterAlignment
-            Layout.horizontalStretchFactor: {
-                return (Panel.itemAlignment === Dock.CenterAlignment && !dock.useColumnLayout) ? (dock.width - dockCenterPart.implicitWidth) / 2 - dockLeftPart.implicitWidth - 10: -1
-            }
-
-            Layout.verticalStretchFactor: {
-                return (Panel.itemAlignment === Dock.CenterAlignment && dock.useColumnLayout) ? (dock.height - dockCenterPart.implicitHeight) / 2 - dockLeftPart.implicitHeight - 10 : -1
-            }
-        }
-
-        Item {
             id: dockCenterPart
             implicitWidth: centerLoader.implicitWidth
             implicitHeight: centerLoader.implicitHeight
             onXChanged: dockCenterPartPosChanged()
             onYChanged: dockCenterPartPosChanged()
+            Layout.leftMargin: !useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
+                (dock.width - dockCenterPart.implicitWidth) / 2 - (dockLeftPart.implicitWidth + 20) + Math.min((dock.width - dockCenterPart.implicitWidth) / 2 - (dockRightPart.implicitWidth + 20), 0) : 0
+            Layout.topMargin: useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
+                (dock.height - dockCenterPart.implicitHeight) / 2 - (dockLeftPart.implicitHeight + 20) + Math.min((dock.height - dockCenterPart.implicitHeight) / 2 - (dockRightPart.implicitHeight + 20), 0) : 0
+
             OverflowContainer {
                 id: centerLoader
                 anchors.fill: parent
@@ -323,24 +318,11 @@ Window {
                     rightDockOrder: 20
                 }
             }
-            Behavior on x {
-                NumberAnimation { duration: 500 }
-            }
-            Behavior on y {
-                NumberAnimation { duration: 500 }
-            }
         }
 
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.horizontalStretchFactor: {
-                return (Panel.itemAlignment === Dock.CenterAlignment && !dock.useColumnLayout) ? ( dock.width - dockCenterPart.implicitWidth ) / 2 - dockRightPart.implicitWidth - 10 : 1
-            }
-
-            Layout.verticalStretchFactor: {
-                return (Panel.itemAlignment === Dock.CenterAlignment && dock.useColumnLayout) ? ( dock.height - dockCenterPart.implicitHeight ) / 2 - dockRightPart.implicitHeight - 10 : 1
-            }
         }
 
         Item {
