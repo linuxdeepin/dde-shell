@@ -142,7 +142,7 @@ void QuickProxyWidgetPrivate::sendWidgetMouseEvent(QMouseEvent *event)
 #endif
     }
 
-    // event->setAccepted(mouseEvent.isAccepted());
+    event->setAccepted(mouseEvent.isAccepted());
 }
 
 void QuickProxyWidgetPrivate::updateProxyGeometryFromWidget()
