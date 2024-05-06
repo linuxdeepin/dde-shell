@@ -30,7 +30,6 @@ public:
     void setDockHeight(int height);
     int dockHeight() const;
 
-    Q_INVOKABLE void setPanelPosition(int x, int y) const;
     Q_INVOKABLE void setDockPosition(int pos) const;
     Q_INVOKABLE void setPanelSize(int size) const;
     Q_INVOKABLE void setDisplayMode(int displayMode) const;

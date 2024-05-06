@@ -34,35 +34,33 @@ AppletItem {
         Component.onCompleted: Applet.initDock()
     }
 
-    function updatePanelGeometry() {
+    function updatePanelSize() {
         var topLeft = this.mapToGlobal(Qt.point(0, 0))
         if (useColumnLayout) {
             Applet.setPanelSize(Window.width)
-            Applet.setPanelPosition(topLeft.x, Window.height - dockHeight - showDesktopWidth)
         } else {
             Applet.setPanelSize(Window.height)
-            Applet.setPanelPosition(Window.width - dockWidth - showDesktopWidth, topLeft.y)
         }
     }
 
     Window.onWindowChanged: {
         Applet.setDockPosition(Panel.position)
         Applet.setDisplayMode(Panel.indicatorStyle)
-        updatePanelGeometry()
+        updatePanelSize()
     }
     Window.onWidthChanged: {
         Applet.collapseExpandedPanel()
-        updatePanelGeometry()
+        updatePanelSize()
     }
     Window.onHeightChanged: {
         Applet.collapseExpandedPanel()
-        updatePanelGeometry()
+        updatePanelSize()
     }
 
     onPositionChanged: Applet.setDockPosition(Panel.position)
     onIndicatorStyleChanged: Applet.setDisplayMode(Panel.indicatorStyle)
-    onDockWidthChanged: updatePanelGeometry()
-    onDockHeightChanged: updatePanelGeometry()
+    onDockWidthChanged: updatePanelSize()
+    onDockHeightChanged: updatePanelSize()
 
     implicitWidth: dockWidth /*useColumnLayout ? Panel.dockSize : trayContainter.suggestedImplicitWidth + overflowBtn.implicitWidth * 2*/
     implicitHeight: dockHeight /*useColumnLayout ? trayContainter.suggestedImplicitHeight + overflowBtn.implicitHeight * 2 : Panel.dockSize*/

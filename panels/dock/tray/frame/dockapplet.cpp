@@ -67,12 +67,6 @@ int DockApplet::dockHeight() const
     return m_dockHeight;
 }
 
-void DockApplet::setPanelPosition(int x, int y) const
-{
-    if (m_window)
-        m_window->move(x, y);
-}
-
 void DockApplet::setDockPosition(int pos) const
 {
     if (m_window)

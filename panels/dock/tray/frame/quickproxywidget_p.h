@@ -32,7 +32,7 @@ public:
     QWidget *dragDropWidget;
     Qt::DropAction lastDropAction;
 
-    void updateProxyGeometryFromWidget();
+    // void updateProxyGeometryFromWidget();
 
     QPointF mapToReceiver(const QPointF &pos, const QWidget *receiver) const;
 
@@ -41,8 +41,8 @@ public:
         ProxyToWidgetMode,
         WidgetToProxyMode
     };
-    quint32 posChangeMode : 2;
-    quint32 sizeChangeMode : 2;
+    // quint32 posChangeMode : 2;
+    // quint32 sizeChangeMode : 2;
     quint32 visibleChangeMode : 2;
     quint32 enabledChangeMode : 2;
     quint32 styleChangeMode : 2;

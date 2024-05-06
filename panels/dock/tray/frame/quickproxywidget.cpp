@@ -27,8 +27,8 @@
 QuickProxyWidgetPrivate::QuickProxyWidgetPrivate()
     : QQuickPaintedItemPrivate(),
     dragDropWidget(nullptr),
-    posChangeMode(NoMode),
-    sizeChangeMode(NoMode),
+    // posChangeMode(NoMode),
+    // sizeChangeMode(NoMode),
     visibleChangeMode(NoMode),
     enabledChangeMode(NoMode),
     styleChangeMode(NoMode),
@@ -145,36 +145,36 @@ void QuickProxyWidgetPrivate::sendWidgetMouseEvent(QMouseEvent *event)
     event->setAccepted(mouseEvent.isAccepted());
 }
 
-void QuickProxyWidgetPrivate::updateProxyGeometryFromWidget()
-{
-    Q_Q(QuickProxyWidget);
-    if (!widget)
-        return;
+// void QuickProxyWidgetPrivate::updateProxyGeometryFromWidget()
+// {
+//     Q_Q(QuickProxyWidget);
+//     if (!widget)
+//         return;
 
-    QRectF widgetGeometry = widget->geometry();
-    QWidget *parentWidget = widget->parentWidget();
-    // if (widget->isWindow()) {
-    //     QuickProxyWidget *proxyParent = nullptr;
-    //     if (parentWidget && (proxyParent = qobject_cast<QuickProxyWidget *>(q->parentWidget()))) {
-    //         // Nested window proxy (e.g., combobox popup), map widget to the
-    //         // parent widget's global coordinates, and map that to the parent
-    //         // proxy's child coordinates.
-    //         widgetGeometry.moveTo(proxyParent->subWidgetRect(parentWidget).topLeft()
-    //                               + parentWidget->mapFromGlobal(widget->pos()));
-    //     }
-    // }
+//     QRectF widgetGeometry = widget->geometry();
+//     // QWidget *parentWidget = widget->parentWidget();
+//     // if (widget->isWindow()) {
+//     //     QuickProxyWidget *proxyParent = nullptr;
+//     //     if (parentWidget && (proxyParent = qobject_cast<QuickProxyWidget *>(q->parentWidget()))) {
+//     //         // Nested window proxy (e.g., combobox popup), map widget to the
+//     //         // parent widget's global coordinates, and map that to the parent
+//     //         // proxy's child coordinates.
+//     //         widgetGeometry.moveTo(proxyParent->subWidgetRect(parentWidget).topLeft()
+//     //                               + parentWidget->mapFromGlobal(widget->pos()));
+//     //     }
+//     // }
 
-    // Adjust to size hint if the widget has never been resized.
-    if (!widget->size().isValid())
-        widgetGeometry.setSize(widget->sizeHint());
+//     // Adjust to size hint if the widget has never been resized.
+//     if (!widget->size().isValid())
+//         widgetGeometry.setSize(widget->sizeHint());
 
-    // Assign new geometry.
-    posChangeMode = QuickProxyWidgetPrivate::WidgetToProxyMode;
-    sizeChangeMode = QuickProxyWidgetPrivate::WidgetToProxyMode;
-    q->setGeometry(widgetGeometry);
-    posChangeMode = QuickProxyWidgetPrivate::NoMode;
-    sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
-}
+//     // Assign new geometry.
+//     posChangeMode = QuickProxyWidgetPrivate::WidgetToProxyMode;
+//     sizeChangeMode = QuickProxyWidgetPrivate::WidgetToProxyMode;
+//     q->setGeometry(widgetGeometry);
+//     posChangeMode = QuickProxyWidgetPrivate::NoMode;
+//     sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
+// }
 
 
 /*!
@@ -346,7 +346,7 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
     //     sz = newWidget->maximumSize();
     //     q->setMaximumSize(sz.isNull() ? QSizeF() : QSizeF(sz));
 
-    updateProxyGeometryFromWidget();
+    // updateProxyGeometryFromWidget();
 
     //     updateProxyInputMethodAcceptanceFromWidget();
 
@@ -357,8 +357,8 @@ void QuickProxyWidgetPrivate::setWidget_helper(QWidget *newWidget, bool autoShow
     // Changes no longer go only from the widget to the proxy.
     enabledChangeMode = QuickProxyWidgetPrivate::NoMode;
     visibleChangeMode = QuickProxyWidgetPrivate::NoMode;
-    posChangeMode = QuickProxyWidgetPrivate::NoMode;
-    sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
+    // posChangeMode = QuickProxyWidgetPrivate::NoMode;
+    // sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
 }
 
 QWidget *QuickProxyWidget::widget() const
@@ -367,26 +367,35 @@ QWidget *QuickProxyWidget::widget() const
     return d->widget;
 }
 
-void QuickProxyWidget::setGeometry(const QRectF &rect)
-{
-    Q_D(QuickProxyWidget);
-    bool proxyResizesWidget = !d->posChangeMode && !d->sizeChangeMode;
-    if (proxyResizesWidget) {
-        d->posChangeMode = QuickProxyWidgetPrivate::ProxyToWidgetMode;
-        d->sizeChangeMode = QuickProxyWidgetPrivate::ProxyToWidgetMode;
-    }
-    if (d->widget) {
-        d->widget->setGeometry(rect.toRect());
-    }
-    if (proxyResizesWidget) {
-        d->posChangeMode = QuickProxyWidgetPrivate::NoMode;
-        d->sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
-    }
-}
+// void QuickProxyWidget::setGeometry(const QRectF &rect)
+// {
+//     Q_D(QuickProxyWidget);
+//     bool proxyResizesWidget = !d->posChangeMode && !d->sizeChangeMode;
+//     if (proxyResizesWidget) {
+//         d->posChangeMode = QuickProxyWidgetPrivate::ProxyToWidgetMode;
+//         d->sizeChangeMode = QuickProxyWidgetPrivate::ProxyToWidgetMode;
+//     }
+//     if (d->widget) {
+//         d->widget->setGeometry(rect.toRect());
+//     }
+//     if (proxyResizesWidget) {
+//         d->posChangeMode = QuickProxyWidgetPrivate::NoMode;
+//         d->sizeChangeMode = QuickProxyWidgetPrivate::NoMode;
+//     }
+// }
 
 bool QuickProxyWidget::eventFilter(QObject *object, QEvent *event)
 {
     Q_D(QuickProxyWidget);
+    // update proxy widget geometry when tray window moved
+    if (event->type() == QEvent::Move && object->property("__tray_window__").toBool()) {
+        if (d->widget) {
+            QRect rect;
+            rect.setTopLeft(mapToGlobal(QPoint(0, 0)).toPoint());
+            rect.setSize(d->widget->size());
+            d->widget->setGeometry(rect);
+        }
+    }
 
     if (event->type() != QEvent::UpdateRequest && object != d->widget)
         return QQuickPaintedItem::eventFilter(object, event);
@@ -400,14 +409,8 @@ bool QuickProxyWidget::eventFilter(QObject *object, QEvent *event)
         case QEvent::Resize:
             // If the widget resizes itself, we resize the proxy too.
             // Prevent feed-back by checking the geometry change mode.
-            if (!d->sizeChangeMode)
-                d->updateProxyGeometryFromWidget();
-            break;
-        case QEvent::Move:
-            // If the widget moves itself, we move the proxy too.  Prevent
-            // feed-back by checking the geometry change mode.
-            if (!d->posChangeMode)
-                d->updateProxyGeometryFromWidget();
+            // if (!d->sizeChangeMode)
+            //     d->updateProxyGeometryFromWidget();
             break;
         case QEvent::Hide:
         case QEvent::Show:
@@ -696,6 +699,7 @@ void QuickProxyWidget::itemChange(ItemChange change, const ItemChangeData &data)
         Q_D(QuickProxyWidget);
         if (d->widget) {
             if (data.window) {
+                data.window->setProperty("__tray_window__", true);
                 d->widget->windowHandle()->setParent(data.window);
                 d->widget->setVisible(isVisible());
             } else {
@@ -720,9 +724,17 @@ void QuickProxyWidget::itemChange(ItemChange change, const ItemChangeData &data)
 
 void QuickProxyWidget::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
+    Q_D(QuickProxyWidget);
     update();
 
     QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
+
+    if (d->widget) {
+        QRect rect;
+        rect.setTopLeft(mapToGlobal(QPoint(0, 0)).toPoint());
+        rect.setSize(d->widget->size());
+        d->widget->setGeometry(rect);
+    }
 }
 
 bool QuickProxyWidget::event(QEvent *event)
