@@ -269,7 +269,8 @@ bool QuickPluginWindow::eventFilter(QObject *watched, QEvent *event)
 
         m_dragInfo->dockItem = dockItem;
         m_dragInfo->dragPoint = mouseEvent->pos();
-        break;
+
+        return true;
     }
     case QEvent::MouseButtonRelease: {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
@@ -287,7 +288,7 @@ bool QuickPluginWindow::eventFilter(QObject *watched, QEvent *event)
         } while (false);
         m_dragInfo->reset();
 
-        break;
+        return true;
     }
     case QEvent::MouseMove: {
         if (m_dragInfo->isNull())
@@ -299,7 +300,7 @@ bool QuickPluginWindow::eventFilter(QObject *watched, QEvent *event)
             startDrag();
 
         m_dragInfo->reset();
-        break;
+        return true;
     }
     case QEvent::Drop: {
         m_dragEnterMimeData = nullptr;
