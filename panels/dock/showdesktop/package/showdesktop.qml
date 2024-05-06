@@ -6,6 +6,8 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 import org.deepin.ds 1.0
+import org.deepin.dtk 1.0 as D
+import org.deepin.ds.dock 1.0
 
 AppletItem {
     id: showdesktop
@@ -23,13 +25,19 @@ AppletItem {
         color: "gray"
         opacity: 0.01
     }
-    Rectangle {
+
+    Control {
         anchors.left: parent.left
         anchors.top: parent.top
         implicitWidth: showdesktop.implicitWidth === showDesktopWidth ? 1 : showdesktop.implicitWidth
         implicitHeight: showdesktop.implicitWidth === showDesktopWidth ? showdesktop.implicitHeight : 1
-        color: "gray"
-        opacity: 0.5
+
+        Rectangle {
+            property D.Palette lineColor: DockPalette.showDesktopLineColor
+
+            anchors.fill: parent
+            color: D.ColorSelector.lineColor
+        }
     }
 
     MouseArea {
