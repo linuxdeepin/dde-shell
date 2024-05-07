@@ -57,12 +57,7 @@ const QString UosAiPlugin::pluginDisplayName() const
 
 QWidget *UosAiPlugin::itemWidget(const QString &itemKey)
 {
-#ifdef USE_V23_DOCK
-    if (itemKey == QUICK_ITEM_KEY)
-        return m_quickWidget.data();
-#endif
-
-    return m_itemWidget;
+    return nullptr;
 }
 
 QWidget *UosAiPlugin::itemTipsWidget(const QString &itemKey)
@@ -162,7 +157,13 @@ QIcon UosAiPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::ColorTy
             return pixmap;
         }
     }
-    return QIcon();
+
+
+    QString icon = ":/assets/icons/deepin/builtin/uosai.svg";
+    if(DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::DarkType)
+        icon = ":/assets/icons/deepin/builtin/uosai_dark.svg";
+
+    return QIcon(icon);
 }
 #endif
 

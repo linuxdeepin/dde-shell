@@ -780,10 +780,6 @@ void QuickDockItem::setPosition(Dock::Position position)
         QWidget *itemWidget = m_pluginItem->itemWidget(m_itemKey);
         if (itemWidget && m_mainLayout->indexOf(itemWidget) < 0) {
             auto size= suitableSize();
-            if (pluginItem()->pluginName() == QStringLiteral("uosai")) {
-                auto minSize = std::min(size.height(), size.width());
-                size = QSize(minSize, minSize);
-            }
             itemWidget->setFixedSize(size);
         }
     }
@@ -974,10 +970,6 @@ void QuickDockItem::showEvent(QShowEvent *event)
     if (itemWidget && m_mainLayout->indexOf(itemWidget) < 0) {
         itemWidget->show();
         auto size= suitableSize();
-        if (pluginItem()->pluginName() == QStringLiteral("uosai")) {
-            auto minSize = std::min(size.height(), size.width());
-            size = QSize(minSize, minSize);
-        }
         itemWidget->setFixedSize(size);
         this->setFixedSize(size);
         m_mainLayout->addWidget(itemWidget, 0, Qt::AlignCenter);
@@ -1051,10 +1043,6 @@ void QuickDockItem::initUi()
     if (itemWidget && m_mainLayout->indexOf(itemWidget) < 0) {
         itemWidget->show();
         auto size= suitableSize();
-        if (pluginItem()->pluginName() == QStringLiteral("uosai")) {
-            auto minSize = std::min(size.height(), size.width());
-            size = QSize(minSize, minSize);
-        }
         itemWidget->setFixedSize(size);
         this->setFixedSize(size);
         m_mainLayout->addWidget(itemWidget, 0, Qt::AlignCenter);
