@@ -153,6 +153,7 @@ int main(int argc, char *argv[])
     Shell shell;
     // TODO disable qml's cache avoid to parsing error for ExecutionEngine.
     shell.disableQmlCache();
+    shell.setFlickableWheelDeceleration(6000);
 
     AppletManager manager(pluginIds);
 
