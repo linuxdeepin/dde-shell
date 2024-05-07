@@ -1,3 +1,25 @@
+dde-shell (0.0.16) unstable; urgency=medium
+
+  * fix: font warning when exit
+  * chore: using Panel to find children applet
+  * fix: modify launch system-monitor by AM dbus (#312)
+    Thanks to ZhaoYingZhen(issue: 8319)(Influence: dock can display system-monitor app icon)
+  * fix: fix incorrect bluetooth activation status icon in the tray quick panel (#279)
+    Thanks to ZhaoYingZhen(issue: 8237)(Influence: bluetooth activation status icon display)
+  * fix: opacity can't flow changed with dde-appearance(Issue: https://github.com/linuxdeepin/developer-center/issues/8250)
+  * fix: dbus warning when exit
+  * fix: background change when hover(Issue: https://github.com/linuxdeepin/developer-center/issues/8275)
+  * fix: fix show-desktop line color error (#309)
+    Thanks to ZhaoYingZhen(issue: 8284)(Influence: show-desktop line)
+  * fix: fix the power icon displays incorrectly (#320)
+    Thanks to ZhaoYingZhen(issue: 8347)(Influence: power icon display)
+  * chore: set QT_QUICK_FLICKABLE_WHEEL_DECELERATION env
+  * fix: fix the problem of abnormal location of uos-ai plugin(issue: 8322)(Influence: uos-ai plugin display)
+  * feat: destroy plugins manually
+  * fix: dock not in left when no left plugins(issue: 8353, 8352)
+
+ -- Yixue Wang <wangyixue@deepin.org>  Tue, 07 May 2024 15:42:20 +0800
+
 dde-shell (0.0.15) unstable; urgency=medium
 
   * fix: plugin icons should not changed in dcc(issue: 8245)
