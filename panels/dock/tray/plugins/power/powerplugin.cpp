@@ -125,8 +125,17 @@ void PowerPlugin::setSortKey(const QString &itemKey, const int order)
 
 QIcon PowerPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::ColorType themeType)
 {
-    return QIcon::fromTheme(themeType == DGuiApplicationHelper::DarkType ? ":/batteryicons/resources/batteryicons/battery-100-symbolic.svg"
-                                                                          : ":/batteryicons/resources/batteryicons/battery-100-symbolic-dark.svg");
+    if (dockPart == DockPart::DCCSetting) {
+        return QIcon::fromTheme(themeType == DGuiApplicationHelper::DarkType ? ":/batteryicons/resources/batteryicons/battery-100-symbolic.svg"
+                                                                             : ":/batteryicons/resources/batteryicons/battery-100-symbolic-dark.svg");
+    } else {
+        const QPixmap pixmap = m_powerStatusWidget->getBatteryIcon(themeType);
+
+        QIcon batteryIcon;
+        batteryIcon.addPixmap(pixmap);
+
+        return batteryIcon;
+    }
 }
 
 PluginFlags PowerPlugin::flags() const
