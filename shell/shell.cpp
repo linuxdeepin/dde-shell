@@ -50,4 +50,10 @@ void Shell::disableQmlCache()
         qputenv("QML_DISABLE_DISK_CACHE", "1");
 }
 
+void Shell::setFlickableWheelDeceleration(const int &value)
+{
+    if (qEnvironmentVariableIsEmpty("QT_QUICK_FLICKABLE_WHEEL_DECELERATION"))
+        qputenv("QT_QUICK_FLICKABLE_WHEEL_DECELERATION", QString::number(value).toLocal8Bit());
+}
+
 DS_END_NAMESPACE
