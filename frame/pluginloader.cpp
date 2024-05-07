@@ -229,7 +229,7 @@ DPluginLoader::DPluginLoader()
 
 DPluginLoader::~DPluginLoader()
 {
-
+    destroy();
 }
 
 DPluginLoader *DPluginLoader::instance()
@@ -396,6 +396,12 @@ DPluginMetaData DPluginLoader::plugin(const QString &pluginId) const
     D_DC(DPluginLoader);
     d->ensureCompleted();
     return d->pluginMetaData(pluginId);
+}
+
+void DPluginLoader::destroy()
+{
+    D_D(DPluginLoader);
+    d->m_rootApplet.reset();
 }
 
 DS_END_NAMESPACE

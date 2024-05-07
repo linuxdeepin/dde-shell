@@ -28,6 +28,6 @@ DBusAccount::DBusAccount(QObject *parent)
 
 DBusAccount::~DBusAccount()
 {
-    QDBusConnection::systemBus().disconnect(service(), path(), "org.freedesktop.DBus.Properties",  "PropertiesChanged",  "sa{sv}as", this, SLOT(propertyChanged(QDBusMessage)));
+    QDBusConnection::systemBus().disconnect(service(), path(), "org.freedesktop.DBus.Properties",  "PropertiesChanged",  "sa{sv}as", this, SLOT(__propertyChanged__(QDBusMessage)));
 }
 

@@ -64,7 +64,7 @@ void BluetoothMainWidget::initUi()
     m_iconButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_iconButton->setFocusPolicy(Qt::FocusPolicy::TabFocus);
     m_iconButton->setIconSize({24, 24});
-    m_iconButton->setIcon(QIcon(bluetoothIcon(true)));
+    m_iconButton->setIcon(QIcon::fromTheme("bluetooth"));
     m_iconButton->setCheckable(true);
     m_iconButton->setChecked(isOpen());
     m_iconButton->setFocusPolicy(Qt::NoFocus);

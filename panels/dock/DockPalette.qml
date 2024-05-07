@@ -121,4 +121,13 @@ Item {
 
     property D.Palette taskmanagerWindowIndicatorActiveColor: D.DTK.palette.highlight
 
+    property D.Palette showDesktopLineColor: D.Palette {
+        normal {
+            common: Qt.rgba(0, 0, 0, 0.2)
+        }
+        normalDark {
+            common: Qt.rgba(1, 1, 1, 0.2)
+        }
+    }
+
 }

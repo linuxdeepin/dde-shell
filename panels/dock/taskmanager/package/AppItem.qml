@@ -179,7 +179,9 @@ Item {
                 function onPressedAndDragging(isDragging) {
                     if (isDragging) {
                         beatAnimation.stop()
-                        icon.scale = root.iconScale
+                        icon.scale = Qt.binding(function() {
+                            return root.iconScale
+                        })
                     } else {
                         beatAnimation.running = Qt.binding(function() {
                             return root.attention

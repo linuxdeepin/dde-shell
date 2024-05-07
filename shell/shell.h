@@ -17,6 +17,7 @@ public:
     explicit Shell(QObject *parent = nullptr);
     void installDtkInterceptor();
     void disableQmlCache();
+    void setFlickableWheelDeceleration(const int &value);
 };
 
 DS_END_NAMESPACE

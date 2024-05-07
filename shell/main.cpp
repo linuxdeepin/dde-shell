@@ -153,6 +153,7 @@ int main(int argc, char *argv[])
     Shell shell;
     // TODO disable qml's cache avoid to parsing error for ExecutionEngine.
     shell.disableQmlCache();
+    shell.setFlickableWheelDeceleration(6000);
 
     AppletManager manager(pluginIds);
 
@@ -162,6 +163,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [&manager]() {
         qCInfo(dsLog) << "Exit dde-shell.";
+        DPluginLoader::instance()->destroy();
         manager.quit();
     });
 

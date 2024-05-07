@@ -26,6 +26,8 @@ public:
     virtual ~DPluginLoader() override;
 
     static DPluginLoader *instance();
+    void destroy();
+
     QList<DPluginMetaData> plugins() const;
     QList<DPluginMetaData> rootPlugins() const;
     void addPackageDir(const QString &dir);

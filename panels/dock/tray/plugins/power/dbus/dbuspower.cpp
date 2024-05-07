@@ -29,7 +29,7 @@ DBusPower::DBusPower(QObject *parent)
 
 DBusPower::~DBusPower()
 {
-    QDBusConnection::sessionBus().disconnect(service(), path(), "org.freedesktop.DBus.Properties",  "PropertiesChanged",  "sa{sv}as", this, SLOT(propertyChanged(QDBusMessage)));
-    QDBusConnection::systemBus().disconnect("org.freedesktop.UPower", "/org/freedesktop/UPower", "org.freedesktop.DBus.Properties",  "PropertiesChanged", this, SLOT(propertyChanged(QDBusMessage)));
+    QDBusConnection::sessionBus().disconnect(service(), path(), "org.freedesktop.DBus.Properties",  "PropertiesChanged",  "sa{sv}as", this, SLOT(__propertyChanged__(QDBusMessage)));
+    QDBusConnection::systemBus().disconnect("org.freedesktop.UPower", "/org/freedesktop/UPower", "org.freedesktop.DBus.Properties",  "PropertiesChanged", this, SLOT(__propertyChanged__(QDBusMessage)));
 }
 
