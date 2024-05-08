@@ -420,8 +420,8 @@ void XEmbedTrayItemWidget::refershIconImage()
 
     m_image = qimage.scaled(iconSize * ratio, iconSize * ratio, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    // FIXME: qimage looks smaller then what it should be
-    // m_image.setDevicePixelRatio(ratio);
+    // NOTE: the icons of some versions of WeChat(work) are too small, and it`s not our problem
+    m_image.setDevicePixelRatio(ratio);
 
     update();
     Q_EMIT iconChanged();
