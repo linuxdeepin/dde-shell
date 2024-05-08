@@ -34,6 +34,7 @@ AppletItem {
         icon.width: 16
         icon.height: 16
 
+        display: D.IconLabel.IconOnly
         onClicked: {
             Applet.toggleClipboard()
             toolTip.close()

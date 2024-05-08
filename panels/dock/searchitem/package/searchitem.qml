@@ -47,6 +47,7 @@ AppletItem {
         icon.name: "search"
         icon.width: 16
         icon.height: 16
+        display: D.IconLabel.IconOnly
         onClicked: {
             toolTip.close()
             Applet.toggleGrandSearch()
