@@ -229,7 +229,8 @@ Window {
         }
     }
 
-    TapHandler {
+    // TOFIX: cannot receive tapped signal by long pressing on touch screen
+    /* TapHandler {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         gesturePolicy: TapHandler.WithinBounds
         onTapped: function(eventPoint, button) {
@@ -237,6 +238,21 @@ Window {
             MenuHelper.closeCurrent()
             dockMenuLoader.active = true
             if (button === Qt.RightButton && lastActive !== dockMenuLoader.item) {
+                MenuHelper.openMenu(dockMenuLoader.item)
+            }
+        }
+    }
+    */
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+
+        onPressed: {
+            let lastActive = MenuHelper.activeMenu
+            MenuHelper.closeCurrent()
+            dockMenuLoader.active = true
+            if (lastActive !== dockMenuLoader.item) {
                 MenuHelper.openMenu(dockMenuLoader.item)
             }
         }
