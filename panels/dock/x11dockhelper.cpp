@@ -71,7 +71,7 @@ X11DockHelper::X11DockHelper(DockPanel* panel)
         }
     });
 
-    connect(panel, &DockPanel::geometryChanged, this, [this](){
+    connect(panel, &DockPanel::positionChanged, this, [this](){
         updateDockTriggerArea();
     });
 
@@ -150,6 +150,7 @@ void X11DockHelper::createdWakeArea()
     uint32_t values[] = {XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW};
     xcb_change_window_attributes(m_connection, m_triggerWindow, XCB_CW_EVENT_MASK, values);
     xcb_map_window(m_connection, m_triggerWindow);
+    QMetaObject::invokeMethod(this, &X11DockHelper::updateDockTriggerArea, Qt::QueuedConnection);
 }
 
 void X11DockHelper::destoryWakeArea()
