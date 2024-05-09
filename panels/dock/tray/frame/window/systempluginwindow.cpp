@@ -377,8 +377,6 @@ void StretchPluginsItem::mousePressEvent(QMouseEvent *e)
     hideNonModel();
     if (e->button() == Qt::RightButton /*&& perfectIconRect().contains(e->pos())*/)
         return showContextMenu();
-
-    DockItem::mousePressEvent(e);
 }
 
 void StretchPluginsItem::mouseReleaseEvent(QMouseEvent *e)

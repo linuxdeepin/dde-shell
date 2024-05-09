@@ -192,10 +192,8 @@ QSize DateTimeDisplayer::suitableSize(const Dock::Position &position) const
 
 void DateTimeDisplayer::mousePressEvent(QMouseEvent *event)
 {
-    if ((event->button() != Qt::RightButton))
-        return QWidget::mousePressEvent(event);
-
-    m_menu->exec(QCursor::pos());
+    if (event->button() == Qt::RightButton)
+        m_menu->exec(QCursor::pos());
 }
 
 void DateTimeDisplayer::mouseReleaseEvent(QMouseEvent *event)
