@@ -264,7 +264,14 @@ void DockPopupWindow::onButtonPress(int type, int x, int y, const QString &key)
 {
     if (!m_enableMouseRelease)
         return;
-    QScreen *screen = DIS_INS->screen(DOCK_SCREEN->current());
+    // find the screen where dock onto
+    QScreen *screen = nullptr;
+    for (auto tw : qApp->topLevelWidgets()) {
+        if (QString(tw->metaObject()->className()) == "DockTrayWindow") {
+            screen = tw->screen();
+            break;
+        }
+    };
     if (!screen)
         return;
     QRect screenRect = screen->geometry();
