@@ -370,6 +370,9 @@ Window {
             Panel.setMouseGrabEnabled(dragArea, true);
         }
 
+        // this used for blocking MouseEvent sent to bottom MouseArea
+        onClicked: {}
+
         onPositionChanged: function(mouse) {
             if (!dock.isDragging) return
             var newPos = mapToGlobal(mouse.x, mouse.y)
