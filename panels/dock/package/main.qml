@@ -123,7 +123,6 @@ Window {
         text: name
         onTriggered: {
             Applet[prop] = value
-            checked = true
         }
         checked: Applet[prop] === value
     }
