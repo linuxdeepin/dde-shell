@@ -44,7 +44,7 @@ Item {
             if (!window)
                 return
             window.visibleChanged.connect(function() {
-                if (!Panel.popupWindow.visible)
+                if (Panel.popupWindow && !Panel.popupWindow.visible)
                     popup.close()
             })
         }

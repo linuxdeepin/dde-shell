@@ -71,7 +71,7 @@ Item {
             if (!window)
                 return
             window.visibleChanged.connect(function() {
-                if (!Panel.toolTipWindow.visible)
+                if (Panel.toolTipWindow && !Panel.toolTipWindow.visible)
                     toolTip.close()
             })
         }
