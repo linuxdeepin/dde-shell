@@ -331,10 +331,10 @@ WinInfo TrayModel::getWinInfo(const QModelIndex &index)
     return m_winInfos[row];
 }
 
-WinInfo TrayModel::getWinInfo(const QString &itemKey)
+WinInfo TrayModel::getWinInfo(const QString &key, const QString &itemKey)
 {
-    auto find = std::find_if(m_winInfos.begin(), m_winInfos.end(), [itemKey](const WinInfo &info) {
-      return info.itemKey == itemKey;
+    auto find = std::find_if(m_winInfos.begin(), m_winInfos.end(), [key, itemKey](const WinInfo &info) {
+      return info.key == key && info.itemKey == itemKey;
     });
 
     if (find != m_winInfos.end()) {
