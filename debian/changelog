@@ -1,3 +1,22 @@
+dde-shell (0.0.17) unstable; urgency=medium
+
+  * fix: fix the size of app icon when resizing dock size by dcc
+    Thanks to ZhaoYingZhen(issue: #8401)(Influence: icon size)
+  * fix: event delivery error(issue: #8326)
+  * fix: button's icon is not clear(Issue: https://github.com/linuxdeepin/developer-center/issues/8409)
+  * fix: drag mark error(issue: #8208)
+  * fix: refresh when bluetooth panel shown(issue: #8279)
+  * fix: some icon too large(issue: #8372)
+  * fix: tips position error(issue: #8197)
+  * chore: remove warning
+  * fix: dock wake area position not right sometime(issue: #8163)
+  * fix: popup window always hide
+  * fix: power popup cannot show
+  * fix: menu checked status not right(issue: #8478)
+  * fix: click dragArea can open app(issue: #8479)
+
+ -- tsic404 <liuheng@deepin.org>  Fri, 10 May 2024 11:09:47 +0800
+
 dde-shell (0.0.16) unstable; urgency=medium
 
   * fix: font warning when exit
