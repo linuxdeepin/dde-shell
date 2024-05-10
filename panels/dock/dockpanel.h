@@ -80,6 +80,7 @@ public:
 private Q_SLOTS:
     void onWindowGeometryChanged();
     void loadDockPlugins();
+    void launcherVisibleChanged(bool visible);
 
 Q_SIGNALS:
     void geometryChanged(QRect geometry);
@@ -99,6 +100,7 @@ private:
     HideState m_hideState;
     DockHelper* m_helper;
     bool m_compositorReady;
+    bool m_launcherShown;
 };
 
 }
