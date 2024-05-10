@@ -35,6 +35,7 @@ DockPanel::DockPanel(QObject * parent)
     , m_theme(ColorTheme::Dark)
     , m_hideState(Hide)
     , m_compositorReady(false)
+    , m_launcherShown(false)
 {
     // connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
 }
@@ -130,6 +131,9 @@ bool DockPanel::init()
     QMetaObject::invokeMethod(this, [this, dockDaemonAdaptor](){
         Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
     });
+
+    // TODO: get launchpad status from applet not dbus
+    QDBusConnection::sessionBus().connect("org.deepin.dde.Launcher1", "/org/deepin/dde/Launcher1", "org.deepin.dde.Launcher1", "VisibleChanged", this, SLOT(launcherVisibleChanged(bool)));
 
     return true;
 }
@@ -258,7 +262,7 @@ void DockPanel::setCompositorReady(bool ready)
 
 HideState DockPanel::hideState()
 {
-    if (hideMode() == KeepShowing)
+    if (hideMode() == KeepShowing || m_launcherShown)
         return Show;
     return m_hideState;
 }
@@ -311,6 +315,16 @@ void DockPanel::loadDockPlugins()
             QProcess::startDetached(QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR), {"-p", plugin, "-platform", "wayland"});
 #endif
         }
+    }
+}
+
+void DockPanel::launcherVisibleChanged(bool visible)
+{
+    if (visible == m_launcherShown) return;
+
+    m_launcherShown = visible;
+    if (hideMode() != KeepShowing) {
+        Q_EMIT hideStateChanged(hideState());
     }
 }
 
