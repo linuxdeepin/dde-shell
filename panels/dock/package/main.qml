@@ -123,6 +123,9 @@ Window {
         text: name
         onTriggered: {
             Applet[prop] = value
+            checked = Qt.binding(function() {
+                return Applet[prop] === value
+            })
         }
         checked: Applet[prop] === value
     }
