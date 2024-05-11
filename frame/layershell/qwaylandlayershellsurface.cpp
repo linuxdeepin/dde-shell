@@ -123,7 +123,12 @@ void QWaylandLayerShellSurface::zwlr_layer_surface_v1_configure(uint32_t serial,
     if (!m_configured) {
         m_configured = true;
         window()->resizeFromApplyConfigure(m_pendingSize);
+#if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
         window()->handleExpose(QRect(QPoint(), m_pendingSize));
+#else
+        window()->sendRecursiveExposeEvent();
+#endif
+
     } else {
         window()->applyConfigureWhenPossible();
     }
