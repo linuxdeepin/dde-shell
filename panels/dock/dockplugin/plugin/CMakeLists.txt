@@ -8,6 +8,9 @@ find_package(Dtk REQUIRED COMPONENTS Gui Widget)
 find_package(ECM REQUIRED MO_MODULE)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${ECM_MODULE_PATH}")
 find_package(QtWaylandScanner)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(XKBCOMMON REQUIRED IMPORTED_TARGET xkbcommon)
 
 include(KDEInstallDirs)
 
@@ -25,6 +28,7 @@ PUBLIC
     Qt5::Gui
     Qt5::Widgets
     Dtk::Widget
+    PkgConfig::XKBCOMMON
 )
 
 add_library(dockpluginmanager SHARED
@@ -49,6 +53,7 @@ PUBLIC
     dockpluginmanager-interface
 PRIVATE
     PkgConfig::WaylandClient
+    PkgConfig::XKBCOMMON
     Qt5::WaylandClientPrivate
     Qt5::XkbCommonSupportPrivate
 )
