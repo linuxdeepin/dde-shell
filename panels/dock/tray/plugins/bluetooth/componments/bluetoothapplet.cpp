@@ -32,7 +32,6 @@ SettingLabel::SettingLabel(QString text, QWidget *parent)
 {
     setAccessibleName("BluetoothSettingLabel");
     setContentsMargins(0, 0, 0, 0);
-    m_layout->setContentsMargins(QMargins(0, 0, 0, 0));
     m_layout->setSpacing(4);
     m_layout->setContentsMargins(20, 0, 6, 0);
     m_layout->addWidget(m_label, 0, Qt::AlignLeft | Qt::AlignHCenter);
@@ -205,7 +204,7 @@ void BluetoothApplet::onAdapterAdded(Adapter *adapter)
     m_adapterItems.insert(adapter->id(), adapterItem);
 
     // 将最新的设备插入到蓝牙设置前面
-    m_contentLayout->insertWidget(m_contentLayout->count() - 1, adapterItem, Qt::AlignTop | Qt::AlignVCenter);
+    m_contentLayout->insertWidget(m_contentLayout->count() - 2, adapterItem, Qt::AlignTop | Qt::AlignVCenter);
     updateBluetoothPowerState();
     updateSize();
 
@@ -245,14 +244,14 @@ void BluetoothApplet::updateBluetoothPowerState()
 
 void BluetoothApplet::initUi()
 {
+    setContentsMargins(0, 0, 0, 0);
     setFixedWidth(ItemWidth);
     setAccessibleName("BluetoothApplet");
-    setContentsMargins(0, 0, 0, 0);
+    m_contentWidget->setContentsMargins(0, 0, 0, 0);
 
     m_settingLabel->setFixedHeight(DeviceItemHeight);
     DFontSizeManager::instance()->bind(m_settingLabel->label(), DFontSizeManager::T7);
 
-    m_contentLayout->setContentsMargins(QMargins(0, 0, 0, 0));
     m_contentLayout->setSpacing(0);
     m_contentLayout->setContentsMargins(0, 0, 0, 0);
     m_contentLayout->addWidget(m_seperator);
@@ -268,9 +267,8 @@ void BluetoothApplet::initUi()
     m_scroarea->setContentsMargins(0, 0, 0, 0);
     m_scroarea->setWidget(m_contentWidget);
 
-    // updateIconTheme();
+    updateIconTheme();
 
-    m_mainLayout->setContentsMargins(QMargins(0, 0, 0, 0));
     m_mainLayout->setSpacing(0);
     m_mainLayout->setContentsMargins(0, 0, 0, 0);
     m_mainLayout->addWidget(m_scroarea);
@@ -299,24 +297,24 @@ void BluetoothApplet::initConnect()
     connect(m_airPlaneModeInter, &DBusAirplaneMode::EnabledChanged, this, &BluetoothApplet::setDisabled);
 }
 
-// /**
-//  * @brief BluetoothApplet::updateIconTheme 根据主题颜色设置蓝牙界面控件背景色
-//  */
-// void BluetoothApplet::updateIconTheme()
-// {
-//     QPalette widgetBackgroud;
-//     QPalette scroareaBackgroud;
-//     if(DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
-//         widgetBackgroud.setColor(QPalette::Window, QColor(255, 255, 255, 0.03 * 255));
-//     else
-//         widgetBackgroud.setColor(QPalette::Window, QColor(0, 0, 0, 0.03 * 255));
+ /**
+  * @brief BluetoothApplet::updateIconTheme 根据主题颜色设置蓝牙界面控件背景色
+  */
+ void BluetoothApplet::updateIconTheme()
+ {
+     QPalette widgetBackgroud;
+     QPalette scroareaBackgroud;
+     if(DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType)
+         widgetBackgroud.setColor(QPalette::Window, QColor(255, 255, 255, 0.03 * 255));
+     else
+         widgetBackgroud.setColor(QPalette::Window, QColor(0, 0, 0, 0.03 * 255));
 
-//     m_contentWidget->setAutoFillBackground(true);
-//     m_contentWidget->setPalette(widgetBackgroud);
-//     scroareaBackgroud.setColor(QPalette::Window, Qt::transparent);
-//     m_scroarea->setAutoFillBackground(true);
-//     m_scroarea->setPalette(scroareaBackgroud);
-// }
+     m_contentWidget->setAutoFillBackground(true);
+     m_contentWidget->setPalette(widgetBackgroud);
+     scroareaBackgroud.setColor(QPalette::Window, Qt::transparent);
+     m_scroarea->setAutoFillBackground(true);
+     m_scroarea->setPalette(scroareaBackgroud);
+ }
 
 void BluetoothApplet::initAdapters()
 {

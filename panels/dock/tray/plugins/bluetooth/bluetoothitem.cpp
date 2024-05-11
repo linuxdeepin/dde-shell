@@ -33,6 +33,7 @@ BluetoothItem::BluetoothItem(AdaptersManager *adapterManager, QWidget *parent)
     , m_devState(Device::State::StateUnavailable)
     , m_adapterPowered(m_applet->poweredInitState())
 {
+    setContentsMargins(0, 0, 0, 0);
     setAccessibleName("BluetoothPluginItem");
     m_applet->setVisible(false);
     m_tipsLabel->setVisible(false);

@@ -345,11 +345,11 @@ void BluetoothAdapterItem::onDeviceNameUpdated(const Device *device)
 
 void BluetoothAdapterItem::initUi()
 {
+    setContentsMargins(0, 0, 0, 0);
     m_refreshBtn->setFixedSize(24, 24);
     m_refreshBtn->setVisible(m_adapter->powered());
 
     setAccessibleName(m_adapter->name());
-    setContentsMargins(0, 0, 0, 0);
     m_adapterLabel->setFixedSize(ItemWidth, TitleHeight);
     m_adapterLabel->addButton(m_refreshBtn, 0);
     m_adapterLabel->addButton(m_adapterStateBtn, 0);
@@ -358,7 +358,6 @@ void BluetoothAdapterItem::initUi()
     m_adapterStateBtn->setChecked(m_adapter->powered());
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(QMargins(0, 0, 0, 0));
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
