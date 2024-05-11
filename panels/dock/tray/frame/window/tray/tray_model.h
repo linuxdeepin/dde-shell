@@ -97,7 +97,7 @@ public:
 
     void clear();
     WinInfo getWinInfo(const QModelIndex &index);
-    WinInfo getWinInfo(const QString &itemKey);
+    WinInfo getWinInfo(const QString &key, const QString &itemKey);
     void saveConfig(int index, const WinInfo &winInfo);
     void removeWinInfo(WinInfo winInfo);
 

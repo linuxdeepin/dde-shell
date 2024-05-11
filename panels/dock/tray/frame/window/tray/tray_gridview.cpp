@@ -449,7 +449,8 @@ void TrayGridView::handleDropEvent(QDropEvent *e)
         TrayModel *iconModel = TrayModel::getIconModel();
         TrayModel *model = static_cast<TrayModel*>(QListView::model());
         const auto itemKey = static_cast<QString>(e->mimeData()->data("itemKey"));
-        WinInfo info = m_type == Type::DockTray ? iconModel->getWinInfo(itemKey) : dockModel->getWinInfo(itemKey);
+        const auto key = static_cast<QString>(e->mimeData()->data("key"));
+        WinInfo info = m_type == Type::DockTray ? iconModel->getWinInfo(key, itemKey) : dockModel->getWinInfo(key, itemKey);
 
         QModelIndex targetIndex = getIndexFromPos(e->pos());
         int index = -1;
