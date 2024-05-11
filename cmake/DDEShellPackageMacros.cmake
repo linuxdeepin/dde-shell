@@ -73,9 +73,11 @@ function(ds_handle_package_translation)
     )
 
     set(package_dirs ${PROJECT_BINARY_DIR}/packages/${_config_PACKAGE}/)
-    set_source_files_properties(${TRANSLATION_FILES}
-        PROPERTIES OUTPUT_LOCATION "${package_dirs}/translations"
-    )
+
+    # FIXME: not working on Qt 6.7
+    # set_source_files_properties(${TRANSLATION_FILES}
+    #     PROPERTIES OUTPUT_LOCATION "${package_dirs}/translations"
+    # )
 
     add_custom_target(${_config_PACKAGE}_translation ALL
         SOURCES ${TRANSLATION_FILES}
