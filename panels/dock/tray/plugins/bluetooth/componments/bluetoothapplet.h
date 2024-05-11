@@ -104,7 +104,7 @@ private:
     void initConnect();
     // 更新蓝牙插件主界面大小
     void updateSize();
-    // void updateIconTheme();
+    void updateIconTheme();
     void initAdapters();
 
 private:
