@@ -64,7 +64,7 @@ target_link_libraries(dockpanel PRIVATE
 
 if (BUILD_WITH_X11)
     target_compile_definitions(dockpanel PRIVATE BUILD_WITH_X11=)
-    pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb xcb-res xcb-ewmh)
+    pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb xcb-aux xcb-res xcb-ewmh)
     target_sources(dockpanel PRIVATE
         x11dockhelper.h
         x11dockhelper.cpp
