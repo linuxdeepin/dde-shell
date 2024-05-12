@@ -1,3 +1,23 @@
+dde-shell (0.0.18) unstable; urgency=medium
+
+  * feat: add tray dci icons(Issue: https://github.com/linuxdeepin/developer-center/issues/8082)
+  * fix: build on qt 6.7
+  * fix: build failures with Qt 6.7+
+    Thanks to Felix Yan
+  * fix: bluetooth popup has no blur effect and wrong position of separator line
+    Thanks to ZhaoYingZhen(Issue: https://github.com/linuxdeepin/developer-center/issues/8494)(Influence: bluetooth popup has blur effect)
+  * fix: dragging tray icon to dock, but show error app in dock tray area
+    Thanks to ZhaoYingZhen(issue: #8480)(Influence: drag tray icon to dock)
+  * fix: tray plugin mouse right click menu causing dock to crash
+    Thanks to ZhaoYingZhen(Issue: https://github.com/linuxdeepin/developer-center/issues/8506)(Influence: tray plugin mouse right click menu)
+  * fix: qt 6.7 cannot build
+  * fix: dock not shown with launchpad(issue: #8502)
+  * fix: menu can uncheked while double click(issue: #8503)
+  * fix: need link xcb-aux and xkbcommon
+    Thanks to Hillwood Yang
+
+ -- tsic404 <liuheng@deepin.org>  Mon, 13 May 2024 06:54:37 +0800
+
 dde-shell (0.0.17) unstable; urgency=medium
 
   * fix: fix the size of app icon when resizing dock size by dcc
