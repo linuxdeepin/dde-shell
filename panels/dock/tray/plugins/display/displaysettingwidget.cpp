@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "displaysettingwidget.h"
+#include "settingbutton.h"
 
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -15,10 +16,10 @@ const int ItemSpacing = 10;
 DisplaySettingWidget::DisplaySettingWidget(BrightnessModel *model, QWidget *parent)
     : QWidget(parent)
     , m_brightnessAdjWidget(new BrightnessAdjWidget(model, this))
-    , m_settingBtn(new QPushButton(tr("Display Settings"), this))
+    , m_settingBtn(new SettingButton(tr("Display Settings"), this))
 {
     initUI();
-    connect(m_settingBtn, &QPushButton::clicked, this, [ this ](){
+    connect(m_settingBtn, &SettingButton::clicked, this, [ this ](){
         DDBusSender().service("org.deepin.dde.ControlCenter1")
             .path("/org/deepin/dde/ControlCenter1")
             .interface("org.deepin.dde.ControlCenter1")
