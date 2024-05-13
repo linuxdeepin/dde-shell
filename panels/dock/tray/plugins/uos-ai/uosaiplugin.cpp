@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "uosaiplugin.h"
+#include "objectmanager1interface.h"
 
 #include <DGuiApplicationHelper>
 #include <DApplication>
@@ -16,6 +17,10 @@ using namespace uos_ai;
 
 #define QUICK_ITEM_KEY QStringLiteral("quick_item_key")
 #define PLUGIN_STATE_KEY "enable"
+
+static const QString AM_DBUS_PATH = "org.desktopspec.ApplicationManager1";
+static const QString UOS_AI_AM_PATH = "/org/desktopspec/ApplicationManager1/uos_2dai_2dassistant";
+static ObjectManager desktopobjectManager(AM_DBUS_PATH, "/org/desktopspec/ApplicationManager1", QDBusConnection::sessionBus());
 
 UosAiPlugin::UosAiPlugin(QObject *parent)
     : QObject(parent)
@@ -32,6 +37,40 @@ UosAiPlugin::UosAiPlugin(QObject *parent)
     changeTheme();
 
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, &UosAiPlugin::changeTheme);
+    const auto reply = desktopobjectManager.GetManagedObjects();
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(reply, this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *call){
+        QDBusPendingReply<ObjectMap> reply = *call;
+        if (reply.isError()) {
+            call->deleteLater();
+            return;
+        }
+
+        const auto objects = reply.value();
+        for (auto iter = objects.cbegin(); iter != objects.cend(); ++iter) {
+            const auto &objPath = iter.key();
+            if (objPath.path() == UOS_AI_AM_PATH) {
+                m_pluginLoaded = true;
+                break;
+            }
+        }
+        call->deleteLater();
+    });
+    watcher->waitForFinished();
+
+    connect(&desktopobjectManager, &ObjectManager::InterfacesRemoved, this, [this] (const QDBusObjectPath& path, const QStringList& interfaces) {
+        if (path.path() == UOS_AI_AM_PATH) {
+            m_pluginLoaded = false;
+            pluginStateSwitched();
+        }
+    });
+
+    connect(&desktopobjectManager, &ObjectManager::InterfacesAdded, this, [this] (const QDBusObjectPath& path, const ObjectInterfaceMap& info) {
+        if (path.path() == UOS_AI_AM_PATH) {
+            m_pluginLoaded = true;
+            pluginStateSwitched();
+        }
+    });
 #ifdef USE_DOCK_API_V2
     QDBusConnection::sessionBus().connect("com.deepin.copilot", "/com/deepin/copilot", "com.deepin.copilot", "windowVisibleChanged", this, SLOT(onUosAiVisibleChanged(bool)));
     QDBusConnection::sessionBus().connect("com.deepin.copilot", "/com/deepin/copilot", "com.deepin.copilot", "windowActiveChanged", this, SLOT(onUosAiVisibleChanged(bool)));
@@ -139,7 +178,7 @@ void UosAiPlugin::pluginStateSwitched()
 
 bool UosAiPlugin::pluginIsDisable()
 {
-    return !m_proxyInter->getValue(this, PLUGIN_STATE_KEY, true).toBool();
+    return !(m_pluginLoaded && m_proxyInter->getValue(this, PLUGIN_STATE_KEY, true).toBool());
 }
 
 #ifdef USE_V23_DOCK
