@@ -1,3 +1,9 @@
+dde-shell (0.0.19) unstable; urgency=medium
+
+  * feat: remove uos-ai plugin when uos ai uninstalled
+
+ -- tsic404 <liuheng@deepin.org>  Mon, 13 May 2024 14:09:19 +0800
+
 dde-shell (0.0.18) unstable; urgency=medium
 
   * feat: add tray dci icons(Issue: https://github.com/linuxdeepin/developer-center/issues/8082)
