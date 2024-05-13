@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/icons">
-        <file>icon/keyboard-symbolic-dark.svg</file>
-        <file>icon/keyboard-symbolic.svg</file>
-    </qresource>
-</RCC>
