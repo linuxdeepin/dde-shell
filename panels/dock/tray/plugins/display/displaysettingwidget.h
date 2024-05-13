@@ -10,7 +10,7 @@
 
 #include <QWidget>
 
-class QPushButton;
+class SettingButton;
 class BrightnessAdjWidget;
 
 /*!
@@ -33,7 +33,7 @@ private:
 
 private:
     BrightnessAdjWidget *m_brightnessAdjWidget;     // 亮度调整
-    QPushButton *m_settingBtn;                      // 设置按钮
+    SettingButton *m_settingBtn;                    // 设置按钮
 };
 
 
