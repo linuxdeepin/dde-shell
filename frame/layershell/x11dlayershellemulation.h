@@ -31,5 +31,6 @@ private slots:
 private:
     QWindow* m_window;
     DLayerShellWindow* m_dlayerShellWindow;
+    QTimer* m_exclusionZoneTimer;
 };
 DS_END_NAMESPACE

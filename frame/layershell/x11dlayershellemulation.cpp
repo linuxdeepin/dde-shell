@@ -6,6 +6,7 @@
 #include "dlayershellwindow.h"
 #include "x11dlayershellemulation.h"
 
+#include <QTimer>
 #include <QScreen>
 #include <QMargins>
 #include <QGuiApplication>
@@ -22,7 +23,12 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     : QObject(parent)
     , m_window(window)
     , m_dlayerShellWindow(DLayerShellWindow::get(m_window))
+    , m_exclusionZoneTimer(new QTimer(this))
 {
+    m_exclusionZoneTimer->setSingleShot(true);
+    m_exclusionZoneTimer->setInterval(200);
+    connect(m_exclusionZoneTimer, &QTimer::timeout, this, &LayerShellEmulation::onExclusionZoneChanged);
+
     onLayerChanged();
     connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, &LayerShellEmulation::onLayerChanged);
 
@@ -35,11 +41,22 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     connect(m_dlayerShellWindow, &DLayerShellWindow::exclusionZoneChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
 
     // qml height or width may update later, need to update anchor postion and exclusion zone
-    connect(m_window, &QWindow::widthChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
+    connect(m_window, &QWindow::widthChanged, this, [this](){
+        m_exclusionZoneTimer->start();
+    });
     connect(m_window, &QWindow::widthChanged, this, &LayerShellEmulation::onPositionChanged);
 
-    connect(m_window, &QWindow::heightChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
+    connect(m_window, &QWindow::heightChanged, this, [this](){
+        m_exclusionZoneTimer->start();
+    });
     connect(m_window, &QWindow::heightChanged, this, &LayerShellEmulation::onPositionChanged);
+
+    connect(m_window, &QWindow::xChanged, this, [this](){
+        m_exclusionZoneTimer->start();
+    });
+    connect(m_window, &QWindow::yChanged, this, [this](){
+        m_exclusionZoneTimer->start();
+    });
 
     auto screen = m_window->screen();
     connect(screen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
