@@ -31,15 +31,7 @@ OnboardItem::OnboardItem(QWidget *parent)
 
 QIcon OnboardItem::iconPixmap(QSize size, DGuiApplicationHelper::ColorType themeType) const
 {
-    QString iconName;
-    if (std::min(width(), height()) <= PLUGIN_BACKGROUND_MIN_SIZE
-        || themeType == DGuiApplicationHelper::LightType) {
-        iconName = ":/icons/icon/keyboard-symbolic.svg";
-    } else {
-        iconName = ":/icons/icon/keyboard-symbolic-dark.svg";
-    }
-
-    return QIcon(iconName);
+    return QIcon::fromTheme("onboard-symbolic");
 }
 
 void OnboardItem::paintEvent(QPaintEvent *e)
@@ -88,15 +80,7 @@ void OnboardItem::paintEvent(QPaintEvent *e)
         painter.fillPath(path, color);
     }
 
-    QString iconName;
-    if (std::min(width(), height()) <= PLUGIN_BACKGROUND_MIN_SIZE
-        || DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType) {
-        iconName = ":/icons/icon/keyboard-symbolic.svg";
-    } else {
-        iconName = ":/icons/icon/keyboard-symbolic-dark.svg";
-    }
-
-    const QPixmap &pixmap = loadSvg(iconName, QSize(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE));
+    const QPixmap &pixmap = QIcon::fromTheme("onboard-symbolic").pixmap(PLUGIN_ICON_MAX_SIZE, PLUGIN_ICON_MAX_SIZE);
     painter.setOpacity(1);
     const QRectF &rf = QRectF(rect());
     const QRectF &rfp = QRectF(pixmap.rect());

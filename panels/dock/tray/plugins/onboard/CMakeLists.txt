@@ -20,7 +20,7 @@ find_package(Dtk6Gui REQUIRED)
 find_package(Dtk6Widget REQUIRED)
 
 add_definitions("${QT_DEFINITIONS} -DQT_PLUGIN")
-add_library(${PLUGIN_NAME} SHARED ${SRCS} onboard.qrc)
+add_library(${PLUGIN_NAME} SHARED ${SRCS})
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ../)
 
 target_include_directories(${PLUGIN_NAME} PUBLIC ${Qt6DBus_INCLUDE_DIRS}
