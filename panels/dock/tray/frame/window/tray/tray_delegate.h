@@ -13,7 +13,7 @@
 #define ITEM_SIZE 30
 // 托盘图标固定20个像素
 // 16 x 16 will make the icon be cut, reserve 2 pixels for each side to prevent being cut
-#define ICON_SIZE 20
+#define ICON_SIZE 16
 #define ITEM_SPACING 5
 
 class ExpandIconWidget;

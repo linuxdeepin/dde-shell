@@ -23,7 +23,7 @@
 
 DGUI_USE_NAMESPACE
 
-#define IconSize 20
+#define IconSize 16
 
 const QStringList ItemCategoryList {"ApplicationStatus", "Communications", "SystemServices", "Hardware"};
 const QStringList ItemStatusList {"Passive", "Active", "NeedsAttention"};
