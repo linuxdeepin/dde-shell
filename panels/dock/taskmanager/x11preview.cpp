@@ -249,7 +249,8 @@ public:
         if (WM_HELPER->hasComposite()) {
             auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
             auto size = calSize(pixmap.size()); 
-            auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio);
+            auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            scaledPixmap.setDevicePixelRatio(qApp->devicePixelRatio());
 
             hoverRect.setSize(size + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2));
             hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
@@ -257,7 +258,7 @@ public:
             const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
 
             painter->save();
-            painter->setRenderHint(QPainter::Antialiasing);
+            painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
             pen.setWidth(1);
             pen.setColor(themeType == DGuiApplicationHelper::DarkType ? QColor(255, 255, 255, 255 * 0.1) : QColor(0, 0, 0, 255 * 0.1));
             painter->setPen(pen);
@@ -269,7 +270,7 @@ public:
             QPainterPath clipPath;
             clipPath.addRoundedRect(imageRect, radius, radius);
             painter->setClipPath(clipPath);
-            painter->drawPixmap(imageRect, pixmap.scaled(size, Qt::KeepAspectRatio));
+            painter->drawPixmap(imageRect, scaledPixmap);
             painter->setClipping(false);
             painter->drawRoundedRect(imageRect, radius, radius);
             if (option.state.testFlag(QStyle::State_MouseOver)) {
@@ -324,7 +325,7 @@ public:
         auto closeButton = new DToolButton(parent);
         closeButton->setIconSize(QSize(16, 16));
         closeButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
-        closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + 4, -4));
+        closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + 4, -5));
         closeButton->setVisible(true);
         closeButton->setIcon(QIcon::fromTheme("close"));
 
