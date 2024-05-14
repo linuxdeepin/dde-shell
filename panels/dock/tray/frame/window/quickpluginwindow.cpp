@@ -921,10 +921,15 @@ void QuickDockItem::mousePressEvent(QMouseEvent *event)
     }
 
     if (!m_contextMenu->actions().isEmpty()) {
-        m_contextMenu->popup(QCursor::pos());
-    }
+        QTimer::singleShot(0, this, [this]() {
+            QMenu contextMenu(this);
+            contextMenu.addActions(m_contextMenu->actions());
+            contextMenu.exec(QCursor::pos());
+        });
 
-    return QWidget::mousePressEvent(event);
+        // Fixme: Can cause crash in some cases
+        //m_contextMenu->popup(QCursor::pos());
+    }
 }
 
 void QuickDockItem::enterEvent(QEnterEvent *event)
