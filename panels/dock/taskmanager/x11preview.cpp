@@ -634,7 +634,8 @@ void X11WindowPreviewContainer::updateSize()
     setMinimumSize(0, 0);
 
     m_view->setMaximumHeight(m_view->viewportSizeHint().height());
-    m_previewTitle->setMaximumWidth(m_view->width() - m_previewIcon->width() - m_closeAllButton->width() - 20);
+    int maxContentWidth = std::max(m_view->width(), PREVIEW_CONTENT_WIDTH);
+    m_previewTitle->setMaximumWidth(maxContentWidth - m_previewIcon->width() - m_closeAllButton->width() - 20);
 
     QTimer::singleShot(0, this, &X11WindowPreviewContainer::adjustSize);
 }
