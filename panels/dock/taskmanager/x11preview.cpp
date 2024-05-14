@@ -9,6 +9,7 @@
 #include "x11windowmonitor.h"
 
 #include <cstdint>
+#include <qnamespace.h>
 #include <unistd.h>
 
 #include <QFile>
@@ -249,7 +250,7 @@ public:
         if (WM_HELPER->hasComposite()) {
             auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
             auto size = calSize(pixmap.size()); 
-            auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio);
+            auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
             hoverRect.setSize(size + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2));
             hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
@@ -269,7 +270,7 @@ public:
             QPainterPath clipPath;
             clipPath.addRoundedRect(imageRect, radius, radius);
             painter->setClipPath(clipPath);
-            painter->drawPixmap(imageRect, pixmap.scaled(size, Qt::KeepAspectRatio));
+            painter->drawPixmap(imageRect, scaledPixmap);
             painter->setClipping(false);
             painter->drawRoundedRect(imageRect, radius, radius);
             if (option.state.testFlag(QStyle::State_MouseOver)) {
