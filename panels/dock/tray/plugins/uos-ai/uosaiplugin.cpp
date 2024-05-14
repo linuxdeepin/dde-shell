@@ -60,15 +60,19 @@ UosAiPlugin::UosAiPlugin(QObject *parent)
 
     connect(&desktopobjectManager, &ObjectManager::InterfacesRemoved, this, [this] (const QDBusObjectPath& path, const QStringList& interfaces) {
         if (path.path() == UOS_AI_AM_PATH) {
+            if (!pluginIsDisable()) {
+                m_proxyInter->itemRemoved(this, pluginName());
+            }
             m_pluginLoaded = false;
-            pluginStateSwitched();
         }
     });
 
     connect(&desktopobjectManager, &ObjectManager::InterfacesAdded, this, [this] (const QDBusObjectPath& path, const ObjectInterfaceMap& info) {
         if (path.path() == UOS_AI_AM_PATH) {
             m_pluginLoaded = true;
-            pluginStateSwitched();
+            if (!pluginIsDisable()) {
+                m_proxyInter->itemAdded(this, pluginName());
+            }
         }
     });
 #ifdef USE_DOCK_API_V2
