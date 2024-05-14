@@ -1,3 +1,9 @@
+dde-shell (0.0.23) unstable; urgency=medium
+
+  * fix: uos-ai disabled(issue: 8593)
+
+ -- tsic404 <liuheng@deepin.org>  Tue, 14 May 2024 20:39:52 +0800
+
 dde-shell (0.0.22) unstable; urgency=medium
 
   * fix: x11 preview title length too small(Influence: x11 preview title display)
