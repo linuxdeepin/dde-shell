@@ -1,3 +1,9 @@
+dde-shell (0.0.21) unstable; urgency=medium
+
+  * fix: app tray icon size not same as plugin
+
+ -- tsic404 <tsic@tsic-v23>  Tue, 14 May 2024 14:44:31 +0800
+
 dde-shell (0.0.20) unstable; urgency=medium
 
   * fix: brightness-popup's setting button no blur effect and txt color has error
