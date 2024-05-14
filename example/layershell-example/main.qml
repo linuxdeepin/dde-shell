@@ -55,6 +55,17 @@ Window {
                 ListElement { text: "KeyboardInteractivityOnDemand"; keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand }
             }
         }
+
+        ComboBox {
+            id: screenComboBox
+            width: 200
+            textRole: "name"
+            anchors.left: parent.left
+            onActivated: {
+                root.screen = model[screenComboBox.currentIndex]
+            }
+            model: Application.screens
+        }
     }
 
     Item {

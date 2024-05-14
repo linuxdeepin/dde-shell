@@ -36,11 +36,16 @@ private:
     void calcAndSetRequestSize(QSize requestSize);
     bool anchorsSizeConflict() const;
     void trySetAnchorsAndSize();
+    void initLayerSurface(QScreen* screen);
+    void initConnections();
 
+private:
     DLayerShellWindow* m_dlayerShellWindow;
     QSize m_pendingSize;
     QSize m_requestSize;
     bool m_configured = false;
+    QtWaylandClient::QWaylandWindow *m_window;
+    QtWayland::zwlr_layer_shell_v1 *m_shell;
 };
 
 DS_END_NAMESPACE
