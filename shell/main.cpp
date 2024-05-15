@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     a.setOrganizationName("deepin");
     a.setApplicationName("org.deepin.dde-shell");
+    a.setApplicationVersion(QT_STRINGIFY(DS_VERSION));
 
     QCommandLineParser parser;
     parser.addHelpOption();
