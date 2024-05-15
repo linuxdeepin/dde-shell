@@ -23,6 +23,8 @@ macro(ds_build_package)
             OUTPUT_NAME ${_config_PACKAGE}
             LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/
         )
+        # avoid warning when `D_APPLET_CLASS` used in .cpp
+        set_property(TARGET ${_config_TARGET} APPEND PROPERTY AUTOMOC_MACRO_NAMES "D_APPLET_CLASS")
     endif()
 endmacro()
 
