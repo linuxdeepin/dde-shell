@@ -18,6 +18,11 @@ add_executable(dde-shell
     override_dtkdeclarative_qml.qrc
 )
 
+target_compile_definitions(dde-shell
+PRIVATE
+    DS_VERSION=${CMAKE_PROJECT_VERSION}
+)
+
 target_link_libraries(dde-shell PRIVATE
     dde-shell-frame
     Qt${QT_VERSION_MAJOR}::Gui
