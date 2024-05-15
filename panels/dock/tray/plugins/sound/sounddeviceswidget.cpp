@@ -49,7 +49,7 @@ using namespace Dock;
 
 SoundDevicesWidget::SoundDevicesWidget(QWidget *parent)
     : QWidget(parent)
-    , m_tipsLabel(new TipsWidget(this))
+    , m_tipsLabel(new TipsWidget)
     , m_sliderContainer(new SliderContainer(this))
     , m_descriptionLabel(new QLabel(tr("Output Device"), this))
     , m_deviceList(new DListView(this))

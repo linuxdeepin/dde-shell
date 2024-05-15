@@ -44,10 +44,10 @@ void PluginChildPage::pushWidget(QWidget *widget)
         m_containerLayout->removeItem(item);
     }
     m_topWidget = widget;
-    if (widget) {
-        widget->installEventFilter(this);
-        m_containerLayout->addWidget(widget);
-        widget->show();
+    if (m_topWidget) {
+        m_topWidget->installEventFilter(this);
+        m_containerLayout->addWidget(m_topWidget);
+        m_topWidget->show();
     }
     QMetaObject::invokeMethod(this, &PluginChildPage::resetHeight, Qt::QueuedConnection);
 }
@@ -96,4 +96,17 @@ void PluginChildPage::resetHeight()
     QMargins m = m_containerLayout->contentsMargins();
     m_container->setFixedHeight(m.top() + m.bottom() + (m_topWidget ? m_topWidget->height() : 0));
     setFixedHeight(m_headerWidget->height() + m_container->height());
+}
+
+void PluginChildPage::hideEvent(QHideEvent *event)
+{
+    for (int i = m_containerLayout->count() - 1; i >= 0; i--) {
+        QLayoutItem *item = m_containerLayout->itemAt(i);
+        item->widget()->removeEventFilter(this);
+        m_containerLayout->removeItem(item);
+        item->widget()->setParent(nullptr);
+    }
+
+    m_topWidget = nullptr;
+    return QWidget::hideEvent(event);
 }
