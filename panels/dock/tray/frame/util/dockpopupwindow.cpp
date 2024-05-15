@@ -342,3 +342,15 @@ bool PopupSwitchWidget::eventFilter(QObject *watched, QEvent *event)
 
     return QWidget::eventFilter(watched, event);
 }
+
+void PopupSwitchWidget::hideEvent(QHideEvent *event)
+{
+    for (int i = m_containerLayout->count() - 1; i >= 0; i--) {
+        QLayoutItem *item = m_containerLayout->itemAt(i);
+        item->widget()->removeEventFilter(this);
+        m_containerLayout->removeItem(item);
+        item->widget()->setParent(nullptr);
+    }
+
+    return QWidget::hideEvent(event);
+}

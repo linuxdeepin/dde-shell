@@ -90,6 +90,7 @@ public:
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
 
 private:
     QVBoxLayout *m_containerLayout;
