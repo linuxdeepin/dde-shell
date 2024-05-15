@@ -34,6 +34,12 @@ void outputPluginTreeStruct(const DPluginMetaData &plugin, int level)
     }
 }
 
+// disable log's output in some case.
+static void disableLogOutput()
+{
+    QLoggingCategory::setFilterRules("*.debug=false");
+}
+
 static void exitApp(int signal)
 {
     Q_UNUSED(signal);
@@ -107,6 +113,7 @@ int main(int argc, char *argv[])
     parser.process(a);
 
     if (parser.isSet(listOption)) {
+        disableLogOutput();
         for (const auto &item : DPluginLoader::instance()->rootPlugins()) {
             outputPluginTreeStruct(item, 0);
         }
@@ -125,7 +132,6 @@ int main(int argc, char *argv[])
     std::signal(SIGKILL, exitApp);
 
     QList<QString> pluginIds;
-    QList<DApplet *> applets;
     if (parser.isSet(testOption)) {
         pluginIds << "org.deepin.ds.example";
     } else if (parser.isSet(panelOption)) {

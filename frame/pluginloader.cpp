@@ -25,8 +25,8 @@ DS_BEGIN_NAMESPACE;
 
 DCORE_USE_NAMESPACE
 
-static const QString MetaDataFileName{"metadata.json"};
-static const QString PluginSuffix{".so"};
+static constexpr auto MetaDataFileName{"metadata.json"};
+static constexpr auto PluginSuffix{".so"};
 
 Q_DECLARE_LOGGING_CATEGORY(dsLog)
 
@@ -100,9 +100,9 @@ public:
     {
         QStringList result;
         // 'DDE_SHELL_PACKAGE_PATH' directory.
-        const auto dtkPluginPath = qgetenv("DDE_SHELL_PACKAGE_PATH");
+        const auto dtkPluginPath = qEnvironmentVariable("DDE_SHELL_PACKAGE_PATH");
         if (!dtkPluginPath.isEmpty())
-            result.append(dtkPluginPath);
+            result << dtkPluginPath.split(QDir::listSeparator());
 
         const QString packageDir = buildingDir("packages");
         if (!packageDir.isEmpty())
@@ -120,9 +120,9 @@ public:
     {
         QStringList result;
         // 'DDE_SHELL_PACKAGE_PATH' directory.
-        const auto dtkPluginPath = qgetenv("DDE_SHELL_PLUGIN_PATH");
+        const auto dtkPluginPath = qEnvironmentVariable("DDE_SHELL_PLUGIN_PATH");
         if (!dtkPluginPath.isEmpty())
-            result.append(dtkPluginPath);
+            result << dtkPluginPath.split(QDir::listSeparator());
 
         const QString pluginsDir = buildingDir("plugins");
         if (!pluginsDir.isEmpty())
