@@ -7,7 +7,6 @@
 #include "appletitemmodel.h"
 
 #include "pluginloader.h"
-#include "pluginmetadata.h"
 
 #include <QLoggingCategory>
 
