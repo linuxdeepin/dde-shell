@@ -169,6 +169,30 @@ Item {
 
             LaunchAnimation {
                 id: launchAnimation
+                launchSpace: {
+                    switch (Panel.position) {
+                    case Dock.Top:
+                    case Dock.Bottom:
+                    // todo: use icon.height * iconScale is not good
+                    return (root.height - icon.height * iconScale) / 2
+                    case Dock.Left:
+                    case Dock.Right:
+                        return (root.width - icon.width * iconScale) / 2
+                    }
+                }
+
+                direction: {
+                    switch (Panel.position) {
+                    case Dock.Top:
+                        return LaunchAnimation.Direction.Down
+                    case Dock.Bottom:
+                        return LaunchAnimation.Direction.Up
+                    case Dock.Left:
+                        return LaunchAnimation.Direction.Right
+                    case Dock.Right:
+                        return LaunchAnimation.Direction.Left
+                    }
+                }
                 target: icon
                 loops: 1
                 running: false
