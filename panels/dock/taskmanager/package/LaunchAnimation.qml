@@ -2,63 +2,108 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import QtQuick 2.15
+import QtQuick 2.99
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 
 SequentialAnimation {
+    enum Direction {
+        Down,
+        Left,
+        Up,
+        Right
+    }
     property Item target: parent
+    required property int direction
+    required property int launchSpace
     id: root
     PropertyAnimation {
         target: root.target
         property: getAxis()
         from: value(0)
-        to: value(0.15)
-        duration: 60
+        to: value(0.8)
+        duration: 40
     }
     PropertyAnimation {
         target: root.target
         property: getAxis()
-        from: value(0.15)
-        to: value(0.05)
-        duration: 60
+        from: value(0.8)
+        to: value(1)
+        duration: 40
     }
     PropertyAnimation {
         target: root.target
         property: getAxis()
-        from: value(0.05)
-        to: value(0.15)
-        duration: 60
+        from: value(1)
+        to: value(0.6)
+        duration: 40
     }
     PropertyAnimation {
         target: root.target
         property: getAxis()
-        from: value(0.15)
-        to: value(0.10)
-        duration: 60
+        from: value(0.6)
+        to: value(0.6)
+        duration: 40
     }
     PropertyAnimation {
         target: root.target
         property: getAxis()
-        from: value(0.10)
-        to: value(0.15)
-        duration: 60
+        from: value(0.6)
+        to: value(0.9)
+        duration: 40
     }
     PropertyAnimation {
         target: root.target
         property: getAxis()
-        from: value(0.15)
-        to: value(0.15)
-        duration: 500
+        from: value(0.9)
+        to: value(0.8)
+        duration: 40
     }
     PropertyAnimation {
         target: root.target
         property: getAxis()
-        from: value(0.15)
+        from: value(0.8)
+        to: value(0.6)
+        duration: 40
+    }
+    PropertyAnimation {
+        target: root.target
+        property: getAxis()
+        from: value(0.6)
+        to: value(0.8)
+        duration: 80
+    }
+    PropertyAnimation {
+        target: root.target
+        property: getAxis()
+        from: value(0.8)
+        to: value(0.7)
+        duration: 40
+    }
+    PropertyAnimation {
+        target: root.target
+        property: getAxis()
+        from: value(0.7)
+        to: value(0.7)
+        duration: 320
+    }
+    PropertyAnimation {
+        target: root.target
+        property: getAxis()
+        from: value(0.7)
+        to: value(-0.2)
+        duration: 240
+    }
+    PropertyAnimation {
+        target: root.target
+        property: getAxis()
+        from: value(-0.2)
         to: value(0)
-        duration: 60
+        duration: 80
     }
+
+
     onStarted: {
         target.anchors.centerIn = null
     }
@@ -74,15 +119,15 @@ SequentialAnimation {
     }
 
     function value(amplitude) {
-        switch (Panel.position) {
-        case Dock.Top:
-            return target.y + target.height * amplitude
-        case Dock.Bottom:
-            return target.y - target.height * amplitude
-        case Dock.Left:
-            return target.x + target.width * amplitude
-        case Dock.Right:
-            return target.x - target.width * amplitude
+        switch (root.direction) {
+        case LaunchAnimation.Direction.Down:
+            return target.y + root.launchSpace * amplitude
+        case LaunchAnimation.Direction.Up:
+            return target.y - root.launchSpace * amplitude
+        case LaunchAnimation.Direction.Right:
+            return target.x + root.launchSpace * amplitude
+        case LaunchAnimation.Direction.Left:
+            return target.x - root.launchSpace * amplitude
         }
     }
 }
