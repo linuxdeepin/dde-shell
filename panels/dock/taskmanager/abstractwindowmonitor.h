@@ -22,6 +22,7 @@ public:
     AbstractWindowMonitor(QObject* parent = nullptr): QObject(parent){};
     virtual void start() = 0;
     virtual void stop() = 0;
+    virtual void clear() = 0;
 
     virtual QPointer<AbstractWindow> getWindowByWindowId(ulong windowId) = 0;
 

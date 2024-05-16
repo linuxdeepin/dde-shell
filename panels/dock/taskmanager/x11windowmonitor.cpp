@@ -68,7 +68,7 @@ void X11WindowMonitor::start()
     uint32_t value_list[] = {
             0                               | XCB_EVENT_MASK_PROPERTY_CHANGE        |
             XCB_EVENT_MASK_VISIBILITY_CHANGE    | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY    |
-            XCB_EVENT_MASK_STRUCTURE_NOTIFY     | XCB_EVENT_MASK_FOCUS_CHANGE           
+            XCB_EVENT_MASK_STRUCTURE_NOTIFY     | XCB_EVENT_MASK_FOCUS_CHANGE
     };
 
     xcb_change_window_attributes(X11->getXcbConnection(), m_rootWindow, XCB_CW_EVENT_MASK, value_list);
@@ -84,6 +84,13 @@ void X11WindowMonitor::stop()
     qApp->removeNativeEventFilter(m_xcbEventFilter.get());
     m_xcbEventFilter.reset(nullptr);
     Q_EMIT AbstractWindowMonitor::WindowMonitorShutdown();
+}
+
+
+void X11WindowMonitor::clear()
+{
+    m_windows.clear();
+    m_windowPreview.reset(nullptr);
 }
 
 QPointer<AbstractWindow> X11WindowMonitor::getWindowByWindowId(ulong windowId)

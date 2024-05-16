@@ -34,6 +34,7 @@ public:
     explicit X11WindowMonitor(QObject* parent = nullptr);
     virtual void start() override;
     virtual void stop() override;
+    virtual void clear() override;
 
     virtual QPointer<AbstractWindow> getWindowByWindowId(ulong windowId) override;
     virtual void presentWindows(QList<uint32_t> windows) override;

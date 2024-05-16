@@ -64,6 +64,7 @@ public:
     explicit WaylandWindowMonitor(QObject* parent = nullptr);
     virtual void start() override;
     virtual void stop() override;
+    virtual void clear() override;
 
     virtual QPointer<AbstractWindow> getWindowByWindowId(ulong windowId) override;
 

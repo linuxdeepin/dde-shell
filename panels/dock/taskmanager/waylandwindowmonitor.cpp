@@ -88,10 +88,23 @@ void WaylandWindowMonitor::start()
 {
     m_foreignToplevelManager.reset(new ForeignToplevelManager(this));
     connect(m_foreignToplevelManager.get(), &ForeignToplevelManager::newForeignToplevelHandle, this, &WaylandWindowMonitor::handleForeignToplevelHandleAdded);
+    connect(m_foreignToplevelManager.get(), &ForeignToplevelManager::activeChanged, this, [this]{
+        if (!m_foreignToplevelManager->isActive()) {
+            clear();
+        }
+    });
 }
+
 void WaylandWindowMonitor::stop()
 {
     m_foreignToplevelManager.reset(nullptr);
+}
+
+
+void WaylandWindowMonitor::clear()
+{
+    m_windows.clear();
+    m_dockPreview.reset(nullptr);
 }
 
 QPointer<AbstractWindow> WaylandWindowMonitor::getWindowByWindowId(ulong windowId)
