@@ -49,6 +49,8 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
         }
 
         connect(nowScreen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
+        onPositionChanged();
+        QMetaObject::invokeMethod(this, &LayerShellEmulation::onExclusionZoneChanged, Qt::QueuedConnection);
     });
 
     // connect(m_dlayerShellWindow, &DS_NAMESPACE::DLayerShellWindow::keyboardInteractivityChanged, this, &LayerShellEmulation::onKeyboardInteractivityChanged);
@@ -68,6 +70,7 @@ void LayerShellEmulation::onLayerChanged()
     auto xcbWindow = dynamic_cast<QNativeInterface::Private::QXcbWindow*>(m_window->handle());
     switch (m_dlayerShellWindow->layer()) {
         case DLayerShellWindow::LayerBackground: {
+            m_window->setFlags(m_window->flags() & ~Qt::WindowStaysOnBottomHint);
             xcbWindow->setWindowType(QNativeInterface::Private::QXcbWindow::Desktop);
             break;
         }
@@ -78,6 +81,7 @@ void LayerShellEmulation::onLayerChanged()
             break;
         }
         case DLayerShellWindow::LayerTop: {
+            m_window->setFlags(m_window->flags() & ~Qt::WindowStaysOnBottomHint);
             xcbWindow->setWindowType(QNativeInterface::Private::QXcbWindow::Dock);
             break;
         }
@@ -85,6 +89,7 @@ void LayerShellEmulation::onLayerChanged()
             // on deepin Notification will be influenced by exclusionZone,
             // while plasma works all right, maybe deepin kwin bug?
             // FIXME: fix above
+            m_window->setFlags(m_window->flags() & ~Qt::WindowStaysOnBottomHint);
             xcbWindow->setWindowType(QNativeInterface::Private::QXcbWindow::Notification);
             break;
         }
@@ -95,8 +100,9 @@ void LayerShellEmulation::onPositionChanged()
 {
     auto anchors = m_dlayerShellWindow->anchors();
     auto screen = m_window->screen();
-    auto x = (screen->geometry().right() - m_window->width()) / 2;
-    auto y = (screen->geometry().height() - m_window->height()) / 2;
+    auto screenRect = screen->geometry();
+    auto x = screenRect.left() + (screenRect.width() - m_window->width()) / 2;
+    auto y = screenRect.top() + (screenRect.height() - m_window->height()) / 2;
     if (anchors & DLayerShellWindow::AnchorRight) {
         // https://doc.qt.io/qt-6/qrect.html#right
         x = (screen->geometry().right() + 1 - m_window->width() - m_dlayerShellWindow->rightMargin());

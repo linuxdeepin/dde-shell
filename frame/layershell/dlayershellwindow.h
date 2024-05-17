@@ -28,6 +28,8 @@ class DS_SHARE DLayerShellWindow : public QObject
     Q_PROPERTY(Layer layer READ layer WRITE setLayer NOTIFY layerChanged)
     Q_PROPERTY(KeyboardInteractivity keyboardInteractivity READ keyboardInteractivity WRITE setKeyboardInteractivity NOTIFY keyboardInteractivityChanged)
     Q_PROPERTY(ScreenConfiguration screenConfiguration READ screenConfiguration WRITE setScreenConfiguration)
+    
+    Q_PROPERTY(bool closeOnDismissed READ closeOnDismissed WRITE setCloseOnDismissed)
 
 public:
     ~DLayerShellWindow() override;
