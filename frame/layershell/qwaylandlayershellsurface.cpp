@@ -28,6 +28,10 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
     wl_output *output = nullptr;
     if (m_dlayerShellWindow->screenConfiguration() == DLayerShellWindow::ScreenFromQWindow) {
         auto waylandScreen = dynamic_cast<QtWaylandClient::QWaylandScreen*>(window->window()->screen()->handle());
+        connect(window->window(), &QWindow::screenChanged, this, [window](){
+            window->reset();
+            window->reinit();
+        });
         if (!waylandScreen) {
             qCWarning(layershellsurface) << "failed to get screen for wayland";
         } else {

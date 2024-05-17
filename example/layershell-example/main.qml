@@ -20,6 +20,10 @@ Window {
     DLayerShellWindow.rightMargin: right.value
     DLayerShellWindow.topMargin: top.value
     DLayerShellWindow.bottomMargin: bottom.value
+    DLayerShellWindow.closeOnDismissed: false
+
+    // default bind to primary screen
+    screen: Application.screens[0]
 
     Column {
         id: comboBox
@@ -54,6 +58,17 @@ Window {
                 ListElement { text: "KeyboardInteractivityExclusive"; keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityExclusive }
                 ListElement { text: "KeyboardInteractivityOnDemand"; keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand }
             }
+        }
+
+        ComboBox {
+            id: screenComboBox
+            width: 200
+            textRole: "name"
+            anchors.left: parent.left
+            onActivated: {
+                root.screen = model[screenComboBox.currentIndex]
+            }
+            model: Application.screens
         }
     }
 
