@@ -67,6 +67,9 @@ public:
     bool IsDocked(const QString &desktopFile);
     bool RequestUndock(const QString &desktopFile);
 
+private Q_SLOTS:
+    void onAppletListChanged();
+
 private:
     DockPanel* parent() const;
     QString getAppID(const QString &desktopfile);

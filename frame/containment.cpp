@@ -57,6 +57,7 @@ DApplet *DContainment::createApplet(const DAppletData &data)
     });
 
     d->m_applets.append(applet);
+    Q_EMIT appletListChanged();
     return applet;
 }
 
@@ -66,6 +67,7 @@ void DContainment::removeApplet(DApplet *applet)
     D_D(DContainment);
     if (d->m_applets.contains(applet)) {
         d->m_applets.removeOne(applet);
+        Q_EMIT appletListChanged();
     }
     if (auto view = applet->rootObject()) {
         d->m_model->remove(view);

@@ -36,33 +36,9 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
         setPluginVisible("org.deepin.ds.dock.multitaskview", pluginsVisible);
     });
 
-    // Communicate with the other module
-    auto getOtherApplet = [ = ] {
-        QList<DS_NAMESPACE::DApplet *> list = appletList("org.deepin.ds.dock.tray");
-        if (!list.isEmpty()) m_oldDockApplet = list.first();
-
-        list = appletList("org.deepin.ds.dock.clipboarditem");
-        if (!list.isEmpty()) m_clipboardApplet = list.first();
-
-        list = appletList("org.deepin.ds.dock.searchitem");
-        if (!list.isEmpty()) m_searchApplet = list.first();
-
-        list = appletList("org.deepin.ds.dock.multitaskview");
-        if (!list.isEmpty()) m_multitaskviewApplet = list.first();
-
-        return m_oldDockApplet && m_clipboardApplet && m_searchApplet && m_multitaskviewApplet;
-    };
-
-    // TODO: DQmlGlobal maybe missing a  signal which named `appletListChanged`?
-    QTimer *timer = new QTimer;
-    timer->setInterval(1000);
-    connect(timer, &QTimer::timeout, this, [ = ] {
-        if (getOtherApplet()) {
-            timer->stop();
-            timer->deleteLater();
-        }
-    });
-    timer->start();
+    auto root = qobject_cast<DS_NAMESPACE::DContainment *>(this->parent());
+    connect(root, &DS_NAMESPACE::DContainment::appletListChanged, this, &DockDBusProxy::onAppletListChanged);
+    onAppletListChanged();
 }
 
 DockPanel* DockDBusProxy::parent() const
@@ -224,6 +200,22 @@ bool DockDBusProxy::RequestUndock(const QString &desktopFile)
     bool res = true;
     QMetaObject::invokeMethod(appletItem, "RequestUndock", Qt::DirectConnection, Q_RETURN_ARG(bool, res), Q_ARG(QString, id));
     return res;
+}
+
+void DockDBusProxy::onAppletListChanged()
+{
+    // Communicate with the other module
+    QList<DS_NAMESPACE::DApplet *> list = appletList("org.deepin.ds.dock.tray");
+    if (!m_oldDockApplet && !list.isEmpty()) m_oldDockApplet = list.first();
+
+    list = appletList("org.deepin.ds.dock.clipboarditem");
+    if (!m_clipboardApplet && !list.isEmpty()) m_clipboardApplet = list.first();
+
+    list = appletList("org.deepin.ds.dock.searchitem");
+    if (!m_searchApplet && !list.isEmpty()) m_searchApplet = list.first();
+
+    list = appletList("org.deepin.ds.dock.multitaskview");
+    if (!m_multitaskviewApplet && !list.isEmpty()) m_multitaskviewApplet = list.first();
 }
 
 QStringList DockDBusProxy::GetLoadedPlugins()
