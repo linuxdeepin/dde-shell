@@ -26,7 +26,7 @@ AppletItem {
     D.DciIcon {
         id: icon
         anchors.centerIn: parent
-        name: Applet.iconName
+        name: "deepin-multitasking-view"
         scale: Panel.rootObject.dockItemMaxSize * 9 / 14 / Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
         // 9:14 (iconSize/dockHeight)
         sourceSize: Qt.size(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE, Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE)

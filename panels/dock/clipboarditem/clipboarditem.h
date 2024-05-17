@@ -4,31 +4,22 @@
 
 #pragma once
 
-#include "applet.h"
+#include "ddockapplet.h"
 #include "dsglobal.h"
-#include "../dockiteminfo.h"
 
 namespace dock {
 
-class ClipboardItem : public DS_NAMESPACE::DApplet
+class ClipboardItem : public DS_NAMESPACE::DDockApplet
 {
     Q_OBJECT
-    Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
     explicit ClipboardItem(QObject *parent = nullptr);
 
+    QString displayName() const override;
+    QString itemKey() const override;
+    QString settingKey() const override;
+
     Q_INVOKABLE void toggleClipboard();
-
-    Q_INVOKABLE DockItemInfo dockItemInfo();
-
-    inline bool visible() const { return m_visible;}
-    Q_INVOKABLE void setVisible(bool visible);
-
-Q_SIGNALS:
-    void visibleChanged(bool);
-
-private:
-    bool m_visible;
 };
 
 }

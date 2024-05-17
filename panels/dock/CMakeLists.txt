@@ -59,7 +59,7 @@ add_library(dockpanel SHARED
 
 target_link_libraries(dockpanel PRIVATE
     PkgConfig::WaylandClient
-    dde-shell-frame
+    dock-plugin
 )
 
 if (BUILD_WITH_X11)

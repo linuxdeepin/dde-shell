@@ -4,39 +4,29 @@
 
 #pragma once
 
-#include "applet.h"
+#include "ddockapplet.h"
 #include "dsglobal.h"
-#include "../dockiteminfo.h"
 
 namespace dock {
 
-class MultiTaskView : public DS_NAMESPACE::DApplet
+class MultiTaskView : public DS_NAMESPACE::DDockApplet
 {
     Q_OBJECT
-    Q_PROPERTY(QString iconName READ iconName WRITE setIconName NOTIFY iconNameChanged FINAL)
-    Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 
 public:
     explicit MultiTaskView(QObject *parent = nullptr);
     virtual bool init() override;
 
-    QString iconName() const;
-    void setIconName(const QString& iconName);
     bool hasComposite();
 
+    QString displayName() const override;
+    QString itemKey() const override;
+    QString settingKey() const override;
+
     Q_INVOKABLE void openWorkspace();
-    Q_INVOKABLE DockItemInfo dockItemInfo();
 
-    Q_INVOKABLE bool visible() const;
-    Q_INVOKABLE void setVisible(bool visible);
-
-Q_SIGNALS:
-    void iconNameChanged();
-    void visibleChanged();
-
-private:
-    bool m_visible;
-    QString m_iconName;
+public Q_SLOTS:
+    void onHasCompositeChanged();
 };
 
 }

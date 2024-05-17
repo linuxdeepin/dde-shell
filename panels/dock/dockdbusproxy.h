@@ -13,6 +13,10 @@
 #include <QDBusContext>
 #include <QDBusArgument>
 
+namespace DS_NAMESPACE {
+class DDockApplet;
+}
+
 /** this class used for old dock api compatible
   * it will forward old dbus call to new implementation
   */
@@ -78,9 +82,7 @@ private:
     void setPluginVisible(const QString &pluginId, const QVariantMap &pluginsVisible);
 
     DS_NAMESPACE::DApplet *m_oldDockApplet;
-    DS_NAMESPACE::DApplet *m_clipboardApplet;
-    DS_NAMESPACE::DApplet *m_searchApplet;
-    DS_NAMESPACE::DApplet *m_multitaskviewApplet;
+    QList<DS_NAMESPACE::DDockApplet *> m_dockApplets;
 };
 }
 

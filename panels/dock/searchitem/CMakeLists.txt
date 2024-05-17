@@ -5,12 +5,10 @@
 add_library(dock-searchitem SHARED
     searchitem.cpp
     searchitem.h
-    ../dockiteminfo.cpp
-    ../dockiteminfo.h
 )
 
 target_link_libraries(dock-searchitem PRIVATE
-    dde-shell-frame
+    dock-plugin
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.searchitem TARGET dock-searchitem)
