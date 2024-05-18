@@ -660,12 +660,8 @@ DockPopupWindow *QuickPluginWindow::getPopWindow() const
 
 void QuickPluginWindow::updateDockItemSize(QuickDockItem *dockItem)
 {
-    if (dockItem->pluginItem() && dockItem->pluginItem()->pluginName() == "deepin-screen-recorder-plugin") {
-        if (m_position == Dock::Position::Top || m_position == Dock::Position::Bottom) {
-            dockItem->setFixedSize(dockItem->suitableSize().width(), height());
-        } else {
-            dockItem->setFixedSize(width(), dockItem->suitableSize().height());
-        }
+    if (dockItem->pluginItem() && dockItem->pluginItem()->pluginSizePolicy() == PluginsItemInterface::PluginSizePolicy::Custom) {
+        dockItem->setFixedSize(dockItem->suitableSize());
     } else {
         dockItem->setFixedSize(30, 30);
     }
@@ -809,7 +805,7 @@ void QuickDockItem::hideToolTip()
 
 QSize QuickDockItem::suitableSize() const
 {
-    int widgetSize = (m_pluginItem->displayMode() == Dock::DisplayMode::Efficient) ? 24 : 30;
+    int widgetSize = iconSize();
     if (m_pluginItem->pluginSizePolicy() == PluginsItemInterface::PluginSizePolicy::Custom) {
         QPixmap pixmap = iconPixmap();
         if (!pixmap.isNull()) {
@@ -835,17 +831,17 @@ QSize QuickDockItem::suitableSize() const
         QWidget *itemWidget = m_pluginItem->itemWidget(m_itemKey);
         if (itemWidget) {
             int itemWidth = widgetSize;
-            int itemHeight = ICONHEIGHT;
+            int itemHeight = widgetSize;
             QSize itemSize = itemWidget->sizeHint();
             if (m_position == Dock::Position::Top || m_position == Dock::Position::Bottom) {
                 if (itemSize.width() > widgetSize)
                     itemWidth = itemSize.width();
-                if (itemSize.height() > 0 && itemSize.height() <= topLevelWidget()->height())
-                    itemHeight = itemSize.height();
+                if (itemSize.height() > 0)
+                    itemHeight = qBound(0, itemSize.height(), topLevelWidget()->height());
             } else {
-                if (itemSize.width() > 0 && itemSize.width() < topLevelWidget()->width())
-                    itemWidth = itemSize.width();
-                if (itemSize.height() > widgetSize && itemSize.height() < ICONHEIGHT)
+                if (itemSize.width() > 0)
+                    itemWidth = qBound(0, itemSize.width(), topLevelWidget()->width());
+                if (itemSize.height() > widgetSize)
                     itemHeight = itemSize.height();
             }
 
@@ -853,10 +849,7 @@ QSize QuickDockItem::suitableSize() const
         }
     }
 
-    if (m_position == Dock::Position::Top || m_position == Dock::Position::Bottom)
-        return QSize(widgetSize, ICONHEIGHT);
-
-    return QSize(ICONWIDTH, widgetSize);
+    return QSize(widgetSize, widgetSize);
 }
 
 void QuickDockItem::paintEvent(QPaintEvent *event)
