@@ -39,6 +39,7 @@ Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPrevie
 #define PREVIEW_CONTENT_HEIGHT 118
 #define PREVIEW_CONTENT_WIDTH 208
 #define PREVIEW_HOVER_BORDER 4
+#define PREVIEW_MINI_WIDTH 140
 #define PREVIEW_HOVER_BORDER_COLOR QColor(0, 0, 0, 255 * 0.2)
 #define PREVIEW_HOVER_BORDER_COLOR_DARK_MODE QColor(255, 255, 255, 255 * 0.3)
 #define PREVIEW_BACKGROUND_COLOR QColor(0, 0, 0, 255 * 0.05)
@@ -202,6 +203,11 @@ private:
         int imageStride = imageInfo.value("stride").toUInt();
         int imageFormat = imageInfo.value("format").toUInt();
 
+        if (imageWidth <= 1 || imageHeight <= 1) {
+            ::close(fd[0]);
+            return QPixmap();
+        }
+
         QFile file;
         if (!file.open(fd[0], QIODevice::ReadOnly)) {
             file.close();
@@ -252,8 +258,6 @@ public:
             auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             scaledPixmap.setDevicePixelRatio(qApp->devicePixelRatio());
 
-            hoverRect.setSize(size + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2));
-            hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
             DStyleHelper dstyle(m_listView->style());
             const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
 
@@ -264,7 +268,7 @@ public:
             painter->setPen(pen);
             QRect imageRect(
                 (option.rect.left() + ((option.rect.width() - scaledPixmap.width()) / 2)),
-                (option.rect.top() + ((option.rect.height() - scaledPixmap.height()) / 2)) + 1,
+                (option.rect.top() + ((option.rect.height() - scaledPixmap.height()) / 2)),
                 scaledPixmap.width(),
                 scaledPixmap.height());
             QPainterPath clipPath;
@@ -275,7 +279,7 @@ public:
             painter->drawRoundedRect(imageRect, radius, radius);
             if (option.state.testFlag(QStyle::State_MouseOver)) {
                 QPainterPath path;
-                path.addRoundedRect(hoverRect, radius + 2, radius + 2);
+                path.addRoundedRect(option.rect.marginsAdded(QMargins(-2, -2, -2, -2)), radius + 2, radius + 2);
                 pen.setWidth(PREVIEW_HOVER_BORDER);
                 pen.setColor(themeType == DGuiApplicationHelper::DarkType ? PREVIEW_HOVER_BORDER_COLOR_DARK_MODE : PREVIEW_HOVER_BORDER_COLOR);
                 painter->setPen(pen);
@@ -342,19 +346,10 @@ public:
 private:
     QSize calSize(const QSize &imageSize) const
     {
-        qreal factor;
-        if (m_listView->flow() == QListView::LeftToRight) {
-            factor = qreal(PREVIEW_CONTENT_HEIGHT) / imageSize.height();
-            auto scaled = imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
-            if (scaled.width() <= PREVIEW_CONTENT_WIDTH) {
-                return scaled;
-            }
-        } else {
-            factor = qreal(PREVIEW_CONTENT_WIDTH) / imageSize.width();
-            auto scaled = imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
-            if (scaled.height() <= PREVIEW_CONTENT_HEIGHT) {
-                return scaled;
-            }
+        qreal factor = qreal(PREVIEW_CONTENT_HEIGHT) / imageSize.height();
+        auto scaled = imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
+        if (scaled.width() <= PREVIEW_CONTENT_WIDTH) {
+            return scaled;
         }
 
         return {PREVIEW_CONTENT_WIDTH, PREVIEW_CONTENT_HEIGHT};
@@ -621,7 +616,12 @@ void X11WindowPreviewContainer::updateSize()
     setMaximumSize(screenSize);
     setMinimumSize(0, 0);
 
-    m_view->setMaximumHeight(m_view->viewportSizeHint().height());
+    m_view->setFixedSize(m_view->viewportSizeHint());
+
+    if (m_view->width() + this->contentsMargins().left() * 2 <= PREVIEW_MINI_WIDTH) {
+        setMaximumWidth(PREVIEW_MINI_WIDTH);
+    }
+
     int maxContentWidth = std::max(m_view->width(), PREVIEW_CONTENT_WIDTH);
     m_previewTitle->setMaximumWidth(maxContentWidth - m_previewIcon->width() - m_closeAllButton->width() - 20);
 
