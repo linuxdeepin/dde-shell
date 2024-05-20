@@ -60,6 +60,7 @@ public:
     const QList<QPointer<AbstractWindow>>& getAppendWindows();
 
     QString getCurrentActiveWindowName() const;
+    QString getCurrentActiveWindowIcon() const;
 
 protected:
     friend class TaskManager;
