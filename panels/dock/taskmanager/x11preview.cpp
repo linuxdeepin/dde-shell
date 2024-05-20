@@ -392,20 +392,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
             m_monitor->previewWindow(enter.data(WindowIdRole).toInt());
         }
 
-        QPixmap pix;
-        const QStringList strs = enter.data(WindowIconRole).toString().split("base64,");
-
-        if (strs.size() == 2) {
-            pix.loadFromData(QByteArray::fromBase64(strs.at(1).toLatin1()));
-            pix = pix.scaled(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
-        }
-
-        if (!pix.isNull()) {
-            m_previewIcon->setPixmap(pix);
-        } else {
-            m_previewIcon->setPixmap(QIcon::fromTheme(m_previewItem->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
-        }
-
+        updatePreviewIconFromBase64(enter.data(WindowIconRole).toString());
         updatePreviewTitle(enter.data(WindowTitleRole).toString());
     });
 
@@ -424,7 +411,7 @@ void X11WindowPreviewContainer::showPreview(const QPointer<AppItem> &item, const
     m_direction = direction;
 
     m_isDockPreviewCount += 1;
-    m_previewIcon->setPixmap(QIcon::fromTheme(item->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
+    updatePreviewIconFromBase64(item->getCurrentActiveWindowIcon());
     updatePreviewTitle(item->getCurrentActiveWindowName());
     m_model->setData(item);
 
@@ -653,8 +640,7 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
 
         m_closeAllButton->setVisible(true);
         if (m_previewItem.isNull()) return false;
-
-        m_previewIcon->setPixmap(QIcon::fromTheme(m_previewItem->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
+        updatePreviewIconFromBase64(m_previewItem->getCurrentActiveWindowIcon());
         updatePreviewTitle(m_previewItem->getCurrentActiveWindowName());
         break;
     }
@@ -674,5 +660,23 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
 
     return false;
 }
-}
 
+void X11WindowPreviewContainer::updatePreviewIconFromBase64(const QString &base64Data)
+{
+    const QStringList strs = base64Data.split("base64,");
+    QPixmap pix;
+    if (strs.size() == 2) {
+        pix.loadFromData(QByteArray::fromBase64(strs.at(1).toLatin1()));
+        pix = pix.scaled(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+
+    if (!pix.isNull()) {
+        m_previewIcon->setPixmap(pix);
+        return;
+    }
+
+    if (m_previewItem) {
+        m_previewIcon->setPixmap(QIcon::fromTheme(m_previewItem->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
+    }
+}
+}
