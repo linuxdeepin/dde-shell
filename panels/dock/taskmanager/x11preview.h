@@ -45,6 +45,7 @@ private:
     inline void updatePreviewTitle(const QString& title);
     inline void initUI();
     inline void updateSize();
+    void updatePreviewIconFromBase64(const QString &base64Data);
 
 public Q_SLOTS:
     void updatePosition();

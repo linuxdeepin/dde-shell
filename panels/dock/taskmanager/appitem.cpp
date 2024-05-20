@@ -309,6 +309,11 @@ QString AppItem::getCurrentActiveWindowName() const
     return m_currentActiveWindow.isNull() ? this->name() : m_currentActiveWindow->title();
 }
 
+QString AppItem::getCurrentActiveWindowIcon() const
+{
+    return m_currentActiveWindow.isNull() ? this->icon() : m_currentActiveWindow->icon();
+}
+
 void AppItem::updateCurrentActiveWindow(QPointer<AbstractWindow> window)
 {
     Q_ASSERT(m_windows.contains(window));

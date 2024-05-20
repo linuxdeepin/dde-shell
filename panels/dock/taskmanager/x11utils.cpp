@@ -198,7 +198,6 @@ QString X11Utils::getWindowIcon(const xcb_window_t& window)
 
         QBuffer buffer;
         buffer.open(QIODevice::WriteOnly);
-        img = img.scaled(30, 30, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         img.save(&buffer, "PNG");
         QString encode = buffer.data().toBase64();
         iconContent = QString("%1,%2").arg("data:image/png;base64").arg(encode);
