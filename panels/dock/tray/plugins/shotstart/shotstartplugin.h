@@ -53,7 +53,7 @@ public:
     //void pluginStateSwitched() override;
     PluginFlags flags() const override;
 
-    PluginSizePolicy pluginSizePolicy() const override {return  PluginsItemInterface::Custom;}
+    PluginSizePolicy pluginSizePolicy() const override {return  PluginsItemInterface::System;}
     /**
      * @brief itemWidget:返回插件主控件，用于dde-dock面板上显示
      * @param itemKey:控件名称
