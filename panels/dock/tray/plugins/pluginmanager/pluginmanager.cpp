@@ -90,7 +90,7 @@ PluginFlags PluginManager::flags() const
 
 PluginsItemInterface::PluginSizePolicy PluginManager::pluginSizePolicy() const
 {
-    return PluginSizePolicy::Custom;
+    return PluginSizePolicy::System;
 }
 
 void PluginManager::positionChanged(const Dock::Position position)
