@@ -308,8 +308,9 @@ Item {
             interval: 50
             onTriggered: {
                 var point = root.mapToItem(null, root.width / 2, 0)
+                var AppletPoint = Applet.rootObject.mapToItem(null, root.width / 2, 0)
                 toolTip.toolTipX = point.x
-                toolTip.toolTipY = point.y
+                toolTip.toolTipY = root.useColumnLayout ? point.y : AppletPoint.y
                 toolTip.open()
             }
         }
