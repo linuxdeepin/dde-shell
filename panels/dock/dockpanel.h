@@ -13,9 +13,9 @@
 namespace dock {
 class DockHelper;
 const QStringList pluginDirs = {
-    "/usr/lib/dde-dock/tmp/plugins/",
-    "/usr/lib/dde-dock/tmp/plugins/quick-trays/",
-    "/usr/lib/dde-dock/tmp/plugins/system-trays/"
+    "/usr/lib/dde-dock/plugins/",
+    "/usr/lib/dde-dock/plugins/quick-trays/",
+    "/usr/lib/dde-dock/plugins/system-trays/"
 };
 
 class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext

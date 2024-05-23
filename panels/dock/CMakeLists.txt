@@ -93,14 +93,14 @@ add_subdirectory(dockplugin)
 
 # dock qml element(include Dock.xx defines and DockCompositor)
 file(
-    GLOB dock_plugin_sources
+    GLOB plugin_sources
     constants.h
     # dockfilterproxymodel.cpp
     # dockfilterproxymodel.h
-    dockpluginmanagerextension_p.h
-    dockpluginmanagerextension.cpp
-    dockpluginmanagerintegration_p.h
-    dockpluginmanagerintegration.cpp
+    pluginmanagerextension_p.h
+    pluginmanagerextension.cpp
+    pluginmanagerintegration_p.h
+    pluginmanagerintegration.cpp
 )
 
 set_source_files_properties(DockCompositor.qml PROPERTIES
@@ -121,14 +121,14 @@ qt_add_qml_module(dock-plugin
     URI "org.deepin.ds.dock"
     VERSION "1.0"
     SHARED
-    SOURCES ${dock_plugin_sources}
+    SOURCES ${plugin_sources}
     QML_FILES DockCompositor.qml OverflowContainer.qml MenuHelper.qml DockPalette.qml
     OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/
 )
 
 qt_generate_wayland_protocol_server_sources(dock-plugin
     FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/dockplugin/protocol/dock-plugin-manager-v1.xml
+        ${CMAKE_CURRENT_SOURCE_DIR}/dockplugin/protocol/plugin-manager-v1.xml
 )
 
 target_link_libraries(dock-plugin PUBLIC

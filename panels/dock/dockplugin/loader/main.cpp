@@ -50,12 +50,15 @@ int main(int argc, char *argv[], char *envp[])
     signal(SIGFPE,  sig_crash);
 #endif
 
+    DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
+    Dtk::Widget::DApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
     init_setproctitle(argv, envp);
     qputenv("DSG_APP_ID", "dde-dock");
     qputenv("WAYLAND_DISPLAY", "dockplugin");
-    qputenv("QT_WAYLAND_SHELL_INTEGRATION", "dockplugin-shell");
+    qputenv("QT_WAYLAND_SHELL_INTEGRATION", "plugin-shell");
 
     Dtk::Widget::DApplication app(argc, argv);
+    app.setAttribute(Qt::AA_UseHighDpiPixmaps, true);
 
     QCommandLineParser parser;
     parser.addHelpOption();
@@ -85,10 +88,16 @@ int main(int argc, char *argv[], char *envp[])
     }
 
     PluginsItemInterface *interface = qobject_cast<PluginsItemInterface *>(pluginLoader->instance());
+
+    if (interface == nullptr) {
+        return -1;
+    }
+
     dock::WidgetPlugin dockPlugin(interface);
 
     app.setApplicationName(interface->pluginName());
     app.setApplicationDisplayName(interface->pluginDisplayName());
     setproctitle((QStringLiteral("dock plugin: ") + interface->pluginName()).toStdString().c_str());
+    qputenv("QT_SCALE_FACTOR", "");
     return app.exec();
 }

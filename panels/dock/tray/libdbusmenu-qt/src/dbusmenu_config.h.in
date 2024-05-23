@@ -1,2 +1,0 @@
-/* Whether QIcon::name() exists */
-#cmakedefine HAVE_QICON_NAME
