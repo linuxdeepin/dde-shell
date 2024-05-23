@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/shell/override/dtk">
         <file>InWindowBlur.qml</file>
+        <file>MenuItem.qml</file>
+        <file>Menu.qml</file>
     </qresource>
 </RCC>

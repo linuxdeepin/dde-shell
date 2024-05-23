@@ -23,9 +23,14 @@ public:
     {
         if (type != DataType::QmlFile)
             return path;
-        if (path.path().endsWith("overridable/InWindowBlur.qml")) {
-            qDebug() << "Override dtk's InWindowBlur";
-            return QStringLiteral("qrc:/shell/override/dtk/InWindowBlur.qml");
+
+        if (path.path().endsWith("dtk/MenuItem.qml")) {
+            qDebug() << "Override dtk's MenuItem" << path.path();
+            return QStringLiteral("qrc:/shell/override/dtk/MenuItem.qml");
+        }
+        if (path.path().endsWith("dtk/Menu.qml")) {
+            qDebug() << "Override dtk's Menu" << path.path();
+            return QStringLiteral("qrc:/shell/override/dtk/Menu.qml");
         }
 
         return path;
