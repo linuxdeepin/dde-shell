@@ -15,8 +15,8 @@ pkg_check_modules(XKBCOMMON REQUIRED IMPORTED_TARGET xkbcommon)
 include(KDEInstallDirs)
 
 add_library(dockpluginmanager-interface SHARED
-    dockplugin.h
-    dockplugin.cpp
+    plugin.h
+    plugin.cpp
 )
 
 target_include_directories(dockpluginmanager-interface PUBLIC
@@ -32,20 +32,20 @@ PUBLIC
 )
 
 add_library(dockpluginmanager SHARED
-    dockpluginmanager_p.h
-    dockpluginmanager.cpp
-    dockpluginmanagerintegration_p.h
-    dockpluginmanagerintegration.cpp
-    dockpluginsurface_p.h
-    dockpluginsurface.cpp
+    pluginmanager_p.h
+    pluginmanager.cpp
+    pluginmanagerintegration_p.h
+    pluginmanagerintegration.cpp
+    pluginsurface_p.h
+    pluginsurface.cpp
     main.cpp
 )
 
 ecm_add_qtwayland_client_protocol(dockpluginmanager
 PROTOCOL
-    ${CMAKE_CURRENT_SOURCE_DIR}/../protocol/dock-plugin-manager-v1.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/../protocol/plugin-manager-v1.xml
 BASENAME
-    dock-plugin-manager-v1
+    plugin-manager-v1
 )
 
 target_link_libraries(dockpluginmanager
@@ -60,7 +60,7 @@ PRIVATE
 
 set_target_properties(dockpluginmanager PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/plugins/wayland-shell-integration"
-    OUTPUT_NAME dockplugin-shell
+    OUTPUT_NAME plugin-shell
 )
 
 set_target_properties(dockpluginmanager-interface PROPERTIES

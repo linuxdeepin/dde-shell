@@ -23,6 +23,7 @@
 #include <QGuiApplication>
 #include <QQuickItem>
 #include <DGuiApplicationHelper>
+#include <qt5/QtGui/qguiapplication.h>
 
 #define SETTINGS DockSettings::instance()
 
@@ -37,7 +38,7 @@ DockPanel::DockPanel(QObject * parent)
     , m_compositorReady(false)
     , m_launcherShown(false)
 {
-    // connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
+    connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
 }
 
 bool DockPanel::load()
@@ -304,16 +305,24 @@ void DockPanel::loadDockPlugins()
     QStringList filters;
     filters << "*.so";
 
+    QProcess proc;
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("QT_SCALE_FACTOR", QString::number(qApp->devicePixelRatio()));
+    proc.setProcessEnvironment(env);
+    proc.setProgram(QString("%1/../panels/dock/dockplugin/loader/dockplugin-loader").arg(qApp->applicationDirPath()));
+#ifdef QT_DEBUG
+    proc.setProgram(QString("%1/../panels/dock/dockplugin/loader/dockplugin-loader").arg(qApp->applicationDirPath()));
+#else
+    proc.setProgram(QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR));
+#endif
+
     for (auto pluginDir : pluginDirs) {
         QDir dir(pluginDir);
         auto plugins = dir.entryList(filters, QDir::Files);
         foreach(QString plugin, plugins) {
             plugin = pluginDir + plugin;
-#ifdef QT_DEBUG
-            QProcess::startDetached(QString("%1/../panels/dock/dockplugin/loader/dockplugin-loader").arg(qApp->applicationDirPath()), {"-p", plugin, "-platform", "wayland",});
-#else
-            QProcess::startDetached(QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR), {"-p", plugin, "-platform", "wayland"});
-#endif
+            proc.setArguments({"-p", plugin, "-platform", "wayland",});
+            proc.startDetached();
         }
     }
 }

@@ -514,14 +514,6 @@ Window {
     }
 
     Component.onCompleted: {
-        DockCompositor.dockPosition = Qt.binding(function() {
-            return Panel.position
-        })
-
-        DockCompositor.dockColorTheme = Qt.binding(function(){
-            return Panel.colorTheme
-        })
-
         Panel.toolTipWindow.D.DWindow.themeType = Qt.binding(function(){
             return Panel.colorTheme
         })

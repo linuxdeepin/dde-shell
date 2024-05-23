@@ -33,18 +33,6 @@ Build-Depends:
  libyaml-cpp-dev,
  qtbase5-dev, qtbase5-private-dev, qtwayland5-dev-tools, qtwayland5-private-dev, libdtkgui-dev, libdtkwidget-dev, libdtkcore5-bin,
  qt6-l10n-tools, qt6-svg-dev,
- libxcb-composite0-dev,
- libxcb-damage0-dev,
- libxcb-ewmh-dev,
- libxcb-icccm4-dev,
- libxcb-image0-dev,
- libxcursor-dev,
- libxdamage-dev,
- libxres-dev,
- libxtst-dev,
- libdframeworkdbus-dev,
- libkf6networkmanagerqt-dev,
- libnm-dev (>= 1.4.0~),
 Standards-Version: 3.9.8
 Homepage: http://www.deepin.org
 

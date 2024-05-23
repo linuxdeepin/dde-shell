@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/dsg">
-        <file>built-in-icons/dock-control-panel.dci</file>
-        <file>built-in-icons/dock-control-panel-dark.svg</file>
-        <file>built-in-icons/dock-control-panel.svg</file>
-    </qresource>
-</RCC>

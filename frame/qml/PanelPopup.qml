@@ -18,8 +18,12 @@ Item {
         if (!window)
             return
 
-        window.xOffset = control.x
-        window.yOffset = control.y
+        window.xOffset = Qt.binding(function(){
+            return control.x
+        })
+        window.yOffset = Qt.binding(function(){
+            return control.y
+        })
         window.show()
         popup.open()
     }

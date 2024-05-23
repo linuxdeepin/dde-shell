@@ -3,13 +3,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "constants.h"
-#include "dockplugin.h"
+#include "plugin.h"
 #include "widgetplugin.h"
 #include "pluginsiteminterface.h"
 
+#include <QMenu>
 #include <QPainter>
 #include <QProcess>
 #include <QVBoxLayout>
+#include <QMouseEvent>
+
+#include <cstddef>
 
 namespace dock {
 WidgetPlugin::WidgetPlugin(PluginsItemInterface* pluginItem)
@@ -27,95 +31,24 @@ WidgetPlugin::~WidgetPlugin()
 
 void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QString &itemKey)
 {
-    DockPlugin* plugin;
-
-    if (m_pluginItem->flags() & Type_Common) {
-        auto trayWidget = getQucikPluginTrayWidget();
-        if (trayWidget) {
-            trayWidget->setAttribute(Qt::WA_TranslucentBackground);
-            plugin = getPlugin(trayWidget);
-            plugin->setItemKey(itemKey);
-            plugin->setPluginType(DockPlugin::Tray);
-            plugin->setPluginFlags(m_pluginItem->flags());
-            plugin->setPluginId(m_pluginItem->pluginName());
-            plugin->setContextMenu(m_pluginItem->itemContextMenu(itemKey));
-
-            connect(plugin, &DockPlugin::clicked, this, [this, plugin](const QString& menuId, bool checked){
-                if (menuId.isEmpty()) {
-                    QStringList commandArgument = itemCommand(plugin->itemKey()).split(" ");
-                    if (commandArgument.size() > 0) {
-                        QString command = commandArgument.first();
-                        commandArgument.removeFirst();
-                        QProcess::startDetached(command, commandArgument);
-                    }
-                } else {
-                    m_pluginItem->invokedMenuItem(plugin->itemKey(), menuId, checked);
-                }
-            });
-
-            trayWidget->show();
-        }
-
-        auto quickWidget = m_pluginItem->itemWidget(QUICK_ITEM_KEY);
-        if (quickWidget) {
-            quickWidget->setAttribute(Qt::WA_TranslucentBackground);
-            plugin = getPlugin(quickWidget);
-            plugin->setItemKey(itemKey);
-            plugin->setPluginType(DockPlugin::Quick);
-            plugin->setPluginFlags(m_pluginItem->flags());
-            plugin->setPluginId(m_pluginItem->pluginName());
-            plugin->setContextMenu(m_pluginItem->itemContextMenu(itemKey));
-            quickWidget->show();
-        }
-    } else {
-        auto widget = m_pluginItem->itemWidget(itemKey);
-        if (widget) {
-            widget->setAttribute(Qt::WA_TranslucentBackground);
-            plugin = getPlugin(widget);
-            plugin->setItemKey(itemKey);
-            plugin->setPluginId(m_pluginItem->pluginName());
-            plugin->setPluginFlags(m_pluginItem->flags());
-            plugin->setContextMenu(m_pluginItem->itemContextMenu(itemKey));
-
-            DockPlugin::PluginType type;
-            if (m_pluginItem->flags() & Type_Fixed) {
-                type = DockPlugin::Fixed;
-            } else if (m_pluginItem->flags() & Type_System) {
-                type = DockPlugin::System;
-            } else if (m_pluginItem->flags() & Type_Tool) {
-                type = DockPlugin::Tool;
-            } else if (m_pluginItem->flags() & Type_Tray) {
-                type = DockPlugin::Tray;
-            }
-
-            plugin->setPluginType(type);
-            widget->show();
-        }
+    QWidget *widget = nullptr;
+    Plugin::EmbemdPlugin* plugin;
+    if (m_pluginItem->flags() & Type_Tray) {
+        widget = m_pluginItem->itemWidget(itemKey);
+    } else if (m_pluginItem->flags() & Type_Common) {
+        widget = getQucikPluginTrayWidget(itemKey);
     }
 
-    auto popupWidget = m_pluginItem->itemPopupApplet(itemKey);
-    if (!popupWidget && m_pluginItem->flags() & Type_Common) {
-        popupWidget = m_pluginItem->itemPopupApplet(QUICK_ITEM_KEY);
-    }
+    if (!widget) return;
+    widget->setAttribute(Qt::WA_TranslucentBackground);
+    widget->winId();
+    widget->setFixedSize(QSize(16, 16));
 
-    if (popupWidget) {
-        popupWidget->setAttribute(Qt::WA_TranslucentBackground);
-        plugin = getPlugin(popupWidget);
-        plugin->setPluginType(DockPlugin::Popup);
-        plugin->setItemKey(itemKey);
-        plugin->setPluginId(m_pluginItem->pluginName());
-        popupWidget->show();
-    }
-
-    auto tipsWidget = m_pluginItem->itemTipsWidget(itemKey);
-    if (tipsWidget) {
-        tipsWidget->setAttribute(Qt::WA_TranslucentBackground);
-        plugin = getPlugin(tipsWidget);
-        plugin->setPluginType(DockPlugin::Tooltip);
-        plugin->setItemKey(itemKey);
-        plugin->setPluginId(m_pluginItem->pluginName());
-        tipsWidget->show();
-    }
+    plugin = Plugin::EmbemdPlugin::get(widget->windowHandle());
+    plugin->setPluginFlags(m_pluginItem->flags());
+    plugin->setItemKey(itemKey);
+    plugin->setPluginType(1);
+    widget->show();
 }
 
 void WidgetPlugin::itemUpdate(PluginsItemInterface * const itemInter, const QString &itemKey)
@@ -184,13 +117,15 @@ void WidgetPlugin::updateDockInfo(PluginsItemInterface *const, const DockPart &p
                 m_widget->update();
 
                 auto plugin = getPlugin(m_widget.get());
-                plugin->setContextMenu(m_pluginItem->itemContextMenu(plugin->itemKey()));
             }
             break;
         }
 
         // TODO: implement below cases
         case DockPart::QuickPanel: {
+            if (m_widget) {
+                m_widget->update();
+            }
             break;
         }
 
@@ -220,20 +155,6 @@ const QString WidgetPlugin::itemContextMenu(const QString &itemKey)
     return m_pluginItem->itemContextMenu(itemKey);
 }
 
-void WidgetPlugin::handleClicked(const QString &itemKey, const QString &menuId, const bool checked)
-{
-    if (menuId.isEmpty()) {
-        QStringList commandArgument = itemCommand(itemKey).split(" ");
-        if (commandArgument.size() > 0) {
-            QString command = commandArgument.first();
-            commandArgument.removeFirst();
-            QProcess::startDetached(command, commandArgument);
-        }
-    } else {
-        m_pluginItem->invokedMenuItem(itemKey, menuId, checked);
-    }
-}
-
 void WidgetPlugin::onDockPositionChanged(uint32_t position)
 {
     qApp->setProperty(PROP_POSITION, position);
@@ -246,27 +167,17 @@ void WidgetPlugin::onDockDisplayModeChanged(uint32_t displayMode)
     m_pluginItem->displayModeChanged(static_cast<Dock::DisplayMode>(displayMode));
 }
 
-QWidget* WidgetPlugin::getQucikPluginTrayWidget()
+QWidget* WidgetPlugin::getQucikPluginTrayWidget(const QString &itemKey)
 {
     auto trayIcon = m_pluginItem->icon(DockPart::QuickShow);
     if (trayIcon.isNull())
         return m_widget.get();
 
     if (m_widget.isNull()) {
-        auto func = [this]() -> QPixmap {
-            auto trayIcon = m_pluginItem->icon(DockPart::QuickShow);
-            // NOTE: icon same as TrayIconWidget size, otherwise there will be white space
-            // FIXME: trayIcon size may min than PLUGIN_ICON_MIN_SIZE (such as sound plugin)
-            auto scale = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? 1 : qApp->devicePixelRatio();
-            auto pixmap = trayIcon.pixmap(PLUGIN_ICON_MIN_SIZE * scale, PLUGIN_ICON_MIN_SIZE * scale);
-            pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
-            return pixmap;
-        };
+        m_widget.reset(new TrayIconWidget(m_pluginItem, itemKey));
 
-        m_widget.reset(new TrayIconWidget(func));
-
-        connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, [this](){
-            auto widget = getQucikPluginTrayWidget();
+        connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, [this, itemKey](){
+            auto widget = getQucikPluginTrayWidget(itemKey);
             if (widget) widget->update();
         }, Qt::UniqueConnection);
     }
@@ -274,36 +185,24 @@ QWidget* WidgetPlugin::getQucikPluginTrayWidget()
     return m_widget.get();
 }
 
-DockPlugin* WidgetPlugin::getPlugin(QWidget* widget)
+Plugin::EmbemdPlugin* WidgetPlugin::getPlugin(QWidget* widget)
 {
     widget->setParent(nullptr);
     widget->winId();
-    auto plugin = DockPlugin::get(widget->windowHandle());
-    if (plugin) {
-        connect(plugin, &DockPlugin::dockColorThemeChanged, this, [](uint32_t type){
-            DGuiApplicationHelper::instance()->setPaletteType(static_cast<DGuiApplicationHelper::ColorType>(type));
-        }, Qt::UniqueConnection);
-
-        connect(plugin, &DockPlugin::dockPositionChanged, this, [this](uint32_t position){
-            qApp->setProperty(PROP_POSITION, position);
-            m_pluginItem->positionChanged(static_cast<Dock::Position>(position));
-        }, Qt::UniqueConnection);
-
-        connect(plugin, &DockPlugin::dockDisplayModeChanged, this, [this](uint32_t displayMode){
-            qApp->setProperty(PROP_DISPLAY_MODE, displayMode);
-            m_pluginItem->displayModeChanged(static_cast<Dock::DisplayMode>(displayMode));
-        }, Qt::UniqueConnection);
-    }
-
-    return plugin;
+    return Plugin::EmbemdPlugin::get(widget->windowHandle());
 }
 
-TrayIconWidget::TrayIconWidget(std::function<QPixmap()> trayIconCallback, QWidget* parent)
+TrayIconWidget::TrayIconWidget(PluginsItemInterface* pluginItem, QString itemKey, QWidget* parent)
     : QWidget(parent)
-    , m_callBack(trayIconCallback)
+    , m_pluginItem(pluginItem)
+    , m_itemKey(itemKey)
+    , m_menu(new QMenu)
 {
     auto scale = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? 1 : qApp->devicePixelRatio();
     setFixedSize(PLUGIN_ICON_MIN_SIZE * scale, PLUGIN_ICON_MIN_SIZE * scale);
+    connect(m_menu, &QMenu::triggered, this, [this](QAction *action){
+        m_pluginItem->invokedMenuItem(m_itemKey, action->data().toString(), action->isCheckable() ? action->isChecked() : true);
+    });
 }
 
 TrayIconWidget::~TrayIconWidget()
@@ -311,11 +210,118 @@ TrayIconWidget::~TrayIconWidget()
 
 void TrayIconWidget::paintEvent(QPaintEvent *event)
 {
-    auto pixmap = m_callBack();
+    auto func = [this]() -> QPixmap {
+        auto trayIcon = m_pluginItem->icon(DockPart::QuickShow);
+        if (trayIcon.availableSizes().size() > 0) {
+            QSize size = trayIcon.availableSizes().first();
+            return trayIcon.pixmap(size);
+        }
+
+        int pixmapWidth = static_cast<int>(PLUGIN_ICON_MIN_SIZE * (QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? 1 : qApp->devicePixelRatio()));
+        int pixmapHeight = static_cast<int>(PLUGIN_ICON_MIN_SIZE * (QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? 1 : qApp->devicePixelRatio()));
+        return trayIcon.pixmap(pixmapWidth, pixmapHeight);
+    };
+
+    auto pixmap = func();
+    pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
+
     QPainter painter(this);
     auto scale = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? 1 : qApp->devicePixelRatio();
     QSize size = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? pixmap.size() / qApp->devicePixelRatio() : pixmap.size();
     QRect pixmapRect = QRect(QPoint(0, 0), QSize(PLUGIN_ICON_MIN_SIZE * scale, PLUGIN_ICON_MIN_SIZE * scale));
     painter.drawPixmap(pixmapRect, pixmap);
 }
+
+void TrayIconWidget::enterEvent(QEvent *event)
+{
+    auto popup = m_pluginItem->itemPopupApplet(m_itemKey);
+    if (popup)
+        popup->hide();
+
+    QMetaObject::invokeMethod(this, [this](){
+        auto toolTip = m_pluginItem->itemTipsWidget(m_itemKey);
+        if (!toolTip) {
+            toolTip = m_pluginItem->itemTipsWidget(QUICK_ITEM_KEY);
+        }
+
+        if (!toolTip) {
+            qDebug() << "no tooltip";
+            return;
+        }
+
+        toolTip->setAttribute(Qt::WA_TranslucentBackground);
+        toolTip->winId();
+
+        auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle());
+        pluginPopup->setX(500), pluginPopup->setY(100);
+        toolTip->show();
+    });
+}
+
+void TrayIconWidget::leaveEvent(QEvent *event)
+{
+    auto tooltip = m_pluginItem->itemTipsWidget(m_itemKey);
+    if (tooltip && tooltip->windowHandle())
+        tooltip->windowHandle()->hide();
+}
+
+void TrayIconWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::RightButton) {
+        if (m_menu->actions().isEmpty()) {
+            const QString menuJson = m_pluginItem->itemContextMenu(m_itemKey);
+            if (menuJson.isEmpty())
+                return;
+
+            QJsonDocument jsonDocument = QJsonDocument::fromJson(menuJson.toLocal8Bit().data());
+            if (jsonDocument.isNull())
+                return;
+
+            QJsonObject jsonMenu = jsonDocument.object();
+
+            QJsonArray jsonMenuItems = jsonMenu.value("items").toArray();
+            for (auto item : jsonMenuItems) {
+                QJsonObject itemObj = item.toObject();
+                QAction *action = new QAction(itemObj.value("itemText").toString());
+                action->setCheckable(itemObj.value("isCheckable").toBool());
+                action->setChecked(itemObj.value("checked").toBool());
+                action->setData(itemObj.value("itemId").toString());
+                action->setEnabled(itemObj.value("isActive").toBool());
+                m_menu->addAction(action);
+            }
+        }
+
+        m_menu->setAttribute(Qt::WA_TranslucentBackground, true);
+        // FIXME: qt5integration drawMenuItemBackground will draw a background event is's transparent
+        auto pa = this->palette();
+        pa.setColor(QPalette::ColorRole::Window, Qt::transparent);
+        m_menu->setPalette(pa);
+        m_menu->winId();
+
+        auto pluginPopup = Plugin::PluginPopup::get(m_menu->windowHandle());
+        pluginPopup->setX(500), pluginPopup->setY(100);
+        m_menu->setFixedSize(m_menu->sizeHint());
+        m_menu->exec();
+    } else if (event->button() == Qt::LeftButton) {
+        auto popup = m_pluginItem->itemPopupApplet(m_itemKey);
+
+        if (!popup) {
+            popup = m_pluginItem->itemPopupApplet(QUICK_ITEM_KEY);
+        }
+
+        if (!popup) {
+            auto cmd = m_pluginItem->itemCommand(m_itemKey).split(" ");
+            QProcess::startDetached(cmd.first(), cmd.mid(1));
+            return;
+        }
+
+        popup->setAttribute(Qt::WA_TranslucentBackground);
+        popup->winId();
+
+        auto pluginPopup = Plugin::PluginPopup::get(popup->windowHandle());
+        pluginPopup->setX(500), pluginPopup->setY(100);
+        popup->show();
+    }
+}
+
 }

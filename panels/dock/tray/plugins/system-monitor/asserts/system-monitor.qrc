@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>icons/deepin/builtin/actions/dsm_pluginicon_light_20px.svg</file>
-        <file>icons/deepin/builtin/actions/dsm_pluginicon_dark_20px.svg</file>
-    </qresource>
-</RCC>
