@@ -119,7 +119,11 @@ Item {
         }
     }
 
-    property D.Palette taskmanagerWindowIndicatorActiveColor: D.DTK.palette.highlight
+    property D.Palette taskmanagerWindowIndicatorActiveColor: D.Palette {
+        normal {
+            common: D.DTK.makeColor(D.Color.Highlight)
+        }
+    }
 
     property D.Palette showDesktopLineColor: D.Palette {
         normal {
