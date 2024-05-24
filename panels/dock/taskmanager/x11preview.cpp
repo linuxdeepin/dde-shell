@@ -695,6 +695,10 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
         auto mouseEvent = static_cast<QMouseEvent*>(event);
         if (mouseEvent->button() != Qt::LeftButton) return false;
 
+        // cancel preview b4 active window
+        if (WM_HELPER->hasComposite())
+            m_monitor->cancelPreviewWindow();
+
         auto index = m_view->indexAt(mouseEvent->pos());
         if (index.isValid()) {
             m_previewItem->getAppendWindows()[index.row()]->activate();
