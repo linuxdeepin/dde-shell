@@ -34,9 +34,11 @@ DContainment::~DContainment()
 DApplet *DContainment::createApplet(const DAppletData &data)
 {
     D_D(DContainment);
-    const auto children = DPluginLoader::instance()->childrenPlugin(this->pluginId());
-    if (!children.contains(DPluginLoader::instance()->plugin(data.pluginId()))) {
-        return nullptr;
+    if (!DPluginMetaData::isRootPlugin(this->pluginId())) {
+        const auto children = DPluginLoader::instance()->childrenPlugin(this->pluginId());
+        if (!children.contains(DPluginLoader::instance()->plugin(data.pluginId()))) {
+            return nullptr;
+        }
     }
     auto applet = DPluginLoader::instance()->loadApplet(data);
     if (!applet) {

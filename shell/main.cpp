@@ -8,6 +8,7 @@
 
 #include <DLog>
 #include <DGuiApplicationHelper>
+#include <QWindow>
 
 #include <csignal>
 #include <iostream>
@@ -16,6 +17,7 @@
 #include "containment.h"
 #include "pluginloader.h"
 #include "appletloader.h"
+#include "qmlengine.h"
 #include "shell.h"
 
 DS_USE_NAMESPACE
@@ -73,6 +75,11 @@ public:
             });
         }
     }
+    void enableSceneview()
+    {
+        auto rootApplet = qobject_cast<DContainment *>(DPluginLoader::instance()->rootApplet());
+        rootApplet->setRootObject(DQmlEngine::createObject(QUrl("qrc:/shell/SceneWindow.qml")));
+    }
     void exec()
     {
         for (auto loader : std::as_const(m_loaders)) {
@@ -110,6 +117,8 @@ int main(int argc, char *argv[])
     parser.addOption(disableAppletOption);
     QCommandLineOption listOption("list", "List all applets.", QString());
     parser.addOption(listOption);
+    QCommandLineOption sceneviewOption("sceneview", "View applets in scene, it only works without Window.", QString());
+    parser.addOption(sceneviewOption);
 
     parser.process(a);
 
@@ -167,6 +176,8 @@ int main(int argc, char *argv[])
     shell.setFlickableWheelDeceleration(6000);
 
     AppletManager manager(pluginIds);
+    if (parser.isSet(sceneviewOption))
+        manager.enableSceneview();
 
     QMetaObject::invokeMethod(&a, [&manager](){
         manager.exec();

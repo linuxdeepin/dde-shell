@@ -324,7 +324,8 @@ DApplet *DPluginLoader::loadApplet(const DAppletData &data)
     if (!applet) {
         const auto containmentType = metaData.value("ContainmentType");
         if (containmentType.isValid()) {
-            if (containmentType == "Panel") {
+            const QStringList PanelList {"Panel", "Root"};
+            if (PanelList.contains(containmentType)) {
                 applet = new DPanel();
             } else {
                 applet = new DContainment();
