@@ -11,6 +11,8 @@ import org.deepin.ds 1.0
 ContainmentItem {
     id: root
     objectName: "containment item"
+    implicitWidth: childrenRect.width
+    implicitHeight: childrenRect.height
     RowLayout {
         Repeater {
             model: Containment.appletItems
