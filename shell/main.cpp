@@ -51,6 +51,7 @@ class AppletManager
 public:
     explicit AppletManager(const QStringList &pluginIds)
     {
+        qCDebug(dsLog) << "Preloading plugins:" << pluginIds;
         auto rootApplet = qobject_cast<DContainment *>(DPluginLoader::instance()->rootApplet());
         Q_ASSERT(rootApplet);
 
@@ -155,6 +156,9 @@ int main(int argc, char *argv[])
     if (parser.isSet(disableAppletOption)) {
         const auto disabledApplets = parser.values(disableAppletOption);
         DPluginLoader::instance()->setDisabledApplets(disabledApplets);
+        pluginIds.removeIf([disabledApplets] (const QString &item) {
+            return disabledApplets.contains(item);
+        });
     }
 
     Shell shell;
