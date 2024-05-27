@@ -327,6 +327,11 @@ public:
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         auto closeButton = new DToolButton(parent);
+        closeButton->setStyleSheet(R"(
+QToolButton { background-color: rgba(255, 255, 255, 75%); border: none; border-radius: 8; }
+QToolButton:hover { background-color: rgba(255, 255, 255, 65%); }
+QToolButton:pressed { background-color: rgba(255, 255, 255, 80%); }
+)");
         closeButton->setIconSize(QSize(16, 16));
         closeButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
         closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + 4, -5));
