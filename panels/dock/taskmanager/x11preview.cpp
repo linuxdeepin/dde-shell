@@ -478,12 +478,14 @@ void X11WindowPreviewContainer::leaveEvent(QEvent* event)
 {
     m_isPreviewEntered = false;
     m_hideTimer->start();
+    m_closeAllButton->setVisible(false);
     return DBlurEffectWidget::leaveEvent(event);
 }
 
 void X11WindowPreviewContainer::showEvent(QShowEvent *event)
 {
     updateOrientation();
+    m_closeAllButton->setVisible(false);
     return DBlurEffectWidget::showEvent(event);
 }
 
