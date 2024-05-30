@@ -34,12 +34,12 @@
     <message>
         <location filename="../package/main.qml" line="163"/>
         <source>Align Left</source>
-        <translation>Alinhar à esquerda</translation>
+        <translation>Esquerda</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="168"/>
         <source>Align Center</source>
-        <translation>Alinhamento central</translation>
+        <translation>Centro</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
@@ -59,7 +59,7 @@
     <message>
         <location filename="../package/main.qml" line="201"/>
         <source>Status</source>
-        <translation>Status</translation>
+        <translation>Exibição</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="203"/>
@@ -69,7 +69,7 @@
     <message>
         <location filename="../package/main.qml" line="208"/>
         <source>Keep Hidden</source>
-        <translation>Manter oculto</translation>
+        <translation>Sempre ocultar</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="214"/>

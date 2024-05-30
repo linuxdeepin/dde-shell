@@ -64,12 +64,12 @@
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation type="unfinished"/>
+        <translation>Ativar mudo</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation type="unfinished"/>
+        <translation>Desativar mudo</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
@@ -89,17 +89,17 @@
     <message>
         <location filename="../package/main.qml" line="71"/>
         <source>Window effect enabled</source>
-        <translation>Efeito de janela ativado</translation>
+        <translation>Efeitos visuais ativados</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="72"/>
         <source>Window effect disabled</source>
-        <translation>Efeitos de janela desativado</translation>
+        <translation>Efeitos visuais desativados</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="73"/>
         <source>Failed to enable window effects</source>
-        <translation>Falha ao ativar os efeitos de janela</translation>
+        <translation>Falha ao ativar os efeitos visuais</translation>
     </message>
 </context>
 </TS>
