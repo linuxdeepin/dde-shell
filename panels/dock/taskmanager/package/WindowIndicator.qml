@@ -18,7 +18,6 @@ Item {
     required property int dotHeight
 
     property int borderWidth: (displayMode === Dock.Fashion) ? 1 : 0
-    property int radius: 1
 
     width: indicatorLoader.width
     height: indicatorLoader.height
@@ -37,7 +36,7 @@ Item {
             width: ((root.displayMode === Dock.Fashion || useColumnLayout) ? dotWidth : dotWidth / 2 - 1) + 2 * borderWidth
             height: ((root.displayMode === Dock.Fashion || !useColumnLayout) ? dotHeight : dotHeight / 2 - 1) +  2 * borderWidth
             color: palette.dotIndicator
-            radius: radius
+            radius: (root.displayMode === Dock.Fashion || useColumnLayout) ? width / 2 : height / 2
         }
     }
 
