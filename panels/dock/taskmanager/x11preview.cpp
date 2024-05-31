@@ -26,6 +26,7 @@
 #include <QLoggingCategory>
 #include <QDBusUnixFileDescriptor>
 #include <QPainterPath>
+#include <DIconButton>
 
 #include <DStyle>
 #include <DPlatformHandle>
@@ -326,12 +327,25 @@ public:
 
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        auto closeButton = new DToolButton(parent);
+        auto closeButton = new DIconButton(parent);
+        closeButton->setIcon(DDciIcon::fromTheme("close"));
+
+        QPalette palette = closeButton->palette();
+
+        QColor lightColor = palette.color(QPalette::Normal, QPalette::Light);
+        QColor darkColor = palette.color(QPalette::Normal, QPalette::Dark);
+
+        lightColor.setAlpha(255 * 0.6);
+        darkColor.setAlpha(255 * 0.6);
+
+        palette.setColor(QPalette::Light,  lightColor);
+        palette.setColor(QPalette::Dark,  darkColor);
+        closeButton->setPalette(palette);
+
         closeButton->setIconSize(QSize(16, 16));
         closeButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
         closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + 4, -5));
         closeButton->setVisible(true);
-        closeButton->setIcon(QIcon::fromTheme("close"));
 
         connect(closeButton, &DToolButton::clicked, this, [this, index](){
             X11Utils::instance()->closeWindow(index.data(WindowIdRole).toInt());
