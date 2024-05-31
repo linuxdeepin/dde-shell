@@ -40,7 +40,7 @@ ContainmentItem {
                 required property string iconName
                 required property string menus
                 required property list<string> windows
-                keys: ["text/x-dde-dock-dnd-appid"]
+                keys: ["text/x-dde-dock-dnd-appid", "text/x-dde-launcher-dnd-desktopId"]
 
                 // TODO: 临时溢出逻辑，待后面修改
                 // 1:4 the distance between app : dock height; get width/height≈0.8
@@ -48,10 +48,20 @@ ContainmentItem {
                 implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 0.8 : Panel.rootObject.dockItemMaxSize
 
                 onEntered: function(drag) {
+                    if (drag.keys.includes("text/x-dde-launcher-dnd-desktopId")) {
+                        // accepted but don't need to do anything here.
+                        return;
+                    }
                     visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)
                 }
 
                 onDropped: function(drop) {
+                    if (drop.keys.includes("text/x-dde-launcher-dnd-desktopId")) {
+                        let desktopId = drop.getDataAsString("text/x-dde-launcher-dnd-desktopId")
+                        taskmanager.Applet.requestDockByDesktopId(desktopId)
+                        drop.accepted = false
+                        return;
+                    }
                     drop.accept()
                     taskmanager.Applet.dataModel.moveTo(drop.source.itemId, visualIndex)
                 }
