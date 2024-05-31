@@ -18,10 +18,12 @@ DGUI_USE_NAMESPACE
 namespace dock {
 
 MultiTaskView::MultiTaskView(QObject *parent)
-    : DApplet(parent)
-    , m_iconName("deepin-multitasking-view")
+    : DDockApplet(parent)
 {
-    connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, &MultiTaskView::visibleChanged);
+    connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, &MultiTaskView::onHasCompositeChanged);
+
+    setVisible(true);
+    setIcon("dcc-view");
 }
 
 bool MultiTaskView::init()
@@ -40,75 +42,28 @@ void MultiTaskView::openWorkspace()
         .call();
 }
 
-QString MultiTaskView::iconName() const
+void MultiTaskView::onHasCompositeChanged()
 {
-    return m_iconName;
+    // TODO
+    // setVisible(DWindowManagerHelper::instance()->hasComposite());
 }
 
-void MultiTaskView::setIconName(const QString& iconName)
+QString MultiTaskView::displayName() const
 {
-    if (iconName != m_iconName) {
-        m_iconName = iconName;
-        Q_EMIT iconNameChanged();
-    }
+    return tr("Multitasking View");
 }
 
-bool MultiTaskView::visible() const
+QString MultiTaskView::itemKey() const
 {
-    return m_visible && DWindowManagerHelper::instance()->hasComposite();
+    return QString("multitasking-view");
 }
 
-DockItemInfo MultiTaskView::dockItemInfo()
+QString MultiTaskView::settingKey() const
 {
-    DockItemInfo info;
-    info.name = "multitasking-view";
-    info.displayName = tr("Multitasking View");
-    info.itemKey = "multitasking-view";
-    info.settingKey = "multitasking-view";
-    info.visible = visible();
-    {
-        const auto lightPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::LightType);
-        auto lightPixmap = DDciIcon::fromTheme("dcc-view").pixmap(
-            qApp->devicePixelRatio(),
-            30,
-            DDciIcon::Light,
-            DDciIcon::Normal,
-            DDciIconPalette::fromQPalette(lightPalette)
-            );
-        QBuffer buffer(&info.iconLight);
-        if (buffer.open(QIODevice::WriteOnly)) {
-            lightPixmap.save(&buffer, "png");
-        }
-    }
-    {
-        const auto darkPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::DarkType);
-        auto darkPixmap = DDciIcon::fromTheme("dcc-view").pixmap(
-            qApp->devicePixelRatio(),
-            30,
-            DDciIcon::Dark,
-            DDciIcon::Normal,
-            DDciIconPalette::fromQPalette(darkPalette)
-            );
-        QBuffer buffer(&info.iconDark);
-        if (buffer.open(QIODevice::WriteOnly)) {
-            darkPixmap.save(&buffer, "png");
-        }
-    }
-
-    return info;
-}
-
-void MultiTaskView::setVisible(bool visible)
-{
-    if (m_visible != visible) {
-        m_visible = visible;
-
-        Q_EMIT visibleChanged();
-    }
+    return QString("multitasking-view");
 }
 
 D_APPLET_CLASS(MultiTaskView)
 }
-
 
 #include "multitaskview.moc"

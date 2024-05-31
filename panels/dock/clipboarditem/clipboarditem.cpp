@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "applet.h"
 #include "clipboarditem.h"
 #include "pluginfactory.h"
 
@@ -25,64 +24,30 @@ static DDBusSender clipboardDbus()
 }
 
 ClipboardItem::ClipboardItem(QObject *parent)
-    : DApplet(parent)
-    , m_visible(true)
+    : DDockApplet(parent)
 {
+    setVisible(true);
+    setIcon("clipboard");
+}
 
+QString ClipboardItem::displayName() const
+{
+    return tr("Clipboard");
+}
+
+QString ClipboardItem::itemKey() const
+{
+    return QString("clipboard");
+}
+
+QString ClipboardItem::settingKey() const
+{
+       return QString("clipboard");
 }
 
 void ClipboardItem::toggleClipboard()
 {
     clipboardDbus().method("Toggle").call();
-}
-
-DockItemInfo ClipboardItem::dockItemInfo()
-{
-    DockItemInfo info;
-    info.name = "clipboard";
-    info.displayName = tr("Clipboard");
-    info.itemKey = "clipboard";
-    info.settingKey = "clipboard";
-    info.visible = m_visible;
-    {
-        const auto lightPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::LightType);
-        auto lightPixmap = DDciIcon::fromTheme("clipboard").pixmap(
-            qApp->devicePixelRatio(),
-            30,
-            DDciIcon::Light,
-            DDciIcon::Normal,
-            DDciIconPalette::fromQPalette(lightPalette)
-            );
-        QBuffer buffer(&info.iconLight);
-        if (buffer.open(QIODevice::WriteOnly)) {
-            lightPixmap.save(&buffer, "png");
-        }
-    }
-    {
-        const auto darkPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::DarkType);
-        auto darkPixmap = DDciIcon::fromTheme("clipboard").pixmap(
-            qApp->devicePixelRatio(),
-            30,
-            DDciIcon::Dark,
-            DDciIcon::Normal,
-            DDciIconPalette::fromQPalette(darkPalette)
-            );
-        QBuffer buffer(&info.iconDark);
-        if (buffer.open(QIODevice::WriteOnly)) {
-            darkPixmap.save(&buffer, "png");
-        }
-    }
-
-    return info;
-}
-
-void ClipboardItem::setVisible(bool visible)
-{
-    if (m_visible != visible) {
-        m_visible = visible;
-
-        Q_EMIT visibleChanged(visible);
-    }
 }
 
 D_APPLET_CLASS(ClipboardItem)

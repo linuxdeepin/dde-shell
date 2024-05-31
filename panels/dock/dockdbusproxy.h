@@ -13,6 +13,10 @@
 #include <QDBusContext>
 #include <QDBusArgument>
 
+namespace DS_NAMESPACE {
+class DDockApplet;
+}
+
 /** this class used for old dock api compatible
   * it will forward old dbus call to new implementation
   */
@@ -67,6 +71,9 @@ public:
     bool IsDocked(const QString &desktopFile);
     bool RequestUndock(const QString &desktopFile);
 
+private Q_SLOTS:
+    void onAppletListChanged();
+
 private:
     DockPanel* parent() const;
     QString getAppID(const QString &desktopfile);
@@ -75,9 +82,7 @@ private:
     void setPluginVisible(const QString &pluginId, const QVariantMap &pluginsVisible);
 
     DS_NAMESPACE::DApplet *m_oldDockApplet;
-    DS_NAMESPACE::DApplet *m_clipboardApplet;
-    DS_NAMESPACE::DApplet *m_searchApplet;
-    DS_NAMESPACE::DApplet *m_multitaskviewApplet;
+    QList<DS_NAMESPACE::DDockApplet *> m_dockApplets;
 };
 }
 

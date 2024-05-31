@@ -39,6 +39,9 @@ public:
     bool load() override;
     bool init() override;
 
+Q_SIGNALS:
+    void appletListChanged();
+
 protected:
     explicit DContainment(DContainmentPrivate &dd, QObject *parent = nullptr);
 };

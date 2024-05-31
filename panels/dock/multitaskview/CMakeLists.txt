@@ -5,12 +5,10 @@
 add_library(dock-multitaskview SHARED
     multitaskview.cpp
     multitaskview.h
-    ../dockiteminfo.cpp
-    ../dockiteminfo.h
 )
 
 target_link_libraries(dock-multitaskview PRIVATE
-    dde-shell-frame
+    dock-plugin
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.multitaskview TARGET dock-multitaskview)
