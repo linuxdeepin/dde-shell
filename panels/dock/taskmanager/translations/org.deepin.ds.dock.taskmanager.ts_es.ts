@@ -29,7 +29,7 @@
     <message>
         <location filename="../appitem.cpp" line="118"/>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Cerrar todo</translation>
     </message>
 </context>
 </TS>
