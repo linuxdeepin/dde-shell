@@ -44,7 +44,7 @@
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Top</source>
-        <translation>Arriba</translation>
+        <translation>parte superior</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="183"/>
