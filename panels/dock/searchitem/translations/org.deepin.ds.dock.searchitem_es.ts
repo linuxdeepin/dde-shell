@@ -17,7 +17,7 @@
     <message>
         <location filename="../package/searchitem.qml" line="53"/>
         <source>SearchConfig</source>
-        <translation type="unfinished"/>
+        <translation>Configuración de Búsqueda</translation>
     </message>
 </context>
 </TS>
