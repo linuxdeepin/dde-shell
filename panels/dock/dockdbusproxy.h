@@ -29,6 +29,8 @@ class DockDBusProxy final: public QObject, public QDBusContext
     Q_PROPERTY(uint WindowSizeEfficient READ windowSizeEfficient WRITE setWindowSizeEfficient)
     Q_PROPERTY(uint WindowSizeFashion READ windowSizeFashion WRITE setWindowSizeFashion)
     Q_PROPERTY(int DisplayMode READ displayMode WRITE setDisplayMode FINAL)
+    Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary FINAL)
+
 
 public:
     DockDBusProxy(DockPanel* parent = nullptr);
@@ -66,6 +68,9 @@ public:
     bool RequestDock(const QString &desktopFile, int index);
     bool IsDocked(const QString &desktopFile);
     bool RequestUndock(const QString &desktopFile);
+
+    bool showInPrimary() const;
+    void setShowInPrimary(bool newShowInPrimary);
 
 private:
     DockPanel* parent() const;

@@ -100,6 +100,8 @@ bool DockPanel::init()
             connect(window(), &QQuickWindow::widthChanged, this, &DockPanel::onWindowGeometryChanged);
             connect(window(), &QQuickWindow::heightChanged, this, &DockPanel::onWindowGeometryChanged);
             QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
+            if (showInPrimary())
+                updateDockScreen();
         }
     });
 
@@ -134,6 +136,8 @@ bool DockPanel::init()
 
     // TODO: get launchpad status from applet not dbus
     QDBusConnection::sessionBus().connect("org.deepin.dde.Launcher1", "/org/deepin/dde/Launcher1", "org.deepin.dde.Launcher1", "VisibleChanged", this, SLOT(launcherVisibleChanged(bool)));
+    if (showInPrimary())
+        connect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockPanel::updateDockScreen, Qt::UniqueConnection);
 
     return true;
 }
@@ -328,6 +332,14 @@ void DockPanel::launcherVisibleChanged(bool visible)
     }
 }
 
+void DockPanel::updateDockScreen() 
+{
+    auto win = window();
+    if (!win)
+        return;
+    win->setScreen(qApp->primaryScreen());
+}
+
 void DockPanel::setMouseGrabEnabled(QQuickItem *item, bool enabled)
 {
     if (!item) return;
@@ -338,8 +350,25 @@ void DockPanel::setMouseGrabEnabled(QQuickItem *item, bool enabled)
     window->setMouseGrabEnabled(enabled);
 }
 
-D_APPLET_CLASS(DockPanel)
 
+bool DockPanel::showInPrimary() const
+{
+    return SETTINGS->showInPrimary();
+}
+
+void DockPanel::setShowInPrimary(bool newShowInPrimary)
+{
+    if (SETTINGS->showInPrimary() == newShowInPrimary)
+        return;
+    SETTINGS->setShowInPrimary(newShowInPrimary);
+    if (newShowInPrimary)
+        connect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockPanel::updateDockScreen, Qt::UniqueConnection);
+    else
+        disconnect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockPanel::updateDockScreen);
+    emit showInPrimaryChanged();
+}
+
+D_APPLET_CLASS(DockPanel)
 }
 
 #include "dockpanel.moc"

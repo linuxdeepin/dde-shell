@@ -52,15 +52,25 @@
 			"permissions": "readwrite",
 			"visibility": "private"
 		},
-    "Plugins_Visible": {
-			"value": {},
-			"serial": 0,
-			"flags": [],
-			"name": "The visibilities of plugins",
-			"name[zh_CN]": "插件可见性",
-			"description": "The loaded plugin which is visible when dock is started.",
-			"permissions": "readwrite",
-			"visibility": "private"
-    }
+		"Plugins_Visible": {
+				"value": {},
+				"serial": 0,
+				"flags": [],
+				"name": "The visibilities of plugins",
+				"name[zh_CN]": "插件可见性",
+				"description": "The loaded plugin which is visible when dock is started.",
+				"permissions": "readwrite",
+				"visibility": "private"
+		},
+		"Show_In_Primary": {
+			"value": true,
+            "serial": 0,
+            "flags": [],
+            "name": "show_in_primary",
+            "name[zh_CN]": "任务栏显示在主屏幕",
+            "description": "show dock in primary screen",
+            "permissions": "readwrite",
+            "visibility": "private"
+		}
 	}
 }
