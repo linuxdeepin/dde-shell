@@ -10,7 +10,7 @@ endif()
 
 # project(dde-dock)
 
-find_package(DtkTools REQUIRED)
+find_package(Dtk6Tools REQUIRED)
 
 set(CMAKE_THREAD_LIBS_INIT "-lpthread")
 set(CMAKE_HAVE_THREADS_LIBRARY 1)
