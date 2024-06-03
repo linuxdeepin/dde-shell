@@ -84,12 +84,12 @@
     <message>
         <location filename="../package/main.qml" line="70"/>
         <source>High performance</source>
-        <translation type="unfinished"/>
+        <translation>Alto rendimiento</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="71"/>
         <source>Window effect enabled</source>
-        <translation type="unfinished"/>
+        <translation>Efectos de ventana activados</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="72"/>
