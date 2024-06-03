@@ -49,7 +49,7 @@
     <message>
         <location filename="../package/main.qml" line="183"/>
         <source>Bottom</source>
-        <translation type="unfinished"/>
+        <translation>parte inferior</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="195"/>
