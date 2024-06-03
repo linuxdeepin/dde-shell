@@ -17,6 +17,7 @@ const static QString keyDockSize                = "Dock_Size";
 const static QString keyItemAlignment           = "Item_Alignment";
 const static QString keyIndicatorStyle          = "Indicator_Style";
 const static QString keyPluginsVisible           = "Plugins_Visible";
+const static QString keyShowInPrimary           = "Show_In_Primary";
 
 namespace dock {
 
@@ -175,6 +176,11 @@ void DockSettings::init()
             } else if (keyPluginsVisible == key) {
                 auto pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
                 setPluginsVisible(pluginsVisible);
+            } else if (keyShowInPrimary == key) {
+                auto showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
+                if (showInPrimary == m_showInPrimary) return;
+                m_showInPrimary = showInPrimary;
+                Q_EMIT showInPrimaryChanged(m_showInPrimary);
             }
         });
     } else {
@@ -265,6 +271,21 @@ void DockSettings::setPluginsVisible(const QVariantMap & pluginsVisible)
     m_pluginsVisible = pluginsVisible;
     m_dockConfig->setValue(keyPluginsVisible, QVariant::fromValue(m_pluginsVisible));
     Q_EMIT pluginsVisibleChanged(m_pluginsVisible);
+}
+
+void DockSettings::setShowInPrimary(bool newShowInPrimary)
+{
+    if (m_showInPrimary == newShowInPrimary) {
+        return;
+    }
+    m_showInPrimary = newShowInPrimary;
+    m_dockConfig->setValue(keyShowInPrimary, m_showInPrimary);
+    Q_EMIT showInPrimaryChanged(m_showInPrimary);
+}
+
+bool DockSettings::showInPrimary() const
+{
+    return m_showInPrimary;
 }
 
 void DockSettings::addWriteJob(WriteJob job)

@@ -501,7 +501,7 @@ void X11WindowPreviewContainer::resizeEvent(QResizeEvent *event)
 
 void X11WindowPreviewContainer::updatePosition()
 {
-    auto screenRect = screen()->geometry();
+    auto screenRect = m_baseWindow->screen()->geometry();
     auto dockWindowPosition = m_baseWindow->position();
     int xPosition = dockWindowPosition.x() + m_previewXoffset;
     int yPosition = dockWindowPosition.y() + m_previewYoffset;

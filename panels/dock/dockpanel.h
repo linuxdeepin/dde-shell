@@ -34,6 +34,7 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged FINAL)
     Q_PROPERTY(ItemAlignment itemAlignment READ itemAlignment WRITE setItemAlignment NOTIFY itemAlignmentChanged FINAL)
     Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
+    Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
 
     Q_PROPERTY(bool debugMode READ debugMode FINAL CONSTANT)
 
@@ -77,10 +78,14 @@ public:
     Q_INVOKABLE void openDockSettings() const;
     Q_INVOKABLE void setMouseGrabEnabled(QQuickItem *item, bool enabled);
 
+    bool showInPrimary() const;
+    void setShowInPrimary(bool newShowInPrimary);
+
 private Q_SLOTS:
     void onWindowGeometryChanged();
     void loadDockPlugins();
     void launcherVisibleChanged(bool visible);
+    void updateDockScreen();
 
 Q_SIGNALS:
     void geometryChanged(QRect geometry);
@@ -94,6 +99,7 @@ Q_SIGNALS:
     void positionChanged(Position position);
     void itemAlignmentChanged(ItemAlignment alignment);
     void indicatorStyleChanged(IndicatorStyle style);
+    void showInPrimaryChanged();
 
 private:
     ColorTheme m_theme;

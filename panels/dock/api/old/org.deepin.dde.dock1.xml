@@ -5,7 +5,6 @@
         <property access="read" type="(iiii)" name="geometry">
             <annotation name="org.qtproject.QtDBus.QtTypeName" value="QRect"/>
         </property>
-        <property access="readwrite" type="i" name="position"/>
         <property access="readwrite" type="b" name="showInPrimary"/>
         <method name="callShow"/>
         <method name="ReloadPlugins"/>

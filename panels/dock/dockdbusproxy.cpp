@@ -320,5 +320,18 @@ void DockDBusProxy::resizeDock(int offset, bool dragging)
     parent()->setDockSize(offset);
 }
 
+bool DockDBusProxy::showInPrimary() const
+{
+    return parent()->showInPrimary();
+}
+
+void DockDBusProxy::setShowInPrimary(bool newShowInPrimary)
+{
+    if (parent()->showInPrimary() == newShowInPrimary)
+        return;
+
+    parent()->setShowInPrimary(newShowInPrimary);
+}
+
 }
 

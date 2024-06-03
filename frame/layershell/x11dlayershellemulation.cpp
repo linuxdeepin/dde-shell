@@ -43,12 +43,14 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
 
     auto screen = m_window->screen();
     connect(screen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
+    connect(screen, &QScreen::geometryChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
     connect(m_window, &QWindow::screenChanged, this, [this](QScreen *nowScreen){
         for (auto screen : qApp->screens()) {
             screen->disconnect(this);
         }
 
         connect(nowScreen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
+        connect(nowScreen, &QScreen::geometryChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
         onPositionChanged();
         QMetaObject::invokeMethod(this, &LayerShellEmulation::onExclusionZoneChanged, Qt::QueuedConnection);
     });
@@ -149,22 +151,36 @@ void LayerShellEmulation::onExclusionZoneChanged()
     xcb_ewmh_wm_strut_partial_t strut_partial;
     memset(&strut_partial, 0, sizeof(xcb_ewmh_wm_strut_partial_t));
     auto anchors = m_dlayerShellWindow->anchors();
+    QRect rect = m_window->screen()->geometry();
     if ((anchors == DLayerShellWindow::AnchorLeft) || (anchors ^ DLayerShellWindow::AnchorLeft) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) {
-        strut_partial.left = m_dlayerShellWindow->exclusionZone() * scaleFactor;
-        strut_partial.left_start_y = m_window->y();
-        strut_partial.left_end_y = m_window->y() + m_window->height();
+        strut_partial.left = (m_dlayerShellWindow->exclusionZone() + rect.x()) * scaleFactor;
+        strut_partial.left_start_y = rect.y();
+        strut_partial.left_end_y = rect.y() + m_window->height();
     } else if ((anchors == DLayerShellWindow::AnchorRight) || (anchors ^ DLayerShellWindow::AnchorRight) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) {
-        strut_partial.right = m_dlayerShellWindow->exclusionZone() * scaleFactor;
-        strut_partial.right_start_y = m_window->y();
-        strut_partial.right_end_y = m_window->y() + m_window->height();
+        int boundary = 0;
+        for (auto screen : qApp->screens()) {
+            if (boundary < screen->geometry().right())
+                boundary = screen->geometry().right();
+        }
+        strut_partial.right = (m_dlayerShellWindow->exclusionZone() + boundary - rect.right()) * scaleFactor;
+        strut_partial.right_start_y = rect.y();
+        strut_partial.right_end_y = rect.y() + m_window->height();
     } else if ((anchors == DLayerShellWindow::AnchorTop) || (anchors ^ DLayerShellWindow::AnchorTop) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) {
-        strut_partial.top = m_dlayerShellWindow->exclusionZone() * scaleFactor;
-        strut_partial.top_start_x = m_window->x();
-        strut_partial.top_end_x = m_window->x() + m_window->width();
+        strut_partial.top = (m_dlayerShellWindow->exclusionZone() + rect.y()) * scaleFactor;
+        strut_partial.top_start_x = rect.x();
+        strut_partial.top_end_x = rect.x() + m_window->width();
     } else if ((anchors == DLayerShellWindow::AnchorBottom) || (anchors ^ DLayerShellWindow::AnchorBottom) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) {
-        strut_partial.bottom = m_dlayerShellWindow->exclusionZone() * scaleFactor;
-        strut_partial.bottom_start_x = m_window->x();
-        strut_partial.bottom_end_x = m_window->x() + m_window->width();
+        // Note: In the X environment, 
+        // the upper screen's exclusive zone spans across the entire lower screen when there are multiple screens, 
+        // but there is no issue.
+        int boundary = 0;
+        for (auto screen : qApp->screens()) {
+            if (boundary < screen->virtualGeometry().bottom())
+                boundary = screen->virtualGeometry().bottom();
+        }
+        strut_partial.bottom = (m_dlayerShellWindow->exclusionZone() + boundary - rect.height()) * scaleFactor;
+        strut_partial.bottom_start_x = rect.x();
+        strut_partial.bottom_end_x = rect.x() + m_window->width();
     }
 
     xcb_ewmh_set_wm_strut_partial(&ewmh_connection, m_window->winId(), strut_partial);
