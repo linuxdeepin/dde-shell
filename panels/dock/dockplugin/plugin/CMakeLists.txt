@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: CC0-1.0
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 find_package(Qt5 REQUIRED COMPONENTS Gui WaylandClient XkbCommonSupport)
 find_package(Dtk REQUIRED COMPONENTS Gui Widget)
@@ -11,6 +14,7 @@ find_package(QtWaylandScanner)
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(XKBCOMMON REQUIRED IMPORTED_TARGET xkbcommon)
+pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
 
 include(KDEInstallDirs)
 
