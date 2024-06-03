@@ -54,12 +54,12 @@
     <message>
         <location filename="../package/main.qml" line="195"/>
         <source>Right</source>
-        <translation type="unfinished"/>
+        <translation>Derecha</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="201"/>
         <source>Status</source>
-        <translation type="unfinished"/>
+        <translation>Estado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="203"/>
