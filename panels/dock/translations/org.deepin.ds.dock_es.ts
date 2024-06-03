@@ -79,7 +79,7 @@
     <message>
         <location filename="../package/main.qml" line="221"/>
         <source>Dock Settings</source>
-        <translation type="unfinished"/>
+        <translation>Configuración del Dock</translation>
     </message>
 </context>
 </TS>
