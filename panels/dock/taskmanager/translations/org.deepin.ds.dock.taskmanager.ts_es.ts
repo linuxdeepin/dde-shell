@@ -24,7 +24,7 @@
     <message>
         <location filename="../appitem.cpp" line="111"/>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>Forzar cierre</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="118"/>
