@@ -2,4 +2,5 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
+add_subdirectory(quickpanel)
 ds_install_package(PACKAGE org.deepin.ds.dock.tray)

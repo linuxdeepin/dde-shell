@@ -11,6 +11,7 @@ import Qt.labs.platform 1.1 as LP
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
 import org.deepin.ds.dock 1.0
+import org.deepin.ds.dock.tray.quickpanel 1.0 as TQP
 
 AppletItem {
     id: tray
@@ -97,6 +98,8 @@ AppletItem {
                 }
             }
         }
+
+        TQP.QuickPanel { }
     }
 
     Connections {
