@@ -18,14 +18,38 @@ PluginManager::~PluginManager()
 {
 }
 
+
+void PluginManager::plugin_manager_v1_position_changed(uint32_t dock_position)
+{
+    if (dock_position != m_dockPosition) {
+        m_dockPosition = dock_position;
+        Q_EMIT dockPositionChanged(m_dockPosition);
+    }
+}
+
+void PluginManager::plugin_manager_v1_color_theme_changed(uint32_t dock_color_theme)
+{
+    if (dock_color_theme != m_dockColorType) {
+        m_dockColorType = dock_color_theme;
+        Q_EMIT dockColorThemeChanged(m_dockColorType);
+    }
+}
+
 void PluginManager::plugin_manager_v1_event_message(const QString &msg)
 {
+    qInfo() << "plugin receive event message" << msg;
     Q_UNUSED(msg);
+    Q_EMIT eventMessage(msg);
+}
+
+void PluginManager::requestMessage(const QString &plugin_id, const QString &item_key, const QString &msg)
+{
+    request_message(plugin_id, item_key, msg);
 }
 
 QtWaylandClient::QWaylandShellSurface* PluginManager::createPluginSurface(QtWaylandClient::QWaylandWindow *window)
 {
-    if (EmbemdPlugin::contains(window->window())) {
+    if (EmbedPlugin::contains(window->window())) {
         return new PluginSurface(this, window);
     }
 

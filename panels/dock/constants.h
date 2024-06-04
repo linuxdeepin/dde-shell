@@ -66,6 +66,63 @@ enum AniAction {
     AA_Hide
 };
 
+enum TrayPopupType {
+    TrayPopupTypePanel = 1,
+    TrayPopupTypeTooltip = 2,
+    TrayPopupTypeMenu = 3
+};
+
+/**
+ * @brief 用于在插件的 message 和 MessageCallbackFunc 方法中解析 json格式 数据。
+ * 详细的说明见 plugins-developer-guide.md 文档
+ * @since 2.0.0
+ */
+const QString MSG_TYPE = QStringLiteral("msgType"); // 固定 key 值，表明当前消息类型是什么
+const QString MSG_DATA = QStringLiteral("data"); // 固定 key 值，从该字段中获取具体数据
+
+/**
+ * @brief 插件功能是否可用
+ * eg：蓝牙被拔掉后，蓝牙插件的 support 的状态应该是 false，任务栏会把蓝牙的图标从控制中心-个性化-任务栏-插件区域中移除
+ */
+const QString MSG_GET_SUPPORT_FLAG = QStringLiteral("getSupportFlag");
+const QString MSG_SUPPORT_FLAG = QStringLiteral("supportFlag");
+const QString MSG_SUPPORT_FLAG_CHANGED = QStringLiteral("supportFlagChanged");
+
+/**
+ * @brief 插件图标的激活状态；当状态发生变化时，插件需要主动把状态发送给任务栏
+ * true: 插件处于激活状态，false：插件出于失活状态
+ */
+const QString MSG_ITEM_ACTIVE_STATE = QStringLiteral("itemActiveState");
+
+/**
+ * @brief 插件请求任务栏更新插件的 tooltips
+ * 任务栏收到请求后会主动调用 itemTips() 方法。
+ * 一般用于一个插件里面含有多个图标，鼠标 hover 到不同图标上时显示不同 tooltips 的场景。
+ */
+const QString MSG_UPDATE_TOOLTIPS_VISIBLE = QStringLiteral("updateTooltipsVisible");
+
+/**
+ * @brief 任务栏应用溢出状态
+ */
+const QString MSG_UPDATE_OVERFLOW_STATE = QStringLiteral("updateOverflowState");
+const int OVERFLOW_STATE_NOT_EXIST = 0; // 没有溢出区
+const int OVERFLOW_STATE_EXIST = 1; // 有溢出区
+const int OVERFLOW_STATE_ALL = 2; // 所有应用都在溢出区
+
+// for qml
+enum OverFlowState {
+    OverflowNotExist = OVERFLOW_STATE_NOT_EXIST,
+    OverflowExist = OVERFLOW_STATE_EXIST,
+    OverflowAll = OVERFLOW_STATE_ALL
+};
+
+/**
+ * @brief 任务栏面板Size；当任务栏size发生改变时，通知插件
+ * 插件根据任务栏size做出大小调整，例如时间日期插件
+ */
+const QString MSG_DOCK_PANEL_SIZE_CHANGED = QStringLiteral("dockPanelSizeChanged");
+
+
 Q_ENUM_NS(SIZE)
 Q_ENUM_NS(IndicatorStyle)
 Q_ENUM_NS(ItemAlignment)
@@ -74,6 +131,8 @@ Q_ENUM_NS(HideMode)
 Q_ENUM_NS(Position)
 Q_ENUM_NS(HideState)
 Q_ENUM_NS(AniAction)
+Q_ENUM_NS(TrayPopupType)
+Q_ENUM_NS(OverFlowState)
 }
 
 Q_DECLARE_METATYPE(dock::SIZE)
@@ -84,4 +143,5 @@ Q_DECLARE_METATYPE(dock::HideMode)
 Q_DECLARE_METATYPE(dock::HideState)
 Q_DECLARE_METATYPE(dock::AniAction)
 Q_DECLARE_METATYPE(dock::Position)
-
+Q_DECLARE_METATYPE(dock::TrayPopupType)
+Q_DECLARE_METATYPE(dock::OverFlowState)

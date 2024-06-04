@@ -13,7 +13,7 @@
 #include <QScopedPointer>
 
 namespace Plugin {
-class EmbemdPlugin;
+class EmbedPlugin;
 }
 namespace dock {
 class TrayIconWidget;
@@ -45,10 +45,12 @@ public:
 public Q_SLOTS:
     void onDockPositionChanged(uint32_t position);
     void onDockDisplayModeChanged(uint32_t displayMode);
+    void onDockEventMessageArrived(const QString &message);
 
 private:
     QWidget* getQucikPluginTrayWidget(const QString &itemKey);
-    Plugin::EmbemdPlugin* getPlugin(QWidget*);
+    Plugin::EmbedPlugin* getPlugin(QWidget*);
+    void initConnections(Plugin::EmbedPlugin *plugin);
 
 private:
     PluginsItemInterface* m_pluginItem;

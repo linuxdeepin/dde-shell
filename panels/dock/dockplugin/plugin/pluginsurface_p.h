@@ -22,10 +22,10 @@ public:
 
 protected:
     virtual void plugin_close() override;
-    virtual void plugin_pos(int32_t x, int32_t y) override;
+    virtual void plugin_geometry(int32_t x, int32_t y, int32_t width, int32_t height) override;
 
 private:
-    EmbemdPlugin* m_plugin;
+    EmbedPlugin* m_plugin;
     QWindow* m_window;
 };
 

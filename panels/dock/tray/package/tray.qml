@@ -27,13 +27,14 @@ AppletItem {
         
         property int defaultX: popup.x
         property int defaultY: popup.y
+        property int popupType
 
         onHeightChanged: {
             popup.y = popup.defaultY - popup.height
         }
 
         onWidthChanged: {
-            popup.x = popup.defaultX - popup.width / 2
+            popup.x =  popupType === Dock.TrayPopupTypeMenu ? popup.defaultX : popup.defaultX - popup.width / 2
         }
 
         Item {
@@ -66,20 +67,45 @@ AppletItem {
                 id: pluginItem
                 property var plugin: modelData
                 property var popupShow: false
-                // TODO: should follow size size pilocy
-                implicitHeight: 16
-                implicitWidth: 16
+                implicitHeight: surfaceItem.height
+                implicitWidth: surfaceItem.width
+
+                property var itemGlobalPoint: {
+                    var a = pluginItem
+                    var x = 0, y = 0
+                    while(a.parent) {
+                        x += a.x
+                        y += a.y
+                        a = a.parent
+                    }
+
+                    return Qt.point(x, y)
+                }
 
                 ShellSurfaceItem {
+                    id: surfaceItem
                     anchors.centerIn: parent
                     shellSurface: plugin
-                    width: pluginItem.implicitWidth
-                    height: pluginItem.implicitHeight
                 }
 
                 Component.onCompleted: {
-                    var pos = pluginItem.mapToItem(null, 0, 0)
-                    plugin.updatePluginGeometry(Qt.rect(pos.x, pos.y, 16, 16))
+                    plugin.updatePluginGeometry(Qt.rect(itemGlobalPoint.x, itemGlobalPoint.y, surfaceItem.width, surfaceItem.height))
+                }
+
+                Timer {
+                    id: updatePluginItemGeometryTimer
+                    interval: 500
+                    running: false
+                    repeat: false
+                    onTriggered: {
+                        if (itemGlobalPoint.x > 0 && itemGlobalPoint.y > 0) {
+                            plugin.updatePluginGeometry(Qt.rect(itemGlobalPoint.x, itemGlobalPoint.y, surfaceItem.width, surfaceItem.height))
+                        }
+                    }
+                }
+
+                onItemGlobalPointChanged: {
+                    updatePluginItemGeometryTimer.start()
                 }
             }
         }
@@ -89,10 +115,10 @@ AppletItem {
         target: DockCompositor
         function onPopupCreated(popupSurface)
         {
-            // TODO: position need to recalucate
             popupContent.shellSurface = popupSurface
-            popup.defaultX = popupSurface.x - (popup.width / 2)
-            popup.defaultY = - 10
+            popup.popupType = popupSurface.popupType
+            popup.defaultX = popupSurface.x
+            popup.defaultY = popupSurface.popupType === Dock.TrayPopupTypeMenu ? popupSurface.y : -10
             popup.open()
         }
     }

@@ -12,10 +12,17 @@ namespace Plugin {
 PluginSurface::PluginSurface(PluginManager *manager, QtWaylandClient::QWaylandWindow *window)
     : QtWaylandClient::QWaylandShellSurface(window)
     , QtWayland::plugin()
-    , m_plugin(EmbemdPlugin::get(window->window()))
+    , m_plugin(EmbedPlugin::get(window->window()))
     , m_window(window->window())
 {
     init(manager->create_plugin(m_plugin->pluginId(), m_plugin->itemKey(),m_plugin->pluginFlags(), m_plugin->pluginType(), window->wlSurface()));
+    connect(manager, &PluginManager::dockPositionChanged, m_plugin, &EmbedPlugin::dockPositionChanged);
+    connect(manager, &PluginManager::dockColorThemeChanged, m_plugin, &EmbedPlugin::dockColorThemeChanged);
+    connect(manager, &PluginManager::eventMessage, m_plugin, &EmbedPlugin::eventMessage);
+
+    connect(m_plugin, &EmbedPlugin::requestMessage, manager, [manager, this](const QString &msg) {
+        manager->requestMessage(m_plugin->pluginId(), m_plugin->itemKey(), msg);
+    });
 }
 
 PluginSurface::~PluginSurface()
@@ -27,9 +34,9 @@ void PluginSurface::plugin_close()
     m_window->hide();
 }
 
-void PluginSurface::plugin_pos(int32_t x, int32_t y)
+void PluginSurface::plugin_geometry(int32_t x, int32_t y, int32_t width, int32_t height)
 {
-    m_window->setX(x), m_window->setY(y);
+    m_window->setGeometry(x, y, width, height);
 }
 
 PluginPopupSurface::PluginPopupSurface(PluginManager *manager, QtWaylandClient::QWaylandWindow *window)
