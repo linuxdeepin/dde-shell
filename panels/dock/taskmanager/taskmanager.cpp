@@ -182,6 +182,13 @@ bool TaskManager::allowForceQuit()
     return Settings->isAllowedForceQuit();
 }
 
+bool TaskManager::requestDockByDesktopId(const QString& appID)
+{
+    if (appID.startsWith("internal/")) return false;
+    QString dockAppId(Q_LIKELY(appID.endsWith(".desktop")) ? appID.chopped(8) : appID);
+    return RequestDock(dockAppId);
+}
+
 bool TaskManager::RequestDock(QString appID)
 {
     auto desktopfileParser = DESKTOPFILEFACTORY::createById(appID, "amAPP");

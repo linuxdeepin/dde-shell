@@ -15,6 +15,7 @@ add_executable(dde-shell
     appletloader.cpp
     shell.h
     shell.cpp
+    dde-shell.qrc
     override_dtkdeclarative_qml.qrc
 )
 

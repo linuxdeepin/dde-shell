@@ -107,7 +107,6 @@ file(GLOB SRC_PATH
     ${XCB}
     )
 
-add_subdirectory("networkmanager-qt")
 add_subdirectory("frame")
 add_subdirectory("plugins")
 add_subdirectory("libdbusmenu-qt")

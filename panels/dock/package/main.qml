@@ -250,7 +250,7 @@ Window {
         model: Applet.appletItems
         delegate: Item {
             property var order: model.data.dockOrder
-            property bool itemVisible: model.data.shouldVisible
+            property bool itemVisible: model.data.shouldVisible === undefined || model.data.shouldVisible
 
             onItemVisibleChanged: {
                 updateAppItems()
