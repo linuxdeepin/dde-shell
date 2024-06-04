@@ -64,7 +64,7 @@ public:
     void initPlugins()
     {
         for (const auto &item : m_pluginDirs) {
-            const QDirIterator::IteratorFlags flags = QDirIterator::Subdirectories;
+            const QDirIterator::IteratorFlags flags = QDirIterator::Subdirectories | QDirIterator::FollowSymlinks;
             const QStringList nameFilters = {MetaDataFileName};
 
             QDirIterator it(item, nameFilters, QDir::Files, flags);
