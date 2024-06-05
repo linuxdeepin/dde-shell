@@ -5,6 +5,7 @@
 #pragma once
 
 #include "pluginproxyinterface.h"
+#include "common.h"
 
 #include <QMenu>
 #include <QLabel>
@@ -36,7 +37,7 @@ public:
     void saveValue(PluginsItemInterface * const itemInter, const QString &key, const QVariant &value) override;
     const QVariant getValue(PluginsItemInterface *const itemInter, const QString &key, const QVariant& fallback = QVariant()) override;
     void removeValue(PluginsItemInterface *const itemInter, const QStringList &keyList) override;
-    void updateDockInfo(PluginsItemInterface *const, const DockPart &) override;
+    void updateDockInfo(PluginsItemInterface *const, const DockPart &);
 
     const QString pluginName() const;
     const QString itemCommand(const QString &itemKey);

@@ -1,15 +1,15 @@
-// Copyright (C) 2011 ~ 2018 Deepin Technology Co., Ltd.
-// SPDX-FileCopyrightText: 2018 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2011 - 2022 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#pragma once
+#ifndef PLUGINPROXYINTERFACE_H
+#define PLUGINPROXYINTERFACE_H
+
+#include "constants.h"
 
 #include <QtCore>
 
 class PluginsItemInterface;
-enum class DockPart;
-
 class PluginProxyInterface
 {
 public:
@@ -40,7 +40,6 @@ public:
     /// \param itemKey
     ///
     virtual void itemRemoved(PluginsItemInterface * const itemInter, const QString &itemKey) = 0;
-
     ///
     /// \brief requestContextMenu
     /// request show context menu
@@ -77,10 +76,6 @@ public:
     /// SeeAlse: saveValue
     ///
     virtual void removeValue(PluginsItemInterface *const itemInter, const QStringList &keyList) = 0;
-
-    ///
-    /// update display or information
-    ///
-    ///
-    virtual void updateDockInfo(PluginsItemInterface *const, const DockPart &) {}
 };
+
+#endif // PLUGINPROXYINTERFACE_H
