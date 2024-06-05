@@ -32,6 +32,14 @@
       <entry name="plugin_id"       value="1" summary="given wl_surface has another plugin_id"/>
     </enum>
 
+    <event name="position_changed">
+        <arg name="dock_position" type="uint"/>
+    </event>
+
+    <event name="color_theme_changed">
+        <arg name="dock_color_theme" type="uint"/>
+    </event>
+
     <event name="event_message">
       <description summary="a message sent from server (dock)">
         This event will emitted when server(dock) send message to plugin.
@@ -45,6 +53,8 @@
         This event will emitted when client send message to server.
         Such as plugin status interface defined.
       </description>
+      <arg name="plugin_id"  type="string"/>
+      <arg name="item_key"  type="string"/>
       <arg name="msg"  type="string"/>
     </request>
 
@@ -76,9 +86,11 @@
 
   <interface name="plugin" version="1">
     <event name="close"/>
-    <event name="pos">
+    <event name="geometry">
       <arg name="x" type="int"/>
       <arg name="y" type="int"/>
+      <arg name="width" type="int"/>
+      <arg name="height" type="int"/>
     </event>
   </interface>
 </protocol>

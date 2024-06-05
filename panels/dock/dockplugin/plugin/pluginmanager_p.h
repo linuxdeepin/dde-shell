@@ -23,8 +23,20 @@ public:
 
     QtWaylandClient::QWaylandShellSurface* createPluginSurface(QtWaylandClient::QWaylandWindow *window);
 
-protected:
-    virtual void plugin_manager_v1_event_message(const QString &msg) override;
+    void requestMessage(const QString &plugin_id, const QString &item_key, const QString &msg);
 
+Q_SIGNALS:
+    void eventMessage(const QString &msg);
+    void dockPositionChanged(uint32_t position);
+    void dockColorThemeChanged(uint32_t colorType);
+
+protected:
+    virtual void plugin_manager_v1_position_changed(uint32_t dock_position);
+    virtual void plugin_manager_v1_color_theme_changed(uint32_t dock_color_theme);
+    virtual void plugin_manager_v1_event_message(const QString &msg);
+
+private:
+    uint32_t m_dockPosition;
+    uint32_t m_dockColorType;
 };
 }

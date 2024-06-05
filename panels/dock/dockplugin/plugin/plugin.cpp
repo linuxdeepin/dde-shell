@@ -8,10 +8,10 @@
 #include <cstdint>
 
 namespace Plugin {
-class EmbemdPluginPrivate
+class EmbedPluginPrivate
 {
 public:
-    explicit EmbemdPluginPrivate(QWindow* window)
+    explicit EmbedPluginPrivate(QWindow* window)
         : parentWindow(window)
     {}
 
@@ -23,44 +23,44 @@ public:
     uint32_t pluginOrder;
 };
 
-EmbemdPlugin::EmbemdPlugin(QWindow* window)
+EmbedPlugin::EmbedPlugin(QWindow* window)
     : QObject(window)
-    , d(new EmbemdPluginPrivate(window))
+    , d(new EmbedPluginPrivate(window))
 {
 
 }
 
-EmbemdPlugin::~EmbemdPlugin()
+EmbedPlugin::~EmbedPlugin()
 {
     d.reset(nullptr);
 }
 
-QString EmbemdPlugin::pluginId() const
+QString EmbedPlugin::pluginId() const
 {
     return d->pluginId;
 }
 
-QString EmbemdPlugin::itemKey() const
+QString EmbedPlugin::itemKey() const
 {
     return d->itemKey;
 }
 
-int EmbemdPlugin::pluginType() const
+int EmbedPlugin::pluginType() const
 {
     return d->pluginType;
 }
 
-int EmbemdPlugin::pluginFlags() const
+int EmbedPlugin::pluginFlags() const
 {
     return d->pluginFlags;
 }
 
-uint32_t EmbemdPlugin::pluginOrder() const
+uint32_t EmbedPlugin::pluginOrder() const
 {
     return d->pluginOrder;
 }
 
-void EmbemdPlugin::setPluginId(const QString& pluginid)
+void EmbedPlugin::setPluginId(const QString& pluginid)
 {
     if (d->pluginId == pluginid) {
         return;
@@ -70,7 +70,7 @@ void EmbemdPlugin::setPluginId(const QString& pluginid)
     Q_EMIT pluginIdChanged();
 }
 
-void EmbemdPlugin::setItemKey(const QString& itemkey)
+void EmbedPlugin::setItemKey(const QString& itemkey)
 {
     if (d->itemKey == itemkey) {
         return;
@@ -80,7 +80,7 @@ void EmbemdPlugin::setItemKey(const QString& itemkey)
     Q_EMIT itemKeyChanged();
 }
 
-void EmbemdPlugin::setPluginType(int type)
+void EmbedPlugin::setPluginType(int type)
 {
     if (d->pluginType == type) {
         return;
@@ -90,7 +90,7 @@ void EmbemdPlugin::setPluginType(int type)
     Q_EMIT pluginTypeChanged();
 }
 
-void EmbemdPlugin::setPluginFlags(int flags)
+void EmbedPlugin::setPluginFlags(int flags)
 {
     if (d->pluginFlags == flags) {
         return;
@@ -100,7 +100,7 @@ void EmbemdPlugin::setPluginFlags(int flags)
     Q_EMIT pluginFlagsChanged();
 }
 
-void EmbemdPlugin::setPluginOrder(uint32_t order)
+void EmbedPlugin::setPluginOrder(uint32_t order)
 {
     if (d->pluginOrder == order) {
         return;
@@ -110,19 +110,19 @@ void EmbemdPlugin::setPluginOrder(uint32_t order)
     Q_EMIT pluginOrderChanged();
 }
 
-static QMap<QWindow*, EmbemdPlugin*> s_map;
-EmbemdPlugin* EmbemdPlugin::get(QWindow* window)
+static QMap<QWindow*, EmbedPlugin*> s_map;
+EmbedPlugin* EmbedPlugin::get(QWindow* window)
 {
     auto plugin = s_map.value(window);
     if (!plugin) {
-        plugin = new EmbemdPlugin(window);
+        plugin = new EmbedPlugin(window);
         s_map.insert(window, plugin);
     }
 
     return plugin;
 }
 
-bool EmbemdPlugin::contains(QWindow *window)
+bool EmbedPlugin::contains(QWindow *window)
 {
     return s_map.keys().contains(window);
 }

@@ -7,12 +7,11 @@
 #include <QObject>
 #include <QWindow>
 #include <QString>
-#include <qt6/QtGui/qwindow.h>
 
 namespace Plugin {
-class EmbemdPluginPrivate;
+class EmbedPluginPrivate;
 
-class Q_DECL_EXPORT EmbemdPlugin : public QObject
+class Q_DECL_EXPORT EmbedPlugin : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString itemKey READ itemKey WRITE setItemKey NOTIFY itemKeyChanged)
@@ -22,8 +21,14 @@ class Q_DECL_EXPORT EmbemdPlugin : public QObject
     Q_PROPERTY(uint32_t pluginOrder READ pluginOrder WRITE setPluginOrder NOTIFY pluginOrderChanged)
 
 public:
+    enum PluginType {
+        Tray,
+        Fixed,
+        Quick,
+    };
+    Q_ENUM(PluginType)
 
-    ~EmbemdPlugin();
+    ~EmbedPlugin();
 
     QString pluginId() const;
     void setPluginId(const QString& pluginid);
@@ -40,11 +45,13 @@ public:
     uint32_t pluginOrder() const;
     void setPluginOrder(uint32_t order);
 
-    static EmbemdPlugin* get(QWindow* window);
+    static EmbedPlugin* get(QWindow* window);
     static bool contains(QWindow* window);
 
 Q_SIGNALS:
-    void message(const QString &msg);
+    void eventMessage(const QString &msg);
+    void dockPositionChanged(uint32_t position);
+    void dockColorThemeChanged(uint32_t colorType);
 
 Q_SIGNALS:
     void itemKeyChanged();
@@ -52,10 +59,11 @@ Q_SIGNALS:
     void pluginTypeChanged();
     void pluginFlagsChanged();
     void pluginOrderChanged();
+    void requestMessage(const QString &msg);
 
 private:
-    explicit EmbemdPlugin(QWindow* window);
-    QScopedPointer<EmbemdPluginPrivate> d;
+    explicit EmbedPlugin(QWindow* window);
+    QScopedPointer<EmbedPluginPrivate> d;
 };
 
 
@@ -70,6 +78,13 @@ class Q_DECL_EXPORT PluginPopup : public QObject
 
     Q_PROPERTY(int x READ x WRITE setX NOTIFY xChanged)
     Q_PROPERTY(int y READ y WRITE setY NOTIFY yChanged)
+
+public:
+    enum PopupType {
+        PopupTypePanel = 1,
+        PopupTypeTooltip = 2,
+        PopupTypeMenu = 3
+    };
 
 public:
     ~PluginPopup();

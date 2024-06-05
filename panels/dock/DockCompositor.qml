@@ -15,6 +15,9 @@ import org.deepin.ds.dock 1.0
 Item {
     id: dockCompositor
 
+    property alias dockPosition: pluginManager.dockPosition
+    property alias dockColorTheme: pluginManager.dockColorTheme
+
     property ListModel trayPluginSurfaces: ListModel {}
     property ListModel quickPluginSurfaces: ListModel {}
     property ListModel fixedPluginSurfaces: ListModel {}
