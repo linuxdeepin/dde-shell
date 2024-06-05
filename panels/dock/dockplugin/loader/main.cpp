@@ -4,7 +4,7 @@
 
 #include "setproctitle.h"
 #include "widgetplugin.h"
-#include "pluginsiteminterface.h"
+#include "pluginsiteminterface_v2.h"
 
 #include <DDBusSender>
 #include <DApplication>
@@ -17,7 +17,10 @@
 #include <QStringLiteral>
 
 #include <cstdlib>
+#include <DGuiApplicationHelper>
 #include <signal.h>
+
+DGUI_USE_NAMESPACE
 
 static QString pluginDisplayName;
 
@@ -89,10 +92,13 @@ int main(int argc, char *argv[], char *envp[])
 
     PluginsItemInterface *interface = qobject_cast<PluginsItemInterface *>(pluginLoader->instance());
 
-    if (interface == nullptr) {
-        return -1;
+    if (!interface) {
+      interface = qobject_cast<PluginsItemInterfaceV2*>(pluginLoader->instance());
     }
-
+    if (!interface) {
+        qWarning() << "get interface failed!" << pluginLoader->instance() << qobject_cast<PluginsItemInterfaceV2*>(pluginLoader->instance());;
+        return 0;
+    }
     dock::WidgetPlugin dockPlugin(interface);
 
     app.setApplicationName(interface->pluginName());

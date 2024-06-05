@@ -11,6 +11,8 @@ add_executable(dockplugin-loader
     main.cpp
     widgetplugin.h
     widgetplugin.cpp
+    pluginitem.h
+    pluginitem.cpp
     utils/setproctitle.h
     utils/setproctitle.cpp
 )
@@ -30,3 +32,9 @@ target_link_libraries(dockplugin-loader PRIVATE
 )
 
 install(TARGETS dockplugin-loader DESTINATION ${CMAKE_INSTALL_LIBEXECDIR})
+
+#dconfig
+dtk_add_config_meta_files(APPID org.deepin.dde.dock FILES ./configs/org.deepin.dde.dock.plugin.common.json)
+
+#schemas
+install(FILES configs/com.deepin.dde.control-center.gschema.xml DESTINATION ${CMAKE_INSTALL_DATADIR}/glib-2.0/schemas)

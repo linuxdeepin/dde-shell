@@ -6,12 +6,22 @@
 #include "plugin.h"
 #include "widgetplugin.h"
 #include "pluginsiteminterface.h"
+#include "pluginsiteminterface_v2.h"
+/*#include "pluginsiteminterface_v2.h"*/
 
 #include <QMenu>
 #include <QPainter>
 #include <QProcess>
 #include <QVBoxLayout>
 #include <QMouseEvent>
+
+#include <cstddef>
+#include <DGuiApplicationHelper>
+#include <qglobal.h>
+
+#include "pluginitem.h"
+
+DGUI_USE_NAMESPACE
 
 namespace dock {
 WidgetPlugin::WidgetPlugin(PluginsItemInterface* pluginItem)
@@ -32,25 +42,26 @@ WidgetPlugin::~WidgetPlugin()
 
 void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QString &itemKey)
 {
-    QWidget *widget = nullptr;
+    PluginItem *item = new PluginItem(m_pluginItem, itemKey);
+    /*QWidget *widget = nullptr;*/
     Plugin::EmbedPlugin* plugin;
-    if (m_pluginItem->flags() & Type_Tray) {
-        widget = m_pluginItem->itemWidget(itemKey);
-    } else if (m_pluginItem->flags() & Type_Common) {
-        widget = getQucikPluginTrayWidget(itemKey);
-    }
+    /*if (m_pluginItem->flags() & Type_Tray) {*/
+    /*    widget = m_pluginItem->itemWidget(itemKey);*/
+    /*} else if (m_pluginItem->flags() & Type_Common) {*/
+    /*    widget = getQucikPluginTrayWidget(itemKey);*/
+    /*}*/
 
-    if (!widget) return;
-    widget->setAttribute(Qt::WA_TranslucentBackground);
-    widget->winId();
-    widget->setFixedSize(QSize(16, 16));
+    /*if (!widget) return;*/
+    /*widget->setAttribute(Qt::WA_TranslucentBackground);*/
+    /*widget->winId();*/
+    /*widget->setFixedSize(QSize(16, 16));*/
     
-    plugin = Plugin::EmbedPlugin::get(widget->windowHandle());
+    plugin = Plugin::EmbedPlugin::get(item->windowHandle());
     initConnections(plugin);
-    plugin->setPluginFlags(m_pluginItem->flags());
+    plugin->setPluginFlags(item->flags());
     plugin->setItemKey(itemKey);
     plugin->setPluginType(1);
-    widget->show();
+    item->show();
 
     // 模拟发送message request, 此调用应该在回调函数中
     Q_EMIT plugin->requestMessage("plugin test message");
@@ -99,6 +110,10 @@ void WidgetPlugin::requestRefreshWindowVisible(PluginsItemInterface * const item
 
 void WidgetPlugin::requestSetAppletVisible(PluginsItemInterface * const itemInter, const QString &itemKey, const bool visible)
 {
+    QWidget* appletWidget = itemInter->itemPopupApplet(itemKey);
+    appletWidget->setFixedSize(400, 400);
+    appletWidget->setParent(nullptr);
+    appletWidget->show();
 }
 
 void WidgetPlugin::saveValue(PluginsItemInterface * const itemInter, const QString &key, const QVariant &value)
@@ -179,7 +194,12 @@ void WidgetPlugin::onDockEventMessageArrived(const QString &message)
 
 QWidget* WidgetPlugin::getQucikPluginTrayWidget(const QString &itemKey)
 {
-    auto trayIcon = m_pluginItem->icon(DockPart::QuickShow);
+    PluginsItemInterfaceV2 *interface_v2 = dynamic_cast<PluginsItemInterfaceV2 *>(m_pluginItem);
+    if (!interface_v2) {
+        return m_widget.get(); 
+    }
+
+    auto trayIcon = interface_v2->icon(Dock::IconType::IconType_None, (Dock::ThemeType)DGuiApplicationHelper::instance()->themeType());
     if (trayIcon.isNull())
         return m_widget.get();
 
@@ -234,7 +254,11 @@ TrayIconWidget::~TrayIconWidget()
 void TrayIconWidget::paintEvent(QPaintEvent *event)
 {
     auto func = [this]() -> QPixmap {
-        auto trayIcon = m_pluginItem->icon(DockPart::QuickShow);
+        PluginsItemInterfaceV2 *interface_v2 = dynamic_cast<PluginsItemInterfaceV2 *>(m_pluginItem);
+        if (!interface_v2) {
+            return QPixmap(); 
+        }
+        auto trayIcon = interface_v2->icon(Dock::IconType::IconType_None, (Dock::ThemeType)DGuiApplicationHelper::instance()->themeType());
         if (trayIcon.availableSizes().size() > 0) {
             QSize size = trayIcon.availableSizes().first();
             return trayIcon.pixmap(size);
