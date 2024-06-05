@@ -9,6 +9,7 @@
 #include "panel.h"
 #include "dstypes.h"
 #include "private/dsqmlglobal_p.h"
+#include "quick/dsquickdrag_p.h"
 #include "layershell/dlayershellwindow.h"
 
 #include <qqml.h>
@@ -41,10 +42,12 @@ void QmlpluginPlugin::registerTypes(const char *uri)
     qmlRegisterSingletonInstance(uri, 1, 0, "DS", DQmlGlobal::instance());
     qmlRegisterType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow");
     qmlRegisterUncreatableType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow","LayerShell Attached");
+    qmlRegisterUncreatableType<DQuickDrag>(uri, 1, 0, "DQuickDrag","DQuickDrag Attached");
 
     dsRegisterType(uri, 1, 0, "PanelPopup");
     dsRegisterType(uri, 1, 0, "PanelToolTip");
     dsRegisterType(uri, 1, 0, "PanelPopupWindow");
+    dsRegisterType(uri, 1, 0, "QuickDragWindow");
 }
 
 void QmlpluginPlugin::initializeEngine(QQmlEngine *engine, const char *uri)
