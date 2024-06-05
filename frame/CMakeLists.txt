@@ -23,6 +23,7 @@ set(PRIVATE_HEADERS
     private/dsqmlglobal_p.h
     layershell/qwaylandlayershellsurface_p.h
     layershell/qwaylandlayershellintegration_p.h
+    quick/dsquickdrag_p.h
 )
 add_library(dde-shell-frame SHARED
     ${PUBLIC_HEADERS}
@@ -46,6 +47,7 @@ add_library(dde-shell-frame SHARED
     layershell/dlayershellwindow.cpp
     layershell/qwaylandlayershellsurface.cpp
     layershell/qwaylandlayershellintegration.cpp
+    quick/dsquickdrag.cpp
     ddeshell_qml.qrc
 )
 
@@ -70,6 +72,7 @@ PUBLIC
     Qt${QT_VERSION_MAJOR}::Quick
 PRIVATE
     Qt${QT_VERSION_MAJOR}::Concurrent
+    Qt${QT_VERSION_MAJOR}::GuiPrivate
     Qt${QT_VERSION_MAJOR}::WaylandClientPrivate
 )
 target_include_directories(dde-shell-frame INTERFACE
