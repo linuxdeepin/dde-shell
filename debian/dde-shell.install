@@ -18,4 +18,4 @@ usr/lib/*/libdde-dockplugin-interface.so.*
 usr/share/dsg/configs/org.deepin.ds.dock/
 usr/share/dsg/configs/org.deepin.dde.dock/
 usr/share/dde-shell/*/translations
-usr/share
+usr/share/glib-2.0/schemas/

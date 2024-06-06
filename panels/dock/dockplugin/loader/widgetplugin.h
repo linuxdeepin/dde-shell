@@ -6,6 +6,7 @@
 
 #include "pluginproxyinterface.h"
 #include "common.h"
+#include "pluginitem.h"
 
 #include <QMenu>
 #include <QLabel>
@@ -21,7 +22,6 @@ class TrayIconWidget;
 class WidgetPlugin : public QObject, public PluginProxyInterface
 {
     Q_OBJECT
-    Q_PROPERTY(QString pluginId READ pluginName)
 
 public:
     WidgetPlugin(PluginsItemInterface* pluginItem);
@@ -37,11 +37,6 @@ public:
     void saveValue(PluginsItemInterface * const itemInter, const QString &key, const QVariant &value) override;
     const QVariant getValue(PluginsItemInterface *const itemInter, const QString &key, const QVariant& fallback = QVariant()) override;
     void removeValue(PluginsItemInterface *const itemInter, const QStringList &keyList) override;
-    void updateDockInfo(PluginsItemInterface *const, const DockPart &);
-
-    const QString pluginName() const;
-    const QString itemCommand(const QString &itemKey);
-    const QString itemContextMenu(const QString &itemKey);
 
 public Q_SLOTS:
     void onDockPositionChanged(uint32_t position);
@@ -49,33 +44,13 @@ public Q_SLOTS:
     void onDockEventMessageArrived(const QString &message);
 
 private:
-    QWidget* getQuickPluginTrayWidget(const QString &itemKey);
     Plugin::EmbedPlugin* getPlugin(QWidget*);
     void initConnections(Plugin::EmbedPlugin *plugin);
 
 private:
-    PluginsItemInterface* m_pluginItem;
-
-    QScopedPointer<TrayIconWidget> m_widget;
+    PluginsItemInterface* m_pluginsItemInterface;
+    QScopedPointer<PluginItem> m_pluginItem;
+    QList<PluginItem*> m_pluginItems;
 };
 
-class TrayIconWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    TrayIconWidget(PluginsItemInterface* m_pluginItem, QString m_itemKey, QWidget* parent = nullptr);
-    ~TrayIconWidget();
-
-    void paintEvent(QPaintEvent *event) override;
-
-protected:
-    void enterEvent(QEvent *event) override;
-    void leaveEvent(QEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-
-private:
-    PluginsItemInterface* m_pluginItem;
-    QString m_itemKey;
-    QMenu *m_menu;
-};
 }
