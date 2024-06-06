@@ -16,23 +16,19 @@ const static Dock::PluginFlags UNADAPTED_PLUGIN_FLAGS = Dock::PluginFlag::Type_U
 PluginItem::PluginItem(PluginsItemInterface *pluginItemInterface, const QString &itemKey, QWidget *parent)
     : QWidget(parent)
     , m_pluginInterface(pluginItemInterface)
-    , m_pluginInterfacev2(nullptr)
+    , m_pluginInterfacev2(dynamic_cast<PluginsItemInterfaceV2*>(pluginItemInterface))
     , m_centralWidget(pluginItemInterface->itemWidget(itemKey))
     , m_itemKey(itemKey)
-    , m_menu(new QMenu)
+    , m_menu(new QMenu(this))
 {
-    m_pluginInterfacev2 = dynamic_cast<PluginsItemInterfaceV2*>(pluginItemInterface);
-    m_centralWidget->setVisible(true);
-    m_centralWidget->installEventFilter(this);
+    setAttribute(Qt::WA_TranslucentBackground);
 
-    QHBoxLayout *hLayout = new QHBoxLayout;
+    auto hLayout = new QHBoxLayout;
     hLayout->addWidget(m_centralWidget);
-    hLayout->setSpacing(0);
+    hLayout->setContentsMargins(0, 0, 0, 0);
+    hLayout->setMargin(0);
 
     setLayout(hLayout);
-    /*setAttribute(Qt::WA_TranslucentBackground);*/
-    qInfo() << this->geometry();
-    qInfo() << m_centralWidget->geometry();
 }
 
 PluginItem::~PluginItem() = default;
@@ -67,14 +63,20 @@ void PluginItem::mouseLeftButtonClicked()
         proc->startDetached(command);
         return;
     }
+
     if (auto popup = m_pluginInterface->itemPopupApplet(m_itemKey)) {
         if (popup->isVisible()) {
             popup->hide();
             return;
         }
-        popup->setParent(nullptr);
-        /*popup->setAttribute(Qt::WA_TranslucentBackground);*/
+
+        popup->setAttribute(Qt::WA_TranslucentBackground);
         popup->winId();
+
+        auto geometry = windowHandle()->geometry();
+        auto pluginPopup = Plugin::PluginPopup::get(popup->windowHandle());
+        pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypePanel);
+        pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
         popup->show();
     }
 }
@@ -111,9 +113,10 @@ void PluginItem::mouseRightButtonClicked()
     m_menu->setPalette(pa);
     m_menu->winId();
 
+    auto geometry = windowHandle()->geometry();
     auto pluginPopup = Plugin::PluginPopup::get(m_menu->windowHandle());
     pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeMenu);
-    pluginPopup->setX(geometry().x() + geometry().width() / 2), pluginPopup->setY(geometry().y() + geometry().height() / 2);
+    pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
     m_menu->setFixedSize(m_menu->sizeHint());
     m_menu->exec();
 }
@@ -153,9 +156,11 @@ void PluginItem::enterEvent(QEvent *event)
         toolTip->setAttribute(Qt::WA_TranslucentBackground);
         toolTip->winId();
 
+        auto geometry = windowHandle()->geometry();
         auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle());
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeTooltip);
-        pluginPopup->setX(geometry().x() + geometry().width() / 2), pluginPopup->setY(geometry().y() + geometry().height() / 2);
+        pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
+        toolTip->setFixedSize(toolTip->sizeHint());
         toolTip->show();
     });
 }

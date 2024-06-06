@@ -57,6 +57,7 @@ QtWaylandClient::QWaylandShellSurface* PluginManager::createPluginSurface(QtWayl
         return new PluginPopupSurface(this, window);
     }
 
-    Q_UNREACHABLE();
+    qWarning() << "create plugin surface failed, unknown window type";
+    return nullptr;
 }
 }

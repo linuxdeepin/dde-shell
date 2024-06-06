@@ -49,7 +49,7 @@ public Q_SLOTS:
     void onDockEventMessageArrived(const QString &message);
 
 private:
-    QWidget* getQucikPluginTrayWidget(const QString &itemKey);
+    QWidget* getQuickPluginTrayWidget(const QString &itemKey);
     Plugin::EmbedPlugin* getPlugin(QWidget*);
     void initConnections(Plugin::EmbedPlugin *plugin);
 
