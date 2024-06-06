@@ -321,6 +321,7 @@ void DockPanel::loadDockPlugins()
         auto plugins = dir.entryList(filters, QDir::Files);
         foreach(QString plugin, plugins) {
             plugin = pluginDir + plugin;
+            qInfo() << "pluginLoader load plugin" << plugin;
             proc.setArguments({"-p", plugin, "-platform", "wayland",});
             proc.startDetached();
         }

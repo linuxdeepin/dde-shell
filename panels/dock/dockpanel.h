@@ -12,11 +12,17 @@
 
 namespace dock {
 class DockHelper;
+#ifdef QT_DEBUG
+const QStringList pluginDirs = {
+    "/home/uos/Desktop/test/"
+};
+#else
 const QStringList pluginDirs = {
     "/usr/lib/dde-dock/plugins/",
     "/usr/lib/dde-dock/plugins/quick-trays/",
     "/usr/lib/dde-dock/plugins/system-trays/"
 };
+#endif
 
 class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
 {

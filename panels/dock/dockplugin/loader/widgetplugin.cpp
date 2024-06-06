@@ -42,26 +42,27 @@ WidgetPlugin::~WidgetPlugin()
 
 void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QString &itemKey)
 {
-    PluginItem *item = new PluginItem(m_pluginItem, itemKey);
-    /*QWidget *widget = nullptr;*/
-    Plugin::EmbedPlugin* plugin;
-    /*if (m_pluginItem->flags() & Type_Tray) {*/
-    /*    widget = m_pluginItem->itemWidget(itemKey);*/
-    /*} else if (m_pluginItem->flags() & Type_Common) {*/
-    /*    widget = getQucikPluginTrayWidget(itemKey);*/
-    /*}*/
+    auto pluginItemV2 = dynamic_cast<PluginsItemInterfaceV2*>(m_pluginItem);
+    Q_ASSERT(pluginItemV2);
 
-    /*if (!widget) return;*/
-    /*widget->setAttribute(Qt::WA_TranslucentBackground);*/
-    /*widget->winId();*/
-    /*widget->setFixedSize(QSize(16, 16));*/
-    
-    plugin = Plugin::EmbedPlugin::get(item->windowHandle());
+    QWidget *widget = getQuickPluginTrayWidget(itemKey);
+    if (!widget) {
+        widget = new PluginItem(m_pluginItem, itemKey);
+    } else {
+        widget->setFixedSize(QSize(16, 16));
+    }
+
+    Plugin::EmbedPlugin* plugin;
+    widget->setAttribute(Qt::WA_TranslucentBackground);
+    widget->winId();
+
+    plugin = Plugin::EmbedPlugin::get(widget->windowHandle());
     initConnections(plugin);
-    plugin->setPluginFlags(item->flags());
+    plugin->setPluginFlags(pluginItemV2->flags());
     plugin->setItemKey(itemKey);
     plugin->setPluginType(1);
-    item->show();
+    widget->windowHandle()->hide();
+    widget->show();
 
     // 模拟发送message request, 此调用应该在回调函数中
     Q_EMIT plugin->requestMessage("plugin test message");
@@ -192,7 +193,7 @@ void WidgetPlugin::onDockEventMessageArrived(const QString &message)
     // TODO
 }
 
-QWidget* WidgetPlugin::getQucikPluginTrayWidget(const QString &itemKey)
+QWidget* WidgetPlugin::getQuickPluginTrayWidget(const QString &itemKey)
 {
     PluginsItemInterfaceV2 *interface_v2 = dynamic_cast<PluginsItemInterfaceV2 *>(m_pluginItem);
     if (!interface_v2) {
@@ -200,14 +201,15 @@ QWidget* WidgetPlugin::getQucikPluginTrayWidget(const QString &itemKey)
     }
 
     auto trayIcon = interface_v2->icon(Dock::IconType::IconType_None, (Dock::ThemeType)DGuiApplicationHelper::instance()->themeType());
-    if (trayIcon.isNull())
+    if (trayIcon.isNull()) {
         return m_widget.get();
+    }
 
     if (m_widget.isNull()) {
         m_widget.reset(new TrayIconWidget(m_pluginItem, itemKey));
 
         connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, [this, itemKey](){
-            auto widget = getQucikPluginTrayWidget(itemKey);
+            auto widget = getQuickPluginTrayWidget(itemKey);
             if (widget) widget->update();
         }, Qt::UniqueConnection);
     }
@@ -299,9 +301,10 @@ void TrayIconWidget::enterEvent(QEvent *event)
         toolTip->setAttribute(Qt::WA_TranslucentBackground);
         toolTip->winId();
 
+        auto geometry = windowHandle()->geometry();
         auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle());
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeTooltip);
-        pluginPopup->setX(geometry().x() + geometry().width() / 2), pluginPopup->setY(geometry().y() + geometry().height() / 2);
+        pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
         toolTip->show();
     });
 }
@@ -346,9 +349,10 @@ void TrayIconWidget::mouseReleaseEvent(QMouseEvent *event)
         m_menu->setPalette(pa);
         m_menu->winId();
 
+        auto geometry = windowHandle()->geometry();
         auto pluginPopup = Plugin::PluginPopup::get(m_menu->windowHandle());
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeMenu);
-        pluginPopup->setX(geometry().x() + geometry().width() / 2), pluginPopup->setY(geometry().y() + geometry().height() / 2);
+        pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
         m_menu->setFixedSize(m_menu->sizeHint());
         m_menu->exec();
     } else if (event->button() == Qt::LeftButton) {
@@ -372,9 +376,10 @@ void TrayIconWidget::mouseReleaseEvent(QMouseEvent *event)
         popup->setAttribute(Qt::WA_TranslucentBackground);
         popup->winId();
 
+        auto geometry = windowHandle()->geometry();
         auto pluginPopup = Plugin::PluginPopup::get(popup->windowHandle());
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypePanel);
-        pluginPopup->setX(geometry().x() + geometry().width() / 2), pluginPopup->setY(geometry().y() + geometry().height() / 2);
+        pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
         popup->show();
     }
 }
