@@ -179,6 +179,7 @@ Window {
             MutuallyExclusiveMenu {
                 title: qsTr("Position")
                 EnumPropertyMenuItem {
+                    enabled: Panel.debugMode
                     name: qsTr("Top")
                     prop: "position"
                     value: Dock.Top
@@ -189,11 +190,13 @@ Window {
                     value: Dock.Bottom
                 }
                 EnumPropertyMenuItem {
+                    enabled: Panel.debugMode
                     name: qsTr("Left")
                     prop: "position"
                     value: Dock.Left
                 }
                 EnumPropertyMenuItem {
+                    enabled: Panel.debugMode
                     name: qsTr("Right")
                     prop: "position"
                     value: Dock.Right
