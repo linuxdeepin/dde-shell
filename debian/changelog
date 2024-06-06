@@ -1,3 +1,27 @@
+dde-shell (0.0.24) unstable; urgency=medium
+
+  * chore: allow follow symlinks when init plugins
+  * feat: allow build dockplugin as toplevel project
+  * fix(taskmanager): radius of the indicators are not working (linuxdeepin/developer-center#8804)
+  * fix: Control Center has not been default docked (linuxdeepin/developer-center#8852)
+  * feat: Add support for only the primary screen in multi-screen setups.
+  * feat: drop item to dock to pin app
+  * fix: The app preview close button is not clear (https://github.com/linuxdeepin/developer-center/issues/8628)
+  * feat: support to display non window plugin
+  * fix: tooltip overlaps with dock (https://github.com/linuxdeepin/developer-center/issues/8171)
+  * fix: PluginManager and ShotStartPlugin size not same as other tray plugin
+  * fix: tray plugin size not follow PluginSizePolicy
+  * fix: x11 preview display problem
+  * refact: link dynamic networkmanagerqt instead of static
+  * fix: blurred icons during app preview (https://github.com/linuxdeepin/developer-center/issues/8649)
+  * feat: add multi screen support
+  * fix: The app launch animation exceeds the boundaries. (https://github.com/linuxdeepin/developer-center/issues/8614)
+  * fix: x11 preview content is blurry
+  * fix: coredump app exit after open quick panel childPage (https://github.com/linuxdeepin/developer-center/issues/8604)
+  * feat: support reconnect wayland compositor
+
+ -- zsien <quezhiyong@deepin.org>  Thu, 06 Jun 2024 16:52:57 +0800
+
 dde-shell (0.0.23) unstable; urgency=medium
 
   * fix: uos-ai disabled(issue: 8593)
