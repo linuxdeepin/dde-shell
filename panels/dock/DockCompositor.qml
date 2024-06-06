@@ -43,7 +43,13 @@ Item {
             id: pluginManager
 
             onPluginSurfaceCreated: (dockPluginSurface) => {
-                trayPluginSurfaces.append({shellSurface: dockPluginSurface})
+                if (dockPluginSurface.pluginType === Dock.Tray) {
+                    trayPluginSurfaces.append({shellSurface: dockPluginSurface})
+                } else if (trayPluginSurfaces.pluginType === Dock.Quick) {
+                    quickPluginSurfaces.append({shellSurface: dockPluginSurface})
+                } else if (dockPluginSurface.pluginType === Dock.Fixed) {
+                    fixedPluginSurfaces.append({shellSurface: dockPluginSurface})
+                }
             }
 
             onPluginSurfaceDestroyed: (dockPluginSurface) => {
