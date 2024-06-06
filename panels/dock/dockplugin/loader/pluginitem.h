@@ -19,7 +19,7 @@ class PluginItem : public QWidget
 public:
     explicit PluginItem(PluginsItemInterface *pluginInterface, const QString &itemKey, QWidget *parent = nullptr);
     ~PluginItem() override;
-    int flags();
+    static int flags(PluginsItemInterface *pluginsItemInterface);
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;

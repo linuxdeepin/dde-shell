@@ -21,26 +21,29 @@ PluginItem::PluginItem(PluginsItemInterface *pluginItemInterface, const QString 
     , m_itemKey(itemKey)
     , m_menu(new QMenu(this))
 {
+    winId();
     setAttribute(Qt::WA_TranslucentBackground);
 
     auto hLayout = new QHBoxLayout;
     hLayout->addWidget(m_centralWidget);
-    hLayout->setContentsMargins(0, 0, 0, 0);
     hLayout->setMargin(0);
+    hLayout->setSpacing(0);
 
     setLayout(hLayout);
 }
 
 PluginItem::~PluginItem() = default;
 
-int PluginItem::flags()
+int PluginItem::flags(PluginsItemInterface *pluginsItemInterface)
 {
-    if (m_pluginInterfacev2) {
-        return m_pluginInterfacev2->flags();
+    auto pluginsItemInterfacev2 = dynamic_cast<PluginsItemInterfaceV2*>(pluginsItemInterface);
+    if (pluginsItemInterfacev2) {
+        return pluginsItemInterfacev2->flags();
     }
-    auto obj = dynamic_cast<QObject*>(m_pluginInterface);
+    auto obj = dynamic_cast<QObject*>(pluginsItemInterfacev2);
     if (!obj) {
         qWarning() << "failed to convert v1 to object!";
+        return UNADAPTED_PLUGIN_FLAGS;
     }
     bool ok;
     auto flags = obj->property("pluginFlags").toInt(&ok);
