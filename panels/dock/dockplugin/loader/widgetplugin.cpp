@@ -28,8 +28,10 @@ WidgetPlugin::WidgetPlugin(PluginsItemInterface* pluginsItemInterface, QPluginLo
         m_pluginsItemInterface->init(this);
     });
 
-    // TODO 需要给插件一个回调函数，以便插件通过回调函数告诉dock信息;并在回调函数中直接给出Json返回值
-    // using MessageCallbackFunc = QString (*)(PluginsItemInterfaceV2 *, const QString&);
+    auto pluginsItemInterfaceV2 = dynamic_cast<PluginsItemInterfaceV2 *>(pluginsItemInterface);
+    if (pluginsItemInterfaceV2) {
+        pluginsItemInterfaceV2->setMessageCallback(WidgetPlugin::messageCallback);
+    }
 }
 
 WidgetPlugin::~WidgetPlugin()
@@ -41,7 +43,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
     qInfo() << "itemAdded:" << itemKey;
     auto flag = PluginItem::flags(m_pluginLoader,itemInter);
     if (flag & Dock::Type_Quick) {
-        PluginItem *item = new PluginItem(itemInter, QUICK_ITEM_KEY, itemKey);
+        PluginItem *item = new PluginItem(itemInter, Dock::QUICK_ITEM_KEY, itemKey);
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin, item);
         plugin->setPluginFlags(flag);
@@ -49,7 +51,6 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         plugin->setItemKey(itemKey);
         plugin->setPluginType(Plugin::EmbedPlugin::Quick);
         plugin->setPluginSizePolicy(itemInter->pluginSizePolicy());
-        Q_EMIT plugin->requestMessage("plugin test message");
         item->windowHandle()->hide();
         item->show();
         m_pluginItems << item;
@@ -66,7 +67,6 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
             plugin->setItemKey(itemKey);
             plugin->setPluginType(Plugin::EmbedPlugin::Tray);
             plugin->setPluginSizePolicy(itemInter->pluginSizePolicy());
-            Q_EMIT plugin->requestMessage("plugin test message");
             item->windowHandle()->hide();
             item->show();
             m_pluginItems << item;
@@ -81,14 +81,10 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         plugin->setItemKey(itemKey);
         plugin->setPluginType(Plugin::EmbedPlugin::Fixed);
         plugin->setPluginSizePolicy(itemInter->pluginSizePolicy());
-        Q_EMIT plugin->requestMessage("plugin test message");
         item->windowHandle()->hide();
         item->show();
         m_pluginItems << item;
     }
-
-
-    // 模拟发送message request, 此调用应该在回调函数中
 }
 
 void WidgetPlugin::itemUpdate(PluginsItemInterface * const itemInter, const QString &itemKey)
@@ -98,7 +94,7 @@ void WidgetPlugin::itemUpdate(PluginsItemInterface * const itemInter, const QStr
     auto widget = m_pluginsItemInterface->itemWidget(itemKey);
     if (widget) widget->update();
 
-    auto quickPanel = m_pluginsItemInterface->itemWidget(QUICK_ITEM_KEY);
+    auto quickPanel = m_pluginsItemInterface->itemWidget(Dock::QUICK_ITEM_KEY);
     if(quickPanel) quickPanel->update();
 
     auto popupWidget = m_pluginsItemInterface->itemPopupApplet(itemKey);
@@ -113,7 +109,7 @@ void WidgetPlugin::itemRemoved(PluginsItemInterface * const itemInter, const QSt
     auto widget = m_pluginsItemInterface->itemWidget(itemKey);
     if(widget) widget->hide();
 
-    auto quickPanel = m_pluginsItemInterface->itemWidget(QUICK_ITEM_KEY);
+    auto quickPanel = m_pluginsItemInterface->itemWidget(Dock::QUICK_ITEM_KEY);
     if(quickPanel) quickPanel->hide();
 
     auto popupWidget = m_pluginsItemInterface->itemPopupApplet(itemKey);
@@ -214,6 +210,21 @@ void WidgetPlugin::initConnections(Plugin::EmbedPlugin *plugin, PluginItem *plug
             pluginItem->updateItemWidgetSize(geometry.size());
         }
     });
+}
+
+QString WidgetPlugin::messageCallback(PluginsItemInterfaceV2 *pluginItem, const QString &msg)
+{
+    qInfo() << "Plugin callback message:" << pluginItem->pluginName() << msg;
+    foreach (auto plugin, Plugin::EmbedPlugin::all()) {
+        Q_EMIT plugin->requestMessage(msg);
+    }
+
+    QJsonObject ret;
+    ret["code"] = 0;
+
+    QJsonDocument result;
+    result.setObject(ret);
+    return result.toJson();
 }
 
 }

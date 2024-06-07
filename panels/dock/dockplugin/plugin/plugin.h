@@ -48,6 +48,7 @@ public:
     static EmbedPlugin* get(QWindow* window);
     static bool contains(QWindow* window);
     static bool contains(const QString &itemKey, int type);
+    static QList<EmbedPlugin *> all();
 
 Q_SIGNALS:
     void eventMessage(const QString &msg);
