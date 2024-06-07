@@ -1,3 +1,21 @@
+dde-shell (0.0.24) unstable; urgency=medium
+
+  * fix(taskmanager): radius of the indicators are not working (linuxdeepin/developer-center#8804)
+  * fix: Control Center has not been default docked (linuxdeepin/developer-center#8852)
+  * fix: The app preview close button is not clear (https://github.com/linuxdeepin/developer-center/issues/8628)
+  * fix: tooltip overlaps with dock (https://github.com/linuxdeepin/developer-center/issues/8171)
+  * chore: remove warning
+  * fix: PluginManager and ShotStartPlugin size not same as other tray plugin
+  * fix: tray plugin size not follow PluginSizePolicy
+  * fix: x11 preview display problem (#370)
+  * fix: blurred icons during app preview (https://github.com/linuxdeepin/developer-center/issues/8649)
+  * fix: The app launch animation exceeds the boundaries. (https://github.com/linuxdeepin/developer-center/issues/8614)
+  * fix: x11 preview content is blurry
+  * fix: coredump app exit after open quick panel childPage (https://github.com/linuxdeepin/developer-center/issues/8604)
+  * chore: add version for dde-shell
+
+ -- zsien <quezhiyong@deepin.org>  Fri, 07 Jun 2024 11:18:37 +0800
+
 dde-shell (0.0.23) unstable; urgency=medium
 
   * fix: uos-ai disabled(issue: 8593)
