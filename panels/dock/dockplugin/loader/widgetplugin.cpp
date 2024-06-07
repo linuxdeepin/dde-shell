@@ -15,7 +15,6 @@
 #include <QVBoxLayout>
 #include <QMouseEvent>
 
-#include <cstddef>
 #include <DGuiApplicationHelper>
 #include <qglobal.h>
 

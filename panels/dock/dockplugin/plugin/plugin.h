@@ -22,7 +22,7 @@ class Q_DECL_EXPORT EmbedPlugin : public QObject
 
 public:
     enum PluginType {
-        Tray,
+        Tray = 1,
         Fixed,
         Quick,
     };

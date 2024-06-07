@@ -72,9 +72,14 @@ enum TrayPopupType {
     TrayPopupTypeMenu = 3
 };
 
+enum TrayPluginType {
+    Tray = 1,
+    Fixed,
+    Quick,
+};
+
 /**
  * @brief 用于在插件的 message 和 MessageCallbackFunc 方法中解析 json格式 数据。
- * 详细的说明见 plugins-developer-guide.md 文档
  * @since 2.0.0
  */
 const QString MSG_TYPE = QStringLiteral("msgType"); // 固定 key 值，表明当前消息类型是什么
@@ -133,6 +138,7 @@ Q_ENUM_NS(HideState)
 Q_ENUM_NS(AniAction)
 Q_ENUM_NS(TrayPopupType)
 Q_ENUM_NS(OverFlowState)
+Q_ENUM_NS(TrayPluginType)
 }
 
 Q_DECLARE_METATYPE(dock::SIZE)
@@ -145,3 +151,4 @@ Q_DECLARE_METATYPE(dock::AniAction)
 Q_DECLARE_METATYPE(dock::Position)
 Q_DECLARE_METATYPE(dock::TrayPopupType)
 Q_DECLARE_METATYPE(dock::OverFlowState)
+Q_DECLARE_METATYPE(dock::TrayPluginType)
