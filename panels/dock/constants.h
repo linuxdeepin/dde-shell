@@ -69,7 +69,8 @@ enum AniAction {
 enum TrayPopupType {
     TrayPopupTypePanel = 1,
     TrayPopupTypeTooltip = 2,
-    TrayPopupTypeMenu = 3
+    TrayPopupTypeMenu = 3,
+    TrayPopupTypeEmbed = 4
 };
 
 enum TrayPluginType {
