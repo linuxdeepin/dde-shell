@@ -41,31 +41,47 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
     qInfo() << "itemAdded:" << itemKey;
     auto flag = PluginItem::flags(itemInter);
     if (flag & Dock::Type_Quick) {
-        PluginItem *item = new PluginItem(itemInter, QUICK_ITEM_KEY) ;
+        PluginItem *item = new PluginItem(itemInter, QUICK_ITEM_KEY);
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin);
         plugin->setPluginFlags(item->flags(itemInter));
         plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
-        plugin->setPluginType(TrayPluginType::Quick);
+        plugin->setPluginType(Plugin::EmbedPlugin::Quick);
         Q_EMIT plugin->requestMessage("plugin test message");
         item->windowHandle()->hide();
         item->show();
         m_pluginItems << item;
     }
-    if (flag & Dock::Attribute_Normal) {
-        PluginItem *item = new PluginItem(itemInter, itemKey) ;
+    if (flag & Dock::Type_Quick || flag & Dock::Type_Tool ||
+        flag & Dock::Type_System || flag & Dock::Type_Tray || 
+        flag & Dock::Attribute_Normal) {
+        PluginItem *item = new PluginItem(itemInter, itemKey);
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin);
         plugin->setPluginFlags(item->flags(itemInter));
         plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
-        plugin->setPluginType(TrayPluginType::Tray);
+        plugin->setPluginType(Plugin::EmbedPlugin::Tray);
         Q_EMIT plugin->requestMessage("plugin test message");
         item->windowHandle()->hide();
         item->show();
         m_pluginItems << item;
     }
+    if (flag & Dock::Type_Fixed) {
+        PluginItem *item = new PluginItem(itemInter, itemKey);
+        Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
+        initConnections(plugin);
+        plugin->setPluginFlags(item->flags(itemInter));
+        plugin->setPluginId(itemInter->pluginName());
+        plugin->setItemKey(itemKey);
+        plugin->setPluginType(Plugin::EmbedPlugin::Fixed);
+        Q_EMIT plugin->requestMessage("plugin test message");
+        item->windowHandle()->hide();
+        item->show();
+        m_pluginItems << item;
+    }
+
 
     // 模拟发送message request, 此调用应该在回调函数中
 }
