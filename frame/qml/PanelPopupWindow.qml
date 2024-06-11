@@ -30,6 +30,7 @@ Window {
     D.DWindow.shadowRadius: 8
     // TODO set shadowOffset maunally.
     D.DWindow.shadowOffset: Qt.point(0, 10)
+    D.ColorSelector.family: D.Palette.CrystalColor
 
     color: "transparent"
     D.StyledBehindWindowBlur {
