@@ -156,6 +156,7 @@ void PluginItem::enterEvent(QEvent *event)
             return;
         }
 
+        toolTip->setParent(nullptr);
         toolTip->setAttribute(Qt::WA_TranslucentBackground);
         toolTip->winId();
 
@@ -163,7 +164,9 @@ void PluginItem::enterEvent(QEvent *event)
         auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle());
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeTooltip);
         pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
-        toolTip->setFixedSize(toolTip->sizeHint());
+        if (toolTip->sizeHint().width() > 0 && toolTip->sizeHint().height() > 0) {
+            toolTip->setFixedSize(toolTip->sizeHint());
+        }
         toolTip->show();
     });
 }
