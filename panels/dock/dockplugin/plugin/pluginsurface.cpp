@@ -15,7 +15,7 @@ PluginSurface::PluginSurface(PluginManager *manager, QtWaylandClient::QWaylandWi
     , m_plugin(EmbedPlugin::get(window->window()))
     , m_window(window->window())
 {
-    init(manager->create_plugin(m_plugin->pluginId(), m_plugin->itemKey(),m_plugin->pluginFlags(), m_plugin->pluginType(), window->wlSurface()));
+    init(manager->create_plugin(m_plugin->pluginId(), m_plugin->itemKey(), m_plugin->pluginFlags(), m_plugin->pluginType(), window->wlSurface()));
     connect(manager, &PluginManager::dockPositionChanged, m_plugin, &EmbedPlugin::dockPositionChanged);
     connect(manager, &PluginManager::dockColorThemeChanged, m_plugin, &EmbedPlugin::dockColorThemeChanged);
     connect(manager, &PluginManager::eventMessage, m_plugin, &EmbedPlugin::eventMessage);
@@ -45,7 +45,7 @@ PluginPopupSurface::PluginPopupSurface(PluginManager *manager, QtWaylandClient::
     , m_popup(PluginPopup::get(window->window()))
     , m_window(window->window())
 {
-    init(manager->create_popup_at(m_popup->x(), m_popup->y(), m_popup->popupType(), window->wlSurface()));
+    init(manager->create_popup_at(m_popup->pluginId(), m_popup->itemKey(), m_popup->popupType(), m_popup->x(), m_popup->y(), window->wlSurface()));
 }
 
 PluginPopupSurface::~PluginPopupSurface()
