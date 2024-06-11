@@ -114,6 +114,12 @@ void WidgetPlugin::requestRefreshWindowVisible(PluginsItemInterface * const item
 void WidgetPlugin::requestSetAppletVisible(PluginsItemInterface * const itemInter, const QString &itemKey, const bool visible)
 {
     QWidget* appletWidget = itemInter->itemPopupApplet(itemKey);
+    if (!appletWidget) {
+        qWarning() << itemKey << " plugin applet popup is null";
+        return;
+    }
+
+    appletWidget->winId();
     appletWidget->setFixedSize(400, 400); // TODO size form server
     appletWidget->setParent(nullptr);
 
