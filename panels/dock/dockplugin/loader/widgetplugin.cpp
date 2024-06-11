@@ -45,6 +45,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin);
         plugin->setPluginFlags(item->flags(itemInter));
+        plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
         plugin->setPluginType(TrayPluginType::Quick);
         Q_EMIT plugin->requestMessage("plugin test message");
@@ -57,6 +58,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin);
         plugin->setPluginFlags(item->flags(itemInter));
+        plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
         plugin->setPluginType(TrayPluginType::Tray);
         Q_EMIT plugin->requestMessage("plugin test message");
@@ -116,6 +118,8 @@ void WidgetPlugin::requestSetAppletVisible(PluginsItemInterface * const itemInte
     appletWidget->setParent(nullptr);
 
     auto pluginPopup = Plugin::PluginPopup::get(appletWidget->windowHandle());
+    pluginPopup->setPluginId(m_pluginsItemInterface->pluginName());
+    pluginPopup->setItemKey(itemKey);
     pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeEmbed);
     appletWidget->show();
 }

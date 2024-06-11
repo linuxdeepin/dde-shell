@@ -62,9 +62,11 @@
       <description summary="created popup window">
         This will created a popup window at (x, y) pos relative to ouput.
       </description>
+      <arg name="plugin_id"     type="string"/>
+      <arg name="item_key"      type="string"/>
+      <arg name="type"          type="int"/>
       <arg name="x"             type="int"/>
       <arg name="y"             type="int"/>
-      <arg name="type"          type="int"/>
 
       <arg name="surface" type="object" interface="wl_surface"/>
       <arg name="id"      type="new_id" interface="plugin_popup"/>

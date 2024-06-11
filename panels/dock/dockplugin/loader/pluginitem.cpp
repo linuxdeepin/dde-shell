@@ -84,6 +84,8 @@ void PluginItem::mouseLeftButtonClicked()
 
         auto geometry = windowHandle()->geometry();
         auto pluginPopup = Plugin::PluginPopup::get(popup->windowHandle());
+        pluginPopup->setPluginId(m_pluginInterface->pluginName());
+        pluginPopup->setItemKey(m_itemKey);
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypePanel);
         pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
         m_isPanelPopupShow = true;
@@ -125,6 +127,8 @@ void PluginItem::mouseRightButtonClicked()
 
     auto geometry = windowHandle()->geometry();
     auto pluginPopup = Plugin::PluginPopup::get(m_menu->windowHandle());
+    pluginPopup->setPluginId(m_pluginInterface->pluginName());
+    pluginPopup->setItemKey(m_itemKey);
     pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeMenu);
     pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
     m_menu->setFixedSize(m_menu->sizeHint());
@@ -170,6 +174,8 @@ void PluginItem::enterEvent(QEvent *event)
 
         auto geometry = windowHandle()->geometry();
         auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle());
+        pluginPopup->setPluginId(m_pluginInterface->pluginName());
+        pluginPopup->setItemKey(m_itemKey);
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeTooltip);
         pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
         if (toolTip->sizeHint().width() > 0 && toolTip->sizeHint().height() > 0) {

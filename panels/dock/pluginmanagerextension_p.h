@@ -43,8 +43,8 @@ Q_SIGNALS:
     void messageRequest(PluginSurface *, const QString &msg);
 
 protected:
-    virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key,const QString &msg) override;
-    virtual void plugin_manager_v1_create_popup_at(Resource *resource, int32_t x, int32_t y, int32_t type, struct ::wl_resource *surface, uint32_t id) override;
+    virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg) override;
+    virtual void plugin_manager_v1_create_popup_at(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t type, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id) override;
     virtual void plugin_manager_v1_create_plugin(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t plugin_flags, int32_t type, struct ::wl_resource *surface, uint32_t id) override;
 
 private:
@@ -105,13 +105,19 @@ class PluginPopup : public QWaylandShellSurfaceTemplate<PluginSurface>, public Q
     Q_OBJECT
     Q_PROPERTY(int32_t x READ x WRITE setX NOTIFY xChanged)
     Q_PROPERTY(int32_t y READ y WRITE setY NOTIFY yChanged)
+    Q_PROPERTY(QString pluginId READ pluginId)
+    Q_PROPERTY(QString itemKey READ itemKey)
     Q_PROPERTY(int32_t popupType READ popupType)
 
 public:
-    PluginPopup(PluginManager* shell, int x, int y, int popupType, QWaylandSurface *surface, const QWaylandResource &resource);
+    PluginPopup(PluginManager* shell, const QString &pluginId, const QString &itemKey, int x, int y, int popupType,
+                QWaylandSurface *surface, const QWaylandResource &resource);
     QWaylandQuickShellIntegration *createIntegration(QWaylandQuickShellSurfaceItem *item) override;
 
     QWaylandSurface *surface() const;
+
+    QString pluginId() const;
+    QString itemKey() const;
 
     int32_t x() const;
     int32_t y() const;
@@ -126,8 +132,8 @@ Q_SIGNALS:
     void yChanged();
 
 private:
-    QWaylandSurface* m_surface;
     PluginManager* m_manager;
+    QWaylandSurface* m_surface;
 
     QString m_itemKey;
     QString m_pluginId;
