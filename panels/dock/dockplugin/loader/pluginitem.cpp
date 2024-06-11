@@ -68,11 +68,17 @@ void PluginItem::mouseLeftButtonClicked()
     }
 
     if (auto popup = m_pluginInterface->itemPopupApplet(m_itemKey)) {
-        if (popup->isVisible()) {
+        if (!m_isPanelPopupShow && popup->isVisible()) {
+            popup->windowHandle()->hide();
+        }
+
+        if (m_isPanelPopupShow) {
             popup->hide();
+            m_isPanelPopupShow = false;
             return;
         }
 
+        popup->setParent(nullptr);
         popup->setAttribute(Qt::WA_TranslucentBackground);
         popup->winId();
 
@@ -80,6 +86,7 @@ void PluginItem::mouseLeftButtonClicked()
         auto pluginPopup = Plugin::PluginPopup::get(popup->windowHandle());
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypePanel);
         pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
+        m_isPanelPopupShow = true;
         popup->show();
     }
 }
@@ -121,6 +128,7 @@ void PluginItem::mouseRightButtonClicked()
     pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeMenu);
     pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
     m_menu->setFixedSize(m_menu->sizeHint());
+    m_isPanelPopupShow = false;
     m_menu->exec();
 }
 
@@ -167,6 +175,7 @@ void PluginItem::enterEvent(QEvent *event)
         if (toolTip->sizeHint().width() > 0 && toolTip->sizeHint().height() > 0) {
             toolTip->setFixedSize(toolTip->sizeHint());
         }
+        m_isPanelPopupShow = false;
         toolTip->show();
     });
 }
