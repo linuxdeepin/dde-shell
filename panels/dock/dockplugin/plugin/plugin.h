@@ -83,7 +83,8 @@ public:
     enum PopupType {
         PopupTypePanel = 1,
         PopupTypeTooltip = 2,
-        PopupTypeMenu = 3
+        PopupTypeMenu = 3,
+        PopupTypeEmbed = 4
     };
 
 public:
