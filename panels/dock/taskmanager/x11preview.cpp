@@ -38,7 +38,10 @@ Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPrevie
 
 #define PREVIEW_TITLE_HEIGHT 20
 #define PREVIEW_CONTENT_HEIGHT 118
-#define PREVIEW_CONTENT_WIDTH 208
+#define PREVIEW_CONTENT_MAX_WIDTH 240
+#define PREVIEW_CONTENT_MIN_WIDTH 80
+#define PREVIEW_CONTENT_MARGIN 10
+#define PREVIEW_CONTAINER_MARGIN 10
 #define PREVIEW_HOVER_BORDER 4
 #define PREVIEW_MINI_WIDTH 140
 #define PREVIEW_HOVER_BORDER_COLOR QColor(0, 0, 0, 255 * 0.2)
@@ -290,14 +293,14 @@ public:
         } else {
             auto rect = QRect((option.rect.left()),
                                     (option.rect.top()),
-                                    PREVIEW_CONTENT_WIDTH + PREVIEW_HOVER_BORDER * 2,
+                                    PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2,
                                     PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2)
                                 .marginsAdded(QMargins(-PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER));
             auto text = QFontMetrics(m_parent->font()).elidedText(index.data(WindowTitleRole).toString(), Qt::TextElideMode::ElideRight, rect.width() - PREVIEW_TITLE_HEIGHT);
             painter->drawText(rect, text);
 
             if (option.state.testFlag(QStyle::State_MouseOver)) {
-                hoverRect.setSize(QSize(PREVIEW_CONTENT_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2));
+                hoverRect.setSize(QSize(PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2));
                 hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
 
                 painter->save();
@@ -318,11 +321,12 @@ public:
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         if (!WM_HELPER->hasComposite()) {
-            return QSize(PREVIEW_CONTENT_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2);
+            return QSize(PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2);
         }
 
         auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
-        return calSize(pixmap.size()) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2); 
+        int width = qBound(PREVIEW_CONTENT_MIN_WIDTH, calSize(pixmap.size()).width(), PREVIEW_CONTENT_MAX_WIDTH);
+        return QSize(width, PREVIEW_CONTENT_HEIGHT) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2); 
     }
 
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
@@ -360,13 +364,15 @@ public:
 private:
     QSize calSize(const QSize &imageSize) const
     {
-        qreal factor = qreal(PREVIEW_CONTENT_HEIGHT) / imageSize.height();
-        auto scaled = imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
-        if (scaled.width() <= PREVIEW_CONTENT_WIDTH) {
-            return scaled;
+        qreal factor = 1.0f;
+        if (imageSize.height() > PREVIEW_CONTENT_HEIGHT) {
+            factor = qreal(PREVIEW_CONTENT_HEIGHT) / imageSize.height();
+        }
+        if (imageSize.width() * factor > PREVIEW_CONTENT_MAX_WIDTH) {
+            factor = qreal(PREVIEW_CONTENT_MAX_WIDTH) / imageSize.width();
         }
 
-        return {PREVIEW_CONTENT_WIDTH, PREVIEW_CONTENT_HEIGHT};
+        return imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
     }
 
 };
@@ -377,6 +383,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
     , m_isPreviewEntered(false)
     , m_isDockPreviewCount(0)
     , m_model(new AppItemWindowModel(this))
+    , m_titleWidget(new QWidget())
 {
     m_hideTimer = new QTimer(this);
     m_hideTimer->setSingleShot(true);
@@ -489,13 +496,6 @@ void X11WindowPreviewContainer::hideEvent(QHideEvent*)
 
 void X11WindowPreviewContainer::resizeEvent(QResizeEvent *event)
 {
-    m_previewTitle->setText(
-        QFontMetrics(m_previewTitle->font())
-            .elidedText(m_previewTitleStr,
-                        Qt::TextElideMode::ElideRight,
-                        width() - m_previewTitle->geometry().left() - (width() - m_closeAllButton->geometry().left()) - 1)
-    );
-
     updatePosition();
 }
 
@@ -542,12 +542,7 @@ void X11WindowPreviewContainer::updatePosition()
 void X11WindowPreviewContainer::updatePreviewTitle(const QString& title)
 {
     m_previewTitleStr = title;
-    m_previewTitle->setText(
-        QFontMetrics(m_previewTitle->font())
-            .elidedText(m_previewTitleStr,
-                        Qt::TextElideMode::ElideRight,
-                        width() - m_previewTitle->geometry().left() - (width() - m_closeAllButton->geometry().left()) - 1)
-    );
+    m_previewTitle->setText(m_previewTitleStr);
 }
 
 void X11WindowPreviewContainer::initUI()
@@ -556,9 +551,10 @@ void X11WindowPreviewContainer::initUI()
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* titleLayout = new QHBoxLayout;
     titleLayout->setContentsMargins(5, 0, 5, 0);
+    titleLayout->setSpacing(0);
 
     m_previewIcon = new QLabel(this);
-    m_previewTitle = new QLabel(this);
+    m_previewTitle = new DLabel(this);
     m_previewTitle->setFixedHeight(PREVIEW_TITLE_HEIGHT);
     m_previewIcon->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
 
@@ -569,6 +565,7 @@ void X11WindowPreviewContainer::initUI()
 
     m_previewIcon->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_previewTitle->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    m_previewTitle->setElideMode(Qt::ElideRight);
 
     auto updateWindowTitleColorType = [this](){
         QPalette pa = palette();
@@ -582,9 +579,10 @@ void X11WindowPreviewContainer::initUI()
     connect(DGuiApplicationHelper::instance(), & DGuiApplicationHelper::themeTypeChanged, this , updateWindowTitleColorType);
 
     titleLayout->addWidget(m_previewIcon);
+    titleLayout->addSpacing(6);  
     titleLayout->addWidget(m_previewTitle);
     titleLayout->addStretch();
-    titleLayout->addWidget(m_closeAllButton);
+    titleLayout->addWidget(m_closeAllButton, 0, Qt::AlignRight);
 
     m_view->setModel(m_model);
     m_view->setItemDelegate(new AppItemWindowDeletegate(m_view, this));
@@ -601,9 +599,16 @@ void X11WindowPreviewContainer::initUI()
     pal.setColor(QPalette::Base, Qt::transparent);
     m_view->setPalette(pal);
 
-    mainLayout->addLayout(titleLayout);
+    m_titleWidget->setLayout(titleLayout);
+
+    mainLayout->addWidget(m_titleWidget, 0, Qt::AlignHCenter);
+    mainLayout->addSpacing(PREVIEW_CONTENT_MARGIN);
     mainLayout->addWidget(m_view);
     mainLayout->setAlignment(m_view, Qt::AlignCenter);
+    mainLayout->setSpacing(0);
+    mainLayout->setContentsMargins(PREVIEW_CONTENT_MARGIN, PREVIEW_CONTENT_MARGIN,
+                                    PREVIEW_CONTENT_MARGIN, PREVIEW_CONTENT_MARGIN);
+
     setLayout(mainLayout);
 
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -625,20 +630,46 @@ void X11WindowPreviewContainer::updateSize()
     m_view->updateGeometry();
 
     auto screenSize = screen()->size();
-    screenSize -= QSize(m_direction % 2 == 0 ? 0 : m_baseWindow->width() + 20, m_direction % 2 == 0 ? m_baseWindow->height() + 20 : 0);
 
-    setMaximumSize(screenSize);
-    setMinimumSize(0, 0);
+    auto calFixHeight = [=]()-> int {
+        int resHeight = screenSize.height();
 
-    m_view->setFixedSize(m_view->viewportSizeHint());
+        bool beyondEdge = m_view->viewportSizeHint().height() + 2 * PREVIEW_CONTENT_MARGIN + PREVIEW_TITLE_HEIGHT > screenSize.height();
+        // 3 * PREVIEW_CONTENT_MARGIN = titleWidget到listview的距离 + 2 * margin
+        int listviewContainerHeight = m_view->viewportSizeHint().height() + 3 * PREVIEW_CONTENT_MARGIN  + PREVIEW_TITLE_HEIGHT;
+
+        if (m_direction % 2 == 0) {
+            // 2D模式下Listview纵向排列, 需要去掉任务栏高度, 所以减去 m_baseWindow->height()
+            resHeight = beyondEdge ? screenSize.height() - 2 * PREVIEW_CONTENT_MARGIN - m_baseWindow->height() : listviewContainerHeight;
+        } else {
+            resHeight = beyondEdge ? screenSize.height() - 2 * PREVIEW_CONTENT_MARGIN : listviewContainerHeight;
+        }
+
+        return resHeight;
+    };
+
+    auto calFixWidth = [=]()-> int {
+        int resWidth = screenSize.width();
+
+        bool beyondEdge = m_view->viewportSizeHint().width() + 2 * (PREVIEW_CONTENT_MARGIN + PREVIEW_CONTAINER_MARGIN) > screenSize.width();
+        int listviewContainerWidth = m_view->viewportSizeHint().width() + 2 * PREVIEW_CONTENT_MARGIN;
+
+        if (m_direction % 2 == 0) {
+            resWidth = beyondEdge ? screenSize.width() - 2 * PREVIEW_CONTENT_MARGIN : listviewContainerWidth;
+        } else {
+            resWidth = listviewContainerWidth;
+        }
+
+        return resWidth;
+    };
+
+    setFixedSize(calFixWidth(), calFixHeight());
 
     if (m_view->width() + this->contentsMargins().left() * 2 <= PREVIEW_MINI_WIDTH) {
         setMaximumWidth(PREVIEW_MINI_WIDTH);
     }
 
-    int maxContentWidth = std::max(m_view->width(), PREVIEW_CONTENT_WIDTH);
-    m_previewTitle->setMaximumWidth(maxContentWidth - m_previewIcon->width() - m_closeAllButton->width() - 20);
-
+    m_titleWidget->setFixedWidth(m_view->width());
     QTimer::singleShot(0, this, &X11WindowPreviewContainer::adjustSize);
 }
 

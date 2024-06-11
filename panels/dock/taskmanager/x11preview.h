@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-#include <QLabel>
+#include <DLabel>
 #include <QWidget>
 #include <QListView>
 #include <DToolButton>
@@ -62,9 +62,10 @@ private:
 
     AppItemWindowModel* m_model;
     PreviewsListView* m_view;
+    QWidget *m_titleWidget;
 
     QLabel* m_previewIcon;
-    QLabel* m_previewTitle;
+    DLabel* m_previewTitle;
     DToolButton* m_closeAllButton;
 
     QTimer* m_hideTimer;
