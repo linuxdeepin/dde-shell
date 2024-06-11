@@ -40,6 +40,8 @@ private:
     QWidget *m_centralWidget;
     QString m_itemKey;
     QMenu *m_menu;
+
+    bool m_isPanelPopupShow = false;
 };
 
 #endif // PLUGINSITEM_H
