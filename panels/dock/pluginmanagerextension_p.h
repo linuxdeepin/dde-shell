@@ -116,6 +116,8 @@ public:
 
     QWaylandSurface *surface() const;
 
+    Q_INVOKABLE void close() { send_close(); }
+
     QString pluginId() const;
     QString itemKey() const;
 
