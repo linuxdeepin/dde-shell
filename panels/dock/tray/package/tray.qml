@@ -115,6 +115,10 @@ AppletItem {
         target: DockCompositor
         function onPopupCreated(popupSurface)
         {
+            // Embed popup is plugin's child page in quickpanel
+            if (popupSurface.popupType === Dock.TrayPopupTypeEmbed)
+                return
+
             popupContent.shellSurface = popupSurface
             popup.popupType = popupSurface.popupType
             popup.defaultX = popupSurface.x
