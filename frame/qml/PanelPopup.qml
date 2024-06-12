@@ -10,6 +10,11 @@ Item {
     id: control
     visible: false
     default property alias popupContent: popup.contentChildren
+
+    property int margins: 10
+    property int popupX: 0
+    property int popupY: 0
+
     function open()
     {
         var window = Panel.popupWindow
@@ -23,11 +28,11 @@ Item {
             return popup.height + popup.topPadding + popup.bottomPadding
         })
 
-        window.xOffset = Qt.binding(function(){
-            return control.x
+        window.xOffset = Qt.binding(function() {
+            return control.popupX - control.width / 2
         })
-        window.yOffset = Qt.binding(function(){
-            return control.y
+        window.yOffset = Qt.binding(function() {
+            return control.popupY - control.height - control.margins
         })
         window.show()
         popup.open()

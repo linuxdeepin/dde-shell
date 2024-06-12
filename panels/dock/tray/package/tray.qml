@@ -24,18 +24,6 @@ AppletItem {
         id: popup
         width: popupContent.width
         height: popupContent.height
-        
-        property int defaultX: popup.x
-        property int defaultY: popup.y
-        property int popupType
-
-        onHeightChanged: {
-            popup.y = popup.defaultY - popup.height
-        }
-
-        onWidthChanged: {
-            popup.x =  popupType === Dock.TrayPopupTypeMenu ? popup.defaultX : popup.defaultX - popup.width / 2
-        }
 
         Item {
             anchors.fill: parent
@@ -120,9 +108,8 @@ AppletItem {
                 return
 
             popupContent.shellSurface = popupSurface
-            popup.popupType = popupSurface.popupType
-            popup.defaultX = popupSurface.x
-            popup.defaultY = popupSurface.popupType === Dock.TrayPopupTypeMenu ? popupSurface.y : -10
+            popup.popupX = popupSurface.x
+            popup.popupY = popupSurface.popupType === Dock.TrayPopupTypeMenu ? popupSurface.y : 0
             popup.open()
         }
     }
