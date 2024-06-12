@@ -36,7 +36,8 @@ DApplet *DAppletItem::applet() const
 DApplet *DAppletItem::qmlAttachedProperties(QObject *object)
 {
     if (auto context = qmlContext(object)) {
-        return context->contextProperty("_ds_applet").value<DApplet *>();
+        if (context->isValid())
+            return context->contextProperty("_ds_applet").value<DApplet *>();
     }
     return nullptr;
 }
