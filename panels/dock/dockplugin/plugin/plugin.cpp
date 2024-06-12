@@ -127,6 +127,17 @@ bool EmbedPlugin::contains(QWindow *window)
     return s_map.keys().contains(window);
 }
 
+bool EmbedPlugin::contains(const QString &itemKey, int type)
+{
+    for (const auto *plugin : s_map.values()) {
+        if (itemKey == plugin->itemKey() && type == plugin->pluginType()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 class PluginPopupPrivate
 {
 public:

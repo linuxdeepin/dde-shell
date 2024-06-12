@@ -56,17 +56,19 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
     if (flag & Dock::Type_Quick || flag & Dock::Type_Tool ||
         flag & Dock::Type_System || flag & Dock::Type_Tray || 
         flag & Dock::Attribute_Normal) {
-        PluginItem *item = new PluginItem(itemInter, itemKey);
-        Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
-        initConnections(plugin);
-        plugin->setPluginFlags(item->flags(itemInter));
-        plugin->setPluginId(itemInter->pluginName());
-        plugin->setItemKey(itemKey);
-        plugin->setPluginType(Plugin::EmbedPlugin::Tray);
-        Q_EMIT plugin->requestMessage("plugin test message");
-        item->windowHandle()->hide();
-        item->show();
-        m_pluginItems << item;
+        if (!Plugin::EmbedPlugin::contains(itemKey, Plugin::EmbedPlugin::Tray)) {
+            PluginItem *item = new PluginItem(itemInter, itemKey);
+            Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
+            initConnections(plugin);
+            plugin->setPluginFlags(item->flags(itemInter));
+            plugin->setPluginId(itemInter->pluginName());
+            plugin->setItemKey(itemKey);
+            plugin->setPluginType(Plugin::EmbedPlugin::Tray);
+            Q_EMIT plugin->requestMessage("plugin test message");
+            item->windowHandle()->hide();
+            item->show();
+            m_pluginItems << item;
+        }
     }
     if (flag & Dock::Type_Fixed) {
         PluginItem *item = new PluginItem(itemInter, itemKey);
