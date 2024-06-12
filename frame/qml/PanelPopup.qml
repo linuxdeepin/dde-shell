@@ -10,13 +10,18 @@ Item {
     id: control
     visible: false
     default property alias popupContent: popup.contentChildren
-    Panel.popupWindow.width: control.width
-    Panel.popupWindow.height: control.height
     function open()
     {
         var window = Panel.popupWindow
         if (!window)
             return
+
+        window.width = Qt.binding(function() {
+            return popup.width + popup.leftPadding + popup.rightPadding
+        })
+        window.height = Qt.binding(function() {
+            return popup.height + popup.topPadding + popup.bottomPadding
+        })
 
         window.xOffset = Qt.binding(function(){
             return control.x
@@ -26,6 +31,7 @@ Item {
         })
         window.show()
         popup.open()
+        window.requestActivate()
     }
     function close()
     {
@@ -35,6 +41,20 @@ Item {
 
         window.close()
         popup.close()
+    }
+
+    Connections {
+        target: Panel.popupWindow
+        function onActiveChanged()
+        {
+            var window = Panel.popupWindow
+            if (!window)
+                return
+            // TODO why activeChanged is not emit.
+            if (Panel.popupWindow && !Panel.popupWindow.active) {
+                control.close()
+            }
+        }
     }
 
     Popup {
@@ -49,10 +69,11 @@ Item {
                 return
             window.visibleChanged.connect(function() {
                 if (Panel.popupWindow && !Panel.popupWindow.visible)
-                    popup.close()
+                    control.close()
             })
         }
         // TODO dtk's blur causes blurred screen.
         background: null
     }
+    Component.onDestruction: control.close()
 }
