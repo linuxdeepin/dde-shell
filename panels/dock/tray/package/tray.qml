@@ -7,10 +7,11 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtWayland.Compositor
 import Qt.labs.platform 1.1 as LP
+import org.deepin.dtk 1.0 as D
 
 import org.deepin.ds 1.0
-import org.deepin.dtk 1.0 as D
 import org.deepin.ds.dock 1.0
+import org.deepin.ds.dock.tray 1.0 as DDT
 import org.deepin.ds.dock.tray.quickpanel 1.0 as TQP
 
 AppletItem {
@@ -18,8 +19,8 @@ AppletItem {
 
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 25
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : trayContainter.suggestedImplicitWidth
-    implicitHeight: useColumnLayout ? trayContainter.suggestedImplicitHeight : Panel.rootObject.dockSize
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : overflowId.implicitWidth
+    implicitHeight: useColumnLayout ? overflowId.implicitHeight : Panel.rootObject.dockSize
 
     PanelPopup {
         id: popup
@@ -47,59 +48,15 @@ AppletItem {
         property bool trayVisible: true
         columnSpacing: 10
         rowSpacing: 10
-        OverflowContainer {
-            id: trayContainter
-            useColumnLayout: tray.useColumnLayout
-            model: DockCompositor.trayPluginSurfaces
-            spacing: 10
-            delegate: Item {
-                id: pluginItem
-                property var plugin: modelData
-                property var popupShow: false
-                implicitHeight: surfaceItem.height
-                implicitWidth: surfaceItem.width
-
-                property var itemGlobalPoint: {
-                    var a = pluginItem
-                    var x = 0, y = 0
-                    while(a.parent) {
-                        x += a.x
-                        y += a.y
-                        a = a.parent
-                    }
-
-                    return Qt.point(x, y)
-                }
-
-                ShellSurfaceItem {
-                    id: surfaceItem
-                    anchors.centerIn: parent
-                    shellSurface: plugin
-                }
-
-                Component.onCompleted: {
-                    plugin.updatePluginGeometry(Qt.rect(itemGlobalPoint.x, itemGlobalPoint.y, surfaceItem.width, surfaceItem.height))
-                }
-
-                Timer {
-                    id: updatePluginItemGeometryTimer
-                    interval: 500
-                    running: false
-                    repeat: false
-                    onTriggered: {
-                        if (itemGlobalPoint.x > 0 && itemGlobalPoint.y > 0) {
-                            plugin.updatePluginGeometry(Qt.rect(itemGlobalPoint.x, itemGlobalPoint.y, surfaceItem.width, surfaceItem.height))
-                        }
-                    }
-                }
-
-                onItemGlobalPointChanged: {
-                    updatePluginItemGeometryTimer.start()
-                }
-            }
-        }
 
         TQP.QuickPanel { }
+
+        TrayContainer {
+            isHorizontal: !tray.useColumnLayout
+            model: DDT.TraySortOrderModel
+            collapsed: DDT.TraySortOrderModel.collapsed
+            color: "transparent"
+        }
     }
 
     Connections {
@@ -114,6 +71,21 @@ AppletItem {
             popup.popupX = popupSurface.x
             popup.popupY = popupSurface.popupType === Dock.TrayPopupTypeMenu ? popupSurface.y : 0
             popup.open()
+        }
+    }
+
+    Connections {
+        target: DockCompositor
+        function onPluginSurfacesUpdated() {
+            let surfacesData = []
+            for (let i = 0; i < DockCompositor.trayPluginSurfaces.count; i++) {
+                let item = DockCompositor.trayPluginSurfaces.get(i).shellSurface
+                let surfaceId = `${item.pluginId}::${item.itemKey}`
+                surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin"})
+                console.log(surfaceId, item, item.pluginId, "surfaceId")
+            }
+            DDT.TraySortOrderModel.availableSurfaces = surfacesData
+            console.log("onPluginSurfacesUpdated", surfacesData)
         }
     }
 

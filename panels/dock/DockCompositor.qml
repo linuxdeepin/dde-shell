@@ -24,6 +24,7 @@ Item {
 
     property var compositor: waylandCompositor
 
+    signal pluginSurfacesUpdated()
     signal popupCreated(var popup)
 
     function removeDockPluginSurface(model, object) {
@@ -33,6 +34,22 @@ Item {
                 break
             }
         }
+    }
+
+    function findSurfaceFromModel(model, surfaceId) {
+        for (var i = 0; i < model.count; ++i) {
+            let item = model.get(i).shellSurface
+            if (surfaceId === `${item.pluginId}::${item.itemKey}`) {
+                console.log("found!", surfaceId)
+                return item
+            }
+        }
+        console.log("not found", surfaceId)
+        return null
+    }
+
+    function findSurface(surfaceId) {
+        return findSurfaceFromModel(trayPluginSurfaces, surfaceId)
     }
 
     WaylandCompositor {
@@ -50,10 +67,12 @@ Item {
                 } else if (dockPluginSurface.pluginType === Dock.Fixed) {
                     fixedPluginSurfaces.append({shellSurface: dockPluginSurface})
                 }
+                dockCompositor.pluginSurfacesUpdated()
             }
 
             onPluginSurfaceDestroyed: (dockPluginSurface) => {
                 removeDockPluginSurface(trayPluginSurfaces, dockPluginSurface)
+                dockCompositor.pluginSurfacesUpdated()
             }
 
             onPluginPopupCreated: (popup) => {
