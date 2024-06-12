@@ -522,6 +522,14 @@ Window {
             return Panel.colorTheme
         })
 
+        DockCompositor.dockColorTheme = Qt.binding(function(){
+            return Panel.colorTheme
+        })
+
+        DockCompositor.dockPosition = Qt.binding(function(){
+            return Panel.position
+        })
+
         dock.itemIconSizeBase = dock.dockItemMaxSize
 
         changeDragAreaAnchor()
