@@ -34,6 +34,7 @@ DockPanel::DockPanel(QObject * parent)
     : DPanel(parent)
     , m_theme(ColorTheme::Dark)
     , m_hideState(Hide)
+    , m_dockScreen(nullptr)
     , m_compositorReady(false)
     , m_launcherShown(false)
 {
@@ -61,6 +62,27 @@ bool DockPanel::init()
     DockDaemonAdaptor* dockDaemonAdaptor = new DockDaemonAdaptor(proxy);
     QDBusConnection::sessionBus().registerService("org.deepin.dde.daemon.Dock1");
     QDBusConnection::sessionBus().registerObject("/org/deepin/dde/daemon/Dock1", "org.deepin.dde.daemon.Dock1", proxy);
+    connect(this, &DockPanel::rootObjectChanged, this, [this](){
+        connect(window(), &QWindow::screenChanged, this, [ = ] {
+            // FIXME: find why window screen changed and fix it
+            if (m_dockScreen) {
+                if (m_dockScreen != window()->screen() && qApp->screens().contains( m_dockScreen)) {
+                    qWarning() << "m_dockScreen" << m_dockScreen << m_dockScreen->name() << "window()->screen()" << window()->screen() << window()->screen()->name();
+                    QTimer::singleShot(10, this, [this](){
+                        window()->setScreen(m_dockScreen); 
+                    });
+                }
+            }else {
+                m_dockScreen = window()->screen();
+            }
+        });
+    });
+    connect(this, &DockPanel::hideModeChanged, this, [this](){
+        if (hideMode() != KeepShowing)
+            setHideState(Hide);
+        else
+            setHideState(Show);
+    });
     connect(SETTINGS, &DockSettings::positionChanged, this, [this, dockDaemonAdaptor](){
         Q_EMIT positionChanged(position());
         Q_EMIT dockDaemonAdaptor->PositionChanged(position());
@@ -69,6 +91,10 @@ bool DockPanel::init()
         QMetaObject::invokeMethod(this,[this](){
             Q_EMIT onWindowGeometryChanged();
         });
+    });
+    connect(SETTINGS, &DockSettings::showInPrimaryChanged, this, [this, dockDaemonAdaptor](){
+        updateDockScreen();
+        Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
     });
 
     connect(this, &DockPanel::frontendWindowRectChanged, dockDaemonAdaptor, &DockDaemonAdaptor::FrontendWindowRectChanged);
@@ -120,7 +146,7 @@ bool DockPanel::init()
 
 
     connect(m_helper, &DockHelper::mouseInDockAreaChanged, this, [this](){
-        if (hideMode() == KeepShowing) return;
+        if (hideMode() == KeepShowing || m_launcherShown) return;
         if (m_helper->mouseInDockArea()) {
             m_hideState = Show;
             Q_EMIT hideStateChanged(m_hideState);
@@ -266,8 +292,6 @@ void DockPanel::setCompositorReady(bool ready)
 
 HideState DockPanel::hideState()
 {
-    if (hideMode() == KeepShowing || m_launcherShown)
-        return Show;
     return m_hideState;
 }
 
@@ -327,8 +351,14 @@ void DockPanel::launcherVisibleChanged(bool visible)
     if (visible == m_launcherShown) return;
 
     m_launcherShown = visible;
-    if (hideMode() != KeepShowing) {
-        Q_EMIT hideStateChanged(hideState());
+    if (m_launcherShown) {
+        setHideState(Show);
+    } else {
+        if (hideMode() != KeepShowing && !m_helper->mouseInDockArea()) {
+            setHideState(Hide);
+        } else {
+            setHideState(Show);
+        }
     }
 }
 
@@ -337,7 +367,7 @@ void DockPanel::updateDockScreen()
     auto win = window();
     if (!win)
         return;
-    win->setScreen(qApp->primaryScreen());
+    setDockScreen(qApp->primaryScreen());
 }
 
 void DockPanel::setMouseGrabEnabled(QQuickItem *item, bool enabled)
@@ -365,10 +395,32 @@ void DockPanel::setShowInPrimary(bool newShowInPrimary)
         connect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockPanel::updateDockScreen, Qt::UniqueConnection);
     else
         disconnect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockPanel::updateDockScreen);
-    emit showInPrimaryChanged();
+    Q_EMIT showInPrimaryChanged(showInPrimary());
 }
 
 D_APPLET_CLASS(DockPanel)
+
+void DockPanel::setHideState(HideState newHideState)
+{
+    if (m_hideState == newHideState)
+        return;
+    m_hideState = newHideState;
+    Q_EMIT hideStateChanged(m_hideState);
+}
+
+QScreen * DockPanel::dockScreen()
+{
+    return m_dockScreen;
+}
+
+void DockPanel::setDockScreen(QScreen *screen)
+{
+    if (m_dockScreen == screen)
+        return;
+    m_dockScreen = screen;
+    window()->setScreen(m_dockScreen);
+    Q_EMIT dockScreenChanged(m_dockScreen);
+}
 }
 
 #include "dockpanel.moc"

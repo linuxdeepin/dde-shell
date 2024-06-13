@@ -44,7 +44,7 @@ Window {
 
     DLayerShellWindow.anchors: position2Anchors(Applet.position)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
-    DLayerShellWindow.exclusionZone: Applet.dockSize
+    DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing ? Applet.dockSize : 0
 
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
