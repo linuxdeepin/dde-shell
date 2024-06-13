@@ -26,7 +26,7 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(QRect frontendWindowRect READ frontendWindowRect NOTIFY frontendWindowRectChanged FINAL)
     Q_PROPERTY(bool compositorReady READ compositorReady WRITE setCompositorReady NOTIFY compositorReadyChanged FINAL)
 
-    Q_PROPERTY(HideState hideState READ hideState NOTIFY hideStateChanged FINAL)
+    Q_PROPERTY(HideState hideState READ hideState WRITE setHideState NOTIFY hideStateChanged FINAL)
     Q_PROPERTY(ColorTheme colorTheme READ colorTheme WRITE setColorTheme NOTIFY colorThemeChanged FINAL)
 
     Q_PROPERTY(uint dockSize READ dockSize WRITE setDockSize NOTIFY dockSizeChanged FINAL)
@@ -81,6 +81,10 @@ public:
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);
 
+    void setHideState(HideState newHideState);
+    QScreen* dockScreen();
+    void setDockScreen(QScreen *screen);
+
 private Q_SLOTS:
     void onWindowGeometryChanged();
     void loadDockPlugins();
@@ -99,12 +103,14 @@ Q_SIGNALS:
     void positionChanged(Position position);
     void itemAlignmentChanged(ItemAlignment alignment);
     void indicatorStyleChanged(IndicatorStyle style);
-    void showInPrimaryChanged();
+    void showInPrimaryChanged(bool showInPrimary);
+    void dockScreenChanged(QScreen *screen);
 
 private:
     ColorTheme m_theme;
     HideState m_hideState;
     DockHelper* m_helper;
+    QScreen *m_dockScreen;
     bool m_compositorReady;
     bool m_launcherShown;
 };

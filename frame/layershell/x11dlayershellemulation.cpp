@@ -44,6 +44,7 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     auto screen = m_window->screen();
     connect(screen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
     connect(screen, &QScreen::geometryChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
+    connect(qApp, &QGuiApplication::primaryScreenChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
     connect(m_window, &QWindow::screenChanged, this, [this](QScreen *nowScreen){
         for (auto screen : qApp->screens()) {
             screen->disconnect(this);
@@ -175,10 +176,10 @@ void LayerShellEmulation::onExclusionZoneChanged()
         // but there is no issue.
         int boundary = 0;
         for (auto screen : qApp->screens()) {
-            if (boundary < screen->virtualGeometry().bottom())
-                boundary = screen->virtualGeometry().bottom();
+            if (boundary < screen->geometry().bottom())
+                boundary = screen->geometry().bottom();
         }
-        strut_partial.bottom = (m_dlayerShellWindow->exclusionZone() + boundary - rect.height()) * scaleFactor;
+        strut_partial.bottom = (m_dlayerShellWindow->exclusionZone() + boundary - rect.bottom()) * scaleFactor;
         strut_partial.bottom_start_x = rect.x();
         strut_partial.bottom_end_x = rect.x() + m_window->width();
     }

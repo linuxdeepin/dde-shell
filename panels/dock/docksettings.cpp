@@ -146,6 +146,7 @@ void DockSettings::init()
         m_alignment = string2ItenAlignment(m_dockConfig->value(keyItemAlignment).toString());
         m_style = string2IndicatorStyle(m_dockConfig->value(keyIndicatorStyle).toString());
         m_pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
+        m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
 
         connect(m_dockConfig.data(), &DConfig::valueChanged, this, [this](const QString& key){
             if (keyDockSize == key) {
