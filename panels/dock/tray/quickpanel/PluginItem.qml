@@ -4,7 +4,6 @@
 
 import QtQuick
 import QtQuick.Controls
-import QtWayland.Compositor
 
 import org.deepin.dtk 1.0
 
@@ -18,15 +17,10 @@ Control {
         dragItem: root
     }
 
-    ShellSurfaceItem {
+    ShellSurfaceItemProxy {
         id: surfaceLayer
         anchors.centerIn: parent
         anchors.fill: parent
-        // Rectangle {
-        //     anchors.fill: parent
-        //     opacity: 0.3
-        //     color: "gray"
-        // }
     }
 
     // TODO Control's hovered is false when hover ShellSurfaceItem.

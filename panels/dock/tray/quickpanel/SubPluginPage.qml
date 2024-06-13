@@ -54,15 +54,10 @@ Item {
         Item { Layout.fillHeight: true; Layout.preferredWidth: 1 }
 
         // content
-        ShellSurfaceItem {
+        ShellSurfaceItemProxy {
             id: surfaceLayer
             Layout.fillHeight: true
             Layout.fillWidth: true
-            // Rectangle {
-            //     anchors.fill: parent
-            //     color: "red"
-            //     opacity: 0.3
-            // }
         }
 
         Item { Layout.fillHeight: true; Layout.preferredWidth: 1 }
