@@ -80,5 +80,8 @@ Item {
         // TODO dtk's blur causes blurred screen.
         background: null
     }
-    Component.onDestruction: control.close()
+    Component.onDestruction: {
+        if (popup.visible)
+            control.close()
+    }
 }
