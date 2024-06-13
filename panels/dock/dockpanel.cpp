@@ -316,14 +316,13 @@ void DockPanel::loadDockPlugins()
     proc.setProgram(QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR));
 #endif
 
-    QStringList dirs = pluginDirs;
-#ifdef QT_DEBUG
+    QStringList dirs;;
     const auto pluginsPath = qEnvironmentVariable("TRAY_DEBUG_PLUGIN_PATH");
-    if (!pluginsPath.isEmpty()) {
-        dirs.clear();
+    if (!pluginsPath.isEmpty())
         dirs << pluginsPath.split(QDir::listSeparator());
-    }
-#endif
+
+    if (dirs.isEmpty())
+        dirs << pluginDirs;
 
     for (auto &pluginDir : dirs) {
         QDir dir(pluginDir);
