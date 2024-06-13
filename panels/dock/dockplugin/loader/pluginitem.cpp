@@ -13,12 +13,13 @@
 
 const static Dock::PluginFlags UNADAPTED_PLUGIN_FLAGS = Dock::PluginFlag::Type_Unadapted | Dock::PluginFlag::Attribute_Normal;
 
-PluginItem::PluginItem(PluginsItemInterface *pluginItemInterface, const QString &itemKey, QWidget *parent)
+PluginItem::PluginItem(PluginsItemInterface *pluginItemInterface, const QString &itemKey, const QString &quickItemKey, QWidget *parent)
     : QWidget(parent)
     , m_pluginInterface(pluginItemInterface)
     , m_pluginInterfacev2(dynamic_cast<PluginsItemInterfaceV2*>(pluginItemInterface))
     , m_centralWidget(pluginItemInterface->itemWidget(itemKey))
     , m_itemKey(itemKey)
+    , m_quickItemKey(quickItemKey)
     , m_menu(new QMenu(this))
 {
     winId();
@@ -34,24 +35,24 @@ PluginItem::PluginItem(PluginsItemInterface *pluginItemInterface, const QString 
 
 PluginItem::~PluginItem() = default;
 
-int PluginItem::flags(PluginsItemInterface *pluginsItemInterface)
+int PluginItem::flags(QPluginLoader *pluginLoader, PluginsItemInterface *pluginsItemInterface)
 {
     auto pluginsItemInterfacev2 = dynamic_cast<PluginsItemInterfaceV2*>(pluginsItemInterface);
     if (pluginsItemInterfacev2) {
         return pluginsItemInterfacev2->flags();
     }
-    auto obj = dynamic_cast<QObject*>(pluginsItemInterfacev2);
+    auto obj = pluginLoader->instance();
     if (!obj) {
-        qWarning() << "failed to convert v1 to object!";
+        qWarning() << "the instance of plugin loader is nullptr";
         return UNADAPTED_PLUGIN_FLAGS;
     }
     bool ok;
     auto flags = obj->property("pluginFlags").toInt(&ok);
-    if (ok) {
-        return flags;
+    if (!ok) {
+        qWarning() << "failed to pluginFlags toInt!";
+        return UNADAPTED_PLUGIN_FLAGS;
     }
-
-    return UNADAPTED_PLUGIN_FLAGS;
+    return flags;
 }
 
 void PluginItem::mouseLeftButtonClicked()
@@ -96,13 +97,17 @@ void PluginItem::mouseLeftButtonClicked()
 void PluginItem::mouseRightButtonClicked()
 {
     if (m_menu->actions().isEmpty()) {
-        const QString menuJson = m_pluginInterface->itemContextMenu(m_itemKey);
-        if (menuJson.isEmpty())
+        const QString menuJson = m_pluginInterface->itemContextMenu(m_quickItemKey.isEmpty() ? m_itemKey : m_quickItemKey);
+        if (menuJson.isEmpty()) {
+            qWarning() << "itemContextMenu is empty!";
             return;
+        }
 
         QJsonDocument jsonDocument = QJsonDocument::fromJson(menuJson.toLocal8Bit().data());
-        if (jsonDocument.isNull())
+        if (jsonDocument.isNull()) {
+            qWarning() << "jsonDocument is null!";
             return;
+        }
 
         QJsonObject jsonMenu = jsonDocument.object();
 
@@ -130,7 +135,8 @@ void PluginItem::mouseRightButtonClicked()
     pluginPopup->setPluginId(m_pluginInterface->pluginName());
     pluginPopup->setItemKey(m_itemKey);
     pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeMenu);
-    pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
+    pluginPopup->setX(geometry.x() + geometry.width() / 2);
+    pluginPopup->setY(geometry.y() + geometry.height() / 2);
     m_menu->setFixedSize(m_menu->sizeHint());
     m_isPanelPopupShow = false;
     m_menu->exec();

@@ -16,13 +16,13 @@
 #include <DGuiApplicationHelper>
 #include <qglobal.h>
 
-
 DGUI_USE_NAMESPACE
 
 namespace dock {
-WidgetPlugin::WidgetPlugin(PluginsItemInterface* pluginsItemInterface)
+WidgetPlugin::WidgetPlugin(PluginsItemInterface* pluginsItemInterface, QPluginLoader *pluginLoader)
     : QObject()
     , m_pluginsItemInterface(pluginsItemInterface)
+    , m_pluginLoader(pluginLoader)
 {
     QMetaObject::invokeMethod(this, [this](){
         m_pluginsItemInterface->init(this);
@@ -39,12 +39,12 @@ WidgetPlugin::~WidgetPlugin()
 void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QString &itemKey)
 {
     qInfo() << "itemAdded:" << itemKey;
-    auto flag = PluginItem::flags(itemInter);
+    auto flag = PluginItem::flags(m_pluginLoader,itemInter);
     if (flag & Dock::Type_Quick) {
-        PluginItem *item = new PluginItem(itemInter, QUICK_ITEM_KEY);
+        PluginItem *item = new PluginItem(itemInter, QUICK_ITEM_KEY, itemKey);
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin);
-        plugin->setPluginFlags(item->flags(itemInter));
+        plugin->setPluginFlags(flag);
         plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
         plugin->setPluginType(Plugin::EmbedPlugin::Quick);
@@ -60,7 +60,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
             PluginItem *item = new PluginItem(itemInter, itemKey);
             Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
             initConnections(plugin);
-            plugin->setPluginFlags(item->flags(itemInter));
+            plugin->setPluginFlags(flag);
             plugin->setPluginId(itemInter->pluginName());
             plugin->setItemKey(itemKey);
             plugin->setPluginType(Plugin::EmbedPlugin::Tray);
@@ -74,7 +74,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         PluginItem *item = new PluginItem(itemInter, itemKey);
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin);
-        plugin->setPluginFlags(item->flags(itemInter));
+        plugin->setPluginFlags(flag);
         plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
         plugin->setPluginType(Plugin::EmbedPlugin::Fixed);

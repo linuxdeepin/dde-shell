@@ -17,9 +17,9 @@ class PluginItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit PluginItem(PluginsItemInterface *pluginInterface, const QString &itemKey, QWidget *parent = nullptr);
+    explicit PluginItem(PluginsItemInterface *pluginInterface, const QString &itemKey, const QString &quickItemKey = QString(), QWidget *parent = nullptr);
     ~PluginItem() override;
-    static int flags(PluginsItemInterface *pluginsItemInterface);
+    static int flags(QPluginLoader *pluginLoader, PluginsItemInterface *pluginsItemInterface);
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;
@@ -39,9 +39,11 @@ private:
     PluginsItemInterfaceV2 *m_pluginInterfacev2;
     QWidget *m_centralWidget;
     QString m_itemKey;
+    QString m_quickItemKey;
     QMenu *m_menu;
 
     bool m_isPanelPopupShow = false;
+    static QPluginLoader *m_pluginLoader;
 };
 
 #endif // PLUGINSITEM_H

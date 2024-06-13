@@ -24,7 +24,7 @@ class WidgetPlugin : public QObject, public PluginProxyInterface
     Q_OBJECT
 
 public:
-    WidgetPlugin(PluginsItemInterface* pluginItem);
+    WidgetPlugin(PluginsItemInterface* pluginItem, QPluginLoader *pluginLoader);
     ~WidgetPlugin();
 
     // proxy interface
@@ -51,6 +51,7 @@ private:
     PluginsItemInterface* m_pluginsItemInterface;
     QScopedPointer<PluginItem> m_pluginItem;
     QList<PluginItem*> m_pluginItems;
+    QPluginLoader* m_pluginLoader;
 };
 
 }
