@@ -27,6 +27,18 @@ AppletItem {
         width: popupContent.width
         height: popupContent.height
 
+        function delayOpen(interval) {
+            if (interval > 0) {
+                delayTimer.interval = interval
+                delayTimer.start()
+            } else {
+                if (delayTimer.running) {
+                    delayTimer.stop()
+                }
+                open()
+            }
+        }
+
         Item {
             anchors.fill: parent
             ShellSurfaceItem {
@@ -34,6 +46,13 @@ AppletItem {
                 anchors.centerIn: parent
                 onSurfaceDestroyed: {
                     popup.close()
+                }
+            }
+
+            Timer {
+                id: delayTimer
+                onTriggered: {
+                    popup.open()
                 }
             }
         }
@@ -70,7 +89,11 @@ AppletItem {
             popupContent.shellSurface = popupSurface
             popup.popupX = popupSurface.x
             popup.popupY = popupSurface.popupType === Dock.TrayPopupTypeMenu ? popupSurface.y : 0
-            popup.open()
+            if (popupSurface.popupType === Dock.TrayPopupTypeTooltip) {
+                popup.delayOpen(100)
+            } else {
+                popup.delayOpen(0)
+            }
         }
     }
 
