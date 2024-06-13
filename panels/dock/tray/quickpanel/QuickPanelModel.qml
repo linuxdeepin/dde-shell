@@ -9,5 +9,5 @@ import org.deepin.ds.dock.tray.quickpanel 1.0
 QuickPanelProxyModel {
     id: root
 
-    signal requestShowSubPlugin(var plugin, var subSurface)
+    signal requestShowSubPlugin(var pluginId, var subSurface)
 }

@@ -16,11 +16,11 @@ Item {
 
     Connections {
         target: model
-        function onRequestShowSubPlugin(plugin, surface) {
-            console.log("show subplugin, plugin")
+        function onRequestShowSubPlugin(pluginId, surface) {
+            console.log("show subplugin, plugin", pluginId)
             panelView.push(subPluginPageLoader,
                            {
-                               pluginKey: plugin,
+                               pluginId: pluginId,
                                model: root.model,
                                shellSurface: surface
                            },
