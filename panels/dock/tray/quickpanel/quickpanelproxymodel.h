@@ -13,8 +13,8 @@ namespace dock {
 class QuickPanelProxyModel : public QSortFilterProxyModel, public QQmlParserStatus
 {
     Q_OBJECT
-    Q_PROPERTY(QString trayItemPluginName READ trayItemPluginName WRITE setTrayItemPluginName NOTIFY trayItemPluginNameChanged FINAL)
-    Q_PROPERTY(QObject* traySurfaceItem READ traySurfaceItem NOTIFY traySurfaceItemChanged FINAL)
+    Q_PROPERTY(QString trayItemPluginId READ trayItemPluginId WRITE setTrayItemPluginId NOTIFY trayItemPluginIdChanged FINAL)
+    Q_PROPERTY(QObject* trayItemSurface READ trayItemSurface NOTIFY trayItemSurfaceChanged FINAL)
     Q_PROPERTY(QAbstractItemModel* trayPluginModel READ trayPluginModel WRITE setTrayPluginModel NOTIFY trayPluginModelChanged FINAL)
     QML_NAMED_ELEMENT(QuickPanelProxyModel)
     Q_INTERFACES(QQmlParserStatus)
@@ -26,17 +26,17 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    QObject *traySurfaceItem() const;
+    QObject *trayItemSurface() const;
 
-    QString trayItemPluginName() const;
-    void setTrayItemPluginName(const QString &newTrayItemPluginName);
+    QString trayItemPluginId() const;
+    void setTrayItemPluginId(const QString &newTrayItemPluginId);
 
     QAbstractItemModel *trayPluginModel() const;
     void setTrayPluginModel(QAbstractItemModel *newTrayPluginModel);
 
 signals:
-    void traySurfaceItemChanged();
-    void trayItemPluginNameChanged();
+    void trayItemSurfaceChanged();
+    void trayItemPluginIdChanged();
 
     void trayPluginModelChanged();
 
@@ -56,19 +56,21 @@ private:
     int surfaceType(const QModelIndex &index) const;
     int surfaceOrder(const QModelIndex &index) const;
     QString surfacePluginId(const QModelIndex &index) const;
-    QString surfaceName(const QModelIndex &index) const;
+    QString surfaceItemKey(const QModelIndex &index) const;
+    QString surfaceDisplayName(const QModelIndex &index) const;
     QVariant surfaceValue(const QModelIndex &index, const QByteArray &roleName) const;
     QModelIndex surfaceIndex(const QString &pluginId) const;
     QObject *surfaceObject(const QModelIndex &index) const;
+    QObject *traySurfaceObject(const QString &pluginId) const;
     int roleByName(const QByteArray &roleName) const;
     QAbstractListModel *surfaceModel() const;
 private slots:
-    void updateTraySurfaceItem();
+    void updateTrayItemSurface();
 
 private:
     QStringList m_quickPlugins;
     QStringList m_hideInPanelPlugins;
-    QString m_trayItemPluginName;
+    QString m_trayItemPluginId;
     QAbstractItemModel *m_trayPluginModel = nullptr;
 };
 

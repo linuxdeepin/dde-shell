@@ -10,6 +10,8 @@ import org.deepin.dtk 1.0
 Control {
     id: root
     property alias shellSurface: surfaceLayer.shellSurface
+    property alias itemKey: dragLayer.itemKey
+    property alias traySurface: dragLayer.fallbackDragImage
 
     DragItem {
         id: dragLayer

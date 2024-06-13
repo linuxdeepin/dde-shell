@@ -5,6 +5,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
+import QtWayland.Compositor
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0
@@ -14,16 +15,17 @@ Item {
     id: root
 
     required property Item dragItem
+    required property string itemKey
+    required property var fallbackDragImage
 
     Component.onCompleted: {
         dragItem.Drag.keys = [
-            "text/x-dde-launcher-dnd-desktopId"
+            root.itemKey
         ]
         dragItem.Drag.mimeData = {
-            "text/x-dde-launcher-dnd-desktopId": "dde-calendar.desktop"
+            "text/RequestDock": "plugin/quick"
         }
         dragItem.Drag.dragType = Drag.Automatic
-        dragItem.Drag.supportedActions = Qt.CopyAction
         dragItem.Drag.supportedActions = Qt.CopyAction
         dragItem.DQuickDrag.hotSpotScale = Qt.binding(function () {
             return Qt.size(0.5, 0.5)
@@ -36,13 +38,11 @@ Item {
         })
     }
 
-    property string fallbackDragImage: "computer-symbolic"
     property string draggingImage
     property size fallbackIconSize: Qt.size(16, 16)
 
     property Component overlayWindow: QuickDragWindow {
         property size dragItemSize
-        property string iconName
         property point startDragPoint
         property point currentDragPoint
         property int endDragPointArea
@@ -71,16 +71,28 @@ Item {
             return h
         }
 
-        iconName: !isFallbackIcon ? root.draggingImage : root.fallbackDragImage
         height: getHeight()
-        width: (dragItemSize.width * 1.0 / dragItemSize.height) * height
+        width: !isFallbackIcon ? (dragItemSize.width * 1.0 / dragItemSize.height) * height : root.fallbackIconSize.width
 
-        DciIcon {
-            id: iconView
+        Loader {
+            active: !isFallbackIcon
             anchors.fill: parent
-            sourceSize: Qt.size(width, height)
-            asynchronous: false
-            name: iconName
+            sourceComponent: DciIcon {
+                id: iconView
+                anchors.fill: parent
+                sourceSize: Qt.size(width, height)
+                asynchronous: false
+                name: root.draggingImage
+            }
+        }
+
+        Loader {
+            active: isFallbackIcon
+            anchors.fill: parent
+            sourceComponent: ShellSurfaceItem {
+                anchors.centerIn: parent
+                shellSurface: root.fallbackDragImage
+            }
         }
     }
 

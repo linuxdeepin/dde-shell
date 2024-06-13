@@ -14,7 +14,7 @@ Item {
     implicitWidth: childrenRect.width
     implicitHeight: childrenRect.height
 
-    required property var pluginKey
+    required property var pluginId
     property alias shellSurface: surfaceLayer.shellSurface
     required property var model
     signal requestBack()
@@ -35,7 +35,7 @@ Item {
                 icon.height: 16
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 onClicked: {
-                    console.log("request back:", pluginKey)
+                    console.log("request back:", pluginId)
                     shellSurface.close()
                     requestBack()
                 }
@@ -45,7 +45,7 @@ Item {
 
             Label {
                 Layout.alignment: Qt.AlignHCenter
-                text: model.getTitle(pluginKey)
+                text: model.getTitle(pluginId)
             }
 
             Item { Layout.fillWidth: true; Layout.preferredHeight: 1 }

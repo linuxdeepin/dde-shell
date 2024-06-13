@@ -40,14 +40,16 @@ Item {
 
         delegate: PluginItem {
             width: {
-                if (model.type === 4)
+                if (model.surfaceLayoutType === 4)
                     return 310
-                if (model.type === 2)
+                if (model.surfaceLayoutType === 2)
                     return 150
                 return 70
             }
             height: 60
             shellSurface: model.surface
+            itemKey: model.surfaceItemKey
+            traySurface: model.traySurface
         }
     }
 }

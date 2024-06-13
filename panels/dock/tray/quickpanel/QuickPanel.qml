@@ -21,11 +21,11 @@ Item {
     implicitHeight: {
         return panelTrayItem.height
     }
-    property string trayItemPluginName: "sound-item-key"
+    property string trayItemPluginId: "sound"
 
     PanelTrayItem {
         id: panelTrayItem
-        shellSurface: quickpanelModel.traySurfaceItem
+        shellSurface: quickpanelModel.trayItemSurface
         onClicked: {
             console.log("show quickpanel")
             var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
@@ -50,16 +50,16 @@ Item {
         id: quickpanelModel
         sourceModel: DockCompositor.quickPluginSurfaces
         trayPluginModel: DockCompositor.trayPluginSurfaces
-        trayItemPluginName: root.trayItemPluginName
+        trayItemPluginId: root.trayItemPluginId
     }
 
     Connections {
         target: DockCompositor
         function onPopupCreated(popupSurface)
         {
-            console.log("popup created", popupSurface.popupType, popupSurface.itemKey)
-            if (popupSurface.popupType === 4) {
-                quickpanelModel.requestShowSubPlugin(popupSurface.itemKey, popupSurface)
+            console.log("popup created", popupSurface.popupType, popupSurface.pluginId)
+            if (popupSurface.popupType === Dock.TrayPopupTypeEmbed) {
+                quickpanelModel.requestShowSubPlugin(popupSurface.pluginId, popupSurface)
             }
         }
     }
