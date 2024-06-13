@@ -18,6 +18,7 @@ qt_add_qml_module(
         QuickPanelModel.qml
         QuickPanelPage.qml
         SubPluginPage.qml
+        ShellSurfaceItemProxy.qml
     OUTPUT_DIRECTORY
         "${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/tray/quickpanel"
 )
