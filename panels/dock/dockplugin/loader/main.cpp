@@ -99,7 +99,7 @@ int main(int argc, char *argv[], char *envp[])
         qWarning() << "get interface failed!" << pluginLoader->instance() << qobject_cast<PluginsItemInterfaceV2*>(pluginLoader->instance());;
         return 0;
     }
-    dock::WidgetPlugin dockPlugin(interface);
+    dock::WidgetPlugin dockPlugin(interface, pluginLoader);
 
     app.setApplicationName(interface->pluginName());
     app.setApplicationDisplayName(interface->pluginDisplayName());
