@@ -30,7 +30,7 @@ Control {
             Layout.preferredWidth: 16
             Layout.preferredHeight: 16
             sourceComponent: Item {
-                ShellSurfaceItem {
+                ShellSurfaceItemProxy {
                     anchors.fill: parent
                     shellSurface: root.shellSurface
                 }
