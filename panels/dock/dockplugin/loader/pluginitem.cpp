@@ -84,7 +84,12 @@ void PluginItem::mouseLeftButtonClicked()
         popup->winId();
 
         auto geometry = windowHandle()->geometry();
+        bool hasCreated = Plugin::PluginPopup::contains(popup->windowHandle());
         auto pluginPopup = Plugin::PluginPopup::get(popup->windowHandle());
+        if (!hasCreated) {
+            connect(pluginPopup, &Plugin::PluginPopup::eventGeometry, this, &PluginItem::updatePopupSize);
+        }
+
         pluginPopup->setPluginId(m_pluginInterface->pluginName());
         pluginPopup->setItemKey(m_itemKey);
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypePanel);
@@ -197,4 +202,18 @@ void PluginItem::leaveEvent(QEvent *event)
     auto tooltip = m_pluginInterface->itemTipsWidget(m_itemKey);
     if (tooltip && tooltip->windowHandle())
         tooltip->windowHandle()->hide();
+}
+
+void PluginItem::updateItemWidgetSize(const QSize &size)
+{
+    m_centralWidget->setFixedSize(size);
+    update();
+}
+
+void PluginItem::updatePopupSize(const QRect &rect)
+{
+    if (auto popup = m_pluginInterface->itemPopupApplet(m_itemKey)) {
+        popup->setFixedSize(rect.size());
+        popup->update();
+    }
 }

@@ -117,6 +117,7 @@ public:
     QWaylandSurface *surface() const;
 
     Q_INVOKABLE void close() { send_close(); }
+    Q_INVOKABLE void updatePluginGeometry(const QRect &geometry);
 
     QString pluginId() const;
     QString itemKey() const;

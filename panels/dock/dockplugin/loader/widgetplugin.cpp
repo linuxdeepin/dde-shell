@@ -43,7 +43,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
     if (flag & Dock::Type_Quick) {
         PluginItem *item = new PluginItem(itemInter, QUICK_ITEM_KEY, itemKey);
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
-        initConnections(plugin);
+        initConnections(plugin, item);
         plugin->setPluginFlags(flag);
         plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
@@ -59,7 +59,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         if (!Plugin::EmbedPlugin::contains(itemKey, Plugin::EmbedPlugin::Tray)) {
             PluginItem *item = new PluginItem(itemInter, itemKey);
             Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
-            initConnections(plugin);
+            initConnections(plugin, item);
             plugin->setPluginFlags(flag);
             plugin->setPluginId(itemInter->pluginName());
             plugin->setItemKey(itemKey);
@@ -73,7 +73,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
     if (flag & Dock::Type_Fixed) {
         PluginItem *item = new PluginItem(itemInter, itemKey);
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
-        initConnections(plugin);
+        initConnections(plugin, item);
         plugin->setPluginFlags(flag);
         plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
@@ -138,10 +138,17 @@ void WidgetPlugin::requestSetAppletVisible(PluginsItemInterface * const itemInte
     }
 
     appletWidget->winId();
-    appletWidget->setFixedSize(400, 400); // TODO size form server
     appletWidget->setParent(nullptr);
 
+    bool hasCreated = Plugin::PluginPopup::contains(appletWidget->windowHandle());
     auto pluginPopup = Plugin::PluginPopup::get(appletWidget->windowHandle());
+    if (!hasCreated) {
+        connect(pluginPopup, &Plugin::PluginPopup::eventGeometry, appletWidget, [appletWidget](const QRect &geometry) {
+            appletWidget->setFixedSize(geometry.size());
+            appletWidget->update();
+        });
+    }
+
     pluginPopup->setPluginId(m_pluginsItemInterface->pluginName());
     pluginPopup->setItemKey(itemKey);
     pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeEmbed);
@@ -186,7 +193,7 @@ Plugin::EmbedPlugin* WidgetPlugin::getPlugin(QWidget* widget)
     return Plugin::EmbedPlugin::get(widget->windowHandle());
 }
 
-void WidgetPlugin::initConnections(Plugin::EmbedPlugin *plugin)
+void WidgetPlugin::initConnections(Plugin::EmbedPlugin *plugin, PluginItem *pluginItem)
 {
     if (!plugin)
         return;
@@ -197,6 +204,12 @@ void WidgetPlugin::initConnections(Plugin::EmbedPlugin *plugin)
 
     connect(plugin, &Plugin::EmbedPlugin::dockPositionChanged, this, &WidgetPlugin::onDockPositionChanged, Qt::UniqueConnection);
     connect(plugin, &Plugin::EmbedPlugin::eventMessage, this, &WidgetPlugin::onDockEventMessageArrived, Qt::UniqueConnection);
+
+    connect(plugin, &Plugin::EmbedPlugin::eventGeometry, this, [plugin, pluginItem](const QRect &geometry) {
+        if (plugin->pluginType() == Plugin::EmbedPlugin::Quick) {
+            pluginItem->updateItemWidgetSize(geometry.size());
+        }
+    });
 }
 
 }

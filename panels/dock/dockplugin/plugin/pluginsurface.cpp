@@ -37,6 +37,8 @@ void PluginSurface::plugin_close()
 void PluginSurface::plugin_geometry(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     m_window->setGeometry(x, y, width, height);
+
+    Q_EMIT m_plugin->eventGeometry(QRect(x, y, width, height));
 }
 
 PluginPopupSurface::PluginPopupSurface(PluginManager *manager, QtWaylandClient::QWaylandWindow *window)
@@ -55,6 +57,14 @@ PluginPopupSurface::~PluginPopupSurface()
 void PluginPopupSurface::plugin_popup_close()
 {
     m_window->hide();
+}
+
+void PluginPopupSurface::plugin_popup_geometry(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    auto plugin = PluginPopup::get(m_window);
+    if (plugin) {
+        Q_EMIT plugin->eventGeometry(QRect(x, y, width, height));
+    }
 }
 
 }
