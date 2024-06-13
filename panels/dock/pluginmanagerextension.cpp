@@ -104,6 +104,15 @@ QWaylandQuickShellIntegration* PluginPopup::createIntegration(QWaylandQuickShell
     return new PluginPopupIntegration(item);
 }
 
+void PluginPopup::updatePluginGeometry(const QRect &geometry)
+{
+    if (geometry.width() <= 0 || geometry.height() <= 0) {
+        return;
+    }
+
+    send_geometry(geometry.x(), geometry.y(), geometry.width(), geometry.height());
+}
+
 QString PluginPopup::pluginId() const
 {
     return m_pluginId;

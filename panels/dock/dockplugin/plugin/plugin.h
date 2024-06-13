@@ -51,6 +51,7 @@ public:
 
 Q_SIGNALS:
     void eventMessage(const QString &msg);
+    void eventGeometry(const QRect &geometry);
     void dockPositionChanged(uint32_t position);
     void dockColorThemeChanged(uint32_t colorType);
 
@@ -108,6 +109,9 @@ public:
 
     static PluginPopup* get(QWindow* window);
     static bool contains(QWindow* window);
+
+Q_SIGNALS:
+    void eventGeometry(const QRect &geometry);
 
 Q_SIGNALS:
     void itemKeyChanged();

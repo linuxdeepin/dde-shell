@@ -84,6 +84,12 @@
   </interface>
   <interface name="plugin_popup" version="1">
     <event name="close"/>
+    <event name="geometry">
+      <arg name="x" type="int"/>
+      <arg name="y" type="int"/>
+      <arg name="width" type="int"/>
+      <arg name="height" type="int"/>
+    </event>
   </interface>
 
   <interface name="plugin" version="1">

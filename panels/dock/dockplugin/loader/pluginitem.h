@@ -10,8 +10,6 @@
 #include <QWidget>
 #include <QMenu>
 
-class QGSettings;
-
 class PluginItem : public QWidget
 {
     Q_OBJECT
@@ -20,6 +18,8 @@ public:
     explicit PluginItem(PluginsItemInterface *pluginInterface, const QString &itemKey, const QString &quickItemKey = QString(), QWidget *parent = nullptr);
     ~PluginItem() override;
     static int flags(QPluginLoader *pluginLoader, PluginsItemInterface *pluginsItemInterface);
+
+    void updateItemWidgetSize(const QSize &size);
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;
@@ -33,6 +33,9 @@ protected:
 private:
     void mouseLeftButtonClicked();
     void mouseRightButtonClicked();
+
+private:
+    void updatePopupSize(const QRect &rect);
 
 private:
     PluginsItemInterface *m_pluginInterface;
