@@ -5,7 +5,7 @@
 #include "constants.h"
 #include "plugin.h"
 #include "widgetplugin.h"
-#include "pluginitem.h"
+#include "quickpluginitem.h"
 
 #include <QMenu>
 #include <QPainter>
@@ -40,10 +40,11 @@ WidgetPlugin::~WidgetPlugin()
 
 void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QString &itemKey)
 {
-    qInfo() << "itemAdded:" << itemKey;
+    qDebug() << "itemAdded:" << itemKey;
     auto flag = PluginItem::flags(m_pluginLoader,itemInter);
     if (flag & Dock::Type_Quick) {
-        PluginItem *item = new PluginItem(itemInter, Dock::QUICK_ITEM_KEY, itemKey);
+        PluginItem *item = new QuickPluginItem(itemInter,  itemKey);
+        item->init();
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin, item);
         plugin->setPluginFlags(flag);
@@ -60,6 +61,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         flag & Dock::Attribute_Normal) {
         if (!Plugin::EmbedPlugin::contains(itemKey, Plugin::EmbedPlugin::Tray)) {
             PluginItem *item = new PluginItem(itemInter, itemKey);
+            item->init();
             Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
             initConnections(plugin, item);
             plugin->setPluginFlags(flag);
@@ -74,6 +76,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
     }
     if (flag & Dock::Type_Fixed) {
         PluginItem *item = new PluginItem(itemInter, itemKey);
+        item->init();
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin, item);
         plugin->setPluginFlags(flag);

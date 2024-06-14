@@ -13,6 +13,8 @@ add_executable(dockplugin-loader
     widgetplugin.cpp
     pluginitem.h
     pluginitem.cpp
+    quickpluginitem.h
+    quickpluginitem.cpp
     utils/setproctitle.h
     utils/setproctitle.cpp
 )

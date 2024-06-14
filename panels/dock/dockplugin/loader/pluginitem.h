@@ -15,21 +15,22 @@ class PluginItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit PluginItem(PluginsItemInterface *pluginInterface, const QString &itemKey, const QString &quickItemKey = QString(), QWidget *parent = nullptr);
+    explicit PluginItem(PluginsItemInterface *pluginsItemInterface, const QString &itemKey, QWidget *parent = nullptr);
     ~PluginItem() override;
+
     static int flags(QPluginLoader *pluginLoader, PluginsItemInterface *pluginsItemInterface);
 
+    void init();
     void updateItemWidgetSize(const QSize &size);
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
-    /*void mouseMoveEvent(QMouseEvent *e) override;*/
-    /*void contextMenuEvent(QContextMenuEvent *e) override;*/
     void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
-    /*bool eventFilter(QObject *watched, QEvent *event) override;*/
-    /*void showEvent(QShowEvent *event) override;*/
+    virtual QWidget *centralWidget();
+    PluginsItemInterface * pluginsItemInterface();
+
 private:
     void mouseLeftButtonClicked();
     void mouseRightButtonClicked();
@@ -38,11 +39,9 @@ private:
     void updatePopupSize(const QRect &rect);
 
 private:
-    PluginsItemInterface *m_pluginInterface;
-    PluginsItemInterfaceV2 *m_pluginInterfacev2;
-    QWidget *m_centralWidget;
+    PluginsItemInterface *m_pluginsItemInterface;
+    PluginsItemInterfaceV2 *m_pluginsItemInterfacev2;
     QString m_itemKey;
-    QString m_quickItemKey;
     QMenu *m_menu;
 
     bool m_isPanelPopupShow = false;
