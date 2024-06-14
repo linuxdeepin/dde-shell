@@ -44,7 +44,6 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
     // internal tray actions
     appendRow(createTrayItem("internal/action-show-stash", "tray-action", "action-show-stash"));
     appendRow(createTrayItem("internal/action-toggle-collapse", "tray-action", "action-toggle-collapse"));
-    appendRow(createTrayItem("internal/action-toggle-quick-settings", "tray-action", "action-toggle-quick-settings"));
 
     // testing purpose dummy entries.
     appendRow(createTrayItem("web-browser", "stashed", "dummy"));
@@ -110,12 +109,6 @@ void TraySortOrderModel::updateVisualIndexes()
         results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
         currentVisualIndex++;
     }
-
-    // "internal/action-toggle-quick-settings"
-    results = findItems("internal/action-toggle-quick-settings");
-    Q_ASSERT(!results.isEmpty());
-    results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
-    currentVisualIndex++;
 
     // we don't care about the fixed items here since its width/height is not a fixed value
 
