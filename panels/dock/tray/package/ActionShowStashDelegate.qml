@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Controls
 import org.deepin.dtk 1.0 as D
 
+import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 
 D.ToolButton {
@@ -15,7 +16,7 @@ D.ToolButton {
     width: 16
     height: 16
     icon.name: {
-        switch (DockCompositor.dockPosition) {
+        switch (Panel.position) {
             case Dock.Right: return "arrow-left"
             case Dock.Left: return "arrow-right"
             case Dock.Top: return "arrow-down"
