@@ -44,7 +44,7 @@ Q_SIGNALS:
 
 protected:
     virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg) override;
-    virtual void plugin_manager_v1_create_popup_at(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t type, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id) override;
+    virtual void plugin_manager_v1_create_popup_at(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t type, int32_t layer, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id) override;
     virtual void plugin_manager_v1_create_plugin(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t plugin_flags, int32_t type, struct ::wl_resource *surface, uint32_t id) override;
 
 private:
@@ -108,9 +108,10 @@ class PluginPopup : public QWaylandShellSurfaceTemplate<PluginSurface>, public Q
     Q_PROPERTY(QString pluginId READ pluginId)
     Q_PROPERTY(QString itemKey READ itemKey)
     Q_PROPERTY(int32_t popupType READ popupType)
+    Q_PROPERTY(int32_t popupLayer READ popupLayer)
 
 public:
-    PluginPopup(PluginManager* shell, const QString &pluginId, const QString &itemKey, int x, int y, int popupType,
+    PluginPopup(PluginManager* shell, const QString &pluginId, const QString &itemKey, int x, int y, int popupType, int popupLayer,
                 QWaylandSurface *surface, const QWaylandResource &resource);
     QWaylandQuickShellIntegration *createIntegration(QWaylandQuickShellSurfaceItem *item) override;
 
@@ -129,6 +130,7 @@ public:
     void setY(int32_t y);
 
     int32_t popupType() const;
+    int32_t popupLayer() const;
 
 Q_SIGNALS:
     void xChanged();
@@ -141,6 +143,7 @@ private:
     QString m_itemKey;
     QString m_pluginId;
     int32_t m_popupType;
+    int32_t m_popupLayer;
 
     int32_t m_x;
     int32_t m_y;
