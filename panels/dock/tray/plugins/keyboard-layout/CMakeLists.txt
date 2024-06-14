@@ -36,5 +36,5 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     Dtk6::Gui
     Qt6::Svg)
 
-install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-dock/tmp/plugins/)
+install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR}/plugins/)
 install(FILES ./keybord_layout.json DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/dde-dock/indicator)

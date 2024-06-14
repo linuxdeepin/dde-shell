@@ -37,4 +37,4 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     )
 
 set(CMAKE_INSTALL_PREFIX "/usr")
-install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-dock/tmp/plugins)
+install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR}/plugins)

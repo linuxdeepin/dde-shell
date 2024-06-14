@@ -73,5 +73,5 @@ PRIVATE
 
 install(
 TARGETS ${PLUGIN_NAME}
-LIBRARY DESTINATION lib/dde-dock/tmp/plugins/quick-trays
+LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR}/plugins/quick-trays
 )

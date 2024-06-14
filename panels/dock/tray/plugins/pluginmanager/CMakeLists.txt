@@ -45,4 +45,4 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     Dtk6::Widget
 )
 
-install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-dock/tmp/plugins/loader)
+install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR}/loader/plugins)
