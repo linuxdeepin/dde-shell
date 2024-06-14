@@ -47,7 +47,7 @@ PluginPopupSurface::PluginPopupSurface(PluginManager *manager, QtWaylandClient::
     , m_popup(PluginPopup::get(window->window()))
     , m_window(window->window())
 {
-    init(manager->create_popup_at(m_popup->pluginId(), m_popup->itemKey(), m_popup->popupType(), m_popup->x(), m_popup->y(), window->wlSurface()));
+    init(manager->create_popup_at(m_popup->pluginId(), m_popup->itemKey(), m_popup->popupType(), m_popup->popupLayer(),  m_popup->x(), m_popup->y(), window->wlSurface()));
 }
 
 PluginPopupSurface::~PluginPopupSurface()
