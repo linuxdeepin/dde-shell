@@ -49,14 +49,14 @@ AppletItem {
         columnSpacing: 10
         rowSpacing: 10
 
-        TQP.QuickPanel { }
-
         TrayContainer {
             isHorizontal: !tray.useColumnLayout
             model: DDT.TraySortOrderModel
             collapsed: DDT.TraySortOrderModel.collapsed
             color: "transparent"
         }
+
+        TQP.QuickPanel { }
     }
 
     Connections {

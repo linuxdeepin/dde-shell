@@ -33,8 +33,4 @@ LQM.DelegateChooser {
             isHorizontal: root.isHorizontal
         }
     }
-    LQM.DelegateChoice {
-        roleValue: "action-toggle-quick-settings"
-        ActionToggleQuickSettingsDelegate {}
-    }
 }
