@@ -1,0 +1,17 @@
+{
+    "magic":"dsg.config.meta",
+    "version":"1.0",
+    "contents":{
+        "quickPlugins": {
+            "value": ["network", "bluetooth", "wireless-casting", "grand-search", "eye-comfort-mode", "airplane-mode", "dnd-mode", "shot-start-plugin", "shot-start-record-plugin", "clipboard", "system-monitor", "media", "dde-brightness", "sound"],
+            "serial": 0,
+            "flags": [],
+            "name": "Quick plugins",
+            "name[zh_CN]": "快捷面板插件",
+            "description[zh_CN]": "指定了插件在快捷面板的显示顺序，从左到右，自上往下，其它的未指定的插件，按照插件的大小，放在最后面（例如：插件占两格，就放在所有两格插件的后面）。\n修改后重启任务栏（注销或者重启电脑亦可）生效）",
+            "description":"",
+            "permissions":"readonly",
+            "visibility":"private"
+        }
+    }
+}
