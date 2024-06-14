@@ -139,6 +139,7 @@ void WidgetPlugin::requestSetAppletVisible(PluginsItemInterface * const itemInte
 
     appletWidget->winId();
     appletWidget->setParent(nullptr);
+    appletWidget->setAttribute(Qt::WA_TranslucentBackground);
 
     bool hasCreated = Plugin::PluginPopup::contains(appletWidget->windowHandle());
     auto pluginPopup = Plugin::PluginPopup::get(appletWidget->windowHandle());
