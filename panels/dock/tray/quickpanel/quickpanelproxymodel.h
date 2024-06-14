@@ -21,7 +21,7 @@ class QuickPanelProxyModel : public QSortFilterProxyModel, public QQmlParserStat
 public:
     explicit QuickPanelProxyModel(QObject *parent = nullptr);
 
-    Q_INVOKABLE QString getTitle(const QString &pluginName) const;
+    Q_INVOKABLE QString getTitle(const QString &pluginId) const;
 
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
@@ -49,16 +49,16 @@ protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
 private:
-    void updateQuickPluginsOrder();
+    void updateQuickPlugins();
     void watchingCountChanged();
 
     int pluginOrder(const QModelIndex &index) const;
     int surfaceType(const QModelIndex &index) const;
     int surfaceOrder(const QModelIndex &index) const;
+    QString surfacePluginId(const QModelIndex &index) const;
     QString surfaceName(const QModelIndex &index) const;
     QVariant surfaceValue(const QModelIndex &index, const QByteArray &roleName) const;
-    QVariant surfaceValue(const QString &pluginName, const QByteArray &roleName) const;
-    QVariant surfaceValue(const QString &pluginName) const;
+    QModelIndex surfaceIndex(const QString &pluginId) const;
     QObject *surfaceObject(const QModelIndex &index) const;
     int roleByName(const QByteArray &roleName) const;
     QAbstractListModel *surfaceModel() const;

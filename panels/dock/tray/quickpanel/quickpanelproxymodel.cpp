@@ -13,19 +13,24 @@ static const int ProxyRole = Qt::UserRole + 10;
 QuickPanelProxyModel::QuickPanelProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)
 {
-    updateQuickPluginsOrder();
+    updateQuickPlugins();
     sort(0);
 }
 
-QString QuickPanelProxyModel::getTitle(const QString &pluginName) const
+QString QuickPanelProxyModel::getTitle(const QString &pluginId) const
 {
-    return surfaceValue(pluginName, "pluginId").toString();
+    const auto index = surfaceIndex(pluginId);
+    if (!index.isValid())
+        return {};
+    return surfaceName(index);
 }
 
 QVariant QuickPanelProxyModel::data(const QModelIndex &index, int role) const
 {
     const auto sourceIndex = mapToSource(index);
     switch (role) {
+    case ProxyRole + 0:
+        return surfacePluginId(sourceIndex);
     case ProxyRole + 1:
         return surfaceName(sourceIndex);
     case ProxyRole + 2:
@@ -39,7 +44,8 @@ QVariant QuickPanelProxyModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> QuickPanelProxyModel::roleNames() const
 {
     const QHash<int, QByteArray> roles {
-        {ProxyRole + 1, "pluginName"}, // plugin's id.
+        {ProxyRole + 0, "pluginId"}, // plugin's id.
+        {ProxyRole + 1, "pluginName"}, // plugin's displayName.
         {ProxyRole + 2, "type"}, // layout's type. (1, signal), (2, multi), (4, full)
         {ProxyRole + 3, "surface"}, // surface item.
     };
@@ -59,18 +65,18 @@ bool QuickPanelProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
     const auto index = this->sourceModel()->index(sourceRow, 0, sourceParent);
     if (!index.isValid())
         return false;
-    const auto &name = surfaceName(index);
-    return !m_hideInPanelPlugins.contains(name);
+    if (m_quickPlugins.isEmpty())
+        return true;
+    const auto &id = surfacePluginId(index);
+    return m_quickPlugins.contains(id);
 }
 
-void QuickPanelProxyModel::updateQuickPluginsOrder()
+void QuickPanelProxyModel::updateQuickPlugins()
 {
-    QScopedPointer<DConfig> dconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.quick-panel"));
-    m_quickPlugins = dconfig->value("quickPluginsOrder").toStringList();
-    m_hideInPanelPlugins = dconfig->value("hiddenQuickPlugins").toStringList();
-    qDebug() << "Fetched QuickPanel's orders by DConfig,"
-             << "order list size:" << m_quickPlugins.size()
-             << "hide size:" <<m_hideInPanelPlugins.size();
+    std::unique_ptr<DConfig> dconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.tray"));
+    m_quickPlugins = dconfig->value("quickPlugins").toStringList();
+    qDebug() << "Fetched QuickPanel's plugin by DConfig,"
+             << "plugin list size:" << m_quickPlugins.size();
     invalidate();
 }
 
@@ -94,10 +100,10 @@ void QuickPanelProxyModel::watchingCountChanged()
 
 int QuickPanelProxyModel::pluginOrder(const QModelIndex &index) const
 {
-    const auto name = surfaceName(index);
-    auto ret = m_quickPlugins.indexOf(name);
+    const auto id = surfacePluginId(index);
+    auto ret = m_quickPlugins.indexOf(id);
     auto order = surfaceOrder(index);
-    if (order >= 0) {
+    if (order > 0) {
         ret = order;
     }
     auto type = surfaceType(index);
@@ -127,6 +133,11 @@ int QuickPanelProxyModel::surfaceOrder(const QModelIndex &index) const
     return surfaceValue(index, "order").toInt();
 }
 
+QString QuickPanelProxyModel::surfacePluginId(const QModelIndex &index) const
+{
+    return surfaceValue(index, "pluginId").toString();
+}
+
 QString QuickPanelProxyModel::surfaceName(const QModelIndex &index) const
 {
     return surfaceValue(index, "itemKey").toString();
@@ -140,26 +151,18 @@ QVariant QuickPanelProxyModel::surfaceValue(const QModelIndex &index, const QByt
     return {};
 }
 
-QVariant QuickPanelProxyModel::surfaceValue(const QString &pluginName, const QByteArray &roleName) const
+QModelIndex QuickPanelProxyModel::surfaceIndex(const QString &pluginId) const
 {
     const auto targetModel = surfaceModel();
     if (!targetModel)
         return {};
     for (int i = 0; i < targetModel->rowCount(); i++) {
         const auto index = targetModel->index(i, 0);
-        const auto name = surfaceName(index);
-        if (name == pluginName) {
-            if (roleName.isEmpty())
-                return QVariant::fromValue(surfaceObject(index));
-            return surfaceValue(index, roleName);
-        }
+        const auto id = surfacePluginId(index);
+        if (pluginId == pluginId)
+            return index;
     }
     return {};
-}
-
-QVariant QuickPanelProxyModel::surfaceValue(const QString &pluginName) const
-{
-    return surfaceValue(pluginName, {});
 }
 
 QObject *QuickPanelProxyModel::surfaceObject(const QModelIndex &index) const
