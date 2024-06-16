@@ -49,7 +49,7 @@
     <message>
         <location filename="../package/main.qml" line="63"/>
         <source>Fn toggle</source>
-        <translation type="unfinished"/>
+        <translation>Alternar Fn</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="64"/>
