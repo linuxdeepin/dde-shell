@@ -79,7 +79,7 @@
     <message>
         <location filename="../package/main.qml" line="221"/>
         <source>Dock Settings</source>
-        <translation>Configuración del Dock</translation>
+        <translation>Ajustes del muelle</translation>
     </message>
 </context>
 </TS>
