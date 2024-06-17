@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "pluginproxyinterface.h"
 #include "common.h"
 #include "pluginitem.h"
+#include "pluginsiteminterface_v2.h"
 
 #include <QMenu>
 #include <QLabel>
@@ -46,6 +46,8 @@ public Q_SLOTS:
 private:
     Plugin::EmbedPlugin* getPlugin(QWidget*);
     void initConnections(Plugin::EmbedPlugin *plugin, PluginItem *pluginItem);
+
+    static QString messageCallback(PluginsItemInterfaceV2 *, const QString &);
 
 private:
     PluginsItemInterface* m_pluginsItemInterface;

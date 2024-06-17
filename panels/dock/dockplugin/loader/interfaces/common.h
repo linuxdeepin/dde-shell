@@ -12,6 +12,3 @@ enum class DockPart {
     SystemPanel,      // 系统插件显示区域
     DCCSetting        // 显示在控制中心个性化设置的图标
 };
-
-// 快捷面板详情页面的itemWidget对应的itemKey
-#define QUICK_ITEM_KEY "quick_item_key"

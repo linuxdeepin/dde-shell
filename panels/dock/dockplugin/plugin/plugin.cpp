@@ -138,6 +138,11 @@ bool EmbedPlugin::contains(const QString &itemKey, int type)
     return false;
 }
 
+QList<EmbedPlugin *> EmbedPlugin::all()
+{
+    return s_map.values();
+}
+
 class PluginPopupPrivate
 {
 public:
