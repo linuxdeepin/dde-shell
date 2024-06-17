@@ -18,7 +18,7 @@ class Q_DECL_EXPORT EmbedPlugin : public QObject
     Q_PROPERTY(QString pluginId READ pluginId WRITE setPluginId NOTIFY pluginIdChanged)
     Q_PROPERTY(int pluginType READ pluginType WRITE setPluginType NOTIFY pluginTypeChanged)
     Q_PROPERTY(int pluginFlags READ pluginFlags WRITE setPluginFlags NOTIFY pluginFlagsChanged)
-    Q_PROPERTY(uint32_t pluginOrder READ pluginOrder WRITE setPluginOrder NOTIFY pluginOrderChanged)
+    Q_PROPERTY(uint32_t pluginSizePolicy READ pluginSizePolicy WRITE setPluginSizePolicy NOTIFY pluginSizePolicyChanged)
 
 public:
     enum PluginType {
@@ -42,8 +42,8 @@ public:
     int pluginType() const;
     void setPluginType(int type);
 
-    uint32_t pluginOrder() const;
-    void setPluginOrder(uint32_t order);
+    int pluginSizePolicy() const;
+    void setPluginSizePolicy(int sizePolicy);
 
     static EmbedPlugin* get(QWindow* window);
     static bool contains(QWindow* window);
@@ -60,7 +60,7 @@ Q_SIGNALS:
     void pluginIdChanged();
     void pluginTypeChanged();
     void pluginFlagsChanged();
-    void pluginOrderChanged();
+    void pluginSizePolicyChanged();
     void requestMessage(const QString &msg);
 
 private:

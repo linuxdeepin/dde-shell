@@ -79,6 +79,11 @@ enum TrayPluginType {
     Quick,
 };
 
+enum TrayPluginSizePolicy {
+    System = 1 << 0, // Follow the system
+    Custom = 1 << 1  // The custom
+};
+
 /**
  * @brief 用于在插件的 message 和 MessageCallbackFunc 方法中解析 json格式 数据。
  * @since 2.0.0
@@ -140,6 +145,7 @@ Q_ENUM_NS(AniAction)
 Q_ENUM_NS(TrayPopupType)
 Q_ENUM_NS(OverFlowState)
 Q_ENUM_NS(TrayPluginType)
+Q_ENUM_NS(TrayPluginSizePolicy)
 }
 
 Q_DECLARE_METATYPE(dock::SIZE)
@@ -153,3 +159,4 @@ Q_DECLARE_METATYPE(dock::Position)
 Q_DECLARE_METATYPE(dock::TrayPopupType)
 Q_DECLARE_METATYPE(dock::OverFlowState)
 Q_DECLARE_METATYPE(dock::TrayPluginType)
+Q_DECLARE_METATYPE(dock::TrayPluginSizePolicy)
