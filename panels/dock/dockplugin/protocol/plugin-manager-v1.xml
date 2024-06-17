@@ -78,6 +78,7 @@
       <arg name="item_key"      type="string"/>
       <arg name="plugin_flags"  type="int"/>
       <arg name="type"          type="int"/>
+      <arg name="size_policy"   type="int"/>
 
       <arg name="surface" type="object" interface="wl_surface"/>
       <arg name="id"      type="new_id" interface="plugin"/>

@@ -45,7 +45,7 @@ Q_SIGNALS:
 protected:
     virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg) override;
     virtual void plugin_manager_v1_create_popup_at(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t type, int32_t layer, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id) override;
-    virtual void plugin_manager_v1_create_plugin(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t plugin_flags, int32_t type, struct ::wl_resource *surface, uint32_t id) override;
+    virtual void plugin_manager_v1_create_plugin(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t plugin_flags, int32_t type, int32_t size_policy, struct ::wl_resource *surface, uint32_t id) override;
 
 private:
     static QJsonObject getRootObj(const QString &jsonStr);
@@ -65,10 +65,11 @@ class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public
     Q_PROPERTY(QString itemKey READ itemKey)
     Q_PROPERTY(uint32_t pluginFlags READ pluginFlags)
     Q_PROPERTY(uint32_t pluginType READ pluginType)
+    Q_PROPERTY(uint32_t pluginSizePolicy READ pluginSizePolicy)
     Q_PROPERTY(bool isItemActive WRITE setItemActive READ isItemActive NOTIFY itemActiveChanged)
 
 public:
-    PluginSurface(PluginManager* shell, const QString& pluginId, const QString& itemKey, int pluginFlags, int pluginType, QWaylandSurface *surface, const QWaylandResource &resource);
+    PluginSurface(PluginManager* shell, const QString& pluginId, const QString& itemKey, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource);
     QWaylandQuickShellIntegration *createIntegration(QWaylandQuickShellSurfaceItem *item) override;
 
     QWaylandSurface *surface() const;
@@ -78,6 +79,7 @@ public:
     QString contextMenu() const;
     uint32_t pluginType() const;
     uint32_t pluginFlags() const;
+    uint32_t pluginSizePolicy() const;
 
     void setItemActive(bool isActive);
     bool isItemActive() const;
@@ -96,6 +98,7 @@ private:
 
     uint32_t m_flags;
     uint32_t m_pluginType;
+    uint32_t m_sizePolicy;
 
     bool m_isItemActive = false;
 };

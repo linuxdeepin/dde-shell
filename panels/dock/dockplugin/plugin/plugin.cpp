@@ -20,7 +20,7 @@ public:
     QString itemKey;
     int pluginFlags;
     int pluginType;
-    uint32_t pluginOrder;
+    int sizePolicy;
 };
 
 EmbedPlugin::EmbedPlugin(QWindow* window)
@@ -55,9 +55,9 @@ int EmbedPlugin::pluginFlags() const
     return d->pluginFlags;
 }
 
-uint32_t EmbedPlugin::pluginOrder() const
+int EmbedPlugin::pluginSizePolicy() const
 {
-    return d->pluginOrder;
+    return d->sizePolicy;
 }
 
 void EmbedPlugin::setPluginId(const QString& pluginid)
@@ -100,14 +100,14 @@ void EmbedPlugin::setPluginFlags(int flags)
     Q_EMIT pluginFlagsChanged();
 }
 
-void EmbedPlugin::setPluginOrder(uint32_t order)
+void EmbedPlugin::setPluginSizePolicy(int sizePolicy)
 {
-    if (d->pluginOrder == order) {
+    if (d->sizePolicy == sizePolicy) {
         return;
     }
 
-    d->pluginOrder = order;
-    Q_EMIT pluginOrderChanged();
+    d->sizePolicy = sizePolicy;
+    Q_EMIT pluginSizePolicyChanged();
 }
 
 static QMap<QWindow*, EmbedPlugin*> s_map;

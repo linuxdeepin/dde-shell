@@ -48,6 +48,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
         plugin->setPluginType(Plugin::EmbedPlugin::Quick);
+        plugin->setPluginSizePolicy(itemInter->pluginSizePolicy());
         Q_EMIT plugin->requestMessage("plugin test message");
         item->windowHandle()->hide();
         item->show();
@@ -64,6 +65,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
             plugin->setPluginId(itemInter->pluginName());
             plugin->setItemKey(itemKey);
             plugin->setPluginType(Plugin::EmbedPlugin::Tray);
+            plugin->setPluginSizePolicy(itemInter->pluginSizePolicy());
             Q_EMIT plugin->requestMessage("plugin test message");
             item->windowHandle()->hide();
             item->show();
@@ -78,6 +80,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         plugin->setPluginId(itemInter->pluginName());
         plugin->setItemKey(itemKey);
         plugin->setPluginType(Plugin::EmbedPlugin::Fixed);
+        plugin->setPluginSizePolicy(itemInter->pluginSizePolicy());
         Q_EMIT plugin->requestMessage("plugin test message");
         item->windowHandle()->hide();
         item->show();
