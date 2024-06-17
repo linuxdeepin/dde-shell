@@ -8,26 +8,6 @@
 
 namespace docktray {
 
-QStandardItem * TraySortOrderModel::createTrayItem(const QString & name, const QString & sectionType, const QString & delegateType)
-{
-    QStandardItem * item = new QStandardItem(name);
-    item->setData(name, TraySortOrderModel::SurfaceIdRole);
-    item->setData(true, TraySortOrderModel::VisibilityRole);
-    item->setData(sectionType, TraySortOrderModel::SectionTypeRole);
-    item->setData(delegateType, TraySortOrderModel::DelegateTypeRole);
-
-    if (sectionType == "stashed") {
-        m_stashedIds.append(name);
-    } else if (sectionType == "collapsable") {
-        m_collapsableIds.append(name);
-    } else if (sectionType == "pinned") {
-        m_pinnedIds.append(name);
-    }
-    qDebug() << sectionType << name;
-
-    return item;
-}
-
 TraySortOrderModel::TraySortOrderModel(QObject *parent)
     : QStandardItemModel(parent)
 {
@@ -45,12 +25,14 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
     appendRow(createTrayItem("internal/action-show-stash", "tray-action", "action-show-stash"));
     appendRow(createTrayItem("internal/action-toggle-collapse", "tray-action", "action-toggle-collapse"));
 
+#ifdef QT_DEBUG
     // testing purpose dummy entries.
-    appendRow(createTrayItem("web-browser", "stashed", "dummy"));
-    appendRow(createTrayItem("folder-trash", "stashed", "dummy"));
+    appendRow(createTrayItem("trash::trash", "stashed", "dummy"));
+    appendRow(createTrayItem("dnd-mode::dnd-mode-key", "stashed", "dummy"));
     appendRow(createTrayItem("web-browser-symbolic", "collapsable", "dummy"));
     appendRow(createTrayItem("user-info-symbolic", "collapsable", "dummy"));
     appendRow(createTrayItem("folder-symbolic", "pinned", "dummy"));
+#endif
 
     connect(this, &TraySortOrderModel::availableSurfacesChanged, this, &TraySortOrderModel::onAvailableSurfacesChanged);
 
@@ -64,6 +46,50 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
 TraySortOrderModel::~TraySortOrderModel()
 {
     // dtor
+}
+
+QString TraySortOrderModel::findSection(const QString & surfaceId, const QString & fallback)
+{
+    if (m_pinnedIds.contains(surfaceId)) return QLatin1String("pinned");
+    if (m_collapsableIds.contains(surfaceId)) return QLatin1String("collapsable");
+    if (m_stashedIds.contains(surfaceId)) return QLatin1String("stashed");
+
+    return fallback;
+}
+
+void TraySortOrderModel::registerToSection(const QString & surfaceId, const QString & sectionType)
+{
+    QStringList * section = nullptr;
+    if (sectionType == "stashed") {
+        section = &m_stashedIds;
+    } else if (sectionType == "collapsable") {
+        section = &m_collapsableIds;
+    } else if (sectionType == "pinned") {
+        section = &m_pinnedIds;
+    } else if (sectionType == "tray-action") {
+        // can safely ignore, no need to register to any section
+        return;
+    }
+
+    if (!section->contains(surfaceId)) {
+        section->append(surfaceId);
+    }
+}
+
+QStandardItem * TraySortOrderModel::createTrayItem(const QString & name, const QString & sectionType, const QString & delegateType)
+{
+    QString actualSectionType = findSection(name, sectionType);
+    registerToSection(name, actualSectionType);
+
+    qDebug() << actualSectionType << name << delegateType;
+
+    QStandardItem * item = new QStandardItem(name);
+    item->setData(name, TraySortOrderModel::SurfaceIdRole);
+    item->setData(true, TraySortOrderModel::VisibilityRole);
+    item->setData(actualSectionType, TraySortOrderModel::SectionTypeRole);
+    item->setData(delegateType, TraySortOrderModel::DelegateTypeRole);
+
+    return item;
 }
 
 void TraySortOrderModel::updateVisualIndexes()

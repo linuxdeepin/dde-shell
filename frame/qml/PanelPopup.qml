@@ -10,6 +10,7 @@ Item {
     id: control
     visible: false
     default property alias popupContent: popup.contentChildren
+    property alias popupVisible: popup.visible
 
     property int margins: 10
     property int popupX: 0

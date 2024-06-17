@@ -11,31 +11,34 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 
 LQM.DelegateChooser {
     id: root
-    property bool isHorizontal: false
-    property bool collapsed: false
+
+    required property int columnCount
+    required property int rowCount
 
     role: "delegateType"
     LQM.DelegateChoice {
         roleValue: "dummy"
-        TrayItemPositioner {
+        StashedItemPositioner {
             contentItem: DummyDelegate {}
         }
     }
     LQM.DelegateChoice {
         roleValue: "legacy-tray-plugin"
-        TrayItemPositioner {
-            contentItem: ActionLegacyTrayPluginDelegate {}
+        StashedItemPositioner {
+            contentItem: ActionLegacyTrayPluginDelegate {
+                inputEventsEnabled: false // temporary
+            }
         }
     }
     LQM.DelegateChoice {
         roleValue: "action-show-stash"
-        TrayItemPositioner {
+        StashedItemPositioner {
             contentItem: ActionShowStashDelegate {}
         }
     }
     LQM.DelegateChoice {
         roleValue: "action-toggle-collapse"
-        TrayItemPositioner {
+        StashedItemPositioner {
             contentItem: ActionToggleCollapseDelegate {
                 isHorizontal: root.isHorizontal
             }
