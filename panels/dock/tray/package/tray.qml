@@ -58,6 +58,29 @@ AppletItem {
         }
     }
 
+    PanelPopup {
+        id: stashedPopup
+        width: stashedContainer.width
+        height: stashedContainer.height
+
+        Control {
+            id: stashedContainer
+            padding: 10
+            contentItem: StashContainer {
+                color: "transparent"
+                model: DDT.SortFilterProxyModel {
+                    sourceModel: DDT.TraySortOrderModel
+                    filterRowCallback: (sourceRow, sourceParent) => {
+                        console.log(sourceRow, sourceParent)
+                        let index = sourceModel.index(sourceRow, 0, sourceParent)
+                        return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) === "stashed"
+                    }
+                }
+                anchors.centerIn: parent
+            }
+        }
+    }
+
     GridLayout {
         id: overflowId
         columns: 1

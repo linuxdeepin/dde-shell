@@ -57,6 +57,8 @@ private:
     QStringList m_pinnedIds;
     QStringList m_fixedIds;
 
+    QString findSection(const QString & surfaceId, const QString & fallback);
+    void registerToSection(const QString & surfaceId, const QString & sectionType);
     QStandardItem * createTrayItem(const QString & name, const QString & sectionType, const QString & delegateType);
     void updateVisualIndexes();
     void registerSurfaceId(const QString & name, const QString & delegateType);

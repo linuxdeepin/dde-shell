@@ -10,8 +10,19 @@ import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 
 D.ToolButton {
-    x: isHorizontal ? (model.visualIndex * (16 + 10)) : 0
-    y: !isHorizontal ? (model.visualIndex * (16 + 10)) : 0
+    id: root
+
+    property var itemGlobalPoint: {
+        var a = root
+        var x = 0, y = 0
+        while(a.parent) {
+            x += a.x
+            y += a.y
+            a = a.parent
+        }
+
+        return Qt.point(x, y)
+    }
 
     width: 16
     height: 16
@@ -28,13 +39,12 @@ D.ToolButton {
     display: D.IconLabel.IconOnly
 
     onClicked: {
-        //
-    }
-
-    Behavior on x {
-        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
-    }
-    Behavior on y {
-        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+        if (stashedPopup.popupVisible) {
+            stashedPopup.close()
+        } else {
+            stashedPopup.popupX = itemGlobalPoint.x + root.width / 2
+            stashedPopup.open()
+        }
+        
     }
 }

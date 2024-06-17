@@ -11,8 +11,6 @@ D.ToolButton {
     property bool isHorizontal: false
     property bool collapsed: DDT.TraySortOrderModel.collapsed
 
-    x: isHorizontal ? (model.visualIndex * (16 + 10)) : 0
-    y: !isHorizontal ? (model.visualIndex * (16 + 10)) : 0
     z: 5
 
     width: 16
@@ -24,12 +22,5 @@ D.ToolButton {
 
     onClicked: {
         DDT.TraySortOrderModel.collapsed = !DDT.TraySortOrderModel.collapsed
-    }
-
-    Behavior on x {
-        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
-    }
-    Behavior on y {
-        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
     }
 }
