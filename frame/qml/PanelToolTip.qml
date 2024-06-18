@@ -13,6 +13,7 @@ Item {
     default property alias toolTipContentItem: toolTip.contentItem
     property alias text: toolTip.text
     property alias toolTipVisible: toolTip.visible
+    property var toolTipWindow: Panel.toolTipWindow
     property int toolTipX: 0
     property int toolTipY: 0
     property int margins: 10
@@ -26,7 +27,7 @@ Item {
 
     function open()
     {
-        var window = Panel.toolTipWindow
+        var window = toolTipWindow
         if (!window)
             return
         window.width = Qt.binding(function() {
@@ -48,7 +49,7 @@ Item {
     
     function close()
     {
-        var window = Panel.toolTipWindow
+        var window = toolTipWindow
         if (!window)
             return
 
@@ -64,17 +65,17 @@ Item {
         id: toolTip
         padding: 0
         // TODO it's a bug for qt, ToolTip's text color can't change with window's palette changed.
-        palette.toolTipText: Panel.toolTipWindow ? Panel.toolTipWindow.palette.toolTipText : undefined
+        palette.toolTipText: toolTipWindow ? toolTipWindow.palette.toolTipText : undefined
         anchors.centerIn: parent
         topPadding: 0
         bottomPadding: 0
-        parent: Panel.toolTipWindow ? Panel.toolTipWindow.contentItem : undefined
+        parent: toolTipWindow ? toolTipWindow.contentItem : undefined
         onParentChanged: function() {
-            var window = Panel.toolTipWindow
+            var window = toolTipWindow
             if (!window)
                 return
             window.visibleChanged.connect(function() {
-                if (Panel.toolTipWindow && !Panel.toolTipWindow.visible)
+                if (toolTipWindow && !toolTipWindow.visible)
                     toolTip.close()
             })
         }
