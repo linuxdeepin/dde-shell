@@ -17,6 +17,11 @@ Item {
 
     function open()
     {
+        if (popup.visible) {
+            close()
+            return
+        }
+
         var window = Panel.popupWindow
         if (!window)
             return
