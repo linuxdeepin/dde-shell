@@ -11,6 +11,7 @@ Item {
     visible: false
     default property alias popupContent: popup.contentChildren
     property alias popupVisible: popup.visible
+    property var popupWindow: Panel.popupWindow
 
     property int margins: 10
     property int popupX: 0
@@ -23,7 +24,7 @@ Item {
             return
         }
 
-        var window = Panel.popupWindow
+        var window = popupWindow
         if (!window)
             return
 
@@ -46,7 +47,7 @@ Item {
     }
     function close()
     {
-        var window = Panel.popupWindow
+        var window = popupWindow
         if (!window)
             return
 
@@ -55,14 +56,14 @@ Item {
     }
 
     Connections {
-        target: Panel.popupWindow
+        target: popupWindow
         function onActiveChanged()
         {
-            var window = Panel.popupWindow
+            var window = popupWindow
             if (!window)
                 return
             // TODO why activeChanged is not emit.
-            if (Panel.popupWindow && !Panel.popupWindow.active) {
+            if (popupWindow && !popupWindow.active) {
                 control.close()
             }
         }
@@ -73,13 +74,13 @@ Item {
         padding: 0
         width: control.width
         height: control.height
-        parent: Panel.popupWindow ? Panel.popupWindow.contentItem : undefined
+        parent: popupWindow ? popupWindow.contentItem : undefined
         onParentChanged: function() {
-            var window = Panel.popupWindow
+            var window = popupWindow
             if (!window)
                 return
             window.visibleChanged.connect(function() {
-                if (Panel.popupWindow && !Panel.popupWindow.visible)
+                if (popupWindow && !popupWindow.visible)
                     control.close()
             })
         }
