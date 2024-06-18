@@ -61,11 +61,11 @@ private:
 class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public QtWaylandServer::plugin
 {
     Q_OBJECT
-    Q_PROPERTY(QString pluginId READ pluginId)
-    Q_PROPERTY(QString itemKey READ itemKey)
-    Q_PROPERTY(uint32_t pluginFlags READ pluginFlags)
-    Q_PROPERTY(uint32_t pluginType READ pluginType)
-    Q_PROPERTY(uint32_t pluginSizePolicy READ pluginSizePolicy)
+    Q_PROPERTY(QString pluginId READ pluginId CONSTANT)
+    Q_PROPERTY(QString itemKey READ itemKey CONSTANT)
+    Q_PROPERTY(uint32_t pluginFlags READ pluginFlags CONSTANT)
+    Q_PROPERTY(uint32_t pluginType READ pluginType CONSTANT)
+    Q_PROPERTY(uint32_t pluginSizePolicy READ pluginSizePolicy CONSTANT)
     Q_PROPERTY(bool isItemActive WRITE setItemActive READ isItemActive NOTIFY itemActiveChanged)
 
 public:
