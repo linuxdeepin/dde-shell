@@ -9,7 +9,8 @@ import org.deepin.ds 1.0
 Item {
     id: control
 
-    default property alias toolTipContent: toolTip.contentChildren
+    property alias toolTipContent: toolTip.contentChildren
+    default property alias toolTipContentItem: toolTip.contentItem
     property alias text: toolTip.text
     property alias toolTipVisible: toolTip.visible
     property int toolTipX: 0
@@ -35,10 +36,12 @@ Item {
             return toolTip.height + toolTip.topPadding + toolTip.bottomPadding
         })
 
-        var pointX = control.toolTipX - window.width / 2
-        var pointY = control.toolTipY - window.height - control.margins
-        window.xOffset = pointX
-        window.yOffset = pointY
+        window.xOffset = Qt.binding(function() {
+            return control.toolTipX - toolTip.width / 2
+        })
+        window.yOffset = Qt.binding(function() {
+            return control.toolTipY - toolTip.height - control.margins
+        })
         window.show()
         toolTip.open()
     }

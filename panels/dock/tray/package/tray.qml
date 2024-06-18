@@ -27,18 +27,6 @@ AppletItem {
         width: popupContent.width
         height: popupContent.height
 
-        function delayOpen(interval) {
-            if (interval > 0) {
-                delayTimer.interval = interval
-                delayTimer.start()
-            } else {
-                if (delayTimer.running) {
-                    delayTimer.stop()
-                }
-                open()
-            }
-        }
-
         Item {
             anchors.fill: parent
             ShellSurfaceItem {
@@ -48,12 +36,18 @@ AppletItem {
                     popup.close()
                 }
             }
+        }
+    }
 
-            Timer {
-                id: delayTimer
-                onTriggered: {
-                    popup.open()
-                }
+    PanelToolTip {
+        id: toolTip
+        property alias shellSurface: toolTipContent.shellSurface
+
+        ShellSurfaceItem {
+            id: toolTipContent
+            anchors.centerIn: parent
+            onSurfaceDestroyed: {
+                toolTip.close()
             }
         }
     }
@@ -82,17 +76,19 @@ AppletItem {
         target: DockCompositor
         function onPopupCreated(popupSurface)
         {
-            // Embed popup is plugin's child page in quickpanel
-            if (popupSurface.popupType === Dock.TrayPopupTypeEmbed)
-                return
-
-            popupContent.shellSurface = popupSurface
-            popup.popupX = popupSurface.x
-            popup.popupY = popupSurface.popupType === Dock.TrayPopupTypeMenu ? popupSurface.y : 0
             if (popupSurface.popupType === Dock.TrayPopupTypeTooltip) {
-                popup.delayOpen(100)
-            } else {
-                popup.delayOpen(0)
+                toolTip.shellSurface = popupSurface
+                toolTip.toolTipX = popupSurface.x
+                toolTip.open()
+            } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
+                popupContent.shellSurface = popupSurface
+                popup.popupX = popupSurface.x
+                popup.popupY = popupSurface.y
+                popup.open()
+            } else if (popupSurface.popupType === Dock.TrayPopupTypePanel) {
+                popupContent.shellSurface = popupSurface
+                popup.popupX = popupSurface.x
+                popup.open()
             }
         }
     }
@@ -121,6 +117,12 @@ AppletItem {
     WaylandOutput {
         compositor: DockCompositor.compositor
         window: Panel.popupWindow
+        sizeFollowsWindow: false
+    }
+
+    WaylandOutput {
+        compositor: DockCompositor.compositor
+        window: Panel.toolTipWindow
         sizeFollowsWindow: false
     }
 }
