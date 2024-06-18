@@ -78,7 +78,6 @@ class Q_DECL_EXPORT PluginPopup : public QObject
     Q_PROPERTY(QString itemKey READ itemKey WRITE setItemKey NOTIFY itemKeyChanged)
     Q_PROPERTY(QString pluginId READ pluginId WRITE setPluginId NOTIFY pluginIdChanged)
     Q_PROPERTY(int popupType READ popupType WRITE setPopupType NOTIFY popupTypeChanged)
-    Q_PROPERTY(int popupLayer READ popupLayer WRITE setPopupLayer NOTIFY popupLayerChanged)
 
     Q_PROPERTY(int x READ x WRITE setX NOTIFY xChanged)
     Q_PROPERTY(int y READ y WRITE setY NOTIFY yChanged)
@@ -89,10 +88,6 @@ public:
         PopupTypeTooltip = 2,
         PopupTypeMenu = 3,
         PopupTypeEmbed = 4
-    };
-    enum PopupLayer {
-        PopupFirst = 1,
-        PopupSecond
     };
 
 public:
@@ -106,9 +101,6 @@ public:
 
     int popupType() const;
     void setPopupType(const int& type);
-
-    int popupLayer() const;
-    void setPopupLayer(const int & popupLayer);
 
     int x() const;
     void setX(const int& x);
@@ -126,7 +118,6 @@ Q_SIGNALS:
     void itemKeyChanged();
     void pluginIdChanged();
     void popupTypeChanged();
-    void popupLayerChanged();
 
     void xChanged();
     void yChanged();
