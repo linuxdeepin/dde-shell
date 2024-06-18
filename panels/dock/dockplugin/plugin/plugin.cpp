@@ -155,7 +155,6 @@ public:
     QString itemKey;
     int pluginFlags;
     int popupType;
-    int popupLayer;
     int x;
     int y;
 };
@@ -187,11 +186,6 @@ int PluginPopup::popupType() const
     return d->popupType;
 }
 
-int PluginPopup::popupLayer() const
-{
-    return d->popupLayer;
-}
-
 void PluginPopup::setPluginId(const QString& pluginid)
 {
     if (d->pluginId == pluginid) {
@@ -220,16 +214,6 @@ void PluginPopup::setPopupType(const int& type)
 
     d->popupType = type;
     Q_EMIT popupTypeChanged();
-}
-
-void PluginPopup::setPopupLayer(const int& level)
-{
-    if (d->popupLayer == level) {
-        return;
-    }
-
-    d->popupLayer = level;
-    Q_EMIT popupLayerChanged();
 }
 
 int PluginPopup::x() const

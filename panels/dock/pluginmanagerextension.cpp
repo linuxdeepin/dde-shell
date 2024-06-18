@@ -88,13 +88,12 @@ void PluginSurface::updatePluginGeometry(const QRect &geometry)
     send_geometry(geometry.x(), geometry.y(), geometry.width(), geometry.height());
 }
 
-PluginPopup::PluginPopup(PluginManager* manager, const QString &pluginId, const QString &itemKey, int x, int y, int popupType, int layer, QWaylandSurface *surface, const QWaylandResource &resource)
+PluginPopup::PluginPopup(PluginManager* manager, const QString &pluginId, const QString &itemKey, int x, int y, int popupType, QWaylandSurface *surface, const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)
     , m_pluginId(pluginId)
     , m_itemKey(itemKey)
     , m_popupType(popupType)
-    , m_popupLayer(layer)
 {
     init(resource.resource());
     setExtensionContainer(surface);
@@ -155,11 +154,6 @@ void PluginPopup::setY(int32_t y)
 int32_t PluginPopup::popupType() const
 {
     return m_popupType;
-}
-
-int32_t PluginPopup::popupLayer() const
-{
-    return m_popupLayer;
 }
 
 PluginManager::PluginManager(QWaylandCompositor *compositor)
@@ -288,13 +282,13 @@ void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QS
     Q_EMIT pluginSurfaceCreated(plugin);
 }
 
-void PluginManager::plugin_manager_v1_create_popup_at(Resource *resource, const QString &pluginId, const QString &itemKey, int32_t type, int32_t layer, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id)
+void PluginManager::plugin_manager_v1_create_popup_at(Resource *resource, const QString &pluginId, const QString &itemKey, int32_t type, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id)
 {
     QWaylandSurface *qwaylandSurface = QWaylandSurface::fromResource(surface);
     QWaylandResource shellSurfaceResource(wl_resource_create(resource->client(), &::plugin_popup_interface,
                                                            wl_resource_get_version(resource->handle), id));
 
-    auto plugin = new PluginPopup(this, pluginId, itemKey, x, y, type, layer, qwaylandSurface, shellSurfaceResource);
+    auto plugin = new PluginPopup(this, pluginId, itemKey, x, y, type, qwaylandSurface, shellSurfaceResource);
     plugin->setX(x), plugin->setY(y);
     Q_EMIT pluginPopupCreated(plugin);
 }
