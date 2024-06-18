@@ -133,6 +133,12 @@ enum OverFlowState {
  */
 const QString MSG_DOCK_PANEL_SIZE_CHANGED = QStringLiteral("dockPanelSizeChanged");
 
+/**
+ * @brief 最小弹窗高度，根据快捷面板的高度动态变化
+ * 任务栏主动发送给插件，只会给快捷插件发送
+ */
+const QString MSG_SET_APPLET_MIN_HEIGHT = QStringLiteral("setAppletMinHeight");
+
 
 Q_ENUM_NS(SIZE)
 Q_ENUM_NS(IndicatorStyle)

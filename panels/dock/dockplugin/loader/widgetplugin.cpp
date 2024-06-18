@@ -183,7 +183,10 @@ void WidgetPlugin::onDockDisplayModeChanged(uint32_t displayMode)
 
 void WidgetPlugin::onDockEventMessageArrived(const QString &message)
 {
-    // TODO
+    auto pluginsItemInterfaceV2 = dynamic_cast<PluginsItemInterfaceV2 *>(m_pluginsItemInterface);
+    if (pluginsItemInterfaceV2) {
+        pluginsItemInterfaceV2->message(message);
+    }
 }
 
 Plugin::EmbedPlugin* WidgetPlugin::getPlugin(QWidget* widget)
