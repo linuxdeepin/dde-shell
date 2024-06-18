@@ -42,6 +42,13 @@ Window {
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
 
+    function blendColorAlpha(fallback) {
+        var appearance = DS.applet("org.deepin.ds.dde-appearance")
+        if (!appearance || appearance.opacity < 0)
+            return fallback
+        return appearance.opacity
+    }
+
     DLayerShellWindow.anchors: position2Anchors(Applet.position)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Applet.dockSize
@@ -50,6 +57,7 @@ Window {
     D.DWindow.windowRadius: 0
     D.DWindow.enableBlurWindow: true
     D.DWindow.themeType: Panel.colorTheme
+    D.DWindow.borderColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, dock.blendColorAlpha(0.6) + 10 / 255) : Qt.rgba(0, 0, 0, 0.15)
     D.ColorSelector.family: D.Palette.CrystalColor
 
     onDockSizeChanged: {
@@ -72,23 +80,21 @@ Window {
         control: parent
         anchors.fill: parent
         cornerRadius: 0
-
-        function blendColorAlpha(fallback) {
-            var appearance = DS.applet("org.deepin.ds.dde-appearance")
-            if (!appearance || appearance.opacity < 0)
-                return fallback
-            return appearance.opacity
-        }
         blendColor: {
             if (valid) {
                 return DStyle.Style.control.selectColor(undefined,
-                                                    Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, blendColorAlpha(0.6)),
-                                                    Qt.rgba(10 / 255, 10 / 255, 10 /255, blendColorAlpha(85 / 255)))
+                                                    Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, dock.blendColorAlpha(0.6)),
+                                                    Qt.rgba(10 / 255, 10 / 255, 10 /255, dock.blendColorAlpha(85 / 255)))
             }
             return DStyle.Style.control.selectColor(undefined,
                                                 DStyle.Style.behindWindowBlur.lightNoBlurColor,
                                                 DStyle.Style.behindWindowBlur.darkNoBlurColor)
         }
+    }
+
+    D.InsideBoxBorder {
+        anchors.fill: parent
+        color: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(1, 1, 1, 0.15) : Qt.rgba(1, 1, 1, dock.blendColorAlpha(0.6) - 0.05)
     }
 
     PropertyAnimation {
