@@ -53,6 +53,21 @@ void PluginItem::mouseLeftButtonClicked()
         return;
     }
 
+    auto setPluginMsg = [this]  {
+        auto pluginsItemInterfaceV2 = dynamic_cast<PluginsItemInterfaceV2 *>(m_pluginsItemInterface);
+        if (!pluginsItemInterfaceV2)
+            return;
+
+        QJsonObject obj;
+        obj[Dock::MSG_TYPE] = Dock::MSG_APPLET_CONTAINER;
+        obj[Dock::MSG_DATA] = Dock::APPLET_CONTAINER_DOCK;
+
+        QJsonDocument msg;
+        msg.setObject(obj);
+
+        pluginsItemInterfaceV2->message(msg.toJson());
+    };
+
     if (auto popup = m_pluginsItemInterface->itemPopupApplet(m_itemKey)) {
         if (!m_isPanelPopupShow && popup->isVisible()) {
             popup->windowHandle()->hide();
@@ -64,6 +79,7 @@ void PluginItem::mouseLeftButtonClicked()
             return;
         }
 
+        setPluginMsg();
         popup->setParent(nullptr);
         popup->setAttribute(Qt::WA_TranslucentBackground);
         popup->winId();
