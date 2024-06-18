@@ -120,6 +120,11 @@ void PluginPopup::updatePluginGeometry(const QRect &geometry)
     send_geometry(geometry.x(), geometry.y(), geometry.width(), geometry.height());
 }
 
+void PluginPopup::setEmbedPanelMinHeight(int height)
+{
+    m_manager->setEmbedPanelMinHeight(height);
+}
+
 QString PluginPopup::pluginId() const
 {
     return m_pluginId;
@@ -232,6 +237,15 @@ void PluginManager::setDockColorTheme(uint32_t type)
             send_color_theme_changed(target->handle, m_dockColorTheme);
         }
     }
+}
+
+void PluginManager::setEmbedPanelMinHeight(int height)
+{
+    QJsonObject obj;
+    obj[dock::MSG_TYPE] = dock::MSG_SET_APPLET_MIN_HEIGHT;
+    obj[dock::MSG_DATA] = height;
+
+    send_event_message(toJson(obj));
 }
 
 void PluginManager::plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg)

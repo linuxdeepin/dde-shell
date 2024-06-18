@@ -36,6 +36,8 @@ public:
     uint32_t dockColorTheme() const;
     void setDockColorTheme(uint32_t type);
 
+    void setEmbedPanelMinHeight(int height);
+
 Q_SIGNALS:
     void pluginPopupCreated(PluginPopup*);
     void pluginSurfaceCreated(PluginSurface*);
@@ -122,6 +124,7 @@ public:
 
     Q_INVOKABLE void close() { send_close(); }
     Q_INVOKABLE void updatePluginGeometry(const QRect &geometry);
+    Q_INVOKABLE void setEmbedPanelMinHeight(int height);
 
     QString pluginId() const;
     QString itemKey() const;
