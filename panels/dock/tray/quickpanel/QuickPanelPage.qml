@@ -4,7 +4,10 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtWayland.Compositor
 
+import org.deepin.ds.dock 1.0
+import org.deepin.ds 1.0
 import org.deepin.dtk 1.0
 
 Item {
@@ -43,6 +46,46 @@ Item {
         SubPluginPage {
             onRequestBack: function () {
                 panelView.pop()
+            }
+        }
+    }
+
+    PanelPopupWindow {
+        id: toolTipWindow
+    }
+    PanelToolTip {
+        id: toolTip
+        toolTipWindow: toolTipWindow
+
+        property alias shellSurface: surfaceLayer.shellSurface
+        ShellSurfaceItem {
+            id: surfaceLayer
+            anchors.centerIn: parent
+            onSurfaceDestroyed: {
+                toolTip.close()
+            }
+        }
+    }
+
+    WaylandOutput {
+        compositor: DockCompositor.compositor
+        window: toolTip.toolTipWindow
+        sizeFollowsWindow: false
+    }
+
+    Connections {
+        target: DockCompositor
+        function onPopupCreated(popupSurface)
+        {
+            if (!model.isQuickPanelPopup(popupSurface.pluginId, popupSurface.itemKey))
+                return
+
+            if (popupSurface.popupType === Dock.TrayPopupTypeTooltip) {
+                console.log("quickpanel's tooltip created", popupSurface.popupType, popupSurface.pluginId)
+
+                toolTip.shellSurface = popupSurface
+                toolTip.toolTipX = popupSurface.x
+                toolTip.open()
             }
         }
     }

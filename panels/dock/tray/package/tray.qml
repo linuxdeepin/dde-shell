@@ -99,6 +99,9 @@ AppletItem {
         target: DockCompositor
         function onPopupCreated(popupSurface)
         {
+            if (!isTrayPluginPopup(popupSurface))
+                return
+
             if (popupSurface.popupType === Dock.TrayPopupTypeTooltip) {
                 toolTip.shellSurface = popupSurface
                 toolTip.toolTipX = popupSurface.x
@@ -113,6 +116,10 @@ AppletItem {
                 popup.popupX = popupSurface.x
                 popup.open()
             }
+        }
+        function isTrayPluginPopup(popupSurface)
+        {
+            return DockCompositor.findSurface(`${popupSurface.pluginId}::${popupSurface.itemKey}`)
         }
     }
 

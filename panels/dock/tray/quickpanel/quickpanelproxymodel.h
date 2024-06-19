@@ -22,6 +22,7 @@ public:
     explicit QuickPanelProxyModel(QObject *parent = nullptr);
 
     Q_INVOKABLE QString getTitle(const QString &pluginId) const;
+    Q_INVOKABLE bool isQuickPanelPopup(const QString &pluginId, const QString &itemKey) const;
 
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
