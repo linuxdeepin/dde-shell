@@ -13,6 +13,7 @@ Item {
     property alias popupVisible: popup.visible
     property var popupWindow: Panel.popupWindow
 
+    property int paddings: 0
     property int margins: 10
     property int popupX: 0
     property int popupY: 0
@@ -36,10 +37,10 @@ Item {
         })
 
         window.xOffset = Qt.binding(function() {
-            return control.popupX - control.width / 2
+            return control.popupX - window.width / 2
         })
         window.yOffset = Qt.binding(function() {
-            return control.popupY - control.height - control.margins
+            return control.popupY - window.height - control.margins
         })
         window.show()
         popup.open()
@@ -71,7 +72,7 @@ Item {
 
     Popup {
         id: popup
-        padding: 0
+        padding: control.paddings
         width: control.width
         height: control.height
         parent: popupWindow ? popupWindow.contentItem : undefined
