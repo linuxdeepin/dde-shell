@@ -179,7 +179,7 @@ void PluginManager::updateDockOverflowState(int state)
     obj[dock::MSG_TYPE] = dock::MSG_UPDATE_OVERFLOW_STATE;
     obj[dock::MSG_DATA] = state;
 
-    send_event_message(toJson(obj));
+    sendEventMsg(toJson(obj));
 }
 
 void PluginManager::dockPanelSizeChanged(int width, int height)
@@ -192,7 +192,7 @@ void PluginManager::dockPanelSizeChanged(int width, int height)
     obj[dock::MSG_TYPE] = dock::MSG_DOCK_PANEL_SIZE_CHANGED;
     obj[dock::MSG_DATA] = sizeData;
 
-    send_event_message(toJson(obj));
+    sendEventMsg(toJson(obj));
 }
 
 uint32_t PluginManager::dockPosition() const
@@ -239,7 +239,7 @@ void PluginManager::setEmbedPanelMinHeight(int height)
     obj[dock::MSG_TYPE] = dock::MSG_SET_APPLET_MIN_HEIGHT;
     obj[dock::MSG_DATA] = height;
 
-    send_event_message(toJson(obj));
+    sendEventMsg(toJson(obj));
 }
 
 void PluginManager::plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg)
@@ -323,4 +323,14 @@ QString PluginManager::toJson(const QJsonObject &jsonObj)
     QJsonDocument doc;
     doc.setObject(jsonObj);
     return doc.toJson();
+}
+
+void PluginManager::sendEventMsg(const QString &msg)
+{
+    foreach (PluginSurface *plugin, m_pluginSurfaces) {
+        Resource *target = resourceMap().value(plugin->surface()->waylandClient());
+        if (target) {
+            send_event_message(target->handle, msg);
+        }
+    }
 }
