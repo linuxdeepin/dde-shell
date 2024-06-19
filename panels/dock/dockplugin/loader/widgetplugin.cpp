@@ -133,12 +133,28 @@ void WidgetPlugin::requestRefreshWindowVisible(PluginsItemInterface * const item
 
 void WidgetPlugin::requestSetAppletVisible(PluginsItemInterface * const itemInter, const QString &itemKey, const bool visible)
 {
+    auto setPluginMsg = [itemInter]  {
+        auto pluginsItemInterfaceV2 = dynamic_cast<PluginsItemInterfaceV2 *>(itemInter);
+        if (!pluginsItemInterfaceV2)
+            return;
+
+        QJsonObject obj;
+        obj[Dock::MSG_TYPE] = Dock::MSG_APPLET_CONTAINER;
+        obj[Dock::MSG_DATA] = Dock::APPLET_CONTAINER_QUICK_PANEL;
+
+        QJsonDocument msg;
+        msg.setObject(obj);
+
+        pluginsItemInterfaceV2->message(msg.toJson());
+    };
+
     QWidget* appletWidget = itemInter->itemPopupApplet(itemKey);
     if (!appletWidget) {
         qWarning() << itemKey << " plugin applet popup is null";
         return;
     }
 
+    setPluginMsg();
     appletWidget->winId();
     appletWidget->setParent(nullptr);
     appletWidget->setAttribute(Qt::WA_TranslucentBackground);
