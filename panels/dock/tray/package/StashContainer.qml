@@ -57,6 +57,22 @@ Item {
         anchors.fill: parent
     }
 
+    DropArea {
+        anchors.fill: parent
+        keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
+        onEntered: function (dragEvent) {
+            console.log(dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId"))
+        }
+        onPositionChanged: function (dragEvent) {
+            let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            console.log("dragging", surfaceId)
+        }
+        onDropped: function (dropEvent) {
+            let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            DDT.TraySortOrderModel.dropToStashTray(surfaceId, 0, false);
+        }
+    }
+
     // Tray items
     Repeater {
         anchors.fill: parent

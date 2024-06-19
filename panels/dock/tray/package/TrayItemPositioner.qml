@@ -9,7 +9,7 @@ Control {
     id: root
     property bool itemVisible: {
         if (model.sectionType === "collapsable") return !collapsed
-        return model.sectionType !== "stashed"
+        return model.sectionType !== "stashed" && model.visibility
     }
 
     width: 16

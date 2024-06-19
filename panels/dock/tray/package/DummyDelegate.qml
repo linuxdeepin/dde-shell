@@ -4,7 +4,7 @@
 
 import QtQuick
 import QtQuick.Controls
-import Qt.labs.platform 1.1 as LP
+import org.deepin.ds.dock.tray 1.0 as DDT
 
 Button {
     icon.name: model.surfaceId
@@ -12,4 +12,24 @@ Button {
     icon.height: 16
     width: 16
     height: 16
+
+    Drag.active: dragHandler.active
+    Drag.dragType: Drag.Automatic
+    Drag.mimeData: {
+        "text/x-dde-shell-tray-dnd-surfaceId": model.surfaceId
+    }
+    Drag.supportedActions: Qt.MoveAction
+    Drag.onActiveChanged: {
+        DDT.TraySortOrderModel.actionsAlwaysVisible = Drag.active
+        if (!Drag.active) {
+            // reset position on drop
+            Qt.callLater(() => { x = 0; y = 0; });
+        }
+    }
+    contentItem: Rectangle {
+        color: "grey"
+    }
+    DragHandler {
+        id: dragHandler
+    }
 }

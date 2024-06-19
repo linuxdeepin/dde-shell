@@ -108,6 +108,32 @@ Item {
         anchors.fill: parent
     }
 
+    DropArea {
+        anchors.fill: parent
+        keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
+        onEntered: function (dragEvent) {
+            console.log(dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId"))
+        }
+        onPositionChanged: function (dragEvent) {
+            let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            let pos = root.isHorizontal ? drag.x : drag.y
+            let currentItemIndex = pos / (root.itemSize + root.itemSpacing)
+            let currentPosMapToItem = pos % (root.itemSize + root.itemSpacing)
+            let isBefore = currentPosMapToItem < root.itemSize / 2
+            console.log("dragging", surfaceId, Math.floor(currentItemIndex), currentPosMapToItem, isBefore)
+            // DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
+        }
+        onDropped: function (dropEvent) {
+            let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            let pos = root.isHorizontal ? drag.x : drag.y
+            let currentItemIndex = pos / (root.itemSize + root.itemSpacing)
+            let currentPosMapToItem = pos % (root.itemSize + root.itemSpacing)
+            let isBefore = currentPosMapToItem < root.itemSize / 2
+            console.log("dropped", currentItemIndex, currentPosMapToItem, isBefore)
+            DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
+        }
+    }
+
     // Tray items
     Repeater {
         anchors.fill: parent

@@ -25,9 +25,7 @@ LQM.DelegateChooser {
     LQM.DelegateChoice {
         roleValue: "legacy-tray-plugin"
         StashedItemPositioner {
-            contentItem: ActionLegacyTrayPluginDelegate {
-                inputEventsEnabled: false // temporary
-            }
+            contentItem: ActionLegacyTrayPluginDelegate {}
         }
     }
     LQM.DelegateChoice {
