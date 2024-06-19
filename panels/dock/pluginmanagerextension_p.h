@@ -52,6 +52,7 @@ protected:
 private:
     static QJsonObject getRootObj(const QString &jsonStr);
     static QString toJson(const QJsonObject &jsonObj);
+    void sendEventMsg(const QString &msg);
 
 private:
     QList<PluginSurface*> m_pluginSurfaces;
