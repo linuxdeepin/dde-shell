@@ -32,6 +32,16 @@ QString QuickPanelProxyModel::getTitle(const QString &pluginId) const
     return surfaceDisplayName(index);
 }
 
+bool QuickPanelProxyModel::isQuickPanelPopup(const QString &pluginId, const QString &itemKey) const
+{
+    const auto index = surfaceIndex(pluginId);
+    if (!index.isValid())
+        return false;
+
+    const auto item = surfaceItemKey(index);
+    return item == itemKey;
+}
+
 QVariant QuickPanelProxyModel::data(const QModelIndex &index, int role) const
 {
     const auto sourceIndex = mapToSource(index);
