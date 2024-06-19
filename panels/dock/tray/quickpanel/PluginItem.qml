@@ -12,6 +12,7 @@ Control {
     property alias shellSurface: surfaceLayer.shellSurface
     property alias itemKey: dragLayer.itemKey
     property alias traySurface: dragLayer.fallbackDragImage
+    ColorSelector.family: Palette.CommonColor
 
     DragItem {
         id: dragLayer

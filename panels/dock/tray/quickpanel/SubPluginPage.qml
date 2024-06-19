@@ -11,13 +11,19 @@ import org.deepin.dtk 1.0
 
 Item {
     id: root
-    implicitWidth: childrenRect.width
-    implicitHeight: childrenRect.height
+    width: childrenRect.width
+    height: Math.min(Math.max(subPluginMinHeight, childrenRect.height), 600)
 
     required property var pluginId
     property alias shellSurface: surfaceLayer.shellSurface
     required property var model
     signal requestBack()
+    property int subPluginMinHeight
+
+    Component.onCompleted: {
+        var minHeight = Math.max(panelView.height, 360)
+        // shellSurface.setEmbedPanelMinHeight(minHeight)
+    }
 
     ColumnLayout {
         anchors.fill: parent

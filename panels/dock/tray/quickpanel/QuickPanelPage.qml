@@ -25,7 +25,8 @@ Item {
                            {
                                pluginId: pluginId,
                                model: root.model,
-                               shellSurface: surface
+                               shellSurface: surface,
+                               subPluginMinHeight: Math.max(360, panelPage.height)
                            },
                            StackView.PushTransition)
         }
@@ -33,8 +34,8 @@ Item {
 
     StackView {
         id: panelView
-        width: panelPage.width
-        height: panelPage.childrenRect.height
+        width: currentItem.width
+        height: currentItem.height
         initialItem: PanelPluginPage {
             id: panelPage
             model: root.model

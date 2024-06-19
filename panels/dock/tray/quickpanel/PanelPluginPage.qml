@@ -13,24 +13,37 @@ import org.deepin.dtk 1.0
 
 Item {
     id: root
-    width: {
-        return view.width
-    }
-    height: {
-        return view.childrenRect.height
-    }
+    width: pluginView.width
+    height: pluginView.height
     readonly property int cellSize: 70
     readonly property int columnCellCounts: 4
     required property var model
+    readonly property int pluginViewHeight: pluginView.height
 
     Flow {
-        id: view
-        width: 330
-        anchors.fill: parent
+        id: pluginView
+        width: 310
+        height: childrenRect.height
         spacing: 10
         Repeater {
             anchors.fill: parent
             model: viewModel
+        }
+        RowLayout {
+            width: pluginView.width
+            ActionButton {
+                icon.name: "settings"
+                onClicked: {
+                }
+            }
+
+            Item { Layout.fillWidth: true; Layout.preferredHeight: 1 }
+
+            ActionButton {
+                icon.name: "settings"
+                onClicked: {
+                }
+            }
         }
     }
 
