@@ -48,10 +48,8 @@ void PluginItem::mouseLeftButtonClicked()
 {
     const QString command = m_pluginsItemInterface->itemCommand(m_itemKey);
     if (!command.isEmpty()) {
-        qDebug() << "command: " << command;
-        auto *proc = new QProcess(this);
-        connect(proc, static_cast<void (QProcess::*)(int)>(&QProcess::finished), proc, &QProcess::deleteLater);
-        proc->startDetached(command);
+        qInfo() << "command: " << command;
+        QProcess::startDetached(command, QStringList());
         return;
     }
 
@@ -192,7 +190,7 @@ QWidget* PluginItem::centralWidget()
     return m_pluginsItemInterface->itemWidget(m_itemKey);
 }
 
-PluginsItemInterface * PluginItem::pluginsItemInterface() 
+PluginsItemInterface * PluginItem::pluginsItemInterface()
 {
     return m_pluginsItemInterface;
 }
