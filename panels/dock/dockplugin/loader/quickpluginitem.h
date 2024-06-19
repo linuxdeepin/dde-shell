@@ -17,7 +17,11 @@ public:
 protected:
     virtual QWidget *centralWidget() override;
 
+    virtual void mouseReleaseEvent(QMouseEvent *e) override;
+    virtual void mouseRightButtonClicked() override;
+
 private:
+    QAction *m_onDockAction;
 };
 
 #endif

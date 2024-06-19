@@ -8,8 +8,8 @@
 #include "pluginsiteminterface_v2.h"
 
 #include <QWidget>
-#include <QMenu>
 
+class QMenu;
 class PluginItem : public QWidget
 {
     Q_OBJECT
@@ -18,34 +18,39 @@ public:
     explicit PluginItem(PluginsItemInterface *pluginsItemInterface, const QString &itemKey, QWidget *parent = nullptr);
     ~PluginItem() override;
 
-    static int flags(QPluginLoader *pluginLoader, PluginsItemInterface *pluginsItemInterface);
-
     void init();
     void updateItemWidgetSize(const QSize &size);
+
+    int pluginFlags() const;
+    void setPluginFlags(int flags);
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
     void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
+
     virtual QWidget *centralWidget();
+    virtual void mouseRightButtonClicked();
     PluginsItemInterface * pluginsItemInterface();
+    void initPluginMenu();
 
 private:
     void mouseLeftButtonClicked();
-    void mouseRightButtonClicked();
 
 private:
     void updatePopupSize(const QRect &rect);
 
-private:
-    PluginsItemInterface *m_pluginsItemInterface;
-    PluginsItemInterfaceV2 *m_pluginsItemInterfacev2;
+protected:
     QString m_itemKey;
     QMenu *m_menu;
 
+private:
+    PluginsItemInterface *m_pluginsItemInterface;
+    PluginsItemInterfaceV2 *m_pluginsItemInterfacev2;
+
+    int m_pluginFlags = 0;
     bool m_isPanelPopupShow = false;
-    static QPluginLoader *m_pluginLoader;
 };
 
 #endif // PLUGINSITEM_H

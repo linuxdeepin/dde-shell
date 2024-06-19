@@ -41,9 +41,10 @@ WidgetPlugin::~WidgetPlugin()
 void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QString &itemKey)
 {
     qDebug() << "itemAdded:" << itemKey;
-    auto flag = PluginItem::flags(m_pluginLoader,itemInter);
+    auto flag = getPluginFlags();
     if (flag & Dock::Type_Quick) {
-        PluginItem *item = new QuickPluginItem(itemInter,  itemKey);
+        PluginItem *item = new QuickPluginItem(itemInter, itemKey);
+        item->setPluginFlags(flag);
         item->init();
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin, item);
@@ -61,6 +62,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
         flag & Dock::Attribute_Normal) {
         if (!Plugin::EmbedPlugin::contains(itemKey, Plugin::EmbedPlugin::Tray)) {
             PluginItem *item = new PluginItem(itemInter, itemKey);
+            item->setPluginFlags(flag);
             item->init();
             Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
             initConnections(plugin, item);
@@ -76,6 +78,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
     }
     if (flag & Dock::Type_Fixed) {
         PluginItem *item = new PluginItem(itemInter, itemKey);
+        item->setPluginFlags(flag);
         item->init();
         Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
         initConnections(plugin, item);
@@ -232,6 +235,28 @@ void WidgetPlugin::initConnections(Plugin::EmbedPlugin *plugin, PluginItem *plug
             pluginItem->updateItemWidgetSize(geometry.size());
         }
     });
+}
+
+int WidgetPlugin::getPluginFlags()
+{
+    const Dock::PluginFlags UNADAPTED_PLUGIN_FLAGS = Dock::PluginFlag::Type_Unadapted | Dock::PluginFlag::Attribute_Normal;
+
+    auto pluginsItemInterfaceV2 = dynamic_cast<PluginsItemInterfaceV2 *>(m_pluginsItemInterface);
+    if (pluginsItemInterfaceV2) {
+        return pluginsItemInterfaceV2->flags();
+    }
+    auto obj = m_pluginLoader->instance();
+    if (!obj) {
+        qWarning() << "the instance of plugin loader is nullptr";
+        return UNADAPTED_PLUGIN_FLAGS;
+    }
+    bool ok;
+    auto flags = obj->property("pluginFlags").toInt(&ok);
+    if (!ok) {
+        qWarning() << "failed to pluginFlags toInt!";
+        return UNADAPTED_PLUGIN_FLAGS;
+    }
+    return flags;
 }
 
 QString WidgetPlugin::messageCallback(PluginsItemInterfaceV2 *pluginItem, const QString &msg)

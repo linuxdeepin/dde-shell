@@ -46,7 +46,7 @@ public Q_SLOTS:
 private:
     Plugin::EmbedPlugin* getPlugin(QWidget*);
     void initConnections(Plugin::EmbedPlugin *plugin, PluginItem *pluginItem);
-
+    int getPluginFlags();
     static QString messageCallback(PluginsItemInterfaceV2 *, const QString &);
 
 private:
