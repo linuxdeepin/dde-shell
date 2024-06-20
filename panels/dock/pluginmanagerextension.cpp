@@ -15,11 +15,12 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 
-PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, const QString& itemKey, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource)
+PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, const QString& itemKey, const QString &displayName, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)
     , m_itemKey(itemKey)
     , m_pluginId(pluginId)
+    , m_displayName(displayName)
     , m_flags(pluginFlags)
     , m_pluginType(pluginType)
     , m_sizePolicy(sizePolicy)
@@ -47,6 +48,11 @@ QString PluginSurface::pluginId() const
 QString PluginSurface::itemKey() const
 {
     return m_itemKey;
+}
+
+QString PluginSurface::displayName() const
+{
+    return m_displayName;
 }
 
 uint32_t PluginSurface::pluginType() const
@@ -272,7 +278,7 @@ void PluginManager::plugin_manager_v1_request_message(Resource *resource, const 
     }
 }
 
-void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QString &pluginId, const QString &itemKey, int32_t plugin_flags, int32_t type, int32_t size_policy, struct ::wl_resource *surface, uint32_t id)
+void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QString &pluginId, const QString &itemKey, const QString &display_name, int32_t plugin_flags, int32_t type, int32_t size_policy, struct ::wl_resource *surface, uint32_t id)
 {
     QWaylandSurface *qwaylandSurface = QWaylandSurface::fromResource(surface);
     connect(qwaylandSurface, &QWaylandSurface::surfaceDestroyed, this, [this, qwaylandSurface](){
@@ -291,7 +297,7 @@ void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QS
     send_position_changed(resource->handle, m_dockPosition);
     send_color_theme_changed(resource->handle, m_dockColorTheme);
 
-    auto plugin = new PluginSurface(this, pluginId, itemKey, plugin_flags, type, size_policy, qwaylandSurface, shellSurfaceResource);
+    auto plugin = new PluginSurface(this, pluginId, itemKey, display_name, plugin_flags, type, size_policy, qwaylandSurface, shellSurfaceResource);
     m_pluginSurfaces << plugin;
     Q_EMIT pluginSurfaceCreated(plugin);
 }

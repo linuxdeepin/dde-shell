@@ -75,6 +75,7 @@
     <request name="create_plugin">
       <arg name="plugin_id"     type="string"/>
       <arg name="item_key"      type="string"/>
+      <arg name="display_name"  type="string"/>
       <arg name="plugin_flags"  type="int"/>
       <arg name="type"          type="int"/>
       <arg name="size_policy"   type="int"/>

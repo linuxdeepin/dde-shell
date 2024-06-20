@@ -47,7 +47,7 @@ Q_SIGNALS:
 protected:
     virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg) override;
     virtual void plugin_manager_v1_create_popup_at(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t type, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id) override;
-    virtual void plugin_manager_v1_create_plugin(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t plugin_flags, int32_t type, int32_t size_policy, struct ::wl_resource *surface, uint32_t id) override;
+    virtual void plugin_manager_v1_create_plugin(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &display_name, int32_t plugin_flags, int32_t type, int32_t size_policy, struct ::wl_resource *surface, uint32_t id) override;
 
 private:
     static QJsonObject getRootObj(const QString &jsonStr);
@@ -69,16 +69,18 @@ class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public
     Q_PROPERTY(uint32_t pluginFlags READ pluginFlags CONSTANT)
     Q_PROPERTY(uint32_t pluginType READ pluginType CONSTANT)
     Q_PROPERTY(uint32_t pluginSizePolicy READ pluginSizePolicy CONSTANT)
+    Q_PROPERTY(QString displayName READ displayName CONSTANT)
     Q_PROPERTY(bool isItemActive WRITE setItemActive READ isItemActive NOTIFY itemActiveChanged)
 
 public:
-    PluginSurface(PluginManager* shell, const QString& pluginId, const QString& itemKey, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource);
+    PluginSurface(PluginManager* shell, const QString& pluginId, const QString& itemKey, const QString &displayName, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource);
     QWaylandQuickShellIntegration *createIntegration(QWaylandQuickShellSurfaceItem *item) override;
 
     QWaylandSurface *surface() const;
 
     QString pluginId() const;
     QString itemKey() const;
+    QString displayName() const;
     QString contextMenu() const;
     uint32_t pluginType() const;
     uint32_t pluginFlags() const;
@@ -98,6 +100,7 @@ private:
 
     QString m_itemKey;
     QString m_pluginId;
+    QString m_displayName;
 
     uint32_t m_flags;
     uint32_t m_pluginType;
