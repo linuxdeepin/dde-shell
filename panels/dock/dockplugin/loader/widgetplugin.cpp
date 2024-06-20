@@ -51,7 +51,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
             initConnections(plugin, item);
             plugin->setPluginFlags(flag);
             plugin->setPluginId(itemInter->pluginName());
-            plugin->setItemKey(itemKey);
+            plugin->setItemKey(Dock::QUICK_ITEM_KEY);
             plugin->setPluginType(Plugin::EmbedPlugin::Quick);
             plugin->setPluginSizePolicy(itemInter->pluginSizePolicy());
             item->windowHandle()->hide();

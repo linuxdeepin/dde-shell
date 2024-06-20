@@ -32,8 +32,11 @@ protected:
 
     virtual QWidget *centralWidget();
     virtual void mouseRightButtonClicked();
+    virtual void showPluginTooltip();
+
     PluginsItemInterface * pluginsItemInterface();
     void initPluginMenu();
+    void showTooltip(const QString &itemKey);
 
 private:
     void mouseLeftButtonClicked();

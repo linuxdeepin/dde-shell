@@ -122,33 +122,9 @@ void PluginItem::mouseReleaseEvent(QMouseEvent *e)
 
 void PluginItem::enterEvent(QEvent *event)
 {
-    auto popup = m_pluginsItemInterface->itemPopupApplet(m_itemKey);
-    if (popup)
-        popup->hide();
+    showPluginTooltip();
 
-    QMetaObject::invokeMethod(this, [this](){
-        auto toolTip = m_pluginsItemInterface->itemTipsWidget(m_itemKey);
-        if (!toolTip) {
-            qDebug() << "no tooltip";
-            return;
-        }
-
-        toolTip->setParent(nullptr);
-        toolTip->setAttribute(Qt::WA_TranslucentBackground);
-        toolTip->winId();
-
-        auto geometry = windowHandle()->geometry();
-        auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle());
-        pluginPopup->setPluginId(m_pluginsItemInterface->pluginName());
-        pluginPopup->setItemKey(m_itemKey);
-        pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeTooltip);
-        pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
-        if (toolTip->sizeHint().width() > 0 && toolTip->sizeHint().height() > 0) {
-            toolTip->setFixedSize(toolTip->sizeHint());
-        }
-        m_isPanelPopupShow = false;
-        toolTip->show();
-    });
+    QWidget::enterEvent(event);
 }
 
 void PluginItem::leaveEvent(QEvent *event)
@@ -231,4 +207,39 @@ void PluginItem::initPluginMenu()
         action->setEnabled(itemObj.value("isActive").toBool());
         m_menu->addAction(action);
     }
+}
+
+void PluginItem::showPluginTooltip()
+{
+    auto popup = m_pluginsItemInterface->itemPopupApplet(m_itemKey);
+    if (popup->isVisible())
+        popup->hide();
+
+    showTooltip(m_itemKey);
+}
+
+void PluginItem::showTooltip(const QString &itemKey)
+{
+    QMetaObject::invokeMethod(this, [itemKey, this](){
+        auto toolTip = m_pluginsItemInterface->itemTipsWidget(itemKey);
+        if (!toolTip) {
+            qDebug() << "no tooltip";
+            return;
+        }
+
+        toolTip->setParent(nullptr);
+        toolTip->setAttribute(Qt::WA_TranslucentBackground);
+        toolTip->winId();
+
+        auto geometry = windowHandle()->geometry();
+        auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle());
+        pluginPopup->setPluginId(m_pluginsItemInterface->pluginName());
+        pluginPopup->setItemKey(itemKey);
+        pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeTooltip);
+        pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
+        if (toolTip->sizeHint().width() > 0 && toolTip->sizeHint().height() > 0) {
+            toolTip->setFixedSize(toolTip->sizeHint());
+        }
+        toolTip->show();
+    });
 }
