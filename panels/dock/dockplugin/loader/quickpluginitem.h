@@ -19,6 +19,7 @@ protected:
 
     virtual void mouseReleaseEvent(QMouseEvent *e) override;
     virtual void mouseRightButtonClicked() override;
+    virtual void showPluginTooltip() override;
 
 private:
     QAction *m_onDockAction;

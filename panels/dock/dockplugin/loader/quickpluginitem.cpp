@@ -71,3 +71,8 @@ void QuickPluginItem::mouseRightButtonClicked()
     m_menu->exec();
 }
 
+void QuickPluginItem::showPluginTooltip()
+{
+    showTooltip(Dock::QUICK_ITEM_KEY);
+}
+
