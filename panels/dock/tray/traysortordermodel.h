@@ -50,6 +50,7 @@ public:
 
     Q_INVOKABLE bool dropToStashTray(const QString & draggedSurfaceId, int dropVisualIndex, bool isBefore);
     Q_INVOKABLE bool dropToDockTray(const QString & draggedSurfaceId, int dropVisualIndex, bool isBefore);
+    Q_INVOKABLE void setSurfaceVisible(const QString & surfaceId, bool visible);
 
 signals:
     void collapsedChanged(bool);
@@ -68,6 +69,8 @@ private:
     QStringList m_collapsableIds;
     QStringList m_pinnedIds;
     QStringList m_fixedIds;
+    // surface IDs that should be invisible/hidden from the tray area.
+    QStringList m_hiddenIds;
 
     QStandardItem * findItemByVisualIndex(int visualIndex, VisualSections visualSection) const;
     QStringList * getSection(const QString & sectionType);
