@@ -22,26 +22,30 @@ Item {
 
     Flow {
         id: pluginView
-        width: 310
-        height: childrenRect.height
+        width: 330
         spacing: 10
+        padding: 10
         Repeater {
-            anchors.fill: parent
             model: viewModel
         }
+
         RowLayout {
-            width: pluginView.width
+            width: pluginView.width - pluginView.leftPadding - pluginView.rightPadding
             ActionButton {
-                icon.name: "settings"
+                icon.name: "quickpanel-setting"
                 onClicked: {
+                    console.log("clicked settings")
+                    model.openSystemSettings()
                 }
             }
 
             Item { Layout.fillWidth: true; Layout.preferredHeight: 1 }
 
             ActionButton {
-                icon.name: "settings"
+                icon.name: "quickpanel-power"
                 onClicked: {
+                    console.log("clicked shutdown")
+                    model.openShutdownScreen()
                 }
             }
         }
