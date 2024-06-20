@@ -10,8 +10,7 @@
 #include <QMouseEvent>
 #include <qglobal.h>
 #include <qobject.h>
-
-const static Dock::PluginFlags UNADAPTED_PLUGIN_FLAGS = Dock::PluginFlag::Type_Unadapted | Dock::PluginFlag::Attribute_Normal;
+#include <QMenu>
 
 PluginItem::PluginItem(PluginsItemInterface *pluginItemInterface, const QString &itemKey, QWidget *parent)
     : QWidget(parent)
@@ -23,26 +22,6 @@ PluginItem::PluginItem(PluginsItemInterface *pluginItemInterface, const QString 
 }
 
 PluginItem::~PluginItem() = default;
-
-int PluginItem::flags(QPluginLoader *pluginLoader, PluginsItemInterface *pluginsItemInterface)
-{
-    auto pluginsItemInterfacev2 = dynamic_cast<PluginsItemInterfaceV2*>(pluginsItemInterface);
-    if (pluginsItemInterfacev2) {
-        return pluginsItemInterfacev2->flags();
-    }
-    auto obj = pluginLoader->instance();
-    if (!obj) {
-        qWarning() << "the instance of plugin loader is nullptr";
-        return UNADAPTED_PLUGIN_FLAGS;
-    }
-    bool ok;
-    auto flags = obj->property("pluginFlags").toInt(&ok);
-    if (!ok) {
-        qWarning() << "failed to pluginFlags toInt!";
-        return UNADAPTED_PLUGIN_FLAGS;
-    }
-    return flags;
-}
 
 void PluginItem::mouseLeftButtonClicked()
 {
@@ -103,31 +82,9 @@ void PluginItem::mouseLeftButtonClicked()
 void PluginItem::mouseRightButtonClicked()
 {
     if (m_menu->actions().isEmpty()) {
-        const QString menuJson = m_pluginsItemInterface->itemContextMenu(m_itemKey);
-        if (menuJson.isEmpty()) {
-            qWarning() << "itemContextMenu is empty!";
-            return;
-        }
-
-        QJsonDocument jsonDocument = QJsonDocument::fromJson(menuJson.toLocal8Bit().data());
-        if (jsonDocument.isNull()) {
-            qWarning() << "jsonDocument is null!";
-            return;
-        }
-
-        QJsonObject jsonMenu = jsonDocument.object();
-
-        QJsonArray jsonMenuItems = jsonMenu.value("items").toArray();
-        for (auto item : jsonMenuItems) {
-            QJsonObject itemObj = item.toObject();
-            QAction *action = new QAction(itemObj.value("itemText").toString());
-            action->setCheckable(itemObj.value("isCheckable").toBool());
-            action->setChecked(itemObj.value("checked").toBool());
-            action->setData(itemObj.value("itemId").toString());
-            action->setEnabled(itemObj.value("isActive").toBool());
-            m_menu->addAction(action);
-        }
+        initPluginMenu();
     }
+
     qDebug() << "mouseRightButtonClicked:" << m_itemKey << m_menu->actions().size();
     m_menu->setAttribute(Qt::WA_TranslucentBackground, true);
     // FIXME: qt5integration drawMenuItemBackground will draw a background event is's transparent
@@ -217,6 +174,16 @@ void PluginItem::updateItemWidgetSize(const QSize &size)
     update();
 }
 
+int PluginItem::pluginFlags() const
+{
+    return m_pluginFlags;
+}
+
+void PluginItem::setPluginFlags(int flags)
+{
+    m_pluginFlags = flags;
+}
+
 void PluginItem::updatePopupSize(const QRect &rect)
 {
     if (auto popup = m_pluginsItemInterface->itemPopupApplet(m_itemKey)) {
@@ -238,3 +205,30 @@ void PluginItem::init()
     setLayout(hLayout);
 }
 
+void PluginItem::initPluginMenu()
+{
+    const QString menuJson = m_pluginsItemInterface->itemContextMenu(m_itemKey);
+    if (menuJson.isEmpty()) {
+        qWarning() << "itemContextMenu is empty!";
+        return;
+    }
+
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(menuJson.toLocal8Bit().data());
+    if (jsonDocument.isNull()) {
+        qWarning() << "jsonDocument is null!";
+        return;
+    }
+
+    QJsonObject jsonMenu = jsonDocument.object();
+
+    QJsonArray jsonMenuItems = jsonMenu.value("items").toArray();
+    for (auto item : jsonMenuItems) {
+        QJsonObject itemObj = item.toObject();
+        QAction *action = new QAction(itemObj.value("itemText").toString());
+        action->setCheckable(itemObj.value("isCheckable").toBool());
+        action->setChecked(itemObj.value("checked").toBool());
+        action->setData(itemObj.value("itemId").toString());
+        action->setEnabled(itemObj.value("isActive").toBool());
+        m_menu->addAction(action);
+    }
+}

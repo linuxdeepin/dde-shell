@@ -246,6 +246,11 @@ const QString PLUGIN_PROP_NEED_CHAMELEON = QStringLiteral("needChameleon");
  * 返回需要设置的QMargin()
  */
 const QString PLUGIN_PROP_CHAMELEON_MARGIN = QStringLiteral("chameleonMargin");
+
+// 插件右键菜单中"驻留任务栏/移除驻留"选项
+const QString dockMenuItemId = QStringLiteral("dock-item-id");
+const QString unDockMenuItemId = QStringLiteral("undock-item-id");
+
 }
 
 Q_DECLARE_METATYPE(Dock::DisplayMode)
