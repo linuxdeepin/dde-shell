@@ -191,7 +191,7 @@ QString QuickPanelProxyModel::surfaceItemKey(const QModelIndex &index) const
 
 QString QuickPanelProxyModel::surfaceDisplayName(const QModelIndex &index) const
 {
-    return surfaceValue(index, "pluginName").toString();
+    return surfaceValue(index, "displayName").toString();
 }
 
 QVariant QuickPanelProxyModel::surfaceValue(const QModelIndex &index, const QByteArray &roleName) const
