@@ -13,8 +13,8 @@ Window {
 
     property real xOffset: 0
     property real yOffset: 0
-    x: selectValue(transientParent.x + xOffset, 0, Screen.width - root.width)
-    y: selectValue(transientParent.y + yOffset, 0, Screen.height - root.height)
+    x: selectValue(transientParent ? transientParent.x + xOffset : 0, 0, Screen.width - root.width)
+    y: selectValue(transientParent ? transientParent.y + yOffset : 0, 0, Screen.height - root.height)
     function selectValue(value, min, max) {
         if (value < min)
             return min

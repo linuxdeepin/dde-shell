@@ -19,12 +19,22 @@ Item {
     readonly property int columnCellCounts: 4
     required property var model
     readonly property int pluginViewHeight: pluginView.height
+    function forceLayout()
+    {
+        ready()
+    }
+    signal ready()
 
     Flow {
         id: pluginView
         width: 330
         spacing: 10
         padding: 10
+        // TODO it's only work once, incorrect position for later.
+        onPositioningComplete: function () {
+            if (root.visible)
+                root.forceLayout()
+        }
         Repeater {
             model: viewModel
         }
@@ -56,6 +66,7 @@ Item {
         model: root.model
 
         delegate: PluginItem {
+            id: pluginItem
             width: {
                 if (model.surfaceLayoutType === 4)
                     return 310
@@ -67,6 +78,13 @@ Item {
             shellSurface: model.surface
             itemKey: model.surfaceItemKey
             traySurface: model.traySurface
+
+            Connections {
+                target: root
+                onReady: function () {
+                    pluginItem.updateSurface()
+                }
+            }
         }
     }
 }

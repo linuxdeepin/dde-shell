@@ -13,6 +13,10 @@ Control {
     property alias itemKey: dragLayer.itemKey
     property alias traySurface: dragLayer.fallbackDragImage
     ColorSelector.family: Palette.CommonColor
+    function updateSurface()
+    {
+        surfaceLayer.updateSurfacePosition()
+    }
 
     DragItem {
         id: dragLayer
