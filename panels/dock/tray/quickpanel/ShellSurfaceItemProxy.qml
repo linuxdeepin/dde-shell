@@ -15,7 +15,14 @@ ShellSurfaceItem {
     {
         if (!shellSurface || !(shellSurface.updatePluginGeometry))
             return
-        var pos = root.mapToItem(null, 0, 0)
-        shellSurface.updatePluginGeometry(Qt.rect(pos.x , pos.y, root.width, root.height))
+        shellSurface.updatePluginGeometry(Qt.rect(0, 0, surface.width, surface.height))
+    }
+    function updateSurfacePosition()
+    {
+        if (!shellSurface || !(shellSurface.updatePluginGeometry))
+            return
+
+        var pos = surface.mapToItem(null, 0, 0)
+        shellSurface.updatePluginGeometry(Qt.rect(pos.x, pos.y, surface.width, surface.height))
     }
 }

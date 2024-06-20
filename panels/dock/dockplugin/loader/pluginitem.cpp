@@ -212,7 +212,7 @@ void PluginItem::initPluginMenu()
 void PluginItem::showPluginTooltip()
 {
     auto popup = m_pluginsItemInterface->itemPopupApplet(m_itemKey);
-    if (popup->isVisible())
+    if (popup && popup->isVisible())
         popup->hide();
 
     showTooltip(m_itemKey);

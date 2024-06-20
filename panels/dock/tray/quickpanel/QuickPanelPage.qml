@@ -34,11 +34,14 @@ Item {
 
     StackView {
         id: panelView
-        width: currentItem.width
-        height: currentItem.height
+        width: currentItem ? currentItem.width : 10
+        height: currentItem ? currentItem.height : 10
         initialItem: PanelPluginPage {
             id: panelPage
             model: root.model
+            StackView.onActivated: {
+                panelPage.forceLayout()
+            }
         }
     }
 
@@ -116,7 +119,6 @@ Item {
                 console.log("quickpanel's menu created", popupSurface.popupType, popupSurface.pluginId)
 
                 popup.shellSurface = popupSurface
-                popup.popupX = popupSurface.x
                 popup.open()
             }
         }
