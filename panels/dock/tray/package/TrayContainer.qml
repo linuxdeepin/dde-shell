@@ -131,6 +131,7 @@ Item {
             let isBefore = currentPosMapToItem < root.itemSize / 2
             console.log("dropped", currentItemIndex, currentPosMapToItem, isBefore)
             DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
+            DDT.TraySortOrderModel.actionsAlwaysVisible = false
         }
     }
 

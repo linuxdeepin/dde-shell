@@ -86,6 +86,14 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
     if (!dropOnItem) return false;
     QString dropOnSurfaceId(dropOnItem->data(SurfaceIdRole).toString());
 
+    // If it's hidden, remove it from the hidden list. updateVisualIndexes() will update the
+    // item's VisibilityRole property.
+    // This is mainly for the drag item from quick settings panel feature.
+    auto deferUpdateVisualIndex = qScopeGuard([this](){updateVisualIndexes();});
+    if (m_hiddenIds.contains(draggedSurfaceId)) {
+        m_hiddenIds.removeOne(draggedSurfaceId);
+    }
+
     if (dropOnSurfaceId == QLatin1String("internal/action-show-stash")) {
         if (isBefore) {
             // show stash action is always the first action, cannot drop before it
@@ -99,7 +107,6 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
             sourceSection->removeOne(draggedSurfaceId);
             m_collapsableIds.prepend(draggedSurfaceId);
         }
-        updateVisualIndexes();
         return true;
     }
 
@@ -122,7 +129,6 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
                 m_pinnedIds.prepend(draggedSurfaceId);
             }
         }
-        updateVisualIndexes();
         return true;
     }
 
@@ -148,8 +154,21 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
         sourceSection->removeOne(draggedSurfaceId);
         targetSection->insert(targetIndex, draggedSurfaceId);
     }
-    updateVisualIndexes();
     return true;
+}
+
+void TraySortOrderModel::setSurfaceVisible(const QString &surfaceId, bool visible)
+{
+    if (visible) {
+        if (m_hiddenIds.contains(surfaceId)) {
+            m_hiddenIds.removeOne(surfaceId);
+        }
+    } else {
+        if (!m_hiddenIds.contains(surfaceId)) {
+            m_hiddenIds.append(surfaceId);
+        }
+    }
+    updateVisualIndexes();
 }
 
 QStandardItem *TraySortOrderModel::findItemByVisualIndex(int visualIndex, VisualSections visualSection) const
@@ -239,10 +258,14 @@ void TraySortOrderModel::updateVisualIndexes()
     for (const QString & id : std::as_const(m_stashedIds)) {
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
-        showStashActionVisible = true;
+        bool itemVisible = !m_hiddenIds.contains(id);
         results[0]->setData(QLatin1String("stashed"), TraySortOrderModel::SectionTypeRole);
-        results[0]->setData(stashedVisualIndex, TraySortOrderModel::VisualIndexRole);
-        stashedVisualIndex++;
+        results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
+        if (itemVisible) {
+            showStashActionVisible = true;
+            results[0]->setData(stashedVisualIndex, TraySortOrderModel::VisualIndexRole);
+            stashedVisualIndex++;
+        }
     }
 
     int currentVisualIndex = 0;
@@ -260,13 +283,15 @@ void TraySortOrderModel::updateVisualIndexes()
     for (const QString & id : std::as_const(m_collapsableIds)) {
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
-        if (!results[0]->data(TraySortOrderModel::VisibilityRole).toBool()) continue;
-        toogleCollapseActionVisible = true;
+        bool itemVisible = !m_hiddenIds.contains(id);
         results[0]->setData(QLatin1String("collapsable"), TraySortOrderModel::SectionTypeRole);
-        results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
-
-        if (!m_collapsed) {
-            currentVisualIndex++;
+        results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
+        if (itemVisible) {
+            toogleCollapseActionVisible = true;
+            results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
+            if (!m_collapsed) {
+                currentVisualIndex++;
+            }
         }
     }
 
@@ -283,9 +308,13 @@ void TraySortOrderModel::updateVisualIndexes()
     for (const QString & id : std::as_const(m_pinnedIds)) {
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
+        bool itemVisible = !m_hiddenIds.contains(id);
         results[0]->setData(QLatin1String("pinned"), TraySortOrderModel::SectionTypeRole);
-        results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
-        currentVisualIndex++;
+        results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
+        if (itemVisible) {
+            results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
+            currentVisualIndex++;
+        }
     }
 
     // we don't care about the fixed items here since its width/height is not a fixed value
