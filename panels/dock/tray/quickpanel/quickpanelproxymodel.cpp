@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <DConfig>
+#include <DDBusSender>
 DCORE_USE_NAMESPACE
 
 namespace dock {
@@ -40,6 +41,26 @@ bool QuickPanelProxyModel::isQuickPanelPopup(const QString &pluginId, const QStr
 
     const auto item = surfaceItemKey(index);
     return item == itemKey;
+}
+
+void QuickPanelProxyModel::openSystemSettings()
+{
+    DDBusSender()
+        .service("org.deepin.dde.ControlCenter1")
+        .interface("org.deepin.dde.ControlCenter1")
+        .path("/org/deepin/dde/ControlCenter1")
+        .method(QString("Show"))
+        .call();
+}
+
+void QuickPanelProxyModel::openShutdownScreen()
+{
+    DDBusSender()
+        .service("org.deepin.dde.ShutdownFront1")
+        .interface("org.deepin.dde.ShutdownFront1")
+        .path("/org/deepin/dde/ShutdownFront1")
+        .method("Show")
+        .call();
 }
 
 QVariant QuickPanelProxyModel::data(const QModelIndex &index, int role) const

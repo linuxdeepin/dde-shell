@@ -23,6 +23,8 @@ public:
 
     Q_INVOKABLE QString getTitle(const QString &pluginId) const;
     Q_INVOKABLE bool isQuickPanelPopup(const QString &pluginId, const QString &itemKey) const;
+    Q_INVOKABLE void openSystemSettings();
+    Q_INVOKABLE void openShutdownScreen();
 
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;

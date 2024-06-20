@@ -21,8 +21,8 @@ Item {
     property int subPluginMinHeight
 
     Component.onCompleted: {
-        var minHeight = Math.max(panelView.height, 360)
-        // shellSurface.setEmbedPanelMinHeight(minHeight)
+        var surfaceMinHeight = subPluginMinHeight - titleLayer.height
+        shellSurface.setEmbedPanelMinHeight(surfaceMinHeight)
     }
 
     ColumnLayout {
@@ -31,6 +31,7 @@ Item {
 
         // header
         RowLayout {
+            id: titleLayer
             Layout.fillWidth: true
             Layout.leftMargin: 8
             Layout.topMargin: 10

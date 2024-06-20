@@ -39,7 +39,6 @@ Item {
         id: popup
         width: popupContent.width
         height: popupContent.height
-        paddings: 10
 
         QuickPanelPage {
             id: popupContent
