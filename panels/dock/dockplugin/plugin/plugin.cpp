@@ -18,6 +18,7 @@ public:
     QWindow* parentWindow;
     QString pluginId;
     QString itemKey;
+    QString displayName;
     int pluginFlags;
     int pluginType;
     int sizePolicy;
@@ -141,6 +142,16 @@ bool EmbedPlugin::contains(const QString &itemKey, int type)
 QList<EmbedPlugin *> EmbedPlugin::all()
 {
     return s_map.values();
+}
+
+QString EmbedPlugin::displayName() const
+{
+    return d->displayName;
+}
+
+void EmbedPlugin::setDisplayName(const QString &displayName)
+{
+    d->displayName = displayName;
 }
 
 class PluginPopupPrivate

@@ -45,6 +45,9 @@ public:
     int pluginSizePolicy() const;
     void setPluginSizePolicy(int sizePolicy);
 
+    QString displayName() const;
+    void setDisplayName(const QString &displayName);
+
     static EmbedPlugin* get(QWindow* window);
     static bool contains(QWindow* window);
     static bool contains(const QString &itemKey, int type);

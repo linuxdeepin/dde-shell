@@ -51,6 +51,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
             initConnections(plugin, item);
             plugin->setPluginFlags(flag);
             plugin->setPluginId(itemInter->pluginName());
+            plugin->setDisplayName(itemInter->pluginDisplayName());
             plugin->setItemKey(Dock::QUICK_ITEM_KEY);
             plugin->setPluginType(Plugin::EmbedPlugin::Quick);
             plugin->setPluginSizePolicy(itemInter->pluginSizePolicy());
@@ -69,6 +70,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
             initConnections(plugin, item);
             plugin->setPluginFlags(flag);
             plugin->setPluginId(itemInter->pluginName());
+            plugin->setDisplayName(itemInter->pluginDisplayName());
             plugin->setItemKey(itemKey);
             plugin->setPluginType(Plugin::EmbedPlugin::Tray);
             plugin->setPluginSizePolicy(itemInter->pluginSizePolicy());
@@ -85,6 +87,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
             Plugin::EmbedPlugin* plugin = Plugin::EmbedPlugin::get(item->windowHandle());
             initConnections(plugin, item);
             plugin->setPluginFlags(flag);
+            plugin->setDisplayName(itemInter->pluginDisplayName());
             plugin->setPluginId(itemInter->pluginName());
             plugin->setItemKey(itemKey);
             plugin->setPluginType(Plugin::EmbedPlugin::Fixed);
