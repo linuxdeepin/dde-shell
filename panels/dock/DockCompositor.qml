@@ -60,6 +60,7 @@ Item {
             id: pluginManager
 
             onPluginSurfaceCreated: (dockPluginSurface) => {
+                console.log("plugin surface created", dockPluginSurface.pluginId, dockPluginSurface.itemKey, dockPluginSurface.pluginType)
                 if (dockPluginSurface.pluginType === Dock.Tray) {
                     trayPluginSurfaces.append({shellSurface: dockPluginSurface})
                 } else if (dockPluginSurface.pluginType === Dock.Quick) {
@@ -71,11 +72,13 @@ Item {
             }
 
             onPluginSurfaceDestroyed: (dockPluginSurface) => {
+                console.log("plugin surface destroyed", dockPluginSurface.pluginId, dockPluginSurface.itemKey, dockPluginSurface.pluginType)
                 removeDockPluginSurface(trayPluginSurfaces, dockPluginSurface)
                 dockCompositor.pluginSurfacesUpdated()
             }
 
             onPluginPopupCreated: (popup) => {
+                console.log("plugin popup created", popup.pluginId, popup.itemKey, popup.pluginType)
                 dockCompositor.popupCreated(popup)
             }
         }
