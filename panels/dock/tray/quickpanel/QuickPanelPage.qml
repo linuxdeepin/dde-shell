@@ -74,6 +74,31 @@ Item {
         sizeFollowsWindow: false
     }
 
+    PanelPopupWindow {
+        id: popupWindow
+    }
+    PanelPopup {
+        id: popup
+        width: popupSurfaceLayer.width
+        height: popupSurfaceLayer.height
+        popupWindow: popupWindow
+
+        property alias shellSurface: popupSurfaceLayer.shellSurface
+        ShellSurfaceItem {
+            id: popupSurfaceLayer
+            anchors.centerIn: parent
+            onSurfaceDestroyed: {
+                popup.close()
+            }
+        }
+    }
+
+    WaylandOutput {
+        compositor: DockCompositor.compositor
+        window: popup.popupWindow
+        sizeFollowsWindow: false
+    }
+
     Connections {
         target: DockCompositor
         function onPopupCreated(popupSurface)
@@ -87,6 +112,12 @@ Item {
                 toolTip.shellSurface = popupSurface
                 toolTip.toolTipX = popupSurface.x
                 toolTip.open()
+            } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
+                console.log("quickpanel's menu created", popupSurface.popupType, popupSurface.pluginId)
+
+                popup.shellSurface = popupSurface
+                popup.popupX = popupSurface.x
+                popup.open()
             }
         }
     }
