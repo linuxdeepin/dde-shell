@@ -11,7 +11,7 @@ import org.deepin.dtk 1.0
 
 Item {
     id: root
-    width: childrenRect.width
+    implicitWidth: 330
     height: Math.min(Math.max(subPluginMinHeight, childrenRect.height), 600)
 
     required property var pluginId
@@ -26,8 +26,8 @@ Item {
     }
 
     ColumnLayout {
-        anchors.fill: parent
         spacing: 0
+        width: root.width
 
         // header
         RowLayout {
