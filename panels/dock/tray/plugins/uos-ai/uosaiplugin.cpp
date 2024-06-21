@@ -188,20 +188,6 @@ bool UosAiPlugin::pluginIsDisable()
 #ifdef USE_V23_DOCK
 QIcon UosAiPlugin::icon(const DockPart &dockPart, DGuiApplicationHelper::ColorType themeType)
 {
-    QString iconName = "UosAiAssistant";
-    if (dockPart == DockPart::DCCSetting) {
-        QPixmap pixmap = loadSvg(iconName, QSize(18, 18));
-        if (themeType == DGuiApplicationHelper::ColorType::LightType) {
-            return pixmap;
-        } else {
-            QPainter pa(&pixmap);
-            pa.setCompositionMode(QPainter::CompositionMode_SourceIn);
-            pa.fillRect(pixmap.rect(), Qt::white);
-            return pixmap;
-        }
-    }
-
-
     QString icon = ":/assets/icons/deepin/builtin/uosai.svg";
     if(DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::DarkType)
         icon = ":/assets/icons/deepin/builtin/uosai_dark.svg";
