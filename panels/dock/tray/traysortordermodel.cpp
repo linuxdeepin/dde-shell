@@ -5,6 +5,7 @@
 #include "traysortordermodel.h"
 
 #include <QDebug>
+#include <DConfig>
 
 namespace docktray {
 
@@ -20,6 +21,9 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
         {TraySortOrderModel::DelegateTypeRole, QByteArrayLiteral("delegateType")}
     });
     setItemRoleNames(defaultRoleNames);
+
+    // init sort order data and hidden list data
+    loadDataFromDConfig();
 
     // internal tray actions
     appendRow(createTrayItem("internal/action-show-stash", "tray-action", "action-show-stash"));
@@ -60,6 +64,9 @@ bool TraySortOrderModel::dropToStashTray(const QString &draggedSurfaceId, int dr
     Q_ASSERT(draggedItems.count() == 1);
     QStringList * sourceSection = getSection(draggedItems[0]->data(SectionTypeRole).toString());
 
+    // Ensure position adjustment will be saved at last
+    auto deferSaveSortOrder = qScopeGuard([this](){saveDataToDConfig();});
+
     // drag inside the stashed section
     if (sourceSection == &m_stashedIds) {
         return false;
@@ -85,6 +92,9 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
     Q_CHECK_PTR(dropOnItem);
     if (!dropOnItem) return false;
     QString dropOnSurfaceId(dropOnItem->data(SurfaceIdRole).toString());
+
+    // Ensure position adjustment will be saved at last
+    auto deferSaveSortOrder = qScopeGuard([this](){saveDataToDConfig();});
 
     // If it's hidden, remove it from the hidden list. updateVisualIndexes() will update the
     // item's VisibilityRole property.
@@ -335,6 +345,26 @@ void TraySortOrderModel::registerSurfaceId(const QString &name, const QString &d
     appendRow(createTrayItem(name, "collapsable", delegateType));
 }
 
+void TraySortOrderModel::loadDataFromDConfig()
+{
+    using namespace Dtk::Core;
+    std::unique_ptr<DConfig> dconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.tray"));
+    m_stashedIds = dconfig->value("stashedSurfaceIds").toStringList();
+    m_collapsableIds = dconfig->value("collapsableSurfaceIds").toStringList();
+    m_pinnedIds = dconfig->value("pinnedSurfaceIds").toStringList();
+    m_hiddenIds = dconfig->value("hiddenSurfaceIds").toStringList();
+}
+
+void TraySortOrderModel::saveDataToDConfig()
+{
+    using namespace Dtk::Core;
+    std::unique_ptr<DConfig> dconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.tray"));
+    dconfig->setValue("stashedSurfaceIds", m_stashedIds);
+    dconfig->setValue("collapsableSurfaceIds", m_collapsableIds);
+    dconfig->setValue("pinnedSurfaceIds", m_pinnedIds);
+    dconfig->setValue("hiddenSurfaceIds", m_hiddenIds);
+}
+
 void TraySortOrderModel::onAvailableSurfacesChanged()
 {
     QStringList availableSurfaceIds;
@@ -356,6 +386,8 @@ void TraySortOrderModel::onAvailableSurfacesChanged()
     }
     // finally, update visual index
     updateVisualIndexes();
+    // and also save the current sort order
+    saveDataToDConfig();
 }
 
 }

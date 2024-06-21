@@ -79,6 +79,8 @@ private:
     QStandardItem * createTrayItem(const QString & name, const QString & sectionType, const QString & delegateType);
     void updateVisualIndexes();
     void registerSurfaceId(const QString & name, const QString & delegateType);
+    void loadDataFromDConfig();
+    void saveDataToDConfig();
 
 private slots:
     void onAvailableSurfacesChanged();
