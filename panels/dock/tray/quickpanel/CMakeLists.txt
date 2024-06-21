@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-qt_add_qml_module(
-    tray-quickpanel
+qt_add_qml_module(tray-quickpanel
+    PLUGIN_TARGET tray-quickpanel
     URI "org.deepin.ds.dock.tray.quickpanel"
     VERSION "1.0"
     SOURCES
