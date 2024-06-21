@@ -48,6 +48,7 @@ Item {
     Component {
         id: subPluginPageLoader
         SubPluginPage {
+            width: panelPage.width
             onRequestBack: function () {
                 panelView.pop()
             }
