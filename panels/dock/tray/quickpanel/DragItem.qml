@@ -15,16 +15,15 @@ Item {
     id: root
 
     required property Item dragItem
-    required property string itemKey
+    required property string dragTextData
     required property var fallbackDragImage
 
     Component.onCompleted: {
-        dragItem.Drag.keys = [
-            root.itemKey
-        ]
-        dragItem.Drag.mimeData = {
-            "text/RequestDock": "plugin/quick"
-        }
+        dragItem.Drag.mimeData = Qt.binding(function () {
+            return {
+                "text/x-dde-shell-tray-dnd-surfaceId": root.dragTextData
+            }
+        })
         dragItem.Drag.dragType = Drag.Automatic
         dragItem.Drag.supportedActions = Qt.CopyAction
         dragItem.DQuickDrag.hotSpotScale = Qt.binding(function () {
