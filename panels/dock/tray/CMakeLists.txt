@@ -5,15 +5,7 @@
 add_subdirectory(quickpanel)
 
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Gui Qml)
-
-add_library(dock-traymodel SHARED
-    traysortordermodel.cpp
-    traysortordermodel.h
-)
-
-target_link_libraries(dock-traymodel PRIVATE
-    Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Qml
-)
+find_package(Dtk6 REQUIRED COMPONENTS Core Gui)
 
 ds_install_package(PACKAGE org.deepin.ds.dock.tray)
 
@@ -33,4 +25,5 @@ qt_add_qml_module(dock-tray
 target_link_libraries(dock-tray PUBLIC
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Qml
+    Dtk${DTK_VERSION_MAJOR}::Core
 )
