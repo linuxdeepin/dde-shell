@@ -34,11 +34,15 @@ Item {
 
     StackView {
         id: panelView
+        property int contentHeight: currentItem ? currentItem.height : 10
         width: currentItem ? currentItem.width : 10
-        height: currentItem ? currentItem.height : 10
+        height: panelView.contentHeight
         initialItem: PanelPluginPage {
             id: panelPage
             model: root.model
+            StackView.onActivating: {
+                panelView.contentHeight = Qt.binding(function() { return height })
+            }
             StackView.onActivated: {
                 panelPage.forceLayout()
             }
@@ -51,6 +55,9 @@ Item {
             width: panelPage.width
             onRequestBack: function () {
                 panelView.pop()
+            }
+            StackView.onActivating: {
+                panelView.contentHeight = Qt.binding(function() { return contentHeight})
             }
         }
     }
