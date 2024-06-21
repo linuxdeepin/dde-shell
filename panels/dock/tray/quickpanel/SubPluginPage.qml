@@ -12,8 +12,9 @@ import org.deepin.dtk 1.0
 Item {
     id: root
     implicitWidth: 330
-    height: Math.min(Math.max(subPluginMinHeight, childrenRect.height), 600)
+    implicitHeight: contentHeight
 
+    readonly property int contentHeight: Math.min(Math.max(subPluginMinHeight, subPluginView.height), 600)
     required property var pluginId
     property alias shellSurface: surfaceLayer.shellSurface
     required property var model
@@ -26,6 +27,7 @@ Item {
     }
 
     ColumnLayout {
+        id: subPluginView
         spacing: 0
         width: root.width
 
@@ -61,9 +63,8 @@ Item {
         Item { Layout.fillHeight: true; Layout.preferredWidth: 1 }
 
         // content
-        ShellSurfaceItemProxy {
+        ShellSurfaceItem {
             id: surfaceLayer
-            Layout.fillHeight: true
             Layout.fillWidth: true
         }
 
