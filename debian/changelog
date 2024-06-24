@@ -1,3 +1,11 @@
+dde-shell (0.0.25) unstable; urgency=medium
+
+  * fix: Application preview UI issue(https://github.com/linuxdeepin/developer-center/issues/8801)
+  * fix: dock panel border color issue(https://github.com/linuxdeepin/developer-center/issues/8342)
+  * fix: uos-ai icon error(https://github.com/linuxdeepin/developer-center/issues/9363)
+
+ -- Zhang kun <zhangkun2@uniontech.com>  Mon, 24 Jun 2024 11:10:20 +0800
+
 dde-shell (0.0.24) unstable; urgency=medium
 
   * fix(taskmanager): radius of the indicators are not working (linuxdeepin/developer-center#8804)
