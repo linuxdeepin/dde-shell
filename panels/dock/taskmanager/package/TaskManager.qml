@@ -52,8 +52,12 @@ ContainmentItem {
                 }
 
                 onDropped: function(drop) {
-                    drop.accept()
-                    taskmanager.Applet.dataModel.moveTo(drop.source.itemId, visualIndex)
+                    if (drop.keys.includes("text/x-dde-launcher-dnd-desktopId")) {
+                        let desktopId = drop.getDataAsString("text/x-dde-launcher-dnd-desktopId")
+                        taskmanager.Applet.requestDockByDesktopId(desktopId)
+                        drop.accepted = false
+                        return;
+                    }
                 }
 
                 property int visualIndex: DelegateModel.itemsIndex
@@ -72,6 +76,14 @@ ContainmentItem {
                     visualIndex: delegateRoot.visualIndex
                     Component.onCompleted: {
                         clickItem.connect(taskmanager.Applet.clickItem)
+                    }
+
+                    onDragFinished: function() {
+                        // 就算在非法区域松开也更新 Model
+                        taskmanager.Applet.dataModel.moveTo(itemId, visualIndex)
+
+                        // 更新 visualModel 的 model 数据
+                        visualModel.model = taskmanager.Applet.dataModel
                     }
                     anchors.fill: parent // This is mandatory for draggable item center in drop area
                 }
