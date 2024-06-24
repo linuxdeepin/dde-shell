@@ -122,11 +122,14 @@ Item {
 
                 toolTip.shellSurface = popupSurface
                 toolTip.toolTipX = popupSurface.x
+                toolTip.toolTipY = popupSurface.y
                 toolTip.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
                 console.log("quickpanel's menu created", popupSurface.popupType, popupSurface.pluginId)
 
                 popup.shellSurface = popupSurface
+                popup.popupX = popupSurface.x
+                popup.popupY = popupSurface.y
                 popup.open()
             }
         }

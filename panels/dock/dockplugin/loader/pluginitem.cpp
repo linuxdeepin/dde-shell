@@ -23,15 +23,8 @@ PluginItem::PluginItem(PluginsItemInterface *pluginItemInterface, const QString 
 
 PluginItem::~PluginItem() = default;
 
-void PluginItem::mouseLeftButtonClicked()
+QWidget *PluginItem::itemPopupApplet()
 {
-    const QString command = m_pluginsItemInterface->itemCommand(m_itemKey);
-    if (!command.isEmpty()) {
-        qInfo() << "command: " << command;
-        QProcess::startDetached(command, QStringList());
-        return;
-    }
-
     auto setPluginMsg = [this]  {
         auto pluginsItemInterfaceV2 = dynamic_cast<PluginsItemInterfaceV2 *>(m_pluginsItemInterface);
         if (!pluginsItemInterfaceV2)
@@ -55,7 +48,7 @@ void PluginItem::mouseLeftButtonClicked()
         if (m_isPanelPopupShow) {
             popup->windowHandle()->hide();
             m_isPanelPopupShow = false;
-            return;
+            return nullptr;
         }
 
         setPluginMsg();
@@ -73,13 +66,13 @@ void PluginItem::mouseLeftButtonClicked()
         pluginPopup->setPluginId(m_pluginsItemInterface->pluginName());
         pluginPopup->setItemKey(m_itemKey);
         pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypePanel);
-        pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
         m_isPanelPopupShow = true;
-        popup->show();
+        return popup;
     }
+    return nullptr;
 }
 
-void PluginItem::mouseRightButtonClicked()
+QMenu *PluginItem::pluginContextMenu()
 {
     if (m_menu->actions().isEmpty()) {
         initPluginMenu();
@@ -98,11 +91,9 @@ void PluginItem::mouseRightButtonClicked()
     pluginPopup->setPluginId(m_pluginsItemInterface->pluginName());
     pluginPopup->setItemKey(m_itemKey);
     pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeMenu);
-    pluginPopup->setX(geometry.x() + geometry.width() / 2);
-    pluginPopup->setY(geometry.y() + geometry.height() / 2);
     m_menu->setFixedSize(m_menu->sizeHint());
     m_isPanelPopupShow = false;
-    m_menu->exec();
+    return m_menu;
 }
 
 void PluginItem::mousePressEvent(QMouseEvent *e)
@@ -113,16 +104,44 @@ void PluginItem::mousePressEvent(QMouseEvent *e)
 void PluginItem::mouseReleaseEvent(QMouseEvent *e)
 {
     if (e->button() == Qt::LeftButton) {
-        mouseLeftButtonClicked();
+        if (executeCommand())
+            return;
+
+        if (auto popup = itemPopupApplet()) {
+            if (auto pluginPopup = Plugin::PluginPopup::get(popup->windowHandle())) {
+                auto geometry = windowHandle()->geometry();
+                const auto offset = e->pos();
+                pluginPopup->setX(geometry.x() + offset.x());
+                pluginPopup->setY(geometry.y() + offset.y());
+                popup->show();
+            }
+        }
     } else if (e->button() == Qt::RightButton) {
-        mouseRightButtonClicked();
+        if (auto menu = pluginContextMenu()) {
+            if (auto pluginPopup = Plugin::PluginPopup::get(menu->windowHandle())) {
+                auto geometry = windowHandle()->geometry();
+                const auto offset = e->pos();
+                pluginPopup->setX(geometry.x() + offset.x());
+                pluginPopup->setY(geometry.y() + offset.y());
+                menu->exec();
+            }
+        }
     }
     QWidget::mouseReleaseEvent(e);
 }
 
 void PluginItem::enterEvent(QEvent *event)
 {
-    showPluginTooltip();
+    if (auto toolTip = pluginTooltip()) {
+        if (auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle())) {
+            auto geometry = windowHandle()->geometry();
+            auto e = dynamic_cast<QEnterEvent *>(event);
+            const auto offset = e->pos();
+            pluginPopup->setX(geometry.x() + offset.x());
+            pluginPopup->setY(geometry.y() + offset.y());
+            toolTip->show();
+        }
+    }
 
     QWidget::enterEvent(event);
 }
@@ -209,37 +228,45 @@ void PluginItem::initPluginMenu()
     }
 }
 
-void PluginItem::showPluginTooltip()
+QWidget *PluginItem::pluginTooltip()
 {
     auto popup = m_pluginsItemInterface->itemPopupApplet(m_itemKey);
     if (popup && popup->isVisible())
         popup->windowHandle()->hide();
 
-    showTooltip(m_itemKey);
+    return itemTooltip(m_itemKey);
 }
 
-void PluginItem::showTooltip(const QString &itemKey)
+QWidget * PluginItem::itemTooltip(const QString &itemKey)
 {
-    QMetaObject::invokeMethod(this, [itemKey, this](){
-        auto toolTip = m_pluginsItemInterface->itemTipsWidget(itemKey);
-        if (!toolTip) {
-            qDebug() << "no tooltip";
-            return;
-        }
+    auto toolTip = m_pluginsItemInterface->itemTipsWidget(itemKey);
+    if (!toolTip) {
+        qDebug() << "no tooltip";
+        return nullptr;
+    }
 
-        toolTip->setParent(nullptr);
-        toolTip->setAttribute(Qt::WA_TranslucentBackground);
-        toolTip->winId();
+    toolTip->setParent(nullptr);
+    toolTip->setAttribute(Qt::WA_TranslucentBackground);
+    toolTip->winId();
 
-        auto geometry = windowHandle()->geometry();
-        auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle());
-        pluginPopup->setPluginId(m_pluginsItemInterface->pluginName());
-        pluginPopup->setItemKey(itemKey);
-        pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeTooltip);
-        pluginPopup->setX(geometry.x() + geometry.width() / 2), pluginPopup->setY(geometry.y() + geometry.height() / 2);
-        if (toolTip->sizeHint().width() > 0 && toolTip->sizeHint().height() > 0) {
-            toolTip->setFixedSize(toolTip->sizeHint());
-        }
-        toolTip->show();
-    });
+    auto geometry = windowHandle()->geometry();
+    auto pluginPopup = Plugin::PluginPopup::get(toolTip->windowHandle());
+    pluginPopup->setPluginId(m_pluginsItemInterface->pluginName());
+    pluginPopup->setItemKey(itemKey);
+    pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeTooltip);
+    if (toolTip->sizeHint().width() > 0 && toolTip->sizeHint().height() > 0) {
+        toolTip->setFixedSize(toolTip->sizeHint());
+    }
+    return toolTip;
+}
+
+bool PluginItem::executeCommand()
+{
+    const QString command = m_pluginsItemInterface->itemCommand(m_itemKey);
+    if (!command.isEmpty()) {
+        qInfo() << "command: " << command;
+        QProcess::startDetached(command, QStringList());
+        return true;
+    }
+    return false;
 }
