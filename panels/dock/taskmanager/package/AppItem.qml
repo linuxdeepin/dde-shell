@@ -24,6 +24,7 @@ Item {
     required property int visualIndex
 
     signal clickItem(itemId: string, menuId: string)
+    signal dragFinished()
 
     Drag.active: mouseArea.drag.active
     Drag.source: root
@@ -245,6 +246,11 @@ Item {
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         drag.target: root
+        drag.onActiveChanged: {
+            if (!drag.active)
+                root.dragFinished()
+        }
+
         onPressed: function (mouse) {
             if (mouse.button === Qt.LeftButton) {
                 icon.grabToImage(function(result) {
