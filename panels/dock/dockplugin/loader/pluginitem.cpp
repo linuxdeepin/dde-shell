@@ -53,7 +53,7 @@ void PluginItem::mouseLeftButtonClicked()
         }
 
         if (m_isPanelPopupShow) {
-            popup->hide();
+            popup->windowHandle()->hide();
             m_isPanelPopupShow = false;
             return;
         }
@@ -213,7 +213,7 @@ void PluginItem::showPluginTooltip()
 {
     auto popup = m_pluginsItemInterface->itemPopupApplet(m_itemKey);
     if (popup && popup->isVisible())
-        popup->hide();
+        popup->windowHandle()->hide();
 
     showTooltip(m_itemKey);
 }

@@ -119,16 +119,16 @@ void WidgetPlugin::itemUpdate(PluginsItemInterface * const itemInter, const QStr
 void WidgetPlugin::itemRemoved(PluginsItemInterface * const itemInter, const QString &itemKey)
 {
     auto widget = m_pluginsItemInterface->itemWidget(itemKey);
-    if(widget) widget->hide();
+    if(widget) widget->windowHandle()->hide();
 
     auto quickPanel = m_pluginsItemInterface->itemWidget(Dock::QUICK_ITEM_KEY);
-    if(quickPanel) quickPanel->hide();
+    if(quickPanel) quickPanel->windowHandle()->hide();
 
     auto popupWidget = m_pluginsItemInterface->itemPopupApplet(itemKey);
-    if(popupWidget) popupWidget->hide();
+    if(popupWidget) popupWidget->windowHandle()->hide();
 
     auto tipsWidget = m_pluginsItemInterface->itemTipsWidget(itemKey);
-    if(tipsWidget) tipsWidget->hide();
+    if(tipsWidget) tipsWidget->windowHandle()->hide();
 
 }
 
