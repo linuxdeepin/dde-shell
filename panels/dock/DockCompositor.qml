@@ -73,7 +73,13 @@ Item {
 
             onPluginSurfaceDestroyed: (dockPluginSurface) => {
                 console.log("plugin surface destroyed", dockPluginSurface.pluginId, dockPluginSurface.itemKey, dockPluginSurface.pluginType)
-                removeDockPluginSurface(trayPluginSurfaces, dockPluginSurface)
+                if (dockPluginSurface.pluginType === Dock.Tray) {
+                    removeDockPluginSurface(trayPluginSurfaces, dockPluginSurface)
+                } else if (dockPluginSurface.pluginType === Dock.Quick) {
+                    removeDockPluginSurface(quickPluginSurfaces, dockPluginSurface)
+                } else if (dockPluginSurface.pluginType === Dock.Fixed) {
+                    removeDockPluginSurface(fixedPluginSurfaces, dockPluginSurface)
+                }
                 dockCompositor.pluginSurfacesUpdated()
             }
 
