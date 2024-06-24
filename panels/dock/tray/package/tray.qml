@@ -65,7 +65,6 @@ AppletItem {
                 model: DDT.SortFilterProxyModel {
                     sourceModel: DDT.TraySortOrderModel
                     filterRowCallback: (sourceRow, sourceParent) => {
-                        console.log(sourceRow, sourceParent)
                         let index = sourceModel.index(sourceRow, 0, sourceParent)
                         return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) === "stashed"
                     }
@@ -93,6 +92,17 @@ AppletItem {
         }
 
         TQP.QuickPanel { }
+
+        OverflowContainer {
+            id: fixedTrayItemsContainer
+
+            property var surfaceData: []
+
+            useColumnLayout: tray.useColumnLayout
+            model: surfaceData
+            spacing: 10
+            delegate: FixedTrayItemDelegate {}
+        }
     }
 
     Connections {
@@ -127,14 +137,21 @@ AppletItem {
         target: DockCompositor
         function onPluginSurfacesUpdated() {
             let surfacesData = []
+            let fixedSurfacesData = []
             for (let i = 0; i < DockCompositor.trayPluginSurfaces.count; i++) {
                 let item = DockCompositor.trayPluginSurfaces.get(i).shellSurface
                 let surfaceId = `${item.pluginId}::${item.itemKey}`
-                surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin"})
-                console.log(surfaceId, item, item.pluginId, "surfaceId")
+                let dataObject = {"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin"}
+                if (item.pluginSizePolicy === Dock.Custom) {
+                    fixedSurfacesData.push(dataObject)
+                } else {
+                    surfacesData.push(dataObject)
+                }
+                console.log(surfaceId, item, item.pluginSizePolicy, "surfaceId")
             }
             DDT.TraySortOrderModel.availableSurfaces = surfacesData
-            console.log("onPluginSurfacesUpdated", surfacesData)
+            fixedTrayItemsContainer.surfaceData = fixedSurfacesData
+            console.log("onPluginSurfacesUpdated", surfacesData, fixedTrayItemsContainer.surfaceIds)
         }
     }
 
