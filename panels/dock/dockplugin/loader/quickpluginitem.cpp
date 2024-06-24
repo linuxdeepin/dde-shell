@@ -26,14 +26,22 @@ QWidget *QuickPluginItem::centralWidget()
 void QuickPluginItem::mouseReleaseEvent(QMouseEvent *e)
 {
      if (e->button() == Qt::RightButton) {
-        mouseRightButtonClicked();
+        if (auto menu = pluginContextMenu()) {
+            if (auto pluginPopup = Plugin::PluginPopup::get(menu->windowHandle())) {
+                auto geometry = windowHandle()->geometry();
+                const auto offset = e->pos();
+                pluginPopup->setX(geometry.x() + offset.x());
+                pluginPopup->setY(geometry.y() + offset.y());
+                menu->exec();
+            }
+        }
         e->accept();
     }
 
     QWidget::mouseReleaseEvent(e);
 }
 
-void QuickPluginItem::mouseRightButtonClicked()
+QMenu *QuickPluginItem::pluginContextMenu()
 {
     if (m_menu->isEmpty()) {
         initPluginMenu();
@@ -65,14 +73,16 @@ void QuickPluginItem::mouseRightButtonClicked()
     pluginPopup->setPluginId(pluginsItemInterface()->pluginName());
     pluginPopup->setItemKey(Dock::QUICK_ITEM_KEY);
     pluginPopup->setPopupType(Plugin::PluginPopup::PopupTypeMenu);
-    pluginPopup->setX(geometry.x() + geometry.width() / 2);
-    pluginPopup->setY(geometry.y() + geometry.height() / 2);
     m_menu->setFixedSize(m_menu->sizeHint());
-    m_menu->exec();
+    return m_menu;
 }
 
-void QuickPluginItem::showPluginTooltip()
+QWidget *QuickPluginItem::pluginTooltip()
 {
-    showTooltip(Dock::QUICK_ITEM_KEY);
+    auto popup = pluginsItemInterface()->itemPopupApplet(m_itemKey);
+    if (popup && popup->isVisible())
+        popup->windowHandle()->hide();
+
+    return itemTooltip(Dock::QUICK_ITEM_KEY);
 }
 
