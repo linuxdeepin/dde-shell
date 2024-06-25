@@ -155,7 +155,17 @@ void PluginItem::leaveEvent(QEvent *event)
 
 QWidget* PluginItem::centralWidget()
 {
-    return m_pluginsItemInterface->itemWidget(m_itemKey);
+    auto trayItemWidget = m_pluginsItemInterface->itemWidget(m_itemKey);
+    auto size = trayItemWidget->sizeHint();
+    // TODO by sizePolicy when network plugin fixed
+    if (size.width() > 0 && size.height() > 0) {
+        trayItemWidget->setFixedSize(trayItemWidget->sizeHint());
+    } else if (trayItemWidget->height() > 16) {
+        // FIXME: libdock-wirelesscasting-plugin.so return trayItemWidget.size=(640,480)
+        trayItemWidget->setFixedSize(16, 16);
+    }
+
+    return trayItemWidget;
 }
 
 PluginsItemInterface * PluginItem::pluginsItemInterface()
