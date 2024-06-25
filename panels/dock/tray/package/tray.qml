@@ -32,7 +32,7 @@ AppletItem {
             ShellSurfaceItem {
                 id: popupContent
                 anchors.centerIn: parent
-                onSurfaceDestroyed: {
+                onSurfaceDestroyed: function () {
                     popup.close()
                 }
             }
@@ -46,7 +46,7 @@ AppletItem {
         ShellSurfaceItem {
             id: toolTipContent
             anchors.centerIn: parent
-            onSurfaceDestroyed: {
+            onSurfaceDestroyed: function () {
                 toolTip.close()
             }
         }
@@ -104,16 +104,28 @@ AppletItem {
 
             if (popupSurface.popupType === Dock.TrayPopupTypeTooltip) {
                 toolTip.shellSurface = popupSurface
-                toolTip.toolTipX = popupSurface.x
+                toolTip.toolTipX = Qt.binding(function () {
+                    return toolTip.shellSurface.x - toolTip.width / 2
+                })
+                toolTip.toolTipY = Qt.binding(function () {
+                    return -toolTip.height - 10
+                })
                 toolTip.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
                 popupContent.shellSurface = popupSurface
                 popup.popupX = popupSurface.x
-                popup.popupY = popupSurface.y
+                popup.popupY = Qt.binding(function () {
+                    return popupContent.shellSurface.y - popup.height
+                })
                 popup.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypePanel) {
                 popupContent.shellSurface = popupSurface
-                popup.popupX = popupSurface.x
+                popup.popupX = Qt.binding(function () {
+                    return popupContent.shellSurface.x - popup.width / 2
+                })
+                popup.popupY = Qt.binding(function () {
+                    return -popup.height - 10
+                })
                 popup.open()
             }
         }

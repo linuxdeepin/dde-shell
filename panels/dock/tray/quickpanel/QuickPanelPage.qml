@@ -40,10 +40,10 @@ Item {
         initialItem: PanelPluginPage {
             id: panelPage
             model: root.model
-            StackView.onActivating: {
+            StackView.onActivating: function () {
                 panelView.contentHeight = Qt.binding(function() { return height })
             }
-            StackView.onActivated: {
+            StackView.onActivated: function () {
                 panelPage.forceLayout()
             }
         }
@@ -56,7 +56,7 @@ Item {
             onRequestBack: function () {
                 panelView.pop()
             }
-            StackView.onActivating: {
+            StackView.onActivating: function () {
                 panelView.contentHeight = Qt.binding(function() { return contentHeight})
             }
         }
@@ -73,7 +73,7 @@ Item {
         ShellSurfaceItem {
             id: surfaceLayer
             anchors.centerIn: parent
-            onSurfaceDestroyed: {
+            onSurfaceDestroyed: function () {
                 toolTip.close()
             }
         }
@@ -98,7 +98,7 @@ Item {
         ShellSurfaceItem {
             id: popupSurfaceLayer
             anchors.centerIn: parent
-            onSurfaceDestroyed: {
+            onSurfaceDestroyed: function () {
                 popup.close()
             }
         }
@@ -122,14 +122,18 @@ Item {
 
                 toolTip.shellSurface = popupSurface
                 toolTip.toolTipX = popupSurface.x
-                toolTip.toolTipY = popupSurface.y
+                toolTip.toolTipY = Qt.binding(function () {
+                    return toolTip.shellSurface.y - toolTip.height
+                })
                 toolTip.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
                 console.log("quickpanel's menu created", popupSurface.popupType, popupSurface.pluginId)
 
                 popup.shellSurface = popupSurface
-                popup.popupX = popupSurface.x
-                popup.popupY = popupSurface.y
+                popup.popupX = popup.shellSurface.x
+                popup.popupY = Qt.binding(function () {
+                    return popup.shellSurface.y - popup.height
+                })
                 popup.open()
             }
         }
