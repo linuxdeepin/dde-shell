@@ -6,6 +6,7 @@
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QStandardPaths>
+#include <QIcon>
 
 #include <DLog>
 #include <DGuiApplicationHelper>
