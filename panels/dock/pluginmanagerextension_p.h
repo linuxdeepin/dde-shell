@@ -70,6 +70,7 @@ class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public
     Q_PROPERTY(uint32_t pluginType READ pluginType CONSTANT)
     Q_PROPERTY(uint32_t pluginSizePolicy READ pluginSizePolicy CONSTANT)
     Q_PROPERTY(QString displayName READ displayName CONSTANT)
+    Q_PROPERTY(QSize size READ pluginSize NOTIFY sizeChanged)
     Q_PROPERTY(bool isItemActive WRITE setItemActive READ isItemActive NOTIFY itemActiveChanged)
 
 public:
@@ -85,6 +86,7 @@ public:
     uint32_t pluginType() const;
     uint32_t pluginFlags() const;
     uint32_t pluginSizePolicy() const;
+    QSize pluginSize() const;
 
     void setItemActive(bool isActive);
     bool isItemActive() const;
@@ -93,6 +95,7 @@ public:
 
 signals:
     void itemActiveChanged();
+    void sizeChanged();
 
 private:
     PluginManager* m_manager;

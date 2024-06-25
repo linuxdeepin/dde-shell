@@ -28,6 +28,8 @@ PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, co
     init(resource.resource());
     setExtensionContainer(surface);
     QWaylandCompositorExtension::initialize();
+
+    connect(surface, &QWaylandSurface::bufferSizeChanged, this, &PluginSurface::sizeChanged);
 }
 
 QWaylandQuickShellIntegration* PluginSurface::createIntegration(QWaylandQuickShellSurfaceItem *item)
@@ -68,6 +70,11 @@ uint32_t PluginSurface::pluginFlags() const
 uint32_t PluginSurface::pluginSizePolicy () const
 {
     return m_sizePolicy;
+}
+
+QSize PluginSurface::pluginSize() const
+{
+    return m_surface->bufferSize();
 }
 
 void PluginSurface::setItemActive(bool isActive)
