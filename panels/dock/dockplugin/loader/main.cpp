@@ -62,6 +62,7 @@ int main(int argc, char *argv[], char *envp[])
 
     Dtk::Widget::DApplication app(argc, argv);
     app.setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+    app.setQuitOnLastWindowClosed(false);
 
     QCommandLineParser parser;
     parser.addHelpOption();

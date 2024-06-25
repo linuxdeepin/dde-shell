@@ -128,11 +128,17 @@ bool EmbedPlugin::contains(QWindow *window)
     return s_map.keys().contains(window);
 }
 
-bool EmbedPlugin::contains(const QString &itemKey, int type)
+bool EmbedPlugin::contains(const QString &pluginId, int type, const QString &itemKey)
 {
     for (const auto *plugin : s_map.values()) {
-        if (itemKey == plugin->itemKey() && type == plugin->pluginType()) {
-            return true;
+        if (itemKey.isEmpty()) {
+            if (pluginId == plugin->pluginId() && type == plugin->pluginType()) {
+                return true;
+            }
+        } else {
+            if (pluginId == plugin->pluginId() && itemKey == plugin->itemKey() && type == plugin->pluginType()) {
+                return true;
+            }
         }
     }
 

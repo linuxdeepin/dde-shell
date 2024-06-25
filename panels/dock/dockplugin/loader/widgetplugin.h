@@ -47,8 +47,12 @@ private:
     Plugin::EmbedPlugin* getPlugin(QWidget*);
     void initConnections(Plugin::EmbedPlugin *plugin, PluginItem *pluginItem);
     int getPluginFlags();
-    static QString messageCallback(PluginsItemInterfaceV2 *, const QString &);
     void pluginUpdateDockSize(const QSize &size);
+
+    static QString messageCallback(PluginsItemInterfaceV2 *, const QString &);
+    static bool supportFlag(PluginsItemInterfaceV2 *pluginV2);
+    static QJsonObject getRootObj(const QString &jsonStr);
+    static QString toJson(const QJsonObject &jsonObj);
 
 private:
     PluginsItemInterface* m_pluginsItemInterface;
