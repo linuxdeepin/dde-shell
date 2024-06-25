@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
+#include <QStandardPaths>
 
 #include <DLog>
 #include <DGuiApplicationHelper>
@@ -120,6 +121,14 @@ int main(int argc, char *argv[])
         }
         return 0;
     }
+
+    auto dirs = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+    QStringList fallbacks = QIcon::fallbackSearchPaths();
+    for (const auto fb : dirs) {
+        fallbacks << fb + QLatin1String("/icons");
+    }
+    // To Fix (developer-center#8413) Qt6 find icons will ignore ${GenericDataLocation}/icons/xxx.png
+    QIcon::setFallbackSearchPaths(fallbacks);
 
     Dtk::Core::DLogManager::registerConsoleAppender();
     Dtk::Core::DLogManager::registerFileAppender();
