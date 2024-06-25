@@ -47,22 +47,24 @@ Item {
         if (!popupWindow)
             return
 
-        readyBinding = true
-        Qt.callLater(function () {
-            popupWindow.show()
-            popup.open()
-            popupWindow.requestActivate()
+        readyBinding = Qt.binding(function () {
+            return popupWindow && popupWindow.currentItem === control
         })
 
+        popupWindow.currentItem = control
+        Qt.callLater(function () {
+            popupWindow.show()
+            popupWindow.requestActivate()
+        })
     }
+
     function close()
     {
         if (!popupWindow)
             return
 
-        readyBinding = false
+        popupWindow.currentItem = null
         popupWindow.close()
-        popup.close()
     }
 
     Connections {
@@ -81,6 +83,7 @@ Item {
     Popup {
         id: popup
         padding: 0
+        visible: readyBinding
         width: control.width
         height: control.height
         parent: popupWindow ? popupWindow.contentItem : undefined
