@@ -17,6 +17,7 @@ add_executable(dockplugin-loader
     quickpluginitem.cpp
     utils/setproctitle.h
     utils/setproctitle.cpp
+    loader.qrc
 )
 
 target_include_directories(dockplugin-loader PUBLIC
