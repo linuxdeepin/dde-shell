@@ -36,7 +36,9 @@ void PluginSurface::plugin_close()
 
 void PluginSurface::plugin_geometry(int32_t x, int32_t y, int32_t width, int32_t height)
 {
-    m_window->setGeometry(x, y, width, height);
+    if (width > 0 && height > 0) {
+        m_window->setGeometry(x, y, width, height);
+    }
 
     Q_EMIT m_plugin->eventGeometry(QRect(x, y, width, height));
 }
