@@ -236,9 +236,15 @@ void WidgetPlugin::initConnections(Plugin::EmbedPlugin *plugin, PluginItem *plug
     connect(plugin, &Plugin::EmbedPlugin::dockPositionChanged, this, &WidgetPlugin::onDockPositionChanged, Qt::UniqueConnection);
     connect(plugin, &Plugin::EmbedPlugin::eventMessage, this, &WidgetPlugin::onDockEventMessageArrived, Qt::UniqueConnection);
 
-    connect(plugin, &Plugin::EmbedPlugin::eventGeometry, this, [plugin, pluginItem](const QRect &geometry) {
+    connect(plugin, &Plugin::EmbedPlugin::eventGeometry, this, [this, plugin, pluginItem](const QRect &geometry) {
         if (plugin->pluginType() == Plugin::EmbedPlugin::Quick) {
             pluginItem->updateItemWidgetSize(geometry.size());
+        } else {
+            if (geometry.width() == -1 || geometry.height() == -1) {
+                if (geometry.width() < 0 && geometry.height() < 0) return;
+                QSize size = geometry.width() == -1 ? QSize(geometry.height(), geometry.height()) : QSize(geometry.width(), geometry.width());
+                pluginUpdateDockSize(size);
+            }
         }
     });
 }
@@ -278,6 +284,27 @@ QString WidgetPlugin::messageCallback(PluginsItemInterfaceV2 *pluginItem, const 
     QJsonDocument result;
     result.setObject(ret);
     return result.toJson();
+}
+
+void WidgetPlugin::pluginUpdateDockSize(const QSize &size)
+{
+    auto pluginsItemInterfaceV2 = dynamic_cast<PluginsItemInterfaceV2 *>(m_pluginsItemInterface);
+    if (!pluginsItemInterfaceV2) {
+        return;
+    }
+
+    QJsonObject sizeData;
+    sizeData["width"] = size.width();
+    sizeData["height"] = size.height();
+
+    QJsonObject obj;
+    obj[Dock::MSG_TYPE] = Dock::MSG_DOCK_PANEL_SIZE_CHANGED;
+    obj[Dock::MSG_DATA] = sizeData;
+
+    QJsonDocument doc;
+    doc.setObject(obj);
+
+    pluginsItemInterfaceV2->message(doc.toJson());
 }
 
 }

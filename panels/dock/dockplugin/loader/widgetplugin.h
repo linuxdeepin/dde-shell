@@ -48,6 +48,7 @@ private:
     void initConnections(Plugin::EmbedPlugin *plugin, PluginItem *pluginItem);
     int getPluginFlags();
     static QString messageCallback(PluginsItemInterfaceV2 *, const QString &);
+    void pluginUpdateDockSize(const QSize &size);
 
 private:
     PluginsItemInterface* m_pluginsItemInterface;
