@@ -18,7 +18,9 @@ QuickPluginItem::QuickPluginItem(PluginsItemInterface *pluginInterface, const QS
 QWidget *QuickPluginItem::centralWidget()
 {
     if (pluginsItemInterface()) {
-        return pluginsItemInterface()->itemWidget(Dock::QUICK_ITEM_KEY);
+        auto quickItem = pluginsItemInterface()->itemWidget(Dock::QUICK_ITEM_KEY);
+        quickItem->setVisible(true);
+        return quickItem;
     }
     return nullptr;
 }

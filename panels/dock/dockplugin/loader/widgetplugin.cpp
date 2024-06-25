@@ -43,7 +43,7 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
     qDebug() << "itemAdded:" << itemKey;
     auto flag = getPluginFlags();
     if (flag & Dock::Type_Quick) {
-        if (!Plugin::EmbedPlugin::contains(itemKey, Plugin::EmbedPlugin::Quick)) {
+        if (!Plugin::EmbedPlugin::contains(itemInter->pluginName(), Plugin::EmbedPlugin::Quick)) {
             PluginItem *item = new QuickPluginItem(itemInter, itemKey);
             item->setPluginFlags(flag);
             item->init();
@@ -58,11 +58,16 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
             item->windowHandle()->hide();
             item->show();
             m_pluginItems << item;
+        } else {
+            auto quickItem = m_pluginsItemInterface->itemWidget(Dock::QUICK_ITEM_KEY);
+            if(quickItem) {
+                quickItem->window()->windowHandle()->show();
+            }
         }
     }
     if (flag & Dock::Type_Quick || flag & Dock::Type_System
         || flag & Dock::Type_Tray || flag & Dock::Attribute_Normal) {
-        if (!Plugin::EmbedPlugin::contains(itemKey, Plugin::EmbedPlugin::Tray)) {
+        if (!Plugin::EmbedPlugin::contains(itemInter->pluginName(), Plugin::EmbedPlugin::Tray, itemKey) && m_pluginsItemInterface->itemWidget(itemKey)) {
             PluginItem *item = new PluginItem(itemInter, itemKey);
             item->setPluginFlags(flag);
             item->init();
@@ -77,10 +82,15 @@ void WidgetPlugin::itemAdded(PluginsItemInterface * const itemInter, const QStri
             item->windowHandle()->hide();
             item->show();
             m_pluginItems << item;
+        } else {
+            auto trayItem = m_pluginsItemInterface->itemWidget(itemKey);
+            if (trayItem) {
+                trayItem->window()->windowHandle()->show();
+            }
         }
     }
     if (flag & Dock::Type_Tool) {
-        if (!Plugin::EmbedPlugin::contains(itemKey, Plugin::EmbedPlugin::Fixed)) {
+        if (!Plugin::EmbedPlugin::contains(itemInter->pluginName(), Plugin::EmbedPlugin::Fixed, itemKey)) {
             PluginItem *item = new PluginItem(itemInter, itemKey);
             item->setPluginFlags(flag);
             item->init();
@@ -119,17 +129,20 @@ void WidgetPlugin::itemUpdate(PluginsItemInterface * const itemInter, const QStr
 void WidgetPlugin::itemRemoved(PluginsItemInterface * const itemInter, const QString &itemKey)
 {
     auto widget = m_pluginsItemInterface->itemWidget(itemKey);
-    if(widget) widget->windowHandle()->hide();
+    if(widget && widget->window() && widget->window()->windowHandle()) {
+        widget->window()->windowHandle()->hide();
+    }
 
     auto quickPanel = m_pluginsItemInterface->itemWidget(Dock::QUICK_ITEM_KEY);
-    if(quickPanel) quickPanel->windowHandle()->hide();
+    if(quickPanel && quickPanel->window() && quickPanel->window()->windowHandle()) {
+        quickPanel->window()->windowHandle()->hide();
+    }
 
     auto popupWidget = m_pluginsItemInterface->itemPopupApplet(itemKey);
     if(popupWidget) popupWidget->windowHandle()->hide();
 
     auto tipsWidget = m_pluginsItemInterface->itemTipsWidget(itemKey);
-    if(tipsWidget) tipsWidget->windowHandle()->hide();
-
+    if(tipsWidget && tipsWidget->windowHandle()) tipsWidget->windowHandle()->hide();
 }
 
 void WidgetPlugin::requestWindowAutoHide(PluginsItemInterface * const itemInter, const QString &itemKey, const bool autoHide)
@@ -274,16 +287,70 @@ int WidgetPlugin::getPluginFlags()
 QString WidgetPlugin::messageCallback(PluginsItemInterfaceV2 *pluginItem, const QString &msg)
 {
     qInfo() << "Plugin callback message:" << pluginItem->pluginName() << msg;
-    foreach (auto plugin, Plugin::EmbedPlugin::all()) {
-        Q_EMIT plugin->requestMessage(msg);
-    }
 
     QJsonObject ret;
-    ret["code"] = 0;
+    ret["code"] = -1;
 
-    QJsonDocument result;
-    result.setObject(ret);
-    return result.toJson();
+    auto rootObj = getRootObj(msg);
+    if (rootObj.isEmpty()) {
+        qWarning() << "Root object is empty";
+        return toJson(ret);
+    }
+
+    auto msgType = rootObj.value(Dock::MSG_TYPE);
+    if (msgType == Dock::MSG_SUPPORT_FLAG_CHANGED) {
+        bool changed = supportFlag(pluginItem);
+        foreach (auto plugin, Plugin::EmbedPlugin::all()) {
+            Q_EMIT plugin->pluginSupportFlagChanged(changed);
+        }
+    } else {
+        foreach (auto plugin, Plugin::EmbedPlugin::all()) {
+            Q_EMIT plugin->requestMessage(msg);
+        }
+    }
+
+    ret["code"] = 0;
+    return toJson(ret);
+}
+
+QJsonObject WidgetPlugin::getRootObj(const QString &jsonStr)
+{
+    QJsonParseError jsonParseError;
+    const QJsonDocument &resultDoc = QJsonDocument::fromJson(jsonStr.toLocal8Bit(), &jsonParseError);
+    if (jsonParseError.error != QJsonParseError::NoError || resultDoc.isEmpty()) {
+        qWarning() << "Result json parse error";
+        return QJsonObject();
+    }
+
+    return resultDoc.object();
+}
+
+QString WidgetPlugin::toJson(const QJsonObject &jsonObj)
+{
+    QJsonDocument doc;
+    doc.setObject(jsonObj);
+    return doc.toJson();
+}
+
+bool WidgetPlugin::supportFlag(PluginsItemInterfaceV2 *pluginV2)
+{
+    if (!pluginV2) {
+        return true;
+    }
+
+    QJsonObject obj;
+    obj[Dock::MSG_TYPE] = Dock::MSG_GET_SUPPORT_FLAG;
+
+    auto ret = pluginV2->message(toJson(obj));
+    if (ret.isEmpty())
+        return true;
+
+    auto rootObj = getRootObj(ret);
+    if (rootObj.isEmpty() || !rootObj.contains(Dock::MSG_SUPPORT_FLAG)) {
+        return true;
+    }
+
+    return rootObj.value(Dock::MSG_SUPPORT_FLAG).toBool(true);
 }
 
 void WidgetPlugin::pluginUpdateDockSize(const QSize &size)

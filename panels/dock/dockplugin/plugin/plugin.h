@@ -50,7 +50,7 @@ public:
 
     static EmbedPlugin* get(QWindow* window);
     static bool contains(QWindow* window);
-    static bool contains(const QString &itemKey, int type);
+    static bool contains(const QString &pluginId, int type, const QString &itemKey = QString());
     static QList<EmbedPlugin *> all();
 
 Q_SIGNALS:
@@ -58,6 +58,7 @@ Q_SIGNALS:
     void eventGeometry(const QRect &geometry);
     void dockPositionChanged(uint32_t position);
     void dockColorThemeChanged(uint32_t colorType);
+    void pluginSupportFlagChanged(bool);
 
 Q_SIGNALS:
     void itemKeyChanged();
