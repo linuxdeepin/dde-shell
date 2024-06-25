@@ -24,6 +24,7 @@ Control {
         anchors.fill: parent
         dragItem: root
         dragTextData: `${root.pluginId}::${root.itemKey}`
+        fallbackIconSize: traySurface ? traySurface.size : Qt.size(16, 16)
     }
 
     ShellSurfaceItemProxy {
