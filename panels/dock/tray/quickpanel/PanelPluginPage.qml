@@ -43,7 +43,7 @@ Item {
             width: pluginView.width - pluginView.leftPadding - pluginView.rightPadding
             ActionButton {
                 icon.name: "quickpanel-setting"
-                onClicked: {
+                onClicked: function () {
                     console.log("clicked settings")
                     model.openSystemSettings()
                 }
@@ -53,7 +53,7 @@ Item {
 
             ActionButton {
                 icon.name: "quickpanel-power"
-                onClicked: {
+                onClicked: function () {
                     console.log("clicked shutdown")
                     model.openShutdownScreen()
                 }
@@ -82,7 +82,7 @@ Item {
 
             Connections {
                 target: root
-                onReady: function () {
+                function onReady () {
                     pluginItem.updateSurface()
                 }
             }

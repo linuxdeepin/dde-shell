@@ -26,11 +26,13 @@ Item {
     PanelTrayItem {
         id: panelTrayItem
         shellSurface: quickpanelModel.trayItemSurface
-        onClicked: {
+        onClicked: function () {
             console.log("show quickpanel")
             var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
             popup.popupX = point.x
-            popup.popupY = 0
+            popup.popupY = Qt.binding(function () {
+                return -popup.height - 10
+            })
             popup.open()
         }
     }

@@ -16,7 +16,9 @@ Item {
     property var toolTipWindow: Panel.toolTipWindow
     property int toolTipX: 0
     property int toolTipY: 0
-    property int margins: 10
+    property bool readyBinding: false
+    width: toolTip.width
+    height: toolTip.height
     onToolTipVisibleChanged: {
         if (toolTipVisible) {
             open()
@@ -25,36 +27,47 @@ Item {
         }
     }
 
+    Binding {
+        when: readyBinding
+        target: toolTipWindow; property: "width"
+        value: toolTip.width
+    }
+    Binding {
+        when: readyBinding
+        target: toolTipWindow; property: "height"
+        value: toolTip.height
+    }
+    Binding {
+        when: readyBinding
+        target: toolTipWindow; property: "xOffset"
+        value: control.toolTipX
+    }
+    Binding {
+        when: readyBinding
+        target: toolTipWindow; property: "yOffset"
+        value: control.toolTipY
+    }
+
     function open()
     {
-        var window = toolTipWindow
-        if (!window)
+        if (!toolTipWindow)
             return
-        window.width = Qt.binding(function() {
-            return toolTip.width + toolTip.leftPadding + toolTip.rightPadding
-        })
-        window.height = Qt.binding(function() {
-            return toolTip.height + toolTip.topPadding + toolTip.bottomPadding
-        })
 
-        window.xOffset = Qt.binding(function() {
-            return control.toolTipX - toolTip.width / 2
+        readyBinding = true
+        Qt.callLater(function () {
+            toolTip.open()
+            toolTipWindow.show()
         })
-        window.yOffset = Qt.binding(function() {
-            return control.toolTipY - toolTip.height - control.margins
-        })
-        window.show()
-        toolTip.open()
     }
     
     function close()
     {
-        var window = toolTipWindow
-        if (!window)
+        if (!toolTipWindow)
             return
 
+        readyBinding = false
         toolTip.close()
-        window.close()
+        toolTipWindow.close()
     }
     function hide()
     {
@@ -71,10 +84,9 @@ Item {
         bottomPadding: 0
         parent: toolTipWindow ? toolTipWindow.contentItem : undefined
         onParentChanged: function() {
-            var window = toolTipWindow
-            if (!window)
+            if (!toolTipWindow)
                 return
-            window.visibleChanged.connect(function() {
+            toolTipWindow.visibleChanged.connect(function() {
                 if (toolTipWindow && !toolTipWindow.visible)
                     toolTip.close()
             })

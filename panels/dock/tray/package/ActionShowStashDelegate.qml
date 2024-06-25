@@ -12,18 +12,6 @@ import org.deepin.ds.dock 1.0
 D.ToolButton {
     id: root
 
-    property var itemGlobalPoint: {
-        var a = root
-        var x = 0, y = 0
-        while(a.parent) {
-            x += a.x
-            y += a.y
-            a = a.parent
-        }
-
-        return Qt.point(x, y)
-    }
-
     width: 16
     height: 16
     icon.name: {
@@ -39,12 +27,13 @@ D.ToolButton {
     display: D.IconLabel.IconOnly
 
     onClicked: {
-        if (stashedPopup.popupVisible) {
-            stashedPopup.close()
-        } else {
-            stashedPopup.popupX = itemGlobalPoint.x + root.width / 2
-            stashedPopup.open()
-        }
-        
+        var point = root.mapToItem(null, root.width / 2, 0)
+        stashedPopup.popupX = Qt.binding(function () {
+            return point.x - stashedPopup.width / 2
+        })
+        stashedPopup.popupY = Qt.binding(function () {
+            return -stashedPopup.height - 10
+        })
+        stashedPopup.open()
     }
 }

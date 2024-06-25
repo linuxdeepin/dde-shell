@@ -12,11 +12,30 @@ Item {
     default property alias popupContent: popup.contentChildren
     property alias popupVisible: popup.visible
     property var popupWindow: Panel.popupWindow
-
-    property int paddings: 0
-    property int margins: 10
     property int popupX: 0
     property int popupY: 0
+    property bool readyBinding: false
+
+    Binding {
+        when: readyBinding
+        target: popupWindow; property: "width"
+        value: popup.width
+    }
+    Binding {
+        when: readyBinding
+        target: popupWindow; property: "height"
+        value: popup.height
+    }
+    Binding {
+        when: readyBinding
+        target: popupWindow; property: "xOffset"
+        value: control.popupX
+    }
+    Binding {
+        when: readyBinding
+        target: popupWindow; property: "yOffset"
+        value: control.popupY
+    }
 
     function open()
     {
@@ -25,34 +44,24 @@ Item {
             return
         }
 
-        var window = popupWindow
-        if (!window)
+        if (!popupWindow)
             return
 
-        window.width = Qt.binding(function() {
-            return popup.width + popup.leftPadding + popup.rightPadding
-        })
-        window.height = Qt.binding(function() {
-            return popup.height + popup.topPadding + popup.bottomPadding
+        readyBinding = true
+        Qt.callLater(function () {
+            popupWindow.show()
+            popup.open()
+            popupWindow.requestActivate()
         })
 
-        window.xOffset = Qt.binding(function() {
-            return control.popupX - window.width / 2
-        })
-        window.yOffset = Qt.binding(function() {
-            return control.popupY - window.height - control.margins
-        })
-        window.show()
-        popup.open()
-        window.requestActivate()
     }
     function close()
     {
-        var window = popupWindow
-        if (!window)
+        if (!popupWindow)
             return
 
-        window.close()
+        readyBinding = false
+        popupWindow.close()
         popup.close()
     }
 
@@ -60,8 +69,7 @@ Item {
         target: popupWindow
         function onActiveChanged()
         {
-            var window = popupWindow
-            if (!window)
+            if (!popupWindow)
                 return
             // TODO why activeChanged is not emit.
             if (popupWindow && !popupWindow.active) {
@@ -72,15 +80,14 @@ Item {
 
     Popup {
         id: popup
-        padding: control.paddings
+        padding: 0
         width: control.width
         height: control.height
         parent: popupWindow ? popupWindow.contentItem : undefined
         onParentChanged: function() {
-            var window = popupWindow
-            if (!window)
+            if (!popupWindow)
                 return
-            window.visibleChanged.connect(function() {
+            popupWindow.visibleChanged.connect(function() {
                 if (popupWindow && !popupWindow.visible)
                     control.close()
             })
