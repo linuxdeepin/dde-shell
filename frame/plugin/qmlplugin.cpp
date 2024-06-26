@@ -47,6 +47,7 @@ void QmlpluginPlugin::registerTypes(const char *uri)
     dsRegisterType(uri, 1, 0, "PanelPopup");
     dsRegisterType(uri, 1, 0, "PanelToolTip");
     dsRegisterType(uri, 1, 0, "PanelPopupWindow");
+    dsRegisterType(uri, 1, 0, "PanelToolTipWindow");
     dsRegisterType(uri, 1, 0, "QuickDragWindow");
 }
 

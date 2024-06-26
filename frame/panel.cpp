@@ -123,7 +123,7 @@ void DPanelPrivate::ensureToolTipWindow() const
         return;
     }
 
-    auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelPopupWindow.qml"));
+    auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelToolTipWindow.qml"));
     if (!object)
         return;
     const_cast<DPanelPrivate *>(this)->m_toolTipWindow = qobject_cast<QQuickWindow *>(object);
