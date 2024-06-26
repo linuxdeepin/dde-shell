@@ -236,7 +236,9 @@ Item {
         property int xOffset: 0
         property int yOffset: 0
         onTriggered: {
-            taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, xOffset, yOffset, Panel.position)
+            if (root.windows.length != 0) {
+                taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, xOffset, yOffset, Panel.position)
+            }
         }
     }
 
