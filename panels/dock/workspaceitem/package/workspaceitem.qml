@@ -59,11 +59,12 @@ AppletItem {
                 border.color: isCurrent ? D.ColorSelector.selectedBorderColor : D.ColorSelector.unSelectedBorderColor
                 implicitWidth: frameSize
                 implicitHeight: isCurrent ? itemSize + 4 : itemSize
-                color: D.ColorSelector.backgroundColor
+                color: isCurrent ? undefined : D.ColorSelector.backgroundColor
                 radius: 3
                 Image {
                     anchors.fill: parent
                     anchors.margins: 1
+                    z: -1
                     id: workspaceImage
                     source: screenImage
                     visible: false
