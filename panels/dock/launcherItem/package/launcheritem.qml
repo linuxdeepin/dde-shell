@@ -37,7 +37,7 @@ AppletItem {
     function updateItemPos()
     {
         var lX = icon.mapToItem(null, icon.width / 2, 0).x
-        var lY = Panel.rootObject.y
+        var lY = icon.mapToItem(null, 0, 0).y
         launcher.itemPos = Qt.point(lX, lY)
     }
     function updateLaunchpadPos()
