@@ -26,7 +26,8 @@ Window {
     }
     flags: Qt.Popup
     D.DWindow.enabled: true
-    D.DWindow.windowRadius: 4 * Screen.devicePixelRatio
+    D.DWindow.windowRadius: (D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius)
+                            * Screen.devicePixelRatio
     D.DWindow.enableBlurWindow: true
     D.DWindow.shadowRadius: 8
     // TODO set shadowOffset maunally.

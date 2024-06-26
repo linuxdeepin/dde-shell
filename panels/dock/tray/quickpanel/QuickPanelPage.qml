@@ -62,7 +62,7 @@ Item {
         }
     }
 
-    PanelPopupWindow {
+    PanelToolTipWindow {
         id: toolTipWindow
     }
     PanelToolTip {
