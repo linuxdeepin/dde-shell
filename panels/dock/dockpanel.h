@@ -13,9 +13,9 @@
 namespace dock {
 class DockHelper;
 const QStringList pluginDirs = {
-    "/usr/lib/dde-dock/tmp/plugins/",
-    "/usr/lib/dde-dock/tmp/plugins/quick-trays/",
-    "/usr/lib/dde-dock/tmp/plugins/system-trays/"
+    QString("%1/%2/plugins/").arg(CMAKE_INSTALL_PREFIX).arg(PLUGIN_INSTALL_DIR),
+    QString("%1/%2/plugins/quick-trays/").arg(CMAKE_INSTALL_PREFIX).arg(PLUGIN_INSTALL_DIR),
+    QString("%1/%2/plugins/system-trays/").arg(CMAKE_INSTALL_PREFIX).arg(PLUGIN_INSTALL_DIR)
 };
 
 class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext

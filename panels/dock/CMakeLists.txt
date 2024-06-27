@@ -4,6 +4,14 @@
 
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 
+if((CMAKE_INSTALL_LIBDIR MATCHES "lib") OR (CMAKE_INSTALL_LIBDIR MATCHES "lib64"))
+    set(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/dde-dock/tmp" CACHE STRING "Plugin install path")
+else()
+    set(PLUGIN_INSTALL_DIR "lib/dde-dock/tmp" CACHE STRING "Plugin install path")
+endif()
+
+add_definitions(-DCMAKE_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\" -DPLUGIN_INSTALL_DIR=\"${PLUGIN_INSTALL_DIR}\")
+
 configure_file(environments.h.in environments.h @ONLY)
 
 find_package(PkgConfig REQUIRED)

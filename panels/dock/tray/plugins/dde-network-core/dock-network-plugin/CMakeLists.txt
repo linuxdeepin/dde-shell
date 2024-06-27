@@ -33,6 +33,6 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
     dde-network-core_static
 )
 
-install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-dock/tmp/plugins/quick-trays)
+install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR}/plugins/quick-trays)
 # 安装 .qm 文件
 install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_DATADIR}/${PLUGIN_NAME}/tmp/translations)
