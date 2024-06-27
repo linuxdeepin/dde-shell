@@ -30,7 +30,7 @@ Item {
     Binding {
         when: readyBinding
         target: toolTipWindow; property: "width"
-        value: toolTip.width
+        value: toolTip.width + toolTip.leftPadding + toolTip.rightPadding
     }
     Binding {
         when: readyBinding
@@ -40,7 +40,7 @@ Item {
     Binding {
         when: readyBinding
         target: toolTipWindow; property: "xOffset"
-        value: control.toolTipX
+        value: control.toolTipX - (toolTip.leftPadding + toolTip.rightPadding) / 2
     }
     Binding {
         when: readyBinding
@@ -53,9 +53,12 @@ Item {
         if (!toolTipWindow)
             return
 
-        readyBinding = true
+        readyBinding = Qt.binding(function () {
+            return toolTipWindow && toolTipWindow.currentItem === control
+        })
+
+        toolTipWindow.currentItem = control
         Qt.callLater(function () {
-            toolTip.open()
             toolTipWindow.show()
         })
     }
@@ -65,8 +68,7 @@ Item {
         if (!toolTipWindow)
             return
 
-        readyBinding = false
-        toolTip.close()
+        toolTipWindow.currentItem = null
         toolTipWindow.close()
     }
     function hide()
@@ -77,6 +79,7 @@ Item {
     ToolTip {
         id: toolTip
         padding: 0
+        visible: readyBinding
         // TODO it's a bug for qt, ToolTip's text color can't change with window's palette changed.
         palette.toolTipText: toolTipWindow ? toolTipWindow.palette.toolTipText : undefined
         anchors.centerIn: parent
