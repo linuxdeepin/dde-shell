@@ -41,7 +41,9 @@ Item {
 
         RowLayout {
             width: pluginView.width - pluginView.leftPadding - pluginView.rightPadding
-            ActionButton {
+            SettingButton {
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                Layout.leftMargin: 6
                 icon.name: "quickpanel-setting"
                 onClicked: function () {
                     console.log("clicked settings")
@@ -51,7 +53,9 @@ Item {
 
             Item { Layout.fillWidth: true; Layout.preferredHeight: 1 }
 
-            ActionButton {
+            SettingButton {
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                Layout.rightMargin: 6
                 icon.name: "quickpanel-power"
                 onClicked: function () {
                     console.log("clicked shutdown")
@@ -86,6 +90,16 @@ Item {
                     pluginItem.updateSurface()
                 }
             }
+        }
+    }
+
+    component SettingButton: ActionButton {
+        id: btn
+        focusPolicy: Qt.NoFocus
+        palette.windowText: ColorSelector.textColor
+        icon {
+            width: 16
+            height: 16
         }
     }
 }

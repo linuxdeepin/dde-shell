@@ -13,7 +13,6 @@ Control {
     property string itemKey
     property alias shellSurface: surfaceLayer.shellSurface
     property alias traySurface: dragLayer.fallbackDragImage
-    ColorSelector.family: Palette.CommonColor
     function updateSurface()
     {
         surfaceLayer.updateSurfacePosition()
@@ -35,6 +34,8 @@ Control {
 
     // TODO Control's hovered is false when hover ShellSurfaceItem.
     background: BoxPanel {
+        insideBorderColor: null
+        outsideBorderColor: null
         color2: color1
         radius: 10
     }
