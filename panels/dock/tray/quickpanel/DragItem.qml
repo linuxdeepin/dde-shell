@@ -5,7 +5,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
-import QtWayland.Compositor
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0
@@ -94,7 +93,7 @@ Item {
         Loader {
             active: isFallbackIcon
             anchors.fill: parent
-            sourceComponent: ShellSurfaceItem {
+            sourceComponent: ShellSurfaceItemProxy {
                 anchors.centerIn: parent
                 shellSurface: root.fallbackDragImage
             }
