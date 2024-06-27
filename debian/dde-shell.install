@@ -12,10 +12,5 @@ usr/lib/*/dde-shell/org.deepin.ds.dde-appearance*
 usr/share/dde-shell/org.deepin.ds.dde-appearance*/
 usr/lib/*/dde-shell/org.deepin.ds.dde-am*
 usr/share/dde-shell/org.deepin.ds.dde-am*/
-usr/libexec/dockplugin-loader
-usr/lib/*/qt5/plugins/wayland-shell-integration
-usr/lib/*/libdde-dockplugin-interface.so.*
 usr/share/dsg/configs/org.deepin.ds.dock/
-usr/share/dsg/configs/org.deepin.dde.dock/
 usr/share/dde-shell/*/translations
-usr/share/glib-2.0/schemas/

@@ -8,6 +8,7 @@ configure_file(environments.h.in environments.h @ONLY)
 
 find_package(PkgConfig REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS Core DBus Gui Qml WaylandCompositor Widgets)
+find_package(DdeTrayLoader REQUIRED)
 pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
 
 file(
@@ -88,9 +89,6 @@ add_subdirectory(taskmanager)
 add_subdirectory(tray)
 add_subdirectory(multitaskview)
 
-# dock plugin load program
-add_subdirectory(dockplugin)
-
 # dock qml element(include Dock.xx defines and DockCompositor)
 file(
     GLOB plugin_sources
@@ -128,7 +126,7 @@ qt_add_qml_module(dock-plugin
 
 qt_generate_wayland_protocol_server_sources(dock-plugin
     FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/dockplugin/protocol/plugin-manager-v1.xml
+        ${DDE_TRAY_LOADER_PROTOCOL}
 )
 
 target_link_libraries(dock-plugin PUBLIC

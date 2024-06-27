@@ -309,12 +309,18 @@ void DockPanel::loadDockPlugins()
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("QT_SCALE_FACTOR", QString::number(qApp->devicePixelRatio()));
     proc.setProcessEnvironment(env);
-    proc.setProgram(QString("%1/../panels/dock/dockplugin/loader/dockplugin-loader").arg(qApp->applicationDirPath()));
-#ifdef QT_DEBUG
-    proc.setProgram(QString("%1/../panels/dock/dockplugin/loader/dockplugin-loader").arg(qApp->applicationDirPath()));
-#else
-    proc.setProgram(QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR));
-#endif
+    QStringList execPaths;
+    execPaths << qEnvironmentVariable("TRAY_LOADER_EXECUTE_PATH")
+              << QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR);
+    QString validExePath;
+    for (const QString & execPath : execPaths) {
+         if (QFile::exists(execPath)) {
+             validExePath = execPath;
+             break;
+         }
+    }
+    qInfo() << "Valid Loader Execute Path:" << validExePath;
+    proc.setProgram(validExePath);
 
     QStringList dirs;;
     const auto pluginsPath = qEnvironmentVariable("TRAY_DEBUG_PLUGIN_PATH");
