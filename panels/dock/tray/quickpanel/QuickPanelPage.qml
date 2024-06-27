@@ -64,6 +64,10 @@ Item {
 
     PanelToolTipWindow {
         id: toolTipWindow
+        onVisibleChanged: function (arg) {
+            if (arg && popupWindow.visible)
+                popupWindow.close()
+        }
     }
     PanelToolTip {
         id: toolTip
@@ -87,6 +91,10 @@ Item {
 
     PanelPopupWindow {
         id: popupWindow
+        onVisibleChanged: function (arg) {
+            if (arg && toolTipWindow.visible)
+                toolTipWindow.close()
+        }
     }
     PanelPopup {
         id: popup
