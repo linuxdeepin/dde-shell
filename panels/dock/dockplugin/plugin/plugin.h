@@ -67,6 +67,7 @@ Q_SIGNALS:
     void pluginFlagsChanged();
     void pluginSizePolicyChanged();
     void requestMessage(const QString &msg);
+    void pluginRecvMouseEvent(int type);
 
 private:
     explicit EmbedPlugin(QWindow* window);

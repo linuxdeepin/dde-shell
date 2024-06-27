@@ -17,6 +17,7 @@ public:
 protected:
     virtual QWidget *centralWidget() override;
 
+    virtual void mousePressEvent(QMouseEvent *e) override;
     virtual void mouseReleaseEvent(QMouseEvent *e) override;
     virtual QMenu *pluginContextMenu() override;
     virtual QWidget *pluginTooltip() override;

@@ -96,6 +96,10 @@ public:
 signals:
     void itemActiveChanged();
     void sizeChanged();
+    void recvMouseEvent(QEvent::Type type);
+
+protected:
+    virtual void plugin_mouse_event(Resource *resource, int32_t type) override;
 
 private:
     PluginManager* m_manager;

@@ -23,6 +23,10 @@ PluginSurface::PluginSurface(PluginManager *manager, QtWaylandClient::QWaylandWi
     connect(m_plugin, &EmbedPlugin::requestMessage, manager, [manager, this](const QString &msg) {
         manager->requestMessage(m_plugin->pluginId(), m_plugin->itemKey(), msg);
     });
+
+    connect(m_plugin, &EmbedPlugin::pluginRecvMouseEvent, this, [this] (int type){
+        mouse_event(type);
+    });
 }
 
 PluginSurface::~PluginSurface()
