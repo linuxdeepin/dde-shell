@@ -39,14 +39,34 @@ Item {
             Layout.topMargin: 10
             Layout.rightMargin: 12
             ActionButton {
+                id: actionBtn
+                Layout.preferredWidth: 16
+                Layout.preferredHeight: 16
                 icon.name: "arrow_ordinary_left"
-                icon.width: 16
-                icon.height: 16
+                icon.width: 12
+                icon.height: 12
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 onClicked: {
                     console.log("request back:", pluginId)
                     shellSurface.close()
                     requestBack()
+                }
+                background: BoxPanel {
+                    radius: actionBtn.width / 2
+                    color1: Palette {
+                        normal {
+                            common: ("transparent")
+                        }
+                        hovered {
+                            crystal:  Qt.rgba(16.0 / 255, 16.0 / 255, 16.0 / 255, 0.2)
+                        }
+                        pressed {
+                            crystal: Qt.rgba(16.0 / 255, 16.0 / 255, 16.0 / 255, 0.15)
+                        }
+                    }
+                    color2: color1
+                    insideBorderColor: null
+                    outsideBorderColor: null
                 }
             }
 

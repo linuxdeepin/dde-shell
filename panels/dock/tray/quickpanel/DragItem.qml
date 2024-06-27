@@ -70,15 +70,21 @@ Item {
             return h
         }
 
+        DWindow.enabled: true
+        DWindow.enableBlurWindow: !isFallbackIcon
+        DWindow.shadowRadius: 8
+        // TODO set shadowOffset maunally.
+        DWindow.shadowOffset: Qt.point(0, 10)
+        ColorSelector.family: Palette.CrystalColor
+
         height: getHeight()
         width: !isFallbackIcon ? (dragItemSize.width * 1.0 / dragItemSize.height) * height : root.fallbackIconSize.width
 
         Loader {
             active: !isFallbackIcon
             anchors.fill: parent
+
             sourceComponent: DciIcon {
-                id: iconView
-                anchors.fill: parent
                 sourceSize: Qt.size(width, height)
                 asynchronous: false
                 name: root.draggingImage
@@ -97,7 +103,7 @@ Item {
 
     DragHandler {
         id: dragHandler
-        // dragThreshold: 1
+        dragThreshold: 5
         onActiveChanged: {
             if (active) {
                 dragItem.grabToImage(function(result) {

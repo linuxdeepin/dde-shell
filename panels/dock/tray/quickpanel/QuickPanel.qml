@@ -26,6 +26,7 @@ Item {
     PanelTrayItem {
         id: panelTrayItem
         shellSurface: quickpanelModel.trayItemSurface
+        isOpened: popup.popupVisible
         onClicked: function () {
             console.log("show quickpanel")
             var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)

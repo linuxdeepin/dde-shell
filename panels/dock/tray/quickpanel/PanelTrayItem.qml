@@ -13,6 +13,7 @@ import org.deepin.dtk 1.0
 Control {
     id: root
     required property var shellSurface
+    property bool isOpened
     signal clicked()
     contentItem: RowLayout {
         TapHandler {
@@ -49,7 +50,23 @@ Control {
         }
     }
     background: BoxPanel {
-        color2: color1
         radius: 0
+        color2: color1
+        property Palette openedPalette: Palette {
+            normal {
+                common: Qt.rgba(16.0 / 255, 16.0 / 255, 16.0 / 255, 0.2)
+            }
+        }
+        property Palette unopenedPalette: Palette {
+            normal {
+                common: ("transparent")
+            }
+            hovered {
+                crystal:  Qt.rgba(16.0 / 255, 16.0 / 255, 16.0 / 255, 0.2)
+            }
+        }
+        color1: isOpened ? openedPalette : unopenedPalette
+        insideBorderColor: null
+        outsideBorderColor: null
     }
 }
