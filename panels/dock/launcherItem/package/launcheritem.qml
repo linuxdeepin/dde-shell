@@ -72,8 +72,12 @@ AppletItem {
             interval: 50
             onTriggered: {
                 var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
-                toolTip.toolTipX = point.x
-                toolTip.toolTipY = point.y
+                toolTip.toolTipX = Qt.binding(function () {
+                    return point.x - toolTip.width / 2
+                })
+                toolTip.toolTipY = Qt.binding(function () {
+                    return -toolTip.height - 10
+                })
                 toolTip.open()
             }
         }
