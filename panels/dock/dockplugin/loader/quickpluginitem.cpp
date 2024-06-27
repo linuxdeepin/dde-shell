@@ -88,3 +88,9 @@ QWidget *QuickPluginItem::pluginTooltip()
     return itemTooltip(Dock::QUICK_ITEM_KEY);
 }
 
+void QuickPluginItem::mousePressEvent(QMouseEvent *e)
+{
+    Q_EMIT recvMouseEvent(e->type());
+
+    PluginItem::mousePressEvent(e);
+}

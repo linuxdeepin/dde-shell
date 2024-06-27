@@ -101,6 +101,12 @@ void PluginSurface::updatePluginGeometry(const QRect &geometry)
     send_geometry(geometry.x(), geometry.y(), geometry.width(), geometry.height());
 }
 
+void PluginSurface::plugin_mouse_event(QtWaylandServer::plugin::Resource *resource, int32_t type)
+{
+    qInfo() << "server plugin surface receive mouse event:" << type;
+    Q_EMIT recvMouseEvent((QEvent::Type)type);
+}
+
 PluginPopup::PluginPopup(PluginManager* manager, const QString &pluginId, const QString &itemKey, int x, int y, int popupType, QWaylandSurface *surface, const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)

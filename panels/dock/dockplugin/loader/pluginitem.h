@@ -24,6 +24,9 @@ public:
     int pluginFlags() const;
     void setPluginFlags(int flags);
 
+signals:
+    void recvMouseEvent(int type);
+
 protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;

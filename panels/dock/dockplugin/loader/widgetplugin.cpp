@@ -260,6 +260,8 @@ void WidgetPlugin::initConnections(Plugin::EmbedPlugin *plugin, PluginItem *plug
             }
         }
     });
+
+    connect(pluginItem, &PluginItem::recvMouseEvent, plugin, &Plugin::EmbedPlugin::pluginRecvMouseEvent);
 }
 
 int WidgetPlugin::getPluginFlags()
