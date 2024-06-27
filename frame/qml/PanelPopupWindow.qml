@@ -35,6 +35,11 @@ Window {
     D.ColorSelector.family: D.Palette.CrystalColor
 
     color: "transparent"
+    onVisibleChanged: function (arg) {
+        if (!arg)
+            DS.closeChildrenWindows(root)
+    }
+
     D.StyledBehindWindowBlur {
         control: parent
         anchors.fill: parent
