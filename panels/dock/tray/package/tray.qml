@@ -19,6 +19,7 @@ AppletItem {
 
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 25
+    readonly property var filterTrayPlugins: ["dde-quick-panel","sound"]
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : overflowId.implicitWidth
     implicitHeight: useColumnLayout ? overflowId.implicitHeight : Panel.rootObject.dockSize
 
@@ -141,6 +142,8 @@ AppletItem {
             let surfacesData = []
             for (let i = 0; i < DockCompositor.trayPluginSurfaces.count; i++) {
                 let item = DockCompositor.trayPluginSurfaces.get(i).shellSurface
+                if (filterTrayPlugins.indexOf(item.pluginId) >= 0)
+                    continue;
                 let surfaceId = `${item.pluginId}::${item.itemKey}`
                 surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin"})
                 console.log(surfaceId, item, item.pluginId, "surfaceId")

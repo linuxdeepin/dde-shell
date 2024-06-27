@@ -12,9 +12,12 @@ import org.deepin.dtk 1.0
 Control {
     id: root
     required property var shellSurface
+    required property var trayQuickPanelItemSurface
     property bool isOpened
     signal clicked()
+    padding: 5
     contentItem: RowLayout {
+        spacing: 5
         TapHandler {
             id: clickedLayer
             gesturePolicy: TapHandler.ReleaseWithinBounds
@@ -27,24 +30,22 @@ Control {
         Loader {
             active: root.shellSurface
             visible: active
-            Layout.preferredWidth: 16
-            Layout.preferredHeight: 16
-            sourceComponent: Item {
-                ShellSurfaceItemProxy {
-                    anchors.fill: parent
-                    shellSurface: root.shellSurface
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: root.clicked()
-                }
+            sourceComponent: TrayItemSurface {
+                shellSurface: root.shellSurface
             }
         }
-
+        Loader {
+            id: quickpanelPlaceholder
+            active: root.trayQuickPanelItemSurface
+            visible: active
+            sourceComponent: TrayItemSurface {
+                shellSurface: root.trayQuickPanelItemSurface
+            }
+        }
         DciIcon {
-            Layout.preferredWidth: 30
-            Layout.preferredHeight: 30
+            visible: !quickpanelPlaceholder.visible
+            Layout.preferredWidth: 16
+            Layout.preferredHeight: 16
             name: "dock-control-panel"
         }
     }
@@ -67,5 +68,33 @@ Control {
         color1: isOpened ? openedPalette : unopenedPalette
         insideBorderColor: null
         outsideBorderColor: null
+    }
+
+    component TrayItemSurface: Item {
+        implicitWidth: surfaceLayer.width
+        implicitHeight: surfaceLayer.height
+        property alias shellSurface: surfaceLayer.shellSurface
+
+        ShellSurfaceItemProxy {
+            id: surfaceLayer
+            property var itemGlobalPoint: surfaceLayer.mapToItem(null, 0, 0)
+            onWidthChanged: updateSurface()
+            onHeightChanged: updateSurface()
+            onItemGlobalPointChanged: updateSurface()
+
+            function updateSurface()
+            {
+                if (!shellSurface || !(shellSurface.updatePluginGeometry))
+                    return
+
+                var pos = surfaceLayer.mapToItem(null, 0, 0)
+                shellSurface.updatePluginGeometry(Qt.rect(pos.x, pos.y, surfaceLayer.width, surfaceLayer.height))
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.clicked()
+        }
     }
 }

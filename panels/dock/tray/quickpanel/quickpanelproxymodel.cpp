@@ -263,6 +263,7 @@ QAbstractListModel *QuickPanelProxyModel::surfaceModel() const
 void QuickPanelProxyModel::updateTrayItemSurface()
 {
     emit trayItemSurfaceChanged();
+    emit trayQuickPanelItemSurfaceChanged();
     if (rowCount() > 0)
         emit dataChanged(index(0, 0), index(rowCount() - 1, 0), {TraySurface});
 }
@@ -310,6 +311,11 @@ void QuickPanelProxyModel::setTrayPluginModel(QAbstractItemModel *newTrayPluginM
     m_trayPluginModel = newTrayPluginModel;
     watchingCountChanged();
     emit trayPluginModelChanged();
+}
+
+QObject *QuickPanelProxyModel::trayQuickPanelItemSurface() const
+{
+    return traySurfaceObject("dde-quick-panel");
 }
 
 }
