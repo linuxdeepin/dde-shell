@@ -19,13 +19,6 @@ Item {
     property bool readyBinding: false
     width: toolTip.width
     height: toolTip.height
-    onToolTipVisibleChanged: {
-        if (toolTipVisible) {
-            open()
-        } else {
-            close()
-        }
-    }
 
     Binding {
         when: readyBinding
