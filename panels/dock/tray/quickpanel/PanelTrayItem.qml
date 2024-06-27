@@ -6,7 +6,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQml
-import QtWayland.Compositor
 
 import org.deepin.dtk 1.0
 
@@ -31,7 +30,7 @@ Control {
             Layout.preferredWidth: 16
             Layout.preferredHeight: 16
             sourceComponent: Item {
-                ShellSurfaceItem {
+                ShellSurfaceItemProxy {
                     anchors.fill: parent
                     shellSurface: root.shellSurface
                 }

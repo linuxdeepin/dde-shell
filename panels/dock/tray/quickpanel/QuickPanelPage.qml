@@ -70,7 +70,7 @@ Item {
         toolTipWindow: toolTipWindow
 
         property alias shellSurface: surfaceLayer.shellSurface
-        ShellSurfaceItem {
+        ShellSurfaceItemProxy {
             id: surfaceLayer
             anchors.centerIn: parent
             onSurfaceDestroyed: function () {
@@ -95,7 +95,7 @@ Item {
         popupWindow: popupWindow
 
         property alias shellSurface: popupSurfaceLayer.shellSurface
-        ShellSurfaceItem {
+        ShellSurfaceItemProxy {
             id: popupSurfaceLayer
             anchors.centerIn: parent
             onSurfaceDestroyed: function () {

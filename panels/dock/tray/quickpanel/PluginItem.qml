@@ -30,6 +30,23 @@ Control {
         id: surfaceLayer
         anchors.centerIn: parent
         anchors.fill: parent
+        onWidthChanged: updateSurfaceSize()
+        onHeightChanged: updateSurfaceSize()
+
+        function updateSurfaceSize()
+        {
+            if (!shellSurface || !(shellSurface.updatePluginGeometry))
+                return
+            shellSurface.updatePluginGeometry(Qt.rect(0, 0, surfaceLayer.width, surfaceLayer.height))
+        }
+        function updateSurfacePosition()
+        {
+            if (!shellSurface || !(shellSurface.updatePluginGeometry))
+                return
+
+            var pos = surfaceLayer.mapToItem(null, 0, 0)
+            shellSurface.updatePluginGeometry(Qt.rect(pos.x, pos.y, surfaceLayer.width, surfaceLayer.height))
+        }
     }
 
     // TODO Control's hovered is false when hover ShellSurfaceItem.

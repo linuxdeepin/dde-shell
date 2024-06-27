@@ -5,7 +5,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtWayland.Compositor
 
 import org.deepin.dtk 1.0
 
@@ -83,7 +82,7 @@ Item {
         Item { Layout.fillHeight: true; Layout.preferredWidth: 1 }
 
         // content
-        ShellSurfaceItem {
+        ShellSurfaceItemProxy {
             id: surfaceLayer
             Layout.fillWidth: true
         }
