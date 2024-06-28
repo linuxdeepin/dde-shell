@@ -41,6 +41,24 @@ Button {
 
             return Qt.point(x, y)
         }
+        
+        property var itemGlobalPos: {
+            var a = pluginItem
+            var x = 0, y = 0
+
+            if (a.Window.window && surfaceItem.visible) {
+                while(a.parent) {
+                    x += a.x
+                    y += a.y
+                    a = a.parent
+                }
+                x += pluginItem.Window.window.x
+                y += pluginItem.Window.window.y
+
+            }
+
+            return Qt.point(x, y)
+        }
 
         ShellSurfaceItem {
             id: surfaceItem
@@ -50,6 +68,7 @@ Button {
 
         Component.onCompleted: {
             pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 16, 16))
+            pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
         }
 
         Timer {
@@ -64,8 +83,26 @@ Button {
             }
         }
 
+        Timer {
+            id: updatePluginItemPosTimer
+            interval: 500
+            running: false
+            repeat: false
+            onTriggered: {
+                pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
+            }
+        }
+
         onItemGlobalPointChanged: {
             updatePluginItemGeometryTimer.start()
+        }
+
+        onItemGlobalPosChanged: {
+            updatePluginItemPosTimer.start()
+        }
+
+        onVisibleChanged: {
+            pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
         }
     }
 
