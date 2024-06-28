@@ -4,6 +4,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import org.deepin.ds.dock.tray 1.0 as DDT
 
 Control {
     id: root
@@ -11,12 +12,17 @@ Control {
         if (model.sectionType === "collapsable") return !collapsed
         return model.sectionType !== "stashed" && model.visibility
     }
+    property size visualSize: Qt.size(0, 0)
 
-    width: 16
-    height: 16
+    property point visualPosition: DDT.TrayItemPositionRegister.visualPosition
+    DDT.TrayItemPositionRegister.visualIndex: model.visualIndex
+    DDT.TrayItemPositionRegister.visualSize: Qt.size(width, height)
 
-    x: isHorizontal ? (model.visualIndex * (16 + 10)) : 0
-    y: !isHorizontal ? (model.visualIndex * (16 + 10)) : 0
+    width: visualSize.width !== 0 ? visualSize.width : 16
+    height: visualSize.height !== 0 ? visualSize.height : 16
+
+    x: visualPosition.x
+    y: visualPosition.y
     Behavior on x {
         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
     }

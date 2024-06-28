@@ -18,13 +18,19 @@ LQM.DelegateChooser {
     LQM.DelegateChoice {
         roleValue: "dummy"
         TrayItemPositioner {
-            contentItem: DummyDelegate {}
+            visualSize: dummyDelegate.visualSize
+            contentItem: DummyDelegate {
+                id: dummyDelegate
+            }
         }
     }
     LQM.DelegateChoice {
         roleValue: "legacy-tray-plugin"
         TrayItemPositioner {
-            contentItem: ActionLegacyTrayPluginDelegate {}
+            visualSize: traySurfaceDelegate.visualSize
+            contentItem: ActionLegacyTrayPluginDelegate {
+                id: traySurfaceDelegate
+            }
         }
     }
     LQM.DelegateChoice {
@@ -37,6 +43,16 @@ LQM.DelegateChooser {
         roleValue: "action-toggle-collapse"
         TrayItemPositioner {
             contentItem: ActionToggleCollapseDelegate {
+                isHorizontal: root.isHorizontal
+            }
+        }
+    }
+    LQM.DelegateChoice {
+        roleValue: "action-toggle-quick-settings"
+        TrayItemPositioner {
+            visualSize: Qt.size(quickSettingsDelegate.width, quickSettingsDelegate.height)
+            ActionToggleQuickSettingsDelegate {
+                id: quickSettingsDelegate
                 isHorizontal: root.isHorizontal
             }
         }

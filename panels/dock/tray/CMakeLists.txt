@@ -18,8 +18,12 @@ qt_add_qml_module(dock-tray
     SOURCES
         traysortordermodel.cpp
         traysortordermodel.h
-        ksortfilterproxymodel.h
+        trayitempositionregister.cpp
+        trayitempositionregister.h
+        trayitempositionmanager.cpp
+        trayitempositionmanager.h
         ksortfilterproxymodel.cpp
+        ksortfilterproxymodel.h
     OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/tray/
 )
 target_link_libraries(dock-tray PUBLIC
