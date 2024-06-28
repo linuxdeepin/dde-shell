@@ -18,12 +18,19 @@ Control {
         surfaceLayer.updateSurfacePosition()
     }
 
+    // Control's hovered is false when hover ShellSurfaceItem.
+    ColorSelector.hovered: hoverHandler.hovered
     DragItem {
         id: dragLayer
         anchors.fill: parent
         dragItem: root
         dragTextData: `${root.pluginId}::${root.itemKey}`
         fallbackIconSize: traySurface ? traySurface.size : Qt.size(16, 16)
+    }
+
+    HoverHandler {
+        id: hoverHandler
+        parent: surfaceLayer
     }
 
     ShellSurfaceItemProxy {
@@ -49,7 +56,6 @@ Control {
         }
     }
 
-    // TODO Control's hovered is false when hover ShellSurfaceItem.
     background: BoxPanel {
         insideBorderColor: null
         outsideBorderColor: null

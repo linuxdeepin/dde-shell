@@ -15,23 +15,21 @@ Control {
     required property var trayQuickPanelItemSurface
     property bool isOpened
     signal clicked()
+    property bool contentHovered
     padding: 5
+    ColorSelector.hovered: root.contentHovered || root.hovered || root.isOpened
+
     contentItem: RowLayout {
         spacing: 5
-        TapHandler {
-            id: clickedLayer
-            gesturePolicy: TapHandler.ReleaseWithinBounds
-            acceptedButtons: Qt.LeftButton
-            onTapped: {
-                root.clicked()
-            }
-        }
 
         Loader {
             active: root.shellSurface
             visible: active
             sourceComponent: TrayItemSurface {
                 shellSurface: root.shellSurface
+                onHoveredChanged: function () {
+                    root.contentHovered = hovered
+                }
             }
         }
         Loader {
@@ -40,6 +38,9 @@ Control {
             visible: active
             sourceComponent: TrayItemSurface {
                 shellSurface: root.trayQuickPanelItemSurface
+                onHoveredChanged: function () {
+                    root.contentHovered = hovered
+                }
             }
         }
         DciIcon {
@@ -50,7 +51,7 @@ Control {
         }
     }
     background: BoxPanel {
-        radius: 0
+        radius: 4
         color2: color1
         property Palette openedPalette: Palette {
             normal {
@@ -68,12 +69,26 @@ Control {
         color1: isOpened ? openedPalette : unopenedPalette
         insideBorderColor: null
         outsideBorderColor: null
+
+        TapHandler {
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            acceptedButtons: Qt.LeftButton
+            onTapped: {
+                root.clicked()
+            }
+        }
     }
 
     component TrayItemSurface: Item {
         implicitWidth: surfaceLayer.width
         implicitHeight: surfaceLayer.height
         property alias shellSurface: surfaceLayer.shellSurface
+        property alias hovered: hoverHandler.hovered
+
+        HoverHandler {
+            id: hoverHandler
+            parent: surfaceLayer
+        }
 
         ShellSurfaceItemProxy {
             id: surfaceLayer
