@@ -24,6 +24,7 @@ Item {
     required property int visualIndex
 
     signal clickItem(itemId: string, menuId: string)
+    signal dragFinished()
 
     Drag.active: mouseArea.drag.active
     Drag.source: root
@@ -235,7 +236,9 @@ Item {
         property int xOffset: 0
         property int yOffset: 0
         onTriggered: {
-            taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, xOffset, yOffset, Panel.position)
+            if (root.windows.length != 0) {
+                taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, xOffset, yOffset, Panel.position)
+            }
         }
     }
 
@@ -245,6 +248,11 @@ Item {
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         drag.target: root
+        drag.onActiveChanged: {
+            if (!drag.active)
+                root.dragFinished()
+        }
+
         onPressed: function (mouse) {
             if (mouse.button === Qt.LeftButton) {
                 icon.grabToImage(function(result) {
