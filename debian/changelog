@@ -1,3 +1,9 @@
+dde-shell (0.0.26) unstable; urgency=medium
+
+  * release 0.0.26
+
+ -- Mike Chen <chenke@deepin.org>  Mon, 01 Jul 2024 14:52:13 +0800
+
 dde-shell (0.0.25) unstable; urgency=medium
 
   * fix: Application preview UI issue(https://github.com/linuxdeepin/developer-center/issues/8801)
