@@ -28,11 +28,13 @@ Item {
     }
     Binding {
         when: readyBinding
+        delayed: true
         target: popupWindow; property: "xOffset"
         value: control.popupX
     }
     Binding {
         when: readyBinding
+        delayed: true
         target: popupWindow; property: "yOffset"
         value: control.popupY
     }
