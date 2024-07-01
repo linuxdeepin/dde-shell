@@ -13,6 +13,7 @@ Control {
     property string itemKey
     property alias shellSurface: surfaceLayer.shellSurface
     property alias traySurface: dragLayer.fallbackDragImage
+    property bool canDrag: true
     function updateSurface()
     {
         surfaceLayer.updateSurfacePosition()
@@ -26,6 +27,20 @@ Control {
         dragItem: root
         dragTextData: `${root.pluginId}::${root.itemKey}`
         fallbackIconSize: traySurface ? traySurface.size : Qt.size(16, 16)
+        enabledDrag: canDrag
+    }
+
+    Connections {
+        target: shellSurface
+        enabled: shellSurface
+        function onRecvMouseEvent(type) {
+            // type (2: Qt.MouseButtonPress), (3: Qt.MouseButtonRelease)
+            if (type === 2) {
+                canDrag = false
+            } else if (type === 3) {
+                canDrag = true
+            }
+        }
     }
 
     HoverHandler {

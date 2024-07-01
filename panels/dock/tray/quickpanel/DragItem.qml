@@ -16,6 +16,7 @@ Item {
     required property Item dragItem
     required property string dragTextData
     required property var fallbackDragImage
+    property bool enabledDrag
 
     Component.onCompleted: {
         dragItem.Drag.mimeData = Qt.binding(function () {
@@ -102,6 +103,7 @@ Item {
 
     DragHandler {
         id: dragHandler
+        enabled: enabledDrag
         dragThreshold: 5
         onActiveChanged: {
             if (active) {
