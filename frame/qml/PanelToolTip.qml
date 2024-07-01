@@ -32,11 +32,13 @@ Item {
     }
     Binding {
         when: readyBinding
+        delayed: true
         target: toolTipWindow; property: "xOffset"
         value: control.toolTipX - (toolTip.leftPadding + toolTip.rightPadding) / 2
     }
     Binding {
         when: readyBinding
+        delayed: true
         target: toolTipWindow; property: "yOffset"
         value: control.toolTipY
     }
