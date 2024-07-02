@@ -92,18 +92,22 @@ Control {
 
         ShellSurfaceItemProxy {
             id: surfaceLayer
-            property var itemGlobalPoint: surfaceLayer.mapToItem(null, 0, 0)
-            onWidthChanged: updateSurface()
-            onHeightChanged: updateSurface()
-            onItemGlobalPointChanged: updateSurface()
+            property var itemGlobalPoint: {
+                var a = surfaceLayer
+                var x = 0, y = 0
+                while(a.parent) {
+                    x += a.x
+                    y += a.y
+                    a = a.parent
+                }
 
-            function updateSurface()
-            {
+                return Qt.point(x, y)
+            }
+
+            onItemGlobalPointChanged: {
                 if (!shellSurface || !(shellSurface.updatePluginGeometry))
                     return
-
-                var pos = surfaceLayer.mapToItem(null, 0, 0)
-                shellSurface.updatePluginGeometry(Qt.rect(pos.x, pos.y, surfaceLayer.width, surfaceLayer.height))
+                shellSurface.updatePluginGeometry(Qt.rect(itemGlobalPoint.x, itemGlobalPoint.y, surfaceLayer.width, surfaceLayer.height))
             }
         }
 
