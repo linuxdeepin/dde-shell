@@ -107,6 +107,23 @@ void PluginSurface::plugin_mouse_event(QtWaylandServer::plugin::Resource *resour
     Q_EMIT recvMouseEvent((QEvent::Type)type);
 }
 
+void PluginSurface::setGlobalPos(const QPoint &pos)
+{
+    QRect g = qApp->primaryScreen() ? qApp->primaryScreen()->geometry() : QRect();
+    for (auto *screen : qApp->screens())
+    {
+        const QRect &sg = screen->geometry();
+        if (sg.contains(pos))
+        {
+            g = sg;
+            break;
+        }
+    }
+
+    auto p = g.topLeft() + (pos - g.topLeft()) * qApp->devicePixelRatio();
+    send_raw_global_pos(p.x(), p.y());
+}
+
 PluginPopup::PluginPopup(PluginManager* manager, const QString &pluginId, const QString &itemKey, int x, int y, int popupType, QWaylandSurface *surface, const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)
