@@ -129,7 +129,9 @@ Item {
                 console.log("quickpanel's tooltip created", popupSurface.popupType, popupSurface.pluginId)
 
                 toolTip.shellSurface = popupSurface
-                toolTip.toolTipX = popupSurface.x
+                toolTip.toolTipX = Qt.binding(function () {
+                    return toolTip.shellSurface.x
+                })
                 toolTip.toolTipY = Qt.binding(function () {
                     return toolTip.shellSurface.y - toolTip.height
                 })
@@ -138,7 +140,9 @@ Item {
                 console.log("quickpanel's menu created", popupSurface.popupType, popupSurface.pluginId)
 
                 popup.shellSurface = popupSurface
-                popup.popupX = popup.shellSurface.x
+                popup.popupX = Qt.binding(function () {
+                    return popup.shellSurface.x
+                })
                 popup.popupY = Qt.binding(function () {
                     return popup.shellSurface.y - popup.height
                 })

@@ -147,6 +147,9 @@ public:
 
     int32_t popupType() const;
 
+protected:
+    virtual void plugin_popup_set_position(Resource *resource, int32_t x, int32_t y) override;
+
 Q_SIGNALS:
     void xChanged();
     void yChanged();

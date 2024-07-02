@@ -114,7 +114,9 @@ AppletItem {
                 toolTip.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
                 popupContent.shellSurface = popupSurface
-                popup.popupX = popupSurface.x
+                popup.popupX = Qt.binding(function () {
+                    return popupContent.shellSurface.x
+                })
                 popup.popupY = Qt.binding(function () {
                     return popupContent.shellSurface.y - popup.height
                 })
