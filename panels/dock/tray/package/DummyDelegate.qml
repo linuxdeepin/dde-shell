@@ -10,8 +10,11 @@ Button {
     icon.name: model.surfaceId
     icon.width: 16
     icon.height: 16
-    width: 16
-    height: 16
+
+    property size visualSize: Qt.size(width, height)
+
+    width: model.surfaceId === "trash::trash" ? 36 : 16
+    height: model.surfaceId === "trash::trash" ? 36 : 16
 
     Drag.active: dragHandler.active
     Drag.dragType: Drag.Automatic

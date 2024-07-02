@@ -68,7 +68,8 @@ AppletItem {
                     filterRowCallback: (sourceRow, sourceParent) => {
                         console.log(sourceRow, sourceParent)
                         let index = sourceModel.index(sourceRow, 0, sourceParent)
-                        return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) === "stashed"
+                        return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) === "stashed" &&
+                               sourceModel.data(index, DDT.TraySortOrderModel.VisibilityRole) === true
                     }
                 }
                 anchors.centerIn: parent
@@ -90,6 +91,7 @@ AppletItem {
             isHorizontal: !tray.useColumnLayout
             model: DDT.TraySortOrderModel
             collapsed: DDT.TraySortOrderModel.collapsed
+            trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
             color: "transparent"
         }
 
@@ -145,7 +147,9 @@ AppletItem {
                 if (filterTrayPlugins.indexOf(item.pluginId) >= 0)
                     continue;
                 let surfaceId = `${item.pluginId}::${item.itemKey}`
-                surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin"})
+                let forbiddenSections = item.pluginSizePolicy === Dock.Custom ? ["stashed", "collapsable", "pinned"] : ["fixed"]
+                let preferredSection = item.pluginSizePolicy === Dock.Custom ? "fixed" : "collapsable"
+                surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin", "sectionType": preferredSection, "forbiddenSections": forbiddenSections})
                 console.log(surfaceId, item, item.pluginId, "surfaceId")
             }
             DDT.TraySortOrderModel.availableSurfaces = surfacesData

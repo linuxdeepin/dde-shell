@@ -82,10 +82,13 @@ Item {
     readonly property int itemSize: 16
     readonly property int itemSpacing: 10
 
+    property int trayHeight: 50
+    property size containerSize: DDT.TrayItemPositionManager.visualSize
+
     implicitWidth: width
-    width: isHorizontal ? (DDT.TraySortOrderModel.visualItemCount * (itemSize + itemSpacing) - itemSpacing) : 16
+    width: containerSize.width
     implicitHeight: height
-    height: !isHorizontal ? (DDT.TraySortOrderModel.visualItemCount * (itemSize + itemSpacing) - itemSpacing) : 16
+    height: containerSize.height
 
     Behavior on width {
         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
@@ -125,11 +128,10 @@ Item {
         }
         onDropped: function (dropEvent) {
             let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
-            let pos = root.isHorizontal ? drag.x : drag.y
-            let currentItemIndex = pos / (root.itemSize + root.itemSpacing)
-            let currentPosMapToItem = pos % (root.itemSize + root.itemSpacing)
-            let isBefore = currentPosMapToItem < root.itemSize / 2
-            console.log("dropped", currentItemIndex, currentPosMapToItem, isBefore)
+            let dropIdx = DDT.TrayItemPositionManager.itemIndexByPoint(Qt.point(drag.x, drag.y))
+            let currentItemIndex = dropIdx.index
+            let isBefore = dropIdx.isBefore
+            console.log("dropped", currentItemIndex, isBefore)
             DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
             DDT.TraySortOrderModel.actionsAlwaysVisible = false
         }
@@ -140,5 +142,17 @@ Item {
         anchors.fill: parent
         model: root.model
         delegate: trayItemDelegateChooser
+    }
+
+    Component.onCompleted: {
+        DDT.TrayItemPositionManager.orientation = Qt.binding(function() {
+            return root.isHorizontal ? Qt.Horizontal : Qt.Vertical
+        });
+        DDT.TrayItemPositionManager.visualItemCount = Qt.binding(function() {
+            return root.model.visualItemCount
+        });
+        DDT.TrayItemPositionManager.dockHeight = Qt.binding(function() {
+            return root.trayHeight
+        });
     }
 }

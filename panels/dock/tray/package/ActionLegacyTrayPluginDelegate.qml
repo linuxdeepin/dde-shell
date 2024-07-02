@@ -18,10 +18,11 @@ Button {
 
     x: isHorizontal ? (model.visualIndex * (16 + 10)) : 0
     y: !isHorizontal ? (model.visualIndex * (16 + 10)) : 0
-    icon.width: 16
-    icon.height: 16
-    width: 16
-    height: 16
+
+    property size visualSize: Qt.size(pluginItem.implicitWidth, pluginItem.implicitHeight)
+
+    readonly property int itemWidth: isHorizontal ? 0 : DDT.TrayItemPositionManager.dockHeight
+    readonly property int itemHeight: isHorizontal ? DDT.TrayItemPositionManager.dockHeight : 0
 
     contentItem: Item {
         id: pluginItem
@@ -49,7 +50,7 @@ Button {
         }
 
         Component.onCompleted: {
-            pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 16, 16))
+            pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, itemWidth, itemHeight))
         }
 
         Timer {
@@ -59,7 +60,7 @@ Button {
             repeat: false
             onTriggered: {
                 if (pluginItem.itemGlobalPoint.x > 0 && pluginItem.itemGlobalPoint.y > 0) {
-                    pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 16, 16))
+                    pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, itemWidth, itemHeight))
                 }
             }
         }

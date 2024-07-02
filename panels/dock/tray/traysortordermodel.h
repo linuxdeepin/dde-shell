@@ -35,6 +35,8 @@ public:
         SectionTypeRole,
         VisualIndexRole,
         DelegateTypeRole,
+        // this tray item cannot be drop (or moved in any form) to the given sections
+        ForbiddenSectionsRole,
         ModelExtendedRole = 0x1000
     };
     Q_ENUM(Roles)
@@ -74,11 +76,12 @@ private:
 
     QStandardItem * findItemByVisualIndex(int visualIndex, VisualSections visualSection) const;
     QStringList * getSection(const QString & sectionType);
-    QString findSection(const QString & surfaceId, const QString & fallback);
+    QString findSection(const QString & surfaceId, const QString & fallback, const QStringList & forbiddenSections = {});
     void registerToSection(const QString & surfaceId, const QString & sectionType);
-    QStandardItem * createTrayItem(const QString & name, const QString & sectionType, const QString & delegateType);
+    QStandardItem * createTrayItem(const QString & name, const QString & sectionType,
+                                  const QString & delegateType, const QStringList & forbiddenSections = {});
     void updateVisualIndexes();
-    void registerSurfaceId(const QString & name, const QString & delegateType);
+    QString registerSurfaceId(const QVariantMap &surfaceData);
     void loadDataFromDConfig();
     void saveDataToDConfig();
 
