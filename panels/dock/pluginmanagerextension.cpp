@@ -180,6 +180,12 @@ int32_t PluginPopup::popupType() const
     return m_popupType;
 }
 
+void PluginPopup::plugin_popup_set_position(Resource *resource, int32_t x, int32_t y)
+{
+    setX(x);
+    setY(y);
+}
+
 PluginManager::PluginManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
 {
