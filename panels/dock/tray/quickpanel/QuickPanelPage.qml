@@ -95,6 +95,16 @@ Item {
             if (arg && toolTipWindow.visible)
                 toolTipWindow.close()
         }
+        onXChanged: {
+            if (!popup.shellSurface)
+                return
+            popup.shellSurface.updatePluginGeometry(Qt.rect(x, y, 0, 0))
+        }
+        onYChanged: {
+            if (!popup.shellSurface)
+                return
+            popup.shellSurface.updatePluginGeometry(Qt.rect(x, y, 0, 0))
+        }
     }
     PanelPopup {
         id: popup
@@ -133,7 +143,7 @@ Item {
                     return toolTip.shellSurface.x
                 })
                 toolTip.toolTipY = Qt.binding(function () {
-                    return toolTip.shellSurface.y - toolTip.height
+                    return toolTip.shellSurface.y
                 })
                 toolTip.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
@@ -144,7 +154,7 @@ Item {
                     return popup.shellSurface.x
                 })
                 popup.popupY = Qt.binding(function () {
-                    return popup.shellSurface.y - popup.height
+                    return popup.shellSurface.y
                 })
                 popup.open()
             }
