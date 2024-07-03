@@ -336,6 +336,7 @@ void DockPanel::loadDockPlugins()
     QProcess proc;
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("QT_SCALE_FACTOR", QString::number(qApp->devicePixelRatio()));
+    env.insert("D_DXCB_DISABLE_OVERRIDE_HIDPI", "1");
     proc.setProcessEnvironment(env);
     QStringList execPaths;
     execPaths << qEnvironmentVariable("TRAY_LOADER_EXECUTE_PATH")
