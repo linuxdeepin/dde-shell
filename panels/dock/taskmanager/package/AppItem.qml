@@ -229,8 +229,9 @@ Item {
         running: false
         repeat: false
         onTriggered: {
-            taskmanager.Applet.setAppItemWindowIconGeometry(root.itemId, Panel.rootObject, iconGlobalPoint.x, iconGlobalPoint.y,
-                iconGlobalPoint.x + icon.width, iconGlobalPoint.y + icon.height)
+            var pos = icon.mapToItem(null, 0, 0)
+            taskmanager.Applet.setAppItemWindowIconGeometry(root.itemId, Panel.rootObject, pos.x, pos.y,
+                pos.x + icon.width * iconScale, pos.y + icon.height * iconScale)
         }
     }
 
