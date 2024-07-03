@@ -92,6 +92,7 @@ public:
     bool isItemActive() const;
 
     Q_INVOKABLE void updatePluginGeometry(const QRect &geometry);
+    Q_INVOKABLE void setGlobalPos(const QPoint &pos);
 
 signals:
     void itemActiveChanged();
