@@ -46,6 +46,7 @@ Control {
             theme: root.ColorSelector.controlTheme
             sourceSize: Qt.size(quickpanelPlaceholder.width, quickpanelPlaceholder.width)
             HoverHandler {
+                enabled: !root.isOpened
                 onHoveredChanged: function () {
                     root.contentHovered = hovered
                     if (hovered) {
