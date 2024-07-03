@@ -9,9 +9,16 @@ add_library(dock-multitaskview SHARED
     ../dockiteminfo.h
 )
 
+target_include_directories(dock-multitaskview PRIVATE
+    "${CMAKE_CURRENT_BINARY_DIR}/../"
+    "../"
+)
+
 target_link_libraries(dock-multitaskview PRIVATE
     dde-shell-frame
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.multitaskview TARGET dock-multitaskview)
 ds_handle_package_translation(PACKAGE org.deepin.ds.dock.multitaskview)
+
+install(FILES "package/icons/multitasking-view.svg" DESTINATION share/dde-dock/icons/dcc-setting)

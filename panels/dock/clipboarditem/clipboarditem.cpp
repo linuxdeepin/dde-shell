@@ -5,6 +5,7 @@
 #include "applet.h"
 #include "clipboarditem.h"
 #include "pluginfactory.h"
+#include "../constants.h"
 
 #include <DDBusSender>
 #include <DDciIcon>
@@ -44,35 +45,7 @@ DockItemInfo ClipboardItem::dockItemInfo()
     info.itemKey = "clipboard";
     info.settingKey = "clipboard";
     info.visible = m_visible;
-    {
-        const auto lightPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::LightType);
-        auto lightPixmap = DDciIcon::fromTheme("clipboard").pixmap(
-            qApp->devicePixelRatio(),
-            30,
-            DDciIcon::Light,
-            DDciIcon::Normal,
-            DDciIconPalette::fromQPalette(lightPalette)
-            );
-        QBuffer buffer(&info.iconLight);
-        if (buffer.open(QIODevice::WriteOnly)) {
-            lightPixmap.save(&buffer, "png");
-        }
-    }
-    {
-        const auto darkPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::DarkType);
-        auto darkPixmap = DDciIcon::fromTheme("clipboard").pixmap(
-            qApp->devicePixelRatio(),
-            30,
-            DDciIcon::Dark,
-            DDciIcon::Normal,
-            DDciIconPalette::fromQPalette(darkPalette)
-            );
-        QBuffer buffer(&info.iconDark);
-        if (buffer.open(QIODevice::WriteOnly)) {
-            darkPixmap.save(&buffer, "png");
-        }
-    }
-
+    info.dccIcon = DCCIconPath + "clipboard.svg";
     return info;
 }
 

@@ -72,6 +72,9 @@ public:
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);
 
+Q_SIGNALS:
+    void pluginVisibleChanged(const QString &pluginName, bool visible) const;
+
 private:
     DockPanel* parent() const;
     QString getAppID(const QString &desktopfile);
@@ -83,6 +86,7 @@ private:
     DS_NAMESPACE::DApplet *m_clipboardApplet;
     DS_NAMESPACE::DApplet *m_searchApplet;
     DS_NAMESPACE::DApplet *m_multitaskviewApplet;
+    DS_NAMESPACE::DApplet *m_trayApplet;
 };
 }
 

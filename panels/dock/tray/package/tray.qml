@@ -22,6 +22,11 @@ AppletItem {
     readonly property var filterTrayPlugins: [quickpanelTrayItemPluginId]
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : overflowId.implicitWidth
     implicitHeight: useColumnLayout ? overflowId.implicitHeight : Panel.rootObject.dockSize
+    Component.onCompleted: {
+        Applet.trayPluginModel = Qt.binding(function () {
+            return DockCompositor.trayPluginSurfaces
+        })
+    }
 
     PanelPopup {
         id: popup
