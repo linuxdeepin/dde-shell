@@ -21,6 +21,7 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
     , m_clipboardApplet(nullptr)
     , m_searchApplet(nullptr)
     , m_multitaskviewApplet(nullptr)
+    , m_trayApplet(nullptr)
 {
     registerPluginInfoMetaType();
 
@@ -39,7 +40,7 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
     // Communicate with the other module
     auto getOtherApplet = [ = ] {
         QList<DS_NAMESPACE::DApplet *> list = appletList("org.deepin.ds.dock.tray");
-        if (!list.isEmpty()) m_oldDockApplet = list.first();
+        if (!list.isEmpty()) m_trayApplet = list.first();
 
         list = appletList("org.deepin.ds.dock.clipboarditem");
         if (!list.isEmpty()) m_clipboardApplet = list.first();
@@ -50,7 +51,7 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
         list = appletList("org.deepin.ds.dock.multitaskview");
         if (!list.isEmpty()) m_multitaskviewApplet = list.first();
 
-        return m_oldDockApplet && m_clipboardApplet && m_searchApplet && m_multitaskviewApplet;
+        return m_trayApplet && m_clipboardApplet && m_searchApplet && m_multitaskviewApplet;
     };
 
     // TODO: DQmlGlobal maybe missing a  signal which named `appletListChanged`?
@@ -235,8 +236,8 @@ QStringList DockDBusProxy::GetLoadedPlugins()
 DockItemInfos DockDBusProxy::plugins()
 {
     DockItemInfos iteminfos;
-    if (m_oldDockApplet) {
-        QMetaObject::invokeMethod(m_oldDockApplet, "plugins", Qt::DirectConnection, qReturnArg(iteminfos));
+    if (m_trayApplet) {
+        QMetaObject::invokeMethod(m_trayApplet, "dockItemInfos", Qt::DirectConnection, qReturnArg(iteminfos));
     }
 
     if (m_clipboardApplet) {
@@ -288,8 +289,8 @@ void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &item
         auto pluginsVisible = DockSettings::instance()->pluginsVisible();
         pluginsVisible[itemKey] = visible;
         DockSettings::instance()->setPluginsVisible(pluginsVisible);
-    } else if (m_oldDockApplet) {
-        QMetaObject::invokeMethod(m_oldDockApplet, "setItemOnDock", Qt::QueuedConnection, settingKey, itemKey, visible);
+    } else if (m_trayApplet) {
+        QMetaObject::invokeMethod(m_trayApplet, "setItemOnDock", Qt::QueuedConnection, settingKey, itemKey, visible);
     }
 }
 

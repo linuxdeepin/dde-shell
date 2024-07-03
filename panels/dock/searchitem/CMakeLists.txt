@@ -9,9 +9,16 @@ add_library(dock-searchitem SHARED
     ../dockiteminfo.h
 )
 
+target_include_directories(dock-searchitem PRIVATE
+    "${CMAKE_CURRENT_BINARY_DIR}/../"
+    "../"
+)
+
 target_link_libraries(dock-searchitem PRIVATE
     dde-shell-frame
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.searchitem TARGET dock-searchitem)
 ds_handle_package_translation(PACKAGE org.deepin.ds.dock.searchitem)
+
+install(FILES "package/icons/search.svg" DESTINATION share/dde-dock/icons/dcc-setting)

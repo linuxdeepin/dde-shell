@@ -72,6 +72,7 @@ class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public
     Q_PROPERTY(QString displayName READ displayName CONSTANT)
     Q_PROPERTY(QSize size READ pluginSize NOTIFY sizeChanged)
     Q_PROPERTY(bool isItemActive WRITE setItemActive READ isItemActive NOTIFY itemActiveChanged)
+    Q_PROPERTY(QString dccIcon READ dccIcon CONSTANT)
 
 public:
     PluginSurface(PluginManager* shell, const QString& pluginId, const QString& itemKey, const QString &displayName, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource);
@@ -87,6 +88,7 @@ public:
     uint32_t pluginFlags() const;
     uint32_t pluginSizePolicy() const;
     QSize pluginSize() const;
+    QString dccIcon() const;
 
     void setItemActive(bool isActive);
     bool isItemActive() const;
@@ -100,7 +102,8 @@ signals:
     void recvMouseEvent(QEvent::Type type);
 
 protected:
-    virtual void plugin_mouse_event(Resource *resource, int32_t type) override;
+    virtual void plugin_mouse_event(Resource *resource, int32_t type) override;;
+    virtual void plugin_dcc_icon(Resource *resource, const QString &type) override;
 
 private:
     PluginManager* m_manager;
@@ -109,6 +112,7 @@ private:
     QString m_itemKey;
     QString m_pluginId;
     QString m_displayName;
+    QString m_dccIcon;
 
     uint32_t m_flags;
     uint32_t m_pluginType;

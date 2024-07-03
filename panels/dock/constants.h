@@ -8,6 +8,7 @@
 #pragma once
 
 #include "dsglobal.h"
+#include "environments.h"
 
 #include <QtCore>
 #include <QQmlEngine>
@@ -139,6 +140,9 @@ const QString MSG_DOCK_PANEL_SIZE_CHANGED = QStringLiteral("dockPanelSizeChanged
  */
 const QString MSG_SET_APPLET_MIN_HEIGHT = QStringLiteral("setAppletMinHeight");
 
+const QString KeyHiddenSurfaceIds = "hiddenSurfaceIds";
+
+const QString DCCIconPath = CMAKE_INSTALL_PREFIX + QString("/share/dde-dock/icons/dcc-setting/");
 
 Q_ENUM_NS(SIZE)
 Q_ENUM_NS(IndicatorStyle)

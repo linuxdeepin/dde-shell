@@ -15,7 +15,7 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 
-PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, const QString& itemKey, const QString &displayName, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource)
+PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, const QString& itemKey, const QString &displayName, int pluginFlags, int pluginType,  int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)
     , m_itemKey(itemKey)
@@ -77,6 +77,11 @@ QSize PluginSurface::pluginSize() const
     return m_surface->bufferSize();
 }
 
+QString PluginSurface::dccIcon() const
+{
+    return m_dccIcon;
+}
+
 void PluginSurface::setItemActive(bool isActive)
 {
     if (m_isItemActive == isActive) {
@@ -105,6 +110,12 @@ void PluginSurface::plugin_mouse_event(QtWaylandServer::plugin::Resource *resour
 {
     qInfo() << "server plugin surface receive mouse event:" << type;
     Q_EMIT recvMouseEvent((QEvent::Type)type);
+}
+
+void PluginSurface::plugin_dcc_icon(Resource *resource, const QString &type)
+{
+    qInfo() << "dcc_icon:" << type;
+    m_dccIcon = type;
 }
 
 void PluginSurface::setGlobalPos(const QPoint &pos)
