@@ -4,15 +4,10 @@
 
 import QtQuick
 import QtQuick.Controls
+import org.deepin.ds 1.0
+import org.deepin.ds.dock.tray.quickpanel 1.0
 
-Button {
+QuickPanel {
     property bool isHorizontal: false
-    icon.name: "dock-control-panel"
-    icon.width: 16
-    icon.height: 16
-    width: isHorizontal ? 26 : 16
-    height: isHorizontal ? 16 : 26
-    onClicked: {
-        // toggle quick settings
-    }
+    trayItemPluginId: Applet.rootObject.quickpanelTrayItemPluginId
 }

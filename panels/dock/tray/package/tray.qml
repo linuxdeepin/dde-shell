@@ -12,14 +12,14 @@ import org.deepin.dtk 1.0 as D
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 import org.deepin.ds.dock.tray 1.0 as DDT
-import org.deepin.ds.dock.tray.quickpanel 1.0 as TQP
 
 AppletItem {
     id: tray
 
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 25
-    readonly property var filterTrayPlugins: ["dde-quick-panel","sound"]
+    readonly property string quickpanelTrayItemPluginId: "sound"
+    readonly property var filterTrayPlugins: [quickpanelTrayItemPluginId]
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : overflowId.implicitWidth
     implicitHeight: useColumnLayout ? overflowId.implicitHeight : Panel.rootObject.dockSize
 
@@ -94,8 +94,6 @@ AppletItem {
             trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
             color: "transparent"
         }
-
-        TQP.QuickPanel { }
     }
 
     Connections {

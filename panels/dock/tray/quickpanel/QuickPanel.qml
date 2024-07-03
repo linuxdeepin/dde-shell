@@ -26,7 +26,6 @@ Item {
     PanelTrayItem {
         id: panelTrayItem
         shellSurface: quickpanelModel.trayItemSurface
-        trayQuickPanelItemSurface: quickpanelModel.trayQuickPanelItemSurface
         isOpened: popup.popupVisible
         onClicked: function () {
             console.log("show quickpanel")

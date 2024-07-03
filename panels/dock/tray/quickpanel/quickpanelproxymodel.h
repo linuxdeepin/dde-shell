@@ -15,7 +15,6 @@ class QuickPanelProxyModel : public QSortFilterProxyModel, public QQmlParserStat
     Q_OBJECT
     Q_PROPERTY(QString trayItemPluginId READ trayItemPluginId WRITE setTrayItemPluginId NOTIFY trayItemPluginIdChanged FINAL)
     Q_PROPERTY(QObject* trayItemSurface READ trayItemSurface NOTIFY trayItemSurfaceChanged FINAL)
-    Q_PROPERTY(QObject* trayQuickPanelItemSurface READ trayQuickPanelItemSurface NOTIFY trayQuickPanelItemSurfaceChanged FINAL)
     Q_PROPERTY(QAbstractItemModel* trayPluginModel READ trayPluginModel WRITE setTrayPluginModel NOTIFY trayPluginModelChanged FINAL)
     QML_NAMED_ELEMENT(QuickPanelProxyModel)
     Q_INTERFACES(QQmlParserStatus)
@@ -35,8 +34,6 @@ public:
     QString trayItemPluginId() const;
     void setTrayItemPluginId(const QString &newTrayItemPluginId);
 
-    QObject *trayQuickPanelItemSurface() const;
-
     QAbstractItemModel *trayPluginModel() const;
     void setTrayPluginModel(QAbstractItemModel *newTrayPluginModel);
 
@@ -45,7 +42,6 @@ signals:
     void trayItemPluginIdChanged();
 
     void trayPluginModelChanged();
-    void trayQuickPanelItemSurfaceChanged();
 
 public:
     void classBegin() override;
