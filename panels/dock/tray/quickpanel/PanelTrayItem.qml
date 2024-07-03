@@ -7,17 +7,22 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQml
 
+import org.deepin.ds 1.0
 import org.deepin.dtk 1.0
 
 Control {
     id: root
     required property var shellSurface
-    required property var trayQuickPanelItemSurface
     property bool isOpened
     signal clicked()
     property bool contentHovered
     padding: 5
     ColorSelector.hovered: root.contentHovered || root.hovered || root.isOpened
+
+    PanelToolTip {
+        id: toolTip
+        text: qsTr("Quick actions")
+    }
 
     contentItem: RowLayout {
         spacing: 5
@@ -32,22 +37,31 @@ Control {
                 }
             }
         }
-        Loader {
-            id: quickpanelPlaceholder
-            active: root.trayQuickPanelItemSurface
-            visible: active
-            sourceComponent: TrayItemSurface {
-                shellSurface: root.trayQuickPanelItemSurface
-                onHoveredChanged: function () {
-                    root.contentHovered = hovered
-                }
-            }
-        }
         DciIcon {
-            visible: !quickpanelPlaceholder.visible
+            id: quickpanelPlaceholder
             Layout.preferredWidth: 16
             Layout.preferredHeight: 16
             name: "dock-control-panel"
+            palette: DTK.makeIconPalette(root.palette)
+            theme: root.ColorSelector.controlTheme
+            sourceSize: Qt.size(quickpanelPlaceholder.width, quickpanelPlaceholder.width)
+            HoverHandler {
+                onHoveredChanged: function () {
+                    root.contentHovered = hovered
+                    if (hovered) {
+                        var point = quickpanelPlaceholder.mapToItem(null, quickpanelPlaceholder.width / 2, 0)
+                        toolTip.toolTipX = Qt.binding(function () {
+                            return point.x - toolTip.width / 2
+                        })
+                        toolTip.toolTipY = Qt.binding(function () {
+                            return -toolTip.height - 10
+                        })
+                        toolTip.open()
+                    } else {
+                        toolTip.close()
+                    }
+                }
+            }
         }
     }
     background: BoxPanel {
