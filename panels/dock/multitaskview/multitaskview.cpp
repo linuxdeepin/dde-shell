@@ -5,6 +5,7 @@
 #include "applet.h"
 #include "multitaskview.h"
 #include "pluginfactory.h"
+#include "../constants.h"
 
 #include <QBuffer>
 
@@ -66,35 +67,7 @@ DockItemInfo MultiTaskView::dockItemInfo()
     info.itemKey = "multitasking-view";
     info.settingKey = "multitasking-view";
     info.visible = visible();
-    {
-        const auto lightPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::LightType);
-        auto lightPixmap = DDciIcon::fromTheme("dcc-view").pixmap(
-            qApp->devicePixelRatio(),
-            30,
-            DDciIcon::Light,
-            DDciIcon::Normal,
-            DDciIconPalette::fromQPalette(lightPalette)
-            );
-        QBuffer buffer(&info.iconLight);
-        if (buffer.open(QIODevice::WriteOnly)) {
-            lightPixmap.save(&buffer, "png");
-        }
-    }
-    {
-        const auto darkPalette = DGuiApplicationHelper::instance()->applicationPalette(DGuiApplicationHelper::DarkType);
-        auto darkPixmap = DDciIcon::fromTheme("dcc-view").pixmap(
-            qApp->devicePixelRatio(),
-            30,
-            DDciIcon::Dark,
-            DDciIcon::Normal,
-            DDciIconPalette::fromQPalette(darkPalette)
-            );
-        QBuffer buffer(&info.iconDark);
-        if (buffer.open(QIODevice::WriteOnly)) {
-            darkPixmap.save(&buffer, "png");
-        }
-    }
-
+    info.dccIcon = DCCIconPath + "multitasking-view.svg";
     return info;
 }
 

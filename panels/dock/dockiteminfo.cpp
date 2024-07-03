@@ -10,14 +10,15 @@ QDebug operator<<(QDebug argument, const DockItemInfo &info)
 {
     argument << "name:" << info.name << ", displayName:" << info.displayName
              << "itemKey:" << info.itemKey << "SettingKey:" << info.settingKey
-             << "icon_light:" << info.iconLight << "icon_dark:" << info.iconDark << "visible:" << info.visible;
+             << "dcc_icon:" << info.dccIcon << "visible:" << info.visible;
     return argument;
 }
 
 QDBusArgument &operator<<(QDBusArgument &arg, const DockItemInfo &info)
 {
     arg.beginStructure();
-    arg << info.name << info.displayName << info.itemKey << info.settingKey << info.iconLight << info.iconDark << info.visible;
+    arg << info.name << info.displayName << info.itemKey
+        << info.settingKey << info.dccIcon << info.visible;
     arg.endStructure();
     return arg;
 }
@@ -25,7 +26,8 @@ QDBusArgument &operator<<(QDBusArgument &arg, const DockItemInfo &info)
 const QDBusArgument &operator>>(const QDBusArgument &arg, DockItemInfo &info)
 {
     arg.beginStructure();
-    arg >> info.name >> info.displayName >> info.itemKey >> info.settingKey >> info.iconLight >> info.iconDark >> info.visible;
+    arg >> info.name >> info.displayName >> info.itemKey
+        >> info.settingKey >> info.dccIcon >> info.visible;
     arg.endStructure();
     return arg;
 }

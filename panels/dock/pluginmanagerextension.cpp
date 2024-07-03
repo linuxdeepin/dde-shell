@@ -77,6 +77,11 @@ QSize PluginSurface::pluginSize() const
     return m_surface->bufferSize();
 }
 
+QString PluginSurface::dccIcon() const
+{
+    return m_dccIcon;
+}
+
 void PluginSurface::setItemActive(bool isActive)
 {
     if (m_isItemActive == isActive) {
@@ -101,6 +106,12 @@ void PluginSurface::plugin_mouse_event(QtWaylandServer::plugin::Resource *resour
 {
     qInfo() << "server plugin surface receive mouse event:" << type;
     Q_EMIT recvMouseEvent((QEvent::Type)type);
+}
+
+void PluginSurface::plugin_dcc_icon(Resource *resource, const QString &icon)
+{
+    qInfo() << "dcc_icon:" << icon;
+    m_dccIcon = icon;
 }
 
 void PluginSurface::setGlobalPos(const QPoint &pos)
