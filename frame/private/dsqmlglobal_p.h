@@ -9,6 +9,10 @@
 #include <QObject>
 #include <DObject>
 
+QT_BEGIN_NAMESPACE
+class QWindow;
+QT_END_NAMESPACE
+
 DS_BEGIN_NAMESPACE
 class DApplet;
 
@@ -24,10 +28,12 @@ public:
 
     Q_INVOKABLE DApplet *applet(const QString &pluginId) const;
     Q_INVOKABLE QList<DApplet *> appletList(const QString &pluginId) const;
+    Q_INVOKABLE static void closeChildrenWindows(QWindow *target);
 
     DApplet *rootApplet() const;
 
     static DQmlGlobal *instance();
+    static QList<QWindow *> allChildrenWindows(QWindow *target);
 
 signals:
     void rootAppletChanged();

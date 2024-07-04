@@ -13,8 +13,9 @@ Window {
 
     property real xOffset: 0
     property real yOffset: 0
-    x: selectValue(transientParent.x + xOffset, 0, Screen.width - root.width)
-    y: selectValue(transientParent.y + yOffset, 0, Screen.height - root.height)
+    property Item currentItem
+    x: selectValue(transientParent ? transientParent.x + xOffset : 0, 0, Screen.width - root.width)
+    y: selectValue(transientParent ? transientParent.y + yOffset : 0, 0, Screen.height - root.height)
     function selectValue(value, min, max) {
         if (value < min)
             return min
@@ -25,13 +26,20 @@ Window {
     }
     flags: Qt.Popup
     D.DWindow.enabled: true
-    D.DWindow.windowRadius: 4 * Screen.devicePixelRatio
+    D.DWindow.windowRadius: (D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius)
+                            * Screen.devicePixelRatio
     D.DWindow.enableBlurWindow: true
     D.DWindow.shadowRadius: 8
     // TODO set shadowOffset maunally.
     D.DWindow.shadowOffset: Qt.point(0, 10)
+    D.ColorSelector.family: D.Palette.CrystalColor
 
     color: "transparent"
+    onVisibleChanged: function (arg) {
+        if (!arg)
+            DS.closeChildrenWindows(root)
+    }
+
     D.StyledBehindWindowBlur {
         control: parent
         anchors.fill: parent

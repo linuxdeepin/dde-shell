@@ -10,45 +10,98 @@ Item {
     id: control
     visible: false
     default property alias popupContent: popup.contentChildren
-    Panel.popupWindow.width: control.width
-    Panel.popupWindow.height: control.height
+    property alias popupVisible: popup.visible
+    property var popupWindow: Panel.popupWindow
+    property int popupX: 0
+    property int popupY: 0
+    property bool readyBinding: false
+
+    Binding {
+        when: readyBinding
+        target: popupWindow; property: "width"
+        value: popup.width
+    }
+    Binding {
+        when: readyBinding
+        target: popupWindow; property: "height"
+        value: popup.height
+    }
+    Binding {
+        when: readyBinding
+        delayed: true
+        target: popupWindow; property: "xOffset"
+        value: control.popupX
+    }
+    Binding {
+        when: readyBinding
+        delayed: true
+        target: popupWindow; property: "yOffset"
+        value: control.popupY
+    }
+
     function open()
     {
-        var window = Panel.popupWindow
-        if (!window)
+        if (popup.visible) {
+            close()
+            return
+        }
+
+        if (!popupWindow)
             return
 
-        window.xOffset = control.x
-        window.yOffset = control.y
-        window.show()
-        popup.open()
+        readyBinding = Qt.binding(function () {
+            return popupWindow && popupWindow.currentItem === control
+        })
+
+        popupWindow.currentItem = control
+        Qt.callLater(function () {
+            popupWindow.show()
+            popupWindow.requestActivate()
+        })
     }
+
     function close()
     {
-        var window = Panel.popupWindow
-        if (!window)
+        if (!popupWindow)
             return
 
-        window.close()
-        popup.close()
+        popupWindow.currentItem = null
+        popupWindow.close()
+    }
+
+    Connections {
+        target: popupWindow
+        function onActiveChanged()
+        {
+            if (!popupWindow)
+                return
+            // TODO why activeChanged is not emit.
+            if (popupWindow && !popupWindow.active) {
+                control.close()
+            }
+        }
     }
 
     Popup {
         id: popup
         padding: 0
+        visible: readyBinding
         width: control.width
         height: control.height
-        parent: Panel.popupWindow ? Panel.popupWindow.contentItem : undefined
+        parent: popupWindow ? popupWindow.contentItem : undefined
         onParentChanged: function() {
-            var window = Panel.popupWindow
-            if (!window)
+            if (!popupWindow)
                 return
-            window.visibleChanged.connect(function() {
-                if (Panel.popupWindow && !Panel.popupWindow.visible)
-                    popup.close()
+            popupWindow.visibleChanged.connect(function() {
+                if (popupWindow && !popupWindow.visible)
+                    control.close()
             })
         }
         // TODO dtk's blur causes blurred screen.
         background: null
+    }
+    Component.onDestruction: {
+        if (popup.visible)
+            control.close()
     }
 }

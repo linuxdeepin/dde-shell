@@ -23,6 +23,7 @@
 #include <QGuiApplication>
 #include <QQuickItem>
 #include <DGuiApplicationHelper>
+#include <qt5/QtGui/qguiapplication.h>
 
 #define SETTINGS DockSettings::instance()
 
@@ -38,7 +39,7 @@ DockPanel::DockPanel(QObject * parent)
     , m_compositorReady(false)
     , m_launcherShown(false)
 {
-    // connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
+    connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
 }
 
 bool DockPanel::load()
@@ -332,16 +333,39 @@ void DockPanel::loadDockPlugins()
     QStringList filters;
     filters << "*.so";
 
-    for (auto pluginDir : pluginDirs) {
+    QProcess proc;
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("QT_SCALE_FACTOR", QString::number(qApp->devicePixelRatio()));
+    proc.setProcessEnvironment(env);
+    QStringList execPaths;
+    execPaths << qEnvironmentVariable("TRAY_LOADER_EXECUTE_PATH")
+              << QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR);
+    QString validExePath;
+    for (const QString & execPath : execPaths) {
+         if (QFile::exists(execPath)) {
+             validExePath = execPath;
+             break;
+         }
+    }
+    qInfo() << "Valid Loader Execute Path:" << validExePath;
+    proc.setProgram(validExePath);
+
+    QStringList dirs;;
+    const auto pluginsPath = qEnvironmentVariable("TRAY_DEBUG_PLUGIN_PATH");
+    if (!pluginsPath.isEmpty())
+        dirs << pluginsPath.split(QDir::listSeparator());
+
+    if (dirs.isEmpty())
+        dirs << pluginDirs;
+
+    for (auto &pluginDir : dirs) {
         QDir dir(pluginDir);
         auto plugins = dir.entryList(filters, QDir::Files);
         foreach(QString plugin, plugins) {
             plugin = pluginDir + plugin;
-#ifdef QT_DEBUG
-            QProcess::startDetached(QString("%1/../panels/dock/dockplugin/loader/dockplugin-loader").arg(qApp->applicationDirPath()), {"-p", plugin, "-platform", "wayland",});
-#else
-            QProcess::startDetached(QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR), {"-p", plugin, "-platform", "wayland"});
-#endif
+            qInfo() << "pluginLoader load plugin" << plugin;
+            proc.setArguments({"-p", plugin, "-platform", "wayland",});
+            proc.startDetached();
         }
     }
 }
