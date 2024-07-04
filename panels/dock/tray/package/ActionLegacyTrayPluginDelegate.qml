@@ -68,7 +68,7 @@ Button {
         }
 
         Component.onCompleted: {
-            pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, itemWidth, itemHeight))
+            pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
             pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
         }
 
@@ -79,7 +79,7 @@ Button {
             repeat: false
             onTriggered: {
                 if (pluginItem.itemGlobalPoint.x > 0 && pluginItem.itemGlobalPoint.y > 0) {
-                    pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, itemWidth, itemHeight))
+                    pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
                 }
             }
         }

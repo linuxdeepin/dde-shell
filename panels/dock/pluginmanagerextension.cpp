@@ -94,10 +94,6 @@ bool PluginSurface::isItemActive() const
 
 void PluginSurface::updatePluginGeometry(const QRect &geometry)
 {
-    if (geometry.width() <= 0 || geometry.height() <= 0) {
-        return;
-    }
-
     send_geometry(geometry.x(), geometry.y(), geometry.width(), geometry.height());
 }
 
