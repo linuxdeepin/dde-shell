@@ -31,6 +31,17 @@ Item {
     readonly property int columnCount: Math.ceil(Math.sqrt(model.count))
     readonly property int rowCount: Math.round(Math.sqrt(model.count))
 
+    function isStashPopup(surfaceId)
+    {
+        for (let i = model.rowCount() - 1; i >= 0; i--) {
+            let index = model.index(i, 0)
+            let data = model.data(index, DDT.TraySortOrderModel.surfaceId)
+            if (data === surfaceId)
+                return true
+        }
+        return false
+    }
+
     implicitWidth: width
     width: columnCount * (itemSize + itemSpacing) - itemSpacing
     implicitHeight: height
@@ -49,6 +60,12 @@ Item {
         columnCount: root.columnCount
         rowCount: root.rowCount
         id: stashedItemDelegateChooser
+    }
+
+    // tooltip and menu
+    DDT.SurfacePopup {
+        objectName: "stash"
+        surfaceAcceptor: isStashPopup
     }
 
     // debug
