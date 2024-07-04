@@ -18,18 +18,28 @@ DGUI_USE_NAMESPACE
 
 namespace dock {
 
+const QString clipboardService = "org.deepin.dde.Clipboard1";
+const QString clipboardPath = "/org/deepin/dde/Clipboard1";
+const QString clipboardInterface = "org.deepin.dde.Clipboard1";
+
 static DDBusSender clipboardDbus()
 {
-    return DDBusSender().service("org.deepin.dde.Clipboard1")
-        .path("/org/deepin/dde/Clipboard1")
-        .interface("org.deepin.dde.Clipboard1");
+    return DDBusSender().service(clipboardService)
+        .path(clipboardPath)
+        .interface(clipboardInterface);
 }
 
 ClipboardItem::ClipboardItem(QObject *parent)
     : DApplet(parent)
     , m_visible(true)
+    , m_clipboardVisible(false)
 {
-
+    QDBusConnection::sessionBus().connect(clipboardService, clipboardPath, clipboardInterface,
+                                          "clipboardVisibleChanged", this, SLOT(onClipboardVisibleChanged(bool)));
+    QDBusInterface clipboardInter(clipboardService, clipboardPath, clipboardInterface, QDBusConnection::sessionBus());
+    if (clipboardInter.isValid()) {
+        m_clipboardVisible = clipboardInter.property("clipboardVisible").toBool();
+    }
 }
 
 void ClipboardItem::toggleClipboard()
@@ -55,6 +65,14 @@ void ClipboardItem::setVisible(bool visible)
         m_visible = visible;
 
         Q_EMIT visibleChanged(visible);
+    }
+}
+
+void ClipboardItem::onClipboardVisibleChanged(bool visible)
+{
+    if (m_clipboardVisible != visible) {
+        m_clipboardVisible = visible;
+        Q_EMIT clipboardVisibleChanged(visible);
     }
 }
 

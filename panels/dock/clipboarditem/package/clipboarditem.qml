@@ -36,6 +36,8 @@ AppletItem {
         icon.width: 16
         icon.height: 16
 
+        D.ColorSelector.hovered: Applet.clipboardVisible || button.hovered
+
         display: D.IconLabel.IconOnly
         onClicked: {
             Applet.toggleClipboard()
@@ -52,11 +54,13 @@ AppletItem {
             }
         }
 
-        background: DP.ButtonPanel {
-            button: button
-            color1: clipboardItem.toolButtonColor
-            color2: clipboardItem.toolButtonColor
-            outsideBorderColor: clipboardItem.toolButtonBorderColor
+        background: D.BoxPanel {
+            property D.Palette backgroundPalette: DockPalette.backgroundPalette
+
+            color2: color1
+            color1: backgroundPalette
+
+            outsideBorderColor: null
             insideBorderColor: null
         }
     }
