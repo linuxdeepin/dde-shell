@@ -59,29 +59,30 @@ AppletItem {
                 border.color: isCurrent ? D.ColorSelector.selectedBorderColor : D.ColorSelector.unSelectedBorderColor
                 implicitWidth: frameSize
                 implicitHeight: isCurrent ? itemSize + 4 : itemSize
-                color: isCurrent ? undefined : D.ColorSelector.backgroundColor
+                color: isCurrent ? "transparent" : D.ColorSelector.backgroundColor
                 radius: 3
-                Image {
-                    anchors.fill: parent
-                    anchors.margins: 1
-                    z: -1
-                    id: workspaceImage
-                    source: screenImage
-                    visible: false
-                    fillMode: Image.PreserveAspectCrop
-                }
-
-                OpacityMask {
-                    anchors.fill: workspaceImage
-                    source: workspaceImage
-                    maskSource: Rectangle {
-                        implicitWidth: workspaceRectangle.implicitWidth
-                        implicitHeight: workspaceRectangle.implicitHeight
-                        radius: workspaceRectangle.radius
-                    }
-                    visible: isCurrent
-                }
             }
+
+            Image {
+                anchors.fill: parent
+                id: workspaceImage
+                source: screenImage
+                visible: false
+                fillMode: Image.PreserveAspectCrop
+            }
+
+            OpacityMask {
+                anchors.fill: workspaceImage
+                z: -1
+                source: workspaceImage
+                maskSource: Rectangle {
+                    implicitWidth: workspaceRectangle.implicitWidth
+                    implicitHeight: workspaceRectangle.implicitHeight
+                    radius: workspaceRectangle.radius
+                }
+                visible: isCurrent
+            }
+
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
