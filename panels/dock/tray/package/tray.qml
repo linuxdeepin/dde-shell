@@ -151,8 +151,28 @@ AppletItem {
                 if (filterTrayPlugins.indexOf(item.pluginId) >= 0)
                     continue;
                 let surfaceId = `${item.pluginId}::${item.itemKey}`
-                let forbiddenSections = item.pluginSizePolicy === Dock.Custom ? ["stashed", "collapsable", "pinned"] : ["fixed"]
-                let preferredSection = item.pluginSizePolicy === Dock.Custom ? "fixed" : "collapsable"
+                let forbiddenSections = ["fixed"]
+                let preferredSection = "collapsable"
+
+                if (item.pluginSizePolicy === Dock.Custom) {
+                    forbiddenSections = ["stashed", "fixed"]
+                    preferredSection = "pinned"
+                }
+
+                if (item.pluginFlags & 0x1000) { // force dock.
+                    forbiddenSections = ["stashed", "collapsable", "fixed"]
+                    preferredSection = "pinned"
+                }
+
+                surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin", "sectionType": preferredSection, "forbiddenSections": forbiddenSections})
+            }
+            // actually only for datetime plugin currently
+            for (let i = 0; i < DockCompositor.fixedPluginSurfaces.count; i++) {
+                let item = DockCompositor.fixedPluginSurfaces.get(i).shellSurface
+                let surfaceId = `${item.pluginId}::${item.itemKey}`
+                let forbiddenSections = ["stashed", "collapsable", "pinned"]
+                let preferredSection = "fixed"
+
                 surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin", "sectionType": preferredSection, "forbiddenSections": forbiddenSections})
             }
             DDT.TraySortOrderModel.availableSurfaces = surfacesData

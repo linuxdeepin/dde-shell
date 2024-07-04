@@ -7,6 +7,11 @@
 #include <QStandardItemModel>
 #include <QQmlEngine>
 
+namespace Dtk {
+namespace Core {
+class DConfig;
+}}
+
 namespace docktray {
 
 class TraySortOrderModel : public QStandardItemModel
@@ -64,6 +69,7 @@ private:
     int m_visualItemCount = 0;
     bool m_collapsed = false;
     bool m_actionsAlwaysVisible = false;
+    std::unique_ptr<Dtk::Core::DConfig> m_dconfig;
     // this is for the plugins that currently available.
     QList<QVariantMap> m_availableSurfaces;
     // these are the sort order data source, it might contain items that are no longer existed.
