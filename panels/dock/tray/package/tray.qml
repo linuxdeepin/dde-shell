@@ -62,6 +62,7 @@ AppletItem {
             id: stashedContainer
             padding: 10
             contentItem: StashContainer {
+                id: stashContainer
                 color: "transparent"
                 model: DDT.SortFilterProxyModel {
                     sourceModel: DDT.TraySortOrderModel
@@ -134,7 +135,10 @@ AppletItem {
         }
         function isTrayPluginPopup(popupSurface)
         {
-            return DockCompositor.findSurface(`${popupSurface.pluginId}::${popupSurface.itemKey}`)
+            let surfaceId = `${popupSurface.pluginId}::${popupSurface.itemKey}`
+            if (stashContainer.isStashPopup(surfaceId))
+                return false
+            return DockCompositor.findSurface(surfaceId)
         }
     }
 
@@ -150,10 +154,9 @@ AppletItem {
                 let forbiddenSections = item.pluginSizePolicy === Dock.Custom ? ["stashed", "collapsable", "pinned"] : ["fixed"]
                 let preferredSection = item.pluginSizePolicy === Dock.Custom ? "fixed" : "collapsable"
                 surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin", "sectionType": preferredSection, "forbiddenSections": forbiddenSections})
-                console.log(surfaceId, item, item.pluginId, "surfaceId")
             }
             DDT.TraySortOrderModel.availableSurfaces = surfacesData
-            console.log("onPluginSurfacesUpdated", surfacesData)
+            console.log("onPluginSurfacesUpdated", surfacesData.length)
         }
     }
 

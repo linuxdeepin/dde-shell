@@ -11,6 +11,7 @@ import QtQml
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0
 import org.deepin.ds.dock 1.0
+import org.deepin.ds.dock.tray 1.0 as DDT
 import org.deepin.ds.dock.tray.quickpanel 1.0
 
 Item {
@@ -46,6 +47,20 @@ Item {
         QuickPanelPage {
             id: popupContent
             model: quickpanelModel
+
+            DDT.SurfacePopup {
+                objectName: "quickpanel"
+                surfaceAcceptor: function (surfaceId) {
+                    let tmp = surfaceId.split("::")
+                    if (tmp.length !== 2) {
+                        console.warn("Incorrect surfaceId format, it should be PluginId::ItemKey.")
+                        return false
+                    }
+                    let pluginId = tmp[0]
+                    let itemKey = tmp[1]
+                    return quickpanelModel.isQuickPanelPopup(pluginId, itemKey)
+                }
+            }
         }
     }
 
