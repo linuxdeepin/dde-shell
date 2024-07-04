@@ -49,18 +49,36 @@ AppletItem {
                 toolTip.toolTipY = Qt.binding(function () {
                     return -toolTip.height - 10
                 })
+                backgroundPanel.visible = true
                 toolTip.open()
             } else {
+                if (!Applet.clipboardVisible) {
+                    backgroundPanel.visible = false
+                }
                 toolTip.close()
             }
         }
 
         background: DP.ButtonPanel {
+            id: backgroundPanel
             button: button
             color1: clipboardItem.toolButtonColor
             color2: clipboardItem.toolButtonColor
             outsideBorderColor: clipboardItem.toolButtonBorderColor
             insideBorderColor: null
+        }
+
+        Component.onCompleted: {
+            if (Applet.clipboardVisible) {
+                backgroundPanel.visible = true
+            }
+        }
+    }
+
+    Connections {
+        target: Applet
+        function onClipboardVisibleChanged(visible) {
+            backgroundPanel.visible = visible
         }
     }
 }
