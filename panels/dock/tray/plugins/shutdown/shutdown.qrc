@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>resources/icons/shutdown-symbolic-dark.svg</file>
-        <file>resources/icons/shutdown-symbolic.svg</file>
-    </qresource>
-</RCC>

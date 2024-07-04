@@ -17,19 +17,15 @@ Item {
 
     property alias dockPosition: pluginManager.dockPosition
     property alias dockColorTheme: pluginManager.dockColorTheme
-    property alias dockDisplayMode: pluginManager.dockDisplayMode
-
-    property var tooltipMap: ({})
-    property var popupMap: ({})
 
     property ListModel trayPluginSurfaces: ListModel {}
-    property ListModel fixedPluginSurfaces: ListModel {}
-    property ListModel systemPluginSurfaces: ListModel {}
-    property ListModel toolPluginSurfaces: ListModel {}
     property ListModel quickPluginSurfaces: ListModel {}
-    property ListModel slidingPanelPluginSurfaces: ListModel {}
+    property ListModel fixedPluginSurfaces: ListModel {}
 
     property var compositor: waylandCompositor
+
+    signal pluginSurfacesUpdated()
+    signal popupCreated(var popup)
 
     function removeDockPluginSurface(model, object) {
         for (var i = 0; i < model.count; ++i) {
@@ -40,109 +36,56 @@ Item {
         }
     }
 
-    function handlePluginTooltipSurfaceAdded(shellSurface) {
-        tooltipMap[shellSurface.pluginId] = (shellSurface)
+    function findSurfaceFromModel(model, surfaceId) {
+        for (var i = 0; i < model.count; ++i) {
+            let item = model.get(i).shellSurface
+            if (surfaceId === `${item.pluginId}::${item.itemKey}`) {
+                console.log("found!", surfaceId)
+                return item
+            }
+        }
+        console.log("not found", surfaceId)
+        return null
     }
 
-    function handleTrayPopupSurfaceAdded(shellSurface) {
-        popupMap[shellSurface.pluginId] = (shellSurface)
-    }
-
-    function handleDockTrayIconSurfaceAdded(shellSurface) {
-        trayPluginSurfaces.append({shellSurface: shellSurface})
-    }
-
-    function handleDockFixedPluginSurfaceAdded(shellSurface) {
-        fixedPluginSurfaces.append({shellSurface: shellSurface})
-    }
-
-    function handleDockSystemPluginSurfacesAdded(shellSurface) {
-        systemPluginSurfaces.append({shellSurface: shellSurface})
-    }
-
-    function handleDockToolPluginSurfaceAdded(shellSurface) {
-        toolPluginSurfaces.append({shellSurface: shellSurface})
-    }
-
-    function handleDockQuickPluginSurfaceAdded(shellSurface) {
-        quickPluginSurfaces.append({shellSurface: shellSurface})
-    }
-
-    function handleDockSlidingPanelPluginSurfaceAdded(shellSurface) {
-        slidingPanelPluginSurfaces.append({shellSurface: shellSurface})
+    function findSurface(surfaceId) {
+        return findSurfaceFromModel(trayPluginSurfaces, surfaceId)
     }
 
     WaylandCompositor {
         id: waylandCompositor
         socketName: "dockplugin"
 
-        DockPluginManager {
+        PluginManager {
             id: pluginManager
 
             onPluginSurfaceCreated: (dockPluginSurface) => {
-                switch(dockPluginSurface.surfaceType) {
-                case DockPluginManager.Tooltip:
-                    dockCompositor.handlePluginTooltipSurfaceAdded(dockPluginSurface)
-                    break
-                case DockPluginManager.Popup:
-                    dockCompositor.handleTrayPopupSurfaceAdded(dockPluginSurface)
-                    break
-                case DockPluginManager.Tray:
-                    dockCompositor.handleDockTrayIconSurfaceAdded(dockPluginSurface)
-                    break
-                case DockPluginManager.Fixed:
-                    dockCompositor.handleDockFixedPluginSurfaceAdded(dockPluginSurface)
-                    break
-                case DockPluginManager.System:
-                    dockCompositor.handleDockSystemPluginSurfacesAdded(dockPluginSurface)
-                    break
-                case DockPluginManager.Tool:
-                    dockCompositor.handleDockToolPluginSurfaceAdded(dockPluginSurface)
-                    break
-                case DockPluginManager.Quick:
-                    dockCompositor.handleDockQuickPluginSurfaceAdded(dockPluginSurface)
-                    break
-                case DockPluginManager.SlidingPanel:
-                    dockCompositor.handleDockSlidingPanelPluginSurfaceAdded(dockPluginSurface)
-                    break
+                console.log("plugin surface created", dockPluginSurface.pluginId, dockPluginSurface.itemKey, dockPluginSurface.pluginType)
+                if (dockPluginSurface.pluginType === Dock.Tray) {
+                    trayPluginSurfaces.append({shellSurface: dockPluginSurface})
+                } else if (dockPluginSurface.pluginType === Dock.Quick) {
+                    quickPluginSurfaces.append({shellSurface: dockPluginSurface})
+                } else if (dockPluginSurface.pluginType === Dock.Fixed) {
+                    fixedPluginSurfaces.append({shellSurface: dockPluginSurface})
                 }
+                dockCompositor.pluginSurfacesUpdated()
             }
 
             onPluginSurfaceDestroyed: (dockPluginSurface) => {
-                switch(dockPluginSurface.surfaceType) {
-                case DockPluginManager.Tooltip: {
-                    delete dockCompositor.tooltipMap[dockPluginSurface.pluginId]
-                    break
+                console.log("plugin surface destroyed", dockPluginSurface.pluginId, dockPluginSurface.itemKey, dockPluginSurface.pluginType)
+                if (dockPluginSurface.pluginType === Dock.Tray) {
+                    removeDockPluginSurface(trayPluginSurfaces, dockPluginSurface)
+                } else if (dockPluginSurface.pluginType === Dock.Quick) {
+                    removeDockPluginSurface(quickPluginSurfaces, dockPluginSurface)
+                } else if (dockPluginSurface.pluginType === Dock.Fixed) {
+                    removeDockPluginSurface(fixedPluginSurfaces, dockPluginSurface)
                 }
-                case DockPluginManager.Popup: {
-                    delete dockCompositor.popupMap[dockPluginSurface.pluginId]
-                    break
-                }
-                case DockPluginManager.Tray: {
-                    removeDockPluginSurface(dockCompositor.trayPluginSurfaces, dockPluginSurface)
-                    break
-                }
-                case DockPluginManager.Fixed: {
-                    removeDockPluginSurface(dockCompositor.fixedPluginSurfaces, dockPluginSurface)
-                    break
-                }
-                case DockPluginManager.System: {
-                    removeDockPluginSurface(dockCompositor.systemPluginSurfaces, dockPluginSurface)
-                    break
-                }
-                case DockPluginManager.Tool: {
-                    removeDockPluginSurface(dockCompositor.toolPluginSurfaces, dockPluginSurface)
-                    break
-                }
-                case DockPluginManager.Quick: {
-                    removeDockPluginSurface(dockCompositor.quickPluginSurfaces, dockPluginSurface)
-                    break
-                }
-                case DockPluginManager.SlidingPanel: {
-                    removeDockPluginSurface(dockCompositor.slidingPanelPluginSurfaces, dockPluginSurface)
-                    break
-                }
-                }
+                dockCompositor.pluginSurfacesUpdated()
+            }
+
+            onPluginPopupCreated: (popup) => {
+                console.log("plugin popup created", popup.pluginId, popup.itemKey, popup.pluginType)
+                dockCompositor.popupCreated(popup)
             }
         }
     }

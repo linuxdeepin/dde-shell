@@ -109,6 +109,10 @@ void DPanelPrivate::ensurePopupWindow() const
      if (m_popupWindow) {
          qCDebug(dsLog) << "Create PopupWidow successfully.";
          m_popupWindow->setTransientParent(q->window());
+         QObject::connect(m_popupWindow, &QWindow::visibleChanged, q, [this] (bool arg) {
+             if (arg)
+                 closeWindow(m_toolTipWindow);
+         });
          Q_EMIT const_cast<DPanel *>(q)->popupWindowChanged();
      }
 }
@@ -123,15 +127,25 @@ void DPanelPrivate::ensureToolTipWindow() const
         return;
     }
 
-    auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelPopupWindow.qml"));
+    auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelToolTipWindow.qml"));
     if (!object)
         return;
     const_cast<DPanelPrivate *>(this)->m_toolTipWindow = qobject_cast<QQuickWindow *>(object);
     if (m_toolTipWindow) {
         qCDebug(dsLog) << "Create ToolTipWindow successfully.";
         m_toolTipWindow->setTransientParent(q->window());
+        QObject::connect(m_toolTipWindow, &QWindow::visibleChanged, q, [this] (bool arg) {
+            if (arg)
+                closeWindow(m_popupWindow);
+        });
         Q_EMIT const_cast<DPanel *>(q)->toolTipWindowChanged();
     }
+}
+
+void DPanelPrivate::closeWindow(QWindow *window)
+{
+    if (window && window->isVisible())
+        window->close();
 }
 
 DS_END_NAMESPACE

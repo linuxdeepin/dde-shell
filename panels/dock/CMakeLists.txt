@@ -8,6 +8,7 @@ configure_file(environments.h.in environments.h @ONLY)
 
 find_package(PkgConfig REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS Core DBus Gui Qml WaylandCompositor Widgets)
+find_package(DdeTrayLoader REQUIRED)
 pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
 
 file(
@@ -88,19 +89,16 @@ add_subdirectory(taskmanager)
 add_subdirectory(tray)
 add_subdirectory(multitaskview)
 
-# dock plugin load program
-add_subdirectory(dockplugin)
-
 # dock qml element(include Dock.xx defines and DockCompositor)
 file(
-    GLOB dock_plugin_sources
+    GLOB plugin_sources
     constants.h
     # dockfilterproxymodel.cpp
     # dockfilterproxymodel.h
-    dockpluginmanagerextension_p.h
-    dockpluginmanagerextension.cpp
-    dockpluginmanagerintegration_p.h
-    dockpluginmanagerintegration.cpp
+    pluginmanagerextension_p.h
+    pluginmanagerextension.cpp
+    pluginmanagerintegration_p.h
+    pluginmanagerintegration.cpp
 )
 
 set_source_files_properties(DockCompositor.qml PROPERTIES
@@ -121,14 +119,14 @@ qt_add_qml_module(dock-plugin
     URI "org.deepin.ds.dock"
     VERSION "1.0"
     SHARED
-    SOURCES ${dock_plugin_sources}
+    SOURCES ${plugin_sources}
     QML_FILES DockCompositor.qml OverflowContainer.qml MenuHelper.qml DockPalette.qml
     OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/
 )
 
 qt_generate_wayland_protocol_server_sources(dock-plugin
     FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/dockplugin/protocol/dock-plugin-manager-v1.xml
+        ${DDE_TRAY_LOADER_PROTOCOL}
 )
 
 target_link_libraries(dock-plugin PUBLIC
@@ -150,3 +148,4 @@ target_include_directories(dock-plugin
 install(DIRECTORY "${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/" DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/")
 dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.json)
 dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.power.json)
+dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.tray.json)

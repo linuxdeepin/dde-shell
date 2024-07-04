@@ -11,6 +11,8 @@
 #include <QLoggingCategory>
 #include <QCoreApplication>
 #include <QQueue>
+#include <QWindow>
+#include <QGuiApplication>
 
 #include <dobject_p.h>
 
@@ -68,6 +70,30 @@ QList<DApplet *> DQmlGlobal::appletList(const QString &pluginId) const
         }
     }
     return ret;
+}
+
+QList<QWindow *> DQmlGlobal::allChildrenWindows(QWindow *target)
+{
+    QList<QWindow *> ret;
+    auto allWindows = qGuiApp->allWindows();
+    while (!allWindows.isEmpty()) {
+        auto window = allWindows.takeFirst();
+        while (window) {
+            if (window->transientParent() == target) {
+                ret << window;
+                break;
+            }
+            window = window->transientParent();
+        }
+    }
+    return ret;
+}
+
+void DQmlGlobal::closeChildrenWindows(QWindow *target)
+{
+    for (const auto item : allChildrenWindows(target))
+        if (item && item->isVisible())
+            item->close();
 }
 
 DApplet *DQmlGlobal::rootApplet() const

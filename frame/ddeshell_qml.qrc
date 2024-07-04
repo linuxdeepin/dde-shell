@@ -3,5 +3,7 @@
         <file>qml/PanelPopup.qml</file>
         <file>qml/PanelToolTip.qml</file>
         <file>qml/PanelPopupWindow.qml</file>
+        <file>qml/PanelToolTipWindow.qml</file>
+        <file>qml/QuickDragWindow.qml</file>
     </qresource>
 </RCC>
