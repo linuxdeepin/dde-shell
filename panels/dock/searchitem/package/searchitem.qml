@@ -50,6 +50,9 @@ AppletItem {
         icon.width: 16
         icon.height: 16
         display: D.IconLabel.IconOnly
+
+        D.ColorSelector.hovered: Applet.grandSearchVisible || button.hovered
+
         onClicked: {
             toolTip.close()
             Applet.toggleGrandSearch()
@@ -64,12 +67,13 @@ AppletItem {
             }
         }
 
-        // TODO: get style from Dtk
-        background: DP.ButtonPanel {
-            button: button
-            color1: searchItem.toolButtonColor
-            color2: searchItem.toolButtonColor
-            outsideBorderColor: searchItem.toolButtonBorderColor
+        background: D.BoxPanel {
+            property D.Palette backgroundPalette: DockPalette.backgroundPalette
+
+            color2: color1
+            color1: backgroundPalette
+
+            outsideBorderColor: null
             insideBorderColor: null
         }
     }
