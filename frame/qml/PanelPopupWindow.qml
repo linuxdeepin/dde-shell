@@ -24,7 +24,8 @@ Window {
 
         return value
     }
-    flags: Qt.Popup
+    // TODO: it's a qt bug which make Qt.Popup can not get input focus
+    flags: Qt.Tool
     D.DWindow.enabled: true
     D.DWindow.windowRadius: (D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius)
                             * Screen.devicePixelRatio
