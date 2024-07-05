@@ -77,6 +77,17 @@ AppletItem {
             }
         }
     }
+    Connections {
+        target: DDT.TraySortOrderModel
+        function onActionsAlwaysVisibleChanged(val) {
+            if (val) {
+                if (!stashedPopup.visible) {
+                    // TODO: position?
+                    stashedPopup.open()
+                }
+            }
+        }
+    }
 
     GridLayout {
         id: overflowId
@@ -152,7 +163,7 @@ AppletItem {
                     continue;
                 let surfaceId = `${item.pluginId}::${item.itemKey}`
                 let forbiddenSections = ["fixed"]
-                let preferredSection = "collapsable"
+                let preferredSection = item.pluginId === "application-tray" ? "stashed" : "collapsable"
 
                 if (item.pluginSizePolicy === Dock.Custom) {
                     forbiddenSections = ["stashed", "fixed"]
