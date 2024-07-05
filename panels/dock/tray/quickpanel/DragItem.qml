@@ -72,9 +72,8 @@ Item {
 
         DWindow.enabled: true
         DWindow.enableBlurWindow: !isFallbackIcon
-        DWindow.shadowRadius: 8
-        // TODO set shadowOffset maunally.
-        DWindow.shadowOffset: Qt.point(0, 10)
+        DWindow.shadowRadius: 0
+        DWindow.borderWidth: 0
         ColorSelector.family: Palette.CrystalColor
 
         height: getHeight()
@@ -84,10 +83,8 @@ Item {
             active: !isFallbackIcon
             anchors.fill: parent
 
-            sourceComponent: DciIcon {
-                sourceSize: Qt.size(width, height)
-                asynchronous: false
-                name: root.draggingImage
+            sourceComponent: Image {
+                source: root.draggingImage
             }
         }
 
@@ -110,11 +107,7 @@ Item {
                 dragItem.grabToImage(function(result) {
                     console.log("grab to image", result.url)
 
-                    var local = "/tmp/" + result.url + ".png"
-                    local = local.replace(/#/g, '-')
-                    result.saveToFile(local)
-
-                    draggingImage = "file://" + local
+                    draggingImage = result.url
                 })
             }
             dragItem.Drag.active = active
