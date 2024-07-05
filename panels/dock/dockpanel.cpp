@@ -23,7 +23,6 @@
 #include <QGuiApplication>
 #include <QQuickItem>
 #include <DGuiApplicationHelper>
-#include <qt5/QtGui/qguiapplication.h>
 
 #define SETTINGS DockSettings::instance()
 
@@ -158,6 +157,9 @@ bool DockPanel::init()
     });
 
     QMetaObject::invokeMethod(this, [this, dockDaemonAdaptor](){
+        m_hideState = hideMode() == KeepShowing || m_helper->mouseInDockArea() ? Show : Hide;
+        Q_EMIT hideStateChanged(m_hideState);
+
         Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
     });
 

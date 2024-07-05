@@ -17,6 +17,7 @@ const QString SECTION_PINNED = QLatin1String("pinned");
 
 TraySortOrderModel::TraySortOrderModel(QObject *parent)
     : QStandardItemModel(parent)
+    , m_dconfig(Dtk::Core::DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.tray"))
 {
     QHash<int, QByteArray> defaultRoleNames = roleNames();
     defaultRoleNames.insert({
@@ -38,14 +39,12 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
     appendRow(createTrayItem("internal/action-toggle-collapse", SECTION_TRAY_ACTION, "action-toggle-collapse"));
     appendRow(createTrayItem("internal/action-toggle-quick-settings", SECTION_TRAY_ACTION, "action-toggle-quick-settings"));
 
-#ifdef QT_DEBUG
-    // testing purpose dummy entries.
-    appendRow(createTrayItem("web-browser-symbolic", SECTION_STASHED, "dummy"));
-    appendRow(createTrayItem("dnd-mode::dnd-mode-key", SECTION_STASHED, "dummy"));
-    appendRow(createTrayItem("trash::trash", SECTION_COLLAPSABLE, "dummy"));
-    appendRow(createTrayItem("user-info-symbolic", SECTION_COLLAPSABLE, "dummy"));
-    appendRow(createTrayItem("folder-symbolic", SECTION_PINNED, "dummy"));
-#endif
+    connect(m_dconfig.get(), &Dtk::Core::DConfig::valueChanged, this, [this](const QString &key){
+        if (key == QLatin1String("hiddenSurfaceIds")) {
+            loadDataFromDConfig();
+            updateVisualIndexes();
+        }
+    });
 
     connect(this, &TraySortOrderModel::availableSurfacesChanged, this, &TraySortOrderModel::onAvailableSurfacesChanged);
 
@@ -427,22 +426,18 @@ QString TraySortOrderModel::registerSurfaceId(const QVariantMap & surfaceData)
 
 void TraySortOrderModel::loadDataFromDConfig()
 {
-    using namespace Dtk::Core;
-    std::unique_ptr<DConfig> dconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.tray"));
-    m_stashedIds = dconfig->value("stashedSurfaceIds").toStringList();
-    m_collapsableIds = dconfig->value("collapsableSurfaceIds").toStringList();
-    m_pinnedIds = dconfig->value("pinnedSurfaceIds").toStringList();
-    m_hiddenIds = dconfig->value("hiddenSurfaceIds").toStringList();
+    m_stashedIds = m_dconfig->value("stashedSurfaceIds").toStringList();
+    m_collapsableIds = m_dconfig->value("collapsableSurfaceIds").toStringList();
+    m_pinnedIds = m_dconfig->value("pinnedSurfaceIds").toStringList();
+    m_hiddenIds = m_dconfig->value("hiddenSurfaceIds").toStringList();
 }
 
 void TraySortOrderModel::saveDataToDConfig()
 {
-    using namespace Dtk::Core;
-    std::unique_ptr<DConfig> dconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.tray"));
-    dconfig->setValue("stashedSurfaceIds", m_stashedIds);
-    dconfig->setValue("collapsableSurfaceIds", m_collapsableIds);
-    dconfig->setValue("pinnedSurfaceIds", m_pinnedIds);
-    dconfig->setValue("hiddenSurfaceIds", m_hiddenIds);
+    m_dconfig->setValue("stashedSurfaceIds", m_stashedIds);
+    m_dconfig->setValue("collapsableSurfaceIds", m_collapsableIds);
+    m_dconfig->setValue("pinnedSurfaceIds", m_pinnedIds);
+    m_dconfig->setValue("hiddenSurfaceIds", m_hiddenIds);
 }
 
 void TraySortOrderModel::onAvailableSurfacesChanged()
