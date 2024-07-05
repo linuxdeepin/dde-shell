@@ -107,14 +107,31 @@ Button {
         }
     }
 
+    property Component overlayWindow: QuickDragWindow {
+        height: parent.visualSize.height
+        width: parent.visualSize.width
+        Item {
+            height: parent.height
+            width: parent.width
+            ShellSurfaceItem {
+                anchors.centerIn: parent
+                shellSurface: pluginItem.plugin
+            }
+        }
+    }
+
     Drag.active: dragHandler.active
     Drag.dragType: Drag.Automatic
+    DQuickDrag.overlay: overlayWindow
+    DQuickDrag.active: Drag.active
+    DQuickDrag.hotSpotScale: Qt.size(0.5, 1)
     Drag.mimeData: {
         "text/x-dde-shell-tray-dnd-surfaceId": model.surfaceId
     }
     Drag.supportedActions: Qt.MoveAction
     Drag.onActiveChanged: {
         DDT.TraySortOrderModel.actionsAlwaysVisible = Drag.active
+        pluginItem.visible = !Drag.active
         if (!Drag.active) {
             // reset position on drop
             Qt.callLater(() => { x = 0; y = 0; });
