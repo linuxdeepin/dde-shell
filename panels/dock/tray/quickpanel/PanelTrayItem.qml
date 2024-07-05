@@ -8,6 +8,7 @@ import QtQuick.Layouts
 import QtQml
 
 import org.deepin.ds 1.0
+import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0
 
 Control {
@@ -22,6 +23,8 @@ Control {
     PanelToolTip {
         id: toolTip
         text: qsTr("Quick actions")
+        toolTipX: DockPanelPositioner.x
+        toolTipY: DockPanelPositioner.y
     }
 
     contentItem: RowLayout {
@@ -50,13 +53,8 @@ Control {
                 onHoveredChanged: function () {
                     root.contentHovered = hovered
                     if (hovered) {
-                        var point = quickpanelPlaceholder.mapToItem(null, quickpanelPlaceholder.width / 2, 0)
-                        toolTip.toolTipX = Qt.binding(function () {
-                            return point.x - toolTip.width / 2
-                        })
-                        toolTip.toolTipY = Qt.binding(function () {
-                            return -toolTip.height - 10
-                        })
+                        var point = quickpanelPlaceholder.mapToItem(null, quickpanelPlaceholder.width / 2, quickpanelPlaceholder.height / 2)
+                        toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
                         toolTip.open()
                     } else {
                         toolTip.close()

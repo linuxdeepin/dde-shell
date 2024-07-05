@@ -99,6 +99,8 @@ file(
     pluginmanagerextension.cpp
     pluginmanagerintegration_p.h
     pluginmanagerintegration.cpp
+    dockpositioner.h
+    dockpositioner.cpp
 )
 
 set_source_files_properties(DockCompositor.qml PROPERTIES
@@ -138,6 +140,7 @@ target_link_libraries(dock-plugin PUBLIC
 PRIVATE
     PkgConfig::WaylandClient
     Qt${QT_VERSION_MAJOR}::WaylandCompositorPrivate
+    dockpanel
 )
 
 target_include_directories(dock-plugin

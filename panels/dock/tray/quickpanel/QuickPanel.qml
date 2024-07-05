@@ -30,10 +30,9 @@ Item {
         isOpened: popup.popupVisible
         onClicked: function () {
             console.log("show quickpanel")
-            var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
-            popup.popupX = point.x
-            popup.popupY = Qt.binding(function () {
-                return -popup.height - 10
+            popup.DockPanelPositioner.bounding = Qt.binding(function () {
+                var point = panelTrayItem.mapToItem(null, panelTrayItem.width / 2, panelTrayItem.height / 2)
+                return Qt.rect(point.x, point.y, popup.width, popup.height)
             })
             popup.open()
         }
@@ -43,6 +42,8 @@ Item {
         id: popup
         width: popupContent.width
         height: popupContent.height
+        popupX: DockPanelPositioner.x
+        popupY: DockPanelPositioner.y
 
         QuickPanelPage {
             id: popupContent

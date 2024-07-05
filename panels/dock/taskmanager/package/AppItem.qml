@@ -309,19 +309,16 @@ Item {
         PanelToolTip {
             id: toolTip
             text: root.name
+            toolTipX: DockPanelPositioner.x
+            toolTipY: DockPanelPositioner.y
         }
 
         Timer {
             id: toolTipShowTimer
             interval: 50
             onTriggered: {
-                var point = root.mapToItem(null, root.width / 2, 0)
-                toolTip.toolTipX = Qt.binding(function () {
-                    return point.x - toolTip.width / 2
-                })
-                toolTip.toolTipY = Qt.binding(function () {
-                    return -toolTip.height - 10
-                })
+                var point = root.mapToItem(null, root.width / 2, root.height / 2)
+                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
                 toolTip.open()
             }
         }
