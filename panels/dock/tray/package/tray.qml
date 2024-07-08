@@ -30,8 +30,11 @@ AppletItem {
 
     PanelPopup {
         id: popup
+        property alias shellSurface: popupContent.shellSurface
         width: popupContent.width
         height: popupContent.height
+        popupX: DockPanelPositioner.x
+        popupY: DockPanelPositioner.y
 
         Item {
             anchors.fill: parent
@@ -45,9 +48,31 @@ AppletItem {
         }
     }
 
+    PanelPopup {
+        id: popupMenu
+        property alias shellSurface: popupMenuContent.shellSurface
+        width: popupMenuContent.width
+        height: popupMenuContent.height
+        popupX: DockPositioner.x
+        popupY: DockPositioner.y
+
+        Item {
+            anchors.fill: parent
+            ShellSurfaceItem {
+                id: popupMenuContent
+                anchors.centerIn: parent
+                onSurfaceDestroyed: function () {
+                    popupMenu.close()
+                }
+            }
+        }
+    }
+
     PanelToolTip {
         id: toolTip
         property alias shellSurface: toolTipContent.shellSurface
+        toolTipX: DockPanelPositioner.x
+        toolTipY: DockPanelPositioner.y
 
         ShellSurfaceItem {
             id: toolTipContent
@@ -122,31 +147,25 @@ AppletItem {
 
             if (popupSurface.popupType === Dock.TrayPopupTypeTooltip) {
                 toolTip.shellSurface = popupSurface
-                toolTip.toolTipX = Qt.binding(function () {
-                    return toolTip.shellSurface.x - toolTip.width / 2
-                })
-                toolTip.toolTipY = Qt.binding(function () {
-                    return -toolTip.height - 10
+                toolTip.DockPanelPositioner.bounding = Qt.binding(function () {
+                    var point = Qt.point(toolTip.shellSurface.x, toolTip.shellSurface.y)
+                    return Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
                 })
                 toolTip.open()
-            } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
-                popupContent.shellSurface = popupSurface
-                popup.popupX = Qt.binding(function () {
-                    return popupContent.shellSurface.x
-                })
-                popup.popupY = Qt.binding(function () {
-                    return popupContent.shellSurface.y - popup.height
-                })
-                popup.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypePanel) {
-                popupContent.shellSurface = popupSurface
-                popup.popupX = Qt.binding(function () {
-                    return popupContent.shellSurface.x - popup.width / 2
-                })
-                popup.popupY = Qt.binding(function () {
-                    return -popup.height - 10
+                popup.shellSurface = popupSurface
+                popup.DockPanelPositioner.bounding = Qt.binding(function () {
+                    var point = Qt.point(popup.shellSurface.x, popup.shellSurface.y)
+                    return Qt.rect(point.x, point.y, popup.width, popup.height)
                 })
                 popup.open()
+            } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
+                popupMenu.shellSurface = popupSurface
+                popupMenu.DockPositioner.bounding = Qt.binding(function () {
+                    var point = Qt.point(popupMenu.shellSurface.x, popupMenu.shellSurface.y)
+                    return Qt.rect(point.x, point.y, popupMenu.width, popupMenu.height)
+                })
+                popupMenu.open()
             }
         }
         function isTrayPluginPopup(popupSurface)

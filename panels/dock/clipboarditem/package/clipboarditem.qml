@@ -24,6 +24,8 @@ AppletItem {
     PanelToolTip {
         id: toolTip
         text: qsTr("Clipboard")
+        toolTipX: DockPanelPositioner.x
+        toolTipY: DockPanelPositioner.y
     }
     D.ToolButton {
         id: button
@@ -42,13 +44,8 @@ AppletItem {
 
         onHoveredChanged: {
             if (hovered) {
-                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, 0)
-                toolTip.toolTipX = Qt.binding(function () {
-                    return point.x - toolTip.width / 2
-                })
-                toolTip.toolTipY = Qt.binding(function () {
-                    return -toolTip.height - 10
-                })
+                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, Applet.rootObject.height / 2)
+                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
                 toolTip.open()
             } else {
                 toolTip.close()
