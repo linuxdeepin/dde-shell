@@ -1,3 +1,14 @@
+dde-shell (0.0.28) unstable; urgency=medium
+
+  * fix: dock now show when init
+  * feat: support popup to align with dock
+  * chore: tray area show dragged item at cursor position
+  * chore: using Image to display drag image
+  * chore: set the plugin visibility
+  * fix: the workspace preview image is displayed abnormally
+
+ -- Wang Fei <wangfei@deepin.org>  Mon, 08 Jul 2024 13:21:32 +0800
+
 dde-shell (0.0.23) unstable; urgency=medium
 
   * fix: uos-ai disabled(issue: 8593)
