@@ -49,7 +49,10 @@ Item {
     }
 
     function findSurface(surfaceId) {
-        return findSurfaceFromModel(trayPluginSurfaces, surfaceId)
+        let ret = findSurfaceFromModel(trayPluginSurfaces, surfaceId)
+        if (ret === null) ret = findSurfaceFromModel(quickPluginSurfaces, surfaceId)
+        if (ret === null) ret = findSurfaceFromModel(fixedPluginSurfaces, surfaceId)
+        return ret
     }
 
     WaylandCompositor {
