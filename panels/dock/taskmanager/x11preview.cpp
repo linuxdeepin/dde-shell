@@ -36,7 +36,7 @@
 
 Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPreview")
 
-#define PREVIEW_TITLE_HEIGHT 20
+#define PREVIEW_TITLE_HEIGHT 24
 #define PREVIEW_CONTENT_HEIGHT 118
 #define PREVIEW_CONTENT_MAX_WIDTH 240
 #define PREVIEW_CONTENT_MIN_WIDTH 80
@@ -559,6 +559,7 @@ void X11WindowPreviewContainer::initUI()
     m_previewTitle = new DLabel(this);
     m_previewTitle->setFixedHeight(PREVIEW_TITLE_HEIGHT);
     m_previewIcon->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+    m_previewIcon->setScaledContents(true);
 
     m_closeAllButton = new DToolButton(this);
     m_closeAllButton->setIconSize(QSize(16, 16));
@@ -718,7 +719,6 @@ void X11WindowPreviewContainer::updatePreviewIconFromBase64(const QString &base6
     QPixmap pix;
     if (strs.size() == 2) {
         pix.loadFromData(QByteArray::fromBase64(strs.at(1).toLatin1()));
-        pix = pix.scaled(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
 
     if (!pix.isNull()) {
