@@ -52,8 +52,11 @@ class DQuickDragPrivate : public DTK_CORE_NAMESPACE::DObjectPrivate
 public:
     D_DECLARE_PUBLIC(DQuickDrag)
     explicit DQuickDragPrivate(DQuickDrag *qq);
+    virtual ~DQuickDragPrivate() override;
 
+    void clear();
     void initDragOverlay(QWindow *dragWindow);
+    void releaseDragOverlay();
     void updateOverlayPosition(const QPoint &pos);
     void showOverlay();
     void hideOverlay();
@@ -80,8 +83,13 @@ bool DragWindowEventFilter::eventFilter(QObject *watched, QEvent *event)
         return false;
 
     if (event->type() == QEvent::PlatformSurface) {
-        qDebug(dsDragLog) << "drag window platform surface";
-        m_drag->initDragOverlay(dragWindow);
+        auto e = dynamic_cast<QPlatformSurfaceEvent *>(event);
+        qDebug(dsDragLog) << "drag window platform surface, event type:" << e->surfaceEventType();
+        if (e->surfaceEventType() == QPlatformSurfaceEvent::SurfaceCreated) {
+            m_drag->initDragOverlay(dragWindow);
+        } else if (e->surfaceEventType() == QPlatformSurfaceEvent::SurfaceAboutToBeDestroyed) {
+            m_drag->releaseDragOverlay();
+        }
     }
 
     if (event->type() == QEvent::Move) {
@@ -123,11 +131,7 @@ void DQuickDrag::setActive(bool newActive)
         return;
     }
 
-    if (d->m_filter) {
-        qApp->removeEventFilter(d->m_filter);
-        d->m_filter->deleteLater();
-        d->m_window->deleteLater();
-    }
+    d->clear();
 
     if (newActive) {
         d->m_filter = new DragWindowEventFilter(d);
@@ -192,6 +196,20 @@ DQuickDragPrivate::DQuickDragPrivate(DQuickDrag *qq)
 {
 }
 
+DQuickDragPrivate::~DQuickDragPrivate()
+{
+    clear();
+}
+
+void DQuickDragPrivate::clear()
+{
+    if (m_filter) {
+        qApp->removeEventFilter(m_filter);
+        m_filter->deleteLater();
+    }
+    releaseDragOverlay();
+}
+
 void DQuickDragPrivate::showOverlay()
 {
     if (!m_window)
@@ -232,6 +250,12 @@ void DQuickDragPrivate::initDragOverlay(QWindow *dragWindow)
 
     updateOverlayPosition(dragWindow->position());
     updateStartDragPoint();
+}
+
+void DQuickDragPrivate::releaseDragOverlay()
+{
+    if (m_window)
+        m_window->deleteLater();
 }
 
 void DQuickDragPrivate::updateOverlayPosition(const QPoint &pos)
