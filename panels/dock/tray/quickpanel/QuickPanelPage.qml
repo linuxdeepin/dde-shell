@@ -56,6 +56,10 @@ Item {
             onRequestBack: function () {
                 panelView.pop()
             }
+            onVisibleChanged: function () {
+                if (!visible)
+                    panelView.pop()
+            }
             StackView.onActivating: function () {
                 panelView.contentHeight = Qt.binding(function() { return contentHeight})
             }
