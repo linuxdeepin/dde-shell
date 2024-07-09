@@ -293,6 +293,7 @@ QStandardItem * TraySortOrderModel::createTrayItem(const QString & name, const Q
     item->setData(actualSectionType, TraySortOrderModel::SectionTypeRole);
     item->setData(delegateType, TraySortOrderModel::DelegateTypeRole);
     item->setData(forbiddenSections, TraySortOrderModel::ForbiddenSectionsRole);
+    item->setData(-1, TraySortOrderModel::VisualIndexRole);
 
     return item;
 }
