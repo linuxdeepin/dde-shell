@@ -8,6 +8,7 @@ import QtQuick.Window
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0
+import org.deepin.ds.dock.tray 1.0
 import org.deepin.ds.dock.tray.quickpanel 1.0
 
 Item {
