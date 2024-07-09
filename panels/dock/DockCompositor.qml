@@ -40,11 +40,9 @@ Item {
         for (var i = 0; i < model.count; ++i) {
             let item = model.get(i).shellSurface
             if (surfaceId === `${item.pluginId}::${item.itemKey}`) {
-                console.log("found!", surfaceId)
                 return item
             }
         }
-        console.log("not found", surfaceId)
         return null
     }
 

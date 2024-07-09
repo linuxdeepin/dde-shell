@@ -97,7 +97,6 @@ AppletItem {
                 model: DDT.SortFilterProxyModel {
                     sourceModel: DDT.TraySortOrderModel
                     filterRowCallback: (sourceRow, sourceParent) => {
-                        console.log(sourceRow, sourceParent)
                         let index = sourceModel.index(sourceRow, 0, sourceParent)
                         return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) === "stashed" &&
                                sourceModel.data(index, DDT.TraySortOrderModel.VisibilityRole) === true
@@ -173,7 +172,11 @@ AppletItem {
             let surfaceId = `${popupSurface.pluginId}::${popupSurface.itemKey}`
             if (stashContainer.isStashPopup(surfaceId))
                 return false
-            return DockCompositor.findSurface(surfaceId)
+            if (DockCompositor.findSurfaceFromModel(DockCompositor.trayPluginSurfaces, surfaceId))
+                return true
+            if (DockCompositor.findSurfaceFromModel(DockCompositor.fixedPluginSurfaces, surfaceId))
+                return true
+            return false
         }
     }
 
