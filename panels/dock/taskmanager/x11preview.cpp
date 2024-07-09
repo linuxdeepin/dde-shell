@@ -37,6 +37,7 @@
 Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPreview")
 
 #define PREVIEW_TITLE_HEIGHT 24
+#define PREVIEW_TITLE_BOTTOMMARGIN 8
 #define PREVIEW_CONTENT_HEIGHT 118
 #define PREVIEW_CONTENT_MAX_WIDTH 240
 #define PREVIEW_CONTENT_MIN_WIDTH 80
@@ -76,7 +77,7 @@ public:
             if (flow() == Flow::LeftToRight) {
                 size.rwidth() += s.width();
                 if (size.height() < s.height()) {
-                    size.setHeight(s.height() + 1);
+                    size.setHeight(s.height());
                 }
             } else {
                 size.rheight() += s.height();
@@ -88,8 +89,10 @@ public:
 
         if (flow() == Flow::LeftToRight) {
             size.rwidth() += spacing() * count * 2;
+            size.rheight() += spacing() * 2;
         } else {
             size.rheight() += spacing() * count * 2;
+            size.rwidth() += spacing() * 2;
         }
 
         return size;
@@ -266,6 +269,17 @@ public:
             const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
 
             painter->save();
+            painter->setPen(Qt::NoPen);
+            if (themeType == DGuiApplicationHelper::DarkType) {
+                painter->setBrush(QColor(255, 255, 255, 0.05 * 255));
+            } else {
+                painter->setBrush(QColor(0, 0, 0, 0.05 * 255));
+            }
+            painter->drawRoundedRect(option.rect.marginsRemoved(QMargins(2, 2, 2, 2)), radius + 2, radius + 2);
+            painter->restore();
+
+
+            painter->save();
             painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
             pen.setWidth(1);
             pen.setColor(themeType == DGuiApplicationHelper::DarkType ? QColor(255, 255, 255, 255 * 0.1) : QColor(0, 0, 0, 255 * 0.1));
@@ -283,7 +297,7 @@ public:
             painter->drawRoundedRect(imageRect, radius, radius);
             if (option.state.testFlag(QStyle::State_MouseOver)) {
                 QPainterPath path;
-                path.addRoundedRect(option.rect.marginsAdded(QMargins(-2, -2, -2, -2)), radius + 2, radius + 2);
+                path.addRoundedRect(option.rect.marginsRemoved(QMargins(2, 2, 2, 2)), radius + 2, radius + 2);
                 pen.setWidth(PREVIEW_HOVER_BORDER);
                 pen.setColor(themeType == DGuiApplicationHelper::DarkType ? PREVIEW_HOVER_BORDER_COLOR_DARK_MODE : PREVIEW_HOVER_BORDER_COLOR);
                 painter->setPen(pen);
@@ -582,6 +596,8 @@ void X11WindowPreviewContainer::initUI()
     connect(DGuiApplicationHelper::instance(), & DGuiApplicationHelper::themeTypeChanged, this , updateWindowTitleColorType);
 
     titleLayout->addWidget(m_previewIcon);
+    titleLayout->setSpacing(0);
+    titleLayout->setContentsMargins(QMargins(PREVIEW_HOVER_BORDER, 0, PREVIEW_HOVER_BORDER, 0));
     titleLayout->addSpacing(6);  
     titleLayout->addWidget(m_previewTitle);
     titleLayout->addStretch();
@@ -589,11 +605,11 @@ void X11WindowPreviewContainer::initUI()
 
     m_view->setModel(m_model);
     m_view->setItemDelegate(new AppItemWindowDeletegate(m_view, this));
-    m_view->setSpacing(1);
     m_view->setMouseTracking(true);
     m_view->viewport()->installEventFilter(this);
     m_view->setAutoFillBackground(false);
     m_view->setFrameStyle(QFrame::NoFrame);
+    m_view->setSpacing(2);
     m_view->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
     m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
     m_view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
@@ -605,12 +621,12 @@ void X11WindowPreviewContainer::initUI()
     m_titleWidget->setLayout(titleLayout);
 
     mainLayout->addWidget(m_titleWidget, 0, Qt::AlignHCenter);
-    mainLayout->addSpacing(PREVIEW_CONTENT_MARGIN);
+    mainLayout->addSpacing(PREVIEW_TITLE_BOTTOMMARGIN - PREVIEW_HOVER_BORDER - m_view->spacing());
     mainLayout->addWidget(m_view);
     mainLayout->setAlignment(m_view, Qt::AlignCenter);
     mainLayout->setSpacing(0);
-    mainLayout->setContentsMargins(PREVIEW_CONTENT_MARGIN, PREVIEW_CONTENT_MARGIN,
-                                    PREVIEW_CONTENT_MARGIN, PREVIEW_CONTENT_MARGIN);
+    mainLayout->setContentsMargins(PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER, PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER / 2,
+                                    PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER, PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER);
 
     setLayout(mainLayout);
 
@@ -638,8 +654,8 @@ void X11WindowPreviewContainer::updateSize()
         int resHeight = screenSize.height();
 
         bool beyondEdge = m_view->viewportSizeHint().height() + 2 * PREVIEW_CONTENT_MARGIN + PREVIEW_TITLE_HEIGHT > screenSize.height();
-        // 3 * PREVIEW_CONTENT_MARGIN = titleWidget到listview的距离 + 2 * margin
-        int listviewContainerHeight = m_view->viewportSizeHint().height() + 3 * PREVIEW_CONTENT_MARGIN  + PREVIEW_TITLE_HEIGHT;
+        // ListView的高度 + Title下边距 + Container上下边距
+        int listviewContainerHeight = m_view->viewportSizeHint().height() + PREVIEW_TITLE_BOTTOMMARGIN - PREVIEW_HOVER_BORDER + 2 * (PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER) + PREVIEW_TITLE_HEIGHT;
 
         if (m_direction % 2 == 0) {
             // 2D模式下Listview纵向排列, 需要去掉任务栏高度, 所以减去 m_baseWindow->height()
@@ -655,7 +671,7 @@ void X11WindowPreviewContainer::updateSize()
         int resWidth = screenSize.width();
 
         bool beyondEdge = m_view->viewportSizeHint().width() + 2 * (PREVIEW_CONTENT_MARGIN + PREVIEW_CONTAINER_MARGIN) > screenSize.width();
-        int listviewContainerWidth = m_view->viewportSizeHint().width() + 2 * PREVIEW_CONTENT_MARGIN;
+        int listviewContainerWidth = m_view->viewportSizeHint().width() + 2 * (PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER);
 
         if (m_direction % 2 == 0) {
             resWidth = beyondEdge ? screenSize.width() - 2 * PREVIEW_CONTENT_MARGIN : listviewContainerWidth;
