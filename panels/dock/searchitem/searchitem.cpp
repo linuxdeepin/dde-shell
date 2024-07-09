@@ -18,18 +18,23 @@
 DGUI_USE_NAMESPACE
 namespace dock {
 
+const QString grandSearchService = "com.deepin.dde.GrandSearch";
+const QString grandSearchPath = "/com/deepin/dde/GrandSearch";
+const QString grandSearchInterface = "com.deepin.dde.GrandSearch";
 static DDBusSender searchDbus()
 {
-    return DDBusSender().service("com.deepin.dde.GrandSearch")
-        .path("/com/deepin/dde/GrandSearch")
-        .interface("com.deepin.dde.GrandSearch");
+    return DDBusSender().service(grandSearchService)
+        .path(grandSearchPath)
+        .interface(grandSearchInterface);
 }
 
 SearchItem::SearchItem(QObject *parent)
     : DApplet(parent)
     , m_visible(true)
+    , m_grandSearchVisible(false)
 {
-
+    QDBusConnection::sessionBus().connect(grandSearchService, grandSearchPath, grandSearchInterface,
+                                          "VisibleChanged", this, SLOT(onGrandSearchVisibleChanged(bool)));
 }
 
 void SearchItem::toggleGrandSearch()
@@ -60,6 +65,15 @@ void SearchItem::setVisible(bool visible)
         m_visible = visible;
 
         Q_EMIT visibleChanged(visible);
+    }
+}
+
+void SearchItem::onGrandSearchVisibleChanged(bool visible)
+{
+    if (m_grandSearchVisible != visible) {
+        m_grandSearchVisible = visible;
+
+        Q_EMIT grandSearchVisibleChanged(visible);
     }
 }
 

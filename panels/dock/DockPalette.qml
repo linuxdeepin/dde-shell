@@ -134,4 +134,12 @@ Item {
         }
     }
 
+    property D.Palette backgroundPalette: D.Palette {
+        normal {
+            common: ("transparent")
+        }
+        hovered {
+            crystal: Qt.rgba(16.0 / 255, 16.0 / 255, 16.0 / 255, 0.2)
+        }
+    }
 }
