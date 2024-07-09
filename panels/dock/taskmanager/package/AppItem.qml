@@ -91,7 +91,13 @@ Item {
                 windowIndicator.anchors.rightMargin = 0
                 windowIndicator.anchors.horizontalCenter = undefined
                 windowIndicator.anchors.verticalCenter = undefined
+
                 let fixedDistance = 2
+                if (Panel.position === Dock.Top || Panel.position === Dock.Bottom) {
+                    fixedDistance = (root.height - Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale) / 2 / 3
+                } else {
+                    fixedDistance = (root.width - Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale) / 2 / 3
+                }
 
                 switch(Panel.position) {
                 case Dock.Top: {
@@ -338,5 +344,9 @@ Item {
 
     onIconGlobalPointChanged: {
         updateWindowIconGeometryTimer.start()
+    }
+
+    onIconScaleChanged: {
+        windowIndicator.updateIndicatorAnchors()
     }
 }
