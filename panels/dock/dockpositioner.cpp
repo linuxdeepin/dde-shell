@@ -28,11 +28,16 @@ static DockPanel *isInDockPanel(QObject *object)
 DockPositioner::DockPositioner(DockPanel *panel, QObject *parent)
     : QObject(parent)
     , m_panel(panel)
+    , m_positionTimer(new QTimer(this))
 {
+    m_positionTimer->setSingleShot(true);
+    m_positionTimer->setInterval(0);
+    connect(m_positionTimer, &QTimer::timeout, this, &DockPositioner::updatePosition);
+
     Q_ASSERT(m_panel);
-    connect(m_panel, &DockPanel::positionChanged, this, &DockPositioner::updatePosition);
-    connect(m_panel, &DockPanel::geometryChanged, this, &DockPositioner::updatePosition);
-    connect(this, &DockPositioner::boundingChanged, this, &DockPositioner::updatePosition);
+    connect(m_panel, &DockPanel::positionChanged, this, &DockPositioner::update);
+    connect(m_panel, &DockPanel::geometryChanged, this, &DockPositioner::update);
+    connect(this, &DockPositioner::boundingChanged, this, &DockPositioner::update);
 }
 
 DockPositioner::~DockPositioner()
@@ -92,6 +97,11 @@ void DockPositioner::setY(int y)
     emit yChanged();
 }
 
+void DockPositioner::update()
+{
+    m_positionTimer->start();
+}
+
 void DockPositioner::updatePosition()
 {
     int xPosition = 0;
@@ -128,8 +138,8 @@ void DockPositioner::updatePosition()
 DockPanelPositioner::DockPanelPositioner(DockPanel *panel, QObject *parent)
     : DockPositioner(panel, parent)
 {
-    connect(this, &DockPanelPositioner::horizontalOffsetChanged, this, &DockPanelPositioner::updatePosition);
-    connect(this, &DockPanelPositioner::vertialOffsetChanged, this, &DockPanelPositioner::updatePosition);
+    connect(this, &DockPanelPositioner::horizontalOffsetChanged, this, &DockPanelPositioner::update);
+    connect(this, &DockPanelPositioner::vertialOffsetChanged, this, &DockPanelPositioner::update);
 }
 
 DockPanelPositioner::~DockPanelPositioner()

@@ -14,8 +14,8 @@ Window {
     property real xOffset: 0
     property real yOffset: 0
     property Item currentItem
-    x: selectValue(transientParent ? transientParent.x + xOffset : 0, 0, Screen.width - root.width)
-    y: selectValue(transientParent ? transientParent.y + yOffset : 0, 0, Screen.height - root.height)
+    x: selectValue(transientParent ? transientParent.x + xOffset : 0, Screen.virtualX, Screen.virtualX + Screen.width - root.width)
+    y: selectValue(transientParent ? transientParent.y + yOffset : 0, Screen.virtualY, Screen.virtualY + Screen.height - root.height)
     function selectValue(value, min, max) {
         if (value < min)
             return min
@@ -23,6 +23,12 @@ Window {
             return max
 
         return value
+    }
+    // following transientParent's screen.
+    Binding {
+        when: root.transientParent
+        target: root; property: "screen"
+        value: root.transientParent ? root.transientParent.screen: undefined
     }
     // TODO: it's a qt bug which make Qt.Popup can not get input focus
     flags: Qt.Tool | Qt.BypassWindowManagerHint
