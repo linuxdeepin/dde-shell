@@ -7,6 +7,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import org.deepin.dtk 1.0
+import org.deepin.ds.dock.tray 1.0
 
 Item {
     id: root
