@@ -34,6 +34,7 @@ public:
     void setX(int x);
     void setY(int y);
 public slots:
+    void update();
     virtual void updatePosition();
 
 signals:
@@ -46,6 +47,7 @@ protected:
     QRect m_bounding {};
     int m_x = 0;
     int m_y = 0;
+    QTimer *m_positionTimer = nullptr;
 };
 
 class DockPanelPositioner : public DockPositioner
