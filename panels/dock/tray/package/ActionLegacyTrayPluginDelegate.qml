@@ -78,6 +78,8 @@ Button {
             running: false
             repeat: false
             onTriggered: {
+                if (!pluginItem.plugin)
+                    return
                 if (pluginItem.itemGlobalPoint.x > 0 && pluginItem.itemGlobalPoint.y > 0) {
                     pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
                 }
@@ -90,6 +92,8 @@ Button {
             running: false
             repeat: false
             onTriggered: {
+                if (!pluginItem.plugin)
+                    return
                 pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
             }
         }
@@ -103,6 +107,8 @@ Button {
         }
 
         onVisibleChanged: {
+            if (!pluginItem.plugin)
+                return
             pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
         }
     }
