@@ -21,6 +21,8 @@ AppletItem {
     property int dockOrder: 25
     readonly property string quickpanelTrayItemPluginId: "sound"
     readonly property var filterTrayPlugins: [quickpanelTrayItemPluginId]
+    property bool quickPanelIsOpened: false
+
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : overflowId.implicitWidth
     implicitHeight: useColumnLayout ? overflowId.implicitHeight : Panel.rootObject.dockSize
     Component.onCompleted: {
@@ -141,6 +143,20 @@ AppletItem {
         }
     }
 
+    function isQuickPanelPopup(popupSurface)
+    {
+        return popupSurface &&
+                popupSurface.pluginId === tray.quickpanelTrayItemPluginId
+    }
+    onQuickPanelIsOpenedChanged: function ()
+    {
+        if (tray.quickPanelIsOpened &&
+                toolTip.toolTipVisible &&
+                isQuickPanelPopup(toolTip.shellSurface)) {
+            toolTip.close()
+        }
+    }
+
     Connections {
         target: DockCompositor
         function onPopupCreated(popupSurface)
@@ -149,6 +165,12 @@ AppletItem {
                 return
 
             if (popupSurface.popupType === Dock.TrayPopupTypeTooltip) {
+                if (tray.quickPanelIsOpened && isQuickPanelPopup(popupSurface)) {
+                    // don't show the surface, and release it.
+                    DockCompositor.closeShellSurface(popupSurface)
+                    return
+                }
+
                 toolTip.shellSurface = popupSurface
                 toolTip.DockPanelPositioner.bounding = Qt.binding(function () {
                     var point = Qt.point(toolTip.shellSurface.x, toolTip.shellSurface.y)

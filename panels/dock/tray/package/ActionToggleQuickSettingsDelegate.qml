@@ -8,7 +8,14 @@ import org.deepin.ds 1.0
 import org.deepin.ds.dock.tray.quickpanel 1.0
 
 QuickPanel {
+    id: root
     property bool isHorizontal: false
     useColumnLayout: !isHorizontal
     trayItemPluginId: Applet.rootObject.quickpanelTrayItemPluginId
+    Component.onCompleted: function () {
+        Applet.rootObject.quickPanelIsOpened = Qt.binding(function () {
+            return root.isOpened
+        })
+    }
+
 }

@@ -24,6 +24,7 @@ Item {
     }
     property alias useColumnLayout: panelTrayItem.useColumnLayout
     property string trayItemPluginId: "sound"
+    readonly property bool isOpened: panelTrayItem.isOpened
 
     PanelTrayItem {
         id: panelTrayItem

@@ -5,6 +5,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtWayland.Compositor
+import org.deepin.ds.dock 1.0
 
 ShellSurfaceItem {
     property bool autoClose: false
@@ -17,7 +18,7 @@ ShellSurfaceItem {
     function closeShellSurface()
     {
         if (surface && shellSurface) {
-            shellSurface.close()
+            DockCompositor.closeShellSurface(shellSurface)
         }
     }
 }
