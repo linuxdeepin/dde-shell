@@ -11,6 +11,7 @@ import org.deepin.dtk 1.0 as D
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
+import org.deepin.ds.dock.tray 1.0
 import org.deepin.ds.dock.tray 1.0 as DDT
 
 AppletItem {
@@ -38,9 +39,10 @@ AppletItem {
 
         Item {
             anchors.fill: parent
-            ShellSurfaceItem {
+            ShellSurfaceItemProxy {
                 id: popupContent
                 anchors.centerIn: parent
+                autoClose: true
                 onSurfaceDestroyed: function () {
                     popup.close()
                 }
@@ -58,9 +60,10 @@ AppletItem {
 
         Item {
             anchors.fill: parent
-            ShellSurfaceItem {
+            ShellSurfaceItemProxy {
                 id: popupMenuContent
                 anchors.centerIn: parent
+                autoClose: true
                 onSurfaceDestroyed: function () {
                     popupMenu.close()
                 }
@@ -74,9 +77,10 @@ AppletItem {
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
 
-        ShellSurfaceItem {
+        ShellSurfaceItemProxy {
             id: toolTipContent
             anchors.centerIn: parent
+            autoClose: true
             onSurfaceDestroyed: function () {
                 toolTip.close()
             }

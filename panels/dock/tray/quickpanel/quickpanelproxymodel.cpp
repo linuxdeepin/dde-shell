@@ -17,7 +17,8 @@ enum {
     QuickSurface,
     QuickSurfaceLayoutType,
     QuickSurfaceItemKey,
-    TraySurface
+    TraySurface,
+    TraySurfaceItemKey
 } ProxyRole;
 }
 QuickPanelProxyModel::QuickPanelProxyModel(QObject *parent)
@@ -81,6 +82,10 @@ QVariant QuickPanelProxyModel::data(const QModelIndex &index, int role) const
         const auto id = surfacePluginId(sourceIndex);
         return QVariant::fromValue(traySurfaceObject(id));
     }
+    case TraySurfaceItemKey: {
+        const auto id = surfacePluginId(sourceIndex);
+        return traySurfaceItemKey(id);
+    }
     }
     return {};
 }
@@ -94,6 +99,7 @@ QHash<int, QByteArray> QuickPanelProxyModel::roleNames() const
         {QuickSurfaceLayoutType, "surfaceLayoutType"}, // quick surface's layout type. (1, signal), (2, multi), (4, full)
         {QuickSurfaceItemKey, "surfaceItemKey"}, // quick surface's itemKey.
         {TraySurface, "traySurface"},// tray surface item.
+        {TraySurfaceItemKey, "traySurfaceItemKey"},// tray surface itemKey.
     };
     return roles;
 }
@@ -247,6 +253,14 @@ QObject *QuickPanelProxyModel::traySurfaceObject(const QString &pluginId) const
     return nullptr;
 }
 
+QString QuickPanelProxyModel::traySurfaceItemKey(const QString &pluginId) const
+{
+    if (auto object = traySurfaceObject(pluginId))
+        return object->property("itemKey").toString();
+
+    return QString();
+}
+
 int QuickPanelProxyModel::roleByName(const QByteArray &roleName) const
 {
     if (!surfaceModel())
@@ -264,7 +278,7 @@ void QuickPanelProxyModel::updateTrayItemSurface()
 {
     emit trayItemSurfaceChanged();
     if (rowCount() > 0)
-        emit dataChanged(index(0, 0), index(rowCount() - 1, 0), {TraySurface});
+        emit dataChanged(index(0, 0), index(rowCount() - 1, 0), {TraySurface, TraySurfaceItemKey});
 }
 
 void QuickPanelProxyModel::classBegin()

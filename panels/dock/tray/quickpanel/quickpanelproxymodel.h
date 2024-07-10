@@ -65,6 +65,7 @@ private:
     QModelIndex surfaceIndex(const QString &pluginId) const;
     QObject *surfaceObject(const QModelIndex &index) const;
     QObject *traySurfaceObject(const QString &pluginId) const;
+    QString traySurfaceItemKey(const QString &pluginId) const;
     int roleByName(const QByteArray &roleName) const;
     QAbstractListModel *surfaceModel() const;
 private slots:

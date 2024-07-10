@@ -81,7 +81,7 @@ Item {
             height: 60
             shellSurface: model.surface
             pluginId: model.pluginId
-            itemKey: model.surfaceItemKey
+            itemKey: model.traySurfaceItemKey
             traySurface: model.traySurface
 
             Connections {

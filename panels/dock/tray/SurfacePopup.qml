@@ -27,9 +27,10 @@ Item {
         toolTipWindow: toolTipWindow
 
         property alias shellSurface: surfaceLayer.shellSurface
-        ShellSurfaceItem {
+        ShellSurfaceItemProxy {
             id: surfaceLayer
             anchors.centerIn: parent
+            autoClose: true
             onSurfaceDestroyed: function () {
                 toolTip.close()
             }
@@ -66,9 +67,10 @@ Item {
         popupWindow: popupWindow
 
         property alias shellSurface: popupSurfaceLayer.shellSurface
-        ShellSurfaceItem {
+        ShellSurfaceItemProxy {
             id: popupSurfaceLayer
             anchors.centerIn: parent
+            autoClose: true
             onSurfaceDestroyed: function () {
                 popup.close()
             }
