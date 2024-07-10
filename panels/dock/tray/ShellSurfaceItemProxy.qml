@@ -9,8 +9,10 @@ import QtWayland.Compositor
 ShellSurfaceItem {
     property bool autoClose: false
     onVisibleChanged: function () {
-        if (autoClose && !visible)
-            closeShellSurface()
+        if (autoClose && !visible) {
+            // surface is valid but client's shellSurface maybe invalid.
+            Qt.callLater(closeShellSurface)
+        }
     }
     function closeShellSurface()
     {
