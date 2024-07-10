@@ -8,6 +8,7 @@ import QtQuick.Layouts
 import QtWayland.Compositor
 import Qt.labs.platform 1.1 as LP
 import org.deepin.dtk 1.0 as D
+import org.deepin.dtk.private 1.0 as DP
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
@@ -20,6 +21,13 @@ Button {
 
     readonly property int itemWidth: isHorizontal ? 0 : DDT.TrayItemPositionManager.dockHeight
     readonly property int itemHeight: isHorizontal ? DDT.TrayItemPositionManager.dockHeight : 0
+    readonly property int inset: 4
+
+    topInset: -inset
+    bottomInset: -inset
+    leftInset: -inset
+    rightInset: -inset
+    padding: inset
 
     contentItem: Item {
         id: pluginItem
@@ -56,6 +64,11 @@ Button {
             }
 
             return Qt.point(x, y)
+        }
+
+        HoverHandler {
+            id: hoverHandler
+            parent: surfaceItem
         }
 
         ShellSurfaceItem {
@@ -108,6 +121,17 @@ Button {
                 return
             pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
         }
+    }
+
+    D.ColorSelector.hovered: (pluginItem.plugin.isItemActive ?? false) || hoverHandler.hovered
+    background: D.BoxPanel {
+        property D.Palette backgroundPalette: DockPalette.backgroundPalette
+
+        color2: color1
+        color1: backgroundPalette
+
+        outsideBorderColor: null
+        insideBorderColor: null
     }
 
     property Component overlayWindow: QuickDragWindow {
