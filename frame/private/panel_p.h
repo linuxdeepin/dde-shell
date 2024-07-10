@@ -27,7 +27,6 @@ public:
     void initDciSearchPaths();
     void ensurePopupWindow() const;
     void ensureToolTipWindow() const;
-    static void closeWindow(QWindow *window);
 
     DQmlEngine *m_engine = nullptr;
     QQuickWindow *m_popupWindow = nullptr;
