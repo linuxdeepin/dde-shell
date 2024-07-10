@@ -9,5 +9,6 @@ import org.deepin.ds.dock.tray.quickpanel 1.0
 
 QuickPanel {
     property bool isHorizontal: false
+    useColumnLayout: !isHorizontal
     trayItemPluginId: Applet.rootObject.quickpanelTrayItemPluginId
 }
