@@ -71,10 +71,11 @@ Item {
             return h
         }
 
-        DWindow.enabled: true
-        DWindow.enableBlurWindow: !isFallbackIcon
-        DWindow.shadowRadius: 0
-        DWindow.borderWidth: 0
+        // TODO: turn on this can cause DnD drag event get rejected, it's likely a dxcb bug.
+        // DWindow.enabled: true
+        // DWindow.enableBlurWindow: !isFallbackIcon
+        // DWindow.shadowRadius: 0
+        // DWindow.borderWidth: 0
         ColorSelector.family: Palette.CrystalColor
 
         height: getHeight()
