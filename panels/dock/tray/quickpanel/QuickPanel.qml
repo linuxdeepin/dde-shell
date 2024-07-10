@@ -22,6 +22,7 @@ Item {
     implicitHeight: {
         return panelTrayItem.height
     }
+    property alias useColumnLayout: panelTrayItem.useColumnLayout
     property string trayItemPluginId: "sound"
 
     PanelTrayItem {

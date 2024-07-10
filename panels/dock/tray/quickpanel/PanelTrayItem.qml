@@ -14,6 +14,7 @@ import org.deepin.dtk 1.0
 
 Control {
     id: root
+    property bool useColumnLayout: false
     required property var shellSurface
     property bool isOpened
     signal clicked()
@@ -28,8 +29,9 @@ Control {
         toolTipY: DockPanelPositioner.y
     }
 
-    contentItem: RowLayout {
+    contentItem: Grid {
         spacing: 5
+        rows: root.useColumnLayout ? 2 : 1
 
         Loader {
             active: root.shellSurface
