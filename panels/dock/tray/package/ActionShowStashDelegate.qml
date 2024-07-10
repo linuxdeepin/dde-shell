@@ -26,6 +26,31 @@ D.ToolButton {
     icon.height: height
     display: D.IconLabel.IconOnly
 
+    states: [
+        State {
+            name: "opened"
+            PropertyChanges { target: root; rotation: 180 }
+        },
+
+        State {
+            name: "closed"
+            PropertyChanges { target: root; rotation: 0 }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            RotationAnimation { duration: 200; }
+        }
+    ]
+
+    Binding {
+        target: root
+        property: "state"
+        value: stashedPopup.popupVisible ? "opened" : "closed"
+        when: stashedPopup.popupVisibleChanged
+    }
+
     onClicked: {
         var point = root.mapToItem(null, root.width / 2, 0)
         stashedPopup.popupX = Qt.binding(function () {
