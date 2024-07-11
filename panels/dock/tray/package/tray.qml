@@ -4,7 +4,6 @@
 
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 import QtWayland.Compositor
 import Qt.labs.platform 1.1 as LP
 import org.deepin.dtk 1.0 as D
@@ -23,8 +22,8 @@ AppletItem {
     readonly property var filterTrayPlugins: [quickpanelTrayItemPluginId]
     property bool quickPanelIsOpened: false
 
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : overflowId.implicitWidth
-    implicitHeight: useColumnLayout ? overflowId.implicitHeight : Panel.rootObject.dockSize
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : trayContainter.implicitWidth
+    implicitHeight: useColumnLayout ? trayContainter.implicitHeight : Panel.rootObject.dockSize
     Component.onCompleted: {
         Applet.trayPluginModel = Qt.binding(function () {
             return DockCompositor.trayPluginSurfaces
@@ -124,23 +123,13 @@ AppletItem {
         }
     }
 
-    GridLayout {
-        id: overflowId
-        columns: 1
-        rows: 1
-        anchors.centerIn: parent
-        flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
-        property bool trayVisible: true
-        columnSpacing: 10
-        rowSpacing: 10
-
-        TrayContainer {
-            isHorizontal: !tray.useColumnLayout
-            model: DDT.TraySortOrderModel
-            collapsed: DDT.TraySortOrderModel.collapsed
-            trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
-            color: "transparent"
-        }
+    TrayContainer {
+        id: trayContainter
+        isHorizontal: !tray.useColumnLayout
+        model: DDT.TraySortOrderModel
+        collapsed: DDT.TraySortOrderModel.collapsed
+        trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
+        color: "transparent"
     }
 
     function isQuickPanelPopup(popupSurface)

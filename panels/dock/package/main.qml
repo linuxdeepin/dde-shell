@@ -267,6 +267,7 @@ Window {
         }
     }
 
+    // TODO: remove GridLayout and use delegatechosser manager all items
     GridLayout {
         id: gridLayout
         anchors.fill: parent
@@ -329,21 +330,21 @@ Window {
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
+    }
 
-        Item {
-            id: dockRightPart
-            implicitWidth: rightLoader.implicitWidth
-            implicitHeight: rightLoader.implicitHeight
-            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
-            OverflowContainer {
-                id: rightLoader
-                anchors.fill: parent
-                useColumnLayout: dock.useColumnLayout
-                model: DockPartAppletModel {
-                    id: dockRightPartModel
-                    leftDockOrder: 20
-                    rightDockOrder: 30
-                }
+    Item {
+        id: dockRightPart
+        implicitWidth: rightLoader.implicitWidth
+        implicitHeight: rightLoader.implicitHeight
+        anchors.right: parent.right
+        OverflowContainer {
+            id: rightLoader
+            anchors.fill: parent
+            useColumnLayout: dock.useColumnLayout
+            model: DockPartAppletModel {
+                id: dockRightPartModel
+                leftDockOrder: 20
+                rightDockOrder: 30
             }
         }
     }
