@@ -130,6 +130,9 @@ AppletItem {
         collapsed: DDT.TraySortOrderModel.collapsed
         trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
         color: "transparent"
+        Component.onCompleted: {
+            DDT.TrayItemPositionManager.layoutHealthCheck(1500)
+        }
     }
 
     function isQuickPanelPopup(popupSurface)

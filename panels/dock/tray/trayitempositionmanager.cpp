@@ -4,6 +4,9 @@
 
 #include "trayitempositionmanager.h"
 
+#include <QTimer>
+#include <QDebug>
+
 namespace docktray {
 
 void TrayItemPositionManager::registerVisualItemSize(int index, const QSize &size)
@@ -82,6 +85,26 @@ Qt::Orientation TrayItemPositionManager::orientation() const
 int TrayItemPositionManager::dockHeight() const
 {
     return m_dockHeight;
+}
+
+// This should only be used to check layout issue or workaround layout issues.
+// Do NOT rely on this to correct layout issue in a long run!
+void TrayItemPositionManager::layoutHealthCheck(int delayMs)
+{
+    QTimer::singleShot(delayMs, [this](){
+        if (m_dockHeight == 0) {
+            qWarning() << "dock height is not valid, aborting layout health check...";
+            return;
+        }
+        QSize result(visualSize(m_visualItemCount - 1, false));
+        if (m_visualSize != result) {
+            qWarning() << "layout size not matched, will trigger a force re-layout...";
+            emit orientationChanged(m_orientation);
+        } else {
+            qDebug() << "no problem founded while performing layout health check!";
+        }
+    });
+    qDebug() << "layout health check scheduled!";
 }
 
 TrayItemPositionManager::TrayItemPositionManager(QObject *parent)
