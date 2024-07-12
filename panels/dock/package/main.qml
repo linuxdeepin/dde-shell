@@ -337,6 +337,7 @@ Window {
         implicitWidth: rightLoader.implicitWidth
         implicitHeight: rightLoader.implicitHeight
         anchors.right: parent.right
+        anchors.bottom: parent.bottom
         OverflowContainer {
             id: rightLoader
             anchors.fill: parent
