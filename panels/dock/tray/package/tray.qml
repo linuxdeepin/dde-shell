@@ -4,7 +4,6 @@
 
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 import QtWayland.Compositor
 import Qt.labs.platform 1.1 as LP
 import org.deepin.dtk 1.0 as D
@@ -21,8 +20,10 @@ AppletItem {
     property int dockOrder: 25
     readonly property string quickpanelTrayItemPluginId: "sound"
     readonly property var filterTrayPlugins: [quickpanelTrayItemPluginId]
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : overflowId.implicitWidth
-    implicitHeight: useColumnLayout ? overflowId.implicitHeight : Panel.rootObject.dockSize
+    property bool quickPanelIsOpened: false
+
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : trayContainter.implicitWidth
+    implicitHeight: useColumnLayout ? trayContainter.implicitHeight : Panel.rootObject.dockSize
     Component.onCompleted: {
         Applet.trayPluginModel = Qt.binding(function () {
             return DockCompositor.trayPluginSurfaces
@@ -122,22 +123,29 @@ AppletItem {
         }
     }
 
-    GridLayout {
-        id: overflowId
-        columns: 1
-        rows: 1
-        anchors.centerIn: parent
-        flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
-        property bool trayVisible: true
-        columnSpacing: 10
-        rowSpacing: 10
+    TrayContainer {
+        id: trayContainter
+        isHorizontal: !tray.useColumnLayout
+        model: DDT.TraySortOrderModel
+        collapsed: DDT.TraySortOrderModel.collapsed
+        trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
+        color: "transparent"
+        Component.onCompleted: {
+            DDT.TrayItemPositionManager.layoutHealthCheck(1500)
+        }
+    }
 
-        TrayContainer {
-            isHorizontal: !tray.useColumnLayout
-            model: DDT.TraySortOrderModel
-            collapsed: DDT.TraySortOrderModel.collapsed
-            trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
-            color: "transparent"
+    function isQuickPanelPopup(popupSurface)
+    {
+        return popupSurface &&
+                popupSurface.pluginId === tray.quickpanelTrayItemPluginId
+    }
+    onQuickPanelIsOpenedChanged: function ()
+    {
+        if (tray.quickPanelIsOpened &&
+                toolTip.toolTipVisible &&
+                isQuickPanelPopup(toolTip.shellSurface)) {
+            toolTip.close()
         }
     }
 
@@ -149,6 +157,12 @@ AppletItem {
                 return
 
             if (popupSurface.popupType === Dock.TrayPopupTypeTooltip) {
+                if (tray.quickPanelIsOpened && isQuickPanelPopup(popupSurface)) {
+                    // don't show the surface, and release it.
+                    DockCompositor.closeShellSurface(popupSurface)
+                    return
+                }
+
                 toolTip.shellSurface = popupSurface
                 toolTip.DockPanelPositioner.bounding = Qt.binding(function () {
                     var point = Qt.point(toolTip.shellSurface.x, toolTip.shellSurface.y)

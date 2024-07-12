@@ -53,6 +53,13 @@ Item {
         return ret
     }
 
+    function closeShellSurface(shellSurface)
+    {
+        if (shellSurface) {
+            shellSurface.close()
+        }
+    }
+
     WaylandCompositor {
         id: waylandCompositor
         socketName: "dockplugin"

@@ -54,6 +54,7 @@ public:
     Q_INVOKABLE DropIndex itemIndexByPoint(const QPoint point) const;
     Qt::Orientation orientation() const;
     int dockHeight() const;
+    Q_INVOKABLE void layoutHealthCheck(int delayMs = 200);
 
 signals:
     void orientationChanged(Qt::Orientation);

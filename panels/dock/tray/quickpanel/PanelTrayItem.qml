@@ -55,7 +55,7 @@ Control {
                 enabled: !root.isOpened
                 onHoveredChanged: function () {
                     root.contentHovered = hovered
-                    if (hovered) {
+                    if (hovered && !root.isOpened) {
                         var point = quickpanelPlaceholder.mapToItem(null, quickpanelPlaceholder.width / 2, quickpanelPlaceholder.height / 2)
                         toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
                         toolTip.open()
