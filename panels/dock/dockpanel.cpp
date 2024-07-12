@@ -342,7 +342,7 @@ void DockPanel::loadDockPlugins()
     proc.setProcessEnvironment(env);
     QStringList execPaths;
     execPaths << qEnvironmentVariable("TRAY_LOADER_EXECUTE_PATH")
-              << QString("%1/dockplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR);
+              << QString("%1/trayplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR);
     QString validExePath;
     for (const QString & execPath : execPaths) {
          if (QFile::exists(execPath)) {
