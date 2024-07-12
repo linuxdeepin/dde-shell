@@ -367,7 +367,7 @@ Window {
 
         onPressed: function(mouse) {
             var launcherItem = DS.applet("org.deepin.ds.launchpad")
-            if (launcherItem) {
+            if (launcherItem && launcherItem.rootObject) {
                 launcherItem.rootObject.hide()
             }
             dock.isDragging = true
