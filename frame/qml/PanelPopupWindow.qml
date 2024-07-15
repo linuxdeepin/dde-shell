@@ -36,7 +36,6 @@ Window {
     D.DWindow.windowRadius: (D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius)
                             * Screen.devicePixelRatio
     D.DWindow.enableBlurWindow: true
-    D.DWindow.shadowRadius: 8
     // TODO set shadowOffset maunally.
     D.DWindow.shadowOffset: Qt.point(0, 10)
     D.ColorSelector.family: D.Palette.CrystalColor

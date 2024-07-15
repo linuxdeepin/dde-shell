@@ -11,4 +11,5 @@ PanelPopupWindow {
     id: root
 
     D.DWindow.windowRadius: 4 * Screen.devicePixelRatio
+    D.DWindow.shadowRadius: 8
 }
