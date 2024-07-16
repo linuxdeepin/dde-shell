@@ -68,6 +68,7 @@ Item {
     DDT.SurfacePopup {
         objectName: "stash"
         surfaceAcceptor: isStashPopup
+        toolTipVOffset: root.itemPadding
     }
 
     // debug

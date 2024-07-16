@@ -14,6 +14,7 @@ Item {
     property var surfaceAcceptor: function (surfaceId) {
         return true
     }
+    property int toolTipVOffset: 0
 
     PanelToolTipWindow {
         id: toolTipWindow
@@ -96,10 +97,10 @@ Item {
 
                 toolTip.shellSurface = popupSurface
                 toolTip.toolTipX = Qt.binding(function () {
-                    return toolTip.shellSurface.x
+                    return toolTip.shellSurface.x - toolTip.width / 2
                 })
                 toolTip.toolTipY = Qt.binding(function () {
-                    return toolTip.shellSurface.y
+                    return toolTip.shellSurface.y - toolTip.height - toolTipVOffset
                 })
                 toolTip.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
