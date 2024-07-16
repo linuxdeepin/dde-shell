@@ -32,6 +32,9 @@ class TrayItemPositionManager : public QObject
     Q_PROPERTY(QSize visualSize MEMBER m_visualSize NOTIFY visualSizeChanged)
     // position manager properties, use to know how to calculate the actual width of visualSize
     Q_PROPERTY(int visualItemCount MEMBER m_visualItemCount NOTIFY visualItemCountChanged)
+    Q_PROPERTY(QSize itemVisualSize MEMBER m_itemVisualSize CONSTANT FINAL)
+    Q_PROPERTY(int itemSpacing MEMBER m_itemSpacing CONSTANT FINAL)
+    Q_PROPERTY(int itemPadding MEMBER m_itemPadding CONSTANT FINAL)
     QML_ELEMENT
     QML_SINGLETON
 public:
@@ -72,6 +75,9 @@ private:
     int m_dockHeight;
     int m_visualItemCount;
     QList<QSize> m_registeredItemsSize;
+    QSize m_itemVisualSize;
+    int m_itemSpacing;
+    int m_itemPadding;
 };
 
 }

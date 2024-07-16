@@ -12,8 +12,6 @@ import org.deepin.ds.dock 1.0
 D.ToolButton {
     id: root
 
-    width: 16
-    height: 16
     icon.name: {
         switch (Panel.position) {
             case Dock.Right: return "arrow-left"
@@ -22,9 +20,14 @@ D.ToolButton {
             case Dock.Bottom: return "arrow-up"
         }
     }
-    icon.width: width
-    icon.height: height
+    icon.width: 16
+    icon.height: 16
     display: D.IconLabel.IconOnly
+
+    topPadding: itemPadding
+    bottomPadding: itemPadding
+    leftPadding: itemPadding
+    rightPadding: itemPadding
 
     states: [
         State {

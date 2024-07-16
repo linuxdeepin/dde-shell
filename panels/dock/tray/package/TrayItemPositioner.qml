@@ -18,8 +18,8 @@ Control {
     DDT.TrayItemPositionRegister.visualIndex: model.visualIndex
     DDT.TrayItemPositionRegister.visualSize: Qt.size(width, height)
 
-    width: visualSize.width !== 0 ? visualSize.width : 16
-    height: visualSize.height !== 0 ? visualSize.height : 16
+    width: visualSize.width !== 0 ? visualSize.width : DDT.TrayItemPositionManager.itemVisualSize.width
+    height: visualSize.height !== 0 ? visualSize.height : DDT.TrayItemPositionManager.itemVisualSize.height
 
     x: visualPosition.x
     y: visualPosition.y

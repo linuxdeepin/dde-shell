@@ -13,6 +13,7 @@ LQM.DelegateChooser {
     id: root
     property bool isHorizontal: false
     property bool collapsed: false
+    required property int itemPadding
 
     role: "delegateType"
     LQM.DelegateChoice {

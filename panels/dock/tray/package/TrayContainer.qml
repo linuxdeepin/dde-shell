@@ -79,8 +79,9 @@ Item {
     property bool collapsed: false
     property bool isHorizontal: true
 
-    readonly property int itemSize: 16
-    readonly property int itemSpacing: 10
+    readonly property int itemVisualSize: DDT.TrayItemPositionManager.itemVisualSize.width
+    readonly property int itemSpacing: DDT.TrayItemPositionManager.itemSpacing
+    readonly property int itemPadding: DDT.TrayItemPositionManager.itemPadding
 
     property int trayHeight: 50
     property size containerSize: DDT.TrayItemPositionManager.visualSize
@@ -103,6 +104,7 @@ Item {
         id: trayItemDelegateChooser
         isHorizontal: root.isHorizontal
         collapsed: root.collapsed
+        itemPadding: root.itemPadding
     }
 
     // debug
@@ -120,9 +122,9 @@ Item {
         onPositionChanged: function (dragEvent) {
             let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
             let pos = root.isHorizontal ? drag.x : drag.y
-            let currentItemIndex = pos / (root.itemSize + root.itemSpacing)
-            let currentPosMapToItem = pos % (root.itemSize + root.itemSpacing)
-            let isBefore = currentPosMapToItem < root.itemSize / 2
+            let currentItemIndex = pos / (root.itemVisualSize + root.itemSpacing)
+            let currentPosMapToItem = pos % (root.itemVisualSize + root.itemSpacing)
+            let isBefore = currentPosMapToItem < root.itemVisualSize / 2
             console.log("dragging", surfaceId, Math.floor(currentItemIndex), currentPosMapToItem, isBefore)
             // DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
         }

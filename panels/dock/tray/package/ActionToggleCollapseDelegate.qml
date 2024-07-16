@@ -13,12 +13,15 @@ D.ToolButton {
 
     z: 5
 
-    width: 16
-    height: 16
     icon.name: isHorizontal ? (collapsed ? "expand-left" : "expand-right") : (collapsed ? "expand-up" : "expand-down")
-    icon.width: width
-    icon.height: height
+    icon.width: 16
+    icon.height: 16
     display: D.IconLabel.IconOnly
+
+    topPadding: itemPadding
+    bottomPadding: itemPadding
+    leftPadding: itemPadding
+    rightPadding: itemPadding
 
     onClicked: {
         DDT.TraySortOrderModel.collapsed = !DDT.TraySortOrderModel.collapsed

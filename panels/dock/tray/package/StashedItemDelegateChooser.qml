@@ -14,6 +14,7 @@ LQM.DelegateChooser {
 
     required property int columnCount
     required property int rowCount
+    required property int itemPadding
 
     role: "delegateType"
     LQM.DelegateChoice {

@@ -9,17 +9,23 @@
 
 namespace docktray {
 
+// style of UI.
+static const int itemSize = 16;
+static const int itemPadding = 4;
+static const int itemSpacing = 0;
+static const QSize itemVisualSize = QSize(itemSize + itemPadding * 2, itemSize + itemPadding * 2);
+
 void TrayItemPositionManager::registerVisualItemSize(int index, const QSize &size)
 {
     while (m_registeredItemsSize.count() < (index + 1)) {
-        m_registeredItemsSize.append(QSize(16, 16));
+        m_registeredItemsSize.append(itemVisualSize);
     }
     m_registeredItemsSize[index] = size;
 }
 
 QSize TrayItemPositionManager::visualItemSize(int index) const
 {
-    if (m_registeredItemsSize.count() <= index) return QSize(16, 16);
+    if (m_registeredItemsSize.count() <= index) return itemVisualSize;
     return m_registeredItemsSize.at(index);
 }
 
@@ -28,15 +34,15 @@ QSize TrayItemPositionManager::visualSize(int index, bool includeLastSpacing) co
     if (m_orientation == Qt::Horizontal) {
         int width = 0;
         for (int i = 0; i <= index; i++) {
-            width += (visualItemSize(i).width() + 10);
+            width += (visualItemSize(i).width() + itemSpacing);
         }
-        return QSize((!includeLastSpacing && index > 0) ? (width - 10) : width, m_dockHeight);
+        return QSize((!includeLastSpacing && index > 0) ? (width - itemSpacing) : width, m_dockHeight);
     } else {
         int height = 0;
         for (int i = 0; i <= index; i++) {
-            height += (visualItemSize(i).height() + 10);
+            height += (visualItemSize(i).height() + itemSpacing);
         }
-        return QSize(m_dockHeight, (!includeLastSpacing && index > 0) ? (height - 10) : height);
+        return QSize(m_dockHeight, (!includeLastSpacing && index > 0) ? (height - itemSpacing) : height);
     }
 }
 
@@ -47,7 +53,7 @@ DropIndex TrayItemPositionManager::itemIndexByPoint(const QPoint point) const
         int width = 0;
         for (int i = 0; i < m_visualItemCount; i++) {
             int visualWidth = visualItemSize(i).width();
-            if (pos < (width + visualWidth + 10)) {
+            if (pos < (width + visualWidth + itemSpacing)) {
                 pos -= width;
                 return DropIndex {
                     .index = i,
@@ -55,7 +61,7 @@ DropIndex TrayItemPositionManager::itemIndexByPoint(const QPoint point) const
                     .isBefore = pos < (visualWidth / 2)
                 };
             }
-            width += (visualWidth + 10);
+            width += (visualWidth + itemSpacing);
         }
         return DropIndex { .index = m_visualItemCount - 1 };
     } else {
@@ -63,7 +69,7 @@ DropIndex TrayItemPositionManager::itemIndexByPoint(const QPoint point) const
         int height = 0;
         for (int i = 0; i <= m_visualItemCount; i++) {
             int visualHeight = visualItemSize(i).height();
-            if (pos < (height + visualHeight + 10)) {
+            if (pos < (height + visualHeight + itemSpacing)) {
                 pos -= height;
                 return DropIndex {
                     .index = i,
@@ -71,7 +77,7 @@ DropIndex TrayItemPositionManager::itemIndexByPoint(const QPoint point) const
                     .isBefore = pos < (visualHeight / 2)
                 };
             }
-            height += (visualHeight + 10);
+            height += (visualHeight + itemSpacing);
         }
         return DropIndex { .index = m_visualItemCount - 1 };
     }
@@ -110,6 +116,10 @@ void TrayItemPositionManager::layoutHealthCheck(int delayMs)
 TrayItemPositionManager::TrayItemPositionManager(QObject *parent)
     : QObject(parent)
 {
+    m_itemSpacing = itemSpacing;
+    m_itemPadding = itemPadding;
+    m_itemVisualSize = itemVisualSize;
+
     connect(this, &TrayItemPositionManager::visualItemCountChanged,
             this, &TrayItemPositionManager::updateVisualSize);
     connect(this, &TrayItemPositionManager::dockHeightChanged,

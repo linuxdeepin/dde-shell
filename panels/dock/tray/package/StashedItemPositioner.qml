@@ -9,11 +9,8 @@ Control {
     id: root
     property bool itemVisible: true
 
-    width: 16
-    height: 16
-
-    x: (index % columnCount) * (16 + 10)
-    y: Math.floor(index / columnCount) * (16 + 10)
+    x: (index % columnCount) * (16 + itemPadding * 2 + 10)
+    y: Math.floor(index / columnCount) * (16 + itemPadding * 2 + 10)
     Behavior on x {
         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
     }
