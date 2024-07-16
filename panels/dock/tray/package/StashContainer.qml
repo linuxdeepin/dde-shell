@@ -27,6 +27,7 @@ Item {
 
     readonly property int itemSize: 16
     readonly property int itemSpacing: 10
+    readonly property int itemPadding: 8
 
     readonly property int columnCount: Math.ceil(Math.sqrt(model.count))
     readonly property int rowCount: Math.round(Math.sqrt(model.count))
@@ -43,9 +44,9 @@ Item {
     }
 
     implicitWidth: width
-    width: columnCount * (itemSize + itemSpacing) - itemSpacing
+    width: columnCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing
     implicitHeight: height
-    height: rowCount * (itemSize + itemSpacing) - itemSpacing
+    height: rowCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing
 
     Behavior on width {
         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
@@ -59,6 +60,7 @@ Item {
     StashedItemDelegateChooser {
         columnCount: root.columnCount
         rowCount: root.rowCount
+        itemPadding: root.itemPadding
         id: stashedItemDelegateChooser
     }
 
