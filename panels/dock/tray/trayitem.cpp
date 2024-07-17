@@ -68,12 +68,18 @@ DockItemInfos TrayItem::dockItemInfos()
     return m_itemInfos;
 }
 
-void TrayItem::setItemOnDock(const QString &settingKey, const QString &surfaceId, bool visible)
+void TrayItem::setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible)
 {
     Q_UNUSED(settingKey)
-
-    visible ? TraySettings::instance()->addTrayItemOnDock(surfaceId) :
-              TraySettings::instance()->removeTrayItemOnDock(surfaceId);
+    QString pluginId;
+    for (const DockItemInfo &itemInfo : m_itemInfos) {
+        if (itemInfo.itemKey == itemKey) {
+            pluginId = itemInfo.name;
+            break;
+        }
+    }
+    visible ? TraySettings::instance()->addTrayItemOnDock(pluginId + "::" + itemKey) :
+              TraySettings::instance()->removeTrayItemOnDock(pluginId + "::" + itemKey);
 }
 
 D_APPLET_CLASS(TrayItem)
