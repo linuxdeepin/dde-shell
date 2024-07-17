@@ -63,8 +63,8 @@ Item {
         if (!toolTipWindow)
             return
 
-        toolTipWindow.currentItem = null
         toolTipWindow.close()
+        toolTipWindow.currentItem = null
     }
     function hide()
     {
