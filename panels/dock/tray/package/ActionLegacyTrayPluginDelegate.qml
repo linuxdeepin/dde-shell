@@ -77,6 +77,8 @@ Button {
         }
 
         Component.onCompleted: {
+            if (!pluginItem.plugin)
+                return
             pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
             pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
         }
@@ -122,7 +124,7 @@ Button {
         }
     }
 
-    D.ColorSelector.hovered: (pluginItem.plugin.isItemActive ?? false) || hoverHandler.hovered
+    D.ColorSelector.hovered: pluginItem.plugin && pluginItem.plugin.isItemActive || hoverHandler.hovered
     background: D.BoxPanel {
         property D.Palette backgroundPalette: DockPalette.backgroundPalette
 

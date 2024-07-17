@@ -78,8 +78,8 @@ Item {
         target: DockCompositor
         function onPopupCreated(popupSurface)
         {
-            console.log("popup created", popupSurface.popupType, popupSurface.pluginId)
             if (popupSurface.popupType === Dock.TrayPopupTypeEmbed) {
+                console.log("popup created", popupSurface.popupType, popupSurface.pluginId)
                 quickpanelModel.requestShowSubPlugin(popupSurface.pluginId, popupSurface)
             }
         }
