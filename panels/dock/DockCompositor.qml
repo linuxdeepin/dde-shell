@@ -92,7 +92,7 @@ Item {
             }
 
             onPluginPopupCreated: (popup) => {
-                console.log("plugin popup created", popup.pluginId, popup.itemKey, popup.pluginType)
+                console.log("plugin popup created", popup.pluginId, popup.itemKey, popup.popupType)
                 dockCompositor.popupCreated(popup)
             }
         }

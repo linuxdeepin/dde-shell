@@ -163,6 +163,7 @@ AppletItem {
                     return
                 }
 
+                console.log("tray's tooltip created", popupSurface.pluginId, popupSurface.itemKey)
                 toolTip.shellSurface = popupSurface
                 toolTip.DockPanelPositioner.bounding = Qt.binding(function () {
                     var point = Qt.point(toolTip.shellSurface.x, toolTip.shellSurface.y)
@@ -170,6 +171,7 @@ AppletItem {
                 })
                 toolTip.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypePanel) {
+                console.log("tray's popup created", popupSurface.pluginId, popupSurface.itemKey)
                 popup.shellSurface = popupSurface
                 popup.DockPanelPositioner.bounding = Qt.binding(function () {
                     var point = Qt.point(popup.shellSurface.x, popup.shellSurface.y)
@@ -177,6 +179,7 @@ AppletItem {
                 })
                 popup.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
+                console.log("tray's menu created", popupSurface.pluginId, popupSurface.itemKey)
                 popupMenu.shellSurface = popupSurface
                 popupMenu.DockPositioner.bounding = Qt.binding(function () {
                     var point = Qt.point(popupMenu.shellSurface.x, popupMenu.shellSurface.y)
