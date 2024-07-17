@@ -23,7 +23,7 @@ public:
     void setTrayPluginModel(QAbstractItemModel *newTrayPluginModel);
 
     Q_INVOKABLE DockItemInfos dockItemInfos();
-    Q_INVOKABLE void setItemOnDock(const QString &settingKey, const QString &surfaceId, bool visible);
+    Q_INVOKABLE void setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible);
 
 Q_SIGNALS:
     void trayPluginModelChanged();
