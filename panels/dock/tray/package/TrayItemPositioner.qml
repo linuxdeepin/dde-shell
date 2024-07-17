@@ -9,7 +9,7 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 Control {
     id: root
     property bool itemVisible: {
-        if (model.sectionType === "collapsable") return !collapsed
+        if (model.sectionType === "collapsable") return !collapsed && model.visibility
         return model.sectionType !== "stashed" && model.visibility
     }
     property size visualSize: Qt.size(0, 0)
