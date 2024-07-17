@@ -28,6 +28,7 @@ depends=('dtk6declarative-git'
          'qt6-tools'
          'qt6-svg'
          'deepin-qt-dbus-factory'
+         'dde-tray-loader'
 )
 makedepends=('git'
              'qt6-tools'
