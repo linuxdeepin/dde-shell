@@ -25,7 +25,7 @@
             "visibility": "private"
         },
         "collapsableSurfaceIds": {
-            "value": [],
+            "value": [ "application-tray:SNI:fcitx5" ],
             "serial": 0,
             "flags": [],
             "name": "Collapsable Area Surface IDs",
