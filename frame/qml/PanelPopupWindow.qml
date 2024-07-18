@@ -14,8 +14,8 @@ Window {
     property real xOffset: 0
     property real yOffset: 0
     property Item currentItem
-    x: selectValue(transientParent ? transientParent.x + xOffset : 0, Screen.virtualX, Screen.virtualX + Screen.width - root.width)
-    y: selectValue(transientParent ? transientParent.y + yOffset : 0, Screen.virtualY, Screen.virtualY + Screen.height - root.height)
+    x: selectValue(transientParent ? transientParent.x + xOffset : 0, Screen.virtualX + 10, Screen.virtualX + Screen.width - root.width - 10)
+    y: selectValue(transientParent ? transientParent.y + yOffset : 0, Screen.virtualY + 10, Screen.virtualY + Screen.height - root.height - 10)
     function selectValue(value, min, max) {
         if (value < min)
             return min
