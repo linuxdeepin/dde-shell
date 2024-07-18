@@ -15,6 +15,8 @@
 #include <QPointer>
 
 namespace dock {
+Q_LOGGING_CATEGORY(dockX11Log, "dde.shell.dock.x11")
+
 const uint16_t monitorSize = 15;
 
 XcbEventFilter::XcbEventFilter(X11DockHelper* helper)
@@ -40,6 +42,8 @@ bool XcbEventFilter::inTriggerArea(xcb_window_t win) const
 
 void XcbEventFilter::processEnterLeave(xcb_window_t win, bool enter)
 {
+    qCDebug(dockX11Log) << "process enter and leave event, isEnter:" << enter
+                        << ", winId:" << win;
     for (auto area: m_helper->m_areas) {
         if (area->triggerWindow() == win) {
             if (enter) {
@@ -231,6 +235,9 @@ const QRect DockTriggerArea::matchDockTriggerArea()
     }
     }
 
+    // map geometry to Native
+    const auto factor = m_screen->devicePixelRatio();
+    triggerArea = QRect(triggerArea.topLeft() * factor, triggerArea.size() * factor);
     return triggerArea;
 }
 
@@ -252,6 +259,7 @@ void DockTriggerArea::updateDockTriggerArea()
     }
 
     QRect rect = matchDockTriggerArea();
+    qCDebug(dockX11Log) << "update dock trigger area" << rect;
     auto connection = qGuiApp->nativeInterface<QNativeInterface::QX11Application>()->connection();
     int values[4] = {rect.x(), rect.y(), rect.width(), rect.height()};
 
