@@ -12,18 +12,13 @@
 #include <QBoxLayout>
 #include <QLabel>
 
+#include <DGuiApplicationHelper>
+
 #include "constants.h"
 
 class TimeWidget : public QWidget
 {
     Q_OBJECT
-
-    enum position {
-        top = 0,
-        right,
-        bottom,
-        left
-    };
 
 public:
     explicit TimeWidget(QWidget *parent = nullptr);
@@ -39,12 +34,6 @@ public:
      * @brief stop:停止计时
      */
     void stop();
-
-    /**
-     * @brief sizeHint:返回控件大小
-     * @return
-     */
-    QSize sizeHint() const override;
 
     /**
      * @brief 是否是wayland协议
@@ -75,14 +64,17 @@ private slots:
     void onTimeout();
 
 private:
+    void updateIcon();
+
+private:
     QTimer *m_timer;
     QIcon *m_lightIcon;
     QIcon *m_shadeIcon;
     QIcon *m_currentIcon;
+    QLabel *m_iconLabel;
+    QLabel *m_textLabel;
     QPixmap m_pixmap;
-    QSize m_textSize;
     QTime m_baseTime;
-    QString m_showTimeStr;
     bool m_bRefresh;
     int m_position;
     bool m_hover;
