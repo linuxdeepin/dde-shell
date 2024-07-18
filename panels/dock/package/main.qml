@@ -483,6 +483,7 @@ Window {
     Connections {
         function onPositionChanged() {
             changeDragAreaAnchor()
+            closeSubWindow()
         }
         function onDockSizeChanged() {
             dock.dockSize = Panel.dockSize
@@ -494,6 +495,10 @@ Window {
             } else {
                 hideShowAnimation.running = true
             }
+        }
+        function closeSubWindow() {
+            if (Panel.popupWindow)
+                Panel.popupWindow.close()
         }
         target: Panel
     }
