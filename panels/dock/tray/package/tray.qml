@@ -16,14 +16,15 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 AppletItem {
     id: tray
 
+    readonly property int nextAppletSpacing: 6
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 25
     readonly property string quickpanelTrayItemPluginId: "sound"
     readonly property var filterTrayPlugins: [quickpanelTrayItemPluginId]
     property bool quickPanelIsOpened: false
 
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : trayContainter.implicitWidth
-    implicitHeight: useColumnLayout ? trayContainter.implicitHeight : Panel.rootObject.dockSize
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : trayContainter.implicitWidth + nextAppletSpacing
+    implicitHeight: useColumnLayout ? trayContainter.implicitHeight + nextAppletSpacing: Panel.rootObject.dockSize
     Component.onCompleted: {
         Applet.trayPluginModel = Qt.binding(function () {
             return DockCompositor.trayPluginSurfaces
