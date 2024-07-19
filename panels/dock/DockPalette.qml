@@ -142,4 +142,13 @@ Item {
             crystal: Qt.rgba(16.0 / 255, 16.0 / 255, 16.0 / 255, 0.2)
         }
     }
+
+    property D.Palette iconTextPalette: D.Palette {
+        normal {
+            common: Qt.rgba(0, 0, 0, 1)
+        }
+        normalDark {
+            common: Qt.rgba(1, 1, 1, 1)
+        }
+    }
 }
