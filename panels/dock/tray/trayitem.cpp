@@ -35,20 +35,46 @@ void TrayItem::setTrayPluginModel(QAbstractItemModel *newTrayPluginModel)
     emit trayPluginModelChanged();
 }
 
-DockItemInfos TrayItem::dockItemInfos()
+QAbstractItemModel *TrayItem::quickPluginModel() const
 {
-    const auto targetModel = m_trayPluginModel;
-    if (!targetModel)
-        return DockItemInfos{};
+    return m_quickPluginModel;
+}
 
-    const auto roleNames = targetModel->roleNames();
+void TrayItem::setQuickPluginModel(QAbstractItemModel *newQuickPluginModel)
+{
+    if (m_quickPluginModel == newQuickPluginModel)
+        return;
+    m_quickPluginModel = newQuickPluginModel;
+    emit quickPluginModelChanged();
+}
+
+QAbstractItemModel *TrayItem::fixedPluginModel() const
+{
+    return m_fixedPluginModel;
+}
+
+void TrayItem::setFixedPluginModel(QAbstractItemModel *newFixedPluginModel)
+{
+    if (m_fixedPluginModel == newFixedPluginModel)
+        return;
+    m_fixedPluginModel = newFixedPluginModel;
+    emit fixedPluginModelChanged();
+}
+
+DockItemInfos TrayItem::dockItemInfosFromModel(QAbstractItemModel *model)
+{
+    if (!model) {
+        return DockItemInfos{};
+    }
+
+    const auto roleNames = model->roleNames();
     const auto modelDataRole = roleNames.key("shellSurface", -1);
     if (modelDataRole < 0)
         return DockItemInfos{};
 
     DockItemInfos itemInfos;
-    for (int i = 0; i < targetModel->rowCount(); i++) {
-        const auto index = targetModel->index(i, 0);
+    for (int i = 0; i < model->rowCount(); i++) {
+        const auto index = model->index(i, 0);
         const auto item = index.data(modelDataRole).value<QObject *>();
         if (!item)
             return DockItemInfos{};
@@ -64,6 +90,16 @@ DockItemInfos TrayItem::dockItemInfos()
         itemInfo.visible = TraySettings::instance()->trayItemIsOnDock(itemInfo.name + "::" + itemInfo.itemKey);
         itemInfos << itemInfo;
     }
+
+    return itemInfos;
+}
+
+DockItemInfos TrayItem::dockItemInfos()
+{
+    DockItemInfos itemInfos;
+    itemInfos.append(dockItemInfosFromModel(m_trayPluginModel));
+    itemInfos.append(dockItemInfosFromModel(m_fixedPluginModel));
+
     m_itemInfos = itemInfos;
     return m_itemInfos;
 }
