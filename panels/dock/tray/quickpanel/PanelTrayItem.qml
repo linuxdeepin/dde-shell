@@ -21,6 +21,8 @@ Control {
     property bool contentHovered
     padding: 5
     ColorSelector.hovered: root.contentHovered || root.hovered || root.isOpened
+    property Palette textColor: DockPalette.iconTextPalette
+    palette.windowText: ColorSelector.textColor
 
     PanelToolTip {
         id: toolTip
