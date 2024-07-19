@@ -12,7 +12,6 @@ panels/dock/tray/plugins/bluetooth/dbusinterface/generation_dbus_interface/
 panels/dock/tray/plugins/airplane-mode/dbusinterface/generation_dbus_interface/
 panels/dock/tray/plugins/keyboard-layout/dbusinterface/generation_dbus_interface/
 panels/dock/tray/plugins/power/dbusinterface/generation_dbus_interface/
-panels/dock/tray/translations/
 obj-x86_64-linux-gnu/
 *.autosave
 */utils/dbus/xml2cpp/*_interface.*
