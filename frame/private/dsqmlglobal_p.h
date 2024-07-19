@@ -29,6 +29,8 @@ public:
     Q_INVOKABLE DApplet *applet(const QString &pluginId) const;
     Q_INVOKABLE QList<DApplet *> appletList(const QString &pluginId) const;
     Q_INVOKABLE static void closeChildrenWindows(QWindow *target);
+    Q_INVOKABLE bool grabKeyboard(QWindow *target, bool grab = true);
+    Q_INVOKABLE bool grabMouse(QWindow *target, bool grab = true);
 
     DApplet *rootApplet() const;
 

@@ -13,6 +13,7 @@ set(PUBLIC_HEADERS
     panel.h
     qmlengine.h
     layershell/dlayershellwindow.h
+    dsutility.h
 )
 
 set(PRIVATE_HEADERS
@@ -25,9 +26,20 @@ set(PRIVATE_HEADERS
     layershell/qwaylandlayershellintegration_p.h
     quick/dsquickdrag_p.h
 )
+set(PRIVATE_SOURCES "")
+if (BUILD_WITH_X11)
+    list(APPEND PRIVATE_HEADERS
+        private/utility_x11_p.h
+    )
+    list(APPEND PRIVATE_SOURCES
+        utility_x11.cpp
+    )
+endif(BUILD_WITH_X11)
+
 add_library(dde-shell-frame SHARED
     ${PUBLIC_HEADERS}
     ${PRIVATE_HEADERS}
+    ${PRIVATE_SOURCES}
     appletitem.h
     containmentitem.h
     dstypes.cpp
@@ -49,6 +61,7 @@ add_library(dde-shell-frame SHARED
     layershell/qwaylandlayershellintegration.cpp
     quick/dsquickdrag.cpp
     ddeshell_qml.qrc
+    dsutility.cpp
 )
 
 qt_generate_wayland_protocol_client_sources(dde-shell-frame FILES
@@ -87,7 +100,7 @@ target_link_directories(dde-shell-frame INTERFACE
 
 if (BUILD_WITH_X11)
     target_compile_definitions(dde-shell-frame PRIVATE BUILD_WITH_X11)
-    pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb-ewmh)
+    pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb-ewmh xtst)
     target_sources(dde-shell-frame PRIVATE layershell/x11dlayershellemulation.h layershell/x11dlayershellemulation.cpp)
     target_link_libraries(dde-shell-frame PRIVATE PkgConfig::XCB)
 endif(BUILD_WITH_X11)
