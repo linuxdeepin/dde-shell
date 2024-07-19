@@ -31,6 +31,7 @@ LQM.DelegateChooser {
             visualSize: traySurfaceDelegate.visualSize
             contentItem: ActionLegacyTrayPluginDelegate {
                 id: traySurfaceDelegate
+                inputEventsEnabled: model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.collapsed
             }
         }
     }
