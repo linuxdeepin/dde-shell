@@ -73,7 +73,6 @@ Button {
             id: surfaceItem
             anchors.centerIn: parent
             shellSurface: pluginItem.plugin
-            inputEventsEnabled: !DDT.TraySortOrderModel.collapsed
         }
 
         Component.onCompleted: {
