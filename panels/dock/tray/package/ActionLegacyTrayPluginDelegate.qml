@@ -17,7 +17,8 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 Button {
     property alias inputEventsEnabled: surfaceItem.inputEventsEnabled
 
-    property size visualSize: Qt.size(pluginItem.implicitWidth + itemPadding * 2, pluginItem.implicitHeight + itemPadding * 2)
+    property size visualSize: isHorizontal ? Qt.size(pluginItem.implicitWidth + itemPadding * 2, itemHeight < pluginItem.implicitHeight + itemPadding * 2 ? itemHeight - itemPadding * 2 : pluginItem.implicitHeight + itemPadding * 2)
+                                           : Qt.size(itemWidth < pluginItem.implicitWidth + itemPadding * 2 ? itemWidth - itemPadding * 2 : pluginItem.implicitWidth + itemPadding * 2, pluginItem.implicitHeight + itemPadding * 2)
 
     readonly property int itemWidth: isHorizontal ? 0 : DDT.TrayItemPositionManager.dockHeight
     readonly property int itemHeight: isHorizontal ? DDT.TrayItemPositionManager.dockHeight : 0
