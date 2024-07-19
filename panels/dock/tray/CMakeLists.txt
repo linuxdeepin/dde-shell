@@ -56,3 +56,4 @@ target_link_libraries(trayitem PRIVATE
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.tray TARGET trayitem)
+ds_handle_package_translation(PACKAGE org.deepin.ds.dock.tray)
