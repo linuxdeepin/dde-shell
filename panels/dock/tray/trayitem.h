@@ -16,20 +16,35 @@ class TrayItem : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
     Q_PROPERTY(QAbstractItemModel* trayPluginModel READ trayPluginModel WRITE setTrayPluginModel NOTIFY trayPluginModelChanged FINAL)
+    Q_PROPERTY(QAbstractItemModel* quickPluginModel READ quickPluginModel WRITE setQuickPluginModel NOTIFY quickPluginModelChanged FINAL)
+    Q_PROPERTY(QAbstractItemModel* fixedPluginModel READ fixedPluginModel WRITE setFixedPluginModel NOTIFY fixedPluginModelChanged FINAL)
 public:
     explicit TrayItem(QObject *parent = nullptr);
 
     QAbstractItemModel *trayPluginModel() const;
     void setTrayPluginModel(QAbstractItemModel *newTrayPluginModel);
 
+    QAbstractItemModel *quickPluginModel() const;
+    void setQuickPluginModel(QAbstractItemModel *newQuickPluginModel);
+
+    QAbstractItemModel *fixedPluginModel() const;
+    void setFixedPluginModel(QAbstractItemModel *newFixedPluginModel);
+
     Q_INVOKABLE DockItemInfos dockItemInfos();
     Q_INVOKABLE void setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible);
 
 Q_SIGNALS:
     void trayPluginModelChanged();
+    void quickPluginModelChanged();
+    void fixedPluginModelChanged();
+
+private:
+    DockItemInfos dockItemInfosFromModel(QAbstractItemModel *model);
 
 private:
     QAbstractItemModel *m_trayPluginModel = nullptr;
+    QAbstractItemModel *m_quickPluginModel = nullptr;
+    QAbstractItemModel *m_fixedPluginModel = nullptr;
     DockItemInfos m_itemInfos;
 };
 

@@ -29,6 +29,12 @@ AppletItem {
         Applet.trayPluginModel = Qt.binding(function () {
             return DockCompositor.trayPluginSurfaces
         })
+        Applet.quickPluginModel = Qt.binding(function () {
+            return DockCompositor.quickPluginSurfaces
+        })
+        Applet.fixedPluginModel = Qt.binding(function () {
+            return DockCompositor.fixedPluginSurfaces
+        })
     }
 
     PanelPopup {
