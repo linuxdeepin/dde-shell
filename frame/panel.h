@@ -21,6 +21,7 @@ class DS_SHARE DPanel : public DContainment
     D_DECLARE_PRIVATE(DPanel)
     Q_PROPERTY(QQuickWindow *popupWindow READ popupWindow NOTIFY popupWindowChanged)
     Q_PROPERTY(QQuickWindow *toolTipWindow READ toolTipWindow NOTIFY toolTipWindowChanged)
+    Q_PROPERTY(QQuickWindow *menuWindow READ menuWindow NOTIFY menuWindowChanged)
 public:
     explicit DPanel(QObject *parent = nullptr);
     virtual ~DPanel() override;
@@ -29,6 +30,7 @@ public:
 
     QQuickWindow *popupWindow() const;
     QQuickWindow *toolTipWindow() const;
+    QQuickWindow *menuWindow() const;
 
     // 加载插件
     virtual bool load() override;
@@ -40,6 +42,7 @@ public:
 Q_SIGNALS:
     void popupWindowChanged();
     void toolTipWindowChanged();
+    void menuWindowChanged();
 };
 
 DS_END_NAMESPACE

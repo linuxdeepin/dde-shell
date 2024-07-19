@@ -27,10 +27,12 @@ public:
     void initDciSearchPaths();
     void ensurePopupWindow() const;
     void ensureToolTipWindow() const;
+    void ensureMenuWindow() const;
 
     DQmlEngine *m_engine = nullptr;
     QQuickWindow *m_popupWindow = nullptr;
     QQuickWindow *m_toolTipWindow = nullptr;
+    QQuickWindow *m_menuWindow = nullptr;
 
     D_DECLARE_PUBLIC(DPanel)
 };
