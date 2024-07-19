@@ -52,13 +52,13 @@ AppletItem {
         }
     }
 
-    PanelPopup {
+    PanelMenu {
         id: popupMenu
         property alias shellSurface: popupMenuContent.shellSurface
         width: popupMenuContent.width
         height: popupMenuContent.height
-        popupX: DockPositioner.x
-        popupY: DockPositioner.y
+        menuX: DockPositioner.x
+        menuY: DockPositioner.y
 
         Item {
             anchors.fill: parent
@@ -255,6 +255,12 @@ AppletItem {
     WaylandOutput {
         compositor: DockCompositor.compositor
         window: Panel.toolTipWindow
+        sizeFollowsWindow: false
+    }
+
+    WaylandOutput {
+        compositor: DockCompositor.compositor
+        window: Panel.menuWindow
         sizeFollowsWindow: false
     }
 }

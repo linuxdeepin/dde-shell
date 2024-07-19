@@ -19,8 +19,8 @@ Item {
     PanelToolTipWindow {
         id: toolTipWindow
         onVisibleChanged: function (arg) {
-            if (arg && popupWindow.visible)
-                popupWindow.close()
+            if (arg && menuWindow.visible)
+                menuWindow.close()
         }
     }
     PanelToolTip {
@@ -44,43 +44,43 @@ Item {
         sizeFollowsWindow: false
     }
 
-    PanelPopupWindow {
-        id: popupWindow
+    PanelMenuWindow {
+        id: menuWindow
         onVisibleChanged: function (arg) {
             if (arg && toolTipWindow.visible)
                 toolTipWindow.close()
         }
         onXChanged: {
-            if (!popup.shellSurface)
+            if (!menu.shellSurface)
                 return
-            popup.shellSurface.updatePluginGeometry(Qt.rect(x, y, 0, 0))
+            menu.shellSurface.updatePluginGeometry(Qt.rect(x, y, 0, 0))
         }
         onYChanged: {
-            if (!popup.shellSurface)
+            if (!menu.shellSurface)
                 return
-            popup.shellSurface.updatePluginGeometry(Qt.rect(x, y, 0, 0))
+            menu.shellSurface.updatePluginGeometry(Qt.rect(x, y, 0, 0))
         }
     }
-    PanelPopup {
-        id: popup
-        width: popupSurfaceLayer.width
-        height: popupSurfaceLayer.height
-        popupWindow: popupWindow
+    PanelMenu {
+        id: menu
+        width: menuSurfaceLayer.width
+        height: menuSurfaceLayer.height
+        menuWindow: menuWindow
 
-        property alias shellSurface: popupSurfaceLayer.shellSurface
+        property alias shellSurface: menuSurfaceLayer.shellSurface
         ShellSurfaceItemProxy {
-            id: popupSurfaceLayer
+            id: menuSurfaceLayer
             anchors.centerIn: parent
             autoClose: true
             onSurfaceDestroyed: function () {
-                popup.close()
+                menu.close()
             }
         }
     }
 
     WaylandOutput {
         compositor: DockCompositor.compositor
-        window: popup.popupWindow
+        window: menu.menuWindow
         sizeFollowsWindow: false
     }
 
@@ -106,14 +106,14 @@ Item {
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
                 console.log(root.objectName, ": menu created", popupSurface.popupType, popupSurface.pluginId)
 
-                popup.shellSurface = popupSurface
-                popup.popupX = Qt.binding(function () {
-                    return popup.shellSurface.x
+                menu.shellSurface = popupSurface
+                menu.menuX = Qt.binding(function () {
+                    return menu.shellSurface.x
                 })
-                popup.popupY = Qt.binding(function () {
-                    return popup.shellSurface.y
+                menu.menuY = Qt.binding(function () {
+                    return menu.shellSurface.y
                 })
-                popup.open()
+                menu.open()
             }
         }
     }

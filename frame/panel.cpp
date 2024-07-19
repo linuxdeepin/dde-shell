@@ -24,6 +24,7 @@ DPanel::DPanel(QObject *parent)
         D_D(DPanel);
         d->ensurePopupWindow();
         d->ensureToolTipWindow();
+        d->ensureMenuWindow();
     });
 }
 
@@ -74,6 +75,12 @@ QQuickWindow *DPanel::toolTipWindow() const
 {
     D_DC(DPanel);
     return d->m_toolTipWindow;
+}
+
+QQuickWindow *DPanel::menuWindow() const
+{
+    D_DC(DPanel);
+    return d->m_menuWindow;
 }
 
 void DPanelPrivate::initDciSearchPaths()
@@ -131,6 +138,33 @@ void DPanelPrivate::ensureToolTipWindow() const
         qCDebug(dsLog) << "Create ToolTipWindow successfully.";
         m_toolTipWindow->setTransientParent(q->window());
         Q_EMIT const_cast<DPanel *>(q)->toolTipWindowChanged();
+    }
+}
+
+void DPanelPrivate::ensureMenuWindow() const
+{
+    if (m_menuWindow)
+        return;
+    D_QC(DPanel);
+    if (!q->window()) {
+        qCWarning(dsLog) << "Failed to create MenuWindow because TransientParent window is empty.";
+        return;
+    }
+
+    auto object = DQmlEngine::createObject(QUrl("qrc:/ddeshell/qml/PanelMenuWindow.qml"));
+    if (!object)
+        return;
+    const_cast<DPanelPrivate *>(this)->m_menuWindow = qobject_cast<QQuickWindow *>(object);
+    if (m_menuWindow) {
+        qCDebug(dsLog) << "Create MenuWindow successfully.";
+        m_menuWindow->setTransientParent(q->window());
+        QObject::connect(m_menuWindow, &QWindow::visibleChanged, m_popupWindow, [this] (bool arg) {
+            if (arg) {
+                if (m_popupWindow && m_popupWindow->isVisible())
+                    m_popupWindow->close();
+            }
+        });
+        Q_EMIT const_cast<DPanel *>(q)->menuWindowChanged();
     }
 }
 
