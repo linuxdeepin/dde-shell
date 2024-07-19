@@ -1,3 +1,10 @@
+dde-shell (0.0.29) unstable; urgency=medium
+
+  * fix: can't hide menu when click outside dock
+  * feat: add grabMouse for window
+
+ -- Yingzhen zhao <zhaoyingzhen@uniontech.com>  Fri, 19 Jul 2024 17:50:32 +0800
+
 dde-shell (0.0.28) unstable; urgency=medium
 
   * fix: dock now show when init
