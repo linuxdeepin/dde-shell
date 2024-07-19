@@ -14,6 +14,10 @@
 #include <QWindow>
 #include <QGuiApplication>
 
+#ifdef BUILD_WITH_X11
+#include "private/utility_x11_p.h"
+#endif
+
 #include <dobject_p.h>
 
 DS_BEGIN_NAMESPACE
@@ -94,6 +98,16 @@ void DQmlGlobal::closeChildrenWindows(QWindow *target)
     for (const auto item : allChildrenWindows(target))
         if (item && item->isVisible())
             item->close();
+}
+
+bool DQmlGlobal::grabKeyboard(QWindow *target, bool grab)
+{
+    return Utility::instance()->grabKeyboard(target, grab);
+}
+
+bool DQmlGlobal::grabMouse(QWindow *target, bool grab)
+{
+    return Utility::instance()->grabMouse(target, grab);
 }
 
 DApplet *DQmlGlobal::rootApplet() const
