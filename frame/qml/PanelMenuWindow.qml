@@ -8,5 +8,5 @@ import QtQuick.Window 2.15
 PanelPopupWindow {
     id: root
 
-    flags: Qt.Tool | Qt.X11BypassWindowManagerHint | Qt.WindowStaysOnTopHint
+    flags: (Qt.platform.pluginName === "xcb" ? Qt.Tool | Qt.X11BypassWindowManagerHint : Qt.ToolTip) | Qt.WindowStaysOnTopHint
 }

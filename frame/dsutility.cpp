@@ -32,11 +32,15 @@ public:
 Utility *Utility::instance()
 {
     static Utility* g_instance = nullptr;
+    auto platformName = QGuiApplication::platformName();
     if (g_instance == nullptr) {
+        if (QStringLiteral("wayland") == platformName) {
+            g_instance = new Utility();
+        }
 #ifdef BUILD_WITH_X11
-        g_instance = new X11Utility();
-#else
-        g_instance = new Utility();
+        else if (QStringLiteral("xcb") == platformName) {
+            g_instance = new X11Utility();
+        }
 #endif
     }
     return g_instance;

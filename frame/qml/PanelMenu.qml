@@ -64,9 +64,9 @@ Item {
     {
         if (!menuWindow)
             return
-
-        menuWindow.currentItem = null
+        
         menuWindow.close()
+        menuWindow.currentItem = null
     }
 
     Connections {
