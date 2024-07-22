@@ -363,11 +363,14 @@ void DockPanel::loadDockPlugins()
 
     for (auto &pluginDir : dirs) {
         QDir dir(pluginDir);
-        auto plugins = dir.entryList(filters, QDir::Files);
-        foreach(QString plugin, plugins) {
-            plugin = pluginDir + plugin;
-            qInfo() << "pluginLoader load plugin" << plugin;
-            proc.setArguments({"-p", plugin, "-platform", "wayland",});
+        if (!dir.exists()) {
+            qWarning() << "The plugin directory does not exist: " << pluginsPath;
+            continue;
+        }
+        auto pluginFileInfos = dir.entryInfoList(filters, QDir::Files);
+        foreach(auto pluginInfo, pluginFileInfos) {
+            qInfo() << "pluginLoader load plugin" << pluginInfo.absoluteFilePath();
+            proc.setArguments({"-p", pluginInfo.absoluteFilePath(), "-platform", "wayland",});
             proc.startDetached();
         }
     }
