@@ -56,6 +56,17 @@
             "description[zh_CN]": "不应当在任何托盘区域显示的标识 ID 列表（快捷面板不视为托盘区域）",
             "permissions": "readwrite",
             "visibility": "private"
+        },
+        "isCollapsed": {
+            "value": false,
+            "serial": 0,
+            "flags": [],
+            "name": "Is Collapsed",
+            "name[zh_CN]": "是否折叠",
+            "description": "Current status of the tray collapsable area",
+            "description[zh_CN]": "托盘折叠区域当前的状态",
+            "permissions": "readwrite",
+            "visibility": "private"
         }
     }
 }
