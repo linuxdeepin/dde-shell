@@ -55,8 +55,8 @@ Item {
 
         menuWindow.currentItem = control
         Qt.callLater(function () {
-            DS.grabMouse(menuWindow)
             menuWindow.show()
+            DS.grabMouse(menuWindow)
         })
     }
 
