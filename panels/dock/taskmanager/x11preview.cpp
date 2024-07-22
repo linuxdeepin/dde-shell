@@ -275,7 +275,7 @@ public:
             } else {
                 painter->setBrush(QColor(0, 0, 0, 0.05 * 255));
             }
-            painter->drawRoundedRect(option.rect.marginsRemoved(QMargins(2, 2, 2, 2)), radius + 2, radius + 2);
+            painter->drawRoundedRect(option.rect.marginsRemoved(QMargins(PREVIEW_HOVER_BORDER, PREVIEW_HOVER_BORDER, PREVIEW_HOVER_BORDER, PREVIEW_HOVER_BORDER)), radius, radius);
             painter->restore();
 
 
