@@ -20,7 +20,13 @@ void TrayItemPositionManager::registerVisualItemSize(int index, const QSize &siz
     while (m_registeredItemsSize.count() < (index + 1)) {
         m_registeredItemsSize.append(itemVisualSize);
     }
+    QSize oldSize = m_registeredItemsSize[index];
     m_registeredItemsSize[index] = size;
+
+    // The registered itemsize may change, and the layout needs to be updated when it does.
+    if (oldSize != size) {
+        emit visualItemSizeChanged();
+    }
 }
 
 QSize TrayItemPositionManager::visualItemSize(int index) const
@@ -125,6 +131,8 @@ TrayItemPositionManager::TrayItemPositionManager(QObject *parent)
     connect(this, &TrayItemPositionManager::dockHeightChanged,
             this, &TrayItemPositionManager::updateVisualSize);
     connect(this, &TrayItemPositionManager::orientationChanged,
+            this, &TrayItemPositionManager::updateVisualSize);
+    connect(this, &TrayItemPositionManager::visualItemSizeChanged,
             this, &TrayItemPositionManager::updateVisualSize);
 }
 

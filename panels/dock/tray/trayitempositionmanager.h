@@ -64,6 +64,7 @@ signals:
     void dockHeightChanged(int);
     void visualSizeChanged(QSize);
     void visualItemCountChanged(int);
+    void visualItemSizeChanged();
 
 private:
     explicit TrayItemPositionManager(QObject *parent = nullptr);
