@@ -51,6 +51,7 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
     connect(this, &TraySortOrderModel::collapsedChanged, this, [this](){
         qDebug() << "collapsedChanged";
         updateVisualIndexes();
+        saveDataToDConfig();
     });
     connect(this, &TraySortOrderModel::actionsAlwaysVisibleChanged, this, [this](){
         qDebug() << "actionsAlwaysVisibleChanged";
@@ -438,6 +439,7 @@ void TraySortOrderModel::loadDataFromDConfig()
     m_collapsableIds = m_dconfig->value("collapsableSurfaceIds").toStringList();
     m_pinnedIds = m_dconfig->value("pinnedSurfaceIds").toStringList();
     m_hiddenIds = m_dconfig->value("hiddenSurfaceIds").toStringList();
+    m_collapsed = m_dconfig->value("isCollapsed").toBool();
 }
 
 void TraySortOrderModel::saveDataToDConfig()
@@ -446,6 +448,7 @@ void TraySortOrderModel::saveDataToDConfig()
     m_dconfig->setValue("collapsableSurfaceIds", m_collapsableIds);
     m_dconfig->setValue("pinnedSurfaceIds", m_pinnedIds);
     m_dconfig->setValue("hiddenSurfaceIds", m_hiddenIds);
+    m_dconfig->setValue("isCollapsed", m_collapsed);
 }
 
 void TraySortOrderModel::onAvailableSurfacesChanged()
