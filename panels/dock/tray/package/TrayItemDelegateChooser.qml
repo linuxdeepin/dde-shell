@@ -28,10 +28,13 @@ LQM.DelegateChooser {
     LQM.DelegateChoice {
         roleValue: "legacy-tray-plugin"
         TrayItemPositioner {
+            id: traySurfacePositioner
             visualSize: traySurfaceDelegate.visualSize
             contentItem: ActionLegacyTrayPluginDelegate {
                 id: traySurfaceDelegate
+                objectName: "tray"
                 inputEventsEnabled: model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.collapsed
+                itemVisible: traySurfacePositioner.itemVisible
             }
         }
     }

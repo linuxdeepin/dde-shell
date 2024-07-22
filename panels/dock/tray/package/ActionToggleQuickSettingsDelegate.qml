@@ -12,6 +12,7 @@ QuickPanel {
     property bool isHorizontal: false
     useColumnLayout: !isHorizontal
     trayItemPluginId: Applet.rootObject.quickpanelTrayItemPluginId
+    trayItemMargins: itemPadding
     Component.onCompleted: function () {
         Applet.rootObject.quickPanelIsOpened = Qt.binding(function () {
             return root.isOpened

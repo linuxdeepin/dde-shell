@@ -24,6 +24,7 @@ PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, co
     , m_flags(pluginFlags)
     , m_pluginType(pluginType)
     , m_sizePolicy(sizePolicy)
+    , m_margins(0)
 {
     init(resource.resource());
     setExtensionContainer(surface);
@@ -382,4 +383,19 @@ void PluginManager::sendEventMsg(const QString &msg)
             send_event_message(target->handle, msg);
         }
     }
+}
+
+int PluginSurface::margins() const
+{
+    return m_margins;
+}
+
+void PluginSurface::setMargins(int newMargins)
+{
+    if (m_margins == newMargins)
+        return;
+    m_margins = newMargins;
+    send_margin(m_margins);
+
+    emit marginsChanged();
 }
