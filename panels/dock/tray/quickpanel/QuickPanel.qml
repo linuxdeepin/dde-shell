@@ -24,12 +24,14 @@ Item {
     }
     property alias useColumnLayout: panelTrayItem.useColumnLayout
     property string trayItemPluginId: "sound"
+    property int trayItemMargins: 4
     readonly property bool isOpened: panelTrayItem.isOpened
 
     PanelTrayItem {
         id: panelTrayItem
         shellSurface: quickpanelModel.trayItemSurface
         isOpened: popup.popupVisible
+        itemMargins: root.trayItemMargins
         onClicked: function () {
             console.log("show quickpanel")
             popup.DockPanelPositioner.bounding = Qt.binding(function () {

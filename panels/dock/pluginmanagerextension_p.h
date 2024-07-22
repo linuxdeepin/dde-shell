@@ -73,10 +73,19 @@ class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public
     Q_PROPERTY(QSize size READ pluginSize NOTIFY sizeChanged)
     Q_PROPERTY(bool isItemActive WRITE setItemActive READ isItemActive NOTIFY itemActiveChanged)
     Q_PROPERTY(QString dccIcon READ dccIcon CONSTANT)
+    Q_PROPERTY(int margins READ margins WRITE setMargins NOTIFY marginsChanged FINAL)
 
 public:
-    PluginSurface(PluginManager* shell, const QString& pluginId, const QString& itemKey, const QString &displayName, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource);
-    QWaylandQuickShellIntegration *createIntegration(QWaylandQuickShellSurfaceItem *item) override;
+    PluginSurface(const PluginSurface &) = delete;
+    PluginSurface(PluginSurface &&) = delete;
+    PluginSurface &operator=(const PluginSurface &) = delete;
+    PluginSurface &operator=(PluginSurface &&) = delete;
+    PluginSurface(PluginManager *shell, const QString &pluginId,
+                  const QString &itemKey, const QString &displayName,
+                  int pluginFlags, int pluginType, int sizePolicy,
+                  QWaylandSurface *surface, const QWaylandResource &resource);
+    QWaylandQuickShellIntegration *
+    createIntegration(QWaylandQuickShellSurfaceItem *item) override;
 
     QWaylandSurface *surface() const;
 
@@ -96,10 +105,15 @@ public:
     Q_INVOKABLE void updatePluginGeometry(const QRect &geometry);
     Q_INVOKABLE void setGlobalPos(const QPoint &pos);
 
+    int margins() const;
+    void setMargins(int newMargins);
+
 signals:
     void itemActiveChanged();
     void sizeChanged();
     void recvMouseEvent(QEvent::Type type);
+
+    void marginsChanged();
 
 protected:
     virtual void plugin_mouse_event(Resource *resource, int32_t type) override;
@@ -119,6 +133,7 @@ private:
     uint32_t m_sizePolicy;
 
     bool m_isItemActive = false;
+    int m_margins = 0;
 };
 
 class PluginPopup : public QWaylandShellSurfaceTemplate<PluginSurface>, public QtWaylandServer::plugin_popup

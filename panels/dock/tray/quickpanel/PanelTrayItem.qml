@@ -16,10 +16,11 @@ Control {
     id: root
     property bool useColumnLayout: false
     required property var shellSurface
+    property int itemMargins
     property bool isOpened
     signal clicked()
     property bool contentHovered
-    padding: 5
+    padding: 0
     ColorSelector.hovered: root.contentHovered || root.hovered || root.isOpened
     property Palette textColor: DockPalette.iconTextPalette
     palette.windowText: ColorSelector.textColor
@@ -32,10 +33,12 @@ Control {
     }
 
     contentItem: Grid {
-        spacing: 5
         rows: root.useColumnLayout ? 2 : 1
+        spacing: 0
+        padding: 0
 
         Loader {
+            id: placeholder
             active: root.shellSurface
             visible: active
             sourceComponent: TrayItemSurface {
@@ -45,14 +48,17 @@ Control {
                 }
             }
         }
-        DciIcon {
+        Control {
             id: quickpanelPlaceholder
-            Layout.preferredWidth: 16
-            Layout.preferredHeight: 16
-            name: "dock-control-panel"
-            palette: DTK.makeIconPalette(root.palette)
-            theme: root.ColorSelector.controlTheme
-            sourceSize: Qt.size(quickpanelPlaceholder.width, quickpanelPlaceholder.width)
+            width: placeholder.width
+            height: placeholder.height
+            contentItem: DciIcon {
+                width: 16
+                height: 16
+                name: "dock-control-panel"
+                palette: DTK.makeIconPalette(root.palette)
+                theme: root.ColorSelector.controlTheme
+            }
             HoverHandler {
                 enabled: !root.isOpened
                 onHoveredChanged: function () {
@@ -87,14 +93,6 @@ Control {
         color1: isOpened ? openedPalette : unopenedPalette
         insideBorderColor: null
         outsideBorderColor: null
-
-        TapHandler {
-            gesturePolicy: TapHandler.ReleaseWithinBounds
-            acceptedButtons: Qt.LeftButton
-            onTapped: {
-                root.clicked()
-            }
-        }
     }
 
     component TrayItemSurface: Item {
@@ -125,13 +123,14 @@ Control {
             onItemGlobalPointChanged: {
                 if (!shellSurface || !(shellSurface.updatePluginGeometry))
                     return
+                shellSurface.margins = root.itemMargins
                 shellSurface.updatePluginGeometry(Qt.rect(itemGlobalPoint.x, itemGlobalPoint.y, 0, 0))
             }
         }
+    }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.clicked()
-        }
+    MouseArea {
+        anchors.fill: parent
+        onClicked: root.clicked()
     }
 }

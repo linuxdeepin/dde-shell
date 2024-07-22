@@ -15,18 +15,27 @@ import org.deepin.ds.dock 1.0
 import org.deepin.ds.dock.tray 1.0 as DDT
 
 Button {
+    id: root
     property alias inputEventsEnabled: surfaceItem.inputEventsEnabled
 
-    property size visualSize: isHorizontal ? Qt.size(pluginItem.implicitWidth + itemPadding * 2, itemHeight < pluginItem.implicitHeight + itemPadding * 2 ? itemHeight - itemPadding * 2 : pluginItem.implicitHeight + itemPadding * 2)
-                                           : Qt.size(itemWidth < pluginItem.implicitWidth + itemPadding * 2 ? itemWidth - itemPadding * 2 : pluginItem.implicitWidth + itemPadding * 2, pluginItem.implicitHeight + itemPadding * 2)
+    property size visualSize: isHorizontal ? Qt.size(pluginItem.implicitWidth, Math.min(itemHeight, pluginItem.implicitHeight))
+                                           : Qt.size(Math.min(itemWidth, pluginItem.implicitWidth), pluginItem.implicitHeight)
 
     readonly property int itemWidth: isHorizontal ? 0 : DDT.TrayItemPositionManager.dockHeight
     readonly property int itemHeight: isHorizontal ? DDT.TrayItemPositionManager.dockHeight : 0
 
-    topPadding: itemPadding
-    bottomPadding: itemPadding
-    leftPadding: itemPadding
-    rightPadding: itemPadding
+    required property bool itemVisible
+    topPadding: 0
+    bottomPadding: 0
+    leftPadding: 0
+    rightPadding: 0
+
+    function updatePluginMargins()
+    {
+        if (!itemVisible)
+            return
+        pluginItem.plugin.margins = itemPadding
+    }
 
     contentItem: Item {
         id: pluginItem
@@ -79,6 +88,7 @@ Button {
         Component.onCompleted: {
             if (!pluginItem.plugin)
                 return
+            updatePluginMargins()
             pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
             pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
         }
@@ -91,6 +101,7 @@ Button {
             onTriggered: {
                 if (!pluginItem.plugin)
                     return
+                updatePluginMargins()
                 if (pluginItem.itemGlobalPoint.x > 0 && pluginItem.itemGlobalPoint.y > 0) {
                     pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
                 }
@@ -120,6 +131,7 @@ Button {
         onVisibleChanged: {
             if (!pluginItem.plugin)
                 return
+            updatePluginMargins()
             pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
         }
     }
@@ -136,8 +148,8 @@ Button {
     }
 
     property Component overlayWindow: QuickDragWindow {
-        height: parent.visualSize.height
-        width: parent.visualSize.width
+        height: root.visualSize.height
+        width: root.visualSize.width
         Item {
             height: parent.height
             width: parent.width
