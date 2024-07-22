@@ -29,6 +29,22 @@ D.ToolButton {
     leftPadding: itemPadding
     rightPadding: itemPadding
 
+    property var itemGlobalPoint: {
+        var a = root
+        var x = 0, y = 0
+        while(a.parent) {
+            x += a.x
+            y += a.y
+            a = a.parent
+        }
+
+        return Qt.point(x + width / 2, y + height / 2)
+    }
+
+    onItemGlobalPointChanged: {
+        stashedPopup.collapsedBtnCenterPoint = itemGlobalPoint
+    }
+
     states: [
         State {
             name: "opened"
@@ -55,32 +71,6 @@ D.ToolButton {
     }
 
     onClicked: {
-        switch (Panel.position) {
-            case Dock.Top: {
-                var point = root.mapToItem(null, root.width / 2, 0)
-                stashedPopup.popupX = Qt.binding(function () { return point.x - stashedPopup.width / 2 })
-                stashedPopup.popupY = Qt.binding(function () { return Panel.rootObject.dockSize + 10 })
-                break
-            }
-            case Dock.Bottom: {
-                var point = root.mapToItem(null, root.width / 2, 0)
-                stashedPopup.popupX = Qt.binding(function () { return point.x - stashedPopup.width / 2 })
-                stashedPopup.popupY = Qt.binding(function () { return -stashedPopup.height - 10 })
-                break
-            }
-            case Dock.Left: {
-                var point = root.mapToItem(null, 0, root.height / 2)
-                stashedPopup.popupX = Qt.binding(function () { return Panel.rootObject.dockSize + 10 })
-                stashedPopup.popupY = Qt.binding(function () { return point.y - stashedPopup.height / 2 })
-                break
-            }
-            case Dock.Right: {
-                var point = root.mapToItem(null, 0, root.height / 2)
-                stashedPopup.popupX = Qt.binding(function () { return -stashedPopup.width - 10 })
-                stashedPopup.popupY = Qt.binding(function () { return  point.y - stashedPopup.height / 2 })
-                break
-            }
-        }
         stashedPopup.open()
     }
 }
