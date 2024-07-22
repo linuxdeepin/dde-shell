@@ -103,10 +103,10 @@ bool MouseGrabEventFilter::eventFilter(QObject *watched, QEvent *event)
 void MouseGrabEventFilter::mousePressEvent(QMouseEvent *e)
 {
     const auto bounding = m_target->geometry();
-    if ((e->position().toPoint().isNull() && !e->globalPosition().isNull()) ||
-        !bounding.contains(e->position().toPoint())) {
+    const auto pos = e->globalPosition();
+    if ((e->position().toPoint().isNull() && !pos.isNull()) ||
+        !bounding.contains(pos.toPoint())) {
         emit outsideMousePressed();
-        const auto pos = e->globalPosition();
         instance()->deliverMouseEvent(e->button(), pos.x(), pos.y());
         return;
     }
