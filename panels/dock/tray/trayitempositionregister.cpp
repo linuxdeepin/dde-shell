@@ -29,6 +29,8 @@ TrayItemPositionRegisterAttachedType::TrayItemPositionRegisterAttachedType(QObje
             this, &TrayItemPositionRegisterAttachedType::visualPositionChanged);
     connect(&TrayItemPositionManager::instance(), &TrayItemPositionManager::visualItemCountChanged,
             this, &TrayItemPositionRegisterAttachedType::visualPositionChanged);
+    connect(&TrayItemPositionManager::instance(), &TrayItemPositionManager::visualItemSizeChanged,
+            this, &TrayItemPositionRegisterAttachedType::visualPositionChanged);
 }
 
 QPoint TrayItemPositionRegisterAttachedType::visualPosition() const
