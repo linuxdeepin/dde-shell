@@ -17,6 +17,10 @@ Window {
     x: selectValue(transientParent ? transientParent.x + xOffset : 0, Screen.virtualX + 10, Screen.virtualX + Screen.width - root.width - 10)
     y: selectValue(transientParent ? transientParent.y + yOffset : 0, Screen.virtualY + 10, Screen.virtualY + Screen.height - root.height - 10)
     function selectValue(value, min, max) {
+        // wayland do not need to be limitted in the screen, this has been done by compositor
+        if (Qt.platform.pluginName === "wayland")
+            return value
+
         if (value < min)
             return min
         if (value > max)
@@ -31,7 +35,7 @@ Window {
         value: root.transientParent ? root.transientParent.screen: undefined
     }
     // TODO: it's a qt bug which make Qt.Popup can not get input focus
-    flags: Qt.Tool
+    flags: Qt.platform.pluginName === "xcb" ? Qt.Tool : Qt.ToolTip
     D.DWindow.enabled: true
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableSystemResize: false
