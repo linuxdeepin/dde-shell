@@ -100,6 +100,11 @@ AppletItem {
         width: stashedContainer.width
         height: stashedContainer.height
 
+        popupX: DockPanelPositioner.x
+        popupY: DockPanelPositioner.y
+
+        property point collapsedBtnCenterPoint: Qt.point(0, 0)
+
         Control {
             id: stashedContainer
             contentItem: StashContainer {
@@ -116,15 +121,20 @@ AppletItem {
                 anchors.centerIn: parent
             }
         }
+
+        Component.onCompleted: {
+            DockPanelPositioner.bounding = Qt.binding(function () {
+                return Qt.rect(collapsedBtnCenterPoint.x, collapsedBtnCenterPoint.y, stashedPopup.width, stashedPopup.height)
+            })
+        }
     }
     Connections {
         target: DDT.TraySortOrderModel
         function onActionsAlwaysVisibleChanged(val) {
-            if (val) {
-                if (!stashedPopup.popupVisible) {
-                    // TODO: position?
-                    stashedPopup.open()
-                }
+            if (val && !stashedPopup.popupVisible) {
+                stashedPopup.open()
+            } else if (!val) {
+                stashedPopup.close()
             }
         }
     }
