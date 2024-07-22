@@ -44,9 +44,9 @@ Item {
     }
 
     implicitWidth: width
-    width: columnCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing
+    width: columnCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing + itemSpacing * 2
     implicitHeight: height
-    height: rowCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing
+    height: rowCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing + itemSpacing * 2
 
     Behavior on width {
         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
@@ -93,10 +93,15 @@ Item {
         }
     }
 
-    // Tray items
-    Repeater {
+    Item {
         anchors.fill: parent
-        model: root.model
-        delegate: stashedItemDelegateChooser
+        anchors.margins: itemSpacing
+
+        // Tray items
+        Repeater {
+            anchors.fill: parent
+            model: root.model
+            delegate: stashedItemDelegateChooser
+        }
     }
 }

@@ -102,7 +102,6 @@ AppletItem {
 
         Control {
             id: stashedContainer
-            padding: 10
             contentItem: StashContainer {
                 id: stashContainer
                 color: "transparent"
@@ -122,7 +121,7 @@ AppletItem {
         target: DDT.TraySortOrderModel
         function onActionsAlwaysVisibleChanged(val) {
             if (val) {
-                if (!stashedPopup.visible) {
+                if (!stashedPopup.popupVisible) {
                     // TODO: position?
                     stashedPopup.open()
                 }
