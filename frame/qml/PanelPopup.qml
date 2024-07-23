@@ -65,8 +65,8 @@ Item {
         if (!popupWindow)
             return
 
-        popupWindow.currentItem = null
         popupWindow.close()
+        popupWindow.currentItem = null
     }
 
     Connections {
