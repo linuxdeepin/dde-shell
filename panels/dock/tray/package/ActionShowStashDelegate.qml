@@ -32,12 +32,12 @@ D.ToolButton {
     states: [
         State {
             name: "opened"
-            PropertyChanges { target: root; rotation: 180 }
+            PropertyChanges { target: root.contentItem; rotation: 180 }
         },
 
         State {
             name: "closed"
-            PropertyChanges { target: root; rotation: 0 }
+            PropertyChanges { target: root.contentItem; rotation: 0 }
         }
     ]
 
