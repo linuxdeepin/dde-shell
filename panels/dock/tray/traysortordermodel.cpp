@@ -352,6 +352,7 @@ void TraySortOrderModel::updateVisualIndexes()
         bool itemVisible = !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_COLLAPSABLE, TraySortOrderModel::SectionTypeRole);
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
+        results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
         if (itemVisible) {
             toogleCollapseActionVisible = true;
             results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
@@ -365,6 +366,7 @@ void TraySortOrderModel::updateVisualIndexes()
     results = findItems("internal/action-toggle-collapse");
     Q_ASSERT(!results.isEmpty());
     results[0]->setData(toogleCollapseActionVisible, TraySortOrderModel::VisibilityRole);
+    results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
     if (toogleCollapseActionVisible) {
         results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
         currentVisualIndex++;
@@ -377,6 +379,7 @@ void TraySortOrderModel::updateVisualIndexes()
         bool itemVisible = !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_PINNED, TraySortOrderModel::SectionTypeRole);
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
+        results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
         if (itemVisible) {
             results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
             currentVisualIndex++;
@@ -399,6 +402,7 @@ void TraySortOrderModel::updateVisualIndexes()
         bool itemVisible = !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_FIXED, TraySortOrderModel::SectionTypeRole);
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
+        results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
         if (itemVisible) {
             results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
             currentVisualIndex++;
