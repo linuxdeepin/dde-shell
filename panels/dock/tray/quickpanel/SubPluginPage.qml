@@ -48,7 +48,6 @@ Item {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
                 onClicked: {
                     console.log("request back:", pluginId)
-                    shellSurface.close()
                     requestBack()
                 }
                 background: BoxPanel {
@@ -85,6 +84,7 @@ Item {
         // content
         ShellSurfaceItemProxy {
             id: surfaceLayer
+            autoClose: true
             Layout.fillWidth: true
         }
 
