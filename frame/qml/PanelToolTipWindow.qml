@@ -11,6 +11,6 @@ PanelPopupWindow {
     id: root
 
     flags: Qt.Tool | Qt.WindowStaysOnTopHint
-    D.DWindow.windowRadius: 4 * Screen.devicePixelRatio
+    D.DWindow.windowRadius: 4
     D.DWindow.shadowRadius: 8
 }
