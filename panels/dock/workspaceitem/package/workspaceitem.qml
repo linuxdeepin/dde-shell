@@ -90,6 +90,7 @@ AppletItem {
                     Applet.dataModel.currentIndex =  content.index
                 }
                 onEntered: {
+                    toolTip.text = content.workspaceName
                     var point = content.mapToItem(null, content.width / 2, content.height / 2)
                     toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
                     toolTip.open()
@@ -106,7 +107,6 @@ AppletItem {
         id: toolTip
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
-        text: listView.currentItem ? listView.currentItem.workspaceName : ""
     }
 
     Rectangle {
