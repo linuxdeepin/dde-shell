@@ -50,8 +50,8 @@ Control {
         }
         Control {
             id: quickpanelPlaceholder
-            width: placeholder.width
-            height: placeholder.height
+            width: placeholder.active ? placeholder.width : 16 + itemMargins
+            height: placeholder.active ? placeholder.height : 16 + itemMargins
             contentItem: DciIcon {
                 width: 16
                 height: 16
