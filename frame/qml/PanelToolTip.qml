@@ -5,13 +5,13 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import org.deepin.ds 1.0
+import org.deepin.dtk.style as DStyle
 
 Item {
     id: control
 
-    property alias toolTipContent: toolTip.contentChildren
     default property alias toolTipContentItem: toolTip.contentItem
-    property alias text: toolTip.text
+    property string text
     property alias toolTipVisible: toolTip.visible
     property var toolTipWindow: Panel.toolTipWindow
     property int toolTipX: 0
@@ -71,25 +71,21 @@ Item {
         close()
     }
 
-    ToolTip {
+    Control {
         id: toolTip
-        padding: 0
+        padding: DStyle.Style.toolTip.horizontalPadding
         visible: readyBinding
-        // TODO it's a bug for qt, ToolTip's text color can't change with window's palette changed.
-        palette.toolTipText: toolTipWindow ? toolTipWindow.palette.toolTipText : undefined
         anchors.centerIn: parent
         topPadding: 0
         bottomPadding: 0
         parent: toolTipWindow ? toolTipWindow.contentItem : undefined
-        onParentChanged: function() {
-            if (!toolTipWindow)
-                return
-            toolTipWindow.visibleChanged.connect(function() {
-                if (toolTipWindow && !toolTipWindow.visible)
-                    toolTip.close()
-            })
+        contentItem: Text {
+            horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
+            font: toolTip.font
+            wrapMode: Text.WordWrap
+            text: control.text
+            color: toolTip.palette.windowText
         }
-        // TODO dtk's blur causes blurred screen.
-        background: null
     }
 }
