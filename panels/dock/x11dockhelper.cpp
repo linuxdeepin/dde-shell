@@ -147,7 +147,7 @@ DockTriggerArea::DockTriggerArea(DockPanel *panel, X11DockHelper *helper, QScree
     , m_holdingTimer(new QTimer(this))
 {
     m_triggerTimer->setSingleShot(true);
-    m_triggerTimer->setInterval(1000);
+    m_triggerTimer->setInterval(1500);
     m_holdingTimer->setSingleShot(true);
     m_holdingTimer->setInterval(200);
 
