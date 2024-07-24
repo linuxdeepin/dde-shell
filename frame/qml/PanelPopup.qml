@@ -15,6 +15,8 @@ Item {
     property int popupX: 0
     property int popupY: 0
     property bool readyBinding: false
+    width: popup.childrenRect.width
+    height: popup.childrenRect.height
 
     Binding {
         when: readyBinding
@@ -85,8 +87,8 @@ Item {
     Item {
         id: popup
         visible: readyBinding
-        width: childrenRect.width
-        height: childrenRect.height
+        width: control.width
+        height: control.height
         parent: popupWindow ? popupWindow.contentItem : undefined
     }
     Component.onDestruction: {
