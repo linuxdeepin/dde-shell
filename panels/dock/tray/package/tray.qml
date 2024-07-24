@@ -119,6 +119,11 @@ AppletItem {
                     }
                 }
                 anchors.centerIn: parent
+                onRowCountChanged: {
+                    if (stashContainer.rowCount === 0 || stashContainer.columnCount === 0) {
+                        stashedPopup.close()
+                    }
+                }
             }
         }
 
