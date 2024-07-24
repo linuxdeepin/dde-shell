@@ -9,12 +9,14 @@ import org.deepin.ds 1.0
 Item {
     id: control
     visible: false
-    default property alias menuContent: menu.contentChildren
+    default property alias menuContent: menu.children
     property alias menuVisible: menu.visible
     property var menuWindow: Panel.menuWindow
     property int menuX: 0
     property int menuY: 0
     property bool readyBinding: false
+    width: menu.childrenRect.width
+    height: menu.childrenRect.height
 
     Binding {
         when: readyBinding
@@ -82,23 +84,12 @@ Item {
         }
     }
 
-    Popup {
+    Item {
         id: menu
-        padding: 0
         visible: readyBinding
         width: control.width
         height: control.height
         parent: menuWindow ? menuWindow.contentItem : undefined
-        onParentChanged: function() {
-            if (!menuWindow)
-                return
-            menuWindow.visibleChanged.connect(function() {
-                if (menuWindow && !menuWindow.visible)
-                    control.close()
-            })
-        }
-        // TODO dtk's blur causes blurred screen.
-        background: null
     }
     Component.onDestruction: {
         if (menu.visible)
