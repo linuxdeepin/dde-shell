@@ -1,3 +1,20 @@
+dde-shell (0.0.30) unstable; urgency=medium
+
+  * fix: the item of datetime and showdesktop display overlap(Issue: 9696)
+  * fix: add margins to extend mouse area for tray item(Issue: 9720)
+  * fix: large radius when exist scaling(Issue: 9818)
+  * fix: popup can drag(Issue: 9896)
+  * fix: workSpace toolTip text error(Issue: 9877)
+  * fix: Tray button rotates as a whole(Issue: 9880)
+  * fix: Application tray position drift(Issue: 9603)
+  * fix: tray container shows blank area when there is only one item(Issue: 9887)
+  * fix: Application preview background color overflow(Issue: 9433)
+  * fix: Application preview background color overflow(Issue: 9433)
+  * fix: the stash container turns into a small ball(Issue: 9830)
+  * refact: using Item instead of Popup for PanelPopup(Issue: 9676)
+
+ -- zyz <zhaoyingzhen@uniontech.com>  Wed, 24 Jul 2024 14:27:44 +0800
+
 dde-shell (0.0.29) unstable; urgency=medium
 
   * fix: can't hide menu when click outside dock
