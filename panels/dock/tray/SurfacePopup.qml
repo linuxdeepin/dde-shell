@@ -66,6 +66,8 @@ Item {
         width: menuSurfaceLayer.width
         height: menuSurfaceLayer.height
         menuWindow: menuWindow
+        menuX: DockPositioner.x
+        menuY: DockPositioner.y
 
         property alias shellSurface: menuSurfaceLayer.shellSurface
         ShellSurfaceItemProxy {
@@ -107,11 +109,9 @@ Item {
                 console.log(root.objectName, ": menu created", popupSurface.popupType, popupSurface.pluginId)
 
                 menu.shellSurface = popupSurface
-                menu.menuX = Qt.binding(function () {
-                    return menu.shellSurface.x
-                })
-                menu.menuY = Qt.binding(function () {
-                    return menu.shellSurface.y
+                menu.DockPositioner.bounding = Qt.binding(function () {
+                    var point = Qt.point(menu.shellSurface.x, menu.shellSurface.y)
+                    return Qt.rect(point.x, point.y, menu.width, menu.height)
                 })
                 menu.open()
             }
