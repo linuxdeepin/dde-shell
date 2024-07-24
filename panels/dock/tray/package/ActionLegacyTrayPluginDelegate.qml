@@ -32,15 +32,12 @@ Button {
 
     function updatePluginMargins()
     {
-        if (!itemVisible)
-            return
         pluginItem.plugin.margins = itemPadding
     }
 
     contentItem: Item {
         id: pluginItem
         property var plugin: DockCompositor.findSurface(model.surfaceId)
-        property var popupShow: false
         implicitHeight: surfaceItem.height
         implicitWidth: surfaceItem.width
 
@@ -86,7 +83,7 @@ Button {
         }
 
         Component.onCompleted: {
-            if (!pluginItem.plugin)
+            if (!pluginItem.plugin || !itemVisible)
                 return
             updatePluginMargins()
             pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
@@ -99,7 +96,7 @@ Button {
             running: false
             repeat: false
             onTriggered: {
-                if (!pluginItem.plugin)
+                if (!pluginItem.plugin || !itemVisible)
                     return
                 updatePluginMargins()
                 if (pluginItem.itemGlobalPoint.x > 0 && pluginItem.itemGlobalPoint.y > 0) {
@@ -114,8 +111,7 @@ Button {
             running: false
             repeat: false
             onTriggered: {
-                if (!pluginItem.plugin)
-                    return
+                if (!pluginItem.plugin || !itemVisible)
                 pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
             }
         }
@@ -129,7 +125,7 @@ Button {
         }
 
         onVisibleChanged: {
-            if (!pluginItem.plugin)
+            if (!pluginItem.plugin || !itemVisible)
                 return
             updatePluginMargins()
             pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
