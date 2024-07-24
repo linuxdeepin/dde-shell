@@ -13,9 +13,24 @@ Window {
 
     property real xOffset: 0
     property real yOffset: 0
+    property int margins: 10
     property Item currentItem
-    x: selectValue(transientParent ? transientParent.x + xOffset : 0, Screen.virtualX + 10, Screen.virtualX + Screen.width - root.width - 10)
-    y: selectValue(transientParent ? transientParent.y + yOffset : 0, Screen.virtualY + 10, Screen.virtualY + Screen.height - root.height - 10)
+    signal requestUpdateGeometry()
+
+    // order to update screen and (x,y)
+    function updateGeometry()
+    {
+        // following transientParent's screen.
+        root.screen = root.transientParent.screen
+
+        let bounding = Qt.rect(root.screen.virtualX + margins, root.screen.virtualY + margins,
+                               root.screen.width - margins * 2, root.screen.height - margins * 2)
+        let pos = Qt.point(transientParent ? transientParent.x + xOffset : xOffset,
+                           transientParent ? transientParent.y + yOffset : YOffset)
+        x = selectValue(pos.x, bounding.left, bounding.right - root.width)
+        y = selectValue(pos.y, bounding.top, bounding.bottom - root.height)
+    }
+
     function selectValue(value, min, max) {
         // wayland do not need to be limitted in the screen, this has been done by compositor
         if (Qt.platform.pluginName === "wayland")
@@ -28,12 +43,9 @@ Window {
 
         return value
     }
-    // following transientParent's screen.
-    Binding {
-        when: root.transientParent
-        target: root; property: "screen"
-        value: root.transientParent ? root.transientParent.screen: undefined
-    }
+
+    width: 10
+    height: 10
     // TODO: it's a qt bug which make Qt.Popup can not get input focus
     flags: Qt.platform.pluginName === "xcb" ? Qt.Tool : Qt.ToolTip
     D.DWindow.enabled: true
@@ -49,6 +61,21 @@ Window {
         if (!arg)
             DS.closeChildrenWindows(root)
     }
+
+    Connections {
+        target: root.transientParent
+        function onScreenChanged()
+        {
+            requestUpdateGeometry()
+        }
+    }
+
+    onHeightChanged: requestUpdateGeometry()
+    onWidthChanged: requestUpdateGeometry()
+    onXOffsetChanged: requestUpdateGeometry()
+    onYOffsetChanged: requestUpdateGeometry()
+
+    onRequestUpdateGeometry: Qt.callLater(updateGeometry)
 
     D.StyledBehindWindowBlur {
         control: parent
