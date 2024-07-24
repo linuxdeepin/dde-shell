@@ -9,7 +9,7 @@ import org.deepin.ds 1.0
 Item {
     id: control
     visible: false
-    default property alias popupContent: popup.contentChildren
+    default property alias popupContent: popup.children
     property alias popupVisible: popup.visible
     property var popupWindow: Panel.popupWindow
     property int popupX: 0
@@ -82,23 +82,12 @@ Item {
         }
     }
 
-    Popup {
+    Item {
         id: popup
-        padding: 0
         visible: readyBinding
-        width: control.width
-        height: control.height
+        width: childrenRect.width
+        height: childrenRect.height
         parent: popupWindow ? popupWindow.contentItem : undefined
-        onParentChanged: function() {
-            if (!popupWindow)
-                return
-            popupWindow.visibleChanged.connect(function() {
-                if (popupWindow && !popupWindow.visible)
-                    control.close()
-            })
-        }
-        // TODO dtk's blur causes blurred screen.
-        background: null
     }
     Component.onDestruction: {
         if (popup.visible)
