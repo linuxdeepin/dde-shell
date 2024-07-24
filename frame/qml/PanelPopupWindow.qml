@@ -59,6 +59,8 @@ Window {
     color: "transparent"
     onVisibleChanged: function (arg) {
         if (!arg)
+            currentItem = null
+        if (!arg)
             DS.closeChildrenWindows(root)
     }
 

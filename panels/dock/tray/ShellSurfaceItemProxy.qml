@@ -17,7 +17,7 @@ ShellSurfaceItem {
     }
     function closeShellSurface()
     {
-        if (surface && shellSurface) {
+        if (surface && shellSurface && output.window && output.window.visible) {
             DockCompositor.closeShellSurface(shellSurface)
         }
     }
