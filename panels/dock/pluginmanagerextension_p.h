@@ -22,6 +22,7 @@ class PluginManager : public QWaylandCompositorExtensionTemplate<PluginManager>,
 
     Q_PROPERTY(uint32_t dockPosition READ dockPosition WRITE setDockPosition)
     Q_PROPERTY(uint32_t dockColorTheme READ dockColorTheme WRITE setDockColorTheme)
+    Q_PROPERTY(QSize dockSize READ dockSize WRITE setDockSize NOTIFY dockSizeChanged FINAL)
 
 public:
     PluginManager(QWaylandCompositor *compositor = nullptr);
@@ -38,11 +39,18 @@ public:
 
     void setEmbedPanelMinHeight(int height);
 
+    QSize dockSize() const;
+    void setDockSize(const QSize &newDockSize);
+
+public slots:
+    void updateDockSize();
+
 Q_SIGNALS:
     void pluginPopupCreated(PluginPopup*);
     void pluginSurfaceCreated(PluginSurface*);
     void pluginSurfaceDestroyed(PluginSurface*);
     void messageRequest(PluginSurface *, const QString &msg);
+    void dockSizeChanged();
 
 protected:
     virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg) override;
@@ -59,6 +67,7 @@ private:
 
     uint32_t m_dockPosition;
     uint32_t m_dockColorTheme;
+    QSize m_dockSize;
 };
 
 class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public QtWaylandServer::plugin

@@ -17,6 +17,7 @@ Item {
 
     property alias dockPosition: pluginManager.dockPosition
     property alias dockColorTheme: pluginManager.dockColorTheme
+    property alias dockSize: pluginManager.dockSize
 
     property ListModel trayPluginSurfaces: ListModel {}
     property ListModel quickPluginSurfaces: ListModel {}
