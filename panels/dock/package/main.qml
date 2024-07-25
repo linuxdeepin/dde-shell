@@ -542,6 +542,10 @@ Window {
             return Panel.position
         })
 
+        DockCompositor.dockSize = Qt.binding(function(){
+            return Qt.size(Panel.frontendWindowRect.width, Panel.frontendWindowRect.height)
+        })
+
         dock.itemIconSizeBase = dock.dockItemMaxSize
 
         changeDragAreaAnchor()

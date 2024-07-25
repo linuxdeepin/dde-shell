@@ -234,6 +234,8 @@ void PluginManager::updateDockOverflowState(int state)
 
 void PluginManager::dockPanelSizeChanged(int width, int height)
 {
+    if (width <= 0 || height <= 0)
+        return;
     QJsonObject sizeData;
     sizeData["width"] = width;
     sizeData["height"] = height;
@@ -344,6 +346,10 @@ void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QS
     auto plugin = new PluginSurface(this, pluginId, itemKey, display_name, plugin_flags, type, size_policy, qwaylandSurface, shellSurfaceResource);
     m_pluginSurfaces << plugin;
     Q_EMIT pluginSurfaceCreated(plugin);
+
+    QTimer::singleShot(100, [this] () {
+        updateDockSize();
+    });
 }
 
 void PluginManager::plugin_manager_v1_create_popup_at(Resource *resource, const QString &pluginId, const QString &itemKey, int32_t type, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id)
@@ -398,4 +404,23 @@ void PluginSurface::setMargins(int newMargins)
     send_margin(m_margins);
 
     emit marginsChanged();
+}
+
+QSize PluginManager::dockSize() const
+{
+    return m_dockSize;
+}
+
+void PluginManager::setDockSize(const QSize &newDockSize)
+{
+    if (m_dockSize == newDockSize)
+        return;
+    m_dockSize = newDockSize;
+    updateDockSize();
+    emit dockSizeChanged();
+}
+
+void PluginManager::updateDockSize()
+{
+    dockPanelSizeChanged(m_dockSize.width(), m_dockSize.height());
 }
