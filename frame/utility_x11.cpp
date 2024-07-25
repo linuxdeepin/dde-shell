@@ -72,10 +72,10 @@ bool X11Utility::grabMouse(QWindow *target, bool grab)
         auto filter = new MouseGrabEventFilter(target);
         qApp->installEventFilter(filter);
         QObject::connect(filter, &MouseGrabEventFilter::outsideMousePressed, target, [filter, target] () {
-            qCDebug(dsLog) << "ungrab mouse for the window:" << target->winId();
-            target->close();
             qApp->removeEventFilter(filter);
+            qCDebug(dsLog) << "ungrab mouse for the window:" << target->winId();
             target->setMouseGrabEnabled(false);
+            target->close();
             filter->deleteLater();
         });
         return target->setMouseGrabEnabled(grab);
@@ -106,8 +106,8 @@ void MouseGrabEventFilter::mousePressEvent(QMouseEvent *e)
     const auto pos = e->globalPosition();
     if ((e->position().toPoint().isNull() && !pos.isNull()) ||
         !bounding.contains(pos.toPoint())) {
-        emit outsideMousePressed();
         instance()->deliverMouseEvent(e->button(), pos.x(), pos.y());
+        emit outsideMousePressed();
         return;
     }
 }
