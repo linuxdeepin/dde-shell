@@ -13,6 +13,8 @@ namespace docktray {
 class TrayItemPositionRegisterAttachedType : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString surfaceId MEMBER m_surfaceId NOTIFY surfaceIdChanged)
+    Q_PROPERTY(QString sectionType MEMBER m_sectionType NOTIFY sectionTypeChanged)
     Q_PROPERTY(int visualIndex MEMBER m_visualIndex NOTIFY visualIndexChanged)
     Q_PROPERTY(QSize visualSize MEMBER m_visualSize NOTIFY visualSizeChanged)
     Q_PROPERTY(QPoint visualPosition READ visualPosition NOTIFY visualPositionChanged)
@@ -23,6 +25,8 @@ public:
     QPoint visualPosition() const;
 
 signals:
+    void surfaceIdChanged(QString);
+    void sectionTypeChanged(QString);
     void visualIndexChanged(int);
     void visualSizeChanged(QSize);
     void visualPositionChanged();
@@ -30,6 +34,8 @@ signals:
 private:
     void registerVisualSize();
 
+    QString m_surfaceId;
+    QString m_sectionType;
     int m_visualIndex = -1;
     QSize m_visualSize;
 };

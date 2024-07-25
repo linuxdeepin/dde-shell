@@ -15,8 +15,10 @@ Control {
     property size visualSize: Qt.size(0, 0)
 
     property point visualPosition: DDT.TrayItemPositionRegister.visualPosition
-    DDT.TrayItemPositionRegister.visualIndex: model.visualIndex
-    DDT.TrayItemPositionRegister.visualSize: Qt.size(width, height)
+    DDT.TrayItemPositionRegister.visualIndex: (model.sectionType !== "stashed") ? model.visualIndex : -1
+    DDT.TrayItemPositionRegister.visualSize: (model.sectionType !== "stashed") ? Qt.size(width, height) : Qt.size(0, 0)
+    DDT.TrayItemPositionRegister.surfaceId: model.surfaceId
+    DDT.TrayItemPositionRegister.sectionType: model.sectionType
 
     width: visualSize.width !== 0 ? visualSize.width : DDT.TrayItemPositionManager.itemVisualSize.width
     height: visualSize.height !== 0 ? visualSize.height : DDT.TrayItemPositionManager.itemVisualSize.height
