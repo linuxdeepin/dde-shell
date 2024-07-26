@@ -40,11 +40,19 @@ AppletItem {
         }
     }
 
+    PanelToolTip {
+        id: toolTip
+        text: qsTr("show desktop")
+        toolTipX: DockPanelPositioner.x
+        toolTipY: DockPanelPositioner.y
+    }
+
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton
         onPressed: {
+            toolTip.close()
             if (showdesktop.needRecoveryWin)
                 showdesktop.needRecoveryWin = false
             else
@@ -58,15 +66,17 @@ AppletItem {
                 rectangle.opacity = 0.01
         }
         onEntered: {
-            if (Applet.checkNeedShowDesktop()) {
-                showdesktop.needRecoveryWin = true
-                Applet.toggleShowDesktop()
-            }
+            var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, Applet.rootObject.height / 2)
+            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+            toolTip.open()
+
             rectangle.opacity = 0.3
         }
         onExited: {
             if (showdesktop.needRecoveryWin)
                 Applet.toggleShowDesktop()
+
+            toolTip.close()
             rectangle.opacity = 0.01
         }
     }
