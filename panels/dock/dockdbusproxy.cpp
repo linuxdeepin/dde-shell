@@ -21,6 +21,7 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
     , m_clipboardApplet(nullptr)
     , m_searchApplet(nullptr)
     , m_multitaskviewApplet(nullptr)
+    , m_showdesktopApplet(nullptr)
     , m_trayApplet(nullptr)
 {
     registerPluginInfoMetaType();
@@ -29,12 +30,14 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
         setPluginVisible("org.deepin.ds.dock.clipboarditem", pluginsVisible);
         setPluginVisible("org.deepin.ds.dock.searchitem", pluginsVisible);
         setPluginVisible("org.deepin.ds.dock.multitaskview", pluginsVisible);
+        setPluginVisible("org.deepin.ds.dock.showdesktop", pluginsVisible);
     });
     connect(parent, &DockPanel::rootObjectChanged, this, [this]() {
         auto pluginsVisible = DockSettings::instance()->pluginsVisible();
         setPluginVisible("org.deepin.ds.dock.clipboarditem", pluginsVisible);
         setPluginVisible("org.deepin.ds.dock.searchitem", pluginsVisible);
         setPluginVisible("org.deepin.ds.dock.multitaskview", pluginsVisible);
+        setPluginVisible("org.deepin.ds.dock.showdesktop", pluginsVisible);
     });
 
     // Communicate with the other module
@@ -51,7 +54,10 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
         list = appletList("org.deepin.ds.dock.multitaskview");
         if (!list.isEmpty()) m_multitaskviewApplet = list.first();
 
-        return m_trayApplet && m_clipboardApplet && m_searchApplet && m_multitaskviewApplet;
+        list = appletList("org.deepin.ds.dock.showdesktop");
+        if (!list.isEmpty()) m_showdesktopApplet = list.first();
+
+        return m_trayApplet && m_clipboardApplet && m_searchApplet && m_multitaskviewApplet && m_showdesktopApplet;
     };
 
     // TODO: DQmlGlobal maybe missing a  signal which named `appletListChanged`?
@@ -259,6 +265,13 @@ DockItemInfos DockDBusProxy::plugins()
             iteminfos.append(info);
         }
     }
+
+    if (m_showdesktopApplet && DWindowManagerHelper::instance()->hasComposite()) {
+        DockItemInfo info;
+        if (QMetaObject::invokeMethod(m_showdesktopApplet, "dockItemInfo", Qt::DirectConnection, qReturnArg(info))) {
+            iteminfos.append(info);
+        }
+    }
     return iteminfos;
 }
 
@@ -286,6 +299,11 @@ void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &item
         DockSettings::instance()->setPluginsVisible(pluginsVisible);
     } else if (itemKey == "multitasking-view" && m_multitaskviewApplet) {
         QMetaObject::invokeMethod(m_multitaskviewApplet, "setVisible", Qt::QueuedConnection, visible);
+        auto pluginsVisible = DockSettings::instance()->pluginsVisible();
+        pluginsVisible[itemKey] = visible;
+        DockSettings::instance()->setPluginsVisible(pluginsVisible);
+    } else if (itemKey == "showdesktop" && m_showdesktopApplet) {
+        QMetaObject::invokeMethod(m_showdesktopApplet, "setVisible", Qt::QueuedConnection, visible);
         auto pluginsVisible = DockSettings::instance()->pluginsVisible();
         pluginsVisible[itemKey] = visible;
         DockSettings::instance()->setPluginsVisible(pluginsVisible);
