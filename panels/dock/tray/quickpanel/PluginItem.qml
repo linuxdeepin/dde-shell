@@ -15,13 +15,12 @@ Control {
     property alias shellSurface: surfaceLayer.shellSurface
     property alias traySurface: dragLayer.fallbackDragImage
     property bool canDrag: true
+    property int radius: 8
     function updateSurface()
     {
         surfaceLayer.updateSurfacePosition()
     }
 
-    // Control's hovered is false when hover ShellSurfaceItem.
-    ColorSelector.hovered: hoverHandler.hovered
     DragItem {
         id: dragLayer
         anchors.fill: parent
@@ -48,6 +47,10 @@ Control {
         id: hoverHandler
         parent: surfaceLayer
     }
+    TapHandler {
+        id: tapHandler
+        parent: surfaceLayer
+    }
 
     ShellSurfaceItemProxy {
         id: surfaceLayer
@@ -72,10 +75,69 @@ Control {
         }
     }
 
-    background: BoxPanel {
-        insideBorderColor: null
-        outsideBorderColor: null
-        color2: color1
-        radius: 10
+    background: Control {
+        id: backgroundControl
+
+        // Control's hovered is false when hover ShellSurfaceItem.
+        ColorSelector.hovered: hoverHandler.hovered
+        ColorSelector.pressed: tapHandler.pressed
+        property Palette backgroundColor: Palette {
+            normal {
+                common: ("transparent")
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.3)
+            }
+            normalDark {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.05)
+            }
+            hovered {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.4)
+            }
+            hoveredDark {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.1)
+            }
+            pressed {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.45)
+            }
+            pressedDark {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.15)
+            }
+        }
+        property Palette insideBorderColor: Palette {
+            normal {
+                common: ("transparent")
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.1)
+            }
+            normalDark {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.05)
+            }
+        }
+        property Palette outsideBorderColor: Palette {
+            normal {
+                common: ("transparent")
+                crystal: Qt.rgba(0.0, 0.0, 0.0, 0.03)
+            }
+            normalDark {
+                crystal: Qt.rgba(0.0, 0.0, 0.0, 0.05)
+            }
+        }
+        Rectangle {
+            anchors.fill: parent
+            radius: root.radius
+            color: backgroundControl.ColorSelector.backgroundColor
+        }
+        InsideBoxBorder {
+            anchors.fill: parent
+            radius: root.radius
+            color: backgroundControl.ColorSelector.insideBorderColor
+            borderWidth: 1
+            z: DTK.AboveOrder
+        }
+        OutsideBoxBorder {
+            anchors.fill: parent
+            radius: root.radius
+            color: backgroundControl.ColorSelector.outsideBorderColor
+            borderWidth: 1 / Screen.devicePixelRatio
+            z: DTK.AboveOrder
+        }
     }
 }
