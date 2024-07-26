@@ -1,3 +1,9 @@
+dde-shell (0.0.32) unstable; urgency=medium
+
+  * fix: unable to set visibility of 'Show Desktop' in DCC(Issue: 9820)
+
+ -- zyz <zhaoyingzhen@uniontech.com>  Fri, 26 Jul 2024 16:11:19 +0800
+
 dde-shell (0.0.31) unstable; urgency=medium
 
   * bump version to 0.0.31
