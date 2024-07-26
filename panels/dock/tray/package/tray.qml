@@ -100,6 +100,9 @@ AppletItem {
         width: stashedContainer.width
         height: stashedContainer.height
 
+        property alias dropHover: stashContainer.dropHover
+        property alias stashItemDragging: stashContainer.stashItemDragging
+
         popupX: DockPanelPositioner.x
         popupY: DockPanelPositioner.y
 
@@ -136,11 +139,18 @@ AppletItem {
     Connections {
         target: DDT.TraySortOrderModel
         function onActionsAlwaysVisibleChanged(val) {
-            if (val && !stashedPopup.popupVisible) {
-                stashedPopup.open()
-            } else if (!val) {
-                stashedPopup.close()
-            }
+            if (!val)
+            closeStashPopupTimer.start()
+        }
+    }
+
+    // Bug to prevent icons from returning to the application tray when the tray is already hidden, which can cause layout confusion
+    Timer {
+        id: closeStashPopupTimer
+        interval: 10
+        repeat: false
+        onTriggered: {
+            stashedPopup.close()
         }
     }
 
