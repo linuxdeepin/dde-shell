@@ -8,11 +8,9 @@ import org.deepin.dtk 1.0 as D
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
-import org.deepin.ds.dock.tray 1.0 as DDT
 
 D.ToolButton {
     id: root
-    property bool isDropHover: model.visualIndex === dropHoverIndex && dropHoverIndex !== -1
 
     icon.name: {
         switch (Panel.position) {
@@ -31,8 +29,6 @@ D.ToolButton {
     leftPadding: itemPadding
     rightPadding: itemPadding
 
-    D.ColorSelector.hovered: (isDropHover && DDT.TraySortOrderModel.actionsAlwaysVisible) || hoverHandler.hovered
-
     property var itemGlobalPoint: {
         var a = root
         var x = 0, y = 0
@@ -43,10 +39,6 @@ D.ToolButton {
         }
 
         return Qt.point(x + width / 2, y + height / 2)
-    }
-
-    HoverHandler {
-        id: hoverHandler
     }
 
     onItemGlobalPointChanged: {
@@ -70,23 +62,6 @@ D.ToolButton {
             RotationAnimation { duration: 200; }
         }
     ]
-
-    onIsDropHoverChanged: {
-        if (isDropHover && !stashedPopup.popupVisible) {
-            stashedPopup.dropHover = false
-            stashedPopup.open()
-        }
-    }
-
-    Timer {
-        id: closeStashPopupTimer
-        running: !isDropHover && !stashedPopup.dropHover && !stashedPopup.stashItemDragging
-        interval: 300
-        repeat: false
-        onTriggered: {
-            stashedPopup.close()
-        }
-    }
 
     Binding {
         target: root
