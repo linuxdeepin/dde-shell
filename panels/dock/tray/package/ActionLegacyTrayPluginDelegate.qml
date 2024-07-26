@@ -30,8 +30,6 @@ Button {
     leftPadding: 0
     rightPadding: 0
 
-    visible: !Drag.active
-
     function updatePluginMargins()
     {
         pluginItem.plugin.margins = itemPadding
@@ -159,27 +157,24 @@ Button {
         }
     }
 
-    Drag.active: mouseArea.drag.active
+    Drag.active: dragHandler.active
     Drag.dragType: Drag.Automatic
     DQuickDrag.overlay: overlayWindow
     DQuickDrag.active: Drag.active
     DQuickDrag.hotSpotScale: Qt.size(0.5, 1)
     Drag.mimeData: {
-        "text/x-dde-shell-tray-dnd-surfaceId": model.surfaceId,
-        "text/x-dde-shell-tray-dnd-sectionType": model.sectionType
+        "text/x-dde-shell-tray-dnd-surfaceId": model.surfaceId
     }
     Drag.supportedActions: Qt.MoveAction
     Drag.onActiveChanged: {
         DDT.TraySortOrderModel.actionsAlwaysVisible = Drag.active
+        pluginItem.visible = !Drag.active
         if (!Drag.active) {
             // reset position on drop
             Qt.callLater(() => { x = 0; y = 0; });
         }
     }
-
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        drag.target: root
+    DragHandler {
+        id: dragHandler
     }
 }

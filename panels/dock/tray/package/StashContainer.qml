@@ -31,8 +31,6 @@ Item {
 
     readonly property int columnCount: Math.ceil(Math.sqrt(model.count))
     readonly property int rowCount: Math.round(Math.sqrt(model.count))
-    property bool dropHover: false
-    property bool stashItemDragging: false
 
     function isStashPopup(surfaceId)
     {
@@ -83,12 +81,7 @@ Item {
         anchors.fill: parent
         keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
         onEntered: function (dragEvent) {
-            let sectionType = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType")
-            dropHover = true
-            stashItemDragging = sectionType === "stashed"
-        }
-        onExited: function (dragEvent) {
-            dropHover = false
+            console.log(dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId"))
         }
         onPositionChanged: function (dragEvent) {
             let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
