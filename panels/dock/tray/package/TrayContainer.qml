@@ -85,6 +85,8 @@ Item {
 
     property int trayHeight: 50
     property size containerSize: DDT.TrayItemPositionManager.visualSize
+    // visiualIndex default value is -1
+    property int dropHoverIndex: -1
 
     implicitWidth: width
     width: containerSize.width
@@ -119,14 +121,22 @@ Item {
         onEntered: function (dragEvent) {
             console.log(dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId"))
         }
+
         onPositionChanged: function (dragEvent) {
             let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
             let pos = root.isHorizontal ? drag.x : drag.y
             let currentItemIndex = pos / (root.itemVisualSize + root.itemSpacing)
             let currentPosMapToItem = pos % (root.itemVisualSize + root.itemSpacing)
             let isBefore = currentPosMapToItem < root.itemVisualSize / 2
-            console.log("dragging", surfaceId, Math.floor(currentItemIndex), currentPosMapToItem, isBefore)
-            // DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
+            dropHoverIndex = Math.floor(currentItemIndex)
+            let isStash = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType") === "stashed"
+            // TODO: If this method is used in the stash area, it will cause the drag state to be terminated when dragging to the tray area
+            if (!isStash && dropHoverIndex !== 0) {
+                dropTrayTimer.handleDrop = function() {
+                    DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
+                }
+                dropTrayTimer.start()
+            }
         }
         onDropped: function (dropEvent) {
             let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
@@ -136,6 +146,16 @@ Item {
             console.log("dropped", currentItemIndex, isBefore)
             DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
             DDT.TraySortOrderModel.actionsAlwaysVisible = false
+        }
+
+        Timer {
+            id: dropTrayTimer
+            interval: 50
+            repeat: false
+            property var handleDrop
+            onTriggered: {
+                handleDrop()
+            }
         }
     }
 
