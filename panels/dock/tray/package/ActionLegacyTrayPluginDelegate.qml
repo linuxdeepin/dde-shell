@@ -112,6 +112,7 @@ Button {
             repeat: false
             onTriggered: {
                 if (!pluginItem.plugin || !itemVisible)
+                    return
                 pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
             }
         }
