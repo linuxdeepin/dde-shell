@@ -101,7 +101,6 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
 
     // Find the item attempted to drop on
     QStandardItem * dropOnItem = findItemByVisualIndex(dropVisualIndex, DockTraySection);
-    Q_CHECK_PTR(dropOnItem);
     if (!dropOnItem) return false;
     QString dropOnSurfaceId(dropOnItem->data(SurfaceIdRole).toString());
 
@@ -117,16 +116,14 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
     }
 
     if (dropOnSurfaceId == QLatin1String("internal/action-show-stash")) {
-        if (isBefore) {
-            // show stash action is always the first action, drop before it consider as drop into stashed area
-            if (sourceSection != &m_stashedIds) {
-                sourceSection->removeOne(draggedSurfaceId);
-                m_stashedIds.append(draggedSurfaceId);
-                return true;
-            } else {
-                // already in the stashed tray
-                return false;
-            }
+        // show stash action is always the first action, drop before it consider as drop into stashed area
+        if (sourceSection != &m_stashedIds) {
+            sourceSection->removeOne(draggedSurfaceId);
+            m_stashedIds.append(draggedSurfaceId);
+            return true;
+        } else {
+            // already in the stashed tray
+            return false;
         }
         if (sourceSection == &m_collapsableIds) {
             // same-section move
@@ -211,7 +208,7 @@ void TraySortOrderModel::setSurfaceVisible(const QString &surfaceId, bool visibl
 QStandardItem *TraySortOrderModel::findItemByVisualIndex(int visualIndex, VisualSections visualSection) const
 {
     QStandardItem * result = nullptr;
-    const QModelIndexList matched = match(index(0, 0), VisualIndexRole, visualIndex, -1);
+    const QModelIndexList matched = match(index(0, 0), VisualIndexRole, visualIndex, -1, Qt::MatchExactly);
     for (const QModelIndex & index : matched) {
         QString section(data(index, SectionTypeRole).toString());
         if (visualSection == DockTraySection) {

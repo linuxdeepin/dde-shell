@@ -27,6 +27,8 @@ AppletItemButton {
     required property bool itemVisible
     padding: 0
 
+    visible: !Drag.active
+
     function updatePluginMargins()
     {
         pluginItem.plugin.margins = itemPadding
@@ -150,24 +152,28 @@ AppletItemButton {
         }
     }
 
-    Drag.active: dragHandler.active
     Drag.dragType: Drag.Automatic
     DQuickDrag.overlay: overlayWindow
     DQuickDrag.active: Drag.active
     DQuickDrag.hotSpotScale: Qt.size(0.5, 1)
     Drag.mimeData: {
-        "text/x-dde-shell-tray-dnd-surfaceId": model.surfaceId
+        "text/x-dde-shell-tray-dnd-surfaceId": model.surfaceId,
+        "text/x-dde-shell-tray-dnd-sectionType": model.sectionType
     }
     Drag.supportedActions: Qt.MoveAction
     Drag.onActiveChanged: {
         DDT.TraySortOrderModel.actionsAlwaysVisible = Drag.active
-        pluginItem.visible = !Drag.active
         if (!Drag.active) {
             // reset position on drop
             Qt.callLater(() => { x = 0; y = 0; });
         }
     }
+
     DragHandler {
         id: dragHandler
+        // To avoid being continuously active in a short period of time
+        onActiveChanged: {
+            Qt.callLater(function(){ root.Drag.active = dragHandler.active })
+        }
     }
 }
