@@ -9,4 +9,12 @@
         <translation>顯示桌面</translation>
     </message>
 </context>
+<context>
+    <name>showdesktop</name>
+    <message>
+        <location filename="../package/showdesktop.qml" line="45"/>
+        <source>show desktop</source>
+        <translation>顯示桌面</translation>
+    </message>
+</context>
 </TS>
