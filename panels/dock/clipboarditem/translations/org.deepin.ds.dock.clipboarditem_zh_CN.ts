@@ -6,7 +6,7 @@
     <message>
         <location filename="../package/clipboarditem.qml" line="22"/>
         <source>Clipboard</source>
-        <translation type="unfinished">剪切板</translation>
+        <translation>剪贴板</translation>
     </message>
 </context>
 <context>
@@ -14,7 +14,7 @@
     <message>
         <location filename="../clipboarditem.cpp" line="42"/>
         <source>Clipboard</source>
-        <translation>剪切板</translation>
+        <translation>剪贴板</translation>
     </message>
 </context>
 </TS>
