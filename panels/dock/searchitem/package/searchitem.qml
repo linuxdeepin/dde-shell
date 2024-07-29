@@ -41,17 +41,11 @@ AppletItem {
         toolTipY: DockPanelPositioner.y
     }
 
-    D.ToolButton {
+    AppletItemButton {
         id: button
         anchors.centerIn: parent
-        width: 30
-        height: 30
         icon.name: "search"
-        icon.width: 16
-        icon.height: 16
-        display: D.IconLabel.IconOnly
-
-        D.ColorSelector.hovered: Applet.grandSearchVisible || button.hovered
+        isActive: Applet.grandSearchVisible
 
         onClicked: {
             toolTip.close()
@@ -65,16 +59,6 @@ AppletItem {
             } else {
                 toolTip.close()
             }
-        }
-
-        background: D.BoxPanel {
-            property D.Palette backgroundPalette: DockPalette.backgroundPalette
-
-            color2: color1
-            color1: backgroundPalette
-
-            outsideBorderColor: null
-            insideBorderColor: null
         }
     }
 

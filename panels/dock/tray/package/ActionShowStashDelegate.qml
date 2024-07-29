@@ -9,7 +9,7 @@ import org.deepin.dtk 1.0 as D
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 
-D.ToolButton {
+AppletItemButton {
     id: root
 
     icon.name: {
@@ -20,14 +20,8 @@ D.ToolButton {
             case Dock.Bottom: return "arrow-up"
         }
     }
-    icon.width: 16
-    icon.height: 16
-    display: D.IconLabel.IconOnly
 
-    topPadding: itemPadding
-    bottomPadding: itemPadding
-    leftPadding: itemPadding
-    rightPadding: itemPadding
+    padding: itemPadding
 
     property var itemGlobalPoint: {
         var a = root

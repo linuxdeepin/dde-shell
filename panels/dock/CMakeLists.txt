@@ -123,6 +123,8 @@ qt_add_qml_module(dock-plugin
     SHARED
     SOURCES ${plugin_sources}
     QML_FILES DockCompositor.qml OverflowContainer.qml MenuHelper.qml DockPalette.qml
+    AppletItemButton.qml
+    AppletItemBackground.qml
     OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/
 )
 
