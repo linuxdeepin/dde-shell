@@ -83,6 +83,7 @@ Item {
             pluginId: model.pluginId
             itemKey: model.traySurfaceItemKey
             traySurface: model.traySurface
+            isActive: model.surface.isItemActive
 
             Connections {
                 target: root

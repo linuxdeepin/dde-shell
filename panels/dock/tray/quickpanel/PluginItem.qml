@@ -16,6 +16,7 @@ Control {
     property alias traySurface: dragLayer.fallbackDragImage
     property bool canDrag: true
     property int radius: 8
+    property bool isActive
     function updateSurface()
     {
         surfaceLayer.updateSurfacePosition()
@@ -102,6 +103,27 @@ Control {
                 crystal: Qt.rgba(1.0, 1.0, 1.0, 0.15)
             }
         }
+        property Palette activeBackgroundColor: Palette {
+            normal {
+                common: ("transparent")
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.8)
+            }
+            normalDark {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.9)
+            }
+            hovered {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.95)
+            }
+            hoveredDark {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.70)
+            }
+            pressed {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.80)
+            }
+            pressedDark {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.85)
+            }
+        }
         property Palette insideBorderColor: Palette {
             normal {
                 common: ("transparent")
@@ -123,7 +145,8 @@ Control {
         Rectangle {
             anchors.fill: parent
             radius: root.radius
-            color: backgroundControl.ColorSelector.backgroundColor
+            color: isActive ? backgroundControl.ColorSelector.activeBackgroundColor
+                            : backgroundControl.ColorSelector.backgroundColor
         }
         InsideBoxBorder {
             anchors.fill: parent
