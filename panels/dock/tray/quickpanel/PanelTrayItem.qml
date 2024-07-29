@@ -20,8 +20,8 @@ Control {
     property bool isOpened
     signal clicked()
     property bool contentHovered
-    padding: 0
-    ColorSelector.hovered: root.contentHovered || root.hovered || root.isOpened
+    ColorSelector.hovered: root.contentHovered || root.hovered
+    ColorSelector.pressed: mouseHandler.pressed
     property Palette textColor: DockPalette.iconTextPalette
     palette.windowText: ColorSelector.textColor
 
@@ -74,25 +74,8 @@ Control {
             }
         }
     }
-    background: BoxPanel {
-        radius: 4
-        color2: color1
-        property Palette openedPalette: Palette {
-            normal {
-                common: Qt.rgba(16.0 / 255, 16.0 / 255, 16.0 / 255, 0.2)
-            }
-        }
-        property Palette unopenedPalette: Palette {
-            normal {
-                common: ("transparent")
-            }
-            hovered {
-                crystal:  Qt.rgba(16.0 / 255, 16.0 / 255, 16.0 / 255, 0.2)
-            }
-        }
-        color1: isOpened ? openedPalette : unopenedPalette
-        insideBorderColor: null
-        outsideBorderColor: null
+    background: AppletItemBackground {
+        isActive: root.isOpened
     }
 
     component TrayItemSurface: Item {
@@ -130,6 +113,7 @@ Control {
     }
 
     MouseArea {
+        id: mouseHandler
         anchors.fill: parent
         onClicked: root.clicked()
     }

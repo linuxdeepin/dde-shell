@@ -14,7 +14,7 @@ import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 import org.deepin.ds.dock.tray 1.0 as DDT
 
-Button {
+AppletItemButton {
     id: root
     property alias inputEventsEnabled: surfaceItem.inputEventsEnabled
 
@@ -25,10 +25,7 @@ Button {
     readonly property int itemHeight: isHorizontal ? DDT.TrayItemPositionManager.dockHeight : 0
 
     required property bool itemVisible
-    topPadding: 0
-    bottomPadding: 0
-    leftPadding: 0
-    rightPadding: 0
+    padding: 0
 
     function updatePluginMargins()
     {
@@ -73,6 +70,10 @@ Button {
 
         HoverHandler {
             id: hoverHandler
+            parent: surfaceItem
+        }
+        TapHandler {
+            id: tapHandler
             parent: surfaceItem
         }
 
@@ -134,15 +135,7 @@ Button {
     }
 
     D.ColorSelector.hovered: pluginItem.plugin && pluginItem.plugin.isItemActive || hoverHandler.hovered
-    background: D.BoxPanel {
-        property D.Palette backgroundPalette: DockPalette.backgroundPalette
-
-        color2: color1
-        color1: backgroundPalette
-
-        outsideBorderColor: null
-        insideBorderColor: null
-    }
+    D.ColorSelector.pressed: tapHandler.pressed
 
     property Component overlayWindow: QuickDragWindow {
         height: root.visualSize.height

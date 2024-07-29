@@ -6,22 +6,17 @@ import QtQuick
 import QtQuick.Controls
 import org.deepin.dtk 1.0 as D
 import org.deepin.ds.dock.tray 1.0 as DDT
+import org.deepin.ds.dock 1.0
 
-D.ToolButton {
+AppletItemButton {
     property bool isHorizontal: false
     property bool collapsed: DDT.TraySortOrderModel.collapsed
 
     z: 5
 
     icon.name: isHorizontal ? (collapsed ? "expand-left" : "expand-right") : (collapsed ? "expand-up" : "expand-down")
-    icon.width: 16
-    icon.height: 16
-    display: D.IconLabel.IconOnly
 
-    topPadding: itemPadding
-    bottomPadding: itemPadding
-    leftPadding: itemPadding
-    rightPadding: itemPadding
+    padding: itemPadding
 
     onClicked: {
         DDT.TraySortOrderModel.collapsed = !DDT.TraySortOrderModel.collapsed
