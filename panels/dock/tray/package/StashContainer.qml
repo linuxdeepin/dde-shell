@@ -64,13 +64,14 @@ Item {
         rowCount: root.rowCount
         itemPadding: root.itemPadding
         id: stashedItemDelegateChooser
+        stashedSurfacePopup: stashSurfacePopup
     }
 
     // tooltip and menu
     DDT.SurfacePopup {
+        id: stashSurfacePopup
         objectName: "stash"
         surfaceAcceptor: isStashPopup
-        toolTipVOffset: root.itemPadding
     }
 
     // debug

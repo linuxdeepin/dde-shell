@@ -15,6 +15,7 @@ LQM.DelegateChooser {
     required property int columnCount
     required property int rowCount
     required property int itemPadding
+    required property var stashedSurfacePopup
 
     role: "delegateType"
     LQM.DelegateChoice {
@@ -28,8 +29,22 @@ LQM.DelegateChooser {
         StashedItemPositioner {
             id: stashItemPositioner
             contentItem: ActionLegacyTrayPluginDelegate {
+                id: trayDelegate
                 objectName: "stash"
                 itemVisible: stashItemPositioner.itemVisible
+
+                Connections {
+                    target: stashedSurfacePopup
+                    function onPopupCreated (surfaceId)
+                    {
+                        if (surfaceId !== model.surfaceId)
+                            return
+                        // `trayDelegate.height / 2` is set in dde-tray-loader
+                        stashedSurfacePopup.toolTipVOffset = Qt.binding(function () {
+                            return itemPadding + trayDelegate.height / 2
+                        })
+                    }
+                }
             }
         }
     }
