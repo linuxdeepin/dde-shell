@@ -39,7 +39,7 @@
     <message>
         <location filename="../package/main.qml" line="181"/>
         <source>Align Top</source>
-        <translation type="unfinished"/>
+        <translation>Ustaw do góry</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="188"/>
