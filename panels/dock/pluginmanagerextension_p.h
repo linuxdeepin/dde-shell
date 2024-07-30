@@ -29,7 +29,7 @@ public:
     void initialize() override;
 
     Q_INVOKABLE void updateDockOverflowState(int state);
-    Q_INVOKABLE void dockPanelSizeChanged(int width, int height);
+    Q_INVOKABLE void setPopupMinHeight(int height);
 
     uint32_t dockPosition() const;
     void setDockPosition(uint32_t dockPosition);
@@ -41,9 +41,6 @@ public:
 
     QSize dockSize() const;
     void setDockSize(const QSize &newDockSize);
-
-public slots:
-    void updateDockSize();
 
 Q_SIGNALS:
     void pluginPopupCreated(PluginPopup*);
@@ -61,6 +58,9 @@ private:
     static QJsonObject getRootObj(const QString &jsonStr);
     static QString toJson(const QJsonObject &jsonObj);
     void sendEventMsg(const QString &msg);
+    void sendEventMsg(Resource *target, const QString &msg);
+    QString dockSizeMsg() const;
+    QString popupMinHeightMsg() const;
 
 private:
     QList<PluginSurface*> m_pluginSurfaces;
@@ -68,6 +68,7 @@ private:
     uint32_t m_dockPosition;
     uint32_t m_dockColorTheme;
     QSize m_dockSize;
+    int m_popupMinHeight = 0;
 };
 
 class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public QtWaylandServer::plugin

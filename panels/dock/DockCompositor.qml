@@ -61,6 +61,11 @@ Item {
         }
     }
 
+    function updatePopupMinHeight(height)
+    {
+        pluginManager.setPopupMinHeight(height)
+    }
+
     WaylandCompositor {
         id: waylandCompositor
         socketName: "dockplugin"
