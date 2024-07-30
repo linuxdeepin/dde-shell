@@ -280,7 +280,7 @@ void TraySortOrderModel::registerToSection(const QString & surfaceId, const QStr
     }
 
     if (!section->contains(surfaceId)) {
-        section->append(surfaceId);
+        section->prepend(surfaceId);
     }
 }
 
