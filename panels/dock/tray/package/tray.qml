@@ -110,6 +110,7 @@ AppletItem {
 
         Control {
             id: stashedContainer
+            padding: 10
             contentItem: StashContainer {
                 id: stashContainer
                 color: "transparent"

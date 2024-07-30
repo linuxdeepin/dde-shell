@@ -18,6 +18,7 @@ class DockPositioner : public QObject
     Q_PROPERTY(int x READ x NOTIFY xChanged FINAL)
     Q_PROPERTY(int y READ y NOTIFY yChanged FINAL)
     QML_NAMED_ELEMENT(DockPositioner)
+    QML_UNCREATABLE("DockPositioner is only available via attached properties.")
     QML_ATTACHED(DockPositioner)
 public:
     explicit DockPositioner(DockPanel *panel, QObject *parent = nullptr);
@@ -56,6 +57,7 @@ class DockPanelPositioner : public DockPositioner
     Q_PROPERTY(int horizontalOffset READ horizontalOffset WRITE setHorizontalOffset RESET resetHorizontalOffset NOTIFY horizontalOffsetChanged FINAL)
     Q_PROPERTY(int vertialOffset READ vertialOffset WRITE setVertialOffset RESET resetVertialOffset NOTIFY vertialOffsetChanged FINAL)
     QML_NAMED_ELEMENT(DockPanelPositioner)
+    QML_UNCREATABLE("DockPanelPositioner is only available via attached properties.")
     QML_ATTACHED(DockPanelPositioner)
 public:
     explicit DockPanelPositioner(DockPanel *panel, QObject *parent = nullptr);
