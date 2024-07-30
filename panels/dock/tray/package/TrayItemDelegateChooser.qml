@@ -35,6 +35,7 @@ LQM.DelegateChooser {
                 objectName: "tray"
                 inputEventsEnabled: model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.collapsed
                 itemVisible: traySurfacePositioner.itemVisible
+                dragable: model.sectionType !== "fixed"
             }
         }
     }
