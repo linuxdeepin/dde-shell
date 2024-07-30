@@ -13,7 +13,7 @@ class WaylandDockHelper : public DockHelper
 
 public:
     WaylandDockHelper(DockPanel* panel);
-    bool mouseInDockArea() override;
+    HideState hideState() override;
 
 public Q_SLOTS:
     void updateDockTriggerArea() override;

@@ -16,8 +16,8 @@ void WaylandDockHelper::updateDockTriggerArea()
     
 }
 
-bool WaylandDockHelper::mouseInDockArea()
+HideState WaylandDockHelper::hideState()
 {
-    return false;
+    return Show;
 }
 }

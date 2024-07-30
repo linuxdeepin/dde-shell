@@ -156,12 +156,12 @@ void DockSettings::init()
                 Q_EMIT dockSizeChanged(m_dockSize);
             } else if (keyHideMode == key) {
                 auto hidemode = string2HideMode(m_dockConfig->value(keyHideMode).toString());
-                if (hidemode != m_hideMode) return;
+                if (hidemode == m_hideMode) return;
                 m_hideMode = hidemode;
                 Q_EMIT hideModeChanged(m_hideMode);
             } else if (keyPosition == key) {
                 auto position = string2Position(m_dockConfig->value(keyPosition).toString());
-                if (position != m_dockPosition) return;
+                if (position == m_dockPosition) return;
                 m_dockPosition = position;
                 Q_EMIT positionChanged(m_dockPosition);
             } else if (keyItemAlignment == key) {

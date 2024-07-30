@@ -6,10 +6,12 @@
 #include "dsglobal.h"
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
+#include <xcb/xcb_ewmh.h>
 
 
 namespace dock {
 class X11DockHelper;
+struct WindowData;
 
 class XcbEventFilter: public QObject, public QAbstractNativeEventFilter
 {
@@ -18,12 +20,36 @@ public:
     XcbEventFilter(X11DockHelper* helper);
     bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *) override;
 
+    xcb_atom_t getAtomByName(const QString& name);
+    QString getNameByAtom(const xcb_atom_t& atom);
+    QList<xcb_window_t> getWindowClientList();
+    QList<xcb_atom_t> getWindowState(const xcb_window_t& window);
+    QList<xcb_atom_t> getWindowTypes(const xcb_window_t& window);
+    QRect getWindowGeometry(const xcb_window_t& window);
+    xcb_window_t getDecorativeWindow(const xcb_window_t& window);
+    uint32_t getWindowWorkspace(const xcb_window_t& window);
+    uint32_t getCurrentWorkspace();
+    void checkCurrentWorkspace();
+    bool shouldSkip(const xcb_window_t& window);
+    void monitorWindowChange(const xcb_window_t& window);
+
+Q_SIGNALS:
+    void windowClientListChanged();
+    void windowPropertyChanged(xcb_window_t window, xcb_atom_t atom);
+    void windowGeometryChanged(xcb_window_t window);
+    void currentWorkspaceChanged();
+
 private:
     bool inTriggerArea(xcb_window_t win) const;
     void processEnterLeave(xcb_window_t win, bool enter);
 
     QPointer<X11DockHelper> m_helper;
     QTimer *m_timer;
+    QMap<QString, xcb_atom_t> m_atoms;
+    xcb_connection_t* m_connection;
+    xcb_window_t m_rootWindow;
+    xcb_ewmh_connection_t m_ewmh;
+    uint32_t m_currentWorkspace;
 };
 
 class DockTriggerArea : public QObject
@@ -67,14 +93,27 @@ class X11DockHelper : public DockHelper
 
 public:
     X11DockHelper(DockPanel* panel);
-    bool mouseInDockArea() override;
+    HideState hideState() override;
     QList<DockTriggerArea*> triggerAreas() const { return m_areas; }
-    
-    void mouseEnterDockArea();
-    void mouseLeaveDockArea();
 
 public Q_SLOTS:
     void updateDockTriggerArea() override;
+
+private Q_SLOTS:
+    void updateHideState(bool show);
+    void onHideModeChanged(HideMode mode);
+
+    void onWindowClientListChanged();
+    void onWindowAdded(xcb_window_t window);
+    void onWindowPropertyChanged(xcb_window_t window, xcb_atom_t atom);
+    void onWindowGeometryChanged(xcb_window_t window);
+    void onWindowWorkspaceChanged(xcb_window_t window);
+
+    void updateWindowHideState(xcb_window_t window);
+    void updateSmartHideState(const dock::HideState &state);
+    void updateDockHideState();
+    void delayedUpdateState();
+    void updateDockArea();
 
 private:
     inline void createdWakeArea();
@@ -83,9 +122,14 @@ private:
     friend class XcbEventFilter;
 
 private:
-    bool m_isHoverIn;
+    dock::HideState m_hideState;
     QString m_registerKey;
     QList<DockTriggerArea*> m_areas;
+    QRect m_dockArea;
+    bool m_needUpdateState;
+    dock::HideState m_smartHideState;
+    QHash<xcb_window_t, WindowData*> m_windows;
+    XcbEventFilter *m_xcbHelper;
 };
 }
 
