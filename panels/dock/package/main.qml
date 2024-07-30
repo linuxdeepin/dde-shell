@@ -226,7 +226,6 @@ Window {
                     value: Dock.KeepHidden
                 }
                 EnumPropertyMenuItem {
-                    enabled: Panel.debugMode
                     name: qsTr("Smart Hide")
                     prop: "hideMode"
                     value: Dock.SmartHide

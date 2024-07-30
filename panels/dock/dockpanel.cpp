@@ -145,19 +145,14 @@ bool DockPanel::init()
     }
 
 
-    connect(m_helper, &DockHelper::mouseInDockAreaChanged, this, [this](){
+    connect(m_helper, &DockHelper::hideStateChanged, this, [this](){
         if (hideMode() == KeepShowing || m_launcherShown) return;
-        if (m_helper->mouseInDockArea()) {
-            m_hideState = Show;
-            Q_EMIT hideStateChanged(m_hideState);
-        } else {
-            m_hideState = Hide;
-            Q_EMIT hideStateChanged(m_hideState);
-        }
+        m_hideState = m_helper->hideState();
+        Q_EMIT hideStateChanged(m_hideState);
     });
 
-    QMetaObject::invokeMethod(this, [this, dockDaemonAdaptor](){
-        m_hideState = hideMode() == KeepShowing || m_helper->mouseInDockArea() ? Show : Hide;
+    QMetaObject::invokeMethod(this, [this, dockDaemonAdaptor]() {
+        m_hideState = hideMode() == KeepShowing ? Show : m_helper->hideState();
         Q_EMIT hideStateChanged(m_hideState);
 
         Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
@@ -384,8 +379,8 @@ void DockPanel::launcherVisibleChanged(bool visible)
     if (m_launcherShown) {
         setHideState(Show);
     } else {
-        if (hideMode() != KeepShowing && !m_helper->mouseInDockArea()) {
-            setHideState(Hide);
+        if (hideMode() != KeepShowing) {
+            setHideState(m_helper->hideState());
         } else {
             setHideState(Show);
         }

@@ -14,15 +14,15 @@ namespace dock {
 class DockHelper : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool mouseInDockArea READ mouseInDockArea NOTIFY mouseInDockAreaChanged FINAL)
+    Q_PROPERTY(HideState hideState READ hideState NOTIFY hideStateChanged FINAL)
 
 public:
     [[nodiscard]] DockHelper* getHelper(DockPanel* parent);
 
-    virtual bool mouseInDockArea() = 0;
+    virtual HideState hideState() = 0;
 
 Q_SIGNALS:
-    void mouseInDockAreaChanged();
+    void hideStateChanged();
 
 public Q_SLOTS:
     virtual void updateDockTriggerArea() = 0;
