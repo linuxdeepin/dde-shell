@@ -84,8 +84,12 @@ Item {
         keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
         onEntered: function (dragEvent) {
             let sectionType = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType")
+            let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
             dropHover = true
             stashItemDragging = sectionType === "stashed"
+            if (!surfaceId.startsWith("application-tray")) {
+                dragEvent.accepted = false
+            }
         }
         onExited: function (dragEvent) {
             dropHover = false

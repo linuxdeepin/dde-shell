@@ -131,11 +131,15 @@ Item {
             dropHoverIndex = Math.floor(currentItemIndex)
             let isStash = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType") === "stashed"
             // TODO: If this method is used in the stash area, it will cause the drag state to be terminated when dragging to the tray area
-            if (!isStash && dropHoverIndex !== 0) {
-                dropTrayTimer.handleDrop = function() {
-                    DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
+            if (!isStash) {
+                if (dropHoverIndex !== 0) {
+                    dropTrayTimer.handleDrop = function() {
+                        DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
+                    }
+                    dropTrayTimer.start()
+                } else if (!surfaceId.startsWith("application-tray")){
+                    dragEvent.accepted = false
                 }
-                dropTrayTimer.start()
             }
         }
         onDropped: function (dropEvent) {
