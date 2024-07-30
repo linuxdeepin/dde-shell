@@ -27,6 +27,11 @@ Item {
     property int trayItemMargins: 4
     readonly property bool isOpened: panelTrayItem.isOpened
 
+    function updatePopupMinHeight(value)
+    {
+        DockCompositor.updatePopupMinHeight(value)
+    }
+
     PanelTrayItem {
         id: panelTrayItem
         shellSurface: quickpanelModel.trayItemSurface
@@ -65,6 +70,10 @@ Item {
                     let itemKey = tmp[1]
                     return quickpanelModel.isQuickPanelPopup(pluginId, itemKey)
                 }
+            }
+
+            onPopupMinHeightChanged: function () {
+                root.updatePopupMinHeight(popupContent.popupMinHeight)
             }
         }
     }

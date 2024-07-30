@@ -16,6 +16,7 @@ Item {
     height: panelView.height
 
     required property var model
+    property int popupMinHeight: Math.max(360, panelPage.height)
 
     Connections {
         target: model
@@ -26,7 +27,7 @@ Item {
                                pluginId: pluginId,
                                model: root.model,
                                shellSurface: surface,
-                               subPluginMinHeight: Math.max(360, panelPage.height)
+                               subPluginMinHeight: root.popupMinHeight
                            },
                            StackView.PushTransition)
         }
