@@ -25,7 +25,12 @@
             "visibility": "private"
         },
         "collapsableSurfaceIds": {
-            "value": [ "application-tray:SNI:fcitx5" ],
+            "value": [
+                "application-tray::SNI::Fcitx",
+                "network::network-item-key",
+                "battery::power",
+                "shutdown::shutdown"
+            ],
             "serial": 0,
             "flags": [],
             "name": "Collapsable Area Surface IDs",
@@ -36,7 +41,9 @@
             "visibility": "private"
         },
         "pinnedSurfaceIds": {
-            "value": [],
+            "value": [
+                "uosai::uosai"
+            ],
             "serial": 0,
             "flags": [],
             "name": "Pinned Area Surface IDs",
