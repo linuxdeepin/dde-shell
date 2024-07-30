@@ -12,7 +12,7 @@ namespace docktray {
 // style of UI.
 static const int itemSize = 16;
 static const int itemPadding = 4;
-static const int itemSpacing = 0;
+static const int itemSpacing = 2;
 static const QSize itemVisualSize = QSize(itemSize + itemPadding * 2, itemSize + itemPadding * 2);
 
 void TrayItemPositionManager::registerVisualItemSize(int index, const QSize &size)

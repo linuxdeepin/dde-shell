@@ -364,7 +364,7 @@ void DockPanel::loadDockPlugins()
     for (auto &pluginDir : dirs) {
         QDir dir(pluginDir);
         if (!dir.exists()) {
-            qWarning() << "The plugin directory does not exist: " << pluginsPath;
+            qWarning() << "The plugin directory does not exist: " << pluginDir;
             continue;
         }
         auto pluginFileInfos = dir.entryInfoList(filters, QDir::Files);

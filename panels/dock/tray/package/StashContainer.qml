@@ -26,7 +26,7 @@ Item {
     property string color: "red"
 
     readonly property int itemSize: 16
-    readonly property int itemSpacing: 10
+    readonly property int itemSpacing: 6
     readonly property int itemPadding: 8
 
     readonly property int columnCount: Math.ceil(Math.sqrt(model.count))

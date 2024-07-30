@@ -18,10 +18,6 @@ static DockPanel *isInDockPanel(QObject *object)
         qWarning() << "only used in DockPanel.";
         return nullptr;
     }
-    if (!qobject_cast<QQuickItem *>(object)) {
-        qWarning() << "only used in QuickItem.";
-        return nullptr;
-    }
     return dockPanel;
 }
 
@@ -114,7 +110,7 @@ void DockPositioner::updatePosition()
     }
     case dock::Right: {
         xPosition = m_bounding.x() - m_bounding.width();
-        yPosition = m_bounding.y() - m_bounding.height();
+        yPosition = m_bounding.y();
         break;
     }
     case dock::Bottom: {
@@ -124,7 +120,7 @@ void DockPositioner::updatePosition()
     }
     case dock::Left: {
         xPosition = m_bounding.x();
-        yPosition = m_bounding.y() - m_bounding.height();
+        yPosition = m_bounding.y();
         break;
     }
     default:
