@@ -15,6 +15,7 @@ Item {
         return true
     }
     property int toolTipVOffset: 0
+    signal popupCreated(var surfaceId)
 
     PanelToolTipWindow {
         id: toolTipWindow
@@ -66,8 +67,6 @@ Item {
         width: menuSurfaceLayer.width
         height: menuSurfaceLayer.height
         menuWindow: menuWindow
-        menuX: DockPositioner.x
-        menuY: DockPositioner.y
 
         property alias shellSurface: menuSurfaceLayer.shellSurface
         ShellSurfaceItemProxy {
@@ -94,6 +93,8 @@ Item {
             if (surfaceAcceptor && !surfaceAcceptor(surfaceId))
                 return
 
+            popupCreated(surfaceId)
+
             if (popupSurface.popupType === Dock.TrayPopupTypeTooltip) {
                 console.log(root.objectName, ": tooltip created", popupSurface.popupType, popupSurface.pluginId)
 
@@ -109,9 +110,11 @@ Item {
                 console.log(root.objectName, ": menu created", popupSurface.popupType, popupSurface.pluginId)
 
                 menu.shellSurface = popupSurface
-                menu.DockPositioner.bounding = Qt.binding(function () {
-                    var point = Qt.point(menu.shellSurface.x, menu.shellSurface.y)
-                    return Qt.rect(point.x, point.y, menu.width, menu.height)
+                menu.menuX = Qt.binding(function () {
+                    return menu.shellSurface.x
+                })
+                menu.menuY = Qt.binding(function () {
+                    return menu.shellSurface.y
                 })
                 menu.open()
             }
