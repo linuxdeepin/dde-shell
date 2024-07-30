@@ -46,6 +46,7 @@
     <signal name="Refreshed">
         <arg type="s"></arg>
     </signal>
+    <property name="GlobalTheme" type="s" access="read"></property>
     <property name="GtkTheme" type="s" access="readwrite"></property>
     <property name="IconTheme" type="s" access="readwrite"></property>
     <property name="CursorTheme" type="s" access="readwrite"></property>
