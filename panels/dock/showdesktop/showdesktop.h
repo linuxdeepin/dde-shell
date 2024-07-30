@@ -6,15 +6,12 @@
 
 #include "applet.h"
 #include "dsglobal.h"
-#include "../dockiteminfo.h"
 
 namespace dock {
 
 class ShowDesktop : public DS_NAMESPACE::DApplet
 {
     Q_OBJECT
-    Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
-
 public:
     explicit ShowDesktop(QObject *parent = nullptr);
     virtual bool init() override;
@@ -22,16 +19,6 @@ public:
 
     Q_INVOKABLE void toggleShowDesktop();
     Q_INVOKABLE bool checkNeedShowDesktop();
-
-    Q_INVOKABLE DockItemInfo dockItemInfo();
-    Q_INVOKABLE bool visible() const;
-    Q_INVOKABLE void setVisible(bool visible);
-
-Q_SIGNALS:
-    void visibleChanged();
-
-private:
-    bool m_visible;
 };
 
 }

@@ -86,7 +86,6 @@ private:
     DS_NAMESPACE::DApplet *m_clipboardApplet;
     DS_NAMESPACE::DApplet *m_searchApplet;
     DS_NAMESPACE::DApplet *m_multitaskviewApplet;
-    DS_NAMESPACE::DApplet *m_showdesktopApplet;
     DS_NAMESPACE::DApplet *m_trayApplet;
 };
 }

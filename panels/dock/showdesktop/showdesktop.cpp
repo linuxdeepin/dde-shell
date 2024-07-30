@@ -5,25 +5,20 @@
 #include "applet.h"
 #include "showdesktop.h"
 #include "pluginfactory.h"
-#include "../constants.h"
 
 #include <QProcess>
 #include <QGuiApplication>
 #include <QDBusInterface>
 #include <QLoggingCategory>
-#include <DWindowManagerHelper>
 
 Q_LOGGING_CATEGORY(showDesktop, "dde.shell.dock.showdesktop")
-
-DGUI_USE_NAMESPACE
 
 namespace dock {
 
 ShowDesktop::ShowDesktop(QObject *parent)
     : DApplet(parent)
-    , m_visible(true)
 {
-    connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, &ShowDesktop::visibleChanged);
+
 }
 
 bool ShowDesktop::load()
@@ -53,32 +48,6 @@ bool ShowDesktop::checkNeedShowDesktop()
 
     qCWarning(showDesktop) << "wm call GetIsShowDesktop fail, res:" << reply.type();
     return false;
-}
-
-DockItemInfo ShowDesktop::dockItemInfo()
-{
-    DockItemInfo info;
-    info.name = "showdesktop";
-    info.displayName = tr("Show Desktop");
-    info.itemKey = "showdesktop";
-    info.settingKey = "showdesktop";
-    info.visible = visible();
-    info.dccIcon = DCCIconPath + "showdesktop.svg";
-    return info;
-}
-
-bool ShowDesktop::visible() const
-{
-    return m_visible && DWindowManagerHelper::instance()->hasComposite();
-}
-
-void ShowDesktop::setVisible(bool visible)
-{
-    if (m_visible != visible) {
-        m_visible = visible;
-
-        Q_EMIT visibleChanged();
-    }
 }
 
 D_APPLET_CLASS(ShowDesktop)
