@@ -25,6 +25,8 @@ AppletItemButton {
     readonly property int itemHeight: isHorizontal ? DDT.TrayItemPositionManager.dockHeight : 0
 
     required property bool itemVisible
+    property bool dragable: true
+
     padding: 0
 
     visible: !Drag.active
@@ -171,6 +173,7 @@ AppletItemButton {
 
     DragHandler {
         id: dragHandler
+        enabled: dragable
         // To avoid being continuously active in a short period of time
         onActiveChanged: {
             Qt.callLater(function(){ root.Drag.active = dragHandler.active })
