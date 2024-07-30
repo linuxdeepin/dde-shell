@@ -4,82 +4,87 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../package/main.qml" line="148"/>
+        <location filename="../package/main.qml" line="162"/>
         <source>Indicator Style</source>
         <translation>Jelölő stíéusa</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="150"/>
+        <location filename="../package/main.qml" line="164"/>
         <source>Fashion Mode</source>
         <translation>Stílusos mód</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="155"/>
+        <location filename="../package/main.qml" line="169"/>
         <source>Efficient Mode</source>
         <translation>Hatékony mód</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="161"/>
+        <location filename="../package/main.qml" line="175"/>
         <source>Alignment</source>
         <translation>Igazítás</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="189"/>
+        <location filename="../package/main.qml" line="206"/>
         <source>Left</source>
         <translation>Bal</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="174"/>
+        <location filename="../package/main.qml" line="194"/>
         <source>Position</source>
         <translation>Pozíció</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="163"/>
+        <location filename="../package/main.qml" line="179"/>
         <source>Align Left</source>
         <translation>Igazítás Balra</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="168"/>
+        <location filename="../package/main.qml" line="181"/>
+        <source>Align Top</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="188"/>
         <source>Align Center</source>
         <translation>Igazítás Középre</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="178"/>
+        <location filename="../package/main.qml" line="196"/>
         <source>Top</source>
         <translation>Fent</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="183"/>
+        <location filename="../package/main.qml" line="201"/>
         <source>Bottom</source>
         <translation>Lent</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="195"/>
+        <location filename="../package/main.qml" line="211"/>
         <source>Right</source>
         <translation>Jobb</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="201"/>
+        <location filename="../package/main.qml" line="217"/>
         <source>Status</source>
         <translation>Állapot</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="203"/>
+        <location filename="../package/main.qml" line="219"/>
         <source>Keep Shown</source>
         <translation>Folyamatosan látható</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="208"/>
+        <location filename="../package/main.qml" line="224"/>
         <source>Keep Hidden</source>
         <translation>Maradjon rejtve</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="214"/>
+        <location filename="../package/main.qml" line="230"/>
         <source>Smart Hide</source>
         <translation>Intelligens elrejtés</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="221"/>
+        <location filename="../package/main.qml" line="237"/>
         <source>Dock Settings</source>
         <translation>Dokkoló beállításai</translation>
     </message>
