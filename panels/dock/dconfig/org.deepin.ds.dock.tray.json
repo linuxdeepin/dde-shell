@@ -26,7 +26,7 @@
         },
         "collapsableSurfaceIds": {
             "value": [
-                "application-tray::SNI::Fcitx",
+                "application-tray::SNI:Fcitx-0",
                 "network::network-item-key",
                 "battery::power",
                 "shutdown::shutdown"
