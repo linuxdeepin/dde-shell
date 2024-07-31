@@ -109,6 +109,13 @@ AppletItem {
         toolTipY: DockPanelPositioner.y
     }
 
+    Connections {
+        target: Applet.dataModel
+        function onCurrentIndexChanged() {
+            toolTip.close()
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         color: "transparent"
