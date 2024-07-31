@@ -259,6 +259,17 @@ QString TraySortOrderModel::findSection(const QString & surfaceId, const QString
         result = SECTION_FIXED;
     }
 
+    // 设置默认隐藏
+    if (!found &&                   // 不在列表中
+        result != SECTION_FIXED &&  // 非固定位置插件（时间）
+        !surfaceId.startsWith("internal/") &&       // 非内置插件
+        !surfaceId.startsWith("application-tray::") // 非托盘图标
+        ) {
+        if (!m_hiddenIds.contains(surfaceId)) {
+            m_hiddenIds.append(surfaceId);
+        }
+    }
+
     if (forbiddenSections.contains(result)) {
         Q_ASSERT(result != fallback);
         if (found) {
