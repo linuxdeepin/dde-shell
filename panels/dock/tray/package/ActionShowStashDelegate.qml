@@ -39,10 +39,6 @@ AppletItemButton {
         return Qt.point(x + width / 2, y + height / 2)
     }
 
-    HoverHandler {
-        id: hoverHandler
-    }
-
     onItemGlobalPointChanged: {
         stashedPopup.collapsedBtnCenterPoint = itemGlobalPoint
     }
@@ -91,5 +87,36 @@ AppletItemButton {
 
     onClicked: {
         stashedPopup.open()
+        toolTip.close()
+    }
+
+    PanelToolTip {
+        id: toolTip
+        text: qsTr("Application tray")
+        toolTipX: DockPanelPositioner.x
+        toolTipY: DockPanelPositioner.y
+    }
+    Timer {
+        id: toolTipShowTimer
+        interval: 200
+        onTriggered: {
+            var point = root.mapToItem(null, root.width / 2, root.height / 2)
+            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+            toolTip.open()
+        }
+    }
+    HoverHandler {
+        id: hoverHandler
+        onHoveredChanged: {
+            if (hovered) {
+                toolTipShowTimer.start()
+            } else {
+                if (toolTipShowTimer.running) {
+                    toolTipShowTimer.stop()
+                }
+
+                toolTip.close()
+            }
+        }
     }
 }
