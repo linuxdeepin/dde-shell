@@ -1,3 +1,18 @@
+dde-shell (0.0.33) unstable; urgency=medium
+
+  * fix: Update translation (#611)(issue: 9965)
+  * fix: adjust ui for dock's applet(Issue: 8633)
+  * feat: support active state for quickpanel's item(Issue: 10020)
+  * fix: The dock translation is incorrect(Issue: 9947)
+  * fix: popup's height isn't enough(Issue: 9702)
+  * fix: adjust ui(Issue: 9995, 9894)
+  * fix: Plugin should not be dragged into the application tray(Issue: 10048)
+  * feat: Add smart hide function(Issue: 9842)
+  * chore: modify the order of systray(Issue: 10049)
+  * Revert "fix: unable to set visibility of 'Show Desktop' in DCC"(Issue: 10055)
+
+ -- zyz <zhaoyingzhen@uniontech.com>  Wed, 31 Jul 2024 13:53:47 +0800
+
 dde-shell (0.0.32) unstable; urgency=medium
 
   * fix: unable to set visibility of 'Show Desktop' in DCC(Issue: 9820)
