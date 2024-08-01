@@ -25,6 +25,7 @@ qt_add_qml_module(dock-tray
         ksortfilterproxymodel.h
     QML_FILES
         SurfacePopup.qml
+        TrayItemSurfacePopup.qml
         ShellSurfaceItemProxy.qml
 
     OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/tray/

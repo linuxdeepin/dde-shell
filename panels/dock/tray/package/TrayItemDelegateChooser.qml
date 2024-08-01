@@ -14,6 +14,7 @@ LQM.DelegateChooser {
     property bool isHorizontal: false
     property bool collapsed: false
     required property int itemPadding
+    required property var surfaceAcceptor
 
     role: "delegateType"
     LQM.DelegateChoice {
@@ -36,6 +37,16 @@ LQM.DelegateChooser {
                 inputEventsEnabled: model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.collapsed
                 itemVisible: traySurfacePositioner.itemVisible
                 dragable: model.sectionType !== "fixed"
+
+                // trayItem's popup
+                DDT.TrayItemSurfacePopup {
+                    surfaceAcceptor: function (surfaceId) {
+                        if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
+                            return false
+
+                        return surfaceId === model.surfaceId
+                    }
+                }
             }
         }
     }
