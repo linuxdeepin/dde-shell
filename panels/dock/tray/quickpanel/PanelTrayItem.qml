@@ -53,8 +53,7 @@ Control {
             width: placeholder.active ? placeholder.width : 16 + itemMargins
             height: placeholder.active ? placeholder.height : 16 + itemMargins
             contentItem: DciIcon {
-                width: 16
-                height: 16
+                sourceSize: Qt.size(16, 16)
                 name: "dock-control-panel"
                 palette: DTK.makeIconPalette(root.palette)
                 theme: root.ColorSelector.controlTheme
