@@ -44,7 +44,7 @@
     <message>
         <location filename="../package/main.qml" line="188"/>
         <source>Align Center</source>
-        <translation>Keskelle</translation>
+        <translation>Tasaa keskelle</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="196"/>
