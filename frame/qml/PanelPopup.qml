@@ -56,12 +56,17 @@ Item {
         })
 
         popupWindow.currentItem = control
-        Qt.callLater(function () {
-            popupWindow.show()
-            popupWindow.requestActivate()
-        })
+        timer.start()
     }
 
+    Timer {
+        id: timer
+        interval: 10
+        onTriggered: {
+            popupWindow.show()
+            popupWindow.requestActivate()
+        }
+    }
     function close()
     {
         if (!popupWindow)
