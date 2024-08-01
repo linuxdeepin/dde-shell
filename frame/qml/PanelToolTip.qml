@@ -53,9 +53,15 @@ Item {
         })
 
         toolTipWindow.currentItem = control
-        Qt.callLater(function () {
+        timer.start()
+    }
+
+    Timer {
+        id: timer
+        interval: 10
+        onTriggered: {
             toolTipWindow.show()
-        })
+        }
     }
     
     function close()
