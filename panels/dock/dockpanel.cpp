@@ -78,9 +78,7 @@ bool DockPanel::init()
         });
     });
     connect(this, &DockPanel::hideModeChanged, this, [this](){
-        if (hideMode() != KeepShowing)
-            setHideState(Hide);
-        else
+        if (hideMode() == KeepShowing)
             setHideState(Show);
     });
     connect(SETTINGS, &DockSettings::positionChanged, this, [this, dockDaemonAdaptor](){

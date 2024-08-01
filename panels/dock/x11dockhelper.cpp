@@ -384,7 +384,14 @@ void X11DockHelper::onHideModeChanged(HideMode mode)
         connect(m_xcbHelper, &XcbEventFilter::windowPropertyChanged, this, &X11DockHelper::onWindowPropertyChanged);
         connect(m_xcbHelper, &XcbEventFilter::windowGeometryChanged, this, &X11DockHelper::onWindowGeometryChanged);
         connect(m_xcbHelper, &XcbEventFilter::currentWorkspaceChanged, this, &X11DockHelper::updateDockHideState, Qt::QueuedConnection);
+        delayedUpdateState();
     } break;
+    case KeepShowing:
+        updateHideState(true);
+        break;
+    case KeepHidden:
+        updateHideState(false);
+        break;
     default: {
 
     } break;
@@ -477,6 +484,9 @@ void X11DockHelper::updateSmartHideState(const HideState &state)
 
 void X11DockHelper::updateDockHideState()
 {
+    if (!m_needUpdateState)
+        return;
+
     int currentWorkspace = m_xcbHelper->getCurrentWorkspace();
     for (auto &&data : m_windows) {
         if (data->state == Hide && (data->workspace == currentWorkspace || data->workspace == allWorkspace)) {
