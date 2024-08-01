@@ -104,7 +104,7 @@ AppletItemButton {
                 if (!pluginItem.plugin || !itemVisible)
                     return
                 updatePluginMargins()
-                if (pluginItem.itemGlobalPoint.x > 0 && pluginItem.itemGlobalPoint.y > 0) {
+                if (pluginItem.itemGlobalPoint.x >= 0 && pluginItem.itemGlobalPoint.y >= 0) {
                     pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
                 }
             }
