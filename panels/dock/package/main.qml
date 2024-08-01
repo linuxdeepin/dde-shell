@@ -251,6 +251,11 @@ Window {
             if (button === Qt.RightButton && lastActive !== dockMenuLoader.item) {
                 MenuHelper.openMenu(dockMenuLoader.item)
             }
+            if (button === Qt.LeftButton) {
+                // try to close popup when clicked empty, because dock does not have focus.
+                if (Panel.popupWindow.visible)
+                    Panel.popupWindow.close()
+            }
         }
     }
 
