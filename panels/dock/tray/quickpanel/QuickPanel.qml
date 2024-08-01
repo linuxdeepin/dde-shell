@@ -27,6 +27,27 @@ Item {
     property int trayItemMargins: 4
     readonly property bool isOpened: panelTrayItem.isOpened
 
+    function isTrayItemPopup(surfaceId)
+    {
+        return pluginIdBySurfaceId(surfaceId) === trayItemPluginId
+    }
+    function pluginIdBySurfaceId(surfaceId)
+    {
+        let tmp = surfaceId.split("::")
+        if (tmp.length !== 2) {
+            return ""
+        }
+        return tmp[0]
+    }
+    function itemKeyBySurfaceId(surfaceId)
+    {
+        let tmp = surfaceId.split("::")
+        if (tmp.length !== 2) {
+            return ""
+        }
+        return tmp[1]
+    }
+
     function updatePopupMinHeight(value)
     {
         DockCompositor.updatePopupMinHeight(value)
@@ -61,13 +82,8 @@ Item {
             DDT.SurfacePopup {
                 objectName: "quickpanel"
                 surfaceAcceptor: function (surfaceId) {
-                    let tmp = surfaceId.split("::")
-                    if (tmp.length !== 2) {
-                        console.warn("Incorrect surfaceId format, it should be PluginId::ItemKey.")
-                        return false
-                    }
-                    let pluginId = tmp[0]
-                    let itemKey = tmp[1]
+                    let pluginId = pluginIdBySurfaceId(surfaceId)
+                    let itemKey = itemKeyBySurfaceId(surfaceId)
                     return quickpanelModel.isQuickPanelPopup(pluginId, itemKey)
                 }
             }
@@ -75,6 +91,20 @@ Item {
             onPopupMinHeightChanged: function () {
                 root.updatePopupMinHeight(popupContent.popupMinHeight)
             }
+        }
+    }
+
+    // trayItem's popup
+    DDT.TrayItemSurfacePopup {
+        id: trayItemSurfacePopup
+        surfaceAcceptor: isTrayItemPopup
+        surfaceFilter: function (surfaceId) {
+            return isOpened
+        }
+    }
+    onIsOpenedChanged: function () {
+        if (isOpened) {
+            trayItemSurfacePopup.closeTooltip()
         }
     }
 

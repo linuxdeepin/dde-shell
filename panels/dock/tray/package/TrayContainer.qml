@@ -87,6 +87,7 @@ Item {
     property size containerSize: DDT.TrayItemPositionManager.visualSize
     // visiualIndex default value is -1
     property int dropHoverIndex: -1
+    required property var surfaceAcceptor
 
     implicitWidth: width
     width: containerSize.width
@@ -107,6 +108,7 @@ Item {
         isHorizontal: root.isHorizontal
         collapsed: root.collapsed
         itemPadding: root.itemPadding
+        surfaceAcceptor: root.surfaceAcceptor
     }
 
     // debug

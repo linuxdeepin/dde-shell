@@ -67,6 +67,10 @@ Item {
         if (!popupWindow)
             return
 
+        // avoid to closing window by other PanelPopup.
+        if (!readyBinding)
+            return
+
         popupWindow.close()
         popupWindow.currentItem = null
     }
