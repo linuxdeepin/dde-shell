@@ -339,12 +339,24 @@ void XcbEventFilter::monitorWindowChange(const xcb_window_t &window)
     xcb_change_window_attributes(m_connection, window, XCB_CW_EVENT_MASK, value_list);
 };
 
+void XcbEventFilter::setWindowState(const xcb_window_t& window, uint32_t list_len, xcb_atom_t *state)
+{
+    xcb_ewmh_set_wm_state(&m_ewmh, window, list_len, state);
+}
+
 X11DockHelper::X11DockHelper(DockPanel* panel)
     : DockHelper(panel)
     , m_xcbHelper(new XcbEventFilter(this))
     , m_hideState(Show)
     , m_smartHideState(Unknown)
 {
+    auto setWindowState = [ this, panel ] {
+        xcb_atom_t atoms[] = {
+            m_xcbHelper->getAtomByName("_NET_WM_STATE_ABOVE")
+        };
+        m_xcbHelper->setWindowState(panel->window()->winId(), sizeof(atoms) / sizeof(atoms[0]), atoms);
+    };
+
     connect(parent(), &DockPanel::rootObjectChanged, this, &X11DockHelper::createdWakeArea);
     connect(panel, &DockPanel::hideStateChanged, this, &X11DockHelper::updateDockTriggerArea);
     connect(panel, &DockPanel::showInPrimaryChanged, this, &X11DockHelper::updateDockTriggerArea);
@@ -353,8 +365,10 @@ X11DockHelper::X11DockHelper(DockPanel* panel)
     connect(panel, &DockPanel::positionChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::dockSizeChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::geometryChanged, this, &X11DockHelper::updateDockArea);
+    connect(panel, &DockPanel::rootObjectChanged, this, setWindowState);
     if (panel->rootObject()) {
         updateDockArea();
+        setWindowState();
     }
     qGuiApp->installNativeEventFilter(m_xcbHelper);
     onHideModeChanged(panel->hideMode());

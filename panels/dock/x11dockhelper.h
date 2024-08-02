@@ -32,6 +32,7 @@ public:
     void checkCurrentWorkspace();
     bool shouldSkip(const xcb_window_t& window);
     void monitorWindowChange(const xcb_window_t& window);
+    void setWindowState(const xcb_window_t& window, uint32_t list_len, xcb_atom_t *state);
 
 Q_SIGNALS:
     void windowClientListChanged();
