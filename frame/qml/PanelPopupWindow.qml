@@ -70,6 +70,26 @@ Window {
         {
             requestUpdateGeometry()
         }
+        function onYChanged()
+        {
+            requestUpdateGeometry()
+        }
+        function onXChanged()
+        {
+            requestUpdateGeometry()
+        }
+    }
+
+    Connections {
+        target: root.Screen
+        function onDesktopAvailableHeightChanged()
+        {
+            requestUpdateGeometry()
+        }
+        function onDesktopAvailableWidthChanged()
+        {
+            requestUpdateGeometry()
+        }
     }
 
     onHeightChanged: requestUpdateGeometry()

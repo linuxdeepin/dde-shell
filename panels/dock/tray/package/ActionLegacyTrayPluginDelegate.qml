@@ -97,7 +97,7 @@ AppletItemButton {
 
         Timer {
             id: updatePluginItemGeometryTimer
-            interval: 500
+            interval: 100
             running: false
             repeat: false
             onTriggered: {
@@ -112,7 +112,7 @@ AppletItemButton {
 
         Timer {
             id: updatePluginItemPosTimer
-            interval: 500
+            interval: 100
             running: false
             repeat: false
             onTriggered: {
