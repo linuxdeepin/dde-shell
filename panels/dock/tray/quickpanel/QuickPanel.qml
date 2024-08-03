@@ -121,6 +121,9 @@ Item {
         {
             if (popupSurface.popupType === Dock.TrayPopupTypeEmbed) {
                 console.log("popup created", popupSurface.popupType, popupSurface.pluginId)
+                if (!popup.popupVisible) {
+                    panelTrayItem.clicked()
+                }
                 quickpanelModel.requestShowSubPlugin(popupSurface.pluginId, popupSurface)
             }
         }
