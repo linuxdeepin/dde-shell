@@ -26,7 +26,7 @@ Item {
     property string color: "red"
 
     readonly property int itemSize: 16
-    readonly property int itemSpacing: 6
+    readonly property int itemSpacing: 10
     readonly property int itemPadding: 8
 
     readonly property int columnCount: Math.ceil(Math.sqrt(model.count))
@@ -46,9 +46,9 @@ Item {
     }
 
     implicitWidth: width
-    width: columnCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing + itemSpacing * 2
+    width: columnCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing
     implicitHeight: height
-    height: rowCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing + itemSpacing * 2
+    height: rowCount * (itemSize + itemPadding * 2 + itemSpacing) - itemSpacing
 
     Behavior on width {
         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
@@ -107,7 +107,7 @@ Item {
 
     Item {
         anchors.fill: parent
-        anchors.margins: itemSpacing
+        anchors.margins: 0
 
         // Tray items
         Repeater {
