@@ -97,12 +97,13 @@ QString AppItem::menus() const
         }
     }
 
-    if (hasWindow()) {
-        QJsonObject allWindowMenu;
-        allWindowMenu["id"] = DOCK_ACTION_ALLWINDOW;
-        allWindowMenu["name"] = tr("All Windows");
-        array.append(allWindowMenu);        
-    }
+    // Temporarily disable all windows action for the related functionality missing in deepin-kwin
+    // if (hasWindow()) {
+    //     QJsonObject allWindowMenu;
+    //     allWindowMenu["id"] = DOCK_ACTION_ALLWINDOW;
+    //     allWindowMenu["name"] = tr("All Windows");
+    //     array.append(allWindowMenu);
+    // }
 
     QJsonObject dockMenu;
     dockMenu["id"] = DOCK_ACTION_DOCK;
