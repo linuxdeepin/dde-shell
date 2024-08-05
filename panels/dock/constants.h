@@ -71,7 +71,8 @@ enum TrayPopupType {
     TrayPopupTypePanel = 1,
     TrayPopupTypeTooltip = 2,
     TrayPopupTypeMenu = 3,
-    TrayPopupTypeEmbed = 4
+    TrayPopupTypeEmbed = 4,
+    TrayPopupTypeSubPopup = 5
 };
 
 enum TrayPluginType {

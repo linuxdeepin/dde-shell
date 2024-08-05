@@ -16,10 +16,17 @@ Window {
     property int margins: 10
     property Item currentItem
     signal requestUpdateGeometry()
+    signal updateGeometryFinished()
 
     // order to update screen and (x,y)
-    function updateGeometry()
+    property var updateGeometryer : function updateGeometry()
     {
+        if (root.width <= 10 || root.height <= 10) {
+            return
+        }
+        if (!root.transientParent)
+            return
+
         // following transientParent's screen.
         root.screen = root.transientParent.screen
 
@@ -97,7 +104,14 @@ Window {
     onXOffsetChanged: requestUpdateGeometry()
     onYOffsetChanged: requestUpdateGeometry()
 
-    onRequestUpdateGeometry: Qt.callLater(updateGeometry)
+    onRequestUpdateGeometry: {
+        if (updateGeometryer) {
+            Qt.callLater(function () {
+                updateGeometryer()
+                updateGeometryFinished()
+            })
+        }
+    }
 
     D.StyledBehindWindowBlur {
         control: parent

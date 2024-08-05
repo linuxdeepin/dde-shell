@@ -25,6 +25,7 @@ qt_add_qml_module(dock-tray
         ksortfilterproxymodel.h
     QML_FILES
         SurfacePopup.qml
+        SurfaceSubPopup.qml
         TrayItemSurfacePopup.qml
         ShellSurfaceItemProxy.qml
 
