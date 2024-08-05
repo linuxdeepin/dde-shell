@@ -26,6 +26,18 @@ AppletItem {
     }
 
     Connections {
+        target: Panel.rootObject
+        function onScreenChanged()
+        {
+            var launchpad = DS.applet("org.deepin.ds.launchpad")
+            if (!launchpad || !launchpad.rootObject)
+                return
+
+            launchpad.rootObject.fullscreenFrame.screen = Panel.rootObject.screen
+        }
+    }
+
+    Connections {
         target: DS.applet("org.deepin.ds.launchpad")
         enabled: target
         function onRootObjectChanged() {
