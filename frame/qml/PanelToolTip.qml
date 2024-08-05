@@ -82,11 +82,12 @@ Item {
 
     Control {
         id: toolTip
-        padding: DStyle.Style.toolTip.horizontalPadding
         visible: readyBinding
         anchors.centerIn: parent
-        topPadding: 0
-        bottomPadding: 0
+        topPadding: DStyle.Style.toolTip.verticalPadding
+        bottomPadding: DStyle.Style.toolTip.verticalPadding
+        leftPadding: DStyle.Style.toolTip.horizontalPadding
+        rightPadding: DStyle.Style.toolTip.horizontalPadding
         parent: toolTipWindow ? toolTipWindow.contentItem : undefined
         contentItem: Text {
             horizontalAlignment: Text.AlignLeft
@@ -94,7 +95,7 @@ Item {
             font: toolTip.font
             wrapMode: Text.WordWrap
             text: control.text
-            color: toolTip.palette.windowText
+            color: toolTip.palette.brightText
         }
     }
 }
