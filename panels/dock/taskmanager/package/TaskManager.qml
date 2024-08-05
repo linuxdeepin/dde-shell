@@ -41,6 +41,7 @@ ContainmentItem {
                 required property string menus
                 required property list<string> windows
                 keys: ["text/x-dde-dock-dnd-appid", "text/x-dde-launcher-dnd-desktopId"]
+                z: attention ? -1 : 0
 
                 // TODO: 临时溢出逻辑，待后面修改
                 // 1:4 the distance between app : dock height; get width/height≈0.8
