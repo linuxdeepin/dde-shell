@@ -177,24 +177,26 @@ QRect DockPanel::frontendWindowRect()
     auto ratio = window()->devicePixelRatio();
     auto screenGeometry = window()->screen()->geometry();
     auto geometry = window()->geometry();
-    auto x = 0, y = 0;
+    auto xOffset = 0, yOffset = 0;
+
     switch (position()) {
         case Top:
-            x = (screenGeometry.width() - geometry.width()) / 2;
+            xOffset = (screenGeometry.width() - geometry.width()) / 2;
             break;
         case Bottom:
-            x = (screenGeometry.width() - geometry.width()) / 2;
-            y = screenGeometry.height() - geometry.height();
+            xOffset = (screenGeometry.width() - geometry.width()) / 2;
+            yOffset = screenGeometry.height() - geometry.height();
             break;
         case Right:
-            x = screenGeometry.width() - geometry.width();
-            y = (screenGeometry.height() - geometry.height()) / 2;
+            xOffset = screenGeometry.width() - geometry.width();
+            yOffset = (screenGeometry.height() - geometry.height()) / 2;
             break;
         case Left:
-            y = screenGeometry.height() - geometry.height();
+            yOffset = screenGeometry.height() - geometry.height();
             break;
     }
-    return QRect(x * ratio, y * ratio, geometry.width() * ratio, geometry.height() * ratio);
+
+    return QRect(screenGeometry.x() + xOffset * ratio, screenGeometry.y() + yOffset * ratio, geometry.width() * ratio, geometry.height() * ratio);
 }
 
 ColorTheme DockPanel::colorTheme()
