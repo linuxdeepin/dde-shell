@@ -65,6 +65,25 @@ Item {
                     popupMenu.close()
                 }
             }
+            SurfaceSubPopup {
+                objectName: "tray's subPopup"
+                surfaceAcceptor: function (surfaceId) {
+                    if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
+                        return false
+                    return true
+                }
+            }
+            Connections {
+                target: popupMenu.menuWindow
+                enabled: popupMenu.readyBinding
+                function onUpdateGeometryFinished()
+                {
+                    if (!popupMenu.shellSurface)
+                        return
+
+                    popupMenu.shellSurface.updatePluginGeometry(Qt.rect(popupMenu.menuWindow.x, popupMenu.menuWindow.y, 0, 0))
+                }
+            }
         }
     }
 
