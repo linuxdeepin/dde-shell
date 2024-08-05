@@ -152,7 +152,7 @@ Control {
             anchors.fill: parent
             radius: root.radius
             color: backgroundControl.ColorSelector.insideBorderColor
-            borderWidth: 1
+            borderWidth: 1 / Screen.devicePixelRatio
             z: DTK.AboveOrder
         }
         OutsideBoxBorder {
