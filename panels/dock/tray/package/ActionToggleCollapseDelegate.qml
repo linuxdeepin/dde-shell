@@ -16,7 +16,7 @@ AppletItemButton {
 
     z: 5
 
-    icon.name: isHorizontal ? (collapsed ? "expand-left" : "expand-right") : (collapsed ? "expand-up" : "expand-down")
+    icon.name: isHorizontal ? "expand-right" : "expand-up"
 
     padding: itemPadding
 
@@ -24,6 +24,26 @@ AppletItemButton {
         DDT.TraySortOrderModel.collapsed = !DDT.TraySortOrderModel.collapsed
         toolTip.close()
     }
+
+    states: [
+        State {
+            name: "opened"
+            when: !collapsed
+            PropertyChanges { target: root.contentItem; rotation: 180 }
+        },
+
+        State {
+            name: "closed"
+            when: collapsed
+            PropertyChanges { target: root.contentItem; rotation: 0 }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            RotationAnimation { duration: 200; }
+        }
+    ]
 
     PanelToolTip {
         id: toolTip
