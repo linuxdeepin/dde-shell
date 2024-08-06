@@ -26,13 +26,19 @@ Item {
         if (useColumnLayout) {
             return Math.max(prev, current)
         } else {
-            return prev + current + root.spacing
+            if (prev == 0) {
+                return current
+            }
+            return prev + root.spacing + current
         }
     }
 
     function calculateImplicitHeight(prev, current) {
         if (useColumnLayout) {
-            return prev + current + root.spacing
+            if (prev == 0) {
+                return current
+            }
+            return prev + root.spacing + current
         } else {
             return Math.max(prev, current)
         }
