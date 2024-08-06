@@ -1,3 +1,31 @@
+dde-shell (0.0.34) unstable; urgency=medium
+
+  * chore: hide tray plugins by default(Issue: #10049)
+  * fix: Modify smart hide to always hide issues(Issue: https://github.com/linuxdeepin/developer-center/issues/10107)
+  * fix: Popup can't switch to other by one click(Issue: https://github.com/linuxdeepin/developer-center/issues/10095)
+  * fix: mouse position drift(Issue: https://github.com/linuxdeepin/developer-center/issues/9964)
+  * fix: dateTime plugin position error
+  * fix: popup can't close when click empty area for dock(Issue: https://github.com/linuxdeepin/developer-center/issues/10075)
+  * chore: tooltip poupu and panel popup delayed show(Issue: https://github.com/linuxdeepin/developer-center/issues/10119)(Influence: tooltip and panle popup display)
+  * fix: dock needs to be on top of the launchpad(Issue: https://github.com/linuxdeepin/developer-center/issues/9996, https://github.com/linuxdeepin/developer-center/issues/9992)
+  * fix: PopupWindow position cannot be refreshed(Issue: https://github.com/linuxdeepin/developer-center/issues/10096)
+  * fix: Unable to pop up when modifying network pop ups(Issue: https://github.com/linuxdeepin/developer-center/issues/10153)
+  * fix: quick panel icon size error(Issue: https://github.com/linuxdeepin/developer-center/issues/9957)
+  * fix: adjust border's width for quickpanel(Issue: https://github.com/linuxdeepin/developer-center/issues/9798)
+  * fix: adjust ui for stashed(Issue: https://github.com/linuxdeepin/developer-center/issues/9894)
+  * fix: Temporarily disable all windows action(Issue: https://github.com/linuxdeepin/developer-center/issues/10172)
+  * fix: fullscreen frame follows the dock(Issue: https://github.com/linuxdeepin/developer-center/issues/7188)
+  * fix: no tooltip when moving from the volume plugin to the shortcut panel icon (#651)(Influence: shortcut panel tooltip)
+  * fix: subMenu can't show
+  * fix: The padding and rounded corners of the tooltip are incorrect
+  * chore: show bluetooth tray icon by default(Issue: #10049)
+  * fix: wrong size(Issue: #10077)
+  * fix: dock's frontendWindowRect size is wrong(Issue: https://github.com/linuxdeepin/developer-center/issues/10155)(Influence: frontendWindowRect size)
+  * fix: sub menu miss focus(Issue: https://github.com/linuxdeepin/developer-center/issues/10015)
+  * fix: adjust radius for stashed
+
+ -- YeShanShan <yeshanshan@deepin.org>  Tue, 06 Aug 2024 15:37:33 +0800
+
 dde-shell (0.0.33) unstable; urgency=medium
 
   * fix: Update translation (#611)(issue: 9965)
