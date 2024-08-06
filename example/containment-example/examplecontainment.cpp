@@ -32,7 +32,7 @@ ExampleContainment::~ExampleContainment()
     }
     if (!res.isEmpty()) {
         const QJsonDocument doc(res);
-        std::unique_ptr<DConfig> config(DConfig::create("org.deepin.ds.example", "org.deepin.ds.example"));
+        std::unique_ptr<DConfig> config(DConfig::create("org.deepin.dde.shell", "org.deepin.ds.example"));
         config->setValue("appletExamples", doc.toVariant());
     }
 }
@@ -40,7 +40,7 @@ ExampleContainment::~ExampleContainment()
 bool ExampleContainment::load()
 {
     DCORE_USE_NAMESPACE;
-    std::unique_ptr<DConfig> config(DConfig::create("org.deepin.ds.example", "org.deepin.ds.example"));
+    std::unique_ptr<DConfig> config(DConfig::create("org.deepin.dde.shell", "org.deepin.ds.example"));
 
     QList<DAppletData> groups;
     auto children = DPluginLoader::instance()->childrenPlugin(pluginId());

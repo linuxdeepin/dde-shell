@@ -125,7 +125,7 @@ bool QuickPanelProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
 
 void QuickPanelProxyModel::updateQuickPlugins()
 {
-    std::unique_ptr<DConfig> dconfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.tray"));
+    std::unique_ptr<DConfig> dconfig(DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dock.tray"));
     m_quickPlugins = dconfig->value("quickPlugins").toStringList();
     qDebug() << "Fetched QuickPanel's plugin by DConfig,"
              << "plugin list size:" << m_quickPlugins.size();

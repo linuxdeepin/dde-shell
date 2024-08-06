@@ -24,7 +24,7 @@ QString ExampleApplet::mainText() const
 bool ExampleApplet::load()
 {
     DCORE_USE_NAMESPACE;
-    std::unique_ptr<DConfig> config(DConfig::create("org.deepin.ds.example", "org.deepin.ds.example"));
+    std::unique_ptr<DConfig> config(DConfig::create("org.deepin.dde.shell", "org.deepin.ds.example"));
     return config->value("loadAppletExampleData").toBool();
 }
 

@@ -39,7 +39,7 @@ TaskManagerSettings* TaskManagerSettings::instance()
 
 TaskManagerSettings::TaskManagerSettings(QObject *parent)
     : QObject(parent)
-    , m_taskManagerDconfig(DConfig::create(QStringLiteral("org.deepin.ds.dock"), QStringLiteral("org.deepin.ds.dock.taskmanager"), QString(), this))
+    , m_taskManagerDconfig(DConfig::create(QStringLiteral("org.deepin.dde.shell"), QStringLiteral("org.deepin.ds.dock.taskmanager"), QString(), this))
 {
     connect(m_taskManagerDconfig, &DConfig::valueChanged, this, [this](const QString &key){
         if (TASKMANAGER_ALLOWFOCEQUIT_KEY == key) {
@@ -152,4 +152,3 @@ QJsonArray TaskManagerSettings::dockedDesktopFiles()
 }
 
 }
-

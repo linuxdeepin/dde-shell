@@ -124,7 +124,7 @@ DockSettings* DockSettings::instance()
 
 DockSettings::DockSettings(QObject* parent)
     : QObject(parent)
-    , m_dockConfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock", QString(), this))
+    , m_dockConfig(DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dock", QString(), this))
     , m_writeTimer(new QTimer(this))
     , m_dockSize(dock::DEFAULT_DOCK_SIZE)
     , m_hideMode(dock::KeepShowing)
@@ -267,7 +267,7 @@ QVariantMap DockSettings::pluginsVisible()
 void DockSettings::setPluginsVisible(const QVariantMap & pluginsVisible)
 {
     if (m_pluginsVisible == pluginsVisible) {
-        return; 
+        return;
     }
     m_pluginsVisible = pluginsVisible;
     m_dockConfig->setValue(keyPluginsVisible, QVariant::fromValue(m_pluginsVisible));
