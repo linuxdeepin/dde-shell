@@ -9,4 +9,5 @@ PanelPopupWindow {
     id: root
 
     flags: (Qt.platform.pluginName === "xcb" ? Qt.Tool | Qt.X11BypassWindowManagerHint : Qt.ToolTip) | Qt.WindowStaysOnTopHint
+    property var mainWindow
 }

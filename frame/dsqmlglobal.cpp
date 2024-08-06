@@ -78,24 +78,12 @@ QList<DApplet *> DQmlGlobal::appletList(const QString &pluginId) const
 
 QList<QWindow *> DQmlGlobal::allChildrenWindows(QWindow *target)
 {
-    QList<QWindow *> ret;
-    auto allWindows = qGuiApp->allWindows();
-    while (!allWindows.isEmpty()) {
-        auto window = allWindows.takeFirst();
-        while (window) {
-            if (window->transientParent() == target) {
-                ret << window;
-                break;
-            }
-            window = window->transientParent();
-        }
-    }
-    return ret;
+    return Utility::instance()->allChildrenWindows(target);
 }
 
 void DQmlGlobal::closeChildrenWindows(QWindow *target)
 {
-    for (const auto item : allChildrenWindows(target))
+    for (const auto item : Utility::instance()->allChildrenWindows(target))
         if (item && item->isVisible())
             item->close();
 }

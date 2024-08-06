@@ -115,6 +115,7 @@ void DPanelPrivate::ensurePopupWindow() const
      const_cast<DPanelPrivate *>(this)->m_popupWindow = qobject_cast<QQuickWindow *>(object);
      if (m_popupWindow) {
          qCDebug(dsLog) << "Create PopupWidow successfully.";
+         m_popupWindow->setObjectName("PanelPopupWidow");
          m_popupWindow->setTransientParent(q->window());
          Q_EMIT const_cast<DPanel *>(q)->popupWindowChanged();
      }
@@ -136,6 +137,7 @@ void DPanelPrivate::ensureToolTipWindow() const
     const_cast<DPanelPrivate *>(this)->m_toolTipWindow = qobject_cast<QQuickWindow *>(object);
     if (m_toolTipWindow) {
         qCDebug(dsLog) << "Create ToolTipWindow successfully.";
+        m_toolTipWindow->setObjectName("PanelToolTipWidow");
         m_toolTipWindow->setTransientParent(q->window());
         Q_EMIT const_cast<DPanel *>(q)->toolTipWindowChanged();
     }
@@ -157,6 +159,7 @@ void DPanelPrivate::ensureMenuWindow() const
     const_cast<DPanelPrivate *>(this)->m_menuWindow = qobject_cast<QQuickWindow *>(object);
     if (m_menuWindow) {
         qCDebug(dsLog) << "Create MenuWindow successfully.";
+        m_menuWindow->setObjectName("PanelMenuWidow");
         m_menuWindow->setTransientParent(q->window());
         QObject::connect(m_menuWindow, &QWindow::visibleChanged, m_popupWindow, [this] (bool arg) {
             if (arg) {

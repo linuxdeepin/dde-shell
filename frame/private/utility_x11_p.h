@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QWindow>
 #include <QGuiApplication>
+#include <QPointer>
 
 DS_BEGIN_NAMESPACE
 
@@ -33,13 +34,20 @@ class MouseGrabEventFilter : public QObject
 public:
     explicit MouseGrabEventFilter(QWindow *target);
 
+    bool tryGrabMouse();
+    QWindow *mainWindow() const;
+    bool isMainWindow() const;
+    static QWindow *mainWindow(QWindow *target);
+    static bool isMainWindow(QWindow *target);
+    void closeAllWindow();
     bool eventFilter(QObject *watched, QEvent *event) override;
 signals:
     void outsideMousePressed();
 private:
     void mousePressEvent(QMouseEvent *e);
+    bool trySelectGrabWindow(QMouseEvent *e);
 
-    QWindow *m_target = nullptr;
+    QPointer<QWindow> m_target;
 };
 
 DS_END_NAMESPACE

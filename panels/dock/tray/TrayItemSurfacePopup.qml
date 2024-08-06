@@ -67,6 +67,7 @@ Item {
             }
             SurfaceSubPopup {
                 objectName: "tray's subPopup"
+                transientParent: popupMenu.menuWindow
                 surfaceAcceptor: function (surfaceId) {
                     if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
                         return false

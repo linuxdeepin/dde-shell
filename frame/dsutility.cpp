@@ -32,18 +32,34 @@ public:
 Utility *Utility::instance()
 {
     static Utility* g_instance = nullptr;
-    auto platformName = QGuiApplication::platformName();
     if (g_instance == nullptr) {
-        if (QStringLiteral("wayland") == platformName) {
-            g_instance = new Utility();
-        }
+        auto platformName = QGuiApplication::platformName();
 #ifdef BUILD_WITH_X11
-        else if (QStringLiteral("xcb") == platformName) {
+        if (QStringLiteral("xcb") == platformName) {
             g_instance = new X11Utility();
         }
 #endif
+        if (g_instance == nullptr)
+            g_instance = new Utility();
     }
     return g_instance;
+}
+
+QList<QWindow *> Utility::allChildrenWindows(QWindow *target)
+{
+    QList<QWindow *> ret;
+    auto allWindows = qGuiApp->allWindows();
+    while (!allWindows.isEmpty()) {
+        auto window = allWindows.takeFirst();
+        while (window) {
+            if (window->transientParent() == target) {
+                ret << window;
+                break;
+            }
+            window = window->transientParent();
+        }
+    }
+    return ret;
 }
 
 Utility::Utility(QObject *parent)
