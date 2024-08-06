@@ -20,7 +20,7 @@ public:
     explicit X11Utility();
     _XDisplay *getDisplay();
 
-    void deliverMouseEvent(uint8_t qMouseButton, int x, int y);
+    void deliverMouseEvent(uint8_t qMouseButton);
 
     bool grabKeyboard(QWindow *target, bool grab = true) override;
     bool grabMouse(QWindow *target, bool grab = true) override;

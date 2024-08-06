@@ -33,7 +33,7 @@ _XDisplay *X11Utility::getDisplay()
     return m_display;
 }
 
-void X11Utility::deliverMouseEvent(uint8_t qMouseButton, int x, int y)
+void X11Utility::deliverMouseEvent(uint8_t qMouseButton)
 {
     uint8_t mouseButton = XCB_BUTTON_INDEX_1;
     switch (qMouseButton) {
@@ -48,7 +48,7 @@ void X11Utility::deliverMouseEvent(uint8_t qMouseButton, int x, int y)
     auto dis = getDisplay();
     if (!dis)
         return;
-    XTestFakeMotionEvent(dis, 0, x, y, 0);
+    XTestFakeRelativeMotionEvent(dis, 0, 0, 0);
     XFlush(dis);
     XTestFakeButtonEvent(dis, mouseButton, true, 0);
     XFlush(dis);
@@ -126,11 +126,10 @@ bool MouseGrabEventFilter::eventFilter(QObject *watched, QEvent *event)
 void MouseGrabEventFilter::mousePressEvent(QMouseEvent *e)
 {
     const auto bounding = m_target->geometry();
-    auto pos = e->globalPosition();
+    const auto pos = e->globalPosition();
     if ((e->position().toPoint().isNull() && !pos.isNull()) ||
         !bounding.contains(pos.toPoint())) {
-        pos = pos * m_target->devicePixelRatio();
-        instance()->deliverMouseEvent(e->button(), pos.x(), pos.y());
+        instance()->deliverMouseEvent(e->button());
         emit outsideMousePressed();
         return;
     }
