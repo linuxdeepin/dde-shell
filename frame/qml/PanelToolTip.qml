@@ -69,6 +69,9 @@ Item {
         if (!toolTipWindow)
             return
 
+        if (!readyBinding)
+            return
+
         toolTipWindow.close()
         toolTipWindow.currentItem = null
     }
