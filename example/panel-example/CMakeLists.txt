@@ -13,6 +13,6 @@ target_link_libraries(ds-panel-example PRIVATE
 
 find_package(Dtk${DTK_VERSION_MAJOR}DConfig REQUIRED)
 
-dtk_add_config_meta_files(APPID "org.deepin.ds.example" FILES org.deepin.ds.example.json)
+dtk_add_config_meta_files(APPID "org.deepin.dde.shell" FILES org.deepin.ds.example.json)
 
 ds_install_package(PACKAGE org.deepin.ds.example TARGET ds-panel-example)

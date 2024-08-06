@@ -19,7 +19,7 @@ TraySettings* TraySettings::instance()
 
 TraySettings::TraySettings(QObject* parent)
     : QObject(parent)
-    , m_trayConfig(DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.tray", QString(), this))
+    , m_trayConfig(DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dock.tray", QString(), this))
 {
     init();
 }

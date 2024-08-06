@@ -17,7 +17,7 @@ const QString SECTION_PINNED = QLatin1String("pinned");
 
 TraySortOrderModel::TraySortOrderModel(QObject *parent)
     : QStandardItemModel(parent)
-    , m_dconfig(Dtk::Core::DConfig::create("org.deepin.ds.dock", "org.deepin.ds.dock.tray"))
+    , m_dconfig(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dock.tray"))
 {
     QHash<int, QByteArray> defaultRoleNames = roleNames();
     defaultRoleNames.insert({

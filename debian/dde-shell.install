@@ -13,5 +13,6 @@ usr/share/dde-shell/org.deepin.ds.dde-appearance*/
 usr/lib/*/dde-shell/org.deepin.ds.dde-am*
 usr/share/dde-shell/org.deepin.ds.dde-am*/
 usr/share/dsg/configs/org.deepin.ds.dock/
+usr/share/dsg/configs/org.deepin.dde.shell/
 usr/share/dde-shell/*/translations
 usr/share/dde-dock/icons/dcc-setting/*.svg
