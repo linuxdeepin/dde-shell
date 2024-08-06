@@ -34,6 +34,7 @@ LQM.DelegateChooser {
                 id: trayDelegate
                 objectName: "stash"
                 itemVisible: stashItemPositioner.itemVisible
+                radius: 8
 
                 background: AppletItemBackground {
                     radius: trayDelegate.radius
