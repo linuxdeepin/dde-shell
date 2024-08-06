@@ -18,6 +18,10 @@ public:
     void installDtkInterceptor();
     void disableQmlCache();
     void setFlickableWheelDeceleration(const int &value);
+    void dconfigsMigrate();
+
+private:
+    bool dconfigMigrate(const QString &newConf, const QString &oldConf);
 };
 
 DS_END_NAMESPACE

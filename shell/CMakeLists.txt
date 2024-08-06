@@ -42,3 +42,4 @@ install(TARGETS dde-shell DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dde-shell@.service DESTINATION ${SYSTEMD_USER_UNIT_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dde-shell-plugin@.service DESTINATION ${SYSTEMD_USER_UNIT_DIR})
+dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES org.deepin.dde.shell.json)
