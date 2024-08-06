@@ -14,8 +14,11 @@ Item {
     property var surfaceAcceptor: function (surfaceId) {
         return true
     }
+    property alias transientParent: menuWindow.transientParent
     PanelMenuWindow {
         id: menuWindow
+        objectName: "subMenu"
+        mainWindow: Panel.menuWindow
         updateGeometryer : function ()
         {
             if (menuWindow.width <= 10 || menuWindow.height <= 10) {

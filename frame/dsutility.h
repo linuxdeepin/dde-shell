@@ -21,6 +21,8 @@ public:
     static Utility *instance();
     virtual bool grabKeyboard(QWindow *target, bool grab = true);
     virtual bool grabMouse(QWindow *target, bool grab = true);
+
+    QList<QWindow *> allChildrenWindows(QWindow *target);
 protected:
     explicit Utility(QObject *parent = nullptr);
 };

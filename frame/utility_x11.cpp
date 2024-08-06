@@ -68,17 +68,17 @@ bool X11Utility::grabKeyboard(QWindow *target, bool grab)
 bool X11Utility::grabMouse(QWindow *target, bool grab)
 {
     if (target) {
-        qCDebug(dsLog) << "grab mouse for the window:" << target->winId();
+        qCDebug(dsLog) << "tray to grab mouse for the window:" << target->winId();
         auto filter = new MouseGrabEventFilter(target);
-        qApp->installEventFilter(filter);
-        QObject::connect(filter, &MouseGrabEventFilter::outsideMousePressed, target, [filter, target] () {
-            qApp->removeEventFilter(filter);
-            qCDebug(dsLog) << "ungrab mouse for the window:" << target->winId();
+        target->installEventFilter(filter);
+        QObject::connect(filter, &MouseGrabEventFilter::outsideMousePressed, target, [this, filter, target] () {
+            qCDebug(dsLog) << "clicked outside mouse for the window:" << target->winId();
             target->setMouseGrabEnabled(false);
-            target->close();
+            target->removeEventFilter(filter);
+            filter->closeAllWindow();
             filter->deleteLater();
         });
-        return target->setMouseGrabEnabled(grab);
+        return filter->tryGrabMouse();
     }
     return false;
 }
@@ -90,12 +90,35 @@ MouseGrabEventFilter::MouseGrabEventFilter(QWindow *target)
 
 }
 
+bool MouseGrabEventFilter::tryGrabMouse()
+{
+    if (isMainWindow())
+        return m_target->setMouseGrabEnabled(true);
+
+    return true;
+}
+
 bool MouseGrabEventFilter::eventFilter(QObject *watched, QEvent *event)
 {
     if (watched != m_target)
         return false;
     if (event->type() == QEvent::MouseButtonRelease) {
         mousePressEvent(static_cast<QMouseEvent *>(event));
+    } else if (event->type() == QEvent::Close) {
+        m_target->removeEventFilter(this);
+        this->deleteLater();
+    } else if (event->type() == QEvent::Leave) {
+        if (!isMainWindow()) {
+            m_target->setMouseGrabEnabled(false);
+            if (auto parent = mainWindow()) {
+                qCDebug(dsLog) << "grab mouse for main window:" << parent->winId();
+                parent->setMouseGrabEnabled(true);
+            }
+        }
+    } else if (event->type() == QEvent::MouseMove) {
+        if (isMainWindow()) {
+            trySelectGrabWindow(static_cast<QMouseEvent *>(event));
+        }
     }
     return false;
 }
@@ -111,6 +134,59 @@ void MouseGrabEventFilter::mousePressEvent(QMouseEvent *e)
         emit outsideMousePressed();
         return;
     }
+}
+
+bool MouseGrabEventFilter::trySelectGrabWindow(QMouseEvent *e)
+{
+    const auto bounding = m_target->geometry();
+    auto pos = QPointF(e->globalPosition());
+    if ((e->position().toPoint().isNull() && !pos.isNull()) ||
+        !bounding.contains(pos.toPoint())) {
+        for (auto item : Utility::instance()->allChildrenWindows(m_target)) {
+            if (!item->isVisible() || isMainWindow(item))
+                continue;
+            if (item->geometry().contains(pos.toPoint())) {
+                qCDebug(dsLog) << "grab mouse for the window:" << item->winId();
+                m_target->setMouseGrabEnabled(false);
+                item->setMouseGrabEnabled(true);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+QWindow *MouseGrabEventFilter::mainWindow() const
+{
+    return mainWindow(m_target);
+}
+
+bool MouseGrabEventFilter::isMainWindow() const
+{
+    return isMainWindow(m_target);
+}
+
+QWindow *MouseGrabEventFilter::mainWindow(QWindow *target)
+{
+    return target ? target->property("mainWindow").value<QWindow *>() : nullptr;
+}
+
+bool MouseGrabEventFilter::isMainWindow(QWindow *target)
+{
+    return !mainWindow(target);
+}
+
+void MouseGrabEventFilter::closeAllWindow()
+{
+    if (auto window = mainWindow()) {
+        for (auto item : Utility::instance()->allChildrenWindows(window)) {
+            if (item && item->isVisible())
+                item->close();
+        }
+    }
+    if (m_target && m_target->isVisible())
+        m_target->close();
+
 }
 
 DS_END_NAMESPACE
