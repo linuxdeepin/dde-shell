@@ -95,11 +95,11 @@ Item {
     height: containerSize.height
 
     Behavior on width {
-        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+        NumberAnimation { duration: 200; easing.type: collapsed ? Easing.OutQuad : Easing.InQuad }
     }
 
     Behavior on height {
-        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+        NumberAnimation { duration: 200; easing.type: collapsed ? Easing.OutQuad : Easing.InQuad }
     }
 
     // Delegates

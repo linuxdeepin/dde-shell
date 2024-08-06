@@ -363,9 +363,10 @@ void TraySortOrderModel::updateVisualIndexes()
         results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
         if (itemVisible) {
             toogleCollapseActionVisible = true;
-            results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
             if (!m_collapsed) {
-                currentVisualIndex++;
+                results[0]->setData(currentVisualIndex++, TraySortOrderModel::VisualIndexRole);
+            } else {
+                results[0]->setData(currentVisualIndex-1, TraySortOrderModel::VisualIndexRole);
             }
         }
     }
