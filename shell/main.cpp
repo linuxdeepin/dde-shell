@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
     QApplication a(argc, argv);
     a.setOrganizationName("deepin");
-    a.setApplicationName("org.deepin.dde-shell");
+    a.setApplicationName("org.deepin.dde.shell");
     a.setApplicationVersion(QT_STRINGIFY(DS_VERSION));
 
     QCommandLineParser parser;
@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
     }
 
     Shell shell;
+    shell.dconfigsMigrate();
     // TODO disable qml's cache avoid to parsing error for ExecutionEngine.
     shell.disableQmlCache();
     shell.setFlickableWheelDeceleration(6000);
