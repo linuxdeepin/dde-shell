@@ -39,7 +39,7 @@
     <message>
         <location filename="../package/main.qml" line="181"/>
         <source>Align Top</source>
-        <translation>Alinhar ao Topo</translation>
+        <translation>Superior</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="188"/>
