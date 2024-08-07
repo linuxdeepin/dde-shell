@@ -115,6 +115,7 @@ private Q_SLOTS:
     void updateDockHideState();
     void delayedUpdateState();
     void updateDockArea();
+    void updateWindowState();
 
 private:
     inline void createdWakeArea();
