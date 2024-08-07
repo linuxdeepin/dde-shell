@@ -97,7 +97,7 @@ AppletItemButton {
 
         Timer {
             id: updatePluginItemGeometryTimer
-            interval: 100
+            interval: 200
             running: false
             repeat: false
             onTriggered: {
@@ -112,7 +112,7 @@ AppletItemButton {
 
         Timer {
             id: updatePluginItemPosTimer
-            interval: 100
+            interval: 200
             running: false
             repeat: false
             onTriggered: {
@@ -144,10 +144,12 @@ AppletItemButton {
     property Component overlayWindow: QuickDragWindow {
         height: root.visualSize.height
         width: root.visualSize.width
-        Item {
+
+        Loader {
             height: parent.height
             width: parent.width
-            ShellSurfaceItem {
+            active: root.DQuickDrag.isDragging
+            sourceComponent: ShellSurfaceItem {
                 anchors.centerIn: parent
                 shellSurface: pluginItem.plugin
             }

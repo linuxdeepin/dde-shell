@@ -10,6 +10,7 @@
 #include <QObject>
 #include <DObject>
 
+class QWindow;
 DS_BEGIN_NAMESPACE
 
 class DQuickDragPrivate;
@@ -21,6 +22,8 @@ class DQuickDrag : public QObject, public DTK_CORE_NAMESPACE::DObject
     Q_PROPERTY(QSizeF hotSpotScale READ hotSpotScale WRITE setHotSpotScale RESET resetHotSpotScale NOTIFY hotSpotScaleChanged FINAL)
     Q_PROPERTY(QPoint startDragPoint READ startDragPoint NOTIFY startDragPointChanged FINAL)
     Q_PROPERTY(QPoint currentDragPoint READ currentDragPoint NOTIFY currentDragPointChanged FINAL)
+    Q_PROPERTY(QWindow* overlayWindow READ overlayWindow NOTIFY overlayWindowChanged FINAL)
+    Q_PROPERTY(bool isDragging READ isDragging NOTIFY isDraggingChanged FINAL)
     D_DECLARE_PRIVATE(DQuickDrag)
 public:
     explicit DQuickDrag(QObject *parent = nullptr);
@@ -38,6 +41,9 @@ public:
     QPoint startDragPoint() const;
     QPoint currentDragPoint() const;
 
+    QWindow* overlayWindow() const;
+    bool isDragging() const;
+
     static DQuickDrag *qmlAttachedProperties(QObject *object);
 signals:
     void activeChanged();
@@ -45,6 +51,8 @@ signals:
     void overlayChanged();
     void hotSpotScaleChanged();
     void currentDragPointChanged();
+    void overlayWindowChanged();
+    void isDraggingChanged();
 };
 
 DS_END_NAMESPACE

@@ -91,7 +91,7 @@ Item {
         }
 
         Loader {
-            active: isFallbackIcon
+            active: isFallbackIcon && root.dragItem.DQuickDrag.isDragging
             anchors.fill: parent
             sourceComponent: ShellSurfaceItemProxy {
                 anchors.centerIn: parent

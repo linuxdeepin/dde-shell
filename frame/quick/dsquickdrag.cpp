@@ -74,6 +74,7 @@ private:
     QPoint m_startDragPoint {0, 0};
     QPoint m_currentDragPoint {0, 0};
     QQmlComponent *m_overlay = nullptr;
+    bool m_isDragging = false;
 };
 
 bool DragWindowEventFilter::eventFilter(QObject *watched, QEvent *event)
@@ -88,6 +89,7 @@ bool DragWindowEventFilter::eventFilter(QObject *watched, QEvent *event)
         if (e->surfaceEventType() == QPlatformSurfaceEvent::SurfaceCreated) {
             m_drag->initDragOverlay(dragWindow);
         } else if (e->surfaceEventType() == QPlatformSurfaceEvent::SurfaceAboutToBeDestroyed) {
+            qDebug(dsDragLog) << "surface destroy";
             m_drag->releaseDragOverlay();
         }
     }
@@ -191,6 +193,18 @@ QPoint DQuickDrag::currentDragPoint() const
     return d->m_currentDragPoint;
 }
 
+QWindow* DQuickDrag::overlayWindow() const
+{
+    D_DC(DQuickDrag);
+    return d->m_window;
+}
+
+bool DQuickDrag::isDragging() const
+{
+    D_DC(DQuickDrag);
+    return d->m_isDragging;
+}
+
 DQuickDragPrivate::DQuickDragPrivate(DQuickDrag *qq)
     : DTK_CORE_NAMESPACE::DObjectPrivate(qq)
 {
@@ -212,15 +226,22 @@ void DQuickDragPrivate::clear()
 
 void DQuickDragPrivate::showOverlay()
 {
+    D_Q(DQuickDrag);
     if (!m_window)
         return;
     m_window->show();
+    m_isDragging = true;
+    Q_EMIT q->isDraggingChanged();
 }
 
 void DQuickDragPrivate::hideOverlay()
 {
+    D_Q(DQuickDrag);
     if (!m_window)
         return;
+    m_isDragging = false;
+    Q_EMIT q->isDraggingChanged();
+
     m_window->hide();
 }
 
@@ -238,6 +259,7 @@ QWindow *DQuickDragPrivate::createDragOverlay()
 
 void DQuickDragPrivate::initDragOverlay(QWindow *dragWindow)
 {
+    D_Q(DQuickDrag);
     if (!m_window)
         m_window = createDragOverlay();
 
@@ -250,6 +272,7 @@ void DQuickDragPrivate::initDragOverlay(QWindow *dragWindow)
 
     updateOverlayPosition(dragWindow->position());
     updateStartDragPoint();
+    Q_EMIT q->overlayWindowChanged();
 }
 
 void DQuickDragPrivate::releaseDragOverlay()
