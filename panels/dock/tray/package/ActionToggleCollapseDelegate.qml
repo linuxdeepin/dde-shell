@@ -16,7 +16,7 @@ AppletItemButton {
 
     z: 5
 
-    icon.name: isHorizontal ? "expand-right" : "expand-up"
+    icon.name: isHorizontal ? "expand-left" : "expand-up"
 
     padding: itemPadding
 
