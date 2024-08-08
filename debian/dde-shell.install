@@ -13,6 +13,9 @@ usr/share/dde-shell/org.deepin.ds.dde-appearance*/
 usr/lib/*/dde-shell/org.deepin.ds.dde-am*
 usr/share/dde-shell/org.deepin.ds.dde-am*/
 usr/share/dsg/configs/org.deepin.ds.dock/
-usr/share/dsg/configs/org.deepin.dde.shell/
+usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.dde.shell.json
+usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.tray.json
+usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.json
+usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.taskmanager.json
 usr/share/dde-shell/*/translations
 usr/share/dde-dock/icons/dcc-setting/*.svg
