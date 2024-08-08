@@ -26,8 +26,8 @@
         },
         "collapsableSurfaceIds": {
             "value": [
-                "bluetooth::bluetooth-item-key",
                 "application-tray::SNI:Fcitx-0",
+                "bluetooth::bluetooth-item-key",
                 "network::network-item-key",
                 "battery::power",
                 "shutdown::shutdown"
