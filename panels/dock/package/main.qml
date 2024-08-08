@@ -81,6 +81,10 @@ Window {
         anchors.fill: parent
         cornerRadius: 0
         blendColor: {
+            // TODO: when dtk support treeland blur, remove following
+            if (Qt.platform.pluginName === "wayland")
+                return "transparent"
+
             if (valid) {
                 return DStyle.Style.control.selectColor(undefined,
                                                     Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, dock.blendColorAlpha(0.6)),
