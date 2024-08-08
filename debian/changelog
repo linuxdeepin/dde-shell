@@ -1,3 +1,9 @@
+dde-shell (0.0.36) unstable; urgency=medium
+
+  * bump version to 0.0.36
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 08 Aug 2024 19:31:54 +0800
+
 dde-shell (0.0.35) unstable; urgency=medium
 
   * fix: dock covered by fullscreen launchpad(Issue: 10222)
