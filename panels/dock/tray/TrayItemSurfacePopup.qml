@@ -19,6 +19,7 @@ Item {
     property var surfaceFilter: function (surfaceId) {
         return false
     }
+    readonly property bool isOpened: popup.popupVisible
     function closeTooltip()
     {
         if (toolTip.toolTipVisible) {

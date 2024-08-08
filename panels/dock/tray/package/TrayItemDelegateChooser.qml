@@ -37,9 +37,11 @@ LQM.DelegateChooser {
                 inputEventsEnabled: model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.collapsed
                 itemVisible: traySurfacePositioner.itemVisible
                 dragable: model.sectionType !== "fixed"
+                isActive: surfacePopup.isOpened
 
                 // trayItem's popup
                 DDT.TrayItemSurfacePopup {
+                    id: surfacePopup
                     surfaceAcceptor: function (surfaceId) {
                         if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
                             return false
