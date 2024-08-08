@@ -1,3 +1,11 @@
+dde-shell (0.0.35) unstable; urgency=medium
+
+  * fix: dock covered by fullscreen launchpad(Issue: 10222)
+  * fix: drag plugin item cause plugin's event blocked (#663)(Issue: 9819)(Influence: dragging plugin and plugin item display)
+  * chore: change the default order of system tray(Issue: 10049)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 08 Aug 2024 15:15:13 +0800
+
 dde-shell (0.0.34) unstable; urgency=medium
 
   * chore: hide tray plugins by default(Issue: #10049)
