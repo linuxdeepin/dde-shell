@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ca">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ca">
 <context>
     <name>main</name>
     <message>
@@ -21,7 +19,7 @@
     <message>
         <location filename="../package/main.qml" line="175"/>
         <source>Alignment</source>
-        <translation type="unfinished"></translation>
+        <translation>Alineació</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="206"/>
@@ -36,17 +34,17 @@
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Align Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Alinea a l&apos;esquerra</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="181"/>
         <source>Align Top</source>
-        <translation type="unfinished"></translation>
+        <translation>Alinea a dalt</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="188"/>
         <source>Align Center</source>
-        <translation type="unfinished"></translation>
+        <translation>Alinea el centre</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="196"/>
