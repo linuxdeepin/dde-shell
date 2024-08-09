@@ -258,8 +258,7 @@ Window {
             }
             if (button === Qt.LeftButton) {
                 // try to close popup when clicked empty, because dock does not have focus.
-                if (Panel.popupWindow.visible)
-                    Panel.popupWindow.close()
+                Panel.requestClosePopup()
             }
         }
     }
@@ -388,6 +387,7 @@ Window {
             oldMousePos = mapToGlobal(mouse.x, mouse.y)
             oldDockSize = dockSize
             recentDeltas = []
+            Panel.requestClosePopup()
             Panel.setMouseGrabEnabled(dragArea, true);
         }
 
@@ -494,7 +494,7 @@ Window {
     Connections {
         function onPositionChanged() {
             changeDragAreaAnchor()
-            closeSubWindow()
+            Panel.requestClosePopup()
         }
         function onDockSizeChanged() {
             dock.dockSize = Panel.dockSize
@@ -507,10 +507,13 @@ Window {
                 hideShowAnimation.running = true
             }
         }
-        function closeSubWindow() {
-            if (Panel.popupWindow)
-                Panel.popupWindow.close()
+        function onRequestClosePopup() {
+            let popup = Panel.popupWindow
+            DS.closeChildrenWindows(popup)
+            if (popup && popup.visible)
+                popup.close()
         }
+
         target: Panel
     }
 

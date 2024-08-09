@@ -105,6 +105,7 @@ Q_SIGNALS:
     void indicatorStyleChanged(IndicatorStyle style);
     void showInPrimaryChanged(bool showInPrimary);
     void dockScreenChanged(QScreen *screen);
+    void requestClosePopup();
 
 private:
     ColorTheme m_theme;
