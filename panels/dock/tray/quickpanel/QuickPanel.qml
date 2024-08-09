@@ -29,7 +29,12 @@ Item {
 
     function isTrayItemPopup(surfaceId)
     {
-        return pluginIdBySurfaceId(surfaceId) === trayItemPluginId
+        if (pluginIdBySurfaceId(surfaceId) !== trayItemPluginId)
+            return false
+
+        let pluginId = pluginIdBySurfaceId(surfaceId)
+        let itemKey = itemKeyBySurfaceId(surfaceId)
+        return !quickpanelModel.isQuickPanelPopup(pluginId, itemKey)
     }
     function pluginIdBySurfaceId(surfaceId)
     {
