@@ -498,7 +498,7 @@ Window {
             if (Panel.hideState === Dock.Hide) {
                 hideTimer.running = true
             } else {
-                hideShowAnimation.running = true
+                hideShowAnimation.restart()
             }
         }
         function onRequestClosePopup() {
