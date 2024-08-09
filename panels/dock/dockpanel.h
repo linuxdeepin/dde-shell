@@ -76,7 +76,6 @@ public:
     bool debugMode() const;
 
     Q_INVOKABLE void openDockSettings() const;
-    Q_INVOKABLE void setMouseGrabEnabled(QQuickItem *item, bool enabled);
 
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);

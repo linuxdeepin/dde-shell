@@ -382,7 +382,7 @@ Window {
             oldDockSize = dockSize
             recentDeltas = []
             Panel.requestClosePopup()
-            Panel.setMouseGrabEnabled(dragArea, true);
+            DS.grabMouse(Panel.rootObject, true)
         }
 
         // this used for blocking MouseEvent sent to bottom MouseArea
@@ -429,7 +429,7 @@ Window {
             Applet.dockSize = dockSize
             itemIconSizeBase = dockItemMaxSize
             pressedAndDragging(false)
-            Panel.setMouseGrabEnabled(dragArea, false);
+            DS.grabMouse(Panel.rootObject, false)
         }
 
         function anchorToTop() {

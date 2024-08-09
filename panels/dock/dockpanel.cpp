@@ -395,17 +395,6 @@ void DockPanel::updateDockScreen()
     setDockScreen(qApp->primaryScreen());
 }
 
-void DockPanel::setMouseGrabEnabled(QQuickItem *item, bool enabled)
-{
-    if (!item) return;
-
-    auto window = item->window();
-    if (!window) return;
-
-    window->setMouseGrabEnabled(enabled);
-}
-
-
 bool DockPanel::showInPrimary() const
 {
     return SETTINGS->showInPrimary();

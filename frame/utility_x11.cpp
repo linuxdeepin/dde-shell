@@ -67,7 +67,7 @@ bool X11Utility::grabKeyboard(QWindow *target, bool grab)
 
 bool X11Utility::grabMouse(QWindow *target, bool grab)
 {
-    if (target) {
+    if (grab && MouseGrabEventFilter::isMatchingWindow(target)) {
         qCDebug(dsLog) << "tray to grab mouse for the window:" << target->winId();
         auto filter = new MouseGrabEventFilter(target);
         target->installEventFilter(filter);
@@ -80,6 +80,8 @@ bool X11Utility::grabMouse(QWindow *target, bool grab)
         });
         return filter->tryGrabMouse();
     }
+    if (target)
+        return target->setMouseGrabEnabled(grab);
     return false;
 }
 
@@ -167,12 +169,18 @@ bool MouseGrabEventFilter::isMainWindow() const
 
 QWindow *MouseGrabEventFilter::mainWindow(QWindow *target)
 {
-    return target ? target->property("mainWindow").value<QWindow *>() : nullptr;
+    return target ? target->property("mainMenuWindow").value<QWindow *>() : nullptr;
 }
 
 bool MouseGrabEventFilter::isMainWindow(QWindow *target)
 {
     return !mainWindow(target);
+}
+
+// distinguish MenuWindow with NormalWindow
+bool MouseGrabEventFilter::isMatchingWindow(QWindow *target)
+{
+    return target && target->property("mainMenuWindow").isValid();
 }
 
 void MouseGrabEventFilter::closeAllWindow()

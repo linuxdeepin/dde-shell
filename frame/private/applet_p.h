@@ -8,6 +8,7 @@
 
 #include <dobject_p.h>
 #include <QVariant>
+#include <QPointer>
 
 DS_BEGIN_NAMESPACE
 /**
@@ -21,7 +22,7 @@ public:
 
     DPluginMetaData m_metaData;
     DAppletData m_data;
-    QObject *m_rootObject{nullptr};
+    QPointer<QObject> m_rootObject;
 
     D_DECLARE_PUBLIC(DApplet);
 };

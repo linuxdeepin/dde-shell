@@ -39,6 +39,7 @@ public:
     bool isMainWindow() const;
     static QWindow *mainWindow(QWindow *target);
     static bool isMainWindow(QWindow *target);
+    static bool isMatchingWindow(QWindow *target);
     void closeAllWindow();
     bool eventFilter(QObject *watched, QEvent *event) override;
 signals:
