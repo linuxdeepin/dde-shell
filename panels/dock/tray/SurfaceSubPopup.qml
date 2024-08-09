@@ -18,7 +18,7 @@ Item {
     PanelMenuWindow {
         id: menuWindow
         objectName: "subMenu"
-        mainWindow: Panel.menuWindow
+        mainMenuWindow: Panel.menuWindow
         updateGeometryer : function ()
         {
             if (menuWindow.width <= 10 || menuWindow.height <= 10) {
