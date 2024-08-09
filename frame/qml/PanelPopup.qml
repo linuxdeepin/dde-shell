@@ -63,6 +63,12 @@ Item {
         id: timer
         interval: 10
         onTriggered: {
+            if (!popupWindow)
+                return
+
+            if (!readyBinding)
+                return
+
             popupWindow.show()
             popupWindow.requestActivate()
         }

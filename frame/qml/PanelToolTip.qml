@@ -60,6 +60,12 @@ Item {
         id: timer
         interval: 10
         onTriggered: {
+            if (!toolTipWindow)
+                return
+
+            if (!readyBinding)
+                return
+
             toolTipWindow.show()
         }
     }

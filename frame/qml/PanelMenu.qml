@@ -66,6 +66,9 @@ Item {
     {
         if (!menuWindow)
             return
+
+        if (!readyBinding)
+            return
         
         menuWindow.close()
         menuWindow.currentItem = null
