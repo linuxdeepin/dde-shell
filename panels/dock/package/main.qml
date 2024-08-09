@@ -56,6 +56,7 @@ Window {
 
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
+    D.DWindow.borderWidth: 1
     D.DWindow.enableBlurWindow: true
     D.DWindow.themeType: Panel.colorTheme
     D.DWindow.borderColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, dock.blendColorAlpha(0.6) + 20 / 255) : Qt.rgba(0, 0, 0, 0.15)
@@ -95,13 +96,6 @@ Window {
                                                 DStyle.Style.behindWindowBlur.lightNoBlurColor,
                                                 DStyle.Style.behindWindowBlur.darkNoBlurColor)
         }
-    }
-
-    D.InsideBoxBorder {
-        anchors.fill: parent
-        // TODO 小数倍缩放下可能会导致边框时有时无，设置0.5的margin规避，不过可能会导致内外边框之间多1px的填充，不是完美的解决方案
-        anchors.margins: 0.5
-        color: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(1, 1, 1, 0.15) : Qt.rgba(1, 1, 1, dock.blendColorAlpha(0.6) - 0.05)
     }
 
     PropertyAnimation {
