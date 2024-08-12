@@ -26,9 +26,11 @@ Control {
     x: visualPosition.x
     y: visualPosition.y
     Behavior on x {
+        enabled: isHorizontal
         NumberAnimation { duration: 200; easing.type: collapsed ? Easing.OutQuad : Easing.InQuad }
     }
     Behavior on y {
+        enabled: !isHorizontal
         NumberAnimation { duration: 200; easing.type: collapsed ? Easing.OutQuad : Easing.InQuad }
     }
     states: [
