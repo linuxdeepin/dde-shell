@@ -9,6 +9,7 @@
 #include <QScreen>
 #include <QMargins>
 #include <QGuiApplication>
+#include <QLoggingCategory>
 
 #include <qpa/qplatformwindow.h>
 #include <qpa/qplatformwindow_p.h>
@@ -17,6 +18,8 @@
 #include <xcb/xcb_ewmh.h>
 
 DS_BEGIN_NAMESPACE
+
+Q_LOGGING_CATEGORY(layershell, "dde.shell.layershell")
 
 LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     : QObject(parent)
@@ -154,7 +157,7 @@ void LayerShellEmulation::onExclusionZoneChanged()
     auto anchors = m_dlayerShellWindow->anchors();
     QRect rect = m_window->screen()->geometry();
     if ((anchors == DLayerShellWindow::AnchorLeft) || (anchors ^ DLayerShellWindow::AnchorLeft) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) {
-        strut_partial.left = (m_dlayerShellWindow->exclusionZone() + rect.x()) * scaleFactor;
+        strut_partial.left = rect.x() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
         strut_partial.left_start_y = rect.y();
         strut_partial.left_end_y = rect.y() + m_window->height();
     } else if ((anchors == DLayerShellWindow::AnchorRight) || (anchors ^ DLayerShellWindow::AnchorRight) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) {
@@ -163,11 +166,11 @@ void LayerShellEmulation::onExclusionZoneChanged()
             if (boundary < screen->geometry().right())
                 boundary = screen->geometry().right();
         }
-        strut_partial.right = (m_dlayerShellWindow->exclusionZone() + boundary - rect.right()) * scaleFactor;
+        strut_partial.right = boundary - rect.right() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
         strut_partial.right_start_y = rect.y();
         strut_partial.right_end_y = rect.y() + m_window->height();
     } else if ((anchors == DLayerShellWindow::AnchorTop) || (anchors ^ DLayerShellWindow::AnchorTop) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) {
-        strut_partial.top = (m_dlayerShellWindow->exclusionZone() + rect.y()) * scaleFactor;
+        strut_partial.top = rect.y() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
         strut_partial.top_start_x = rect.x();
         strut_partial.top_end_x = rect.x() + m_window->width();
     } else if ((anchors == DLayerShellWindow::AnchorBottom) || (anchors ^ DLayerShellWindow::AnchorBottom) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) {
@@ -179,11 +182,14 @@ void LayerShellEmulation::onExclusionZoneChanged()
             if (boundary < screen->geometry().bottom())
                 boundary = screen->geometry().bottom();
         }
-        strut_partial.bottom = (m_dlayerShellWindow->exclusionZone() + boundary - rect.bottom()) * scaleFactor;
+        strut_partial.bottom =  + boundary - rect.bottom() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
         strut_partial.bottom_start_x = rect.x();
         strut_partial.bottom_end_x = rect.x() + m_window->width();
     }
 
+    qCDebug(layershell) << "update exclusion zone, winId:" << m_window->winId()
+                        << ", (left, right, top, bottom)"
+                        << strut_partial.left << strut_partial.right << strut_partial.top << strut_partial.bottom;
     xcb_ewmh_set_wm_strut_partial(&ewmh_connection, m_window->winId(), strut_partial);
 }
 
