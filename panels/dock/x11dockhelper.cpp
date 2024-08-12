@@ -653,8 +653,9 @@ const QRect DockTriggerArea::matchDockTriggerArea()
 {
     QRect triggerArea;
     auto rect = m_screen->geometry();
-    int values[4];
 
+    // map geometry to Native
+    const auto factor = m_screen->devicePixelRatio();
     switch (m_panel->position()) {
     case Top: {
         triggerArea.setX(rect.left());
@@ -665,7 +666,7 @@ const QRect DockTriggerArea::matchDockTriggerArea()
     }
     case Bottom: {
         triggerArea.setX(rect.left());
-        triggerArea.setY(rect.top() + rect.height() - monitorSize + 1);
+        triggerArea.setY(rect.top() + (rect.height() - monitorSize + 1) * factor);
         triggerArea.setWidth(rect.width());
         triggerArea.setHeight(monitorSize);
         break;
@@ -678,7 +679,7 @@ const QRect DockTriggerArea::matchDockTriggerArea()
         break;
     }
     case Right: {
-        triggerArea.setX(rect.left() + rect.width() - monitorSize + 1);
+        triggerArea.setX(rect.left() + (rect.width() - monitorSize + 1) * factor);
         triggerArea.setY(rect.top());
         triggerArea.setWidth(monitorSize);
         triggerArea.setHeight(rect.height());
@@ -686,9 +687,7 @@ const QRect DockTriggerArea::matchDockTriggerArea()
     }
     }
 
-    // map geometry to Native
-    const auto factor = m_screen->devicePixelRatio();
-    triggerArea = QRect(triggerArea.topLeft() * factor, triggerArea.size() * factor);
+    triggerArea = QRect(triggerArea.topLeft(), triggerArea.size() * factor);
     return triggerArea;
 }
 
