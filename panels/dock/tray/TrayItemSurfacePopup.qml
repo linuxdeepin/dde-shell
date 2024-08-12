@@ -66,15 +66,19 @@ Item {
                     popupMenu.close()
                 }
             }
-            SurfaceSubPopup {
-                objectName: "tray's subPopup"
-                transientParent: popupMenu.menuWindow
-                surfaceAcceptor: function (surfaceId) {
-                    if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
-                        return false
-                    return true
+            Loader {
+                active: popupMenu.menuVisible
+                sourceComponent: SurfaceSubPopup {
+                    objectName: "tray's subPopup"
+                    transientParent: popupMenu.menuWindow
+                    surfaceAcceptor: function (surfaceId) {
+                        if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
+                            return false
+                        return true
+                    }
                 }
             }
+
             Connections {
                 target: popupMenu.menuWindow
                 enabled: popupMenu.readyBinding

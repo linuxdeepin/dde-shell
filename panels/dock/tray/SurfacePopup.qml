@@ -57,14 +57,6 @@ Item {
                 return
             menu.shellSurface.updatePluginGeometry(Qt.rect(menu.menuWindow.x, menu.menuWindow.y, 0, 0))
         }
-        SurfaceSubPopup {
-            objectName: "stashed's subPopup"
-            surfaceAcceptor: function (surfaceId) {
-                if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
-                    return false
-                return true
-            }
-        }
     }
     PanelMenu {
         id: menu
@@ -79,6 +71,18 @@ Item {
             autoClose: true
             onSurfaceDestroyed: function () {
                 menu.close()
+            }
+        }
+        Loader {
+            active: menu.menuVisible
+            sourceComponent: SurfaceSubPopup {
+                objectName: "stashed's subPopup"
+                transientParent: menuWindow
+                surfaceAcceptor: function (surfaceId) {
+                    if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
+                        return false
+                    return true
+                }
             }
         }
     }
