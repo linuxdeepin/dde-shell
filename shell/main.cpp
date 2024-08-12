@@ -98,10 +98,11 @@ public:
 
 int main(int argc, char *argv[])
 {
+    setenv("DSG_APP_ID", "org.deepin.dde.shell", 0);
     DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
     QApplication a(argc, argv);
     a.setOrganizationName("deepin");
-    a.setApplicationName("org.deepin.dde.shell");
+    a.setApplicationName("org.deepin.dde-shell");
     a.setApplicationVersion(QT_STRINGIFY(DS_VERSION));
 
     QCommandLineParser parser;
