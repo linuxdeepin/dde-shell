@@ -15,51 +15,51 @@ Item {
         return true
     }
     property alias transientParent: menuWindow.transientParent
-    PanelMenuWindow {
-        id: menuWindow
-        objectName: "subMenu"
-        mainMenuWindow: Panel.menuWindow
-        updateGeometryer : function ()
-        {
-            if (menuWindow.width <= 10 || menuWindow.height <= 10) {
-                return
-            }
 
-            // following transientParent's screen.
-            menuWindow.screen = menuWindow.transientParent.screen
-
-            let bounding = Qt.rect(menuWindow.screen.virtualX + margins, menuWindow.screen.virtualY + margins,
-                                   menuWindow.screen.width - margins * 2, menuWindow.screen.height - margins * 2)
-            let pos = Qt.point(xOffset, yOffset)
-            x = selectValue(pos.x, bounding.left, bounding.right - menuWindow.width)
-            y = selectValue(pos.y, bounding.top, bounding.bottom - menuWindow.height)
-        }
-        onUpdateGeometryFinished: function ()
-        {
-            if (!popup.shellSurface)
-                return
-            popup.shellSurface.updatePluginGeometry(Qt.rect(popup.menuWindow.x, popup.menuWindow.y, 0, 0))
-        }
-    }
     WaylandOutput {
         compositor: DockCompositor.compositor
-        window: popup.menuWindow
         sizeFollowsWindow: false
-    }
+        window: PanelMenuWindow {
+            id: menuWindow
+            objectName: "subMenu"
+            mainMenuWindow: Panel.menuWindow
+            updateGeometryer : function ()
+            {
+                if (menuWindow.width <= 10 || menuWindow.height <= 10) {
+                    return
+                }
 
-    PanelMenu {
-        id: popup
-        width: popupSurfaceLayer.width
-        height: popupSurfaceLayer.height
-        menuWindow: menuWindow
+                // following transientParent's screen.
+                menuWindow.screen = menuWindow.transientParent.screen
 
-        property alias shellSurface: popupSurfaceLayer.shellSurface
-        ShellSurfaceItemProxy {
-            id: popupSurfaceLayer
-            anchors.centerIn: parent
-            autoClose: true
-            onSurfaceDestroyed: function () {
-                popup.close()
+                let bounding = Qt.rect(menuWindow.screen.virtualX + margins, menuWindow.screen.virtualY + margins,
+                                       menuWindow.screen.width - margins * 2, menuWindow.screen.height - margins * 2)
+                let pos = Qt.point(xOffset, yOffset)
+                x = selectValue(pos.x, bounding.left, bounding.right - menuWindow.width)
+                y = selectValue(pos.y, bounding.top, bounding.bottom - menuWindow.height)
+            }
+            onUpdateGeometryFinished: function ()
+            {
+                if (!popup.shellSurface)
+                    return
+                popup.shellSurface.updatePluginGeometry(Qt.rect(popup.menuWindow.x, popup.menuWindow.y, 0, 0))
+            }
+
+            PanelMenu {
+                id: popup
+                width: popupSurfaceLayer.width
+                height: popupSurfaceLayer.height
+                menuWindow: menuWindow
+
+                property alias shellSurface: popupSurfaceLayer.shellSurface
+                ShellSurfaceItemProxy {
+                    id: popupSurfaceLayer
+                    anchors.centerIn: parent
+                    autoClose: true
+                    onSurfaceDestroyed: function () {
+                        popup.close()
+                    }
+                }
             }
         }
     }
