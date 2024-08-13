@@ -25,8 +25,6 @@ class TaskManager : public DS_NAMESPACE::DContainment
 public:
     explicit TaskManager(QObject* parent = nullptr);
 
-    QStringList getDockedItems();
-
     ItemModel* dataModel();
 
     virtual bool init() override;
