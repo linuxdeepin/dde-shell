@@ -1,3 +1,9 @@
+dde-shell (0.0.37) unstable; urgency=medium
+
+  * fix: temporary revert application name change
+
+ -- Deepin Packages Builder <packages@deepin.org>  Tue, 13 Aug 2024 10:48:37 +0800
+
 dde-shell (0.0.36) unstable; urgency=medium
 
   * bump version to 0.0.36
