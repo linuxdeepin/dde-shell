@@ -27,11 +27,11 @@ Control {
     y: visualPosition.y
     Behavior on x {
         enabled: isHorizontal
-        NumberAnimation { duration: 200; easing.type: collapsed ? Easing.OutQuad : Easing.InQuad }
+        NumberAnimation { duration: 200; easing.type: collapsed || !DDT.TraySortOrderModel.isCollapsing ? Easing.OutQuad : Easing.InQuad }
     }
     Behavior on y {
         enabled: !isHorizontal
-        NumberAnimation { duration: 200; easing.type: collapsed ? Easing.OutQuad : Easing.InQuad }
+        NumberAnimation { duration: 200; easing.type: collapsed || !DDT.TraySortOrderModel.isCollapsing ? Easing.OutQuad : Easing.InQuad }
     }
     states: [
         State {
@@ -53,10 +53,14 @@ Control {
             SequentialAnimation {
                 NumberAnimation { properties: "opacity,scale"; easing.type: Easing.OutQuad; duration: 200 }
                 PropertyAction { target: root; property: "visible"; value: false }
+                PropertyAction { target: DDT.TraySortOrderModel; property: "isCollapsing"; value: false }
             }
         },
         Transition {
-            NumberAnimation { properties: "opacity,scale"; easing.type: Easing.InQuad; duration: 200 }
+            SequentialAnimation {
+                NumberAnimation { properties: "opacity,scale"; easing.type: Easing.InQuad; duration: 200 }
+                PropertyAction { target: DDT.TraySortOrderModel; property: "isCollapsing"; value: false }
+            }
         }
     ]
 }
