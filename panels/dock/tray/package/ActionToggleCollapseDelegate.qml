@@ -21,6 +21,7 @@ AppletItemButton {
     padding: itemPadding
 
     onClicked: {
+        DDT.TraySortOrderModel.isCollapsing = true
         DDT.TraySortOrderModel.collapsed = !DDT.TraySortOrderModel.collapsed
         toolTip.close()
     }
