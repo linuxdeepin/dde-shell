@@ -19,20 +19,7 @@ AppletItem {
     property int itemSize: 16
     property int space: 4
     // todo: visible property to be set
-    property bool shouldVisible: {
-        let clipboardApplet = DS.applet("org.deepin.ds.dock.clipboarditem")
-        let searchApplet = DS.applet("org.deepin.ds.dock.searchitem")
-        let clipboardVisible = true
-        let searchVisible = true
-        if (clipboardApplet) {
-            clipboardVisible = clipboardApplet.visible;
-        }
-        if (searchApplet) {
-            searchVisible = searchApplet.visible;
-        }
-
-        return ((clipboardVisible || searchVisible) || Panel.itemAlignment === Dock.CenterAlignment) && listView.count > 1
-    }
+    property bool shouldVisible: listView.count > 1 && Panel.itemAlignment === Dock.CenterAlignment
 
     // visible:listView.count > 1
     implicitWidth: Panel.position === Dock.Top || Panel.position === Dock.Bottom ? listView.count * frameSize + space * (listView.count - 1) : dockSize
