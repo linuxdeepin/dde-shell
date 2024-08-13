@@ -22,24 +22,6 @@ ContainmentItem {
         anchors.centerIn: parent
         useColumnLayout: taskmanager.useColumnLayout
         spacing: Panel.rootObject.itemSpacing
-        add: Transition {
-            NumberAnimation {
-                properties: "scale"
-                from: 0
-                to: 1
-                duration: 200
-                easing.type: Easing.OutQuad
-            }
-        }
-        remove: Transition {
-            NumberAnimation {
-                properties: "scale"
-                from: 1
-                to: 0
-                duration: 200
-                easing.type: Easing.InQuad
-            }
-        }
         displaced: Transition {
             NumberAnimation {
                 properties: "x,y"
@@ -103,6 +85,9 @@ ContainmentItem {
                     onDragFinished: function() {
                         // 就算在非法区域松开也更新 Model
                         taskmanager.Applet.dataModel.moveTo(itemId, visualIndex)
+
+                        // 更新 visualModel 的 model 数据
+                        visualModel.model = taskmanager.Applet.dataModel
                     }
                     anchors.fill: parent // This is mandatory for draggable item center in drop area
                 }
