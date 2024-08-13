@@ -12,8 +12,6 @@ Item {
     property alias delegate: listView.delegate
     property alias spacing: listView.spacing
     property alias count: listView.count
-    property alias add: listView.add
-    property alias remove: listView.remove
     property alias displaced: listView.displaced
     ListView {
         id: listView

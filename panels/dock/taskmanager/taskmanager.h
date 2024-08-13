@@ -17,7 +17,7 @@ class AppItem;
 class TaskManager : public DS_NAMESPACE::DContainment
 {
     Q_OBJECT
-    Q_PROPERTY(ItemModel* dataModel READ dataModel NOTIFY dataModelChanged)
+    Q_PROPERTY(ItemModel* dataModel READ dataModel NOTIFY itemsChanged)
 
     Q_PROPERTY(bool windowSplit READ windowSplit NOTIFY windowSplitChanged)
     Q_PROPERTY(bool allowForceQuit READ allowForceQuit NOTIFY allowedForceQuitChanged)
@@ -47,7 +47,7 @@ public:
     Q_INVOKABLE void setAppItemWindowIconGeometry(const QString& appid, QObject* relativePositionItem, const int& x1, const int& y1, const int& x2, const int& y2);
 
 Q_SIGNALS:
-    void dataModelChanged();
+    void itemsChanged();
     void windowSplitChanged();
     void allowedForceQuitChanged();
 

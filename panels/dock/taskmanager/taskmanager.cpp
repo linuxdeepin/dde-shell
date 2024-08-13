@@ -47,6 +47,9 @@ TaskManager::TaskManager(QObject* parent)
     qDBusRegisterMetaType<PropMap>();
     qDBusRegisterMetaType<QDBusObjectPath>();
 
+    connect(ItemModel::instance(), &ItemModel::itemAdded, this, &TaskManager::itemsChanged);
+    connect(ItemModel::instance(), &ItemModel::itemRemoved, this, &TaskManager::itemsChanged);
+
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
 }

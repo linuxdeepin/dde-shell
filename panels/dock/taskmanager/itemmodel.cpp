@@ -138,6 +138,7 @@ void ItemModel::addItem(QPointer<AbstractItem> item)
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_items.append(item);
     endInsertRows();
+    Q_EMIT itemAdded();
 }
 
 void ItemModel::onItemDestroyed()
@@ -151,6 +152,7 @@ void ItemModel::onItemDestroyed()
     beginRemoveRows(QModelIndex(), beginIndex, lastIndex);
     m_items.removeAll(item);
     endRemoveRows();
+    Q_EMIT itemRemoved();
 }
 
 void ItemModel::onItemChanged()
