@@ -28,7 +28,6 @@
             "value": [
                 "application-tray::SNI:Fcitx-0",
                 "bluetooth::bluetooth-item-key",
-                "network::network-item-key",
                 "battery::power",
                 "shutdown::shutdown"
             ],
@@ -43,7 +42,8 @@
         },
         "pinnedSurfaceIds": {
             "value": [
-                "uosai::uosai"
+                "uosai::uosai",
+                "network::network-item-key"
             ],
             "serial": 0,
             "flags": [],
