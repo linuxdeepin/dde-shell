@@ -78,7 +78,8 @@ DockItemInfos TrayItem::dockItemInfosFromModel(QAbstractItemModel *model)
         const auto item = index.data(modelDataRole).value<QObject *>();
         if (!item)
             return DockItemInfos{};
-        if (!(item->property("pluginFlags").toInt() & Dock::Attribute_CanSetting)) {
+        int flags = item->property("pluginFlags").toInt();
+        if (!(flags & Dock::Attribute_CanSetting) || flags & Dock::Attribute_ForceDock) {
             continue;
         }
         DockItemInfo itemInfo;
