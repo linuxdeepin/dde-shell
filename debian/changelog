@@ -1,3 +1,9 @@
+dde-shell (0.0.39) unstable; urgency=medium
+
+  * chore: disable hide force-docked item(Issue: 10371)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Tue, 13 Aug 2024 20:43:29 +0800
+
 dde-shell (0.0.38) unstable; urgency=medium
 
   * chore: move network plugin to pinned area(Issue: 10355)
