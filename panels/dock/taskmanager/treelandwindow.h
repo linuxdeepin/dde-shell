@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "dsglobal.h"
 #include "abstractwindow.h"
 #include "qwayland-treeland-foreign-toplevel-manager-v1.h"
 
@@ -56,9 +55,9 @@ private:
     QList<uint32_t> m_states;
 };
 
-class WaylandWindowMonitor;
+class TreeLandWindowMonitor;
 
-class WaylandWindow : public AbstractWindow
+class TreeLandWindow : public AbstractWindow
 {
     Q_OBJECT
 
@@ -70,7 +69,7 @@ class WaylandWindow : public AbstractWindow
     };
 
 public:
-    ~WaylandWindow();
+    ~TreeLandWindow();
 
     uint32_t id() override;
     pid_t pid() override;
@@ -103,9 +102,9 @@ private:
     bool isReady();
 
 private:
-    friend class WaylandWindowMonitor;
+    friend class TreeLandWindowMonitor;
 
-    WaylandWindow(uint32_t id, QObject *parent = nullptr);
+    TreeLandWindow(uint32_t id, QObject *parent = nullptr);
 
 private:
     uint32_t m_id;

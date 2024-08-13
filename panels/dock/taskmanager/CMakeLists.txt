@@ -62,10 +62,10 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     desktopfileparserfactory.h
     taskmanager.cpp
     taskmanager.h
-    waylandwindow.cpp
-    waylandwindow.h
-    waylandwindowmonitor.cpp
-    waylandwindowmonitor.h
+    treelandwindow.cpp
+    treelandwindow.h
+    treelandwindowmonitor.cpp
+    treelandwindowmonitor.h
     taskmanagersettings.cpp
     taskmanagersettings.h
 )

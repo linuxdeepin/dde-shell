@@ -12,7 +12,7 @@
 #include "taskmanageradaptor.h"
 #include "desktopfileamparser.h"
 #include "taskmanagersettings.h"
-#include "waylandwindowmonitor.h"
+#include "treelandwindowmonitor.h"
 #include "abstractwindowmonitor.h"
 #include "desktopfileparserfactory.h"
 
@@ -59,7 +59,7 @@ bool TaskManager::load()
     loadDockedAppItems();
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
-        m_windowMonitor.reset(new WaylandWindowMonitor());
+        m_windowMonitor.reset(new TreeLandWindowMonitor());
     }
 
 #ifdef BUILD_WITH_X11

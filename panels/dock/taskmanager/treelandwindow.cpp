@@ -2,8 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "dsglobal.h"
-#include "waylandwindow.h"
+#include "treelandwindow.h"
 #include "abstractwindow.h"
 
 #include <cstdint>
@@ -11,9 +10,10 @@
 
 #include <QLoggingCategory>
 
+#include <private/qwaylandwindow_p.h>
 #include <private/qwaylandnativeinterface_p.h>
 
-Q_LOGGING_CATEGORY(waylandwindowLog, "dde.shell.dock.taskmanager.waylandwindow")
+Q_LOGGING_CATEGORY(waylandwindowLog, "dde.shell.dock.taskmanager.treelandwindow")
 
 namespace dock {
 ForeignToplevelHandle::ForeignToplevelHandle(struct ::ztreeland_foreign_toplevel_handle_v1 *object)
@@ -101,73 +101,73 @@ void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_closed()
     Q_EMIT handlerIsDeleted();
 }
 
-WaylandWindow::WaylandWindow(uint32_t id, QObject *parent)
+TreeLandWindow::TreeLandWindow(uint32_t id, QObject *parent)
     : AbstractWindow(parent)
     , m_id(id)
 {
     qCDebug(waylandwindowLog()) << "wayland window created";
 }
 
-WaylandWindow::~WaylandWindow()
+TreeLandWindow::~TreeLandWindow()
 {
     qCDebug(waylandwindowLog()) << "wayland window destoryed";
 }
 
-uint32_t WaylandWindow::id()
+uint32_t TreeLandWindow::id()
 {
     return m_id;
 }
 
-pid_t WaylandWindow::pid()
+pid_t TreeLandWindow::pid()
 {
     return m_foreignToplevelHandle ? m_foreignToplevelHandle->pid() : 0;
 }
 
-QString WaylandWindow::icon()
+QString TreeLandWindow::icon()
 {
     return "";
 }
 
-QString WaylandWindow::title()
+QString TreeLandWindow::title()
 {
     return m_foreignToplevelHandle ? m_foreignToplevelHandle->title() : "";
 }
 
-void WaylandWindow::updateIsActive()
+void TreeLandWindow::updateIsActive()
 {
 }
 
-bool WaylandWindow::isActive()
+bool TreeLandWindow::isActive()
 {
     return m_foreignToplevelHandle->state().contains(Active);
 }
 
-bool WaylandWindow::shouldSkip()
+bool TreeLandWindow::shouldSkip()
 {
     return false;
 }
 
-bool WaylandWindow::isMinimized()
+bool TreeLandWindow::isMinimized()
 {
     return m_foreignToplevelHandle->state().contains(Minimized);
 }
 
-bool WaylandWindow::allowClose()
+bool TreeLandWindow::allowClose()
 {
     return true;
 }
 
-bool WaylandWindow::isAttention()
+bool TreeLandWindow::isAttention()
 {
     return false;
 }
 
-void WaylandWindow::close()
+void TreeLandWindow::close()
 {
     m_foreignToplevelHandle->close();
 }
 
-void WaylandWindow::activate()
+void TreeLandWindow::activate()
 {
     QtWaylandClient::QWaylandNativeInterface *app =
             static_cast<QtWaylandClient::QWaylandNativeInterface *>(
@@ -176,61 +176,62 @@ void WaylandWindow::activate()
     m_foreignToplevelHandle->activate(seat);
 }
 
-void WaylandWindow::maxmize()
+void TreeLandWindow::maxmize()
 {
     m_foreignToplevelHandle->set_maximized();
 }
 
-void WaylandWindow::minimize()
+void TreeLandWindow::minimize()
 {
     m_foreignToplevelHandle->set_minimized();
 }
 
-void WaylandWindow::killClient()
+void TreeLandWindow::killClient()
 {
     m_foreignToplevelHandle->close();
 }
 
-void WaylandWindow::setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry)
+void TreeLandWindow::setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry)
+{
+    auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(baseWindow->handle());
+    m_foreignToplevelHandle->set_rectangle(waylandWindow->surface(), gemeotry.x(), gemeotry.y(), gemeotry.width(), gemeotry.height());
+}
+
+void TreeLandWindow::updatePid()
+{
+
+}
+void TreeLandWindow::updateIcon()
 {
 
 }
 
-void WaylandWindow::updatePid()
-{
-
-}
-void WaylandWindow::updateIcon()
+void TreeLandWindow::updateTitle()
 {
 
 }
 
-void WaylandWindow::updateTitle()
+void TreeLandWindow::updateShouldSkip()
 {
 
 }
 
-void WaylandWindow::updateShouldSkip()
+void TreeLandWindow::updateAllowClose()
 {
 
 }
 
-void WaylandWindow::updateAllowClose()
+void TreeLandWindow::updateIsMinimized()
 {
 
 }
 
-void WaylandWindow::updateIsMinimized()
-{
-
-}
-
-bool WaylandWindow::isReady()
+bool TreeLandWindow::isReady()
 {
     return m_foreignToplevelHandle->isReady();
 }
 
-void WaylandWindow::setForeignToplevelHandle(ForeignToplevelHandle* handle)
+void TreeLandWindow::setForeignToplevelHandle(ForeignToplevelHandle* handle)
 {
     if (m_foreignToplevelHandle && m_foreignToplevelHandle.get() == handle) return;
     m_foreignToplevelHandle.reset(handle);

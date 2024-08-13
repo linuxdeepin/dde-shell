@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "dsglobal.h"
-#include "waylandwindow.h"
+#include "treelandwindow.h"
 #include "abstractwindowmonitor.h"
 #include "qwayland-treeland-foreign-toplevel-manager-v1.h"
 
@@ -21,7 +20,7 @@ class ForeignToplevelManager : public QWaylandClientExtensionTemplate<ForeignTop
 {
     Q_OBJECT
 public:
-    explicit ForeignToplevelManager(WaylandWindowMonitor* monitor);
+    explicit ForeignToplevelManager(TreeLandWindowMonitor* monitor);
 
 Q_SIGNALS:
     void newForeignToplevelHandle(ForeignToplevelHandle *handle);
@@ -30,16 +29,16 @@ protected:
     void ztreeland_foreign_toplevel_manager_v1_toplevel(struct ::ztreeland_foreign_toplevel_handle_v1 *toplevel) override;
 
 private:
-    WaylandWindowMonitor* m_monitor;
+    TreeLandWindowMonitor* m_monitor;
 };
 
-class TreelandDockPreviewContext : public QWaylandClientExtensionTemplate<TreelandDockPreviewContext>, public QtWayland::treeland_dock_preview_context_v1
+class TreeLandDockPreviewContext : public QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>, public QtWayland::treeland_dock_preview_context_v1
 {
     Q_OBJECT
 
 public:
-    explicit TreelandDockPreviewContext(struct ::treeland_dock_preview_context_v1 *);
-    ~TreelandDockPreviewContext();
+    explicit TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v1 *);
+    ~TreeLandDockPreviewContext();
     void showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
     void hideWindowsPreview();
 
@@ -56,12 +55,12 @@ private:
     QTimer* m_hideTimer;
 };
 
-class WaylandWindowMonitor : public AbstractWindowMonitor
+class TreeLandWindowMonitor : public AbstractWindowMonitor
 {
     Q_OBJECT
 
 public:
-    explicit WaylandWindowMonitor(QObject* parent = nullptr);
+    explicit TreeLandWindowMonitor(QObject* parent = nullptr);
     virtual void start() override;
     virtual void stop() override;
     virtual void clear() override;
@@ -79,9 +78,9 @@ private Q_SLOTS:
     void handleForeignToplevelHandleRemoved();
 
 private:
-    QHash<ulong, QSharedPointer<WaylandWindow>> m_windows;
+    QHash<ulong, QSharedPointer<TreeLandWindow>> m_windows;
     QScopedPointer<ForeignToplevelManager> m_foreignToplevelManager;
-    QScopedPointer<TreelandDockPreviewContext> m_dockPreview;
+    QScopedPointer<TreeLandDockPreviewContext> m_dockPreview;
 
 };
 }
