@@ -179,11 +179,15 @@ bool TaskManager::allowForceQuit()
     return Settings->isAllowedForceQuit();
 }
 
+QString TaskManager::desktopIdToAppId(const QString& desktopId)
+{
+    return Q_LIKELY(desktopId.endsWith(".desktop")) ? desktopId.chopped(8) : desktopId;
+}
+
 bool TaskManager::requestDockByDesktopId(const QString& appID)
 {
     if (appID.startsWith("internal/")) return false;
-    QString dockAppId(Q_LIKELY(appID.endsWith(".desktop")) ? appID.chopped(8) : appID);
-    return RequestDock(dockAppId);
+    return RequestDock(desktopIdToAppId(appID));
 }
 
 bool TaskManager::RequestDock(QString appID)

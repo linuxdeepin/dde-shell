@@ -24,20 +24,18 @@ ContainmentItem {
         spacing: Panel.rootObject.itemSpacing
         add: Transition {
             NumberAnimation {
-                properties: "scale"
+                properties: "scale,opacity"
                 from: 0
                 to: 1
                 duration: 200
-                easing.type: Easing.OutQuad
             }
         }
         remove: Transition {
             NumberAnimation {
-                properties: "scale"
+                properties: "scale,opacity"
                 from: 1
                 to: 0
                 duration: 200
-                easing.type: Easing.InQuad
             }
         }
         displaced: Transition {
@@ -46,6 +44,7 @@ ContainmentItem {
                 easing.type: Easing.OutQuad
             }
         }
+        move: displaced
         model: DelegateModel {
             id: visualModel
             model: taskmanager.Applet.dataModel
@@ -58,8 +57,25 @@ ContainmentItem {
                 required property string iconName
                 required property string menus
                 required property list<string> windows
-                keys: ["text/x-dde-dock-dnd-appid", "text/x-dde-launcher-dnd-desktopId"]
+                keys: ["text/x-dde-dock-dnd-appid"]
                 z: attention ? -1 : 0
+                visible: itemId !== launcherDndDropArea.launcherDndDesktopId
+
+                states: [
+                    State {
+                        name: "item-visible"
+                        when: delegateRoot.visible
+                        PropertyChanges { target: delegateRoot; opacity: 1.0; scale: 1.0; }
+                    },
+                    State {
+                        name: "item-invisible"
+                        when: !delegateRoot.visible
+                        PropertyChanges { target: delegateRoot; opacity: 0.0; scale: 0.0; }
+                    }
+                ]
+
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+                Behavior on scale { NumberAnimation { duration: 200 } }
 
                 // TODO: 临时溢出逻辑，待后面修改
                 // 1:4 the distance between app : dock height; get width/height≈0.8
@@ -67,20 +83,7 @@ ContainmentItem {
                 implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 0.8 : Panel.rootObject.dockItemMaxSize
 
                 onEntered: function(drag) {
-                    if (drag.keys.includes("text/x-dde-launcher-dnd-desktopId")) {
-                        // accepted but don't need to do anything here.
-                        return;
-                    }
                     visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)
-                }
-
-                onDropped: function(drop) {
-                    if (drop.keys.includes("text/x-dde-launcher-dnd-desktopId")) {
-                        let desktopId = drop.getDataAsString("text/x-dde-launcher-dnd-desktopId")
-                        taskmanager.Applet.requestDockByDesktopId(desktopId)
-                        drop.accepted = false
-                        return;
-                    }
                 }
 
                 property int visualIndex: DelegateModel.itemsIndex
@@ -107,6 +110,45 @@ ContainmentItem {
                     }
                     anchors.fill: parent // This is mandatory for draggable item center in drop area
                 }
+            }
+        }
+
+        DropArea {
+            id: launcherDndDropArea
+            anchors.fill: parent
+            keys: ["text/x-dde-launcher-dnd-desktopId"]
+            property string launcherDndDesktopId: ""
+            onEntered: function(drag) {
+                let desktopId = drag.getDataAsString("text/x-dde-launcher-dnd-desktopId")
+                launcherDndDesktopId = taskmanager.Applet.desktopIdToAppId(desktopId)
+                if (taskmanager.Applet.requestDockByDesktopId(desktopId) === false) {
+                    launcherDndDesktopId = ""
+                }
+            }
+
+            onPositionChanged: function(drag) {
+                if (launcherDndDesktopId === "") return
+                let curX = taskmanager.useColumnLayout ? drag.y : drag.x
+                curX *= Screen.devicePixelRatio
+                let cellWidth = Panel.rootObject.dockItemMaxSize
+                let curCell = curX / cellWidth
+                let left = (curX % cellWidth) < (cellWidth / 2)
+                taskmanager.Applet.dataModel.moveTo(launcherDndDesktopId, curCell)
+            }
+
+            onDropped: function(drop) {
+                if (launcherDndDesktopId === "") return
+                let curX = taskmanager.useColumnLayout ? drop.y : drop.x
+                curX *= Screen.devicePixelRatio
+                let cellWidth = Panel.rootObject.dockItemMaxSize
+                let curCell = curX / cellWidth
+                let left = (curX % cellWidth) < (cellWidth / 2)
+                taskmanager.Applet.dataModel.moveTo(launcherDndDesktopId, curCell)
+                launcherDndDesktopId = ""
+            }
+
+            onExited: function() {
+                launcherDndDesktopId = ""
             }
         }
     }
