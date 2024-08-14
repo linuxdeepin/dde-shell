@@ -106,19 +106,19 @@ Control {
         property Palette activeBackgroundColor: Palette {
             normal {
                 common: ("transparent")
-                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.8)
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.80)
             }
             normalDark {
-                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.9)
-            }
-            hovered {
-                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.95)
-            }
-            hoveredDark {
                 crystal: Qt.rgba(1.0, 1.0, 1.0, 0.70)
             }
-            pressed {
+            hovered {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.90)
+            }
+            hoveredDark {
                 crystal: Qt.rgba(1.0, 1.0, 1.0, 0.80)
+            }
+            pressed {
+                crystal: Qt.rgba(1.0, 1.0, 1.0, 0.95)
             }
             pressedDark {
                 crystal: Qt.rgba(1.0, 1.0, 1.0, 0.85)
