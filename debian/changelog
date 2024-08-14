@@ -1,3 +1,10 @@
+dde-shell (0.0.40) unstable; urgency=medium
+
+  * fix: incorrect height for quickpanel's childplugin(Issue: 10036)
+  * fix: incorrect backgroundColor for quickpanel's item (#696)(Issue: 10379)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Wed, 14 Aug 2024 14:18:35 +0800
+
 dde-shell (0.0.39) unstable; urgency=medium
 
   * chore: disable hide force-docked item(Issue: 10371)
