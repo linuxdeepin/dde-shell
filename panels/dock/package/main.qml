@@ -36,6 +36,8 @@ Window {
 
     property bool isDragging: false
 
+    property real dockItemIconSize: dockItemMaxSize * 9 / 14
+
     // NOTE: -1 means not set its size, follow the platform size
     width: Panel.position == Dock.Top || Panel.position == Dock.Bottom ? -1 : dockSize
     height: Panel.position == Dock.Left || Panel.position == Dock.Right ? -1 : dockSize
@@ -284,12 +286,12 @@ Window {
         columns: 1
         rows: 1
         flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
-        columnSpacing: 10
-        rowSpacing: 10
+        property real itemMargin: Math.max((dockItemIconSize / 48 * 10))
+        columnSpacing: dockLeftPartModel.count > 0 ? 10 : itemMargin
+        rowSpacing: columnSpacing
 
         Item {
             id: leftMargin
-            visible: dockLeftPartModel.count > 0
             implicitWidth: 0
             implicitHeight: 0
         }
