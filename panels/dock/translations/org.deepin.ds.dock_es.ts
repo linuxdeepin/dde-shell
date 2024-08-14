@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="es">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="es">
 <context>
     <name>main</name>
     <message>
@@ -41,7 +39,7 @@
     <message>
         <location filename="../package/main.qml" line="181"/>
         <source>Align Top</source>
-        <translation type="unfinished"></translation>
+        <translation>Alinear hacia arriba</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="188"/>

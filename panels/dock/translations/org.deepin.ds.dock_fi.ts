@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="fi">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="fi">
 <context>
     <name>main</name>
     <message>
@@ -41,12 +39,12 @@
     <message>
         <location filename="../package/main.qml" line="181"/>
         <source>Align Top</source>
-        <translation type="unfinished"></translation>
+        <translation>Tasaa ylös</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="188"/>
         <source>Align Center</source>
-        <translation>Keskelle</translation>
+        <translation>Tasaa keskelle</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="196"/>

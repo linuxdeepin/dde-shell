@@ -24,7 +24,7 @@
     <message>
         <location filename="../package/main.qml" line="58"/>
         <source>Numeric keypad on</source>
-        <translation>Teclado numérico ligado</translation>
+        <translation>Teclado numérico ativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="59"/>
@@ -34,12 +34,12 @@
     <message>
         <location filename="../package/main.qml" line="60"/>
         <source>Touchpad on</source>
-        <translation>Touchpad ligado</translation>
+        <translation>Touchpad ativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="61"/>
         <source>Touchpad off</source>
-        <translation>Touchpad desligado</translation>
+        <translation>Touchpad desativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="62"/>
@@ -74,7 +74,7 @@
     <message>
         <location filename="../package/main.qml" line="68"/>
         <source>Balanced power</source>
-        <translation>Potência balanceada</translation>
+        <translation>Equilibrado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="69"/>
