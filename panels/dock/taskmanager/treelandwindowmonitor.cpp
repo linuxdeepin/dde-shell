@@ -41,7 +41,7 @@ TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_pr
     init(context);
 
     m_hideTimer->setSingleShot(true);
-    m_hideTimer->setInterval(500);
+    m_hideTimer->setInterval(800);
 
     connect(m_hideTimer, &QTimer::timeout, this, [this](){
         if (!m_isDockMouseAreaEnter && !m_isPreviewEntered) {
@@ -128,14 +128,22 @@ void TreeLandWindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObje
         m_dockPreview.reset(new TreeLandDockPreviewContext(context));
     }
 
-    QVarLengthArray array = QVarLengthArray<uint32_t>();
-
-    std::transform(item->getAppendWindows().begin(), item->getAppendWindows().end(), std::back_inserter(array), [](const QPointer<AbstractWindow>& window){
-        return window->id();
-    });
-    
-    QByteArray windowIds(reinterpret_cast<char*>(array.data()));
-    m_dockPreview->showWindowsPreview(windowIds, previewXoffset, previewYoffset, direction);
+    auto windows = item->getAppendWindows();
+    m_dockPreview->m_isDockMouseAreaEnter = true;
+    if (windows.length() != 0) {
+        QVarLengthArray array = QVarLengthArray<uint32_t>();
+        std::transform(windows.begin(), windows.end(), std::back_inserter(array), [](const QPointer<AbstractWindow>& window){
+            return window->id();
+        });
+        
+        QByteArray byteArray;
+        int size = array.size() * sizeof(uint32_t);
+        byteArray.resize(size);
+        memcpy(byteArray.data(), array.constData(), size);
+        m_dockPreview->showWindowsPreview(byteArray, previewXoffset, previewYoffset, direction);
+    } else {
+        m_dockPreview->show_tooltip(item->name(), previewXoffset, previewYoffset, direction);
+    }
 }
 
 void TreeLandWindowMonitor::hideItemPreview()

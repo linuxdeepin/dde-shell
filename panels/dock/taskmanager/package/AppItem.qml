@@ -284,7 +284,7 @@ Item {
         property int xOffset: 0
         property int yOffset: 0
         onTriggered: {
-            if (root.windows.length != 0) {
+            if (root.windows.length != 0 || Qt.platform.pluginName === "wayland") {
                 taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, xOffset, yOffset, Panel.position)
             }
         }
@@ -323,7 +323,7 @@ Item {
         }
 
         onEntered: {
-            if (windows.length === 0) {
+            if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
                 toolTipShowTimer.start()
                 return
             }
@@ -347,7 +347,11 @@ Item {
                 toolTipShowTimer.stop()
             }
 
-            if (windows.length === 0) {
+            if (previewTimer.running) {
+                previewTimer.stop()
+            }
+
+            if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
                 toolTip.close()
                 return
             }

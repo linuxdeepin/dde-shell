@@ -49,6 +49,8 @@ Q_SIGNALS:
 protected:
     virtual void treeland_dock_preview_context_v1_enter() override;
     virtual void treeland_dock_preview_context_v1_leave() override;
+    friend class TreeLandWindowMonitor;
+
 private:
     bool m_isPreviewEntered;
     bool m_isDockMouseAreaEnter;
