@@ -20,9 +20,10 @@ Item {
     required property var model
     signal requestBack()
     property int subPluginMinHeight
+    property int headerMargin: 10
 
     Component.onCompleted: {
-        var surfaceMinHeight = subPluginMinHeight - titleLayer.height
+        var surfaceMinHeight = subPluginMinHeight - titleLayer.height - headerMargin
         shellSurface.setEmbedPanelMinHeight(surfaceMinHeight)
     }
 
@@ -36,7 +37,7 @@ Item {
             id: titleLayer
             Layout.fillWidth: true
             Layout.leftMargin: 8
-            Layout.topMargin: 10
+            Layout.topMargin: headerMargin
             Layout.rightMargin: 12
             ActionButton {
                 id: actionBtn
