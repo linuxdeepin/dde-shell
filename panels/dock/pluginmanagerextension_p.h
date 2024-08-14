@@ -42,6 +42,8 @@ public:
     QSize dockSize() const;
     void setDockSize(const QSize &newDockSize);
 
+    void removePluginSurface(PluginSurface *plugin);
+
 Q_SIGNALS:
     void pluginPopupCreated(PluginPopup*);
     void pluginSurfaceCreated(PluginSurface*);
@@ -124,10 +126,13 @@ signals:
     void recvMouseEvent(QEvent::Type type);
 
     void marginsChanged();
+    void aboutToDestroy();
 
 protected:
     virtual void plugin_mouse_event(Resource *resource, int32_t type) override;
     virtual void plugin_dcc_icon(Resource *resource, const QString &icon) override;
+    virtual void plugin_destroy_resource(Resource *resource) override;
+    virtual void plugin_destroy(Resource *resource) override;
 
 private:
     PluginManager* m_manager;
@@ -146,7 +151,7 @@ private:
     int m_margins = 0;
 };
 
-class PluginPopup : public QWaylandShellSurfaceTemplate<PluginSurface>, public QtWaylandServer::plugin_popup
+class PluginPopup : public QWaylandShellSurfaceTemplate<PluginPopup>, public QtWaylandServer::plugin_popup
 {
     Q_OBJECT
     Q_PROPERTY(int32_t x READ x WRITE setX NOTIFY xChanged)
@@ -177,8 +182,13 @@ public:
 
     int32_t popupType() const;
 
+signals:
+    void aboutToDestroy();
+
 protected:
     virtual void plugin_popup_set_position(Resource *resource, int32_t x, int32_t y) override;
+    virtual void plugin_popup_destroy_resource(Resource *resource) override;
+    virtual void plugin_popup_destroy(Resource *resource) override;
 
 Q_SIGNALS:
     void xChanged();
