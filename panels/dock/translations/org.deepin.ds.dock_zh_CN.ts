@@ -34,7 +34,7 @@
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Align Left</source>
-        <translation type="unfinished"/>
+        <translation>靠左</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="181"/>
