@@ -39,12 +39,12 @@
     <message>
         <location filename="../package/main.qml" line="181"/>
         <source>Align Top</source>
-        <translation type="unfinished"/>
+        <translation>靠上</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="188"/>
         <source>Align Center</source>
-        <translation type="unfinished"/>
+        <translation>居中</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="196"/>
