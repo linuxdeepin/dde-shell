@@ -54,7 +54,7 @@
     <message>
         <location filename="../package/main.qml" line="201"/>
         <source>Bottom</source>
-        <translation>底部</translation>
+        <translation>下</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="211"/>
