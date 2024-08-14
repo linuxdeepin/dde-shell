@@ -39,7 +39,7 @@
     <message>
         <location filename="../package/main.qml" line="61"/>
         <source>Touchpad off</source>
-        <translation>Touchpad desligado</translation>
+        <translation>Touchpad desativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="62"/>
