@@ -115,6 +115,19 @@ void PluginSurface::plugin_dcc_icon(Resource *resource, const QString &icon)
     m_dccIcon = icon;
 }
 
+void PluginSurface::plugin_destroy_resource(Resource *resource)
+{
+    Q_UNUSED(resource);
+    Q_EMIT aboutToDestroy();
+    m_manager->removePluginSurface(this);
+    delete this;
+}
+
+void PluginSurface::plugin_destroy(Resource *resource)
+{
+    wl_resource_destroy(resource->handle);
+}
+
 void PluginSurface::setGlobalPos(const QPoint &pos)
 {
     QRect g = qApp->primaryScreen() ? qApp->primaryScreen()->geometry() : QRect();
@@ -207,6 +220,18 @@ void PluginPopup::plugin_popup_set_position(Resource *resource, int32_t x, int32
     setY(y);
 }
 
+void PluginPopup::plugin_popup_destroy_resource(Resource *resource)
+{
+    Q_UNUSED(resource);
+    // TODO why we get a same address with the object when new PluginPopup, if we delete the object.
+    Q_EMIT aboutToDestroy();
+    delete this;
+}
+
+void PluginPopup::plugin_popup_destroy(Resource *resource)
+{
+    wl_resource_destroy(resource->handle);
+}
 PluginManager::PluginManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
 {
@@ -313,15 +338,6 @@ void PluginManager::plugin_manager_v1_request_message(Resource *resource, const 
 void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QString &pluginId, const QString &itemKey, const QString &display_name, int32_t plugin_flags, int32_t type, int32_t size_policy, struct ::wl_resource *surface, uint32_t id)
 {
     QWaylandSurface *qwaylandSurface = QWaylandSurface::fromResource(surface);
-    connect(qwaylandSurface, &QWaylandSurface::surfaceDestroyed, this, [this, qwaylandSurface](){
-        for (PluginSurface *plugin : m_pluginSurfaces) {
-            if (plugin->surface() == qwaylandSurface) {
-                Q_EMIT pluginSurfaceDestroyed(plugin);
-                m_pluginSurfaces.removeAll(plugin);
-                break;
-            }
-        }
-    });
 
     QWaylandResource shellSurfaceResource(wl_resource_create(resource->client(), &::plugin_interface,
                                                            wl_resource_get_version(resource->handle), id));
@@ -408,6 +424,12 @@ void PluginManager::setDockSize(const QSize &newDockSize)
     m_dockSize = newDockSize;
     sendEventMsg(dockSizeMsg());
     emit dockSizeChanged();
+}
+
+void PluginManager::removePluginSurface(PluginSurface *plugin)
+{
+    Q_EMIT pluginSurfaceDestroyed(plugin);
+    m_pluginSurfaces.removeAll(plugin);
 }
 
 QString PluginManager::dockSizeMsg() const
