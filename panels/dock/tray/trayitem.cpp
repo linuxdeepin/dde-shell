@@ -61,27 +61,28 @@ void TrayItem::setFixedPluginModel(QAbstractItemModel *newFixedPluginModel)
     emit fixedPluginModelChanged();
 }
 
-DockItemInfos TrayItem::dockItemInfosFromModel(QAbstractItemModel *model)
+bool TrayItem::loopDockItemInfosModel(QAbstractItemModel *model, const std::function<bool (const DockItemInfo &)> &cb)
 {
     if (!model) {
-        return DockItemInfos{};
+        return true;
     }
 
     const auto roleNames = model->roleNames();
     const auto modelDataRole = roleNames.key("shellSurface", -1);
     if (modelDataRole < 0)
-        return DockItemInfos{};
+        return true;
 
     DockItemInfos itemInfos;
     for (int i = 0; i < model->rowCount(); i++) {
         const auto index = model->index(i, 0);
         const auto item = index.data(modelDataRole).value<QObject *>();
         if (!item)
-            return DockItemInfos{};
+            return true;
         int flags = item->property("pluginFlags").toInt();
         if (!(flags & Dock::Attribute_CanSetting) || flags & Dock::Attribute_ForceDock) {
             continue;
         }
+
         DockItemInfo itemInfo;
         itemInfo.name = item->property("pluginId").toString();
         itemInfo.displayName = item->property("displayName").toString();
@@ -89,32 +90,47 @@ DockItemInfos TrayItem::dockItemInfosFromModel(QAbstractItemModel *model)
         itemInfo.settingKey = DockQuickPlugins;
         itemInfo.dccIcon = item->property("dccIcon").toString();
         itemInfo.visible = TraySettings::instance()->trayItemIsOnDock(itemInfo.name + "::" + itemInfo.itemKey);
-        itemInfos << itemInfo;
+
+        if (!cb(itemInfo)) {
+            return false;
+        }
     }
 
-    return itemInfos;
+    return true;
 }
 
 DockItemInfos TrayItem::dockItemInfos()
 {
     DockItemInfos itemInfos;
-    itemInfos.append(dockItemInfosFromModel(m_trayPluginModel));
-    itemInfos.append(dockItemInfosFromModel(m_fixedPluginModel));
 
-    m_itemInfos = itemInfos;
-    return m_itemInfos;
+    auto cb = [&itemInfos](const DockItemInfo &itemInfo) {
+        itemInfos << itemInfo;
+        return true;
+    };
+    loopDockItemInfosModel(m_trayPluginModel, cb);
+    loopDockItemInfosModel(m_fixedPluginModel, cb);
+
+    return itemInfos;
 }
 
 void TrayItem::setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible)
 {
     Q_UNUSED(settingKey)
     QString pluginId;
-    for (const DockItemInfo &itemInfo : m_itemInfos) {
+    auto cb = [&pluginId, &itemKey](const DockItemInfo &itemInfo) {
         if (itemInfo.itemKey == itemKey) {
             pluginId = itemInfo.name;
-            break;
+            return false;
         }
+
+        return true;
+    };
+    loopDockItemInfosModel(m_trayPluginModel, cb) && loopDockItemInfosModel(m_fixedPluginModel, cb);
+
+    if (pluginId.isEmpty()) {
+        return;
     }
+
     visible ? TraySettings::instance()->addTrayItemOnDock(pluginId + "::" + itemKey) :
               TraySettings::instance()->removeTrayItemOnDock(pluginId + "::" + itemKey);
 }
