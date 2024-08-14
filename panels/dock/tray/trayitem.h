@@ -39,13 +39,12 @@ Q_SIGNALS:
     void fixedPluginModelChanged();
 
 private:
-    DockItemInfos dockItemInfosFromModel(QAbstractItemModel *model);
+    bool loopDockItemInfosModel(QAbstractItemModel *model, const std::function<bool (const DockItemInfo &)> &cb);
 
 private:
     QAbstractItemModel *m_trayPluginModel = nullptr;
     QAbstractItemModel *m_quickPluginModel = nullptr;
     QAbstractItemModel *m_fixedPluginModel = nullptr;
-    DockItemInfos m_itemInfos;
 };
 
 }
