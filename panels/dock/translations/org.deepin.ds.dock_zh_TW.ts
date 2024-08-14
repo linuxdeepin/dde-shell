@@ -49,7 +49,7 @@
     <message>
         <location filename="../package/main.qml" line="196"/>
         <source>Top</source>
-        <translation>頂部</translation>
+        <translation>上</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="201"/>
