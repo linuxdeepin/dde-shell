@@ -42,6 +42,7 @@
         },
         "pinnedSurfaceIds": {
             "value": [
+                "disk-mount::mount-item-key",
                 "uosai::uosai",
                 "network::network-item-key"
             ],
