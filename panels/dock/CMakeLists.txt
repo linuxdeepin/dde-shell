@@ -27,6 +27,8 @@ file(
     dockhelper.cpp
     waylanddockhelper.h
     waylanddockhelper.cpp
+    loadtrayplugins.h
+    loadtrayplugins.cpp
 )
 
 # Old dbus interface compatible

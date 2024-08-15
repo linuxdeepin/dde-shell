@@ -16,6 +16,7 @@
 #include "dockdbusproxy.h"
 #include "dockfrontadaptor.h"
 #include "dockdaemonadaptor.h"
+#include "loadtrayplugins.h"
 
 #include <DDBusSender>
 #include <QQuickWindow>
@@ -35,10 +36,14 @@ DockPanel::DockPanel(QObject * parent)
     , m_theme(ColorTheme::Dark)
     , m_hideState(Hide)
     , m_dockScreen(nullptr)
+    , m_loadTrayPlugins(new LoadTrayPlugins(this))
     , m_compositorReady(false)
     , m_launcherShown(false)
 {
-    connect(this, &DockPanel::compositorReadyChanged, this, &DockPanel::loadDockPlugins);
+    connect(this, &DockPanel::compositorReadyChanged, this, [this] {
+        if (!m_compositorReady) return;
+        m_loadTrayPlugins->loadDockPlugins();
+    });
 }
 
 bool DockPanel::load()
@@ -321,54 +326,6 @@ void DockPanel::openDockSettings() const
         .method(QStringLiteral("ShowPage"))
         .arg(QStringLiteral("personalization/desktop/dock"))
         .call();
-}
-
-void DockPanel::loadDockPlugins()
-{
-    if(!m_compositorReady) return;
-
-    QStringList filters;
-    filters << "*.so";
-
-    QProcess proc;
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert("QT_SCALE_FACTOR", QString::number(qApp->devicePixelRatio()));
-    env.insert("D_DXCB_DISABLE_OVERRIDE_HIDPI", "1");
-    proc.setProcessEnvironment(env);
-    QStringList execPaths;
-    execPaths << qEnvironmentVariable("TRAY_LOADER_EXECUTE_PATH")
-              << QString("%1/trayplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR);
-    QString validExePath;
-    for (const QString & execPath : execPaths) {
-         if (QFile::exists(execPath)) {
-             validExePath = execPath;
-             break;
-         }
-    }
-    qInfo() << "Valid Loader Execute Path:" << validExePath;
-    proc.setProgram(validExePath);
-
-    QStringList dirs;;
-    const auto pluginsPath = qEnvironmentVariable("TRAY_DEBUG_PLUGIN_PATH");
-    if (!pluginsPath.isEmpty())
-        dirs << pluginsPath.split(QDir::listSeparator());
-
-    if (dirs.isEmpty())
-        dirs << pluginDirs;
-
-    for (auto &pluginDir : dirs) {
-        QDir dir(pluginDir);
-        if (!dir.exists()) {
-            qWarning() << "The plugin directory does not exist: " << pluginDir;
-            continue;
-        }
-        auto pluginFileInfos = dir.entryInfoList(filters, QDir::Files);
-        foreach(auto pluginInfo, pluginFileInfos) {
-            qInfo() << "pluginLoader load plugin" << pluginInfo.absoluteFilePath();
-            proc.setArguments({"-p", pluginInfo.absoluteFilePath(), "-platform", "wayland",});
-            proc.startDetached();
-        }
-    }
 }
 
 void DockPanel::launcherVisibleChanged(bool visible)

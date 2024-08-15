@@ -12,11 +12,7 @@
 
 namespace dock {
 class DockHelper;
-const QStringList pluginDirs = {
-    "/usr/lib/dde-dock/plugins/",
-    "/usr/lib/dde-dock/plugins/quick-trays/",
-    "/usr/lib/dde-dock/plugins/system-trays/"
-};
+class LoadTrayPlugins;
 
 class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
 {
@@ -86,7 +82,6 @@ public:
 
 private Q_SLOTS:
     void onWindowGeometryChanged();
-    void loadDockPlugins();
     void launcherVisibleChanged(bool visible);
     void updateDockScreen();
 
@@ -111,6 +106,7 @@ private:
     HideState m_hideState;
     DockHelper* m_helper;
     QScreen *m_dockScreen;
+    LoadTrayPlugins *m_loadTrayPlugins;
     bool m_compositorReady;
     bool m_launcherShown;
 };
