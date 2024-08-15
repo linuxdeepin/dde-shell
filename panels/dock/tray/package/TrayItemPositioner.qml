@@ -15,6 +15,23 @@ Control {
     property size visualSize: Qt.size(0, 0)
 
     property point visualPosition: DDT.TrayItemPositionRegister.visualPosition
+    property bool isDragging: DDT.TraySortOrderModel.actionsAlwaysVisible
+    property bool animationEnable: true
+
+    onIsDraggingChanged: {
+        animationEnable = !isDragging
+        animationEnableTimer.start()
+    }
+
+    Timer {
+        id: animationEnableTimer
+        interval: 10
+        repeat: false
+        onTriggered: {
+            animationEnable = true
+        }
+    }
+
     DDT.TrayItemPositionRegister.visualIndex: (model.sectionType !== "stashed") ? model.visualIndex : -1
     DDT.TrayItemPositionRegister.visualSize: (model.sectionType !== "stashed") ? Qt.size(width, height) : Qt.size(0, 0)
     DDT.TrayItemPositionRegister.surfaceId: model.surfaceId
@@ -26,11 +43,11 @@ Control {
     x: visualPosition.x
     y: visualPosition.y
     Behavior on x {
-        enabled: isHorizontal
+        enabled: isHorizontal && animationEnable
         NumberAnimation { duration: 200; easing.type: collapsed || !DDT.TraySortOrderModel.isCollapsing ? Easing.OutQuad : Easing.InQuad }
     }
     Behavior on y {
-        enabled: !isHorizontal
+        enabled: !isHorizontal && animationEnable
         NumberAnimation { duration: 200; easing.type: collapsed || !DDT.TraySortOrderModel.isCollapsing ? Easing.OutQuad : Easing.InQuad }
     }
     states: [

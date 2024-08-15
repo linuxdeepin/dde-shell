@@ -85,9 +85,25 @@ Item {
 
     property int trayHeight: 50
     property size containerSize: DDT.TrayItemPositionManager.visualSize
+    property bool isDragging: DDT.TraySortOrderModel.actionsAlwaysVisible
+    property bool animationEnable: true
     // visiualIndex default value is -1
     property int dropHoverIndex: -1
     required property var surfaceAcceptor
+
+    onIsDraggingChanged: {
+        animationEnable = !isDragging
+        animationEnableTimer.start()
+    }
+
+    Timer {
+        id: animationEnableTimer
+        interval: 10
+        repeat: false
+        onTriggered: {
+            animationEnable = true
+        }
+    }
 
     implicitWidth: width
     width: containerSize.width
@@ -95,11 +111,13 @@ Item {
     height: containerSize.height
 
     Behavior on width {
-        NumberAnimation { duration: 200; easing.type: collapsed ? Easing.OutQuad : Easing.InQuad }
+        enabled: animationEnable
+        NumberAnimation { duration: 200; easing.type: collapsed || !DDT.TraySortOrderModel.isCollapsing ? Easing.OutQuad : Easing.InQuad }
     }
 
     Behavior on height {
-        NumberAnimation { duration: 200; easing.type: collapsed ? Easing.OutQuad : Easing.InQuad }
+        enabled: animationEnable
+        NumberAnimation { duration: 200; easing.type: collapsed || !DDT.TraySortOrderModel.isCollapsing ? Easing.OutQuad : Easing.InQuad }
     }
 
     // Delegates
