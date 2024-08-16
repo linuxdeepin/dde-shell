@@ -123,6 +123,10 @@ Window {
             return appearance.opacity
         }
         blendColor: {
+            // TODO: when dtk support treeland blur, remove following
+            if (Qt.platform.pluginName === "wayland")
+                return "transparent"
+
             if (valid) {
                 return DStyle.Style.control.selectColor(undefined,
                                                     Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, blendColorAlpha(0.6)),
