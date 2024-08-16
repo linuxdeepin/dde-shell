@@ -41,10 +41,6 @@ public:
     void addItem(QPointer<AbstractItem> item);
     QJsonArray dumpDockedItems() const;
 
-Q_SIGNALS:
-    void itemAdded();
-    void itemRemoved();
-
 private Q_SLOTS:
     void onItemDestroyed();
     void onItemChanged();
