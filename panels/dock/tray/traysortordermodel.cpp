@@ -15,34 +15,43 @@ const QString SECTION_COLLAPSABLE = QLatin1String("collapsable");
 const QString SECTION_FIXED = QLatin1String("fixed");
 const QString SECTION_PINNED = QLatin1String("pinned");
 
+const QString INTERNAL_PREFIX = QLatin1String("internal/");
+const QString ACTION_STASH_PLACEHOLDER = QLatin1String("action-stash-placeholder");
+const QString ACTION_STASH_PLACEHOLDER_NAME = INTERNAL_PREFIX + ACTION_STASH_PLACEHOLDER;
+const QString ACTION_SHOW_STASH = QLatin1String("action-show-stash");
+const QString ACTION_SHOW_STASH_NAME = INTERNAL_PREFIX + ACTION_SHOW_STASH;
+const QString ACTION_TOGGLE_COLLAPSE = QLatin1String("action-toggle-collapse");
+const QString ACTION_TOGGLE_COLLAPSE_NAME = INTERNAL_PREFIX + ACTION_TOGGLE_COLLAPSE;
+const QString ACTION_TOGGLE_QUICK_SETTINGS = QLatin1String("action-toggle-quick-settings");
+const QString ACTION_TOGGLE_QUICK_SETTINGS_NAME = INTERNAL_PREFIX + ACTION_TOGGLE_QUICK_SETTINGS;
+
 TraySortOrderModel::TraySortOrderModel(QObject *parent)
-    : QStandardItemModel(parent)
-    , m_dconfig(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dock.tray"))
-{
-    QHash<int, QByteArray> defaultRoleNames = roleNames();
-    defaultRoleNames.insert({
+    : QAbstractItemModel(parent)
+    , m_defaultRoleNames({
         {TraySortOrderModel::SurfaceIdRole, QByteArrayLiteral("surfaceId")},
         {TraySortOrderModel::VisibilityRole, QByteArrayLiteral("visibility")},
         {TraySortOrderModel::SectionTypeRole, QByteArrayLiteral("sectionType")},
-        {TraySortOrderModel::VisualIndexRole, QByteArrayLiteral("visualIndex")},
         {TraySortOrderModel::DelegateTypeRole, QByteArrayLiteral("delegateType")},
         {TraySortOrderModel::ForbiddenSectionsRole, QByteArrayLiteral("forbiddenSections")}
-    });
-    setItemRoleNames(defaultRoleNames);
+    })
+    , m_dconfig(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dock.tray"))
+{
+    connect(this, &QAbstractListModel::rowsInserted, this, &TraySortOrderModel::rowCountChanged);
+    connect(this, &QAbstractListModel::rowsRemoved, this, &TraySortOrderModel::rowCountChanged);
 
     // init sort order data and hidden list data
     loadDataFromDConfig();
 
     // internal tray actions
-    appendRow(createTrayItem("internal/action-stash-placeholder", SECTION_STASHED, "action-stash-placeholder"));
-    appendRow(createTrayItem("internal/action-show-stash", SECTION_TRAY_ACTION, "action-show-stash"));
-    appendRow(createTrayItem("internal/action-toggle-collapse", SECTION_TRAY_ACTION, "action-toggle-collapse"));
-    appendRow(createTrayItem("internal/action-toggle-quick-settings", SECTION_TRAY_ACTION, "action-toggle-quick-settings"));
+    createTrayItem(ACTION_STASH_PLACEHOLDER_NAME, SECTION_STASHED, ACTION_STASH_PLACEHOLDER);
+    createTrayItem(ACTION_SHOW_STASH_NAME, SECTION_TRAY_ACTION, ACTION_SHOW_STASH);
+    createTrayItem(ACTION_TOGGLE_COLLAPSE_NAME, SECTION_TRAY_ACTION, ACTION_TOGGLE_COLLAPSE);
+    createTrayItem(ACTION_TOGGLE_QUICK_SETTINGS_NAME, SECTION_TRAY_ACTION, ACTION_TOGGLE_QUICK_SETTINGS);
 
     connect(m_dconfig.get(), &Dtk::Core::DConfig::valueChanged, this, [this](const QString &key){
         if (key == QLatin1String("hiddenSurfaceIds")) {
             loadDataFromDConfig();
-            updateVisualIndexes();
+            updateVisibilities();
         }
     });
 
@@ -50,14 +59,13 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
 
     connect(this, &TraySortOrderModel::collapsedChanged, this, [this](){
         qDebug() << "collapsedChanged";
-        updateVisualIndexes();
         saveDataToDConfig();
+        updateVisibilities();
     });
     connect(this, &TraySortOrderModel::actionsAlwaysVisibleChanged, this, [this](){
         qDebug() << "actionsAlwaysVisibleChanged";
-        updateVisualIndexes();
+        updateShowStashActionVisible();
     });
-    updateVisualIndexes();
 }
 
 TraySortOrderModel::~TraySortOrderModel()
@@ -65,65 +73,128 @@ TraySortOrderModel::~TraySortOrderModel()
     // dtor
 }
 
-bool TraySortOrderModel::dropToStashTray(const QString &draggedSurfaceId, int dropVisualIndex, bool isBefore)
+QHash<int, QByteArray> TraySortOrderModel::roleNames() const
 {
-    // Check if the dragged tray surfaceId exists. Reject if not the case
-    QList<QStandardItem *> draggedItems = findItems(draggedSurfaceId);
-    if (draggedItems.isEmpty()) return false;
-    Q_ASSERT(draggedItems.count() == 1);
-    QStandardItem * draggedItem = draggedItems[0];
-    if (draggedItem->data(ForbiddenSectionsRole).toStringList().contains(SECTION_STASHED)) return false;
-    QStringList * sourceSection = getSection(draggedItem->data(SectionTypeRole).toString());
+    return m_defaultRoleNames;
+}
 
-    // Ensure position adjustment will be saved at last
-    auto deferSaveSortOrder = qScopeGuard([this](){saveDataToDConfig();});
-
-    // drag inside the stashed section
-    if (sourceSection == &m_stashedIds) {
-        return false;
-    } else {
-        sourceSection->removeOne(draggedSurfaceId);
-        m_stashedIds.append(draggedSurfaceId);
-        updateVisualIndexes();
-        return true;
+QVariant TraySortOrderModel::data(const QModelIndex &index, int role) const
+{
+    switch (role) {
+    case SurfaceIdRole:
+        return m_list[index.row()].surfaceId;
+    case VisibilityRole:
+        return m_list[index.row()].visible;
+    case SectionTypeRole:
+        return m_list[index.row()].sectionType;
+    case DelegateTypeRole:
+        return m_list[index.row()].delegateType;
+    case ForbiddenSectionsRole:
+        return m_list[index.row()].forbiddenSections;
+    default:
+        return {};
     }
 }
 
-// drop existing item to tray, return true if drop attempt is accepted, false if rejected
-bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dropVisualIndex, bool isBefore)
+QModelIndex TraySortOrderModel::index(int row, int column, const QModelIndex &parent) const
 {
-    // Check if the dragged tray surfaceId exists. Reject if not the case
-    QList<QStandardItem *> draggedItems = findItems(draggedSurfaceId);
-    if (draggedItems.isEmpty()) return false;
-    Q_ASSERT(draggedItems.count() == 1);
-    QStringList * sourceSection = getSection(draggedItems[0]->data(SectionTypeRole).toString());
-    QStringList forbiddenSections(draggedItems[0]->data(ForbiddenSectionsRole).toStringList());
+    if (parent.isValid()) return QModelIndex();
+    if (row < 0 || row >= m_list.size()) return QModelIndex();
+    if (column < 0 || column > 1) return QModelIndex();
 
-    // Find the item attempted to drop on
-    QStandardItem * dropOnItem = findItemByVisualIndex(dropVisualIndex, DockTraySection);
-    if (!dropOnItem) return false;
-    QString dropOnSurfaceId(dropOnItem->data(SurfaceIdRole).toString());
+    return createIndex(row, column);
+}
+
+QModelIndex TraySortOrderModel::parent(const QModelIndex &index) const
+{
+    return QModelIndex();
+}
+
+int TraySortOrderModel::rowCount(const QModelIndex &parent) const
+{
+    if (parent.isValid()) return 0;
+
+    return m_list.size();
+}
+
+int TraySortOrderModel::columnCount(const QModelIndex &parent) const
+{
+    if (parent.isValid()) return 0;
+
+    return 1;
+}
+
+// drop existing item to tray, return true if drop attempt is accepted, false if rejected
+bool TraySortOrderModel::move(const QString &draggedSurfaceId, const QString &dropOnSurfaceId, bool isBefore)
+{
+    bool res = false;
+    QString sectionType;
+    std::tie(res, sectionType) = moveAux(draggedSurfaceId, dropOnSurfaceId, isBefore);
+    if (!res) {
+        return false;
+    }
+
+    auto iter = findItem(draggedSurfaceId);
+    Q_ASSERT(iter != m_list.end());
+
+    QVector<Item>::const_iterator insertIter = findInsertionPos(iter->surfaceId, sectionType);
+    int sourceRow = std::distance(m_list.begin(), iter);
+    int destRow = std::distance(m_list.cbegin(), insertIter);
+    if (sourceRow < destRow) {
+        destRow--;
+    }
+
+    QString originSectionType = iter->sectionType;
+    if (originSectionType != sectionType) {
+        iter->sectionType = sectionType;
+        dataChanged(index(sourceRow, 0), index(sourceRow, 0), { SectionTypeRole });
+    }
+
+    beginMoveRows(QModelIndex(), sourceRow, sourceRow, QModelIndex(), sourceRow < destRow ? destRow + 1 : destRow);
+    m_list.move(sourceRow, destRow);
+    endMoveRows();
+
+    if (originSectionType == SECTION_STASHED && sectionType != SECTION_STASHED) {
+        m_visibleStashed--;
+        updateStashPlaceholderVisible();
+    } else if (originSectionType != SECTION_STASHED && sectionType == SECTION_STASHED) {
+        m_visibleStashed++;
+        updateStashPlaceholderVisible();
+    }
+
+    return true;
+}
+
+std::tuple<bool, QString> TraySortOrderModel::moveAux(const QString &draggedSurfaceId, const QString &dropOnSurfaceId, bool isBefore)
+{
+    Q_ASSERT(!m_hiddenIds.contains(draggedSurfaceId));
+
+    if (draggedSurfaceId == dropOnSurfaceId) {
+        // same item, don't need to do anything
+        return {false, ""};
+    }
+
+    // Check if the dragged tray surfaceId exists. Reject if not the case
+    auto draggedItemIter = findItem(draggedSurfaceId);
+    if (draggedItemIter == m_list.end()) return {false, ""};
+    QStringList *sourceSection = getSection(draggedItemIter->sectionType);
+    QStringList forbiddenSections(draggedItemIter->forbiddenSections);
+
+    auto dropOnItemIter = findItem(dropOnSurfaceId);
+    if (dropOnItemIter == m_list.end()) return {false, ""};
 
     // Ensure position adjustment will be saved at last
     auto deferSaveSortOrder = qScopeGuard([this](){saveDataToDConfig();});
 
-    // If it's hidden, remove it from the hidden list. updateVisualIndexes() will update the
-    // item's VisibilityRole property.
-    // This is mainly for the drag item from quick settings panel feature.
-    auto deferUpdateVisualIndex = qScopeGuard([this](){updateVisualIndexes();});
-    if (m_hiddenIds.contains(draggedSurfaceId)) {
-        m_hiddenIds.removeOne(draggedSurfaceId);
-    }
-
-    if (dropOnSurfaceId == QLatin1String("internal/action-show-stash")) {
+    if (dropOnSurfaceId == ACTION_SHOW_STASH_NAME) {
         // show stash action is always the first action, drop before it consider as drop into stashed area
         if (sourceSection != &m_stashedIds) {
             sourceSection->removeOne(draggedSurfaceId);
             m_stashedIds.append(draggedSurfaceId);
-            return true;
+            return {true, SECTION_STASHED};
         } else {
             // already in the stashed tray
-            return false;
+            return {false, ""};
         }
         if (sourceSection == &m_collapsableIds) {
             // same-section move
@@ -133,53 +204,65 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
             sourceSection->removeOne(draggedSurfaceId);
             m_collapsableIds.prepend(draggedSurfaceId);
         }
-        return true;
+        return {true, SECTION_COLLAPSABLE};
     }
 
-    if (dropOnSurfaceId == QLatin1String("internal/action-toggle-collapse")) {
+    if (dropOnSurfaceId == ACTION_TOGGLE_COLLAPSE_NAME) {
         QStringList * targetSection = isBefore ? &m_collapsableIds : &m_pinnedIds;
         if (isBefore) {
             // move to the end of collapsable section
-            if (forbiddenSections.contains(SECTION_COLLAPSABLE)) return false;
+            if (forbiddenSections.contains(SECTION_COLLAPSABLE)) return {false, ""};
             if (targetSection == sourceSection) {
                 m_collapsableIds.move(m_collapsableIds.indexOf(draggedSurfaceId), m_collapsableIds.count() - 1);
             } else {
                 sourceSection->removeOne(draggedSurfaceId);
                 m_collapsableIds.append(draggedSurfaceId);
             }
+            return {true, SECTION_COLLAPSABLE};
         } else {
             // move to the beginning of pinned section
-            if (forbiddenSections.contains(SECTION_PINNED)) return false;
+            if (forbiddenSections.contains(SECTION_PINNED)) return {false, ""};
             if (targetSection == sourceSection) {
                 m_pinnedIds.move(m_pinnedIds.indexOf(draggedSurfaceId), 0);
             } else {
                 sourceSection->removeOne(draggedSurfaceId);
                 m_pinnedIds.prepend(draggedSurfaceId);
             }
+            return {true, SECTION_PINNED};
         }
-        return true;
     }
 
-    if (dropOnSurfaceId == QLatin1String("internal/action-toggle-quick-settings")) {
-        return false;
+    if (dropOnSurfaceId == ACTION_TOGGLE_QUICK_SETTINGS_NAME) {
+        if (!isBefore) {
+            return {false, ""};
+        }
+
+        QStringList *targetSection = &m_pinnedIds;
+
+        // move to the end of pinned section
+        if (forbiddenSections.contains(SECTION_PINNED)) return {false, ""};
+        if (targetSection == sourceSection) {
+            m_pinnedIds.move(m_pinnedIds.indexOf(draggedSurfaceId), m_pinnedIds.count() - 1);
+        } else {
+            sourceSection->removeOne(draggedSurfaceId);
+            m_pinnedIds.append(draggedSurfaceId);
+        }
+
+        return {true, SECTION_PINNED};
     }
 
-    if (dropOnSurfaceId == draggedSurfaceId) {
-        // same item, don't need to do anything
-        return false;
-    }
-
-    QString targetSectionName(dropOnItem->data(SectionTypeRole).toString());
-    if (forbiddenSections.contains(targetSectionName)) return false;
+    QString targetSectionName(dropOnItemIter->sectionType);
+    if (forbiddenSections.contains(targetSectionName)) return {false, ""};
     QStringList * targetSection = getSection(targetSectionName);
     if (targetSection == sourceSection) {
         int sourceIndex = targetSection->indexOf(draggedSurfaceId);
         int targetIndex = targetSection->indexOf(dropOnSurfaceId);
-        if (isBefore) targetIndex--;
-        if (targetIndex < 0) targetIndex = 0;
+        if (isBefore && sourceIndex < targetIndex) {
+            targetIndex--;
+        }
         if (sourceIndex == targetIndex) {
             // same item (draggedSurfaceId != dropOnSurfaceId caused by isBefore).
-            return false;
+            return {false, ""};
         }
         targetSection->move(sourceIndex, targetIndex);
     } else {
@@ -188,7 +271,7 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
         sourceSection->removeOne(draggedSurfaceId);
         targetSection->insert(targetIndex, draggedSurfaceId);
     }
-    return true;
+    return {true, targetSectionName};
 }
 
 void TraySortOrderModel::setSurfaceVisible(const QString &surfaceId, bool visible)
@@ -202,27 +285,23 @@ void TraySortOrderModel::setSurfaceVisible(const QString &surfaceId, bool visibl
             m_hiddenIds.append(surfaceId);
         }
     }
-    updateVisualIndexes();
+
+    auto i = findItem(surfaceId);
+    if (i == m_list.end()) {
+        return;
+    }
+
+    i->visible = getSurfaceVisible(i->surfaceId, i->sectionType);
+    int row = std::distance(m_list.begin(), i);
+    auto idx = index(row, 0);
+    dataChanged(idx, idx, { VisibilityRole });
 }
 
-QStandardItem *TraySortOrderModel::findItemByVisualIndex(int visualIndex, VisualSections visualSection) const
+QVector<Item>::iterator TraySortOrderModel::findItem(const QString &surfaceId)
 {
-    QStandardItem * result = nullptr;
-    const QModelIndexList matched = match(index(0, 0), VisualIndexRole, visualIndex, -1, Qt::MatchExactly);
-    for (const QModelIndex & index : matched) {
-        QString section(data(index, SectionTypeRole).toString());
-        if (visualSection == DockTraySection) {
-            if (section == SECTION_STASHED) continue;
-            if (m_collapsed && section == SECTION_COLLAPSABLE) continue;
-        } else {
-            if (section != SECTION_STASHED) continue;
-        }
-        if (!data(index, VisibilityRole).toBool()) continue;
-
-        result = itemFromIndex(index);
-        break;
-    }
-    return result;
+    return std::find_if(m_list.begin(), m_list.end(), [surfaceId](const Item & item) {
+        return item.surfaceId == surfaceId;
+    });
 }
 
 QStringList *TraySortOrderModel::getSection(const QString &sectionType)
@@ -263,7 +342,7 @@ QString TraySortOrderModel::findSection(const QString & surfaceId, const QString
     if (!found &&                   // 不在列表中
         !isForceDock &&             // 非 forceDock
         result != SECTION_FIXED &&  // 非固定位置插件（时间）
-        !surfaceId.startsWith("internal/") &&       // 非内置插件
+        !surfaceId.startsWith(INTERNAL_PREFIX) &&   // 非内置插件
         !surfaceId.startsWith("application-tray::") // 非托盘图标
         ) {
         if (!m_hiddenIds.contains(surfaceId)) {
@@ -291,144 +370,146 @@ void TraySortOrderModel::registerToSection(const QString & surfaceId, const QStr
         return;
     }
 
+    // stash placeholder 永远在 stash 最后，不保存位置
+    if (surfaceId == ACTION_STASH_PLACEHOLDER_NAME) {
+        return;
+    }
+
     if (!section->contains(surfaceId)) {
         section->prepend(surfaceId);
     }
 }
 
-QStandardItem * TraySortOrderModel::createTrayItem(const QString & name, const QString & sectionType,
-                                                  const QString & delegateType, const QStringList &forbiddenSections,
-                                                  bool isForceDock)
+QVector<Item>::const_iterator TraySortOrderModel::findInsertionPosInSection(const QString &surfaceId, const QString &sectionType,
+                                                            QVector<Item>::const_iterator sectionBegin, QVector<Item>::const_iterator sectionEnd) const
+{
+    QStringList ids;
+    if (sectionType == SECTION_STASHED) {
+        ids = m_stashedIds;
+    } else if (sectionType == SECTION_COLLAPSABLE) {
+        ids = m_collapsableIds;
+    } else if (sectionType == SECTION_PINNED) {
+        ids = m_pinnedIds;
+    } else if (sectionType == SECTION_FIXED) {
+        ids = m_fixedIds;
+    }
+
+    auto ri = std::find(ids.cbegin(), ids.cend(), surfaceId);
+    if (ri == ids.cend()) {
+        // 不在列表中，插入开头
+        return sectionBegin;
+    }
+
+    // 获取下一个的迭代器
+    ri++;
+    for (; ri != ids.cend(); ri++) {
+        auto res = std::find_if(sectionBegin, sectionEnd, [ri](const Item &item) {
+            return item.surfaceId == *ri;
+        });
+        if (res != sectionEnd) {
+            return res;
+        }
+    }
+
+    // 找不到下一个的迭代器，说明当前是最后一个
+    return sectionEnd;
+}
+
+QVector<Item>::const_iterator TraySortOrderModel::findInsertionPos(const QString &surfaceId, const QString &sectionType) const
+{
+    Q_ASSERT(!m_hiddenIds.contains(surfaceId));
+
+    auto stashedSectionBegin = m_list.cbegin();
+    auto stashedSectionEnd = std::find_if_not(stashedSectionBegin, m_list.cend(), [](const Item &item) {
+        return item.sectionType == SECTION_STASHED && item.surfaceId != ACTION_STASH_PLACEHOLDER_NAME;
+    });
+    if (sectionType == SECTION_STASHED && surfaceId != ACTION_STASH_PLACEHOLDER_NAME) {
+        return findInsertionPosInSection(surfaceId, sectionType, stashedSectionBegin, stashedSectionEnd);
+    }
+
+    auto stashPlaceholderActionBegin = stashedSectionEnd;
+    auto stashPlaceholderActionEnd = std::find_if_not(stashPlaceholderActionBegin, m_list.cend(), [](const Item &item) {
+        return item.surfaceId == ACTION_STASH_PLACEHOLDER_NAME;
+    });
+    if (surfaceId == ACTION_SHOW_STASH_NAME) {
+        return stashPlaceholderActionBegin;
+    }
+
+    auto showStashActionBegin = stashedSectionEnd;
+    auto showStashActionEnd = std::find_if_not(showStashActionBegin, m_list.cend(), [](const Item &item) {
+        return item.surfaceId == ACTION_SHOW_STASH_NAME;
+    });
+    if (surfaceId == ACTION_SHOW_STASH_NAME) {
+        return showStashActionBegin;
+    }
+
+    auto collapsableSectionBegin = showStashActionEnd;
+    auto collapsableSectionEnd = std::find_if_not(collapsableSectionBegin, m_list.cend(), [](const Item &item) {
+        return item.sectionType == SECTION_COLLAPSABLE;
+    });
+    if (sectionType == SECTION_COLLAPSABLE) {
+        Q_ASSERT(m_collapsableIds.contains(surfaceId));
+        return findInsertionPosInSection(surfaceId, sectionType, collapsableSectionBegin, collapsableSectionEnd);
+    }
+
+    auto toggleCollapseActionBegin = collapsableSectionEnd;
+    auto toggleCollapseActionEnd = std::find_if_not(toggleCollapseActionBegin, m_list.cend(), [](const Item &item) {
+        return item.surfaceId == ACTION_TOGGLE_COLLAPSE_NAME;
+    });
+    if (surfaceId == ACTION_TOGGLE_COLLAPSE_NAME) {
+        return toggleCollapseActionBegin;
+    }
+
+    auto pinnedSectionBegin = toggleCollapseActionEnd;
+    auto pinnedSectionEnd = std::find_if_not(pinnedSectionBegin, m_list.cend(), [](const Item &item) {
+        return item.sectionType == SECTION_PINNED;
+    });
+    if (sectionType == SECTION_PINNED) {
+        Q_ASSERT(m_pinnedIds.contains(surfaceId));
+        return findInsertionPosInSection(surfaceId, sectionType, pinnedSectionBegin, pinnedSectionEnd);
+    }
+
+    auto toggleQuickSettingsActionBegin = pinnedSectionEnd;
+    auto toggleQuickSettingsActionEnd = std::find_if_not(toggleQuickSettingsActionBegin, m_list.cend(), [](const Item &item) {
+        return item.surfaceId == ACTION_TOGGLE_QUICK_SETTINGS_NAME;
+    });
+    if (surfaceId == ACTION_TOGGLE_QUICK_SETTINGS_NAME) {
+        return toggleQuickSettingsActionBegin;
+    }
+
+    auto fixedSectionBegin = toggleQuickSettingsActionEnd;
+    auto fixedSectionEnd = m_list.cend();
+    return findInsertionPosInSection(surfaceId, sectionType, fixedSectionBegin, fixedSectionEnd);
+}
+
+void TraySortOrderModel::createTrayItem(const QString & name, const QString & sectionType,
+                                        const QString & delegateType, const QStringList &forbiddenSections,
+                                        bool isForceDock)
 {
     QString actualSectionType = findSection(name, sectionType, forbiddenSections, isForceDock);
     registerToSection(name, actualSectionType);
 
-    qDebug() << actualSectionType << name << delegateType;
+    qDebug() << "====createTrayItem" << actualSectionType << name << delegateType;
+    Item item = {
+        name,
+        getSurfaceVisible(name, actualSectionType),
+        actualSectionType,
+        delegateType,
+        forbiddenSections,
+        isForceDock,
+    };
 
-    QStandardItem * item = new QStandardItem(name);
-    item->setData(name, TraySortOrderModel::SurfaceIdRole);
-    item->setData(true, TraySortOrderModel::VisibilityRole);
-    item->setData(actualSectionType, TraySortOrderModel::SectionTypeRole);
-    item->setData(delegateType, TraySortOrderModel::DelegateTypeRole);
-    item->setData(forbiddenSections, TraySortOrderModel::ForbiddenSectionsRole);
-    item->setData(-1, TraySortOrderModel::VisualIndexRole);
-    item->setData(isForceDock, TraySortOrderModel::IsForceDockRole);
+    QVector<Item>::const_iterator insertIter = findInsertionPos(name, actualSectionType);
 
-    return item;
-}
+    int row = std::distance(m_list.cbegin(), insertIter);
+    beginInsertRows(QModelIndex(), row, row);
+    m_list.insert(insertIter, item);
+    endInsertRows();
 
-void TraySortOrderModel::updateVisualIndexes()
-{
-    for (int i = 0; i < rowCount(); i++) {
-        auto results = item(i);
-        results->setData(-1, TraySortOrderModel::VisualIndexRole);
+    if (actualSectionType == SECTION_STASHED && name != ACTION_STASH_PLACEHOLDER_NAME && item.visible) {
+        m_visibleStashed++;
+        updateStashPlaceholderVisible();
     }
-
-    // stashed action
-    // "internal/action-stash-placeholder"
-    QList<QStandardItem *> results = findItems("internal/action-stash-placeholder");
-    Q_ASSERT(!results.isEmpty());
-    QStandardItem * stashPlaceholder = results[0];
-
-    // the visual index of stashed items are also for their sort order, but the index
-    // number is independently from these non-stashed items.
-    int stashedVisualIndex = 0;
-    bool showStashActionVisible = m_actionsAlwaysVisible;
-    for (const QString & id : std::as_const(m_stashedIds)) {
-        QList<QStandardItem *> results = findItems(id);
-        if (results.isEmpty()) continue;
-        if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
-        if (stashPlaceholder == results[0]) continue;
-        bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
-        results[0]->setData(SECTION_STASHED, TraySortOrderModel::SectionTypeRole);
-        if (itemVisible) {
-            showStashActionVisible = true;
-            results[0]->setData(stashedVisualIndex, TraySortOrderModel::VisualIndexRole);
-            stashedVisualIndex++;
-        }
-    }
-
-    stashPlaceholder->setData(stashedVisualIndex == 0 && showStashActionVisible, TraySortOrderModel::VisibilityRole);
-
-    int currentVisualIndex = 0;
-    // "internal/action-show-stash"
-    results = findItems("internal/action-show-stash");
-    Q_ASSERT(!results.isEmpty());
-    results[0]->setData(showStashActionVisible, TraySortOrderModel::VisibilityRole);
-    if (showStashActionVisible) {
-        results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
-        currentVisualIndex++;
-    }
-
-    // collapsable
-    bool toogleCollapseActionVisible = m_actionsAlwaysVisible;
-    for (const QString & id : std::as_const(m_collapsableIds)) {
-        QList<QStandardItem *> results = findItems(id);
-        if (results.isEmpty()) continue;
-        if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
-        bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
-        results[0]->setData(SECTION_COLLAPSABLE, TraySortOrderModel::SectionTypeRole);
-        results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
-        if (itemVisible) {
-            toogleCollapseActionVisible = true;
-            if (!m_collapsed) {
-                results[0]->setData(currentVisualIndex++, TraySortOrderModel::VisualIndexRole);
-            } else {
-                results[0]->setData(currentVisualIndex-1, TraySortOrderModel::VisualIndexRole);
-            }
-        }
-    }
-
-    // "internal/action-toggle-collapse"
-    results = findItems("internal/action-toggle-collapse");
-    Q_ASSERT(!results.isEmpty());
-    results[0]->setData(toogleCollapseActionVisible, TraySortOrderModel::VisibilityRole);
-    if (toogleCollapseActionVisible) {
-        results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
-        currentVisualIndex++;
-    }
-
-    // pinned
-    for (const QString & id : std::as_const(m_pinnedIds)) {
-        QList<QStandardItem *> results = findItems(id);
-        if (results.isEmpty()) continue;
-        if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
-        bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
-        results[0]->setData(SECTION_PINNED, TraySortOrderModel::SectionTypeRole);
-        results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
-        if (itemVisible) {
-            results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
-            currentVisualIndex++;
-        }
-    }
-
-    // "internal/action-toggle-quick-settings"
-    results = findItems("internal/action-toggle-quick-settings");
-    Q_ASSERT(!results.isEmpty());
-    results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
-    currentVisualIndex++;
-
-    // fixed (not actually 'fixed' since it's just a section next to pinned)
-    // By design, fixed items can be rearranged within the fixed section, but cannot
-    // move to other sections. We archive that by setting the 'forbiddenSections' property
-    // to the items in fixed sections.
-    for (const QString & id : std::as_const(m_fixedIds)) {
-        QList<QStandardItem *> results = findItems(id);
-        if (results.isEmpty()) continue;
-        if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
-        bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
-        results[0]->setData(SECTION_FIXED, TraySortOrderModel::SectionTypeRole);
-        results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
-        if (itemVisible) {
-            results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
-            currentVisualIndex++;
-        }
-    }
-
-    // update visible item count property
-    setProperty("visualItemCount", currentVisualIndex);
-
-    qDebug() << "update" << m_visualItemCount << currentVisualIndex;
 }
 
 QString TraySortOrderModel::registerSurfaceId(const QVariantMap & surfaceData)
@@ -439,19 +520,56 @@ QString TraySortOrderModel::registerSurfaceId(const QVariantMap & surfaceData)
     QStringList forbiddenSections(surfaceData.value("forbiddenSections").toStringList());
     bool isForceDock(surfaceData.value("isForceDock").toBool());
 
-    QList<QStandardItem *> results = findItems(surfaceId);
-    if (!results.isEmpty()) {
-        QStandardItem * result = results[0];
+    auto i = findItem(surfaceId);
+    if (i != m_list.end()) {
         // check if the item is currently in a forbidden zone
-        QString currentSection(result->data(SectionTypeRole).toString());
-        if (forbiddenSections.contains(currentSection)) {
-            result->setData(findSection(surfaceId, preferredSection, forbiddenSections, isForceDock), SectionTypeRole);
+        QString currentSection(i->sectionType);
+        if (!forbiddenSections.contains(currentSection)) {
+            return surfaceId;
         }
-        return surfaceId;
+
+        int row = std::distance(m_list.begin(), i);
+        beginRemoveRows(QModelIndex(), row, row);
+        m_list.erase(i);
+        endRemoveRows();
     }
 
-    appendRow(createTrayItem(surfaceId, preferredSection, delegateType, forbiddenSections, isForceDock));
+    createTrayItem(surfaceId, preferredSection, delegateType, forbiddenSections, isForceDock);
     return surfaceId;
+}
+
+bool TraySortOrderModel::getSurfaceVisible(const QString &surfaceId, const QString &sectionType)
+{
+    if (surfaceId == ACTION_STASH_PLACEHOLDER_NAME) {
+        return getStashPlaceholderVisible();
+    }
+
+    if (surfaceId == ACTION_SHOW_STASH_NAME) {
+        return getShowStashActionVisible();
+    }
+
+    if (sectionType == SECTION_TRAY_ACTION) {
+        return true;
+    }
+
+    if (
+        m_hiddenIds.contains(surfaceId) ||
+        (m_collapsed && sectionType == SECTION_COLLAPSABLE)
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
+bool TraySortOrderModel::getStashPlaceholderVisible()
+{
+    return m_visibleStashed == 0;
+}
+
+bool TraySortOrderModel::getShowStashActionVisible()
+{
+    return m_actionsAlwaysVisible || m_visibleStashed != 0;
 }
 
 void TraySortOrderModel::loadDataFromDConfig()
@@ -483,16 +601,88 @@ void TraySortOrderModel::onAvailableSurfacesChanged()
     }
 
     // check if there are tray items no longer availabled, and remove them.
-    for (int i = rowCount() - 1; i >= 0; i--) {
-        const QString surfaceId(data(index(i, 0), TraySortOrderModel::SurfaceIdRole).toString());
-        if (availableSurfaceIds.contains(surfaceId)) continue;
-        if (surfaceId.startsWith("internal/")) continue;
-        removeRow(i);
+    auto i = m_list.begin(); 
+    while (i != m_list.end()) {
+        if (availableSurfaceIds.contains(i->surfaceId)) {
+            ++i;
+            continue;
+        }
+        if (i->surfaceId.startsWith(INTERNAL_PREFIX)) {
+            ++i;
+            continue;
+        }
+
+        int row = std::distance(m_list.begin(), i);
+        beginRemoveRows(QModelIndex(), row, row);
+        i = m_list.erase(i);
+        endRemoveRows();
     }
-    // finally, update visual index
-    updateVisualIndexes();
+
+    updateVisibilities();
+
     // and also save the current sort order
     saveDataToDConfig();
+}
+
+void TraySortOrderModel::updateStashPlaceholderVisible()
+{
+    auto i = findItem(ACTION_STASH_PLACEHOLDER_NAME);
+    if (i == m_list.end()) {
+        return;
+    }
+
+    bool visible = getStashPlaceholderVisible();
+    if (i->visible == visible) {
+        return;
+    }
+
+    i->visible = visible;
+    QModelIndex idx = index(std::distance(m_list.begin(), i), 0);
+    dataChanged(idx, idx, { VisibilityRole });
+}
+
+void TraySortOrderModel::updateShowStashActionVisible()
+{
+    auto i = findItem(ACTION_SHOW_STASH_NAME);
+    if (i == m_list.end()) {
+        return;
+    }
+
+    bool visible = getShowStashActionVisible();
+    if (i->visible == visible) {
+        return;
+    }
+
+    i->visible = visible;
+    QModelIndex idx = index(std::distance(m_list.begin(), i), 0);
+    dataChanged(idx, idx, { VisibilityRole });
+}
+
+void TraySortOrderModel::updateVisibilities()
+{
+    m_visibleStashed = 0;
+    for (auto i = m_list.begin(); i != m_list.end(); ++i) {
+        bool visible = getSurfaceVisible(i->surfaceId, i->sectionType);
+        if (visible && i->sectionType == SECTION_STASHED && i->surfaceId != ACTION_STASH_PLACEHOLDER_NAME) {
+            m_visibleStashed++;
+        }
+
+        // placeholder 在 stash 最后
+        if (i->surfaceId == ACTION_STASH_PLACEHOLDER_NAME) {
+            visible = getStashPlaceholderVisible();
+        } else if (i->surfaceId == ACTION_SHOW_STASH_NAME) {
+            visible = getShowStashActionVisible();
+        }
+
+        if (i->visible == visible) {
+            continue;
+        }
+
+        i->visible = visible;
+
+        QModelIndex idx = index(std::distance(m_list.begin(), i), 0);
+        dataChanged(idx, idx, { VisibilityRole });
+    }
 }
 
 }

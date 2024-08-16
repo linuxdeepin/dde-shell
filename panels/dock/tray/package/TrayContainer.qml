@@ -86,30 +86,24 @@ Item {
     property int trayHeight: 50
     property size containerSize: DDT.TrayItemPositionManager.visualSize
     property bool isDragging: DDT.TraySortOrderModel.actionsAlwaysVisible
-    property bool animationEnable: true
+    property bool animationEnable: false
     // visiualIndex default value is -1
     property int dropHoverIndex: -1
     required property var surfaceAcceptor
     readonly property bool isDropping: dropArea.containsDrag
 
-    onIsDraggingChanged: {
-        animationEnable = !isDragging
-        animationEnableTimer.start()
-    }
-
+    // 启动时关闭动画，10s 后再启用
     Timer {
         id: animationEnableTimer
-        interval: 10
+        interval: 10000
         repeat: false
         onTriggered: {
             animationEnable = true
         }
     }
 
-    implicitWidth: width
-    width: containerSize.width
-    implicitHeight: height
-    height: containerSize.height
+    implicitWidth: isHorizontal ? trayList.contentItem.childrenRect.width : DDT.TrayItemPositionManager.dockHeight
+    implicitHeight: isHorizontal ? DDT.TrayItemPositionManager.dockHeight : trayList.contentItem.childrenRect.height
 
     Behavior on width {
         enabled: animationEnable
@@ -121,76 +115,68 @@ Item {
         NumberAnimation { duration: 200; easing.type: collapsed || !DDT.TraySortOrderModel.isCollapsing ? Easing.OutQuad : Easing.InQuad }
     }
 
-    // Delegates
-    TrayItemDelegateChooser {
-        id: trayItemDelegateChooser
-        isHorizontal: root.isHorizontal
-        collapsed: root.collapsed
-        itemPadding: root.itemPadding
-        surfaceAcceptor: root.surfaceAcceptor
-        disableInputEvents: root.isDropping
-    }
-
     // debug
     Rectangle {
         color: root.color
         anchors.fill: parent
     }
 
-    DropArea {
-        id: dropArea
+    // Tray items
+    ListView {
+        id: trayList
         anchors.fill: parent
-        keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
-        onEntered: function (dragEvent) {
-            console.log(dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId"))
-        }
+        interactive: false
+        orientation: root.isHorizontal ? Qt.Horizontal : Qt.Vertical
+        spacing: root.itemSpacing
+        model: DelegateModel {
+            id: visualModel
 
-        onPositionChanged: function (dragEvent) {
-            let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
-            let pos = root.isHorizontal ? drag.x : drag.y
-            let currentItemIndex = pos / (root.itemVisualSize + root.itemSpacing)
-            let currentPosMapToItem = pos % (root.itemVisualSize + root.itemSpacing)
-            let isBefore = currentPosMapToItem < root.itemVisualSize / 2
-            dropHoverIndex = Math.floor(currentItemIndex)
-            let isStash = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType") === "stashed"
-            // TODO: If this method is used in the stash area, it will cause the drag state to be terminated when dragging to the tray area
-            if (!isStash) {
-                if (dropHoverIndex !== 0) {
-                    dropTrayTimer.handleDrop = function() {
-                        DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
-                    }
-                    dropTrayTimer.start()
-                } else if (!surfaceId.startsWith("application-tray")){
-                    dragEvent.accepted = false
+            model: DDT.SortFilterProxyModel {
+                sourceModel: root.model
+                filterRowCallback: (sourceRow, sourceParent) => {
+                    let index = sourceModel.index(sourceRow, 0, sourceParent)
+                    return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) !== "stashed" &&
+                           sourceModel.data(index, DDT.TraySortOrderModel.VisibilityRole) === true
                 }
             }
-        }
-        onDropped: function (dropEvent) {
-            let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
-            let dropIdx = DDT.TrayItemPositionManager.itemIndexByPoint(Qt.point(drag.x, drag.y))
-            let currentItemIndex = dropIdx.index
-            let isBefore = dropIdx.isBefore
-            console.log("dropped", currentItemIndex, isBefore)
-            DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
-            DDT.TraySortOrderModel.actionsAlwaysVisible = false
-        }
+            delegate: TrayItemDelegateChooser {
+                id: delegateRoot
+                isHorizontal: root.isHorizontal
+                collapsed: root.collapsed
+                itemPadding: root.itemPadding
+                surfaceAcceptor: root.surfaceAcceptor
+                disableInputEvents: root.isDropping
 
-        Timer {
-            id: dropTrayTimer
-            interval: 50
-            repeat: false
-            property var handleDrop
-            onTriggered: {
-                handleDrop()
+                property int visualIndex: DelegateModel.itemsIndex
             }
         }
-    }
 
-    // Tray items
-    Repeater {
-        anchors.fill: parent
-        model: root.model
-        delegate: trayItemDelegateChooser
+        add: Transition {
+            enabled: animationEnable
+            NumberAnimation {
+                properties: "scale,opacity"
+                from: 0
+                to: 1
+                duration: 200
+            }
+        }
+        remove: Transition {
+            enabled: animationEnable
+            NumberAnimation {
+                properties: "scale,opacity"
+                from: 1
+                to: 0
+                duration: 200
+            }
+        }
+        displaced: Transition {
+            enabled: animationEnable
+            NumberAnimation {
+                properties: "x,y"
+                easing.type: Easing.OutQuad
+            }
+        }
+        move: displaced
     }
 
     Component.onCompleted: {
@@ -198,10 +184,12 @@ Item {
             return root.isHorizontal ? Qt.Horizontal : Qt.Vertical
         });
         DDT.TrayItemPositionManager.visualItemCount = Qt.binding(function() {
-            return root.model.visualItemCount
+            return root.model.rowCount
         });
         DDT.TrayItemPositionManager.dockHeight = Qt.binding(function() {
             return root.trayHeight
         });
+
+        animationEnableTimer.start()
     }
 }

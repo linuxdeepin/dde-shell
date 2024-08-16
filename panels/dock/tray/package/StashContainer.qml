@@ -11,15 +11,12 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 Item {
     id: root
 
-    property var model: ListModel {
-        ListElement {
-            delegateType: "dummy"
-            surfaceId: "folder-trash"
-            visualIndex: 0
-        }
-        ListElement {
-            delegateType: "dummy"
-            visualIndex: 1
+    required property DDT.SortFilterProxyModel model: DDT.SortFilterProxyModel {
+        sourceModel: DDT.TraySortOrderModel
+        filterRowCallback: (sourceRow, sourceParent) => {
+            let index = sourceModel.index(sourceRow, 0, sourceParent)
+            return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) === "stashed" &&
+                    sourceModel.data(index, DDT.TraySortOrderModel.VisibilityRole) === true
         }
     }
 
@@ -59,14 +56,6 @@ Item {
     }
 
     // Delegates
-    StashedItemDelegateChooser {
-        columnCount: root.columnCount
-        rowCount: root.rowCount
-        itemPadding: root.itemPadding
-        id: stashedItemDelegateChooser
-        stashedSurfacePopup: stashSurfacePopup
-    }
-
     // tooltip and menu
     DDT.SurfacePopup {
         id: stashSurfacePopup
@@ -101,19 +90,43 @@ Item {
         }
         onDropped: function (dropEvent) {
             let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
-            DDT.TraySortOrderModel.dropToStashTray(surfaceId, 0, false);
+            DDT.TraySortOrderModel.move(surfaceId, "internal/action-stash-placeholder", true);
         }
     }
 
-    Item {
+    Flow {
+        id: stashedList
         anchors.fill: parent
         anchors.margins: 0
+        spacing: root.itemSpacing
 
-        // Tray items
+        add: Transition {
+            NumberAnimation {
+                properties: "scale,opacity"
+                from: 0
+                to: 1
+                duration: 200
+            }
+        }
+        move: Transition {
+            NumberAnimation {
+                properties: "x,y"
+                easing.type: Easing.OutQuad
+            }
+        }
+
         Repeater {
-            anchors.fill: parent
-            model: root.model
-            delegate: stashedItemDelegateChooser
+            model: DelegateModel {
+                id: visualModel
+                model: root.model
+                delegate: StashedItemDelegateChooser {
+                    columnCount: root.columnCount
+                    rowCount: root.rowCount
+                    itemPadding: root.itemPadding
+                    id: stashedItemDelegateChooser
+                    stashedSurfacePopup: stashSurfacePopup
+                }
+            }
         }
     }
 }
