@@ -60,15 +60,14 @@ AppletItem {
                 toolTip.close()
             }
         }
-    }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        acceptedButtons: Qt.RightButton
-        onClicked: {
-            platformMenuLoader.active = true
-            platformMenuLoader.item.open()
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: {
+                platformMenuLoader.active = true
+                platformMenuLoader.item.open()
+            }
         }
     }
 
