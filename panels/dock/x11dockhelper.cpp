@@ -45,7 +45,7 @@ XcbEventFilter::XcbEventFilter(X11DockHelper *helper)
     m_timer->setInterval(200);
 
     connect(m_timer, &QTimer::timeout, this, [this]() {
-        m_helper->updateHideState(false);
+        m_helper->updateEnterState(false);
     });
     auto *x11Application = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
     m_connection = x11Application->connection();
@@ -87,7 +87,7 @@ void XcbEventFilter::processEnterLeave(xcb_window_t win, bool enter)
     }
 
 // dock enter/leave
-    m_helper->updateHideState(enter);
+    m_helper->updateEnterState(enter);
 }
 
 bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *message, qintptr *)
@@ -349,6 +349,7 @@ X11DockHelper::X11DockHelper(DockPanel* panel)
     , m_xcbHelper(new XcbEventFilter(this))
     , m_hideState(Show)
     , m_smartHideState(Unknown)
+    , m_enter(true)
 {
     connect(parent(), &DockPanel::rootObjectChanged, this, &X11DockHelper::createdWakeArea);
     connect(panel, &DockPanel::hideStateChanged, this, &X11DockHelper::updateDockTriggerArea);
@@ -358,6 +359,8 @@ X11DockHelper::X11DockHelper(DockPanel* panel)
     connect(panel, &DockPanel::positionChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::dockSizeChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::geometryChanged, this, &X11DockHelper::updateDockArea);
+    connect(panel, &DockPanel::showInPrimaryChanged, this, &X11DockHelper::updateDockArea);
+    connect(panel, &DockPanel::dockScreenChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::rootObjectChanged, this, [ this, panel ] {
         connect(panel->window(), &QWindow::visibleChanged, this, &X11DockHelper::updateWindowState, Qt::UniqueConnection);
         updateWindowState();
@@ -377,6 +380,14 @@ void X11DockHelper::updateDockTriggerArea()
 {
     for (auto area: m_areas) {
         area->updateDockTriggerArea();
+    }
+}
+
+void X11DockHelper::updateEnterState(bool enter)
+{
+    if(m_enter!= enter) {
+        m_enter = enter;
+        updateHideState();
     }
 }
 
@@ -400,10 +411,7 @@ void X11DockHelper::onHideModeChanged(HideMode mode)
         delayedUpdateState();
     } break;
     case KeepShowing:
-        updateHideState(true);
-        break;
     case KeepHidden:
-        updateHideState(false);
         break;
     default: {
 
@@ -490,7 +498,7 @@ void X11DockHelper::updateSmartHideState(const HideState &state)
         m_smartHideState = state;
         qCDebug(dockX11Log) << "smart hide state:" << m_smartHideState;
         if (parent()->hideMode() == SmartHide) {
-            updateHideState(m_smartHideState == Show);
+            updateHideState();
         }
     }
 }
@@ -548,6 +556,9 @@ void X11DockHelper::updateDockArea()
     }
     if (m_dockArea != rect) {
         m_dockArea = rect;
+        for (auto it = m_windows.cbegin(); it != m_windows.cend(); ++it) {
+            updateWindowHideState(it.key());
+        }
         delayedUpdateState();
     }
 }
@@ -567,17 +578,22 @@ HideState X11DockHelper::hideState()
     return m_hideState;
 }
 
-void X11DockHelper::updateHideState(bool show)
+void X11DockHelper::updateHideState()
 {
-    if (show) {
-        m_hideState = Show;
+    auto hideState = Show;
+    if (m_enter) {
+        hideState = Show;
     } else {
         if (parent()->hideMode() == HideMode::SmartHide && m_smartHideState == Show) {
-            return;
+            hideState = Show;
+        } else {
+            hideState = Hide;
         }
-        m_hideState = Hide;
     }
-    Q_EMIT hideStateChanged();
+    if (m_hideState != hideState) {
+        m_hideState = hideState;
+        Q_EMIT hideStateChanged();
+    }
 }
 
 void X11DockHelper::createdWakeArea()
@@ -723,7 +739,7 @@ void DockTriggerArea::onTriggerTimer()
         m_panel->setDockScreen(m_screen);
         m_helper->updateDockTriggerArea();
     }
-    m_panel->setHideState(Show);
+    m_helper->updateEnterState(true);
 }
 void DockTriggerArea::onHoldingTimer()
 {

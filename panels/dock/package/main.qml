@@ -17,7 +17,6 @@ import org.deepin.dtk.style 1.0 as DStyle
 
 Window {
     id: dock
-    visible: Panel.hideState != Dock.Hide
     property bool useColumnLayout: Applet.position % 2
     // TODO: 临时溢出逻辑，待后面修改
     property int dockLeftSpaceForCenter: useColumnLayout ? 
@@ -557,7 +556,7 @@ Window {
         })
 
         dock.itemIconSizeBase = dock.dockItemMaxSize
-
+        dock.visible = Panel.hideState !== Dock.Hide
         changeDragAreaAnchor()
     }
 }
