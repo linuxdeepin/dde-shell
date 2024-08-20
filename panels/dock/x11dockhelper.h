@@ -99,9 +99,10 @@ public:
 
 public Q_SLOTS:
     void updateDockTriggerArea() override;
+    void updateEnterState(bool enter);
 
 private Q_SLOTS:
-    void updateHideState(bool show);
+    void updateHideState();
     void onHideModeChanged(HideMode mode);
 
     void onWindowClientListChanged();
@@ -129,6 +130,7 @@ private:
     QList<DockTriggerArea*> m_areas;
     QRect m_dockArea;
     bool m_needUpdateState;
+    bool m_enter;
     dock::HideState m_smartHideState;
     QHash<xcb_window_t, WindowData*> m_windows;
     XcbEventFilter *m_xcbHelper;
