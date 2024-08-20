@@ -14,7 +14,7 @@ Copyright: None
 License: CC0-1.0
 
 # configuration files for CI scripts/tools
-Files: .github/* .obs/*
+Files: .github/* .obs/* .tx/transifex.yaml
 Copyright: None
 License: CC0-1.0
 
