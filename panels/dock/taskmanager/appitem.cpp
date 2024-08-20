@@ -225,11 +225,7 @@ void AppItem::launch()
 void AppItem::requestQuit()
 {
     for (auto window : m_windows) {
-        window->close();
-    }
-
-    if(m_desktopfileParser && !m_desktopfileParser.isNull()) {
-        m_desktopfileParser->requestQuit();
+        window->killClient();
     }
 }
 
