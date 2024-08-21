@@ -41,8 +41,8 @@ Item {
             Layout.rightMargin: 12
             ActionButton {
                 id: actionBtn
-                Layout.preferredWidth: 16
-                Layout.preferredHeight: 16
+                Layout.preferredWidth: 20
+                Layout.preferredHeight: 20
                 icon.name: "arrow_ordinary_left"
                 icon.width: 12
                 icon.height: 12
