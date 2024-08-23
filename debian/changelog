@@ -1,3 +1,23 @@
+dde-shell (0.0.42) unstable; urgency=medium
+
+  * feat: tooltip and preview call to treeland
+  * fix: animation when drag from launchpad to dock
+
+ -- tsic404 <liuheng@deepin.org>  Fri, 23 Aug 2024 16:45:08 +0800
+
+dde-shell (0.0.41) unstable; urgency=medium
+
+  * fix: incorrect animation application when dragging(Issue: 10330)
+  * fix: Dock following mouse display error when modifying SmartHide(Issue: 10404)
+  * fix: plugin process is pulled up again after crashed(Issue: 10400)
+  * fix: modify panel popup shadow offset and color(Issue: 10325)
+  * fix: forced exit is invalid(Issue: 10436)
+  * fix: searchItem right click response range is too large(Issue: 10294)
+  * fix: pupup surface doesn't release(Issue: 10121)
+  * chore: adjust iconSize for quickpanel(Issue: 9852)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Wed, 21 Aug 2024 17:32:09 +0800
+
 dde-shell (0.0.40) unstable; urgency=medium
 
   * fix: incorrect height for quickpanel's childplugin(Issue: 10036)
