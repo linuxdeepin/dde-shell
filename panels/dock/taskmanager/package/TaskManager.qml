@@ -59,17 +59,17 @@ ContainmentItem {
                 required property list<string> windows
                 keys: ["text/x-dde-dock-dnd-appid"]
                 z: attention ? -1 : 0
-                visible: itemId !== launcherDndDropArea.launcherDndDesktopId
+                property bool visibility: itemId !== launcherDndDropArea.launcherDndDesktopId
 
                 states: [
                     State {
                         name: "item-visible"
-                        when: delegateRoot.visible
+                        when: delegateRoot.visibility
                         PropertyChanges { target: delegateRoot; opacity: 1.0; scale: 1.0; }
                     },
                     State {
                         name: "item-invisible"
-                        when: !delegateRoot.visible
+                        when: !delegateRoot.visibility
                         PropertyChanges { target: delegateRoot; opacity: 0.0; scale: 0.0; }
                     }
                 ]
