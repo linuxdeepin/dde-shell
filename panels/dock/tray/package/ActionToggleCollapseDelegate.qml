@@ -15,6 +15,7 @@ AppletItemButton {
     property bool collapsed: DDT.TraySortOrderModel.collapsed
     property bool inputEventsEnabled: true
     hoverEnabled: inputEventsEnabled
+    autoClosePopup: true
 
     z: 5
 

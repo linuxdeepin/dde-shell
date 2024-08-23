@@ -4,7 +4,7 @@
 
 import QtQuick
 import QtQuick.Controls
-
+import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 import org.deepin.dtk
 
@@ -12,6 +12,7 @@ IconButton {
     id: control
     property bool isActive
     property real radius: 4
+    property bool autoClosePopup: false
 
     padding: 4
     topPadding: undefined
@@ -24,6 +25,14 @@ IconButton {
 
     icon.width: 16
     icon.height: 16
+
+    Connections {
+        target: control
+        enabled: autoClosePopup
+        function onClicked() {
+            Panel.requestClosePopup()
+        }
+    }
 
     background: AppletItemBackground {
         radius: control.radius
