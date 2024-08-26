@@ -90,6 +90,7 @@ Item {
     // visiualIndex default value is -1
     property int dropHoverIndex: -1
     required property var surfaceAcceptor
+    readonly property bool isDropping: dropArea.containsDrag
 
     onIsDraggingChanged: {
         animationEnable = !isDragging
@@ -127,6 +128,7 @@ Item {
         collapsed: root.collapsed
         itemPadding: root.itemPadding
         surfaceAcceptor: root.surfaceAcceptor
+        disableInputEvents: root.isDropping
     }
 
     // debug
@@ -136,6 +138,7 @@ Item {
     }
 
     DropArea {
+        id: dropArea
         anchors.fill: parent
         keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
         onEntered: function (dragEvent) {

@@ -13,6 +13,8 @@ AppletItemButton {
     id: root
     property bool isHorizontal: false
     property bool collapsed: DDT.TraySortOrderModel.collapsed
+    property bool inputEventsEnabled: true
+    hoverEnabled: inputEventsEnabled
 
     z: 5
 
@@ -63,6 +65,7 @@ AppletItemButton {
     }
     HoverHandler {
         id: hoverHandler
+        enabled: root.inputEventsEnabled
         onHoveredChanged: {
             if (hovered) {
                 toolTipShowTimer.start()
