@@ -15,6 +15,7 @@ LQM.DelegateChooser {
     property bool collapsed: false
     required property int itemPadding
     required property var surfaceAcceptor
+    property bool disableInputEvents
 
     role: "delegateType"
     LQM.DelegateChoice {
@@ -34,7 +35,7 @@ LQM.DelegateChooser {
             contentItem: ActionLegacyTrayPluginDelegate {
                 id: traySurfaceDelegate
                 objectName: "tray"
-                inputEventsEnabled: model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.collapsed
+                inputEventsEnabled: !disableInputEvents && (model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.collapsed)
                 itemVisible: traySurfacePositioner.itemVisible
                 dragable: model.sectionType !== "fixed"
                 isActive: surfacePopup.isOpened
@@ -63,6 +64,7 @@ LQM.DelegateChooser {
         TrayItemPositioner {
             contentItem: ActionToggleCollapseDelegate {
                 isHorizontal: root.isHorizontal
+                inputEventsEnabled: !disableInputEvents
             }
         }
     }
