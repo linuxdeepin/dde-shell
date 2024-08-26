@@ -1,5 +1,7 @@
 # DDE Shell
 
+ping
+
 The `dde-shell` project provides a plugin system that integrates plugins developed based on this plugin system into DDE.
 
 ## Dependencies
