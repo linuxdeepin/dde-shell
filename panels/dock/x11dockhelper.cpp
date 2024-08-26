@@ -351,7 +351,9 @@ X11DockHelper::X11DockHelper(DockPanel* panel)
     , m_smartHideState(Unknown)
     , m_enter(true)
 {
-    connect(parent(), &DockPanel::rootObjectChanged, this, &X11DockHelper::createdWakeArea);
+    connect(parent(), &DockPanel::rootObjectChanged, this, &X11DockHelper::updateWakeArea);
+    connect(qApp, &QGuiApplication::screenAdded, this, &X11DockHelper::updateWakeArea);
+    connect(qApp, &QGuiApplication::screenRemoved, this, &X11DockHelper::updateWakeArea);
     connect(panel, &DockPanel::hideStateChanged, this, &X11DockHelper::updateDockTriggerArea);
     connect(panel, &DockPanel::showInPrimaryChanged, this, &X11DockHelper::updateDockTriggerArea);
     connect(panel, &DockPanel::hideModeChanged, this, &X11DockHelper::onHideModeChanged);
@@ -596,10 +598,21 @@ void X11DockHelper::updateHideState()
     }
 }
 
-void X11DockHelper::createdWakeArea()
+void X11DockHelper::updateWakeArea()
 {
-    for (auto screen: qApp->screens()) {
-        DockTriggerArea* area = new DockTriggerArea(parent(), this, screen);
+    auto screens = qApp->screens();
+    for (auto it = m_areas.begin(); it != m_areas.end();) {
+        if (screens.contains((*it)->screen())) {
+            screens.removeOne((*it)->screen());
+            ++it;
+        } else {
+            delete (*it);
+            it = m_areas.erase(it);
+        }
+    }
+
+    for (auto screen : screens) {
+        DockTriggerArea *area = new DockTriggerArea(parent(), this, screen);
         m_areas.append(area);
     }
 }
