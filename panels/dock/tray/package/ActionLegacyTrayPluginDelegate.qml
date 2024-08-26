@@ -30,6 +30,7 @@ AppletItemButton {
     padding: 0
 
     visible: !Drag.active
+    hoverEnabled: inputEventsEnabled
 
     function updatePluginMargins()
     {
@@ -138,7 +139,7 @@ AppletItemButton {
         }
     }
 
-    D.ColorSelector.hovered: pluginItem.plugin && pluginItem.plugin.isItemActive || hoverHandler.hovered
+    D.ColorSelector.hovered: root.inputEventsEnabled && (pluginItem.plugin && pluginItem.plugin.isItemActive || hoverHandler.hovered)
     D.ColorSelector.pressed: tapHandler.pressed
 
     property Component overlayWindow: QuickDragWindow {
