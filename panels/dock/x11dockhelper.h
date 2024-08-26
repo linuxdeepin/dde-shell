@@ -119,7 +119,7 @@ private Q_SLOTS:
     void updateWindowState();
 
 private:
-    inline void createdWakeArea();
+    inline void updateWakeArea();
 
 private:
     friend class XcbEventFilter;
