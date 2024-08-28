@@ -91,13 +91,14 @@ Item {
         id: toolTip
         visible: readyBinding
         anchors.centerIn: parent
-        topPadding: DStyle.Style.toolTip.verticalPadding
-        bottomPadding: DStyle.Style.toolTip.verticalPadding
-        leftPadding: DStyle.Style.toolTip.horizontalPadding
-        rightPadding: DStyle.Style.toolTip.horizontalPadding
         parent: toolTipWindow ? toolTipWindow.contentItem : undefined
         font: DTK.fontManager.t6
         contentItem: Text {
+            topPadding: 4
+            bottomPadding: 4
+            leftPadding: 8
+            rightPadding: 8
+
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
             font: toolTip.font
