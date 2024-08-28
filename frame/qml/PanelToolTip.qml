@@ -5,6 +5,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import org.deepin.ds 1.0
+import org.deepin.dtk 1.0
 import org.deepin.dtk.style as DStyle
 
 Item {
@@ -95,6 +96,7 @@ Item {
         leftPadding: DStyle.Style.toolTip.horizontalPadding
         rightPadding: DStyle.Style.toolTip.horizontalPadding
         parent: toolTipWindow ? toolTipWindow.contentItem : undefined
+        font: DTK.fontManager.t6
         contentItem: Text {
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
