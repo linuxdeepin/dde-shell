@@ -61,7 +61,7 @@ Window {
     D.DWindow.enableBlurWindow: true
     // TODO set shadowOffset maunally.
     D.DWindow.shadowOffset: Qt.point(0, 25)
-    D.DWindow.shadowColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.5) : Qt.rgba(0, 0, 0, 0.4)
+    D.DWindow.shadowColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.5) : Qt.rgba(0, 0, 0, 0.2)
     D.ColorSelector.family: D.Palette.CrystalColor
 
     color: "transparent"
