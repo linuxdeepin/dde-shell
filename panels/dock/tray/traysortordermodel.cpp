@@ -319,6 +319,11 @@ QStandardItem * TraySortOrderModel::createTrayItem(const QString & name, const Q
 
 void TraySortOrderModel::updateVisualIndexes()
 {
+    for (int i = 0; i < rowCount(); i++) {
+        auto results = item(i);
+        results->setData(-1, TraySortOrderModel::VisualIndexRole);
+    }
+
     // stashed action
     // "internal/action-stash-placeholder"
     QList<QStandardItem *> results = findItems("internal/action-stash-placeholder");
@@ -332,10 +337,10 @@ void TraySortOrderModel::updateVisualIndexes()
     for (const QString & id : std::as_const(m_stashedIds)) {
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
+        if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
         if (stashPlaceholder == results[0]) continue;
         bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_STASHED, TraySortOrderModel::SectionTypeRole);
-        results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
         if (itemVisible) {
             showStashActionVisible = true;
             results[0]->setData(stashedVisualIndex, TraySortOrderModel::VisualIndexRole);
@@ -360,10 +365,10 @@ void TraySortOrderModel::updateVisualIndexes()
     for (const QString & id : std::as_const(m_collapsableIds)) {
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
+        if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
         bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_COLLAPSABLE, TraySortOrderModel::SectionTypeRole);
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
-        results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
         if (itemVisible) {
             toogleCollapseActionVisible = true;
             if (!m_collapsed) {
@@ -378,7 +383,6 @@ void TraySortOrderModel::updateVisualIndexes()
     results = findItems("internal/action-toggle-collapse");
     Q_ASSERT(!results.isEmpty());
     results[0]->setData(toogleCollapseActionVisible, TraySortOrderModel::VisibilityRole);
-    results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
     if (toogleCollapseActionVisible) {
         results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
         currentVisualIndex++;
@@ -388,10 +392,10 @@ void TraySortOrderModel::updateVisualIndexes()
     for (const QString & id : std::as_const(m_pinnedIds)) {
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
+        if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
         bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_PINNED, TraySortOrderModel::SectionTypeRole);
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
-        results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
         if (itemVisible) {
             results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
             currentVisualIndex++;
@@ -411,10 +415,10 @@ void TraySortOrderModel::updateVisualIndexes()
     for (const QString & id : std::as_const(m_fixedIds)) {
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
+        if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
         bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_FIXED, TraySortOrderModel::SectionTypeRole);
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
-        results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
         if (itemVisible) {
             results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
             currentVisualIndex++;
