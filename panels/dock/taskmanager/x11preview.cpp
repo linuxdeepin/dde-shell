@@ -347,7 +347,7 @@ public:
     {
         auto closeButton = new DIconButton(parent);
         closeButton->setIcon(DDciIcon::fromTheme("close"));
-
+        closeButton->setEnabledCircle(true);
         QPalette palette = closeButton->palette();
 
         QColor lightColor = palette.color(QPalette::Normal, QPalette::Light);
@@ -409,7 +409,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
 
     connect(m_hideTimer, &QTimer::timeout, this, &X11WindowPreviewContainer::callHide);
 
-    connect(m_closeAllButton, &DToolButton::clicked, this, [this](){
+    connect(m_closeAllButton, &DIconButton::clicked, this, [this](){
         if (m_previewItem.isNull()) return;
         for (auto window : m_previewItem->getAppendWindows()) {
             window->close();
@@ -575,10 +575,15 @@ void X11WindowPreviewContainer::initUI()
     m_previewIcon->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
     m_previewIcon->setScaledContents(true);
 
-    m_closeAllButton = new DToolButton(this);
+    m_closeAllButton = new DIconButton(this);
+
     m_closeAllButton->setIconSize(QSize(16, 16));
-    m_closeAllButton->setIcon(QIcon::fromTheme("close"));
+    m_closeAllButton->setIcon(DDciIcon::fromTheme("close"));
     m_closeAllButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+    m_closeAllButton->setEnabledCircle(true);
+
+    DIconButtonHoverFilter *hoverHandler = new DIconButtonHoverFilter(this);
+    m_closeAllButton->installEventFilter(hoverHandler);
 
     m_previewIcon->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_previewTitle->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
