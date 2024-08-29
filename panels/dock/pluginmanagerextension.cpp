@@ -75,7 +75,7 @@ uint32_t PluginSurface::pluginSizePolicy () const
 
 QSize PluginSurface::pluginSize() const
 {
-    return m_surface->bufferSize();
+    return m_surface->bufferSize() / qApp->devicePixelRatio();
 }
 
 QString PluginSurface::dccIcon() const
