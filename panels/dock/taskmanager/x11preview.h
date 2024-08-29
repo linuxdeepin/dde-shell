@@ -15,6 +15,8 @@
 #include <DToolButton>
 #include <QVBoxLayout>
 #include <DBlurEffectWidget>
+#include <DGuiApplicationHelper>
+#include <DIconButton>
 
 DWIDGET_USE_NAMESPACE
 
@@ -23,6 +25,40 @@ class X11WindowMonitor;
 class AppItemWindowModel;
 class AppItemWindowDeletegate;
 class PreviewsListView;
+
+class DIconButtonHoverFilter : public QObject
+{
+    Q_OBJECT public:
+    explicit DIconButtonHoverFilter(QObject* parent = nullptr) : QObject(parent)
+    {
+    }
+
+    void setButtonColor(QObject* watched, QColor color)
+    {
+        DIconButton* button = qobject_cast<DIconButton*>(watched);
+        if (button) {
+            QPalette pt = button->palette();
+            pt.setColor(QPalette::Button, color);
+            button->setPalette(pt);
+        }
+    }
+
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override
+    {
+        if (event->type() == QEvent::HoverEnter) {
+            // 处理 HoverEnter 事件
+            QColor color = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::DarkType ? Qt::white : Qt::black;
+            color.setAlphaF(0.1);
+            setButtonColor(watched, color);
+        } else if (event->type() == QEvent::HoverLeave || event->type() == QEvent::Show) {
+            // 处理 HoverLeave 和 show事件
+            setButtonColor(watched, Qt::transparent);
+        }
+        return QObject::eventFilter(watched, event);
+    }
+};
+
 
 class X11WindowPreviewContainer: public DBlurEffectWidget
 {
@@ -66,7 +102,7 @@ private:
 
     QLabel* m_previewIcon;
     DLabel* m_previewTitle;
-    DToolButton* m_closeAllButton;
+    DIconButton* m_closeAllButton;
 
     QTimer* m_hideTimer;
 
