@@ -23,6 +23,10 @@ qt_add_qml_module(dock-tray
         trayitempositionmanager.h
         ksortfilterproxymodel.cpp
         ksortfilterproxymodel.h
+        kextracolumnsproxymodel.cpp
+        kextracolumnsproxymodel.h
+        listtotableproxymodel.cpp
+        listtotableproxymodel.h
     QML_FILES
         SurfacePopup.qml
         SurfaceSubPopup.qml
