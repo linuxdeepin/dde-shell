@@ -200,65 +200,68 @@ Item {
         }
 
         // TODO: value can set during debugPanel
-        Repeater {
-            model: 5
-            Rectangle {
-                id: rect
-                required property int index
-                property var originSize: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * 1.2 * iconScale
+        Loader {
+            anchors.fill: icon
+            z: -1
+            active: root.attention && !Panel.rootObject.isDragging
+            sourceComponent: Repeater {
+                model: 5
+                Rectangle {
+                    id: rect
+                    required property int index
+                    property var originSize: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * 1.2 * iconScale
 
-                visible: root.attention && !Panel.rootObject.isDragging
-                width: originSize * (index - 1)
-                height: width
-                radius: width / 2
-                color: Qt.rgba(1, 1, 1, 0.1)
+                    width: originSize * (index - 1)
+                    height: width
+                    radius: width / 2
+                    color: Qt.rgba(1, 1, 1, 0.1)
 
-                anchors.centerIn: icon
-                z: -1
-                opacity: Math.min(3 - width / originSize, blendColorAlpha(D.DTK.themeType === D.ApplicationHelper.DarkType ? 0.25 : 1.0))
+                    anchors.centerIn: parent
+                    opacity: Math.min(3 - width / originSize, blendColorAlpha(D.DTK.themeType === D.ApplicationHelper.DarkType ? 0.25 : 1.0))
 
-                function blendColorAlpha(fallback) {
-                    var appearance = DS.applet("org.deepin.ds.dde-appearance")
-                    if (!appearance || appearance.opacity < 0 || appearance.opacity > fallback || appearance.opacity < fallback)
-                        return fallback
-                    return appearance.opacity
-                }
-
-                SequentialAnimation {
-                    running: root.attention && !Panel.rootObject.isDragging
-                    loops: Animation.Infinite
-
-                    // 弹出
-                    ParallelAnimation {
-                        NumberAnimation { target: rect; property: "width"; from: Math.max(originSize * (index - 1), 0); to: originSize * (index); duration: 1200 }
-                        ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
-                        NumberAnimation { target: icon; property: "scale"; from: iconScale; to: iconScale * 1.15; duration: 1200; easing.type: Easing.OutElastic; easing.amplitude: 1; easing.period: 0.2 }
+                    function blendColorAlpha(fallback) {
+                        var appearance = DS.applet("org.deepin.ds.dde-appearance")
+                        if (!appearance || appearance.opacity < 0 || appearance.opacity > fallback || appearance.opacity < fallback)
+                            return fallback
+                        return appearance.opacity
                     }
 
-                    // 收缩
-                    ParallelAnimation {
-                        NumberAnimation { target: rect; property: "width"; from: originSize * (index); to: originSize * (index + 1); duration: 1200 }
-                        ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
-                        NumberAnimation { target: icon; property: "scale"; from: iconScale * 1.15; to: iconScale; duration: 1200; easing.type: Easing.OutElastic; easing.amplitude: 1; easing.period: 0.2 }
+                    SequentialAnimation {
+                        running: true
+                        loops: Animation.Infinite
+
+                        // 弹出
+                        ParallelAnimation {
+                            NumberAnimation { target: rect; property: "width"; from: Math.max(originSize * (index - 1), 0); to: originSize * (index); duration: 1200 }
+                            ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
+                            NumberAnimation { target: icon; property: "scale"; from: iconScale; to: iconScale * 1.15; duration: 1200; easing.type: Easing.OutElastic; easing.amplitude: 1; easing.period: 0.2 }
+                        }
+
+                        // 收缩
+                        ParallelAnimation {
+                            NumberAnimation { target: rect; property: "width"; from: originSize * (index); to: originSize * (index + 1); duration: 1200 }
+                            ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
+                            NumberAnimation { target: icon; property: "scale"; from: iconScale * 1.15; to: iconScale; duration: 1200; easing.type: Easing.OutElastic; easing.amplitude: 1; easing.period: 0.2 }
+                        }
+
+                        // 停顿
+                        ParallelAnimation {
+                            NumberAnimation { target: rect; property: "width"; from: originSize * (index + 1); to: originSize * (index + 2); duration: 1200 }
+                            ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
+                        }
                     }
 
-                    // 停顿
-                    ParallelAnimation {
-                        NumberAnimation { target: rect; property: "width"; from: originSize * (index + 1); to: originSize * (index + 2); duration: 1200 }
-                        ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
+                    D.BoxShadow {
+                        visible: rect.visible
+                        anchors.fill: rect
+                        z: -2
+                        shadowBlur: 20
+                        shadowColor : Qt.rgba(0, 0, 0, 0.05)
+                        shadowOffsetX : 0
+                        shadowOffsetY : 0
+                        cornerRadius: rect.radius
+                        hollow: true
                     }
-                }
-
-                D.BoxShadow {
-                    visible: rect.visible
-                    anchors.fill: rect
-                    z: -2
-                    shadowBlur: 20
-                    shadowColor : Qt.rgba(0, 0, 0, 0.05)
-                    shadowOffsetX : 0
-                    shadowOffsetY : 0
-                    cornerRadius: rect.radius
-                    hollow: true
                 }
             }
         }
