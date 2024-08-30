@@ -109,8 +109,7 @@ AppletItem {
         }
     }
 
-    function isTrayPluginPopup(surfaceId)
-    {
+    function isTrayPluginPopup(surfaceId) {
         if (stashContainer.isStashPopup(surfaceId))
             return false
         if (DockCompositor.findSurfaceFromModel(DockCompositor.trayPluginSurfaces, surfaceId))
