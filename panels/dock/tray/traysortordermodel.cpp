@@ -143,6 +143,9 @@ bool TraySortOrderModel::move(const QString &draggedSurfaceId, const QString &dr
     if (sourceRow < destRow) {
         destRow--;
     }
+    if (sourceRow == destRow) {
+        return false;
+    }
 
     QString originSectionType = iter->sectionType;
     if (originSectionType != sectionType) {
@@ -185,6 +188,24 @@ std::tuple<bool, QString> TraySortOrderModel::moveAux(const QString &draggedSurf
 
     // Ensure position adjustment will be saved at last
     auto deferSaveSortOrder = qScopeGuard([this](){saveDataToDConfig();});
+
+    if (dropOnSurfaceId == ACTION_STASH_PLACEHOLDER_NAME) {
+        // placeholder 只能是 stash 中最后一个
+        if (!isBefore) {
+            return {false, ""};
+        }
+
+        QStringList *targetSection = &m_stashedIds;
+
+        // move to the end of stashed section
+        if (targetSection == sourceSection) {
+            m_stashedIds.move(m_stashedIds.indexOf(draggedSurfaceId), m_stashedIds.count() - 1);
+        } else {
+            sourceSection->removeOne(draggedSurfaceId);
+            m_stashedIds.append(draggedSurfaceId);
+        }
+        return {true, SECTION_STASHED};
+    }
 
     if (dropOnSurfaceId == ACTION_SHOW_STASH_NAME) {
         // show stash action is always the first action, drop before it consider as drop into stashed area
