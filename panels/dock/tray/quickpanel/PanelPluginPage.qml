@@ -21,8 +21,7 @@ Item {
     readonly property int columnCellCounts: 4
     required property var model
     readonly property int pluginViewHeight: pluginView.height
-    function forceLayout()
-    {
+    function forceLayout() {
         ready()
     }
     signal ready()

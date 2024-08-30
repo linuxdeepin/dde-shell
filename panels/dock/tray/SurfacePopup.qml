@@ -51,8 +51,7 @@ Item {
             if (arg && toolTipWindow.visible)
                 toolTipWindow.close()
         }
-        onUpdateGeometryFinished: function ()
-        {
+        onUpdateGeometryFinished: function () {
             if (!menu.shellSurface)
                 return
             menu.shellSurface.updatePluginGeometry(Qt.rect(menu.menuWindow.x, menu.menuWindow.y, 0, 0))
@@ -95,8 +94,7 @@ Item {
 
     Connections {
         target: DockCompositor
-        function onPopupCreated(popupSurface)
-        {
+        function onPopupCreated(popupSurface) {
             let surfaceId = `${popupSurface.pluginId}::${popupSurface.itemKey}`
             if (surfaceAcceptor && !surfaceAcceptor(surfaceId))
                 return
