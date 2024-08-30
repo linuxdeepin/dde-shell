@@ -13,6 +13,8 @@
 
 #include <QGuiApplication>
 #include <QBuffer>
+#include <QDBusServiceWatcher>
+#include <QDBusConnectionInterface>
 
 DGUI_USE_NAMESPACE
 
@@ -29,6 +31,9 @@ static DDBusSender clipboardDbus()
         .interface(clipboardInterface);
 }
 
+static  QDBusServiceWatcher dbusWatcher(clipboardService, QDBusConnection::sessionBus(),
+                                                QDBusServiceWatcher::WatchForOwnerChange);
+
 ClipboardItem::ClipboardItem(QObject *parent)
     : DApplet(parent)
     , m_visible(true)
@@ -36,10 +41,24 @@ ClipboardItem::ClipboardItem(QObject *parent)
 {
     QDBusConnection::sessionBus().connect(clipboardService, clipboardPath, clipboardInterface,
                                           "clipboardVisibleChanged", this, SLOT(onClipboardVisibleChanged(bool)));
-    QDBusInterface clipboardInter(clipboardService, clipboardPath, clipboardInterface, QDBusConnection::sessionBus());
-    if (clipboardInter.isValid()) {
-        m_clipboardVisible = clipboardInter.property("clipboardVisible").toBool();
+
+    auto func = [this](){
+        QDBusInterface clipboardInter(clipboardService, clipboardPath, clipboardInterface, QDBusConnection::sessionBus());
+        if (clipboardInter.isValid()) {
+            m_clipboardVisible = clipboardInter.property("clipboardVisible").toBool();
+        }
+    };
+    if (QDBusConnection::sessionBus().interface()->isServiceRegistered(clipboardService)) {
+        func();
     }
+
+    connect(&dbusWatcher, &QDBusServiceWatcher::serviceRegistered, this, [this, func](){
+        func();
+    });
+
+    connect(&dbusWatcher, &QDBusServiceWatcher::serviceUnregistered, this, [this](){
+        m_clipboardVisible = false;
+    });
 }
 
 void ClipboardItem::toggleClipboard()
