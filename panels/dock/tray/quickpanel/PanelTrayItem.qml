@@ -81,12 +81,7 @@ Control {
         implicitWidth: surfaceLayer.width
         implicitHeight: surfaceLayer.height
         property alias shellSurface: surfaceLayer.shellSurface
-        property alias hovered: hoverHandler.hovered
-
-        HoverHandler {
-            id: hoverHandler
-            parent: surfaceLayer
-        }
+        property alias hovered: surfaceLayer.hovered
 
         ShellSurfaceItemProxy {
             id: surfaceLayer
