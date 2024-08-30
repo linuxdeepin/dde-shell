@@ -44,15 +44,6 @@ Control {
         }
     }
 
-    HoverHandler {
-        id: hoverHandler
-        parent: surfaceLayer
-    }
-    TapHandler {
-        id: tapHandler
-        parent: surfaceLayer
-    }
-
     ShellSurfaceItemProxy {
         id: surfaceLayer
         anchors.centerIn: parent
@@ -80,8 +71,8 @@ Control {
         id: backgroundControl
 
         // Control's hovered is false when hover ShellSurfaceItem.
-        ColorSelector.hovered: hoverHandler.hovered
-        ColorSelector.pressed: tapHandler.pressed
+        ColorSelector.hovered: surfaceLayer.hovered
+        ColorSelector.pressed: surfaceLayer.pressed
         property Palette backgroundColor: Palette {
             normal {
                 common: ("transparent")
