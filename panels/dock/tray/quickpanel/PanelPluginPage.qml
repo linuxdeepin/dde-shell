@@ -10,6 +10,8 @@ import QtQml
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0
+import org.deepin.dtk.private 1.0
+import org.deepin.dtk.style 1.0 as DStyle
 
 Item {
     id: root
@@ -43,7 +45,6 @@ Item {
             width: pluginView.width - pluginView.leftPadding - pluginView.rightPadding
             SettingButton {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                Layout.leftMargin: 6
                 icon.name: "quickpanel-setting"
                 onClicked: function () {
                     console.log("clicked settings")
@@ -55,7 +56,6 @@ Item {
 
             SettingButton {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                Layout.rightMargin: 6
                 icon.name: "quickpanel-power"
                 onClicked: function () {
                     console.log("clicked shutdown")
@@ -94,13 +94,43 @@ Item {
         }
     }
 
+    // TODO same with SideBar of dde-launchpad.
     component SettingButton: ActionButton {
         id: btn
-        focusPolicy: Qt.NoFocus
+        implicitWidth: DStyle.Style.toolButton.width
+        implicitHeight: DStyle.Style.toolButton.height
+
         palette.windowText: ColorSelector.textColor
+        flat: true
         icon {
             width: 16
             height: 16
+        }
+
+        background: ButtonPanel {
+            button: btn
+            radius: 8
+            color1: Palette {
+                normal {
+                    common: ("transparent")
+                    crystal: ("transparent")
+                }
+                hovered {
+                    crystal: Qt.rgba(0, 0, 0, 0.1)
+                }
+                hoveredDark {
+                    crystal: Qt.rgba(1, 1, 1, 0.1)
+                }
+                pressed {
+                    crystal: Qt.rgba(0, 0, 0, 0.15)
+                }
+                pressedDark {
+                    crystal: Qt.rgba(1, 1, 1, 0.05)
+                }
+            }
+            color2: color1
+            insideBorderColor: null
+            outsideBorderColor: null
         }
     }
 }
