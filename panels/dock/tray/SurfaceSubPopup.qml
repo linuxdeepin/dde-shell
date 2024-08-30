@@ -23,8 +23,7 @@ Item {
             id: menuWindow
             objectName: "subMenu"
             mainMenuWindow: Panel.menuWindow
-            updateGeometryer : function ()
-            {
+            updateGeometryer : function () {
                 if (menuWindow.width <= 10 || menuWindow.height <= 10) {
                     return
                 }
@@ -38,8 +37,7 @@ Item {
                 x = selectValue(pos.x, bounding.left, bounding.right - menuWindow.width)
                 y = selectValue(pos.y, bounding.top, bounding.bottom - menuWindow.height)
             }
-            onUpdateGeometryFinished: function ()
-            {
+            onUpdateGeometryFinished: function () {
                 if (!popup.shellSurface)
                     return
                 popup.shellSurface.updatePluginGeometry(Qt.rect(popup.menuWindow.x, popup.menuWindow.y, 0, 0))
@@ -66,8 +64,7 @@ Item {
 
     Connections {
         target: DockCompositor
-        function onPopupCreated(popupSurface)
-        {
+        function onPopupCreated(popupSurface) {
             let surfaceId = `${popupSurface.pluginId}::${popupSurface.itemKey}`
             if (surfaceAcceptor && !surfaceAcceptor(surfaceId))
                 return
