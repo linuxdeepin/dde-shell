@@ -17,8 +17,6 @@ qt_add_qml_module(dock-tray
     SOURCES
         traysortordermodel.cpp
         traysortordermodel.h
-        trayitempositionregister.cpp
-        trayitempositionregister.h
         trayitempositionmanager.cpp
         trayitempositionmanager.h
         ksortfilterproxymodel.cpp

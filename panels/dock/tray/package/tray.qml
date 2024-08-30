@@ -98,9 +98,6 @@ AppletItem {
         trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
         surfaceAcceptor: isTrayPluginPopup
         color: "transparent"
-        Component.onCompleted: {
-            DDT.TrayItemPositionManager.layoutHealthCheck(1500)
-        }
     }
 
     function isTrayPluginPopup(surfaceId) {

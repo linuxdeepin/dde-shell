@@ -84,8 +84,6 @@ Item {
     readonly property int itemPadding: DDT.TrayItemPositionManager.itemPadding
 
     property int trayHeight: 50
-    property size containerSize: DDT.TrayItemPositionManager.visualSize
-    property bool isDragging: DDT.TraySortOrderModel.actionsAlwaysVisible
     property bool animationEnable: false
     // visiualIndex default value is -1
     property int dropHoverIndex: -1
@@ -182,9 +180,6 @@ Item {
     Component.onCompleted: {
         DDT.TrayItemPositionManager.orientation = Qt.binding(function() {
             return root.isHorizontal ? Qt.Horizontal : Qt.Vertical
-        });
-        DDT.TrayItemPositionManager.visualItemCount = Qt.binding(function() {
-            return root.model.rowCount
         });
         DDT.TrayItemPositionManager.dockHeight = Qt.binding(function() {
             return root.trayHeight

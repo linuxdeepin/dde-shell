@@ -13,11 +13,6 @@ Control {
 
     property bool isDragging: DDT.TraySortOrderModel.actionsAlwaysVisible
 
-    DDT.TrayItemPositionRegister.visualIndex: DelegateModel.visualIndex
-    DDT.TrayItemPositionRegister.visualSize: (model.sectionType !== "stashed") ? Qt.size(width, height) : Qt.size(0, 0)
-    DDT.TrayItemPositionRegister.surfaceId: model.surfaceId
-    DDT.TrayItemPositionRegister.sectionType: model.sectionType
-
     width: visualSize.width !== 0 ? visualSize.width : DDT.TrayItemPositionManager.itemVisualSize.width
     height: visualSize.height !== 0 ? visualSize.height : DDT.TrayItemPositionManager.itemVisualSize.height
 
