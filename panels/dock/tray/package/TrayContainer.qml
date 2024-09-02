@@ -119,6 +119,12 @@ Item {
         anchors.fill: parent
     }
 
+    // 避免拖拽时鼠标样式改变
+    DropArea {
+        anchors.fill: parent
+        keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
+    }
+
     // Tray items
     ListView {
         id: trayList
