@@ -58,7 +58,6 @@ ContainmentItem {
                 required property string menus
                 required property list<string> windows
                 keys: ["text/x-dde-dock-dnd-appid"]
-                z: attention ? -1 : 0
                 property bool visibility: itemId !== launcherDndDropArea.launcherDndDesktopId
 
                 states: [
