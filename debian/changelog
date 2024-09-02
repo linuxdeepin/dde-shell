@@ -1,3 +1,15 @@
+dde-shell (1.0.0) unstable; urgency=medium
+
+  * fix missing hovered state for quickpanel
+    (linuxdeepin/developer-center#9799)
+  * fix missing hovered background for quickpanel's power button
+    (linuxdeepin/developer-center#9803)
+  * Modify the taskbar preview close button to a perfect circle
+    (linuxdeepin/developer-center#9813)
+  * Revert ripple animation for maintain branch
+
+ -- Wang Zichong <wangzichong@deepin.org>  Mon, 02 Sep 2024 16:59:00 +0800
+
 dde-shell (0.0.43) unstable; urgency=medium
 
   * bump version to 0.0.43
