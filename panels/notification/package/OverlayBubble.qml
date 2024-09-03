@@ -12,22 +12,35 @@ import org.deepin.dtk 1.0 as D
 D.Control {
     id: control
     property var bubble
+    readonly property int radius: 12
 
     contentItem: ColumnLayout {
         spacing: 0
         Rectangle {
-            Layout.bottomMargin: -30
+            visible: bubble.level > 2
+            Layout.bottomMargin: -34
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: bubbleContent.width -  2 * 18
-            Layout.preferredHeight: 36
-            radius: 18
+            Layout.preferredWidth: bubbleContent.width - 2 * control.radius
+            Layout.preferredHeight: 40
+            radius: control.radius
             opacity: 0.8
             z: control.z + control.z + 1
         }
+
+        Rectangle {
+            Layout.bottomMargin: -34
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: bubbleContent.width - control.radius
+            Layout.preferredHeight: 40
+            radius: control.radius
+            opacity: 0.8
+            z: control.z + control.z + 1
+        }
+
         NormalBubble {
             id: bubbleContent
             Layout.fillWidth: true
-            Layout.maximumWidth: 340
+            Layout.maximumWidth: 360
             bubble: control.bubble
         }
     }
@@ -36,7 +49,7 @@ D.Control {
 
     background: Rectangle {
         implicitWidth: 200
-        radius: 18
+        radius: control.radius
         opacity: 1
         color: "transparent"
     }

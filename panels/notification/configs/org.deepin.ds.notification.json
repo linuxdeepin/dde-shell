@@ -1,0 +1,83 @@
+{
+  "magic": "dsg.config.meta",
+  "version": "1.0",
+  "contents": {
+    "dndmode": {
+      "value": true,
+      "serial": 0,
+      "flags": [],
+      "name": "dndmode",
+      "name[zh_CN]": "勿扰模式",
+      "description": "System notification do not disturb mode",
+      "description[zh_CN]": "系统通知勿扰模式",
+      "permissions": "readwrite",
+      "visibility": "private"
+    },
+    "open-by-time-interval": {
+      "value": true,
+      "serial": 0,
+      "flags": [],
+      "name": "open-by-time-interval",
+      "name[zh_CN]": "开启时间间隔",
+      "description": "open-by-time-interval",
+      "description[zh_CN]": "使用开启时间间隔方式",
+      "permissions": "readwrite",
+      "visibility": "private"
+    },
+    "lockscreen-open-dndmode": {
+      "value": false,
+      "serial": 0,
+      "flags": [],
+      "name": "lockscreen-open-dndmode",
+      "name[zh_CN]": "锁屏时开启勿扰模式",
+      "description": "Turn on Do Not Disturb mode when lock screen",
+      "description[zh_CN]": "当锁屏时开启勿扰模式",
+      "permissions": "readwrite",
+      "visibility": "private"
+    },
+    "start-time": {
+      "value": "22:00",
+      "serial": 0,
+      "flags": [],
+      "name": "start-time",
+      "name[zh_CN]": "开始时间",
+      "description": "start time",
+      "description[zh_CN]": "从什么时间开始",
+      "permissions": "readwrite",
+      "visibility": "private"
+    },
+    "end-time": {
+      "value": "07:00",
+      "serial": 0,
+      "flags": [],
+      "name": "end-time",
+      "name[zh_CN]": "结束时间",
+      "description": "end time",
+      "description[zh_CN]": "结束时间",
+      "permissions": "readwrite",
+      "visibility": "private"
+    },
+    "notification-closed": {
+      "value": false,
+      "serial": 0,
+      "flags": [],
+      "name": "notification-closed",
+      "name[zh_CN]": "关闭通知",
+      "description": "close all notifications",
+      "description[zh_CN]": "关闭所有通知",
+      "permissions": "readwrite",
+      "visibility": "private"
+    },
+    "max-count": {
+      "value": 2000,
+      "serial": 0,
+      "flags": [],
+      "name": "max notification count",
+      "name[zh_CN]": "最大通知数量",
+      "description": "max notification count",
+      "description[zh_CN]": "最大通知数量",
+      "permissions": "readwrite",
+      "visibility": "private"
+    }
+  }
+}
