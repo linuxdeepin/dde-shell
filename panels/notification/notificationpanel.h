@@ -11,7 +11,8 @@ namespace notification {
 
 class BubbleItem;
 class BubbleModel;
-class NotificationProxy;
+class NotificationEntity;
+class NotificationManager;
 class NotificationPanel : public DS_NAMESPACE::DPanel
 {
     Q_OBJECT
@@ -28,8 +29,8 @@ public:
     BubbleModel *bubbles() const;
 
 public Q_SLOTS:
-    void defaultActionInvoke(int bubbleIndex);
-    void actionInvoke(int bubbleIndex, const QString &actionId);
+    void invokeDefaultAction(int bubbleIndex);
+    void invokeAction(int bubbleIndex, const QString &actionId);
     void close(int bubbleIndex);
     void delayProcess(int bubbleIndex);
 
@@ -38,21 +39,14 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onBubbleCountChanged();
-    void onShowBubble(const QString &appName, uint replaceId,
-                      const QString &appIcon, const QString &summary,
-                      const QString &body, const QStringList &actions,
-                      const QVariantMap hints, int expireTimeout,
-                      const QVariantMap bubbleParams);
 
-    void onBubbleTimeout();
 private:
     void setVisible(const bool visible);
-    BubbleItem *bubbleItem(int index);
 
 private:
     bool m_visible = false;
     BubbleModel *m_bubbles = nullptr;
-    NotificationProxy *m_interproxy = nullptr;
+    NotificationManager *m_manager = nullptr;
 };
 
 }

@@ -1,0 +1,73 @@
+// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
+
+#include "dsglobal.h"
+
+#include <QDBusVariant>
+#include <QDBusAbstractAdaptor>
+
+namespace notification {
+
+class DbusAdaptor : public QDBusAbstractAdaptor
+{
+    Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "org.freedesktop.Notifications")
+
+public:
+    explicit DbusAdaptor(QObject *parent = nullptr);
+
+public Q_SLOTS: // methods
+    QStringList GetCapabilities();
+    uint Notify(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary,
+                const QString &body, const QStringList &actions, const QVariantMap &hints, int expireTimeout);
+    void CloseNotification(uint id);
+    QString GetServerInformation(QString &name, QString &vendor, QString &specVersion);
+
+Q_SIGNALS:
+    void ActionInvoked(uint id, const QString &actionKey);
+    void NotificationClosed(uint id, uint reason);
+    // todo void ActivationToken(uint id, const QString &activationToken)
+};
+
+class DDENotificationDbusAdaptor : public DbusAdaptor
+{
+    Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "org.deepin.dde.Notification1")
+
+public:
+    explicit DDENotificationDbusAdaptor(QObject *parent = nullptr);
+
+public Q_SLOTS: // methods
+    QStringList GetAppList();
+    QDBusVariant GetAppInfo(const QString &appId, uint configItem);
+    void SetAppInfo(const QString &appId, uint configItem, const QDBusVariant &value);
+
+    QString GetAppSetting(const QString &appName);
+    void SetAppSetting(const QString &settings);
+
+    void SetSystemInfo(uint configItem, const QDBusVariant &value);
+    QDBusVariant GetSystemInfo(uint configItem);
+
+    // notification center
+    void Toggle();
+    void Show();
+    void Hide();
+
+Q_SIGNALS:
+    void AppAdded(const QString &appId);
+    void AppRemoved(const QString &appId);
+    void AppInfoChanged(const QString &appId, uint configItem, const QDBusVariant &value);
+    void AppSettingChanged(const QString &settings);
+
+    void SystemSettingChanged(const QString &settings);
+    void SystemInfoChanged(uint configItem, const QDBusVariant &value);
+
+    void RecordAdded(const QString &storageId);
+    void RecordCountChanged(uint count);
+};
+
+} // notification
+
