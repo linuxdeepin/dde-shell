@@ -69,12 +69,12 @@
     <message>
         <location filename="../package/main.qml" line="219"/>
         <source>Keep Shown</source>
-        <translation>Maintenir affiché</translation>
+        <translation>Toujours affiché</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="224"/>
         <source>Keep Hidden</source>
-        <translation>Maintenir caché</translation>
+        <translation>Toujours caché</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="230"/>
