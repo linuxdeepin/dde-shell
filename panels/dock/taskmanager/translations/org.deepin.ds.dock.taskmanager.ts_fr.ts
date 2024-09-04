@@ -19,7 +19,7 @@
     <message>
         <location filename="../appitem.cpp" line="105"/>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Ajouter au dock</translation>
     </message>
     <message>
         <location filename="../appitem.cpp" line="111"/>
