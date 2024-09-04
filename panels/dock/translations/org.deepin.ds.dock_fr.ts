@@ -79,7 +79,7 @@
     <message>
         <location filename="../package/main.qml" line="230"/>
         <source>Smart Hide</source>
-        <translation type="unfinished"/>
+        <translation>Masquage intelligemment</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="237"/>
