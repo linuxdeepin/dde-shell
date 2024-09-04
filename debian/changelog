@@ -1,3 +1,9 @@
+dde-shell (1.0.1) unstable; urgency=medium
+
+  * release 1.0.1
+
+ -- xionglinlin <xionglinlin@uniontech.com>  Wed, 04 Sep 2024 17:46:30 +0800
+
 dde-shell (1.0.0) unstable; urgency=medium
 
   * fix missing hovered state for quickpanel
