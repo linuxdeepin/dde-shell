@@ -84,7 +84,7 @@
     <message>
         <location filename="../package/main.qml" line="237"/>
         <source>Dock Settings</source>
-        <translation type="unfinished"/>
+        <translation>Réglages du dock</translation>
     </message>
 </context>
 </TS>
