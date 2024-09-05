@@ -320,8 +320,7 @@ QStandardItem * TraySortOrderModel::createTrayItem(const QString & name, const Q
 void TraySortOrderModel::updateVisualIndexes()
 {
     for (int i = 0; i < rowCount(); i++) {
-        auto results = item(i);
-        results->setData(-1, TraySortOrderModel::VisualIndexRole);
+        item(i)->setData(-1, TraySortOrderModel::VisualIndexRole);
     }
 
     // stashed action

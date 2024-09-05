@@ -81,8 +81,9 @@ AppletItem {
     Connections {
         target: DDT.TraySortOrderModel
         function onActionsAlwaysVisibleChanged(val) {
-            if (!val)
-            closeStashPopupTimer.start()
+            if (!val) {
+                closeStashPopupTimer.start()
+            }
         }
     }
 
