@@ -22,10 +22,8 @@ static X11Utility *instance()
 
 X11Utility::X11Utility()
 {
-    m_display = XOpenDisplay("");
-    if (!m_display) {
-        qCWarning(dsLog) << "Failed to open XDisplay.";
-    }
+    if (auto x11Application = qGuiApp->nativeInterface<QNativeInterface::QX11Application>())
+        m_display = x11Application->display();
 }
 
 _XDisplay *X11Utility::getDisplay()
