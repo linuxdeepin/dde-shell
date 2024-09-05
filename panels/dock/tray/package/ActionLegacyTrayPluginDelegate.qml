@@ -179,7 +179,7 @@ AppletItemButton {
         enabled: dragable
         // To avoid being continuously active in a short period of time
         onActiveChanged: {
-            Qt.callLater(function(){ root.Drag.active = dragHandler.active })
+            Qt.callLater(function() { root.Drag.active = dragHandler.active })
         }
     }
 }
