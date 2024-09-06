@@ -16,6 +16,7 @@ target_include_directories(dock-clipboarditem PRIVATE
 
 target_link_libraries(dock-clipboarditem PRIVATE
     dde-shell-frame
+    Qt${QT_VERSION_MAJOR}::Concurrent
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.clipboarditem TARGET dock-clipboarditem)
