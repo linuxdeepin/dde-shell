@@ -26,6 +26,8 @@ AppletItemButton {
 
     required property bool itemVisible
     property bool dragable: true
+    property string dropOnSurfaceId: ""
+    property bool dropOnBefore: true
 
     padding: 0
 
@@ -160,7 +162,7 @@ AppletItemButton {
     Drag.dragType: Drag.Automatic
     DQuickDrag.overlay: overlayWindow
     DQuickDrag.active: Drag.active
-    DQuickDrag.hotSpotScale: Qt.size(0.5, 1)
+    DQuickDrag.hotSpotScale: Qt.size(0.5, 0.5)
     Drag.mimeData: {
         "text/x-dde-shell-tray-dnd-surfaceId": model.surfaceId,
         "text/x-dde-shell-tray-dnd-sectionType": model.sectionType
@@ -172,6 +174,11 @@ AppletItemButton {
             // reset position on drop
             Qt.callLater(() => { x = 0; y = 0; });
         }
+
+        if (!Drag.active && dropOnSurfaceId != "") {
+            DDT.TraySortOrderModel.move(model.surfaceId, dropOnSurfaceId, dropOnBefore);
+            dropOnSurfaceId = "";
+        }
     }
 
     DragHandler {
@@ -180,6 +187,44 @@ AppletItemButton {
         // To avoid being continuously active in a short period of time
         onActiveChanged: {
             Qt.callLater(function(){ root.Drag.active = dragHandler.active })
+        }
+    }
+
+    DropArea {
+        enabled: dragable
+        anchors.fill: parent
+        keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
+
+        onEntered: function(drag) {
+            let legacyTrayPlugin = drag.source as ActionLegacyTrayPluginDelegate
+            if (!legacyTrayPlugin) {
+                return
+            }
+
+            const sourceSurfaceId = drag.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            const sourceSectionType = drag.getDataAsString("text/x-dde-shell-tray-dnd-sectionType")
+            if (model.sectionType != "stashed" && sourceSectionType == "stashed") {
+                DDT.TraySortOrderModel.move(sourceSurfaceId, model.surfaceId, false);
+                return
+            }
+
+            if (model.sectionType == "stashed" && sourceSectionType != "stashed") {
+                if (!sourceSurfaceId.startsWith("application-tray::")) {
+                    drag.accepted = false
+                    return
+                }
+                DDT.TraySortOrderModel.move(sourceSurfaceId, model.surfaceId, false);
+                return
+            }
+
+            if (DelegateModel.itemsIndex == legacyTrayPlugin.DelegateModel.itemsIndex) {
+                return
+            }
+
+            visualModel.items.move(legacyTrayPlugin.DelegateModel.itemsIndex, DelegateModel.itemsIndex)
+
+            legacyTrayPlugin.dropOnSurfaceId = model.surfaceId
+            legacyTrayPlugin.dropOnBefore = DelegateModel.itemsIndex > legacyTrayPlugin.DelegateModel.itemsIndex
         }
     }
 }

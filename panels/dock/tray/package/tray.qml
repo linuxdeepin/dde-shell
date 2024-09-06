@@ -55,14 +55,6 @@ AppletItem {
             contentItem: StashContainer {
                 id: stashContainer
                 color: "transparent"
-                model: DDT.SortFilterProxyModel {
-                    sourceModel: DDT.TraySortOrderModel
-                    filterRowCallback: (sourceRow, sourceParent) => {
-                        let index = sourceModel.index(sourceRow, 0, sourceParent)
-                        return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) === "stashed" &&
-                               sourceModel.data(index, DDT.TraySortOrderModel.VisibilityRole) === true
-                    }
-                }
                 anchors.centerIn: parent
                 onRowCountChanged: {
                     if (stashContainer.rowCount === 0 || stashContainer.columnCount === 0) {
@@ -98,15 +90,14 @@ AppletItem {
 
     TrayContainer {
         id: trayContainter
+        anchors.right: parent.right
+        anchors.top: parent.top
         isHorizontal: !tray.useColumnLayout
         model: DDT.TraySortOrderModel
         collapsed: DDT.TraySortOrderModel.collapsed
         trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
         surfaceAcceptor: isTrayPluginPopup
         color: "transparent"
-        Component.onCompleted: {
-            DDT.TrayItemPositionManager.layoutHealthCheck(1500)
-        }
     }
 
     function isTrayPluginPopup(surfaceId) {

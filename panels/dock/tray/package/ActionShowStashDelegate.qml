@@ -119,4 +119,26 @@ AppletItemButton {
             }
         }
     }
+
+    DropArea {
+        anchors.fill: parent
+        keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
+
+        onEntered: function(drag) {
+            let legacyTrayPlugin = drag.source as ActionLegacyTrayPluginDelegate
+            if (!legacyTrayPlugin) {
+                return
+            }
+
+            let surfaceId = drag.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            if (!surfaceId.startsWith("application-tray::")) {
+                drag.accepted = false
+                return
+            }
+        }
+        onDropped: function (dropEvent) {
+            let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            DDT.TraySortOrderModel.move(surfaceId, "internal/action-stash-placeholder", true);
+        }
+    }
 }
