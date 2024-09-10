@@ -391,6 +391,12 @@ private:
 
 };
 
+const QString AppearanceService = QStringLiteral("org.deepin.dde.Appearance1");
+const QString AppearancePath = QStringLiteral("/org/deepin/dde/Appearance1");
+const QString PropertiesInterface = QStringLiteral("org.freedesktop.DBus.Properties");
+const QString PropertiesChanged = QStringLiteral("PropertiesChanged");
+const QString OpacityStr = QStringLiteral("Opacity");
+
 X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, QWidget *parent)
     : DBlurEffectWidget(parent)
     , m_direction(0)
@@ -406,6 +412,8 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
     setWindowFlags(Qt::ToolTip | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus | Qt::FramelessWindowHint);
     setMouseTracking(true);
     initUI();
+
+    QDBusConnection::sessionBus().connect(AppearanceService, AppearancePath, PropertiesInterface, PropertiesChanged, this, SLOT(onPropertiesChanged(QDBusMessage)));
 
     connect(m_hideTimer, &QTimer::timeout, this, &X11WindowPreviewContainer::callHide);
 
@@ -426,6 +434,17 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
         updatePreviewTitle(enter.data(WindowTitleRole).toString());
     });
 
+}
+
+void X11WindowPreviewContainer::onPropertiesChanged(const QDBusMessage &message)
+{
+    QVariantMap changedProps = qdbus_cast<QVariantMap>(message.arguments().at(1).value<QDBusArgument>());
+    for (QVariantMap::const_iterator it = changedProps.cbegin(); it != changedProps.cend(); ++it) {
+        if (it.key().toLatin1() == OpacityStr) {
+            setMaskAlpha(it.value().toFloat() * 255);
+            return;
+        }
+    }
 }
 
 void X11WindowPreviewContainer::showPreview(const QPointer<AppItem> &item, const QPointer<QWindow> &window, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
