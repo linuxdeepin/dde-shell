@@ -17,6 +17,7 @@
 #include <DBlurEffectWidget>
 #include <DGuiApplicationHelper>
 #include <DIconButton>
+#include <QDBusMessage>
 
 DWIDGET_USE_NAMESPACE
 
@@ -89,6 +90,7 @@ public Q_SLOTS:
 private Q_SLOTS:
     void updateOrientation();
     void callHide();
+    void onPropertiesChanged(const QDBusMessage &message);
 
 private:
     bool m_isPreviewEntered;
