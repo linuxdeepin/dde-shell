@@ -4,6 +4,7 @@
 #include "xworkspaceworker.h"
 #include "workspacemodel.h"
 
+#include <QGuiApplication>
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(workspaceItem, "dde.shell.dock.workspaceItem")
@@ -29,6 +30,7 @@ XWorkspaceWorker::XWorkspaceWorker(WorkspaceModel *model)
     bus.connect("org.kde.KWin", "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager", "currentChanged", this, SLOT(updateData()));
     bus.connect("org.kde.KWin", "/VirtualDesktopManager", "org.kde.KWin.VirtualDesktopManager", "desktopsChanged", this, SLOT(updateData()));
     bus.connect("org.deepin.dde.Appearance1", "/org/deepin/dde/Appearance1", "org.deepin.dde.Appearance1", "Changed", this, SLOT(appearanceChanged(const QString,const QString)));
+    connect(qApp, &QGuiApplication::primaryScreenChanged, this, &XWorkspaceWorker::updateData);
     connect(m_model, &WorkspaceModel::currentIndexChanged, this, &XWorkspaceWorker::setIndex);
 }
 
