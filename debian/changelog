@@ -1,3 +1,9 @@
+dde-shell (1.0.2) unstable; urgency=medium
+
+  * fix: the opacity of preview window isn't changed
+
+ -- Wang Fei <wangfei@deepin.org>  Wed, 11 Sep 2024 15:52:16 +0800
+
 dde-shell (1.0.1) unstable; urgency=medium
 
   * release 1.0.1
