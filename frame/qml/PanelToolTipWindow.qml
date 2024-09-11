@@ -11,6 +11,6 @@ PanelPopupWindow {
     id: root
 
     flags: (Qt.platform.pluginName === "xcb" ? Qt.Tool : Qt.ToolTip) | Qt.WindowStaysOnTopHint
-    D.DWindow.windowRadius: 8
-    D.DWindow.shadowRadius: 8
+    D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 8 : Math.min(D.DTK.platformTheme.windowRadius, 8)
+    D.DWindow.shadowRadius: D.DWindow.windowRadius
 }
