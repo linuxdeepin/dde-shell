@@ -239,6 +239,8 @@ HideMode DockPanel::hideMode()
 void DockPanel::setHideMode(const HideMode& mode)
 {
     SETTINGS->setHideMode(mode);
+    if (mode == HideMode::KeepHidden)
+        setHideState(Hide);
     Q_EMIT hideStateChanged(hideState());
 }
 
