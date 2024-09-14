@@ -19,3 +19,6 @@ usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.taskmanager.json
 usr/share/dde-shell/*/translations
 usr/share/dde-dock/icons/dcc-setting/*.svg
+usr/lib/*/qt6/qml/org/deepin/ds/notificationcenter/*
+usr/lib/*/dde-shell/org.deepin.ds.notificationcenter*
+usr/share/dde-shell/org.deepin.ds.notificationcenter*/
