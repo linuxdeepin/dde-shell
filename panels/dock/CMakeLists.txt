@@ -27,6 +27,8 @@ file(
     dockhelper.cpp
     waylanddockhelper.h
     waylanddockhelper.cpp
+    loadtrayplugins.h
+    loadtrayplugins.cpp
 )
 
 # Old dbus interface compatible
@@ -153,6 +155,7 @@ target_include_directories(dock-plugin
 
 install(TARGETS dock-plugin DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/")
 install(DIRECTORY "${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/" DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/")
-dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.json)
-dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.power.json)
-dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.tray.json)
+dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.json) # compat
+dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.tray.json) # compat
+dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES dconfig/org.deepin.ds.dock.json)
+dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES dconfig/org.deepin.ds.dock.tray.json)
