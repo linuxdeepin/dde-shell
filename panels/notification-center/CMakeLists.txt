@@ -28,6 +28,8 @@ qt_add_qml_module(notificationcenterpanel
     SOURCES
         notificationcenterpanel.h
         notificationcenterpanel.cpp
+        notificationcenterproxy.h
+        notificationcenterproxy.cpp
         notifyaccessor.h
         notifyaccessor.cpp
         notifymodel.h
