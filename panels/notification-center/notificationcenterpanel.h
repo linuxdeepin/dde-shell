@@ -5,10 +5,10 @@
 #pragma once
 
 #include "panel.h"
-#include <QQuickItem>
 
 namespace notification {
 
+class NotificationCenterProxy;
 class NotificationCenterPanel : public DS_NAMESPACE::DPanel
 {
     Q_OBJECT
@@ -21,15 +21,14 @@ public:
     virtual bool init() override;
 
     bool visible() const;
+    void setVisible(bool newVisible);
+    Q_INVOKABLE void close();
 
 Q_SIGNALS:
     void visibleChanged();
 
 private:
-    void setVisible(const bool visible);
-
-private:
     bool m_visible = false;
+    NotificationCenterProxy *m_proxy = nullptr;
 };
-
 }
