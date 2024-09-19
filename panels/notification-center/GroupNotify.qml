@@ -36,16 +36,16 @@ NotifyItem {
         SettingActionButton {
             Layout.alignment: Qt.AlignRight
             icon.name: "settings"
-
             onClicked: function () {
                 console.log("group setting", appName)
                 let pos = mapToItem(root, Qt.point(width / 2, height))
                 root.setting(pos)
             }
         }
-        SettingActionButton {
+        AnimationSettingButton {
             Layout.alignment: Qt.AlignRight
             icon.name: "close"
+            text: qsTr("Clear All")
             onClicked: function () {
                 root.remove()
             }
