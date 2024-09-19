@@ -10,87 +10,141 @@ import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
 
 D.Control {
+    id: control
     property var bubble
 
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
-        onClicked: {
-            if (!bubble.hasDefaultAction)
-                return
-
-            console.log("default action", bubble.index)
-            Applet.defaultActionInvoke(bubble.index)
-        }
-        property bool longPressed
-        onPressAndHold: {
-            longPressed = true
-        }
-        onPositionChanged: {
-            if (longPressed) {
-                longPressed = false
-                console.log("delay process", bubble.index)
-                Applet.delayProcess(bubble.index)
-            }
-        }
-    }
     contentItem: RowLayout {
-        D.QtIcon {
-            Layout.leftMargin: 10
-            sourceSize: Qt.size(40, 40)
-            name: bubble.iconName
+        Layout.minimumHeight: 40
+
+        ColumnLayout {
+            Layout.topMargin: 8
+            Layout.leftMargin: 8
+
+            D.DciIcon {
+                sourceSize: Qt.size(24, 24)
+                name: bubble.iconName
+            }
+
+            Item {
+                Layout.fillHeight: true
+            }
         }
 
         ColumnLayout {
             spacing: 0
-            Layout.topMargin: 10
-            Layout.bottomMargin: 10
+            Layout.topMargin: 4
+            Layout.bottomMargin: 4
+            Layout.rightMargin: 6
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: 40
+
+            // The first line: appName and timeTip
+            RowLayout {
+                Text {
+                    visible: bubble.appName
+                    Layout.alignment: Qt.AlignLeft
+                    elide: Text.ElideRight
+                    text: bubble.appName
+                    Layout.minimumWidth: 0
+                    maximumLineCount: 1
+                    font: D.DTK.fontManager.t9
+                    color: D.DTK.themeType === D.ApplicationHelper.DarkType ?
+                        Qt.rgba(1, 1, 1, 0.6) : Qt.rgba(0, 0, 0, 0.6)
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                }
+
+                Text {
+                    id: timeTip
+                    Layout.alignment: Qt.AlignRight
+                    Layout.rightMargin: 5
+                    visible: !control.hovered
+                    elide: Text.ElideRight
+                    text: bubble.timeTip
+                    maximumLineCount: 1
+                    font: D.DTK.fontManager.t9
+                    color: D.DTK.themeType === D.ApplicationHelper.DarkType ?
+                        Qt.rgba(1, 1, 1, 0.6) : Qt.rgba(0, 0, 0, 0.6)
+                }
+            }
+
+            // The second line: summary
             Text {
-                visible: bubble.title !== ""
+                visible: bubble.summary !== ""
                 Layout.alignment: Qt.AlignLeft
+                Layout.rightMargin: 5
                 elide: Text.ElideRight
-                text: bubble.title
+                text: bubble.summary
                 Layout.fillWidth: true
                 maximumLineCount: 1
-                font: D.DTK.fontManager.t6
-            }
-
-            Text {
-                visible: bubble.text !== ""
-                Layout.alignment: Qt.AlignLeft
-                elide: Text.ElideRight
-                text: bubble.text
-                Layout.fillWidth: true
-                maximumLineCount: 2
-                font: D.DTK.fontManager.t7
+                font: D.DTK.fontManager.t8
                 textFormat: Text.PlainText
-                wrapMode: Text.WrapAnywhere
+                wrapMode: Text.WordWrap
             }
-        }
 
-        Loader {
-            Layout.bottomMargin: 10
-            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
-            active: bubble.hasDisplayAction
-            sourceComponent: BubbleAction {
-                bubble: control.bubble
-                onActionInvoked: function(actionId) {
-                    console.log("action", actionId, bubble.index)
-                    Applet.actionInvoke(bubble.index, actionId)
+            // The third line: body and image
+            RowLayout {
+                Text {
+                    visible: bubble.body !== ""
+                    Layout.alignment: Qt.AlignLeft
+                    Layout.rightMargin: 5
+                    elide: Text.ElideRight
+                    text: bubble.body
+                    Layout.fillWidth: true
+                    maximumLineCount: 6
+                    font: D.DTK.fontManager.t8
+                    textFormat: Text.PlainText
+                    wrapMode: Text.WordWrap
+                }
+
+                Image {
+                    visible: bubble.bodyImagePath !== ""
+                    source: bubble.bodyImagePath
+                    Layout.alignment: Qt.AlignVCenter
+
+                    fillMode: Image.PreserveAspectFit
+                }
+            }
+
+            // single line action buttons
+            Loader {
+                Layout.topMargin: 6
+                Layout.rightMargin: 8
+                Layout.alignment: Qt.AlignRight | Qt.AlignBottom
+                active: bubble.hasDisplayAction && bubble.urgency === 2
+                sourceComponent: BubbleAction {
+                    bubble: control.bubble
+                    onActionInvoked: function(actionId) {
+                        console.log("action", actionId, bubble.index)
+                        Applet.invokeAction(bubble.index, actionId)
+                    }
                 }
             }
         }
-        
     }
-    
+
+    // hover action buttons
+    Loader {
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 8
+        active: control.hovered && bubble.hasDisplayAction && bubble.urgency !== 2
+        sourceComponent: BubbleAction {
+            bubble: control.bubble
+            onActionInvoked: function(actionId) {
+                console.log("action", actionId, bubble.index)
+                Applet.invokeAction(bubble.index, actionId)
+            }
+        }
+    }
+
     Button {
          id: closeBtn
          visible: control.hovered
-         width: 18
-         height: 18
+         width: 20
+         height: 20
          icon.name: "window-close"
          icon.width: 10
          icon.height: 10

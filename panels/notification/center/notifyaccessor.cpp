@@ -3,19 +3,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "notifyaccessor.h"
+#include "panels/notification/common/notifyentity.h"
+#include "panels/notification/common/dataaccessor.h"
 
 #include <QQmlEngine>
 #include <QGuiApplication>
 #include <QLoggingCategory>
 #include <QDBusInterface>
-#include <QDBusPendingReply>
 #include <QProcess>
 #include <QElapsedTimer>
 #include <QDBusReply>
+#include <QDBusVariant>
 
-#include "notifyentity.h"
+namespace notification {
 
-namespace notifycenter {
 namespace {
 Q_LOGGING_CATEGORY(notifyLog, "notify")
 }
@@ -83,9 +84,9 @@ NotifyAccessor::NotifyAccessor(QObject *parent)
 
     if (!qEnvironmentVariableIsEmpty("DS_NOTIFICATION_DEBUG")) {
         const int value = qEnvironmentVariableIntValue("DS_NOTIFICATION_DEBUG");
-        m_debuging = value;
+        m_debugging = value;
     }
-    if (m_debuging) {
+    if (m_debugging) {
         qApp->installEventFilter(new EventFilter());
     }
 }
@@ -213,7 +214,7 @@ void NotifyAccessor::invokeAction(const NotifyEntity &entity, const QString &act
 {
     qDebug(notifyLog) << "Invoke action for the notify" << entity.id() << actionId;
 
-    QMap<QString, QVariant> hints = NotifyEntity::parseHint(entity.hint());
+    QMap<QString, QVariant> hints = entity.hints();
     if (hints.isEmpty())
         return;
     QMap<QString, QVariant>::const_iterator i = hints.constBegin();
@@ -237,7 +238,7 @@ void NotifyAccessor::pinApplication(const QString &appName, bool pin)
     QDBusReply<void> reply = notifyCenterInterface().call("SetAppInfo",
                                  appName,
                                  ShowNotificationTop,
-                                 QDBusVariant(pin).variant());
+                                 pin);
     if (reply.error().isValid()) {
         qWarning(notifyLog) << "Failed to set Pin of the application" << appName << pin << reply.error().message();
         return;
@@ -273,18 +274,6 @@ void NotifyAccessor::openNotificationSetting()
     }
 }
 
-void NotifyAccessor::addNotify(const QString &appName, const QString &content)
-{
-    qDebug(notifyLog) << "Add notify" << appName;
-    m_accessor->addNotify(appName, content);
-
-    if (auto entity = fetchLastEntity(appName); entity.isValid()) {
-        entityReceived(entity.id());
-    }
-    tryEmitAppsChanged(appName);
-    dataInfoChanged();
-}
-
 void NotifyAccessor::onReceivedRecord(const QString &id)
 {
     dataInfoChanged();
@@ -317,9 +306,9 @@ QStringList NotifyAccessor::apps() const
     return m_apps;
 }
 
-bool NotifyAccessor::debuging() const
+bool NotifyAccessor::debugging() const
 {
-    return m_debuging;
+    return m_debugging;
 }
 
 }
