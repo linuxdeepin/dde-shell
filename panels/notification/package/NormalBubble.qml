@@ -19,12 +19,35 @@ D.Control {
     z: bubble.level <= 1 ? 0 : 1 - bubble.level
 
     background: Rectangle {
-        width: 340
-        radius: 18
+        width: 360
+        radius: 12
         opacity: {
             if (bubble.level === 1)
                 return 0.8
             return 1
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        onClicked: {
+            if (!bubble.hasDefaultAction)
+                return
+
+            console.log("default action", bubble.index)
+            Applet.defaultActionInvoke(bubble.index)
+        }
+        property bool longPressed
+        onPressAndHold: {
+            longPressed = true
+        }
+        onPositionChanged: {
+            if (longPressed) {
+                longPressed = false
+                console.log("delay process", bubble.index)
+                Applet.delayProcess(bubble.index)
+            }
         }
     }
 }
