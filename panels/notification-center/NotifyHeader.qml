@@ -90,9 +90,11 @@ FocusScope {
                     notifySetting.toggle()
                 }
             }
-            SettingActionButton {
+
+            AnimationSettingButton {
                 objectName: "closeAllNotify"
                 icon.name: "close"
+                text: qsTr("Clear All")
                 Layout.alignment: Qt.AlignRight
                 onClicked: function () {
                     console.log("Clear all notify")
