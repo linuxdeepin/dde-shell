@@ -50,7 +50,12 @@ FocusScope {
                 text: qsTr("Notification Center")
                 Layout.alignment: Qt.AlignLeft
                 Layout.leftMargin: 18
-                font: DTK.fontManager.t3
+                font {
+                    pixelSize: DTK.fontManager.t4.pixelSize
+                    family: DTK.fontManager.t4.family
+                    bold: true
+                }
+                color: palette.windowText
                 MouseArea {
                     anchors.fill: parent
                     onDoubleClicked: {

@@ -68,17 +68,10 @@ Control {
         implicitHeight: 30
         implicitWidth: 50
         padding: 0
+        font: DTK.fontManager.t6
         onClicked: {
             console.log("action invoked", actionData.id)
             actionInvoked(actionData.id)
         }
-    }
-
-    background: NotifyItemBackground {
-        radius: 16
-        implicitHeight: 30
-        implicitWidth: 50
-        outsideBorderColor: null
-        insideBorderColor: null
     }
 }

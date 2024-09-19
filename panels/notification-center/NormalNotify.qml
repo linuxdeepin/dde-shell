@@ -53,6 +53,13 @@ NotifyItem {
             onActionInvoked: function (actionId) {
                 root.actionInvoked(actionId)
             }
+            background: NotifyItemBackground {
+                radius: 16
+                implicitHeight: 30
+                implicitWidth: 50
+                outsideBorderColor: null
+                insideBorderColor: null
+            }
         }
     }
 
@@ -64,6 +71,9 @@ NotifyItem {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.topMargin: 10
             Layout.leftMargin: 10
+            palette: DTK.makeIconPalette(root.palette)
+            mode: root.ColorSelector.controlState
+            theme: root.ColorSelector.controlTheme
         }
 
         ColumnLayout {
@@ -85,6 +95,7 @@ NotifyItem {
                 Text {
                     text: root.appName
                     font: DTK.fontManager.t10
+                    color: palette.windowText
                 }
 
                 Item {
@@ -100,6 +111,7 @@ NotifyItem {
                     sourceComponent: Text {
                         text: root.date
                         font: DTK.fontManager.t10
+                        color: palette.windowText
                     }
                 }
             }
@@ -108,7 +120,12 @@ NotifyItem {
                 text: root.title
                 visible: text !== ""
                 maximumLineCount: 1
-                font: DTK.fontManager.t3
+                font {
+                    pixelSize: DTK.fontManager.t8.pixelSize
+                    family: DTK.fontManager.t8.family
+                    bold: true
+                }
+                color: palette.windowText
                 wrapMode: Text.NoWrap
                 elide: Text.ElideMiddle
                 Layout.fillWidth: true
@@ -122,7 +139,8 @@ NotifyItem {
                     text: root.content
                     visible: text !== ""
                     maximumLineCount: 6
-                    font: DTK.fontManager.t5
+                    font: DTK.fontManager.t8
+                    color: palette.windowText
                     wrapMode: Text.WordWrap
                     elide: Text.ElideRight
                     Layout.alignment: Qt.AlignLeft
@@ -150,7 +168,6 @@ NotifyItem {
             Loader {
                 active: root.strongInteractive && root.actions.length > 0
                 visible: active
-                Layout.bottomMargin: 10
                 Layout.alignment: Qt.AlignRight | Qt.AlignBottom
                 sourceComponent: NotifyAction {
                     actions: root.actions
