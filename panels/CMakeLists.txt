@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-add_subdirectory(osd)
 add_subdirectory(dock)
 add_subdirectory(notification)
 add_subdirectory(notification-center)
