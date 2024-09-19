@@ -18,6 +18,8 @@ NotifyItem {
             text: root.appName
             Layout.alignment: Qt.AlignLeft
             Layout.leftMargin: 18
+            font: DTK.fontManager.t5
+            color: palette.windowText
         }
 
         Item {

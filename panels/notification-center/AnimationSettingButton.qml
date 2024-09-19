@@ -32,6 +32,8 @@ SettingActionButton {
             itemVisible: root.textVisible
             contentItem: Text {
                 text: root.text
+                font: DTK.fontManager.t10
+                color: palette.windowText
             }
         }
 

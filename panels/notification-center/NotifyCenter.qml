@@ -11,6 +11,8 @@ import org.deepin.ds.notificationcenter
 FocusScope {
     id: root
 
+    palette: DTK.palette
+
     property alias model: notifyModel
     property int maxViewHeight: 400
 
