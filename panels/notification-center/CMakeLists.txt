@@ -45,6 +45,17 @@ qt_add_qml_module(notificationcenterpanel
         ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/notificationcenter/
 )
 
+qt_add_resources(notificationcenterpanel "ds_notificationcenterpanel_icons"
+    PREFIX "/dsg/built-in-icons"
+    BASE "icons"
+    FILES
+        icons/clean-group.dci
+        icons/clean-alone.dci
+        icons/clean-all.dci
+        icons/fold.dci
+        icons/more.dci
+)
+
 target_link_libraries(notificationcenterpanel
     PRIVATE
         dde-shell-frame

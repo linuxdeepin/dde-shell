@@ -26,8 +26,8 @@ NotifyItem {
         contentItem: Loader {
             active: root.closeVisible || closePlaceHolder.hovered || closePlaceHolder.activeFocus || activeFocus
             sourceComponent: SettingActionButton {
-                objectName: "closeNotiry-" + root.appName
-                icon.name: "close"
+                objectName: "closeNotify-" + root.appName
+                icon.name: "clean-alone"
                 icon.width: 20
                 icon.height: 20
                 forcusBorderVisible: visualFocus || closePlaceHolder.visualFocus
