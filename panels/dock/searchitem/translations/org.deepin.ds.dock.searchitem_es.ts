@@ -12,7 +12,7 @@
     <message>
         <location filename="../package/searchitem.qml" line="24"/>
         <source>GrandSearch</source>
-        <translation>Gran Búsqueda</translation>
+        <translation>Gran búsqueda</translation>
     </message>
     <message>
         <location filename="../package/searchitem.qml" line="53"/>
