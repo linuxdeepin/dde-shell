@@ -74,7 +74,7 @@ FocusScope {
                 focus: true
                 visible: !notifyModel.collapse
                 Layout.alignment: Qt.AlignRight
-                icon.name: "collapse"
+                icon.name: "fold"
                 onClicked: function () {
                     console.log("Clear all notify")
                     notifyModel.collapseAllApp()
@@ -82,10 +82,10 @@ FocusScope {
             }
 
             SettingActionButton {
-                objectName: "settings"
+                objectName: "more"
                 focus: true
                 Layout.alignment: Qt.AlignRight
-                icon.name: "settings"
+                icon.name: "more"
                 onClicked: function () {
                     console.log("Setting notify")
                     let pos = mapToItem(root, Qt.point(width / 2, height))
@@ -98,7 +98,7 @@ FocusScope {
 
             AnimationSettingButton {
                 objectName: "closeAllNotify"
-                icon.name: "close"
+                icon.name: "clean-all"
                 text: qsTr("Clear All")
                 Layout.alignment: Qt.AlignRight
                 onClicked: function () {

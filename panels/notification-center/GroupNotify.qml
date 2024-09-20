@@ -29,7 +29,7 @@ NotifyItem {
 
         SettingActionButton {
             Layout.alignment: Qt.AlignRight
-            icon.name: "collapse"
+            icon.name: "fold"
             onClicked: {
                 console.log("collapse")
                 root.collapse()
@@ -37,7 +37,7 @@ NotifyItem {
         }
         SettingActionButton {
             Layout.alignment: Qt.AlignRight
-            icon.name: "settings"
+            icon.name: "more"
             onClicked: function () {
                 console.log("group setting", appName)
                 let pos = mapToItem(root, Qt.point(width / 2, height))
@@ -46,7 +46,7 @@ NotifyItem {
         }
         AnimationSettingButton {
             Layout.alignment: Qt.AlignRight
-            icon.name: "close"
+            icon.name: "clean-group"
             text: qsTr("Clear All")
             onClicked: function () {
                 root.remove()
