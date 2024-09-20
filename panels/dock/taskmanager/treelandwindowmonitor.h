@@ -16,7 +16,7 @@
 #include <QtWaylandClient/QWaylandClientExtension>
 
 namespace dock {
-class ForeignToplevelManager : public QWaylandClientExtensionTemplate<ForeignToplevelManager>, public QtWayland::ztreeland_foreign_toplevel_manager_v1
+class ForeignToplevelManager : public QWaylandClientExtensionTemplate<ForeignToplevelManager>, public QtWayland::treeland_foreign_toplevel_manager_v1
 {
     Q_OBJECT
 public:
@@ -26,7 +26,7 @@ Q_SIGNALS:
     void newForeignToplevelHandle(ForeignToplevelHandle *handle);
 
 protected:
-    void ztreeland_foreign_toplevel_manager_v1_toplevel(struct ::ztreeland_foreign_toplevel_handle_v1 *toplevel) override;
+    void treeland_foreign_toplevel_manager_v1_toplevel(struct ::treeland_foreign_toplevel_handle_v1 *toplevel) override;
 
 private:
     TreeLandWindowMonitor* m_monitor;
