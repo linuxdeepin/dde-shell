@@ -15,6 +15,7 @@ Build-Depends:
  qt6-wayland-dev-tools,
  qt6-wayland-private-dev,
  wayland-protocols,
+ treeland-protocols,
  libdtk6gui-dev,
  libdtk6core-bin,
  libdtk6core-dev,

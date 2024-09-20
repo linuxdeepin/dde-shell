@@ -16,9 +16,9 @@
 Q_LOGGING_CATEGORY(waylandwindowLog, "dde.shell.dock.taskmanager.treelandwindow")
 
 namespace dock {
-ForeignToplevelHandle::ForeignToplevelHandle(struct ::ztreeland_foreign_toplevel_handle_v1 *object)
+ForeignToplevelHandle::ForeignToplevelHandle(struct ::treeland_foreign_toplevel_handle_v1 *object)
     : QWaylandClientExtensionTemplate<ForeignToplevelHandle>(1)
-    , QtWayland::ztreeland_foreign_toplevel_handle_v1(object)
+    , QtWayland::treeland_foreign_toplevel_handle_v1(object)
     , m_pid(0)
     , m_isReady(false)
 {
@@ -50,7 +50,7 @@ bool ForeignToplevelHandle::isReady() const
     return m_isReady;
 }
 
-void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_pid(uint32_t pid)
+void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_pid(uint32_t pid)
 {
     if (pid == m_pid) return;
 
@@ -58,7 +58,7 @@ void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_pid(uint32_t pi
     Q_EMIT pidChanged();
 }
 
-void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_title(const QString &title)
+void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_title(const QString &title)
 {
     if (title == m_title) return;
 
@@ -66,19 +66,19 @@ void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_title(const QSt
     Q_EMIT titleChanged();
 }
 
-void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_app_id(const QString &app_id)
+void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_app_id(const QString &app_id)
 {
     if (app_id == m_appId) return;
     m_appId = app_id;
 }
 
-void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_identifier(uint32_t identifier)
+void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_identifier(uint32_t identifier)
 {
     if (identifier == m_identifier) return;
     m_identifier = identifier;
 }
 
-void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_state(wl_array *state)
+void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_state(wl_array *state)
 {
     m_states.clear();
     const uint32_t* items = reinterpret_cast<const uint32_t*>(state->data);
@@ -91,12 +91,12 @@ void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_state(wl_array 
     Q_EMIT isActiveChanged();
 }
 
-void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_done()
+void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_done()
 {
     m_isReady = true;
     Q_EMIT handlerIsReady();
 }
-void ForeignToplevelHandle::ztreeland_foreign_toplevel_handle_v1_closed()
+void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_closed()
 {
     Q_EMIT handlerIsDeleted();
 }
