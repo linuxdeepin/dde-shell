@@ -14,12 +14,12 @@
 #include <QtWaylandClient/QWaylandClientExtension>
 
 namespace dock {
-class ForeignToplevelHandle : public QWaylandClientExtensionTemplate<ForeignToplevelHandle>, public QtWayland::ztreeland_foreign_toplevel_handle_v1
+class ForeignToplevelHandle : public QWaylandClientExtensionTemplate<ForeignToplevelHandle>, public QtWayland::treeland_foreign_toplevel_handle_v1
 {
     Q_OBJECT
 
 public:
-    explicit ForeignToplevelHandle(struct ::ztreeland_foreign_toplevel_handle_v1 *object);
+    explicit ForeignToplevelHandle(struct ::treeland_foreign_toplevel_handle_v1 *object);
     bool isReady() const;
     uint32_t id() const;
     pid_t pid() const;
@@ -37,13 +37,13 @@ Q_SIGNALS:
     void isActiveChanged();
 
 protected:
-    void ztreeland_foreign_toplevel_handle_v1_pid(uint32_t pid) override;
-    void ztreeland_foreign_toplevel_handle_v1_title(const QString &title) override;
-    void ztreeland_foreign_toplevel_handle_v1_app_id(const QString &app_id) override;
-    void ztreeland_foreign_toplevel_handle_v1_identifier(uint32_t identifier) override;
-    void ztreeland_foreign_toplevel_handle_v1_state(wl_array *state) override;
-    void ztreeland_foreign_toplevel_handle_v1_done() override;
-    void ztreeland_foreign_toplevel_handle_v1_closed() override;
+    void treeland_foreign_toplevel_handle_v1_pid(uint32_t pid) override;
+    void treeland_foreign_toplevel_handle_v1_title(const QString &title) override;
+    void treeland_foreign_toplevel_handle_v1_app_id(const QString &app_id) override;
+    void treeland_foreign_toplevel_handle_v1_identifier(uint32_t identifier) override;
+    void treeland_foreign_toplevel_handle_v1_state(wl_array *state) override;
+    void treeland_foreign_toplevel_handle_v1_done() override;
+    void treeland_foreign_toplevel_handle_v1_closed() override;
 
 private:
     uint32_t m_pid;
@@ -62,10 +62,10 @@ class TreeLandWindow : public AbstractWindow
     Q_OBJECT
 
     enum WindowState {
-        Active      = QtWayland::ztreeland_foreign_toplevel_handle_v1::state_activated,
-        Maximized   = QtWayland::ztreeland_foreign_toplevel_handle_v1::state_maximized,
-        Minimized   = QtWayland::ztreeland_foreign_toplevel_handle_v1::state_minimized,
-        Fullscreen  = QtWayland::ztreeland_foreign_toplevel_handle_v1::state_fullscreen
+        Active      = QtWayland::treeland_foreign_toplevel_handle_v1::state_activated,
+        Maximized   = QtWayland::treeland_foreign_toplevel_handle_v1::state_maximized,
+        Minimized   = QtWayland::treeland_foreign_toplevel_handle_v1::state_minimized,
+        Fullscreen  = QtWayland::treeland_foreign_toplevel_handle_v1::state_fullscreen
     };
 
 public:

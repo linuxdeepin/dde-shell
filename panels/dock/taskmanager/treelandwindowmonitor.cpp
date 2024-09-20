@@ -26,7 +26,7 @@ ForeignToplevelManager::ForeignToplevelManager(TreeLandWindowMonitor* monitor)
 {
 }
 
-void ForeignToplevelManager::ztreeland_foreign_toplevel_manager_v1_toplevel(struct ::ztreeland_foreign_toplevel_handle_v1 *toplevel)
+void ForeignToplevelManager::treeland_foreign_toplevel_manager_v1_toplevel(struct ::treeland_foreign_toplevel_handle_v1 *toplevel)
 {
     ForeignToplevelHandle* handle = new ForeignToplevelHandle(toplevel);
     connect(handle, &ForeignToplevelHandle::handlerIsReady, m_monitor, &TreeLandWindowMonitor::handleForeignToplevelHandleAdded, Qt::UniqueConnection);
