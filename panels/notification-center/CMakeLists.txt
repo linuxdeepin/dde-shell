@@ -16,6 +16,7 @@ qt_add_qml_module(notificationcenterpanel
         NotifyViewDelegate.qml
         NotifyItemBackground.qml
         NotifyItem.qml
+        NotifyItemContent.qml
         NormalNotify.qml
         OverlapNotify.qml
         GroupNotify.qml

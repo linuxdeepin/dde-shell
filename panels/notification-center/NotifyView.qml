@@ -24,7 +24,7 @@ Control {
         id: view
         spacing: 10
         // activeFocusOnTab: true
-        ScrollBar.vertical: ScrollBar { }
+        // ScrollBar.vertical: ScrollBar { }
 
         model: root.notifyModel
         delegate: NotifyViewDelegate {
@@ -54,11 +54,6 @@ Control {
         //     }
         // }
         addDisplaced: Transition {
-            ParallelAnimation {
-                NumberAnimation { properties: "y"; duration: 300 }
-            }
-        }
-        removeDisplaced: Transition {
             ParallelAnimation {
                 NumberAnimation { properties: "y"; duration: 300 }
             }
