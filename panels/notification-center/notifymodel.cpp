@@ -497,9 +497,22 @@ void NotifyModel::remove(const QString &id)
 
                     qDebug(notifyLog) << "Update notify for ovelay" << entity.id();
 
-                    item->setEntity(entity);
-                    const auto index = this->index(row);
-                    dataChanged(index, index, {});
+                    // item->setEntity(entity);
+                    // const auto index = this->index(row);
+                    // dataChanged(index, index, {});
+
+                    // TODO Reuse the item.
+                    beginRemoveRows(QModelIndex(), row, row);
+                    m_appNotifies.removeOne(notify);
+                    endRemoveRows();
+
+                    beginInsertRows(QModelIndex(), row, row);
+                    auto newNotify = new OverlapAppNotifyItem(entity);
+                    newNotify->updateCount(count);
+                    m_appNotifies.insert(row, newNotify);
+                    endInsertRows();
+
+                    notify->deleteLater();
                 }
             }
         }

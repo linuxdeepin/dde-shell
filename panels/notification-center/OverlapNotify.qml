@@ -14,11 +14,31 @@ NotifyItem {
     property int count: 1
     readonly property int overlapItemRadius: 12
 
+    states: [
+        State {
+            name: "removing"
+            PropertyChanges { target: root; x: root.width; opacity: 0}
+        }
+    ]
+
+    transitions: Transition {
+        to: "removing"
+        ParallelAnimation {
+            NumberAnimation { properties: "x"; duration: 200; easing.type: Easing.InOutQuad }
+            NumberAnimation { properties: "opacity"; duration: 200; easing.type: Easing.InOutQuad }
+        }
+        onRunningChanged: {
+            if (!running) {
+                root.remove()
+            }
+        }
+    }
+
     contentItem: Item {
         width: parent.width
-        implicitHeight: normalNotify.height + indicator.height
-        NormalNotify {
-            id: normalNotify
+        implicitHeight: notifyContent.height + indicator.height
+        NotifyItemContent {
+            id: notifyContent
             width: parent.width
             appName: root.appName
             iconName: root.iconName
@@ -31,7 +51,7 @@ NotifyItem {
             contentIcon: root.contentIcon
 
             onRemove: function () {
-                root.remove()
+                root.state = "removing"
             }
             onActionInvoked: function (actionId) {
                 root.actionInvoked(actionId)
@@ -41,7 +61,7 @@ NotifyItem {
         OverlapIndicator {
             id: indicator
             anchors {
-                top: normalNotify.bottom
+                bottom: parent.bottom
                 left: parent.left
                 leftMargin: overlapItemRadius
                 right: parent.right
