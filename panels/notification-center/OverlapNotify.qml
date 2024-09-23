@@ -24,8 +24,8 @@ NotifyItem {
     transitions: Transition {
         to: "removing"
         ParallelAnimation {
-            NumberAnimation { properties: "x"; duration: 200; easing.type: Easing.InOutQuad }
-            NumberAnimation { properties: "opacity"; duration: 200; easing.type: Easing.InOutQuad }
+            NumberAnimation { properties: "x"; duration: 300; easing.type: Easing.Linear }
+            NumberAnimation { properties: "opacity"; duration: 300; easing.type: Easing.Linear }
         }
         onRunningChanged: {
             if (!running) {

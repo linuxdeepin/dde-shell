@@ -11,7 +11,14 @@ SettingActionButton {
     id: root
 
     property int duration: 200
-    property bool textVisible: root.hovered
+    property bool textVisible: root.hovered && text !== ""
+    property bool enableAnimation: false
+
+    Component.onCompleted: {
+        Qt.callLater(function () {
+            enableAnimation = true
+        })
+    }
 
     contentItem: Item {
         clip: true
@@ -19,9 +26,9 @@ SettingActionButton {
         implicitHeight: iconDelegate.width
 
         Behavior on implicitWidth {
+            enabled: root.enableAnimation
             NumberAnimation { duration: root.duration; easing.type: root.textVisible ? Easing.OutQuad : Easing.InQuad }
         }
-
         AnimationDelegate {
             id: textDelegate
             leftPadding: 4
@@ -73,13 +80,11 @@ SettingActionButton {
         transitions: [
             Transition {
                 to: "invisible"
+                enabled: root.enableAnimation
                 SequentialAnimation {
                     NumberAnimation { property: "opacity"; easing.type: Easing.InQuad; duration: root.duration }
                     PropertyAction { target: delegate; property: "visible"; value: false }
                 }
-            },
-            Transition {
-                NumberAnimation { property: "opacity"; easing.type: Easing.OutQuad; duration: root.duration }
             }
         ]
     }
