@@ -23,6 +23,7 @@ public:
     bool isReady() const;
     uint32_t id() const;
     pid_t pid() const;
+    QString appid() const;
     QString title() const;
     QList<uint32_t> state() const;
 
@@ -32,6 +33,7 @@ Q_SIGNALS:
     void handlerIsDeleted();
 
     // for window info
+    void appidChanged();
     void pidChanged();
     void titleChanged();
     void isActiveChanged();
@@ -73,6 +75,7 @@ public:
 
     uint32_t id() override;
     pid_t pid() override;
+    QString identity() override;
     QString icon() override;
     QString title() override;
     bool isActive() override;
@@ -89,14 +92,6 @@ public:
     void setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry) override;
 
 private:
-    void updatePid() override;
-    void updateIcon() override;
-    void updateTitle() override;
-    void updateIsActive() override;
-    void updateShouldSkip() override;
-    void updateAllowClose() override;
-    void updateIsMinimized() override;
-
     void setForeignToplevelHandle(ForeignToplevelHandle* handle);
 
     bool isReady();

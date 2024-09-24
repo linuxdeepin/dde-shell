@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "dsglobal.h"
-
 #include <QWindow>
 #include <QString>
 #include <QObject>
@@ -19,6 +17,7 @@ class AbstractWindow : public QObject
     Q_OBJECT
     Q_PROPERTY(uint32_t id READ id)
     Q_PROPERTY(pid_t pid READ pid NOTIFY pidChanged FINAL)
+    Q_PROPERTY(QString identity READ identity NOTIFY identityChanged FINAL)
     Q_PROPERTY(QString icon READ icon NOTIFY iconChanged FINAL)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged FINAL)
     Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged FINAL)
@@ -29,6 +28,7 @@ public:
 
     virtual uint32_t id() = 0;
     virtual pid_t pid() = 0;
+    virtual QString identity() = 0;
     virtual QString icon() = 0;
     virtual QString title() = 0;
     virtual bool isActive() = 0;
@@ -61,17 +61,9 @@ protected:
 private:
     QPointer<AppItem> m_appitem;
 
-private:
-    virtual void updatePid() = 0;
-    virtual void updateIcon() = 0;
-    virtual void updateTitle() = 0;
-    virtual void updateIsActive() = 0;
-    virtual void updateShouldSkip() = 0;
-    virtual void updateAllowClose() = 0;
-    virtual void updateIsMinimized() = 0;
-
 Q_SIGNALS:
     void pidChanged();
+    void identityChanged();
     void iconChanged();
     void titleChanged();
     void isActiveChanged();

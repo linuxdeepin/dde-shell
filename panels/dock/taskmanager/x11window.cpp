@@ -4,7 +4,6 @@
 
 #include "x11window.h"
 #include "abstractwindow.h"
-#include "dsglobal.h"
 #include "x11utils.h"
 
 #include <mutex>
@@ -43,6 +42,15 @@ pid_t X11Window::pid()
     }
 
     return m_pid;
+}
+
+QString X11Window::identity()
+{
+    if (m_identity == "") {
+
+    }
+
+    return m_identity;
 }
 
 QString X11Window::icon()
@@ -155,6 +163,16 @@ void X11Window::updatePid()
     m_pid = X11->getWindowPid(m_windowID);
     if (oldPid != m_pid)
         Q_EMIT AbstractWindow::pidChanged();
+}
+
+void X11Window::updateIdentify()
+{
+    auto newWmclas = X11->getWindowWMClass(m_windowID)[0];
+    if (newWmclas == m_identity)
+        return;
+
+    m_identity = newWmclas;
+    Q_EMIT identityChanged();
 }
 
 void X11Window::updateIcon()

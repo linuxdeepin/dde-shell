@@ -35,6 +35,11 @@ pid_t ForeignToplevelHandle::pid() const
     return m_pid;
 }
 
+QString ForeignToplevelHandle::appid() const
+{
+    return m_appId;
+}
+
 QString ForeignToplevelHandle::title() const
 {
     return m_title;
@@ -70,6 +75,8 @@ void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_app_id(const QSt
 {
     if (app_id == m_appId) return;
     m_appId = app_id;
+
+    Q_EMIT appidChanged();
 }
 
 void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_identifier(uint32_t identifier)
@@ -123,6 +130,11 @@ pid_t TreeLandWindow::pid()
     return m_foreignToplevelHandle ? m_foreignToplevelHandle->pid() : 0;
 }
 
+QString TreeLandWindow::identity()
+{
+    return m_foreignToplevelHandle ? m_foreignToplevelHandle->appid() : "";
+}
+
 QString TreeLandWindow::icon()
 {
     return "";
@@ -131,10 +143,6 @@ QString TreeLandWindow::icon()
 QString TreeLandWindow::title()
 {
     return m_foreignToplevelHandle ? m_foreignToplevelHandle->title() : "";
-}
-
-void TreeLandWindow::updateIsActive()
-{
 }
 
 bool TreeLandWindow::isActive()
@@ -197,35 +205,6 @@ void TreeLandWindow::setWindowIconGeometry(const QWindow* baseWindow, const QRec
     m_foreignToplevelHandle->set_rectangle(waylandWindow->surface(), gemeotry.x(), gemeotry.y(), gemeotry.width(), gemeotry.height());
 }
 
-void TreeLandWindow::updatePid()
-{
-
-}
-void TreeLandWindow::updateIcon()
-{
-
-}
-
-void TreeLandWindow::updateTitle()
-{
-
-}
-
-void TreeLandWindow::updateShouldSkip()
-{
-
-}
-
-void TreeLandWindow::updateAllowClose()
-{
-
-}
-
-void TreeLandWindow::updateIsMinimized()
-{
-
-}
-
 bool TreeLandWindow::isReady()
 {
     return m_foreignToplevelHandle->isReady();
@@ -237,6 +216,7 @@ void TreeLandWindow::setForeignToplevelHandle(ForeignToplevelHandle* handle)
     m_foreignToplevelHandle.reset(handle);
     m_id = m_foreignToplevelHandle->id();
 
+    connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::appidChanged, this, &AbstractWindow::identityChanged);
     connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::pidChanged, this, &AbstractWindow::pidChanged);
     connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::titleChanged, this, &AbstractWindow::titleChanged);
     connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::isActiveChanged, this, &AbstractWindow::isActiveChanged);

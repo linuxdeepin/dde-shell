@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "x11utils.h"
-#include "dsglobal.h"
 
 #include <cstddef>
 #include <unistd.h>
@@ -90,7 +89,7 @@ xcb_atom_t X11Utils::getAtomByName(const QString &name)
     return ret;
 }
 
-QString X11Utils::getNameByAtom(const xcb_atom_t& atom)
+QString X11Utils::getNameByAtom(const xcb_atom_t &atom)
 {
     auto name = m_atoms.key(atom);
     if (name.isEmpty()) {
@@ -111,7 +110,7 @@ QString X11Utils::getNameByAtom(const xcb_atom_t& atom)
     }
     return name;
 }
-QList<xcb_window_t> X11Utils::getWindowClientList(const xcb_window_t& window)
+QList<xcb_window_t> X11Utils::getWindowClientList(const xcb_window_t &window)
 {
     QList<xcb_window_t> ret;
     xcb_get_property_cookie_t cookie = xcb_ewmh_get_client_list(&m_ewmh, 0);
@@ -127,7 +126,7 @@ QList<xcb_window_t> X11Utils::getWindowClientList(const xcb_window_t& window)
     return ret;
 }
 
-pid_t X11Utils::getWindowPid(const xcb_window_t& window)
+pid_t X11Utils::getWindowPid(const xcb_window_t &window)
 {
     xcb_res_client_id_spec_t spec = { window, XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID };
     xcb_res_query_client_ids_cookie_t cookie = xcb_res_query_client_ids_unchecked(getXcbConnection(), 1, &spec);
@@ -147,7 +146,7 @@ pid_t X11Utils::getWindowPid(const xcb_window_t& window)
     return 0;
 }
 
-QString X11Utils::getWindowName(const xcb_window_t& window)
+QString X11Utils::getWindowName(const xcb_window_t &window)
 {
     std::string ret;
     xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_name(&m_ewmh, window);
@@ -159,7 +158,7 @@ QString X11Utils::getWindowName(const xcb_window_t& window)
     return ret.c_str();
 }
 
-QString X11Utils::getWindowIconName(const xcb_window_t& window)
+QString X11Utils::getWindowIconName(const xcb_window_t &window)
 {
     std::string ret;
     xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_icon_name(&m_ewmh, window);
@@ -171,7 +170,7 @@ QString X11Utils::getWindowIconName(const xcb_window_t& window)
     return ret.c_str();
 }
 
-QString X11Utils::getWindowIcon(const xcb_window_t& window)
+QString X11Utils::getWindowIcon(const xcb_window_t &window)
 {
     QString iconContent;
     xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_icon(&m_ewmh, window);
@@ -208,7 +207,7 @@ QString X11Utils::getWindowIcon(const xcb_window_t& window)
     return iconContent;
 }
 
-QList<xcb_atom_t> X11Utils::getWindowState(const xcb_window_t& window)
+QList<xcb_atom_t> X11Utils::getWindowState(const xcb_window_t &window)
 {
     QList<xcb_atom_t> ret;
     xcb_get_property_cookie_t cookie = xcb_ewmh_get_wm_state(&m_ewmh, window);
@@ -238,7 +237,7 @@ QList<xcb_atom_t> X11Utils::getWindowAllowedActions(const xcb_window_t &window)
     return ret;
 }
 
-MotifWMHints X11Utils::getWindowMotifWMHints(const xcb_window_t& window)
+MotifWMHints X11Utils::getWindowMotifWMHints(const xcb_window_t &window)
 {
     xcb_atom_t atomWmHints = getAtomByName("_MOTIF_WM_HINTS");
     xcb_get_property_cookie_t cookie = xcb_get_property(m_connection, false, window, atomWmHints, atomWmHints, 0, 5);
@@ -256,6 +255,18 @@ MotifWMHints X11Utils::getWindowMotifWMHints(const xcb_window_t& window)
     return ret;
 }
 
+QStringList X11Utils::getWindowWMClass(const xcb_window_t &window)
+{
+    xcb_atom_t atomWMClass = getAtomByName("WM_CLASS");
+    xcb_get_property_cookie_t cookie = xcb_get_property(m_connection, false, window, atomWMClass, XCB_ATOM_STRING, 0, 1024);
+    std::unique_ptr<xcb_get_property_reply_t> reply(xcb_get_property_reply(m_connection, cookie, nullptr));
+    auto len = xcb_get_property_value_length(reply.get());
+    const char *value = (const char *)xcb_get_property_value(reply.get());
+    const char *class_name = strchr(value, '\0') + 1;
+
+    return {value, class_name};
+}
+
 QList<xcb_atom_t> X11Utils::getWindowTypes(const xcb_window_t &window)
 {
     QList<xcb_atom_t> ret;
@@ -270,7 +281,7 @@ QList<xcb_atom_t> X11Utils::getWindowTypes(const xcb_window_t &window)
     return ret;
 }
 
-void X11Utils::minimizeWindow(const xcb_window_t& window)
+void X11Utils::minimizeWindow(const xcb_window_t &window)
 {
     uint32_t data[2];
     data[0] = XCB_ICCCM_WM_STATE_ICONIC;
@@ -296,24 +307,24 @@ void X11Utils::closeWindow(const xcb_window_t &window)
     xcb_ewmh_request_close_window(&m_ewmh, 0, window, 0, XCB_EWMH_CLIENT_SOURCE_TYPE_OTHER);
 }
 
-void X11Utils::killClient(const xcb_window_t& winid)
+void X11Utils::killClient(const xcb_window_t &winid)
 {
     xcb_kill_client_checked(getXcbConnection(), winid);
 }
 
-void X11Utils::setActiveWindow(const xcb_window_t& window)
+void X11Utils::setActiveWindow(const xcb_window_t &window)
 {
     xcb_ewmh_request_change_active_window(&m_ewmh, 0, window, XCB_EWMH_CLIENT_SOURCE_TYPE_OTHER, XCB_CURRENT_TIME, XCB_WINDOW_NONE);
     restackWindow(window);
     xcb_flush(m_connection);
 }
 
-void X11Utils::restackWindow(const xcb_window_t& window)
+void X11Utils::restackWindow(const xcb_window_t &window)
 {
     xcb_ewmh_request_restack_window(&m_ewmh, 0, window, 0, XCB_STACK_MODE_ABOVE);
 }
 
-void X11Utils::setWindowIconGemeotry(const xcb_window_t& window, const QRect& geometry)
+void X11Utils::setWindowIconGemeotry(const xcb_window_t &window, const QRect &geometry)
 {
     const auto ratio = qApp->devicePixelRatio();
     xcb_ewmh_set_wm_icon_geometry(&m_ewmh, window, geometry.x() * ratio, geometry.y() * ratio, geometry.width() * ratio, geometry.height() * ratio);

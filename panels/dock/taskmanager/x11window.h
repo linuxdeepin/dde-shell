@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "dsglobal.h"
 #include "x11utils.h"
 #include "abstractwindow.h"
 
@@ -22,6 +21,7 @@ public:
     ~X11Window();
     virtual uint32_t id() override;
     virtual pid_t pid() override;
+    virtual QString identity() override;
     virtual QString icon() override;
     virtual QString title() override;
     virtual bool isActive() override;
@@ -42,13 +42,14 @@ private:
     X11Window(xcb_window_t winid, QObject *parent = nullptr);
 
 private:
-    virtual void updatePid() override;
-    virtual void updateIcon() override;
-    virtual void updateTitle() override;
-    virtual void updateIsActive() override;
-    virtual void updateShouldSkip() override;
-    virtual void updateAllowClose() override;
-    virtual void updateIsMinimized() override;
+    void updatePid();
+    void updateIdentify();
+    void updateIcon();
+    void updateTitle();
+    void updateIsActive();
+    void updateShouldSkip();
+    void updateAllowClose();
+    void updateIsMinimized();
 
     void updateMotifWmHints();
 
@@ -68,6 +69,7 @@ private:
 private:
     xcb_window_t m_windowID;
     pid_t m_pid;
+    QString m_identity;
     QString m_icon;
     QString m_title;
 
