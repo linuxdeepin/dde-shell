@@ -1,3 +1,9 @@
+dde-shell (1.0.3) unstable; urgency=medium
+
+  * treeland protocols rename.
+
+ -- tsic404 <liuheng@deepin.org>  Tue, 24 Sep 2024 10:00:40 +0800
+
 dde-shell (1.0.2) unstable; urgency=medium
 
   * fix: the opacity of preview window isn't changed
