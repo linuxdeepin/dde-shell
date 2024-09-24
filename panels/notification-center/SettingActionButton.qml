@@ -15,10 +15,24 @@ ActionButton {
 
     icon.width: 16
     icon.height: 16
+    padding: 4
     font: DTK.fontManager.t8
+
+    Loader {
+        anchors.fill: parent
+        active: root.forcusBorderVisible
+
+        sourceComponent: FocusBoxBorder {
+            radius: root.radius
+            color: root.palette.highlight
+        }
+    }
 
     background: BoxPanel {
         radius: root.radius
+        enableBoxShadow: true
+        boxShadowBlur: 10
+        boxShadowOffsetY: 4
         color1: Palette {
             normal {
                 common: ("transparent")
@@ -59,14 +73,5 @@ ActionButton {
         }
         innerShadowColor1: null
         innerShadowColor2: innerShadowColor1
-        Loader {
-            anchors.fill: parent
-            active: root.forcusBorderVisible
-
-            sourceComponent: FocusBoxBorder {
-                radius: root.radius
-                color: root.palette.highlight
-            }
-        }
     }
 }
