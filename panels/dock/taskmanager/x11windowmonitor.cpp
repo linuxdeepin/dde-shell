@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "appitem.h"
-#include "dsglobal.h"
 #include "x11utils.h"
 #include "x11window.h"
 #include "x11preview.h"
@@ -11,12 +10,7 @@
 #include "x11windowmonitor.h"
 #include "abstractwindowmonitor.h"
 
-#include <memory>
-
-#include <thread>
 #include <cstdint>
-#include <iterator>
-#include <algorithm>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
@@ -194,6 +188,8 @@ void X11WindowMonitor::onWindowPropertyChanged(xcb_window_t window, xcb_atom_t a
         x11Window->updateWindowTypes();
     } else if (atom == X11->getAtomByName("_MOTIF_WM_HINTS")) {
         x11Window->updateMotifWmHints();
+    } else if (atom == X11->getAtomByName("WM_CLASS")) {
+        x11Window->updateIdentify();
     }
 
     auto appitem = x11Window->getAppItem();

@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "dsglobal.h"
-
 #include <cstdint>
 #include <sys/types.h>
 #include <xcb/xcb.h>
@@ -46,25 +44,26 @@ public:
 
     xcb_window_t getRootWindow();
     xcb_window_t getActiveWindow();
-    xcb_atom_t getAtomByName(const QString& name);
-    QString getNameByAtom(const xcb_atom_t& atom);
-    pid_t getWindowPid(const xcb_window_t& window);
-    QString getWindowName(const xcb_window_t& window);
-    QString getWindowIcon(const xcb_window_t& window);
-    QString getWindowIconName(const xcb_window_t& window);
-    QList<xcb_atom_t> getWindowState(const xcb_window_t& window);
-    QList<xcb_atom_t> getWindowTypes(const xcb_window_t& window);
-    QList<xcb_window_t> getWindowClientList(const xcb_window_t& window);
-    QList<xcb_atom_t> getWindowAllowedActions(const xcb_window_t& window);
-    MotifWMHints getWindowMotifWMHints(const xcb_window_t& window);
+    xcb_atom_t getAtomByName(const QString &name);
+    QString getNameByAtom(const xcb_atom_t &atom);
+    pid_t getWindowPid(const xcb_window_t &window);
+    QString getWindowName(const xcb_window_t &window);
+    QString getWindowIcon(const xcb_window_t &window);
+    QString getWindowIconName(const xcb_window_t &window);
+    QList<xcb_atom_t> getWindowState(const xcb_window_t &window);
+    QList<xcb_atom_t> getWindowTypes(const xcb_window_t &window);
+    QList<xcb_window_t> getWindowClientList(const xcb_window_t &window);
+    QList<xcb_atom_t> getWindowAllowedActions(const xcb_window_t &window);
+    MotifWMHints getWindowMotifWMHints(const xcb_window_t &window);
+    QStringList getWindowWMClass(const xcb_window_t &window);
 
-    void minimizeWindow(const xcb_window_t& window);
-    void maxmizeWindow(const xcb_window_t& window);
-    void closeWindow(const xcb_window_t& window);
-    void killClient(const xcb_window_t& window);
-    void setActiveWindow(const xcb_window_t& window);
-    void restackWindow(const xcb_window_t& window);
-    void setWindowIconGemeotry(const xcb_window_t& window, const QRect& geometry);
+    void minimizeWindow(const xcb_window_t &window);
+    void maxmizeWindow(const xcb_window_t &window);
+    void closeWindow(const xcb_window_t &window);
+    void killClient(const xcb_window_t &window);
+    void setActiveWindow(const xcb_window_t &window);
+    void restackWindow(const xcb_window_t &window);
+    void setWindowIconGemeotry(const xcb_window_t &window, const QRect &geometry);
 
 private:
     X11Utils();
