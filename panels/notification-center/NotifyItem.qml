@@ -11,8 +11,6 @@ import org.deepin.ds.notificationcenter
 Control {
     id: root
 
-    property int radius: 16
-
     property string appName: "deepin-editor"
     property string iconName: "deepin-editor"
     property string content: "content"

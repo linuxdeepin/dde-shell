@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import org.deepin.dtk 1.0
+import org.deepin.dtk.private 1.0 as DP
 import org.deepin.ds.notificationcenter
 
 Control {
@@ -14,10 +15,6 @@ Control {
     property var actions: []
     signal actionInvoked(var actionId)
 
-    topPadding: 8
-    bottomPadding: 8
-    leftPadding: 4
-    rightPadding: 4
     contentItem: RowLayout {
         spacing: 5
         height: 30
@@ -63,15 +60,37 @@ Control {
     }
 
     component NotifyActionButton: Button {
+        id: actionButton
         required property var actionData
         text: actionData.text
-        implicitHeight: 30
-        implicitWidth: 50
+        topPadding: undefined
+        bottomPadding: undefined
+        leftPadding: undefined
+        rightPadding: undefined
         padding: 0
+        spacing: 0
         font: DTK.fontManager.t6
         onClicked: {
             console.log("action invoked", actionData.id)
             actionInvoked(actionData.id)
+        }
+
+        background: DP.ButtonPanel {
+            implicitHeight: 30
+            implicitWidth: 50
+            button: actionButton
+            color1: Palette {
+                normal {
+                    common: ("transparent")
+                    crystal: Qt.rgba(0 / 255.0, 0 / 255.0, 0 / 255.0, 0.15)
+                }
+                normalDark {
+                    crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 1)
+                }
+            }
+            color2: color1
+            insideBorderColor: null
+            outsideBorderColor: null
         }
     }
 }

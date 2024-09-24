@@ -25,13 +25,58 @@ NotifyItem {
         contentItem: Loader {
             active: root.closeVisible || closePlaceHolder.hovered || closePlaceHolder.activeFocus || activeFocus
             sourceComponent: SettingActionButton {
+                id: closeBtn
                 objectName: "closeNotify-" + root.appName
                 icon.name: "clean-alone"
-                icon.width: 20
-                icon.height: 20
+                padding: 2
                 forcusBorderVisible: visualFocus || closePlaceHolder.visualFocus
                 onClicked: function () {
                     root.remove()
+                }
+                background: BoxPanel {
+                    radius: closeBtn.radius
+                    enableBoxShadow: true
+                    boxShadowBlur: 4
+                    boxShadowOffsetY: 1
+                    color1: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.5)
+                        }
+                    }
+                    color2: color1
+                    insideBorderColor: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(255 / 255.0, 255 / 255.0, 255 / 255.0, 0.2)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(255 / 255.0, 255 / 255.0, 255 / 255.0, 0.1)
+                        }
+                    }
+                    outsideBorderColor: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(0, 0, 0, 0.08)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(0, 0, 0, 0.4)
+                        }
+                    }
+                    dropShadowColor: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(0, 0, 0, 0.15)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(0, 0, 0, 0.4)
+                        }
+                    }
+                    innerShadowColor1: null
+                    innerShadowColor2: innerShadowColor1
                 }
             }
         }
@@ -40,9 +85,9 @@ NotifyItem {
         id: actionPlaceHolder
         anchors {
             bottom: parent.bottom
-            bottomMargin: 10
+            bottomMargin: 8
             right: parent.right
-            rightMargin: 10
+            rightMargin: 8
         }
 
         active: !root.strongInteractive && root.actions.length > 0
@@ -53,7 +98,7 @@ NotifyItem {
                 root.actionInvoked(actionId)
             }
             background: NotifyItemBackground {
-                radius: 16
+                radius: 6
                 implicitHeight: 30
                 implicitWidth: 50
                 outsideBorderColor: null
@@ -68,7 +113,7 @@ NotifyItem {
             name: root.iconName
             sourceSize: Qt.size(24, 24)
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.topMargin: 10
+            Layout.topMargin: 8
             Layout.leftMargin: 10
             palette: DTK.makeIconPalette(root.palette)
             mode: root.ColorSelector.controlState
@@ -81,10 +126,10 @@ NotifyItem {
             Layout.rightMargin: 10
             Layout.leftMargin: 10
             Layout.topMargin: 4
-            Layout.bottomMargin: 10
+            Layout.bottomMargin: 8
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: 80
+            Layout.minimumHeight: 40
             Layout.maximumHeight: 240
             RowLayout {
                 spacing: 0
@@ -179,6 +224,5 @@ NotifyItem {
     }
 
     background: NotifyItemBackground {
-        radius: root.radius
     }
 }
