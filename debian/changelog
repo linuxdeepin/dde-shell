@@ -1,3 +1,10 @@
+dde-shell (1.0.3) unstable; urgency=medium
+
+  * fix: dock isn't hidden immediately
+  * fix: tooltip radius isn't changed
+
+ -- Yutao Meng <mengyutao@deepin.org>  Wed, 25 Sep 2024 16:40:44 +0800
+
 dde-shell (1.0.2) unstable; urgency=medium
 
   * fix: the opacity of preview window isn't changed
