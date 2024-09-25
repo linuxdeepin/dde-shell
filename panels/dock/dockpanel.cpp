@@ -85,6 +85,8 @@ bool DockPanel::init()
     connect(this, &DockPanel::hideModeChanged, this, [this](){
         if (hideMode() == KeepShowing)
             setHideState(Show);
+        if (hideMode() == KeepHidden)
+            setHideState(Hide);
     });
     connect(SETTINGS, &DockSettings::positionChanged, this, [this, dockDaemonAdaptor](){
         Q_EMIT positionChanged(position());
