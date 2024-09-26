@@ -3,17 +3,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "globals.h"
-#include "dsglobal.h"
 #include "taskmanagersettings.h"
 
 #include <QJsonObject>
 #include <QJsonDocument>
 
-#include <algorithm>
-#include <iterator>
-
 #include <string>
-#include <unordered_map>
 
 #include <yaml-cpp/yaml.h>
 

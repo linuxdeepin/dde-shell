@@ -4,26 +4,33 @@
 
 #pragma once
 
-#include "dsglobal.h"
 #include "abstractwindow.h"
 
 #include <cstdint>
 
 #include <QObject>
-
+#include <QAbstractListModel>
 
 namespace dock {
 class AppItem;
-class AbstractWindowMonitor : public QObject
+class AbstractWindowMonitor : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    AbstractWindowMonitor(QObject* parent = nullptr): QObject(parent){};
+    QHash<int, QByteArray> roleNames() const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = AbstractWindow::winIdRole) const override;
+
+    void trackWindow(AbstractWindow* window);
+    void destroyWindow(AbstractWindow * window);
+
+    AbstractWindowMonitor(QObject* parent = nullptr);
     virtual void start() = 0;
     virtual void stop() = 0;
     virtual void clear() = 0;
 
+    // TODO: remove this when Modelized finizhed.
     virtual QPointer<AbstractWindow> getWindowByWindowId(ulong windowId) = 0;
 
     virtual void presentWindows(QList<uint32_t> windowsId) = 0;
@@ -34,5 +41,8 @@ public:
 Q_SIGNALS:
     void windowAdded(QPointer<AbstractWindow> window);
     void WindowMonitorShutdown();
+
+private:
+    QList<AbstractWindow*> m_trackedWindows;
 };
 }

@@ -6,7 +6,6 @@
 
 #include "abstractwindow.h"
 #include "appitem.h"
-#include "dsglobal.h"
 #include "x11window.h"
 #include "x11preview.h"
 #include "abstractwindowmonitor.h"
