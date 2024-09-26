@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "dsglobal.h"
 #include "itemmodel.h"
 #include "abstractitem.h"
 #include "taskmanagersettings.h"

@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "dsglobal.h"
-
 #include <QString>
 #include <QRegularExpression>
 

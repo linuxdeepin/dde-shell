@@ -49,11 +49,14 @@ qt_add_dbus_adaptor(DBUS_INTERFACES
 
 add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     abstractwindow.h
+    abstractwindowmonitor.cpp
     abstractwindowmonitor.h
     abstractitem.h
     abstractitem.cpp
     appitem.cpp
     appitem.h
+    rolecombinemodel.cpp
+    rolecombinemodel.h
     itemmodel.cpp
     itemmodel.h
     desktopfileabstractparser.cpp
