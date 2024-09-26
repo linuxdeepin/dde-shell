@@ -47,7 +47,7 @@ pid_t X11Window::pid()
 QString X11Window::identity()
 {
     if (m_identity == "") {
-
+        m_identity = X11->getWindowWMClass(m_windowID)[0];
     }
 
     return m_identity;

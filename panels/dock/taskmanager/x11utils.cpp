@@ -257,14 +257,17 @@ MotifWMHints X11Utils::getWindowMotifWMHints(const xcb_window_t &window)
 
 QStringList X11Utils::getWindowWMClass(const xcb_window_t &window)
 {
-    xcb_atom_t atomWMClass = getAtomByName("WM_CLASS");
-    xcb_get_property_cookie_t cookie = xcb_get_property(m_connection, false, window, atomWMClass, XCB_ATOM_STRING, 0, 1024);
-    std::unique_ptr<xcb_get_property_reply_t> reply(xcb_get_property_reply(m_connection, cookie, nullptr));
-    auto len = xcb_get_property_value_length(reply.get());
-    const char *value = (const char *)xcb_get_property_value(reply.get());
-    const char *class_name = strchr(value, '\0') + 1;
+    xcb_icccm_get_wm_class_reply_t wmClassReply;
+    xcb_get_property_cookie_t wmClassCookie;
+    wmClassCookie = xcb_icccm_get_wm_class(m_connection, window);
+    if (xcb_icccm_get_wm_class_reply(m_connection, wmClassCookie, &wmClassReply, nullptr)) {
+        QString instanceName = wmClassReply.instance_name;
+        QString className = wmClassReply.class_name;
+        xcb_icccm_get_wm_class_reply_wipe(&wmClassReply);
+        return {instanceName, className};
+    }
 
-    return {value, class_name};
+    return {};
 }
 
 QList<xcb_atom_t> X11Utils::getWindowTypes(const xcb_window_t &window)
