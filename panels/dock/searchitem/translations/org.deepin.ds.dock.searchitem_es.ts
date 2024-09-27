@@ -4,7 +4,7 @@
     <message>
         <location filename="../searchitem.cpp" line="47"/>
         <source>GrandSearch</source>
-        <translation>Gran Búsqueda</translation>
+        <translation>Gran búsqueda</translation>
     </message>
 </context>
 <context>
@@ -12,7 +12,7 @@
     <message>
         <location filename="../package/searchitem.qml" line="24"/>
         <source>GrandSearch</source>
-        <translation>Gran Búsqueda</translation>
+        <translation>Gran búsqueda</translation>
     </message>
     <message>
         <location filename="../package/searchitem.qml" line="53"/>
