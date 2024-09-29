@@ -189,6 +189,10 @@ NotifyItem {
                     elide: Text.ElideRight
                     Layout.alignment: Qt.AlignLeft
                     Layout.fillWidth: true
+                    linkColor: palette.highlight
+                    onLinkActivated: function (link) {
+                        root.linkActivated(link)
+                    }
                 }
                 Item {
                     Layout.preferredHeight: 1

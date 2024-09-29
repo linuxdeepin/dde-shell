@@ -14,6 +14,8 @@ NotifyItem {
     property int count: 1
     readonly property int overlapItemRadius: 12
 
+    signal expand()
+
     states: [
         State {
             name: "removing"
@@ -71,6 +73,14 @@ NotifyItem {
             count: root.count
         }
     }
+
+    // expand
+    TapHandler {
+        acceptedButtons: Qt.LeftButton
+        onTapped: root.expand()
+    }
+    Keys.onEnterPressed: root.expand()
+    Keys.onReturnPressed: root.expand()
 
     component OverlapIndicator: Control {
         id: overlap
