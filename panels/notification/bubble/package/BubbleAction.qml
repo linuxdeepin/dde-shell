@@ -14,6 +14,7 @@ RowLayout {
 
     D.Button {
         Layout.preferredWidth: 60
+        height: 40
         text: bubble.firstActionText
         onClicked: {
             actionInvoked(bubble.firstActionId)
@@ -27,7 +28,8 @@ RowLayout {
     Component {
         id: singleAction
         D.Button {
-            width: 60
+            width: 100
+            Layout.preferredHeight: 40
             text: bubble.actionTexts[0]
             onClicked: {
                 actionInvoked(bubble.actionIds[index])
@@ -41,6 +43,7 @@ RowLayout {
             model: bubble.actionTexts
             delegate: Button {
                 width: 60
+                height: 40
                 text: modelData
                 onClicked: {
                     actionInvoked(bubble.actionIds[index])

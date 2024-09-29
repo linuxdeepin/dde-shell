@@ -5,4 +5,4 @@
 add_subdirectory(bubble)
 #add_subdirectory(center)
 add_subdirectory(osd)
-#add_subdirectory(server)
+add_subdirectory(server)

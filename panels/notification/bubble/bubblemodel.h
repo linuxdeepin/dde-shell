@@ -8,76 +8,24 @@
 
 #include <QAbstractListModel>
 
+class QTimer;
+
 namespace notification {
 
-class BubbleItem : public QObject
-{
-    Q_OBJECT
-public:
-    explicit BubbleItem(QObject *parent = nullptr);
-    explicit BubbleItem(const QString &text, const QString &title, const QString &iconName, QObject *parent = nullptr);
-
-    QString text() const;
-    QString title() const;
-    QString iconName() const;
-    QString appName() const;
-    int level() const;
-    int id() const;
-    int replaceId() const;
-
-    void setLevel(int newLevel);
-    void setParams(const QString &appName, int id, const QStringList &actions,
-                   const QVariantMap hints, int replaceId, const int timeout,
-                   const QVariantMap bubbleParams);
-
-    QVariantMap toMap() const;
-
-    bool hasDisplayAction() const;
-    bool hasDefaultAction() const;
-    QString defaultActionText() const;
-    QString defaultActionId() const;
-    QString firstActionText() const;
-    QString firstActionId() const;
-    QStringList actionTexts() const;
-    QStringList actionIds() const;
-
-Q_SIGNALS:
-    void levelChanged();
-    void timeout();
-
-private:
-    int defaultActionIdIndex() const;
-    int defaultActionTextIndex() const;
-    QStringList displayActions() const;
-    QString displayText() const;
-
-private:
-    QString m_text;
-    QString m_title;
-    QString m_iconName;
-    QString m_appName;
-    int m_id = 0;
-    QStringList m_actions;
-    QVariantMap m_hints;
-    int m_replaceId;
-    int m_timeout = 0;
-    QString m_ctime;
-    QVariantMap m_extraParams;
-
-private:
-    int m_level = 0;
-    const int TimeOutInterval{5000};
-};
-
+class BubbleItem;
 class BubbleModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
     enum {
-        Text = Qt::UserRole + 1,
-        Title,
+        AppName = Qt::UserRole + 1,
+        Body,
+        Summary,
         IconName,
         Level,
+        CTime,
+        TimeTip,
+        BodyImagePath,
         OverlayCount,
         hasDefaultAction,
         hasDisplayAction,
@@ -86,18 +34,27 @@ public:
         DefaultActionId,
         ActionTexts,
         ActionIds,
-    } BubbleRule;
+        Urgency,
+    } BubbleRole;
 
     explicit BubbleModel(QObject *parent = nullptr);
     ~BubbleModel();
 
+public:
     void push(BubbleItem *bubble);
+
     BubbleItem *replaceBubble(BubbleItem *bubble);
-    bool isReplaceBubble(BubbleItem *bubble) const;
-    void clear();
+    bool isReplaceBubble(const BubbleItem *bubble) const;
+
     QList<BubbleItem *> items() const;
+
     Q_INVOKABLE void remove(int index);
-    void remove(BubbleItem *bubble);
+    void remove(const BubbleItem *bubble);
+    BubbleItem *removeById(uint id);
+    void removeByBubbleId(uint bubbleId);
+    void clear();
+
+    BubbleItem *bubbleItem(int bubbleIndex) const;
 
     int rowCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -107,8 +64,12 @@ public:
     int overlayCount() const;
 
 private:
-    int replaceBubbleIndex(BubbleItem *bubble) const;
+    int replaceBubbleIndex(const BubbleItem *bubble) const;
     void updateLevel();
+    void updateBubbleTimeTip();
+
+private:
+    QTimer *m_updateTimeTipTimer = nullptr;
     QList<BubbleItem *> m_bubbles;
     const int BubbleMaxCount{3};
     const int LastBubbleMaxIndex{BubbleMaxCount - 1};

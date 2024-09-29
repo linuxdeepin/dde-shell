@@ -13,7 +13,7 @@ import org.deepin.dtk 1.0 as D
 Window {
     id: root
     visible: Applet.visible
-    width: 340 + 48
+    width: 360 + 48
     height: Math.max(10, bubbleView.height + 48)
     DLayerShellWindow.bottomMargin: 10
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
@@ -32,7 +32,7 @@ Window {
             NumberAnimation { properties: "x"; from: 100; duration: 500 }
         }
         delegate: Bubble {
-            width: 340
+            width: 360
             bubble: model
         }
     }

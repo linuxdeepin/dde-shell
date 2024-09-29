@@ -29,4 +29,6 @@ D.Control {
     }
 
     z: bubble.level <= 1 ? 0 : 1 - bubble.level
+
+    // background: D.FloatingPanel { }
 }

@@ -1,7 +1,7 @@
 {
     "Plugin": {
         "Version": "1.0",
-        "Id": "org.deepin.ds.notification",
+        "Id": "org.deepin.ds.notificationbubble",
         "Url": "main.qml",
         "ContainmentType": "Panel",
         "Category": "DDE"
