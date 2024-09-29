@@ -4,10 +4,12 @@
 
 #include "shell.h"
 
-#include <memory>
 #include <DConfig>
+#include <QDBusConnection>
+#include <QDBusError>
 #include <QLoggingCategory>
 #include <QQmlAbstractUrlInterceptor>
+#include <memory>
 #include <qmlengine.h>
 
 DS_BEGIN_NAMESPACE
@@ -94,6 +96,16 @@ void Shell::dconfigsMigrate()
     }
 
     dconfig->setValue(QStringLiteral("migratedDConfigs"), migratedDconfigs);
+}
+
+bool Shell::registerDBusService(const QString &serviceName)
+{
+    auto bus = QDBusConnection::sessionBus();
+    if (!bus.registerService(serviceName)) {
+        qCWarning(dsLoaderLog).noquote() << QStringLiteral("Failed to register the dbus service: \"%1\".").arg(serviceName) << bus.lastError().message();
+        return false;
+    }
+    return true;
 }
 
 bool Shell::dconfigMigrate(const QString &newConf, const QString &oldConf)
