@@ -121,6 +121,8 @@ int main(int argc, char *argv[])
     parser.addOption(listOption);
     QCommandLineOption sceneviewOption("sceneview", "View applets in scene, it only works without Window.", QString());
     parser.addOption(sceneviewOption);
+    QCommandLineOption dbusServiceNameOption("serviceName", "Registed DBus service for the serviceName, if it's not empty.", "serviceName", QString("org.deepin.dde.shell"));
+    parser.addOption(dbusServiceNameOption);
 
     parser.process(a);
 
@@ -151,6 +153,24 @@ int main(int argc, char *argv[])
     std::signal(SIGTERM, exitApp);
     std::signal(SIGKILL, exitApp);
 
+    Shell shell;
+    QString serviceName(parser.value(dbusServiceNameOption));
+    if (!parser.isSet(dbusServiceNameOption)) {
+        const QString prefix(serviceName);
+        if (parser.isSet(categoryOption)) {
+            QString subfix(parser.value(categoryOption));
+            serviceName = QString("%1.%2").arg(prefix).arg(subfix);
+        } else {
+            QString subfix(QString::number(QGuiApplication::applicationPid()));
+            serviceName = QString("%1.random%2").arg(prefix).arg(subfix);
+        }
+    }
+    if (!shell.registerDBusService(serviceName)) {
+        qCFatal(dsLog).noquote() << QString("Can't start an instance for the dbus serviceName: \"%1\".").arg(serviceName);
+        return -1;
+    }
+    qCInfo(dsLog).noquote() << QStringLiteral("Register dbus service for the serviceName: \"%1\"").arg(serviceName);
+
     QList<QString> pluginIds;
     if (parser.isSet(testOption)) {
         pluginIds << "org.deepin.ds.example";
@@ -180,7 +200,6 @@ int main(int argc, char *argv[])
         });
     }
 
-    Shell shell;
     shell.dconfigsMigrate();
     // TODO disable qml's cache avoid to parsing error for ExecutionEngine.
     shell.disableQmlCache();

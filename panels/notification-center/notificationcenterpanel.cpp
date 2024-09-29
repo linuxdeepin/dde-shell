@@ -37,9 +37,8 @@ bool NotificationCenterPanel::load()
 bool NotificationCenterPanel::init()
 {
     auto bus = QDBusConnection::sessionBus();
-    bus.registerService("org.deepin.dde.shell");
-    if (!bus.registerObject("/org/deepin/dde/shell/notificationcenter",
-                            "org.deepin.dde.shell.notificationcenter",
+    if (!bus.registerObject("/org/deepin/dde/shell/notification/center",
+                            "org.deepin.dde.shell.notification.center",
                             m_proxy,
                             QDBusConnection::ExportAllSlots)) {
         qWarning(notificationCenterLog) << QString("Can't register to the D-Bus object.");

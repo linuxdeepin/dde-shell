@@ -24,9 +24,6 @@ bool OsdPanel::load()
 #ifndef QT_DEBUG
     return false;
 #else
-    QDBusConnection bus = QDBusConnection::sessionBus();
-    // TODO
-    bus.registerService("org.deepin.dde.Shell");
 
     return DPanel::load();
 #endif
@@ -35,8 +32,8 @@ bool OsdPanel::load()
 bool OsdPanel::init()
 {
     auto bus = QDBusConnection::sessionBus();
-    if (!bus.registerObject(QStringLiteral("/org/deepin/osdService"),
-                       QStringLiteral("org.deepin.osdService"),
+    if (!bus.registerObject(QStringLiteral("/org/deepin/dde/shell/osd"),
+                       QStringLiteral("org.deepin.dde.shell.osd"),
                        this,
                            QDBusConnection::ExportAllSlots)) {
         return false;
