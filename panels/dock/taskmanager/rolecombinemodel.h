@@ -9,7 +9,7 @@
 
 typedef QModelIndex (*CombineFunc)(QVariant, QAbstractItemModel*);
 
-class RoleCombineModel : public QAbstractItemModel
+class RoleCombineModel : public QAbstractProxyModel
 {
     Q_OBJECT
     Q_PROPERTY(QAbstractItemModel majorModel READ majorModel CONSTANT FINAL)
@@ -30,8 +30,10 @@ public:
     QAbstractItemModel* majorModel() const;
     QAbstractItemModel* minorModel() const;
 
+    QModelIndex mapToSource(const QModelIndex &proxyIndex) const override;
+    QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
+
 private:
-    QAbstractItemModel* m_major;
     QAbstractItemModel* m_minor;
 
     // Hash table used to map this QModelIndex row & column 2 origin QModelIndex row & column.

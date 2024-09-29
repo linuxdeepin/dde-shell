@@ -7,13 +7,13 @@
 #include <algorithm>
 
 RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel* minor, int majorRoles, CombineFunc func, QObject* parent)
-    : QAbstractItemModel(parent)
-    , m_major(major)
-    , m_minor(minor)
+    : QAbstractProxyModel(parent)
 {
+    setSourceModel(major);
+    m_minor = minor;
     // create minor row & column map
-    int rowCount = m_major->rowCount();
-    int columnCount = m_major->columnCount();
+    int rowCount = major->rowCount();
+    int columnCount = major->columnCount();
     for (int i = 0; i < rowCount; i++) {
         for (int j = 0; j < columnCount; j++) {
             QModelIndex majorIndex = major->index(i, j);
@@ -24,11 +24,11 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     }
 
     // connect changedSignal
-    connect(m_major, &QAbstractItemModel::dataChanged, this,
+    connect(major, &QAbstractItemModel::dataChanged, this,
         [this, majorRoles, func](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles){
             for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
                 for (int j = topLeft.column(); j <= bottomRight.column(); j++) {
-                    QModelIndex majorIndex = m_major->index(i, j);
+                    QModelIndex majorIndex = sourceModel()->index(i, j);
                     QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
                     if (majorIndex.isValid() && minorIndex.isValid())
                         m_indexMap[qMakePair(i, j)] = qMakePair(minorIndex.row(), minorIndex.column());
@@ -50,7 +50,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
                     if (-1 == majorPos.first && -1 == majorPos.second)
                         continue;
 
-                    auto majorIndex = m_major->index(majorPos.first, majorPos.second);
+                    auto majorIndex = sourceModel()->index(majorPos.first, majorPos.second);
                     if (!majorIndex.isValid())
                         continue;
 
@@ -64,20 +64,38 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
             }
     });
 
-    // create minor role map call it at next evnet loop
-    QMetaObject::invokeMethod(this, [this](){
-        auto minorRolenames = m_minor->roleNames();
-        auto thisRoleNames = roleNames();
-        std::for_each(minorRolenames.constBegin(), minorRolenames.constEnd(), [&minorRolenames, &thisRoleNames, this](auto &roleName){
-            m_minorRolesMap.insert(thisRoleNames.key(roleName), minorRolenames.key(roleName));
-        });
-    }, Qt::QueuedConnection);
+    connect(m_minor, &QAbstractItemModel::rowsInserted, this,
+        [this, majorRoles, func](const QModelIndex &parent, int first, int last){
+        auto rowCount = sourceModel()->rowCount();
+        auto columnCount = sourceModel()->columnCount();
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < columnCount; j++) {
+                // alreay bind, pass this
+                if (m_indexMap.contains(qMakePair(i ,j)))
+                    continue;
+
+                QModelIndex majorIndex = sourceModel()->index(i, j);
+                QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
+                if (majorIndex.isValid() && minorIndex.isValid())
+                    m_indexMap[qMakePair(i, j)] = qMakePair(minorIndex.row(), minorIndex.column());
+            }
+        }
+    });
+
+    // TODO: support columsInserted
+
+    // create minor role map
+    auto minorRolenames = m_minor->roleNames();
+    auto thisRoleNames = roleNames();
+    std::for_each(minorRolenames.constBegin(), minorRolenames.constEnd(), [&minorRolenames, &thisRoleNames, this](auto &roleName){
+        m_minorRolesMap.insert(thisRoleNames.key(roleName), minorRolenames.key(roleName));
+    });
 }
 
 QHash<int, QByteArray> RoleCombineModel::roleNames() const
 {
-    auto roleNames = m_major->roleNames();
-    auto keys = m_major->roleNames().keys();
+    auto roleNames = sourceModel()->roleNames();
+    auto keys = sourceModel()->roleNames().keys();
     auto lastRole = *(std::max_element(keys.constBegin(), keys.constEnd()));
     auto minorRoleNames = m_minor->roleNames().values();
     std::for_each(minorRoleNames.constBegin(), minorRoleNames.constEnd(), [&lastRole, &roleNames, this](auto &roleName){
@@ -89,28 +107,28 @@ QHash<int, QByteArray> RoleCombineModel::roleNames() const
 
 int RoleCombineModel::rowCount(const QModelIndex &parent) const
 {
-    return m_major->rowCount();
+    return sourceModel()->rowCount();
 }
 
 int RoleCombineModel::columnCount(const QModelIndex &parent) const
 {
-    return m_major->columnCount();
+    return sourceModel()->columnCount();
 }
 
 QVariant RoleCombineModel::data(const QModelIndex &index, int role) const
 {
     if (m_minorRolesMap.contains(role)) {
         int row, column;
-        std::tie(row, column) = m_indexMap.value(qMakePair(index.row(), index.column()));
+        std::tie(row, column) = m_indexMap.value(qMakePair(index.row(), index.column()), qMakePair(-1, -1));
         return m_minor->data(m_minor->index(row, column), m_minorRolesMap[role]);
     } else {
-        return m_major->data(m_major->index(index.row(), index.column()), role);
+        return sourceModel()->data(sourceModel()->index(index.row(), index.column()), role);
     }
 }
 
 bool RoleCombineModel::hasIndex(int row, int column, const QModelIndex &parent) const
 {
-    return m_major->hasIndex(row, column, parent);
+    return sourceModel()->hasIndex(row, column, parent);
 }
 
 QModelIndex RoleCombineModel::index(int row, int column, const QModelIndex &parent) const
@@ -118,7 +136,7 @@ QModelIndex RoleCombineModel::index(int row, int column, const QModelIndex &pare
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
-    auto index = m_major->index(row, column);
+    auto index = sourceModel()->index(row, column);
     return createIndex(row, column, index.internalPointer());
 }
 
@@ -129,10 +147,20 @@ QModelIndex RoleCombineModel::parent(const QModelIndex &child) const
 
 QAbstractItemModel* RoleCombineModel::majorModel() const
 {
-    return m_major;
+    return sourceModel();
 }
 
 QAbstractItemModel* RoleCombineModel::minorModel() const
 {
     return m_minor;
+}
+
+QModelIndex RoleCombineModel::mapToSource(const QModelIndex &proxyIndex) const
+{
+    return sourceModel()->index(proxyIndex.row(), proxyIndex.column());
+}
+
+QModelIndex RoleCombineModel::mapFromSource(const QModelIndex &sourceIndex) const
+{
+    return index(sourceIndex.row(), sourceIndex.column());
 }

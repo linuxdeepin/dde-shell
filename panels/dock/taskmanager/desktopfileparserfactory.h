@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "dsglobal.h"
 #include "abstractwindow.h"
 
 #include <QMap>
