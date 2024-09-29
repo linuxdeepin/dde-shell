@@ -27,4 +27,10 @@ Control {
     signal remove()
     signal setting(var pos)
     signal actionInvoked(var actionId)
+    signal linkActivated(var link)
+
+    onLinkActivated: function (link) {
+        console.log("Link actived", link)
+        ApplicationHelper.openUrl(link)
+    }
 }

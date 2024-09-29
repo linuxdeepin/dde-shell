@@ -139,12 +139,6 @@ DelegateChooser {
             strongInteractive: model.strongInteractive
             contentIcon: model.contentIcon
 
-            function expandApp()
-            {
-                console.log("expand")
-                notifyModel.expandApp(index)
-            }
-
             Loader {
                 anchors.fill: parent
                 active: overlapNotify.activeFocus && NotifyAccessor.debuging
@@ -163,14 +157,11 @@ DelegateChooser {
                 }
             }
 
-            // expand
-            TapHandler {
-                acceptedButtons: Qt.LeftButton
-                onTapped: expandApp()
+            onExpand: function ()
+            {
+                console.log("expand")
+                notifyModel.expandApp(model.index)
             }
-            Keys.onEnterPressed: expandApp()
-            Keys.onReturnPressed: expandApp()
-
             onSetting: function (pos) {
                 let tmp = mapToItem(root.view, pos)
                 root.setting(tmp, {
