@@ -176,11 +176,12 @@ void BubbleItem::setEntity(const NotifyEntity &entity)
         m_urgency = hints.value("urgency").toInt();
     }
 
+    //  If 0, never expire. if -1, dependent on the notification server's settings
     int expireTimeout = entity.expiredTimeout();
-    if (m_urgency != Critical && expireTimeout >= 0) {
+    if (m_urgency != Critical && expireTimeout != 0) {
         auto timer = new QTimer(this);
         timer->setSingleShot(true);
-        timer->setInterval(expireTimeout == 0 ? DefaultTimeOutMSecs : expireTimeout);
+        timer->setInterval(expireTimeout == -1 ? DefaultTimeOutMSecs : expireTimeout);
         connect(timer, &QTimer::timeout, this, [this] {
             Q_EMIT expired(this);
         });
