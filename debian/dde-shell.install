@@ -12,12 +12,15 @@ usr/lib/*/dde-shell/org.deepin.ds.dde-appearance*
 usr/share/dde-shell/org.deepin.ds.dde-appearance*/
 usr/lib/*/dde-shell/org.deepin.ds.dde-am*
 usr/share/dde-shell/org.deepin.ds.dde-am*/
+usr/lib/*/dde-shell/org.deepin.ds.dde-apps*
+usr/share/dde-shell/org.deepin.ds.dde-apps*/
 usr/share/dsg/configs/org.deepin.ds.dock/
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.dde.shell.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.tray.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.taskmanager.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.dde.shell.notification.json
+usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dde-apps.json
 usr/share/dde-shell/*/translations
 usr/share/dde-dock/icons/dcc-setting/*.svg
 usr/lib/*/qt6/qml/org/deepin/ds/notificationcenter/*
