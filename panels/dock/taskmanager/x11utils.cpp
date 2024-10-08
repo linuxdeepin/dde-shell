@@ -267,7 +267,8 @@ QStringList X11Utils::getWindowWMClass(const xcb_window_t &window)
         return {instanceName, className};
     }
 
-    return {};
+    // return empty instanceName and className
+    return {"", ""};
 }
 
 QList<xcb_atom_t> X11Utils::getWindowTypes(const xcb_window_t &window)
