@@ -36,12 +36,8 @@ qt_add_qml_module(notificationcenterpanel
         notifyaccessor.cpp
         notifymodel.h
         notifymodel.cpp
-        notifyentity.h
-        notifyentity.cpp
         notifyitem.h
         notifyitem.cpp
-        dbaccessor.h
-        dbaccessor.cpp
     OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/notificationcenter/
 )
@@ -60,9 +56,9 @@ qt_add_resources(notificationcenterpanel "ds_notificationcenterpanel_icons"
 target_link_libraries(notificationcenterpanel
     PRIVATE
         dde-shell-frame
+        notification-shared
         Qt${QT_VERSION_MAJOR}::Quick
         Qt${QT_VERSION_MAJOR}::DBus
-        Qt${QT_VERSION_MAJOR}::Sql
 )
 
 install(TARGETS notificationcenterpanelplugin DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/notificationcenter/")

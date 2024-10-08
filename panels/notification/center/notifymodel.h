@@ -10,11 +10,11 @@
 #include "notifyitem.h"
 
 namespace notifycenter {
-class NotifyEntity;
 class NotifyAccessor;
 /**
  * @brief The NotifyModel class
  */
+using namespace notification;
 class NotifyModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -42,7 +42,7 @@ public:
 
     Q_INVOKABLE void expandApp(int row);
     Q_INVOKABLE void collapseApp(int row);
-    Q_INVOKABLE void remove(const QString &id);
+    Q_INVOKABLE void remove(qint64 id);
     Q_INVOKABLE void removeByApp(const QString &appName);
     Q_INVOKABLE void clear();
     Q_INVOKABLE void collapseAllApp();
@@ -51,7 +51,7 @@ public:
     Q_INVOKABLE void open();
     Q_INVOKABLE void close();
 
-    Q_INVOKABLE void invokeAction(const QString &id, const QString &actionId);
+    Q_INVOKABLE void invokeAction(qint64 id, const QString &actionId);
     Q_INVOKABLE void pinApplication(const QString &appName, bool pin);
 
     QString dataInfo() const;
@@ -75,7 +75,7 @@ public:
     virtual void sort(int column, Qt::SortOrder order) override;
 
 private slots:
-    void doEntityReceived(const QString &id);
+    void doEntityReceived(qint64 id);
     void onCountChanged();
 
 private:

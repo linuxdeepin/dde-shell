@@ -70,7 +70,7 @@ NotifyEntity::NotifyEntity(const QString &appName, uint replacesId, const QStrin
     d->actions = actions;
     d->hints = hints;
     d->expireTimeout = expireTimeout;
-    d->cTime = QDateTime::currentSecsSinceEpoch();
+    d->cTime = QDateTime::currentMSecsSinceEpoch();
 }
 
  NotifyEntity::NotifyEntity(const NotifyEntity &other)

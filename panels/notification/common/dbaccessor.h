@@ -18,16 +18,16 @@ class NotifyEntity;
 class DBAccessor : public DataAccessor
 {
 public:
-    explicit DBAccessor();
+    explicit DBAccessor(const QString &key);
     bool open(const QString &dataPath);
 
     qint64 addEntity(const NotifyEntity &entity) override;
     void updateEntityProcessedType(qint64 id, int processedType) override;
 
-    NotifyEntity fetchEntity(const QString &id, int processedType) override;
+    NotifyEntity fetchEntity(qint64 id) override;
     int fetchEntityCount(const QString &appName, int processedType) const override;
     NotifyEntity fetchLastEntity(const QString &appName, int processedType) override;
-    QList<NotifyEntity> fetchEntities(const QString &appName, int maxCount, int processedType) override;
+    QList<NotifyEntity> fetchEntities(const QString &appName, int processedType, int maxCount) override;
     QList<QString> fetchApps(int maxCount) const override;
 
     void removeEntity(qint64 id) override;
@@ -46,5 +46,6 @@ private:
 
 private:
     QSqlDatabase m_connection;
+    QString m_key;
 };
 }

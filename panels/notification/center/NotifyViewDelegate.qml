@@ -28,7 +28,7 @@ DelegateChooser {
 
             Loader {
                 anchors.fill: parent
-                active: groupNotify.activeFocus && NotifyAccessor.debuging
+                active: groupNotify.activeFocus && NotifyAccessor.debugging
 
                 sourceComponent: FocusBoxBorder {
                     radius: groupNotify.radius
@@ -80,7 +80,7 @@ DelegateChooser {
 
             Loader {
                 anchors.fill: parent
-                active: normalNotify.activeFocus && NotifyAccessor.debuging
+                active: normalNotify.activeFocus && NotifyAccessor.debugging
 
                 sourceComponent: FocusBoxBorder {
                     radius: normalNotify.radius
@@ -141,7 +141,7 @@ DelegateChooser {
 
             Loader {
                 anchors.fill: parent
-                active: overlapNotify.activeFocus && NotifyAccessor.debuging
+                active: overlapNotify.activeFocus && NotifyAccessor.debugging
 
                 sourceComponent: FocusBoxBorder {
                     radius: overlapNotify.radius

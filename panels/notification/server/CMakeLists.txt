@@ -4,7 +4,7 @@
 
 set(NOTIFICATION_SERVER "notificationserver")
 
-file (GLOB SERVER_SOURCES *.cpp *.h ../common/*.h ../common/*.cpp)
+file (GLOB SERVER_SOURCES *.cpp *.h)
 
 set_source_files_properties(
     ${CMAKE_CURRENT_SOURCE_DIR}/dbus/xml/org.deepin.dde.SessionManager1.xml
@@ -29,8 +29,8 @@ target_include_directories(${NOTIFICATION_SERVER} PRIVATE
 
 target_link_libraries(${NOTIFICATION_SERVER} PRIVATE
     dde-shell-frame
+    notification-shared
     Qt${QT_MAJOR_VERSION}::DBus
-    Qt${QT_MAJOR_VERSION}::Sql
 )
 
 dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES configs/org.deepin.dde.shell.notification.json)

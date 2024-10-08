@@ -30,7 +30,7 @@ static const QStringList IgnoreList= {
 
 NotificationManager::NotificationManager(QObject *parent)
     : QObject(parent)
-    , m_persistence(new DBAccessor())
+    , m_persistence(new DBAccessor("Manager"))
     , m_notificationSetting(new NotificationSetting(this))
     , m_userSessionManager(new UserSessionManager(SessionDBusService, SessionDaemonDBusPath, QDBusConnection::sessionBus(), this))
 {

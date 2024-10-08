@@ -29,6 +29,14 @@ void NotificationSetting::setAppSetting(const QString &id, NotificationSetting::
 
 QVariant NotificationSetting::getAppSetting(const QString &id, NotificationSetting::AppConfigItem item)
 {
+    switch (item) {
+    case NotificationSetting::EnableNotification:
+        return true;
+    case NotificationSetting::ShowInNotificationCenter:
+        return true;
+    default:
+        return QVariant();
+    }
     return QVariant();
 }
 

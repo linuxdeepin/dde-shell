@@ -5,7 +5,6 @@
 #include "dbaccessor.h"
 #include "notifyentity.h"
 
-#include <QGuiApplication>
 #include <QLoggingCategory>
 #include <QStandardPaths>
 #include <QDir>
@@ -69,10 +68,11 @@ static QString notificationDBPath()
     return QString();
 }
 
-DBAccessor::DBAccessor()
+DBAccessor::DBAccessor(const QString &key)
+    : m_key(key)
 {
     const auto dataPath = notificationDBPath();
-    qInfo() << "dataPath:" << dataPath;
+    qInfo() << "Accessor's key:" << m_key << ", dataPath:" << dataPath;
     if (!dataPath.isEmpty() && open(dataPath)) {
         tryToCreateTable();
     }
@@ -80,12 +80,10 @@ DBAccessor::DBAccessor()
 
 bool DBAccessor::open(const QString &dataPath)
 {
-    if (m_connection.isOpen()) {
-        m_connection.close();
-    }
-    m_connection = QSqlDatabase::addDatabase("QSQLITE", "QSQLITE");
+    m_connection = QSqlDatabase::addDatabase("QSQLITE", "QSQLITE" + m_key);
     m_connection.setDatabaseName(dataPath);
     qDebug(notifyLog) << "Open database path" << dataPath;
+
     if (!m_connection.open()) {
         qWarning() << "Open database error" << m_connection.lastError().text();
         return false;
@@ -123,6 +121,7 @@ qint64 DBAccessor::addEntity(const NotifyEntity &entity)
     query.bindValue(":timeout", entity.expiredTimeout());
     query.bindValue(":processedType", entity.processedType());
 
+    qDebug(notifyLog) << "Exec query" << query.lastQuery();
     if (!query.exec()) {
         qWarning() << "insert value to database failed: " << query.lastError().text() << entity.bubbleId() << entity.cTime();
         return 0;
@@ -151,23 +150,23 @@ void DBAccessor::updateEntityProcessedType(qint64 id, int processedType)
 {
     QSqlQuery query(m_connection);
 
-    QString cmd = QString("UPDATE %1 SET Processed = :processed WHERE ID = :id").arg(TableName_v2);
+    QString cmd = QString("UPDATE %1 SET ProcessedType = :processed WHERE ID = :id").arg(TableName_v2);
     query.prepare(cmd);
     query.bindValue(":id", id);
     query.bindValue(":processed", processedType);
 
+    qDebug(notifyLog) << "Exec query" << query.lastQuery();
     if (!query.exec()) {
         qWarning() << "update processed type execution error:" << query.lastError().text();
     }
 }
 
-NotifyEntity DBAccessor::fetchEntity(const QString &id, int processedType)
+NotifyEntity DBAccessor::fetchEntity(qint64 id)
 {
     QSqlQuery query(m_connection);
-    QString cmd = QString("SELECT %1 FROM notifications2 WHERE ID = :id AND ProcessedType = :processedType").arg(EntityFields.join(","));
+    QString cmd = QString("SELECT %1 FROM notifications2 WHERE ID = :id").arg(EntityFields.join(","));
     query.prepare(cmd);
     query.bindValue(":id", id);
-    query.bindValue(":processedType", processedType);
 
     qDebug(notifyLog) << "Exec query" << query.lastQuery();
     if (!query.exec()) {
@@ -185,11 +184,11 @@ int DBAccessor::fetchEntityCount(const QString &appName, int processedType) cons
 {
     QSqlQuery query(m_connection);
     if (!appName.isEmpty()) {
-        QString cmd = QString("SELECT COUNT(*) FROM notifications2 WHERE AppName = :appName AND ProcessedType = :processedType");
+        QString cmd = QString("SELECT COUNT(*) FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL)");
         query.prepare(cmd);
         query.bindValue(":appName", appName);
     } else {
-        QString cmd = QString("SELECT COUNT(*) FROM notifications2 WHERE ProcessedType = :processedType");
+        QString cmd = QString("SELECT COUNT(*) FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL)");
         query.prepare(cmd);
     }
 
@@ -210,7 +209,7 @@ int DBAccessor::fetchEntityCount(const QString &appName, int processedType) cons
 NotifyEntity DBAccessor::fetchLastEntity(const QString &appName, int processedType)
 {
     QSqlQuery query(m_connection);
-    QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND ProcessedType = :processedType ORDER BY CTime DESC LIMIT 1").arg(EntityFields.join(","));
+    QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT 1").arg(EntityFields.join(","));
     query.prepare(cmd);
     query.bindValue(":appName", appName);
     query.bindValue(":processedType", processedType);
@@ -230,16 +229,16 @@ NotifyEntity DBAccessor::fetchLastEntity(const QString &appName, int processedTy
     return {};
 }
 
-QList<NotifyEntity> DBAccessor::fetchEntities(const QString &appName, int maxCount, int processedType)
+QList<NotifyEntity> DBAccessor::fetchEntities(const QString &appName, int processedType, int maxCount)
 {
     QSqlQuery query(m_connection);
     if (maxCount >= 0) {
-        QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND ProcessedType = :processedType ORDER BY CTime DESC LIMIT :limit").arg(EntityFields.join(","));
+        QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT :limit").arg(EntityFields.join(","));
         query.prepare(cmd);
         query.bindValue(":appName", appName);
         query.bindValue(":limit", maxCount);
     } else {
-        QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND ProcessedType = :processedType ORDER BY CTime DESC").arg(EntityFields.join(","));
+        QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC").arg(EntityFields.join(","));
         query.prepare(cmd);
         query.bindValue(":appName", appName);
     }

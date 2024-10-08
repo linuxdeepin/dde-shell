@@ -6,7 +6,7 @@
 
 #include "notificationcenterproxy.h"
 #include "notifyaccessor.h"
-#include "dbaccessor.h"
+#include "common/dbaccessor.h"
 #include "pluginfactory.h"
 
 #include <QDBusConnection>
@@ -47,7 +47,7 @@ bool NotificationCenterPanel::init()
 
     DPanel::init();
 
-    auto accessor = new notifycenter::DBAccessor();
+    auto accessor = new notification::DBAccessor("Query");
     notifycenter::NotifyAccessor::instance()->setDataAccessor(accessor);
 
     return true;
