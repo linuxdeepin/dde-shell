@@ -63,12 +63,19 @@ bool NotificationManager::registerDbusService()
     return true;
 }
 
+uint NotificationManager::recordCount() const
+{
+    return m_persistence->fetchEntityCount(QLatin1String(), NotifyEntity::processedValue());
+}
+
 void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
 {
     m_persistence->updateEntityProcessedType(id, NotifyEntity::processedValue());
 
     Q_EMIT ActionInvoked(bubbleId, actionKey);
     Q_EMIT NotificationClosed(bubbleId, NotificationManager::Closed);
+
+    emitRecordCountChanged();
 }
 
 void NotificationManager::notificationClosed(qint64 id, uint bubbleId, uint reason)
@@ -76,11 +83,15 @@ void NotificationManager::notificationClosed(qint64 id, uint bubbleId, uint reas
     m_persistence->updateEntityProcessedType(id, NotifyEntity::processedValue());
 
     Q_EMIT NotificationClosed(bubbleId, reason);
+
+    emitRecordCountChanged();
 }
 
 void NotificationManager::notificationReplaced(qint64 id)
 {
     m_persistence->removeEntity(id);
+
+    emitRecordCountChanged();
 }
 
 QStringList NotificationManager::GetCapabilities()
@@ -289,6 +300,14 @@ void NotificationManager::tryRecordEntity(const QString &appId, NotifyEntity &en
 
     qint64 id = m_persistence->addEntity(entity);
     entity.setId(id);
+
+    emitRecordCountChanged();
+}
+
+void NotificationManager::emitRecordCountChanged()
+{
+    const auto count = m_persistence->fetchEntityCount(QLatin1String(), NotifyEntity::processedValue());
+    emit RecordCountChanged(count);
 }
 
 } // notification

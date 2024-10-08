@@ -21,6 +21,7 @@ class NotificationSetting;
 class NotificationManager : public QObject, public QDBusContext
 {
     Q_OBJECT
+    Q_PROPERTY(uint recordCount READ recordCount NOTIFY RecordCountChanged)
 public:
     explicit NotificationManager(QObject *parent = nullptr);
     ~NotificationManager() override;
@@ -35,6 +36,7 @@ public:
 public:
     bool registerDbusService();
 
+    uint recordCount() const;
     void actionInvoked(qint64 id, uint bubbleId, const QString &actionKey);
     void notificationClosed(qint64 id, uint bubbleId, uint reason);
     void notificationReplaced(qint64 id);
@@ -43,6 +45,7 @@ Q_SIGNALS:
     // Standard Notifications dbus implementation
     void ActionInvoked(uint id, const QString &actionKey);
     void NotificationClosed(uint id, uint reason);
+    void NotificationClosed2(uint id, uint reason);
 
     // Extra DBus APIs
     void RecordCountChanged(uint count);
@@ -78,6 +81,7 @@ private:
     void tryPlayNotificationSound(const QString &appName, bool dndMode,
                                   const QStringList &actions, const QVariantMap &hints) const;
     void tryRecordEntity(const QString &appId, NotifyEntity &entity);
+    void emitRecordCountChanged();
 
 private:
     uint m_replacesCount = 0;
