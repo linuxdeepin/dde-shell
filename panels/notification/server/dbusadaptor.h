@@ -11,6 +11,7 @@
 
 namespace notification {
 
+class NotificationManager;
 class DbusAdaptor : public QDBusAbstractAdaptor
 {
     Q_OBJECT
@@ -26,6 +27,10 @@ public Q_SLOTS: // methods
     void CloseNotification(uint id);
     void GetServerInformation(QString &name, QString &vendor, QString &version, QString &specVersion);
 
+
+protected:
+    NotificationManager *manager() const;
+
 Q_SIGNALS:
     void ActionInvoked(uint id, const QString &actionKey);
     void NotificationClosed(uint id, uint reason);
@@ -35,12 +40,15 @@ Q_SIGNALS:
 class DDENotificationDbusAdaptor : public DbusAdaptor
 {
     Q_OBJECT
+    Q_PROPERTY(uint recordCount READ recordCount NOTIFY RecordCountChanged)
     Q_CLASSINFO("D-Bus Interface", "org.deepin.dde.Notification1")
 
 public:
     explicit DDENotificationDbusAdaptor(QObject *parent = nullptr);
 
 public Q_SLOTS: // methods
+    uint recordCount() const;
+
     QStringList GetAppList();
     QDBusVariant GetAppInfo(const QString &appId, uint configItem);
     void SetAppInfo(const QString &appId, uint configItem, const QDBusVariant &value);

@@ -15,46 +15,40 @@ DbusAdaptor::DbusAdaptor(QObject *parent)
 
 QStringList DbusAdaptor::GetCapabilities()
 {
-    auto manager = qobject_cast<NotificationManager *>(parent());
-    if (!manager)
-        return QStringList();
-
-    return manager->GetCapabilities();
+    return manager()->GetCapabilities();
 }
 
 uint DbusAdaptor::Notify(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary,
                          const QString &body, const QStringList &actions, const QVariantMap &hints,
                          int expireTimeout)
 {
-    auto manager = qobject_cast<NotificationManager *>(parent());
-    if (!manager)
-        return 0;
-
-    return manager->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
+    return manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
 }
 
 void DbusAdaptor::CloseNotification(uint id)
 {
-    auto manager = qobject_cast<NotificationManager *>(parent());
-    if (!manager)
-        return;
-
-    manager->CloseNotification(id);
+    manager()->CloseNotification(id);
 }
 
 void DbusAdaptor::GetServerInformation(QString &name, QString &vendor, QString &version, QString &specVersion)
 {
-    auto manager = qobject_cast<NotificationManager *>(parent());
-    if (!manager)
-        return;
+    manager()->GetServerInformation(name, vendor, version, specVersion);
+}
 
-    manager->GetServerInformation(name, vendor, version, specVersion);
+NotificationManager *DbusAdaptor::manager() const
+{
+    return qobject_cast<NotificationManager *>(parent());
 }
 
 DDENotificationDbusAdaptor::DDENotificationDbusAdaptor(QObject *parent)
     : DbusAdaptor(parent)
 {
     setAutoRelaySignals(true);
+}
+
+uint DDENotificationDbusAdaptor::recordCount() const
+{
+    return manager()->recordCount();
 }
 
 QStringList DDENotificationDbusAdaptor::GetAppList()
