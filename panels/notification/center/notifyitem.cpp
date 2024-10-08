@@ -7,7 +7,6 @@
 #include <QDateTime>
 #include <QLoggingCategory>
 
-#include "notifyentity.h"
 #include "notifyaccessor.h"
 
 namespace notifycenter {
@@ -50,7 +49,7 @@ QString AppNotifyItem::appName() const
     return m_entity.appName();
 }
 
-QString AppNotifyItem::id() const
+qint64 AppNotifyItem::id() const
 {
     Q_ASSERT(m_entity.isValid());
     return m_entity.id();
@@ -63,7 +62,7 @@ QString AppNotifyItem::time() const
 
 void AppNotifyItem::updateTime()
 {
-    QDateTime time = QDateTime::fromMSecsSinceEpoch(m_entity.time());
+    QDateTime time = QDateTime::fromMSecsSinceEpoch(m_entity.cTime());
     if (!time.isValid())
         return;
 
@@ -71,7 +70,7 @@ void AppNotifyItem::updateTime()
     QDateTime currentTime = QDateTime::currentDateTime();
     auto elapsedDay = time.daysTo(currentTime);
     if (elapsedDay == 0) {
-        qint64 msec = QDateTime::currentMSecsSinceEpoch() - m_entity.time();
+        qint64 msec = QDateTime::currentMSecsSinceEpoch() - m_entity.cTime();
         auto minute = msec / 1000 / 60;
         if (minute <= 0) {
             ret = tr("Just now");
@@ -113,11 +112,7 @@ QVariantList AppNotifyItem::actions() const
 
 void AppNotifyItem::updateActions()
 {
-    const auto action = m_entity.action();
-    if (action.isEmpty())
-        return;
-
-    QStringList actions = NotifyEntity::parseAction(action);
+    QStringList actions = m_entity.actions();
     const auto defaultIndex = actions.indexOf(QLatin1String("default"));
     if (defaultIndex >= 0) {
         actions.remove(defaultIndex, 2);
@@ -139,7 +134,7 @@ void AppNotifyItem::updateActions()
 
 void AppNotifyItem::updateStrongInteractive()
 {
-    QMap<QString, QVariant> hints = NotifyEntity::parseHint(m_entity.hint());
+    QMap<QString, QVariant> hints = m_entity.hints();
     if (hints.isEmpty())
         return;
     bool ret = false;
@@ -156,7 +151,7 @@ void AppNotifyItem::updateStrongInteractive()
 
 void AppNotifyItem::updateContentIcon()
 {
-    QMap<QString, QVariant> hints = NotifyEntity::parseHint(m_entity.hint());
+    QMap<QString, QVariant> hints = m_entity.hints();
     if (hints.isEmpty())
         return;
     QString ret;
@@ -222,7 +217,7 @@ bool OverlapAppNotifyItem::isEmpty() const
 }
 
 AppGroupNotifyItem::AppGroupNotifyItem(const QString &appName)
-    : AppNotifyItem(NotifyEntity(QLatin1String("Invalid"), appName))
+    : AppNotifyItem(NotifyEntity(std::numeric_limits<qint64>().max(), appName))
 {
 }
 

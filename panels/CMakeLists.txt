@@ -4,4 +4,3 @@
 
 add_subdirectory(dock)
 add_subdirectory(notification)
-add_subdirectory(notification-center)

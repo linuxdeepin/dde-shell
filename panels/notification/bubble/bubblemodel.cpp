@@ -266,7 +266,8 @@ void BubbleModel::updateBubbleTimeTip()
     for (int i = 0; i < displayRowCount(); i++) {
         auto item = m_bubbles.at(i);
 
-        qint64 diff = QDateTime::currentSecsSinceEpoch() - item->ctime();
+        qint64 diff = QDateTime::currentMSecsSinceEpoch() - item->ctime();
+        diff /= 1000; // secs
         QString timeTip;
         if (diff >= 60) {
             timeTip = tr("%1 minutes ago").arg(diff / 60);

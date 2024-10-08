@@ -9,7 +9,7 @@ Loader {
     id: root
     property int radius: 12
     property color color: palette.base
-    active: NotifyAccessor.debuging
+    active: NotifyAccessor.debugging
     sourceComponent: Rectangle {
         border.color: "cyan"
         color: root.color

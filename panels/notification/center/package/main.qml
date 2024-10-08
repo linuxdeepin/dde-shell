@@ -21,6 +21,7 @@ Window {
         return dockPosition === position ? dockSize + 10 : 0
     }
 
+    // visible: true
     visible: Panel.visible
     flags: Qt.Tool
 

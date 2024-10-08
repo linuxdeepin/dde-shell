@@ -7,7 +7,7 @@
 #include <QTimerEvent>
 #include <QLoggingCategory>
 
-#include "notifyentity.h"
+#include "common/notifyentity.h"
 #include "notifyitem.h"
 #include "notifyaccessor.h"
 
@@ -340,7 +340,7 @@ bool NotifyModel::greaterNotify(const NotifyEntity &item1, const NotifyEntity &i
     const auto item2Pin = m_accessor->applicationPin(item2.appName());
     // using time when pin is same, otherwise using pin.
     if (item1Pin == item2Pin) {
-        return item1.time() >= item2.time();
+        return item1.cTime() >= item2.cTime();
     }
     return item1Pin;
 }
@@ -384,7 +384,7 @@ void NotifyModel::trayUpdateGroupLastEntity(const NotifyEntity &entity)
 {
     if (const auto index = firstNotifyIndex(entity.appName(), NotifyType::Group); index >= 0) {
         auto group = dynamic_cast<AppGroupNotifyItem *>(m_appNotifies.at(index));
-        if (!group->lastEntity().isValid() || group->lastEntity().time() < entity.time()) {
+        if (!group->lastEntity().isValid() || group->lastEntity().cTime() < entity.cTime()) {
             group->updateLastEntity(entity);
         }
     }
@@ -397,7 +397,7 @@ void NotifyModel::trayUpdateGroupLastEntity(const QString &appName)
         if (notifyCount(appName, NotifyType::Group) >= 1) {
             const auto nextNotifyItem = m_appNotifies.at(index + 1);
             const auto entity = nextNotifyItem->entity();
-            if (!group->lastEntity().isValid() || group->lastEntity().time() < entity.time()) {
+            if (!group->lastEntity().isValid() || group->lastEntity().cTime() < entity.cTime()) {
                 group->updateLastEntity(entity);
             }
         }
@@ -411,7 +411,7 @@ bool NotifyModel::greaterNotify(const AppNotifyItem *item1, const AppNotifyItem 
     // `group` is order high in same group.
     if (item1->appName() == item2->appName()) {
         if (item1->type() == item2->type()) {
-            return entity1.time() >= entity2.time();
+            return entity1.cTime() >= entity2.cTime();
         }
         return item1->type() == NotifyType::Group;
     }
@@ -432,7 +432,7 @@ bool NotifyModel::collapse() const
     return m_collapse;
 }
 
-void NotifyModel::remove(const QString &id)
+void NotifyModel::remove(qint64 id)
 {
     qDebug(notifyLog) << "Remove notify by id" << id;
 
@@ -649,7 +649,7 @@ void NotifyModel::expandAllApp()
     refreshRemainCountState();
 }
 
-void NotifyModel::invokeAction(const QString &id, const QString &actionId)
+void NotifyModel::invokeAction(qint64 id, const QString &actionId)
 {
     qDebug(notifyLog) << "Invoke action for the notify" << id << actionId;
     auto entity = m_accessor->fetchEntity(id);
@@ -710,11 +710,11 @@ QVariant NotifyModel::data(const QModelIndex &index, int role) const
     } else if (role == NotifyRole::NotifyAppId) {
         return notify->appName();
     } else if (role == NotifyRole::NotifyIconName) {
-        return notify->entity().iconName();
+        return notify->entity().appIcon();
     } else if (role == NotifyRole::NotifyTitle) {
-        return notify->entity().title();
+        return notify->entity().summary();
     } else if (role == NotifyRole::NotifyContent) {
-        return notify->entity().content();
+        return notify->entity().body();
     } else if (role == NotifyRole::NotifyActions) {
         return notify->actions();
     } else if (role == NotifyRole::NotifyDefaultAction) {
@@ -789,9 +789,14 @@ QHash<int, QByteArray> NotifyModel::roleNames() const
     return roles;
 }
 
-void NotifyModel::doEntityReceived(const QString &id)
+void NotifyModel::doEntityReceived(qint64 id)
 {
+    qDebug(notifyLog) << "Receive entity" << id;
     auto entity = m_accessor->fetchEntity(id);
+    if (!entity.isValid()) {
+        qWarning(notifyLog) << "Received invalid entity:" << id << ", appName:" << entity.appName();
+        return;
+    }
     append(entity);
 }
 

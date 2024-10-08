@@ -6,7 +6,7 @@
 
 #include <QObject>
 #include <QVariantMap>
-#include "notifyentity.h"
+#include "common/notifyentity.h"
 
 namespace notifycenter {
 enum NotifyType {
@@ -17,6 +17,7 @@ enum NotifyType {
 /**
  * @brief The AppNotifyItem class
  */
+using namespace notification;
 class AppNotifyItem : public QObject
 {
 public:
@@ -28,7 +29,7 @@ public:
     virtual NotifyType type() const;
     QString appName() const;
     QString appId() const;
-    QString id() const;
+    qint64 id() const;
     QString time() const;
     void updateTime();
     bool strongInteractive() const;

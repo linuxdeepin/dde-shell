@@ -35,7 +35,7 @@ bool BubblePanel::init()
     DPanel::init();
 
     auto applets = appletList("org.deepin.ds.notificationserver");
-    if (!applets.isEmpty() && !applets.at(0)) {
+    if (applets.isEmpty() || !applets.at(0)) {
         qCWarning(notificationLog) << "Can't get notification server object";
         return false;
     }

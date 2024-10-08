@@ -6,13 +6,17 @@
 
 #include <QObject>
 #include <QtQml/qqml.h>
-#include "panels/notification/common/notifyentity.h"
+#include "common/notifyentity.h"
 
 class QQmlEngine;
 class QJSEngine;
 namespace notification {
-
 class DataAccessor;
+}
+
+namespace notifycenter {
+
+using namespace notification;
 /**
  * @brief The NotifyAccessor class
  */
@@ -35,23 +39,30 @@ public:
     bool applicationPin(const QString &appName) const;
     Q_INVOKABLE void openNotificationSetting();
 
-    NotifyEntity fetchEntity(const QString &id) const;
+    NotifyEntity fetchEntity(qint64 id) const;
     int fetchEntityCount(const QString &appName = QString()) const;
     NotifyEntity fetchLastEntity(const QString &appName) const;
     QList<NotifyEntity> fetchEntities(const QString &appName, int maxCount = -1);
     QStringList fetchApps(int maxCount = -1) const;
-    void removeEntity(const QString &id);
+    void removeEntity(qint64 id);
     void removeEntityByApp(const QString &appName);
     void clear();
 
 signals:
-    void entityReceived(const QString &id);
+    void entityReceived(qint64 id);
+
+public slots:
+    void addNotify(const QString &appName, const QString &content);
+
+signals:
     void dataInfoChanged();
     void appsChanged();
     void debuggingChanged();
 
 private slots:
-    void onReceivedRecord(const QString &id);
+    void onReceivedRecordStateChanged(qint64 id, int processedType);
+    void onReceivedRecord(const QString& id);
+    void onReceivedRecord(qint64 id);
 
 private:
     explicit NotifyAccessor(QObject *parent = nullptr);

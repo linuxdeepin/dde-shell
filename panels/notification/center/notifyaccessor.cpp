@@ -3,20 +3,26 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "notifyaccessor.h"
-#include "panels/notification/common/notifyentity.h"
-#include "panels/notification/common/dataaccessor.h"
 
 #include <QQmlEngine>
 #include <QGuiApplication>
 #include <QLoggingCategory>
 #include <QDBusInterface>
+#include <QDBusPendingReply>
 #include <QProcess>
 #include <QElapsedTimer>
 #include <QDBusReply>
-#include <QDBusVariant>
+#include <pluginloader.h>
 
-namespace notification {
+#include <QQueue>
+#include <applet.h>
+#include <containment.h>
 
+#include "common/dataaccessor.h"
+
+DS_USE_NAMESPACE
+
+namespace notifycenter {
 namespace {
 Q_LOGGING_CATEGORY(notifyLog, "notify")
 }
@@ -73,11 +79,41 @@ public:
     }
 };
 
+static QList<DApplet *> appletList(const QString &pluginId)
+{
+    QList<DApplet *> ret;
+    auto rootApplet = DPluginLoader::instance()->rootApplet();
+    auto root = qobject_cast<DContainment *>(rootApplet);
+
+    QQueue<DContainment *> containments;
+    containments.enqueue(root);
+    while (!containments.isEmpty()) {
+        DContainment *containment = containments.dequeue();
+        for (const auto applet : containment->applets()) {
+            if (auto item = qobject_cast<DContainment *>(applet)) {
+                containments.enqueue(item);
+            }
+            if (applet->pluginId() == pluginId)
+                ret << applet;
+        }
+    }
+    return ret;
+}
+
 NotifyAccessor::NotifyAccessor(QObject *parent)
 {
-    auto connection = QDBusConnection::sessionBus();
-    bool valid = connection.connect(DDENotifyDBusServer, DDENotifyDBusPath, DDENotifyDBusInterface,
-                                    "RecordAdded", this, SLOT(onReceivedRecord(const QString &)));
+    auto applets = appletList("org.deepin.ds.notificationserver");
+    bool valid = false;
+    if (!applets.isEmpty()) {
+        if (auto server = applets.first()) {
+            valid = QObject::connect(server, SIGNAL(notificationStateChanged(qint64, int)), this, SLOT(onReceivedRecordStateChanged(qint64, int)));
+        }
+    } else {
+        // old interface by dbus
+        auto connection = QDBusConnection::sessionBus();
+        valid = connection.connect(DDENotifyDBusServer, DDENotifyDBusPath, DDENotifyDBusInterface,
+                                        "RecordAdded", this, SLOT(onReceivedRecord(const QString &)));
+    }
     if (!valid) {
         qWarning() << "NotifyConnection is invalid, and can't receive RecordAdded signal.";
     }
@@ -117,7 +153,7 @@ void NotifyAccessor::setDataAccessor(DataAccessor *accessor)
     m_accessor = accessor;
 }
 
-NotifyEntity NotifyAccessor::fetchEntity(const QString &id) const
+NotifyEntity NotifyAccessor::fetchEntity(qint64 id) const
 {
     qDebug(notifyLog) << "Fetch entity" << id;
     BENCHMARK();
@@ -129,7 +165,7 @@ int NotifyAccessor::fetchEntityCount(const QString &appName) const
 {
     qDebug(notifyLog) << "Fetch entity count for the app" << appName;
     BENCHMARK();
-    auto ret = m_accessor->fetchEntityCount(appName);
+    auto ret = m_accessor->fetchEntityCount(appName, NotifyEntity::processedValue());
     return ret;
 }
 
@@ -137,14 +173,14 @@ NotifyEntity NotifyAccessor::fetchLastEntity(const QString &appName) const
 {
     qDebug(notifyLog) << "Fetch last entity for the app" << appName;
     BENCHMARK();
-    auto ret = m_accessor->fetchLastEntity(appName);
+    auto ret = m_accessor->fetchLastEntity(appName, NotifyEntity::processedValue());
     return ret;
 }
 
 QList<NotifyEntity> NotifyAccessor::fetchEntities(const QString &appName, int maxCount)
 {
     qDebug(notifyLog) << "Fetch entities for the app" << appName;
-    auto ret = m_accessor->fetchEntities(appName, maxCount);
+    auto ret = m_accessor->fetchEntities(appName, NotifyEntity::processedValue(), maxCount);
     return ret;
 }
 
@@ -156,7 +192,7 @@ QStringList NotifyAccessor::fetchApps(int maxCount) const
     return ret;
 }
 
-void NotifyAccessor::removeEntity(const QString &id)
+void NotifyAccessor::removeEntity(qint64 id)
 {
     qDebug(notifyLog) << "Remove notify" << id;
     BENCHMARK();
@@ -238,7 +274,7 @@ void NotifyAccessor::pinApplication(const QString &appName, bool pin)
     QDBusReply<void> reply = notifyCenterInterface().call("SetAppInfo",
                                  appName,
                                  ShowNotificationTop,
-                                 pin);
+                                 QDBusVariant(pin).variant());
     if (reply.error().isValid()) {
         qWarning(notifyLog) << "Failed to set Pin of the application" << appName << pin << reply.error().message();
         return;
@@ -274,7 +310,35 @@ void NotifyAccessor::openNotificationSetting()
     }
 }
 
-void NotifyAccessor::onReceivedRecord(const QString &id)
+void NotifyAccessor::addNotify(const QString &appName, const QString &content)
+{
+    qDebug(notifyLog) << "Add notify" << appName;
+    static int id = 10000;
+    NotifyEntity entity(id++, appName);
+    entity.setBody(content);
+    m_accessor->addEntity(entity);
+
+    if (auto entity = fetchLastEntity(appName); entity.isValid()) {
+        entityReceived(entity.id());
+    }
+    tryEmitAppsChanged(appName);
+    dataInfoChanged();
+}
+
+void NotifyAccessor::onReceivedRecordStateChanged(qint64 id, int processedType)
+{
+    if (processedType == NotifyEntity::processedValue()) {
+        onReceivedRecord(id);
+    }
+}
+
+void NotifyAccessor::onReceivedRecord(const QString& id)
+{
+    dataInfoChanged();
+    emit entityReceived(id.toLongLong());
+}
+
+void NotifyAccessor::onReceivedRecord(qint64 id)
 {
     dataInfoChanged();
     emit entityReceived(id);
