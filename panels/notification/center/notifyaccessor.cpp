@@ -197,15 +197,7 @@ void NotifyAccessor::removeEntity(qint64 id)
     qDebug(notifyLog) << "Remove notify" << id;
     BENCHMARK();
 
-    // TODO it maybe cause 'database is locked' by remove DB directly.
-    QDBusReply<void> reply = notifyCenterInterface().call("RemoveRecord",
-                                                          id);
-    if (reply.error().isValid()) {
-        qWarning(notifyLog) << "Failed to remove the notification" << id << reply.error().message();
-        return;
-    }
-
-    // m_accessor->removeEntity(id);
+    m_accessor->removeEntity(id);
 
     appsChanged();
     dataInfoChanged();
@@ -216,13 +208,7 @@ void NotifyAccessor::removeEntityByApp(const QString &appName)
     qDebug(notifyLog) << "Remove notifies for the application" << appName;
     BENCHMARK();
 
-    // TODO server doesn't provide a way to remove notification by appName.
-    const auto notifies = fetchEntities(appName);
-    for (auto item : notifies) {
-        notifyCenterInterface().call("RemoveRecord", item.id());
-    }
-
-    // m_accessor->removeEntityByApp(appName);
+    m_accessor->removeEntityByApp(appName);
 
     appsChanged();
     dataInfoChanged();
@@ -232,14 +218,7 @@ void NotifyAccessor::clear()
 {
     qDebug(notifyLog) << "Remove all notify";
 
-    // TODO it maybe cause 'database is locked' by remove DB directly.
-    QDBusReply<void> reply = notifyCenterInterface().call("ClearRecords");
-    if (reply.error().isValid()) {
-        qWarning(notifyLog) << "Failed to remove all notification" << reply.error().message();
-        return;
-    }
-
-    // m_accessor->clear();
+    m_accessor->clear();
 
     appsChanged();
     dataInfoChanged();
