@@ -10,6 +10,8 @@
 #include <QLoggingCategory>
 #include <QQueue>
 
+#include "dbaccessor.h"
+
 namespace notification {
 
 Q_LOGGING_CATEGORY(notificationLog, "dde.shell.notification")
@@ -40,9 +42,10 @@ bool BubblePanel::init()
         return false;
     }
 
+    m_accessor = DBAccessor::instance();
+
     m_notificationServer = applets.at(0);
-    connect(m_notificationServer, SIGNAL(needShowEntity(const QVariantMap &)), this, SLOT(addBubble(const QVariantMap &)));
-    connect(m_notificationServer, SIGNAL(needCloseEntity(uint)), this, SLOT(closeBubble(uint)));
+    connect(m_notificationServer, SIGNAL(notificationStateChanged(qint64, int)), this, SLOT(onNotificationStateChanged(qint64, int)));
 
     connect(m_bubbles, &BubbleModel::rowsInserted, this, &BubblePanel::onBubbleCountChanged);
     connect(m_bubbles, &BubbleModel::rowsRemoved, this, &BubblePanel::onBubbleCountChanged);
@@ -87,7 +90,7 @@ void BubblePanel::close(int bubbleIndex)
         return;
 
     m_bubbles->remove(bubbleIndex);
-    onBubbleClosed(bubble->id(), bubble->bubbleId(), BubbleItem::Closed);
+    onBubbleClosed(bubble->id(), bubble->bubbleId(), NotifyEntity::Closed);
 }
 
 void BubblePanel::delayProcess(int bubbleIndex)
@@ -97,7 +100,18 @@ void BubblePanel::delayProcess(int bubbleIndex)
         return;
 
     m_bubbles->remove(bubbleIndex);
-    onBubbleClosed(bubble->id(), bubble->bubbleId(), BubbleItem::Dismissed);
+    onBubbleClosed(bubble->id(), bubble->bubbleId(), NotifyEntity::Dismissed);
+}
+
+void BubblePanel::onNotificationStateChanged(qint64 id, int processedType)
+{
+    if (processedType == NotifyEntity::NotProcessed) {
+        qDebug() << "Add bubble for the notification" << id;
+        addBubble(id);
+    } else if (processedType == NotifyEntity::Processed) {
+        qDebug() << "Close bubble for the notification" << id;
+        closeBubble(id);
+    }
 }
 
 void BubblePanel::onBubbleCountChanged()
@@ -126,11 +140,10 @@ QList<DS_NAMESPACE::DApplet *> BubblePanel::appletList(const QString &pluginId) 
     return ret;
 }
 
-void BubblePanel::addBubble(const QVariantMap &entityInfo)
+void BubblePanel::addBubble(qint64 id)
 {
-    auto entity = NotifyEntity::fromVariantMap(entityInfo);
+    const auto entity = m_accessor->fetchEntity(id);
     auto bubble = new BubbleItem(entity);
-    connect(bubble, &BubbleItem::expired, this, &BubblePanel::onBubbleExpired);
 
     if (m_bubbles->isReplaceBubble(bubble)) {
         auto oldBubble = m_bubbles->replaceBubble(bubble);
@@ -144,19 +157,9 @@ void BubblePanel::addBubble(const QVariantMap &entityInfo)
     }
 }
 
-void BubblePanel::closeBubble(uint bubbleId)
+void BubblePanel::closeBubble(qint64 id)
 {
-    m_bubbles->removeByBubbleId(bubbleId);
-}
-
-void BubblePanel::onBubbleExpired(BubbleItem *bubble)
-{
-    if (!bubble) {
-        return;
-    }
-
-    m_bubbles->remove(bubble);
-    onBubbleClosed(bubble->id(), bubble->bubbleId(), BubbleItem::Expired);
+    m_bubbles->removeById(id);
 }
 
 void BubblePanel::onActionInvoked(qint64 id, uint bubbleId, const QString &actionId)

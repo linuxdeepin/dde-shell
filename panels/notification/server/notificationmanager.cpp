@@ -17,7 +17,10 @@ DCORE_USE_NAMESPACE
 
 namespace notification {
 
+Q_LOGGING_CATEGORY(notifyServerLog, "dde.shell.notification.server")
+
 static const uint NoReplacesId = 0;
+const int DefaultTimeOutMSecs = 5000;
 static const QString NotificationsDBusService = "org.freedesktop.Notifications";
 static const QString NotificationsDBusPath = "/org/freedesktop/Notifications";
 static const QString DDENotifyDBusServer = "org.deepin.dde.Notification1";
@@ -33,8 +36,10 @@ NotificationManager::NotificationManager(QObject *parent)
     , m_persistence(DBAccessor::instance())
     , m_notificationSetting(new NotificationSetting(this))
     , m_userSessionManager(new UserSessionManager(SessionDBusService, SessionDaemonDBusPath, QDBusConnection::sessionBus(), this))
+    , m_pendingTimeout(new QTimer(this))
 {
-
+    m_pendingTimeout->setSingleShot(true);
+    connect(m_pendingTimeout, &QTimer::timeout, this, &NotificationManager::onHandingPendingEntities);
 }
 
 NotificationManager::~NotificationManager()
@@ -71,6 +76,7 @@ uint NotificationManager::recordCount() const
 void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
 {
     m_persistence->updateEntityProcessedType(id, NotifyEntity::processedValue());
+    Q_EMIT notificationStateChanged(id, NotifyEntity::processedValue());
 
     Q_EMIT ActionInvoked(bubbleId, actionKey);
     Q_EMIT NotificationClosed(bubbleId, NotificationManager::Closed);
@@ -81,6 +87,7 @@ void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString 
 void NotificationManager::notificationClosed(qint64 id, uint bubbleId, uint reason)
 {
     m_persistence->updateEntityProcessedType(id, NotifyEntity::processedValue());
+    Q_EMIT notificationStateChanged(id, NotifyEntity::processedValue());
 
     Q_EMIT NotificationClosed(bubbleId, reason);
 
@@ -90,6 +97,7 @@ void NotificationManager::notificationClosed(qint64 id, uint bubbleId, uint reas
 void NotificationManager::notificationReplaced(qint64 id)
 {
     m_persistence->removeEntity(id);
+    Q_EMIT notificationStateChanged(id, NotifyEntity::removedValue());
 
     emitRecordCountChanged();
 }
@@ -132,6 +140,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     if (strIcon.isEmpty())
         strIcon = m_notificationSetting->getAppSetting(appId, NotificationSetting::AppIcon).toString();
     NotifyEntity entity(appName, replacesId, strIcon, summary, strBody, actions, hints, expireTimeout);
+    entity.setProcessedType(NotifyEntity::NotProcessed);
 
     bool enablePreview = true, lockScreenShow = true;
     bool dndMode = isDoNotDisturb();
@@ -153,13 +162,21 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
         tryRecordEntity(appId, entity);
 
         if (systemNotification || (!dndMode && enableAppNotification && (lockScreenShow || !lockScreen))) {
-            Q_EMIT needShowEntity(entity.toVariantMap());
+            Q_EMIT notificationStateChanged(entity.id(), entity.processedType());
         }
     } else { // maybe replace one
         entity.setBubbleId(replacesId);
         tryRecordEntity(appId, entity);
 
-        Q_EMIT needShowEntity(entity.toVariantMap());
+        Q_EMIT notificationStateChanged(entity.id(), entity.processedType());
+    }
+
+    bool critical = false;
+    if (auto iter = hints.find("urgency"); iter != hints.end()) {
+        critical = iter.value().toUInt() == NotifyEntity::Critical;
+    }
+    if (expireTimeout >= 0 && !critical) {
+        pushPendingEntity(entity);
     }
 
     // If replaces_id is 0, the return value is a UINT32 that represent the notification.
@@ -169,7 +186,10 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
 void NotificationManager::CloseNotification(uint id)
 {
     // TODO If the notification no longer exists, an empty D-BUS Error message is sent back.
-    Q_EMIT needCloseEntity(id);
+    const auto entity = m_persistence->fetchLastEntity(id);
+    if (entity.isValid()) {
+        Q_EMIT notificationStateChanged(entity.id(), entity.processedType());
+    }
 
     Q_EMIT NotificationClosed(id, NotificationManager::Closed);
 }
@@ -308,6 +328,59 @@ void NotificationManager::emitRecordCountChanged()
 {
     const auto count = m_persistence->fetchEntityCount(QLatin1String(), NotifyEntity::processedValue());
     emit RecordCountChanged(count);
+}
+
+void NotificationManager::pushPendingEntity(const NotifyEntity &entity)
+{
+    const int expireTimeout = entity.expiredTimeout();
+    const int interval = expireTimeout == 0 ? DefaultTimeOutMSecs : expireTimeout;
+
+    qint64 point = QDateTime::currentMSecsSinceEpoch() + interval;
+    m_pendingTimeoutEntities.insert(point, entity);
+
+    if (m_lastTimeoutPoint > point) {
+        m_lastTimeoutPoint = point;
+        auto newInterval = m_lastTimeoutPoint - QDateTime::currentMSecsSinceEpoch();
+        m_pendingTimeout->setInterval(newInterval);
+        m_pendingTimeout->start();
+    }
+}
+
+void NotificationManager::onHandingPendingEntities()
+{
+    QList<NotifyEntity> timeoutEntities;
+
+    const auto current = QDateTime::currentMSecsSinceEpoch();
+    for (auto iter = m_pendingTimeoutEntities.begin(); iter != m_pendingTimeoutEntities.end();) {
+        const auto point = iter.key();
+        if (point > current) {
+            iter++;
+            continue;
+        }
+
+        const auto entity = iter.value();;
+        timeoutEntities << entity;
+        iter = m_pendingTimeoutEntities.erase(iter);
+    }
+
+    // update pendingTimeout to deal with m_pendingTimeoutEntities
+    if (!m_pendingTimeoutEntities.isEmpty()) {
+        auto points = m_pendingTimeoutEntities.keys();
+        std::sort(points.begin(), points.end());
+        // find last point to restart pendingTimeout
+        m_lastTimeoutPoint = points.first();
+        auto newInterval = m_lastTimeoutPoint - current;
+        m_pendingTimeout->setInterval(newInterval);
+        m_pendingTimeout->start();
+    } else {
+        // reset m_lastTimeoutPoint
+        m_lastTimeoutPoint = std::numeric_limits<qint64>::max();
+    }
+
+    for (const auto item : timeoutEntities) {
+        qDebug(notifyServerLog) << "Expired for the notification " << item.id() << item.appName();
+        notificationClosed(item.id(), item.bubbleId(), NotifyEntity::Expired);
+    }
 }
 
 } // notification

@@ -15,18 +15,6 @@ class BubbleItem : public QObject
 {
     Q_OBJECT
 public:
-    enum Urgency {
-        Low = 0, // 0-low
-        Normal,  // 1-normal
-        Critical // 2-critical (critical notification does not timeout)
-    };
-
-    enum ClosedReason {
-        Expired = 1,
-        Dismissed = 2,
-        Closed = 3,
-        Unknown = 4,
-    };
 
     explicit BubbleItem(QObject *parent = nullptr);
     explicit BubbleItem(const NotifyEntity &entity, QObject *parent = nullptr);
@@ -64,7 +52,6 @@ public:
 signals:
     void levelChanged();
     void timeTipChanged();
-    void expired(BubbleItem *);
 
 private:
     int defaultActionIdIndex() const;
@@ -77,10 +64,9 @@ private:
 
 private:
     int m_level = 0;
-    int m_urgency = Normal;
+    int m_urgency = NotifyEntity::Normal;
     QString m_timeTip;
     QString m_bodyImagePath;
-    const int DefaultTimeOutMSecs = 5000;
 };
 
 }

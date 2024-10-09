@@ -21,13 +21,6 @@ public:
     {
     }
 
-    enum ProcessedType {
-        None = 0,
-        NotProcessed = 1,
-        Processed = 2,
-        Removed = 3
-    };
-
     QString appName;
     QString appIcon;
     QString summary;
@@ -40,7 +33,7 @@ public:
 
     qint64 id = -1;
     qint64 cTime = 0;
-    int processedType = NotProcessed;
+    int processedType = NotifyEntity::NotProcessed;
     bool enablePreview = true;
 };
 
@@ -229,7 +222,7 @@ void NotifyEntity::setCTime(qint64 cTime)
 
 bool NotifyEntity::processed() const
 {
-    return d->processedType == NotifyData::Processed;
+    return d->processedType == NotifyEntity::Processed;
 }
 
 int NotifyEntity::processedType() const
@@ -252,54 +245,14 @@ void NotifyEntity::setEnablePreview(bool enable)
     d->enablePreview = enable;
 }
 
-QVariantMap NotifyEntity::toVariantMap() const
-{
-    QVariantMap mapInfo;
-
-    mapInfo.insert("id", id());
-    mapInfo.insert("appName", appName());
-    mapInfo.insert("appIcon", appIcon());
-    mapInfo.insert("summary", summary());
-    mapInfo.insert("body", body());
-    mapInfo.insert("actions", actionsString());
-    mapInfo.insert("hints", hintsString());
-    mapInfo.insert("replacesId", replacesId());
-    mapInfo.insert("expireTimeout", expiredTimeout());
-    mapInfo.insert("cTime", cTime());
-    mapInfo.insert("enablePreview", enablePreview());
-
-    return mapInfo;
-}
-
-NotifyEntity NotifyEntity::fromVariantMap(const QVariantMap &mapInfo)
-{
-    if (mapInfo.isEmpty())
-        return NotifyEntity();
-
-    NotifyEntity entity;
-    entity.setId(mapInfo.value("id").toLongLong());
-    entity.setAppName(mapInfo.value("appName").toString());
-    entity.setAppIcon(mapInfo.value("appIcon").toString());
-    entity.setSummary(mapInfo.value("summary").toString());
-    entity.setBody(mapInfo.value("body").toString());
-    entity.setActionString(mapInfo.value("actions").toString());
-    entity.setHintString(mapInfo.value("hints").toString());
-    entity.setReplacesId(mapInfo.value("replacesId").toUInt());
-    entity.setExpiredTimeout(mapInfo.value("expireTimeout").toInt());
-    entity.setCTime(mapInfo.value("cTime").toLongLong());
-    entity.setEnablePreview(mapInfo.value("enablePreview").toBool());
-
-    return entity;
-}
-
 int NotifyEntity::processedValue()
 {
-    return NotifyData::Processed;
+    return NotifyEntity::Processed;
 }
 
 int NotifyEntity::removedValue()
 {
-    return NotifyData::Removed;
+    return NotifyEntity::Removed;
 }
 
 QString NotifyEntity::convertActionsToString(const QStringList &actions)

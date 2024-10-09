@@ -5,6 +5,7 @@
 #pragma once
 
 #include "panel.h"
+#include "dataaccessor.h"
 #include <QQuickItem>
 
 namespace notification {
@@ -38,8 +39,9 @@ Q_SIGNALS:
     void visibleChanged();
 
 private Q_SLOTS:
-    void addBubble(const QVariantMap &entityInfo);
-    void closeBubble(uint bubbleId);
+    void onNotificationStateChanged(qint64 id, int processedType);
+    void addBubble(qint64 id);
+    void closeBubble(qint64 id);
     void onBubbleCountChanged();
 
 private:
@@ -57,6 +59,7 @@ private:
     bool m_visible = false;
     BubbleModel *m_bubbles = nullptr;
     DS_NAMESPACE::DApplet *m_notificationServer = nullptr;
+    DataAccessor *m_accessor = nullptr;
 };
 
 }

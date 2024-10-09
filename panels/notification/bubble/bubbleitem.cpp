@@ -176,18 +176,6 @@ void BubbleItem::setEntity(const NotifyEntity &entity)
         m_urgency = hints.value("urgency").toInt();
     }
 
-    int expireTimeout = entity.expiredTimeout();
-    if (m_urgency != Critical && expireTimeout >= 0) {
-        auto timer = new QTimer(this);
-        timer->setSingleShot(true);
-        timer->setInterval(expireTimeout == 0 ? DefaultTimeOutMSecs : expireTimeout);
-        connect(timer, &QTimer::timeout, this, [this] {
-            Q_EMIT expired(this);
-        });
-
-        timer->start();
-    }
-
     if (entity.hints().contains("dde-body-image-path")) {
         m_bodyImagePath = entity.hints().value("dde-body-image-path").toString();
     }
