@@ -44,25 +44,25 @@ void NotificationSetting::setSystemSetting(NotificationSetting::SystemConfigItem
 {
     switch (item) {
         case DNDMode:
-            m_dConfig->setValue("dndmode", value);
+            m_dConfig->setValue("dndMode", value);
             break;
         case OpenByTimeInterval:
-            m_dConfig->setValue("open-by-time-interval", value);
+            m_dConfig->setValue("openByTimeInterval", value);
             break;
         case LockScreenOpenDNDMode:
-            m_dConfig->setValue("lockscreen-open-dndmode", value);
+            m_dConfig->setValue("lockscreenOpenDndMode", value);
             break;
         case StartTime:
-            m_dConfig->setValue("start-time", value);
+            m_dConfig->setValue("startTime", value);
             break;
         case EndTime:
-            m_dConfig->setValue("end-time", value);
+            m_dConfig->setValue("endTime", value);
             break;
         case CloseNotification:
-            m_dConfig->setValue("notification-closed", value);
+            m_dConfig->setValue("notificationClosed", value);
             break;
         case MaxCount:
-            m_dConfig->setValue("max-count", value);
+            m_dConfig->setValue("maxCount", value);
             break;
         default:
             return;
@@ -74,25 +74,25 @@ QVariant NotificationSetting::getSystemSetting(NotificationSetting::SystemConfig
     QVariant result;
     switch (item) {
         case DNDMode:
-            result = m_dConfig->value("dndmode");
+            result = m_dConfig->value("dndMode");
             break;
         case LockScreenOpenDNDMode:
-            result = m_dConfig->value("lockscreen-open-dndmode");
+            result = m_dConfig->value("lockscreenOpenDndMode");
             break;
         case OpenByTimeInterval:
-            result = m_dConfig->value("open-by-time-interval");
+            result = m_dConfig->value("openByTimeInterval");
             break;
         case StartTime:
-            result = m_dConfig->value("start-time");
+            result = m_dConfig->value("startTime");
             break;
         case EndTime:
-            result = m_dConfig->value("end-time");
+            result = m_dConfig->value("endTime");
             break;
         case CloseNotification:
-            result = m_dConfig->value("notification-closed");
+            result = m_dConfig->value("notificationClosed");
             break;
         case MaxCount:
-            result = m_dConfig->value("max-count");
+            result = m_dConfig->value("maxCount");
             break;
     }
 
