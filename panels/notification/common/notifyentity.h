@@ -12,6 +12,26 @@ class NotifyData;
 class NotifyEntity
 {
 public:
+    enum ProcessedType {
+        None = 0,
+        NotProcessed = 1,
+        Processed = 2,
+        Removed = 3
+    };
+
+    enum Urgency {
+        Low = 0, // 0-low
+        Normal,  // 1-normal
+        Critical // 2-critical (critical notification does not timeout)
+    };
+
+    enum ClosedReason {
+        Expired = 1,
+        Dismissed = 2,
+        Closed = 3,
+        Unknown = 4,
+    };
+
     NotifyEntity();
     explicit NotifyEntity(qint64 id, const QString &appName);
     explicit NotifyEntity(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary,
@@ -68,9 +88,6 @@ public:
 
     bool enablePreview() const;
     void setEnablePreview(bool enable);
-
-    QVariantMap toVariantMap() const;
-    static NotifyEntity fromVariantMap(const QVariantMap &mapInfo);
 
     static int processedValue();
     static int removedValue();

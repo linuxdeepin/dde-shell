@@ -114,7 +114,7 @@ void BubbleModel::remove(const BubbleItem *bubble)
     }
 }
 
-BubbleItem *BubbleModel::removeById(uint id)
+BubbleItem *BubbleModel::removeById(qint64 id)
 {
     for (const auto &item : m_bubbles) {
         if (item->id() == id) {
@@ -124,16 +124,6 @@ BubbleItem *BubbleModel::removeById(uint id)
     }
 
     return nullptr;
-}
-
-void BubbleModel::removeByBubbleId(uint bubbleId)
-{
-    for (const auto &item : m_bubbles) {
-        if (item->bubbleId() == bubbleId) {
-            remove(m_bubbles.indexOf(item));
-            return;
-        }
-    }
 }
 
 BubbleItem *BubbleModel::bubbleItem(int bubbleIndex) const

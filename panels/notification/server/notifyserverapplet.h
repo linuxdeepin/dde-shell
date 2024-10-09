@@ -19,9 +19,6 @@ public:
     bool init() override;
 
 Q_SIGNALS:
-    void needShowEntity(const QVariantMap &mapInfo);
-    void needCloseEntity(uint bubbleId);
-
     void notificationStateChanged(qint64 id, int processedType);
 
 public Q_SLOTS:

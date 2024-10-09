@@ -31,6 +31,7 @@ public:
     int fetchEntityCount(const QString &appName, int processedType) const override;
     NotifyEntity fetchLastEntity(const QString &appName, int processedType) override;
     QList<NotifyEntity> fetchEntities(const QString &appName, int processedType, int maxCount) override;
+    NotifyEntity fetchLastEntity(uint notifyId) override;
     QList<QString> fetchApps(int maxCount) const override;
 
     void removeEntity(qint64 id) override;

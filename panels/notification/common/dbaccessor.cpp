@@ -30,6 +30,7 @@ static const QString ColumnCTime = "CTime";
 static const QString ColumnAction = "Action";
 static const QString ColumnHint = "Hint";
 static const QString ColumnProcessedType = "ProcessedType";
+static const QString ColumnNotifyId = "NotifyId";
 static const QString ColumnReplacesId = "ReplacesId";
 static const QString ColumnTimeout = "Timeout";
 
@@ -42,7 +43,10 @@ static const QStringList EntityFields {
     ColumnCTime,
     ColumnAction,
     ColumnHint,
-    ColumnProcessedType
+    ColumnProcessedType,
+    ColumnNotifyId,
+    ColumnReplacesId,
+    ColumnTimeout
 };
 
 static QString notificationDBPath()
@@ -114,9 +118,10 @@ qint64 DBAccessor::addEntity(const NotifyEntity &entity)
     sqlCmd += ColumnAction + ",";
     sqlCmd += ColumnHint + ",";
     sqlCmd += ColumnReplacesId + ",";
+    sqlCmd += ColumnNotifyId + ",";
     sqlCmd += ColumnTimeout + ",";
     sqlCmd += ColumnProcessedType + ")";
-    sqlCmd += "VALUES (:icon, :summary, :body, :appName, :ctime, :action, :hint, :replacesId, :timeout, :processedType)";
+    sqlCmd += "VALUES (:icon, :summary, :body, :appName, :ctime, :action, :hint, :replacesId, :notifyId, :timeout, :processedType)";
 
     query.prepare(sqlCmd);
     query.bindValue(":icon", entity.appIcon());
@@ -127,6 +132,7 @@ qint64 DBAccessor::addEntity(const NotifyEntity &entity)
     query.bindValue(":action", entity.actionsString());
     query.bindValue(":hint", entity.hintsString());
     query.bindValue(":replacesId", entity.replacesId());
+    query.bindValue(":notifyId", entity.bubbleId());
     query.bindValue(":timeout", entity.expiredTimeout());
     query.bindValue(":processedType", entity.processedType());
 
@@ -272,6 +278,28 @@ QList<NotifyEntity> DBAccessor::fetchEntities(const QString &appName, int proces
     return ret;
 }
 
+NotifyEntity DBAccessor::fetchLastEntity(uint notifyId)
+{
+    QSqlQuery query(m_connection);
+    QString cmd = QString("SELECT %1 FROM notifications2 WHERE notifyId = :notifyId ORDER BY CTime DESC LIMIT 1").arg(EntityFields.join(","));
+    query.prepare(cmd);
+    query.bindValue(":notifyId", notifyId);
+
+    qDebug(notifyLog) << "Exec query" << query.lastQuery();
+    if (!query.exec()) {
+        qWarning() << "Query execution error:" << query.lastError().text();
+        return {};
+    }
+
+    if (query.next()) {
+        auto entity = parseEntity(query);
+
+        qDebug(notifyLog) << "Fetched last entity " << entity.id() <<" by the notifyId" << notifyId;
+        return entity;
+    }
+    return {};
+}
+
 QList<QString> DBAccessor::fetchApps(int maxCount) const
 {
     QSqlQuery query(m_connection);
@@ -365,6 +393,7 @@ void DBAccessor::tryToCreateTable()
     sql += ColumnAction + " TEXT,";
     sql += ColumnHint + " TEXT,";
     sql += ColumnReplacesId + " TEXT,";
+    sql += ColumnNotifyId + " TEXT,";
     sql += ColumnTimeout + " TEXT,";
     sql += ColumnProcessedType + " INTEGER)";
 
@@ -379,6 +408,7 @@ void DBAccessor::tryToCreateTable()
     newColumns[ColumnAction] = "TEXT";
     newColumns[ColumnHint] = "TEXT";
     newColumns[ColumnReplacesId] = "TEXT";
+    newColumns[ColumnNotifyId] = "TEXT";
     newColumns[ColumnTimeout] = "TEXT";
     newColumns[ColumnProcessedType] = "INTEGER";
 
@@ -449,15 +479,18 @@ void DBAccessor::updateProcessTypeValue()
 
 NotifyEntity DBAccessor::parseEntity(const QSqlQuery &query)
 {
-    const auto id = query.value(0).toLongLong();
-    const auto icon = query.value(1).toString();
-    const auto summary = query.value(2).toString();
-    const auto body = query.value(3).toString();
-    const auto appName = query.value(4).toString();
-    const auto time = query.value(5).toString();
-    const auto action = query.value(6).toString();
-    const auto hint = query.value(7).toString();
-    const auto processedType = query.value(10).toUInt();
+    const auto id = query.value(ColumnId).toLongLong();
+    const auto icon = query.value(ColumnIcon).toString();
+    const auto summary = query.value(ColumnSummary).toString();
+    const auto body = query.value(ColumnBody).toString();
+    const auto appName = query.value(ColumnAppName).toString();
+    const auto time = query.value(ColumnCTime).toString();
+    const auto action = query.value(ColumnAction).toString();
+    const auto hint = query.value(ColumnHint).toString();
+    const auto processedType = query.value(ColumnProcessedType).toUInt();
+    const auto notifyId = query.value(ColumnNotifyId).toUInt();
+    const auto replacesId = query.value(ColumnReplacesId).toUInt();
+    const auto timeout = query.value(ColumnTimeout).toInt();
 
     NotifyEntity entity(id, appName);
     entity.setAppIcon(icon);
@@ -467,6 +500,9 @@ NotifyEntity DBAccessor::parseEntity(const QSqlQuery &query)
     entity.setHintString(hint);
     entity.setActionString(action);
     entity.setProcessedType(processedType);
+    entity.setBubbleId(id);
+    entity.setReplacesId(replacesId);
+    entity.setExpiredTimeout(timeout);
 
     return entity;
 }

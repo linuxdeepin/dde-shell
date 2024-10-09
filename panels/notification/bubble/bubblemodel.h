@@ -50,8 +50,7 @@ public:
 
     Q_INVOKABLE void remove(int index);
     void remove(const BubbleItem *bubble);
-    BubbleItem *removeById(uint id);
-    void removeByBubbleId(uint bubbleId);
+    BubbleItem *removeById(qint64 id);
     void clear();
 
     BubbleItem *bubbleItem(int bubbleIndex) const;

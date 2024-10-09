@@ -45,7 +45,6 @@ Q_SIGNALS:
     // Standard Notifications dbus implementation
     void ActionInvoked(uint id, const QString &actionKey);
     void NotificationClosed(uint id, uint reason);
-    void NotificationClosed2(uint id, uint reason);
 
     // Extra DBus APIs
     void RecordCountChanged(uint count);
@@ -55,8 +54,7 @@ Q_SIGNALS:
     void AppRemoved(const QString &id);
 
 signals:
-    void needShowEntity(const QVariantMap &entityInfo);
-    void needCloseEntity(uint id);
+    void notificationStateChanged(qint64 id, int processedType);
 
 public Q_SLOTS:
     // Standard Notifications dbus implementation
@@ -83,12 +81,20 @@ private:
     void tryRecordEntity(const QString &appId, NotifyEntity &entity);
     void emitRecordCountChanged();
 
+    void pushPendingEntity(const NotifyEntity &entity);
+
+private slots:
+    void onHandingPendingEntities();
+
 private:
     uint m_replacesCount = 0;
 
     DataAccessor *m_persistence = nullptr;
     NotificationSetting *m_notificationSetting = nullptr;
     UserSessionManager *m_userSessionManager = nullptr;
+    QTimer *m_pendingTimeout = nullptr;
+    qint64 m_lastTimeoutPoint = std::numeric_limits<qint64>::max();
+    QMultiHash<qint64, NotifyEntity> m_pendingTimeoutEntities;
 };
 
 } // notification
