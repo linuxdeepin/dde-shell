@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Sql)
-
 qt_add_qml_module(notificationcenterpanel
     PLUGIN_TARGET notificationcenterpanelplugin
     URI org.deepin.ds.notificationcenter
@@ -56,7 +54,7 @@ qt_add_resources(notificationcenterpanel "ds_notificationcenterpanel_icons"
 target_link_libraries(notificationcenterpanel
     PRIVATE
         dde-shell-frame
-        notification-shared
+        ds-notification-shared
         Qt${QT_VERSION_MAJOR}::Quick
         Qt${QT_VERSION_MAJOR}::DBus
 )

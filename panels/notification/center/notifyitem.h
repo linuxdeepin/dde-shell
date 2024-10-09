@@ -6,7 +6,7 @@
 
 #include <QObject>
 #include <QVariantMap>
-#include "common/notifyentity.h"
+#include "notifyentity.h"
 
 namespace notifycenter {
 enum NotifyType {

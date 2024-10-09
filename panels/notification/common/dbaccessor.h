@@ -19,6 +19,9 @@ class DBAccessor : public DataAccessor
 {
 public:
     explicit DBAccessor(const QString &key);
+
+    static DBAccessor *instance();
+
     bool open(const QString &dataPath);
 
     qint64 addEntity(const NotifyEntity &entity) override;

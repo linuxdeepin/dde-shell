@@ -78,6 +78,15 @@ DBAccessor::DBAccessor(const QString &key)
     }
 }
 
+DBAccessor *DBAccessor::instance()
+{
+    static DBAccessor *instance = nullptr;
+    if (!instance) {
+        instance = new DBAccessor("Default");
+    }
+    return instance;
+}
+
 bool DBAccessor::open(const QString &dataPath)
 {
     m_connection = QSqlDatabase::addDatabase("QSQLITE", "QSQLITE" + m_key);
