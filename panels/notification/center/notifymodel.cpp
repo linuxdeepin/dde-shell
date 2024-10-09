@@ -7,7 +7,7 @@
 #include <QTimerEvent>
 #include <QLoggingCategory>
 
-#include "common/notifyentity.h"
+#include "notifyentity.h"
 #include "notifyitem.h"
 #include "notifyaccessor.h"
 

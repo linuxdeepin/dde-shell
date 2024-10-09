@@ -21,12 +21,7 @@ OsdPanel::OsdPanel(QObject *parent)
 
 bool OsdPanel::load()
 {
-#ifndef QT_DEBUG
-    return false;
-#else
-
     return DPanel::load();
-#endif
 }
 
 bool OsdPanel::init()

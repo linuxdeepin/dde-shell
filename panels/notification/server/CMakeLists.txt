@@ -23,13 +23,9 @@ add_library(${NOTIFICATION_SERVER} SHARED
     ${SERVER_SOURCES}
 )
 
-target_include_directories(${NOTIFICATION_SERVER} PRIVATE
-    "../common"
-)
-
 target_link_libraries(${NOTIFICATION_SERVER} PRIVATE
     dde-shell-frame
-    notification-shared
+    ds-notification-shared
     Qt${QT_MAJOR_VERSION}::DBus
 )
 

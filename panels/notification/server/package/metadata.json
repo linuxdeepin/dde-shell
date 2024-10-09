@@ -2,6 +2,6 @@
     "Plugin": {
         "Version": "1.0",
         "Id": "org.deepin.ds.notificationserver",
-        "Category": "DDE"
+        "Parent": "org.deepin.ds.notification"
     }
 }

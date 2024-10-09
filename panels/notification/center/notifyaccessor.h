@@ -6,7 +6,7 @@
 
 #include <QObject>
 #include <QtQml/qqml.h>
-#include "common/notifyentity.h"
+#include "notifyentity.h"
 
 class QQmlEngine;
 class QJSEngine;

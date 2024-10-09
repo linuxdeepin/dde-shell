@@ -4,6 +4,6 @@
         "Id": "org.deepin.ds.notificationcenter",
         "Url": "main.qml",
         "ContainmentType": "Panel",
-        "Category": "DDE"
+        "Parent": "org.deepin.ds.notification"
     }
 }

@@ -18,7 +18,7 @@
 #include <applet.h>
 #include <containment.h>
 
-#include "common/dataaccessor.h"
+#include "dataaccessor.h"
 
 DS_USE_NAMESPACE
 
