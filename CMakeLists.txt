@@ -49,6 +49,8 @@ set(DDE_SHELL_TRANSLATION_INSTALL_DIR "${CMAKE_INSTALL_DATADIR}/dde-shell" CACHE
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH};${ECM_MODULE_PATH};${PROJECT_SOURCE_DIR}/cmake")
 include(DDEShellPackageMacros)
+include(KDEClangFormat)
+include(KDEGitCommitHooks)
 
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick WaylandClient DBus LinguistTools Sql)
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui)
@@ -79,3 +81,8 @@ write_basic_package_version_file(
 install(FILES "${PROJECT_SOURCE_DIR}/cmake/DDEShellPackageMacros.cmake" DESTINATION "${CONFIG_INSTALL_DIR}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DDEShellConfig.cmake" DESTINATION "${CONFIG_INSTALL_DIR}")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DDEShellConfigVersion.cmake" DESTINATION "${CONFIG_INSTALL_DIR}")
+
+# add clang-format target for all our real source files
+file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h)
+kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
+kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)
