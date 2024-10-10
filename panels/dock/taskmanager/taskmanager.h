@@ -4,10 +4,11 @@
 
 #pragma once
 
-#include "itemmodel.h"
-#include "containment.h"
 #include "abstractwindow.h"
 #include "abstractwindowmonitor.h"
+#include "containment.h"
+#include "itemmodel.h"
+#include "rolecombinemodel.h"
 
 #include <QPointer>
 
@@ -58,6 +59,7 @@ private:
 
 private:
     QScopedPointer<AbstractWindowMonitor> m_windowMonitor;
+    RoleCombineModel *m_activeAppModel = nullptr;
 };
 
 }

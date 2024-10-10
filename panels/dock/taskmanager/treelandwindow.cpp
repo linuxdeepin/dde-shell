@@ -35,6 +35,11 @@ pid_t ForeignToplevelHandle::pid() const
     return m_pid;
 }
 
+QString ForeignToplevelHandle::appid() const
+{
+    return m_appId;
+}
+
 QString ForeignToplevelHandle::title() const
 {
     return m_title;
@@ -123,6 +128,11 @@ pid_t TreeLandWindow::pid()
     return m_foreignToplevelHandle ? m_foreignToplevelHandle->pid() : 0;
 }
 
+QStringList TreeLandWindow::identity()
+{
+    return {m_foreignToplevelHandle ? m_foreignToplevelHandle->appid() : ""};
+}
+
 QString TreeLandWindow::icon()
 {
     return "";
@@ -131,10 +141,6 @@ QString TreeLandWindow::icon()
 QString TreeLandWindow::title()
 {
     return m_foreignToplevelHandle ? m_foreignToplevelHandle->title() : "";
-}
-
-void TreeLandWindow::updateIsActive()
-{
 }
 
 bool TreeLandWindow::isActive()
@@ -195,35 +201,6 @@ void TreeLandWindow::setWindowIconGeometry(const QWindow* baseWindow, const QRec
 {
     auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(baseWindow->handle());
     m_foreignToplevelHandle->set_rectangle(waylandWindow->surface(), gemeotry.x(), gemeotry.y(), gemeotry.width(), gemeotry.height());
-}
-
-void TreeLandWindow::updatePid()
-{
-
-}
-void TreeLandWindow::updateIcon()
-{
-
-}
-
-void TreeLandWindow::updateTitle()
-{
-
-}
-
-void TreeLandWindow::updateShouldSkip()
-{
-
-}
-
-void TreeLandWindow::updateAllowClose()
-{
-
-}
-
-void TreeLandWindow::updateIsMinimized()
-{
-
 }
 
 bool TreeLandWindow::isReady()

@@ -256,6 +256,21 @@ MotifWMHints X11Utils::getWindowMotifWMHints(const xcb_window_t& window)
     return ret;
 }
 
+QStringList X11Utils::getWindowWMClass(const xcb_window_t &window)
+{
+    xcb_icccm_get_wm_class_reply_t wmClassReply;
+    xcb_get_property_cookie_t wmClassCookie;
+    wmClassCookie = xcb_icccm_get_wm_class(m_connection, window);
+    if (xcb_icccm_get_wm_class_reply(m_connection, wmClassCookie, &wmClassReply, nullptr)) {
+        QString instanceName = wmClassReply.instance_name;
+        QString className = wmClassReply.class_name;
+        xcb_icccm_get_wm_class_reply_wipe(&wmClassReply);
+        return {instanceName, className};
+    }
+
+    return {};
+}
+
 QList<xcb_atom_t> X11Utils::getWindowTypes(const xcb_window_t &window)
 {
     QList<xcb_atom_t> ret;
