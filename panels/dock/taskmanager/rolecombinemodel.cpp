@@ -23,6 +23,46 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
         }
     }
 
+    connect(sourceModel(), &QAbstractItemModel::rowsInserted, this, [this, majorRoles, func](const QModelIndex &parent, int first, int last) {
+        beginInsertRows(index(parent.row(), parent.column()), first, last);
+        for (int i = first; i < last; i++) {
+            QModelIndex majorIndex = sourceModel()->index(i, 0);
+            QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
+            if (majorIndex.isValid() && minorIndex.isValid())
+                m_indexMap[qMakePair(i, 0)] = qMakePair(minorIndex.row(), minorIndex.column());
+        }
+        endInsertRows();
+    });
+    connect(sourceModel(), &QAbstractItemModel::columnsInserted, this, [this, majorRoles, func](const QModelIndex &parent, int first, int last) {
+        beginInsertColumns(index(parent.row(), parent.column()), first, last);
+        for (int j = first; j < last; j++) {
+            QModelIndex majorIndex = sourceModel()->index(0, j);
+            QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
+            if (majorIndex.isValid() && minorIndex.isValid())
+                m_indexMap[qMakePair(0, j)] = qMakePair(minorIndex.row(), minorIndex.column());
+        }
+        endInsertColumns();
+    });
+
+    connect(sourceModel(), &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
+        beginRemoveRows(index(parent.row(), parent.column()), first, last);
+        for (int i = first; i < last; i++) {
+            if (m_indexMap.contains(qMakePair(i, 0))) {
+                m_indexMap.remove(qMakePair(i, 0));
+            }
+        }
+        endRemoveRows();
+    });
+    connect(sourceModel(), &QAbstractItemModel::columnsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
+        beginRemoveColumns(index(parent.row(), parent.column()), first, last);
+        for (int j = first; j < last; j++) {
+            if (m_indexMap.contains(qMakePair(0, j))) {
+                m_indexMap.remove(qMakePair(0, j));
+            }
+        }
+        endRemoveColumns();
+    });
+
     // connect changedSignal
     connect(major, &QAbstractItemModel::dataChanged, this,
         [this, majorRoles, func](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles){
