@@ -169,6 +169,7 @@ void TreeLandWindowMonitor::handleForeignToplevelHandleAdded()
     }
 
     window->setForeignToplevelHandle(handle);
+    trackWindow(window.get());
 
     if (window->isReady())
         Q_EMIT AbstractWindowMonitor::windowAdded(static_cast<QPointer<AbstractWindow>>(window.get()));
@@ -183,6 +184,7 @@ void TreeLandWindowMonitor::handleForeignToplevelHandleRemoved()
 
     auto id = handle->id();
     auto window = m_windows.value(id, nullptr);
+    destroyWindow(window.get());
 
     if (window) {
         m_windows.remove(id);

@@ -10,7 +10,6 @@ namespace apps
 AppItemModel::AppItemModel(QObject *parent)
     : QStandardItemModel(parent)
 {
-    AppGroupManager::instance();
 }
 
 QHash<int, QByteArray> AppItemModel::roleNames() const

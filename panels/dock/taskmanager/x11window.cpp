@@ -45,6 +45,15 @@ pid_t X11Window::pid()
     return m_pid;
 }
 
+QStringList X11Window::identity()
+{
+    if (m_identity.isEmpty()) {
+        m_identity = X11->getWindowWMClass(m_windowID);
+    }
+
+    return m_identity;
+}
+
 QString X11Window::icon()
 {
     if (m_icon.isEmpty()) {
@@ -155,6 +164,16 @@ void X11Window::updatePid()
     m_pid = X11->getWindowPid(m_windowID);
     if (oldPid != m_pid)
         Q_EMIT AbstractWindow::pidChanged();
+}
+
+void X11Window::updateIdentify()
+{
+    auto newWmclas = X11->getWindowWMClass(m_windowID);
+    if (newWmclas == m_identity)
+        return;
+
+    m_identity = newWmclas;
+    Q_EMIT identityChanged();
 }
 
 void X11Window::updateIcon()

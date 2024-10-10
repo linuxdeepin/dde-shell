@@ -4,20 +4,24 @@
 
 #include "appitem.h"
 
+#include "abstractwindow.h"
+#include "abstractwindowmonitor.h"
+#include "desktopfileamparser.h"
+#include "desktopfileparserfactory.h"
+#include "dsglobal.h"
 #include "globals.h"
 #include "itemmodel.h"
-#include "taskmanager.h"
 #include "pluginfactory.h"
-#include "abstractwindow.h"
+#include "pluginloader.h"
+#include "rolecombinemodel.h"
+#include "taskmanager.h"
 #include "taskmanageradaptor.h"
-#include "desktopfileamparser.h"
 #include "taskmanagersettings.h"
 #include "treelandwindowmonitor.h"
-#include "abstractwindowmonitor.h"
-#include "desktopfileparserfactory.h"
 
-#include <QStringLiteral>
 #include <QGuiApplication>
+#include <QStringLiteral>
+#include <qtimer.h>
 
 #ifdef BUILD_WITH_X11
 #include "x11windowmonitor.h"
@@ -76,8 +80,55 @@ bool TaskManager::init()
     QDBusConnection::sessionBus().registerObject("/org/deepin/ds/Dock/TaskManager", "org.deepin.ds.Dock.TaskManager", this);
 
     DApplet::init();
-    if (m_windowMonitor)
-        m_windowMonitor->start();
+
+    auto findApplet = [this](QString pluginId) {
+        QList<DS_NAMESPACE::DApplet *> ret;
+        auto root = qobject_cast<DS_NAMESPACE::DContainment *>(DS_NAMESPACE::DPluginLoader::instance()->rootApplet());
+
+        QQueue<DS_NAMESPACE::DContainment *> containments;
+        containments.enqueue(root);
+        while (!containments.isEmpty()) {
+            DS_NAMESPACE::DContainment *containment = containments.dequeue();
+            for (const auto applet : containment->applets()) {
+                if (auto item = qobject_cast<DS_NAMESPACE::DContainment *>(applet)) {
+                    containments.enqueue(item);
+                }
+                if (applet->pluginId() == pluginId)
+                    ret << applet;
+            }
+        }
+        return ret;
+    };
+
+    auto c = findApplet("org.deepin.ds.dde-apps");
+    if (c.size() > 0) {
+        auto model = c.first()->property("appModel").value<QAbstractItemModel *>();
+        m_activeAppModel =
+            new RoleCombineModel(m_windowMonitor.data(), model, AbstractWindow::identityRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+                auto roleNames = model->roleNames();
+                QList<QByteArray> identifiedOrders = {"desktopId", "startupWMClass", "name", "iconName"};
+
+                auto indentifies = data.toStringList();
+                for (auto id : indentifies) {
+                    if (id.isEmpty())
+                        continue;
+
+                    for (auto identifiedOrder : identifiedOrders) {
+                        auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id);
+                        if (res.size() > 0 && res.first().isValid()) {
+                            return res.first();
+                        }
+                    }
+                }
+
+                return QModelIndex();
+            });
+    }
+
+    QTimer::singleShot(500, [this]() {
+        if (m_windowMonitor)
+            m_windowMonitor->start();
+    });
     return true;
 }
 
@@ -89,7 +140,22 @@ ItemModel* TaskManager::dataModel()
 void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
 {
     if (!window || window->shouldSkip() || window->getAppItem() != nullptr) return;
-    auto desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+
+    // TODO: remove below code and use use model replaced.
+    QModelIndexList res;
+    if (m_activeAppModel) {
+        qDebug() << m_activeAppModel->rowCount();
+        res = m_activeAppModel->match(m_activeAppModel->index(0, 0), AbstractWindow::winIdRole, window->id());
+    }
+
+    QSharedPointer<DesktopfileAbstractParser> desktopfile = nullptr;
+    if (res.size() > 0) {
+        desktopfile = DESKTOPFILEFACTORY::createById(res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString(), "amAPP");
+    }
+
+    if (!desktopfile || !desktopfile->isValied().first) {
+        desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+    }
 
     auto appitem = desktopfile->getAppItem();
 

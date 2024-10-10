@@ -49,6 +49,7 @@ qt_add_dbus_adaptor(DBUS_INTERFACES
 
 add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     abstractwindow.h
+    abstractwindowmonitor.cpp
     abstractwindowmonitor.h
     abstractitem.h
     abstractitem.cpp
@@ -56,6 +57,8 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     appitem.h
     itemmodel.cpp
     itemmodel.h
+    rolecombinemodel.cpp
+    rolecombinemodel.h
     desktopfileabstractparser.cpp
     desktopfileabstractparser.h
     desktopfileamparser.cpp
@@ -86,7 +89,7 @@ target_link_libraries(dock-taskmanager PRIVATE
 
 if (BUILD_WITH_X11)
     target_compile_definitions(dock-taskmanager PRIVATE BUILD_WITH_X11=)
-    pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb xcb-res xcb-ewmh)
+    pkg_check_modules(TaskmanagerXcb REQUIRED IMPORTED_TARGET xcb xcb-res xcb-ewmh xcb-icccm)
     find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Widget)
     target_sources(dock-taskmanager PRIVATE
         x11preview.h
@@ -101,7 +104,7 @@ if (BUILD_WITH_X11)
     )
 
     target_link_libraries(dock-taskmanager PUBLIC
-        PkgConfig::XCB
+        PkgConfig::TaskmanagerXcb
         Qt${QT_VERSION_MAJOR}::Widgets
         Dtk${DTK_VERSION_MAJOR}::Widget
     )
