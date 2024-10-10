@@ -79,7 +79,7 @@ void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString 
     Q_EMIT notificationStateChanged(id, NotifyEntity::processedValue());
 
     Q_EMIT ActionInvoked(bubbleId, actionKey);
-    Q_EMIT NotificationClosed(bubbleId, NotificationManager::Closed);
+    Q_EMIT NotificationClosed(bubbleId, NotifyEntity::Closed);
 
     emitRecordCountChanged();
 }
@@ -175,7 +175,8 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     if (auto iter = hints.find("urgency"); iter != hints.end()) {
         critical = iter.value().toUInt() == NotifyEntity::Critical;
     }
-    if (expireTimeout >= 0 && !critical) {
+    // 0: never expire. -1: DefaultTimeOutMSecs
+    if (expireTimeout != 0 && !critical) {
         pushPendingEntity(entity);
     }
 
@@ -191,7 +192,7 @@ void NotificationManager::CloseNotification(uint id)
         Q_EMIT notificationStateChanged(entity.id(), entity.processedType());
     }
 
-    Q_EMIT NotificationClosed(id, NotificationManager::Closed);
+    Q_EMIT NotificationClosed(id, NotifyEntity::Closed);
 }
 
 void NotificationManager::GetServerInformation(QString &name, QString &vendor, QString &version, QString &specVersion)
@@ -333,7 +334,7 @@ void NotificationManager::emitRecordCountChanged()
 void NotificationManager::pushPendingEntity(const NotifyEntity &entity)
 {
     const int expireTimeout = entity.expiredTimeout();
-    const int interval = expireTimeout == 0 ? DefaultTimeOutMSecs : expireTimeout;
+    const int interval = expireTimeout == -1 ? DefaultTimeOutMSecs : expireTimeout;
 
     qint64 point = QDateTime::currentMSecsSinceEpoch() + interval;
     m_pendingTimeoutEntities.insert(point, entity);

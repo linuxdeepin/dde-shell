@@ -26,13 +26,6 @@ public:
     explicit NotificationManager(QObject *parent = nullptr);
     ~NotificationManager() override;
 
-    enum ClosedReason {
-        Expired = 1,
-        Dismissed = 2,
-        Closed = 3,
-        Unknown = 4,
-    };
-
 public:
     bool registerDbusService();
 
