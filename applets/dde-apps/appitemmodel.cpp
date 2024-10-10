@@ -37,6 +37,8 @@ QVariant AppItemModel::data(const QModelIndex &index, int role) const
         return m_items[i]->iconName();
     case StartUpWMClassRole:
         return m_items[i]->startupWMClass();
+    case NoDisplayRole:
+        return m_items[i]->nodisplay();
     case DDECategoryRole:
         return m_items[i]->ddeCategories();
     case InstalledTimeRole:
