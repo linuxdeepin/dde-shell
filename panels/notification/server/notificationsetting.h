@@ -4,14 +4,16 @@
 
 #pragma once
 
-#include "dsglobal.h"
-
 #include <QObject>
+#include <QVariantMap>
 
-namespace Dtk::Core {
+namespace Dtk {
+namespace Core {
     class DConfig;
 }
+}
 
+class QAbstractListModel;
 namespace notification {
 
 class NotificationSetting : public QObject
@@ -26,8 +28,7 @@ public:
         EnablePreview,
         EnableSound,
         ShowInNotificationCenter,
-        LockScreenShowNotification,
-        ShowOnTop
+        LockScreenShowNotification
     };
 
     enum SystemConfigItem {
@@ -40,24 +41,48 @@ public:
         MaxCount
     };
 
+    struct AppItem {
+        QString id;
+        QString appName;
+        QString appIcon;
+    };
+
 public:
     explicit NotificationSetting(QObject *parent = nullptr);
 
-    void initAllSettings();
+    void setAppAccessor(QAbstractListModel *model);
 
-    void setAppSetting(const QString &id, AppConfigItem item);
-    QVariant getAppSetting(const QString &id, AppConfigItem item);
+    void setAppValue(const QString &id, AppConfigItem item, const QVariant &value);
+    QVariant appValue(const QString &id, AppConfigItem item);
 
-    void setSystemSetting(SystemConfigItem item, const QVariant &value);
-    QVariant getSystemSetting(SystemConfigItem item);
+    void setSystemValue(SystemConfigItem item, const QVariant &value);
+    QVariant systemValue(SystemConfigItem item);
 
+    QStringList apps() const;
+    AppItem appItem(const QString &id) const;
+    QList<AppItem> appItems() const;
+    QList<AppItem> appItemsImpl() const;
+
+    QVariantMap appInfo(const QString &id) const;
+
+signals:
     void appAdded(const QString &appId);
     void appRemoved(const QString &id);
+    void appValueChanged(const QString &appId, uint configItem, const QVariant &value);
+    void systemValueChanged(uint configItem, const QVariant &value);
 
-    QStringList getAppLists();
+private slots:
+    void onAppsChanged();
 
 private:
-    Dtk::Core::DConfig *m_dConfig;
+    void updateAppItemValue(const QVariantMap &info, AppItem &app) const;
+    void invalidAppItemCached();
+
+private:
+    Dtk::Core::DConfig *m_impl = nullptr;
+    QAbstractListModel *m_appAccessor = nullptr;
+    QList<AppItem> m_appItems;
+    QVariantMap m_appsInfo;
 };
 
 } // notification

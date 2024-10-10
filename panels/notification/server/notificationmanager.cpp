@@ -7,6 +7,10 @@
 #include "notifyentity.h"
 #include "dbaccessor.h"
 
+#include <applet.h>
+#include <containment.h>
+#include <pluginloader.h>
+
 #include <QDateTime>
 #include <DDesktopServices>
 #include <DSGApplication>
@@ -14,6 +18,7 @@
 #include <QDBusConnectionInterface>
 
 DCORE_USE_NAMESPACE
+DS_USE_NAMESPACE
 
 namespace notification {
 
@@ -31,6 +36,27 @@ static const QStringList IgnoreList= {
         "dde-control-center"
 };
 
+static QList<DApplet *> appletList(const QString &pluginId)
+{
+    QList<DApplet *> ret;
+    auto rootApplet = DPluginLoader::instance()->rootApplet();
+    auto root = qobject_cast<DContainment *>(rootApplet);
+
+    QQueue<DContainment *> containments;
+    containments.enqueue(root);
+    while (!containments.isEmpty()) {
+        DContainment *containment = containments.dequeue();
+        for (const auto applet : containment->applets()) {
+            if (auto item = qobject_cast<DContainment *>(applet)) {
+                containments.enqueue(item);
+            }
+            if (applet->pluginId() == pluginId)
+                ret << applet;
+        }
+    }
+    return ret;
+}
+
 NotificationManager::NotificationManager(QObject *parent)
     : QObject(parent)
     , m_persistence(DBAccessor::instance())
@@ -40,6 +66,23 @@ NotificationManager::NotificationManager(QObject *parent)
 {
     m_pendingTimeout->setSingleShot(true);
     connect(m_pendingTimeout, &QTimer::timeout, this, &NotificationManager::onHandingPendingEntities);
+
+    auto applets = appletList("org.deepin.ds.dde-apps");
+    if (!applets.isEmpty()) {
+        if (auto apps = applets.first()) {
+            if (auto model = apps->property("appModel").value<QAbstractListModel*>()) {
+                m_notificationSetting->setAppAccessor(model);
+            }
+        }
+    }
+    connect(m_notificationSetting, &NotificationSetting::appAdded, this, &NotificationManager::AppAdded);
+    connect(m_notificationSetting, &NotificationSetting::appRemoved, this, &NotificationManager::AppRemoved);
+    connect(m_notificationSetting, &NotificationSetting::appValueChanged, this, [this] (const QString &appId, uint configItem, const QVariant &value) {
+        Q_EMIT AppInfoChanged(appId, configItem, QDBusVariant(value));
+    });
+    connect(m_notificationSetting, &NotificationSetting::systemValueChanged, this, [this] (uint configItem, const QVariant &value) {
+        Q_EMIT SystemInfoChanged(configItem, QDBusVariant(value));
+    });
 }
 
 NotificationManager::~NotificationManager()
@@ -115,7 +158,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
                                  int expireTimeout)
 {
     qInfo() << "Notify" << appName << replacesId << appIcon << summary << body << actions << hints << expireTimeout;
-    if (calledFromDBus() && m_notificationSetting->getSystemSetting(NotificationSetting::CloseNotification).toBool()) {
+    if (calledFromDBus() && m_notificationSetting->systemValue(NotificationSetting::CloseNotification).toBool()) {
         return 0;
     }
 
@@ -128,7 +171,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     if (appId.isEmpty())
         appId = appName;
 
-    bool enableAppNotification = m_notificationSetting->getAppSetting(appId, NotificationSetting::EnableNotification).toBool();
+    bool enableAppNotification = m_notificationSetting->appValue(appId, NotificationSetting::EnableNotification).toBool();
     if (!enableAppNotification && !IgnoreList.contains(appId)) {
         return 0;
     }
@@ -138,7 +181,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
 
     QString strIcon = appIcon;
     if (strIcon.isEmpty())
-        strIcon = m_notificationSetting->getAppSetting(appId, NotificationSetting::AppIcon).toString();
+        strIcon = m_notificationSetting->appValue(appId, NotificationSetting::AppIcon).toString();
     NotifyEntity entity(appName, replacesId, strIcon, summary, strBody, actions, hints, expireTimeout);
     entity.setProcessedType(NotifyEntity::NotProcessed);
 
@@ -148,8 +191,8 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     bool lockScreen = m_userSessionManager->locked();
 
     if (!systemNotification) {
-        enablePreview = m_notificationSetting->getAppSetting(appId, NotificationSetting::EnablePreview).toBool();
-        lockScreenShow = m_notificationSetting->getAppSetting(appId, NotificationSetting::LockScreenShowNotification).toBool();
+        enablePreview = m_notificationSetting->appValue(appId, NotificationSetting::EnablePreview).toBool();
+        lockScreenShow = m_notificationSetting->appValue(appId, NotificationSetting::LockScreenShowNotification).toBool();
     }
 
     entity.setEnablePreview(enablePreview);
@@ -206,58 +249,54 @@ void NotificationManager::GetServerInformation(QString &name, QString &vendor, Q
 
 QStringList NotificationManager::GetAppList()
 {
-    return QStringList();
+    qDebug(notifyServerLog) << "Get appList";
+    return m_notificationSetting->apps();
 }
 
 QDBusVariant NotificationManager::GetAppInfo(const QString &appId, uint configItem)
 {
-    return QDBusVariant();
+    const auto info = m_notificationSetting->appValue(appId, static_cast<NotificationSetting::AppConfigItem>(configItem));
+    return QDBusVariant(info);
 }
 
 void NotificationManager::SetAppInfo(const QString &appId, uint configItem, const QDBusVariant &value)
 {
-
-}
-
-QString NotificationManager::GetAppSetting(const QString &appName)
-{
-    return QString();
-}
-
-void NotificationManager::SetAppSetting(const QString &settings)
-{
-
+    qDebug(notifyServerLog) << "Set appInfo" << appId << configItem << value.variant();
+    return m_notificationSetting->setAppValue(appId, static_cast<NotificationSetting::AppConfigItem>(configItem), value.variant());
 }
 
 void NotificationManager::SetSystemInfo(uint configItem, const QDBusVariant &value)
 {
-
+    qDebug(notifyServerLog) << "Set systemInfo" << configItem << value.variant();
+    return m_notificationSetting->setSystemValue(static_cast<NotificationSetting::SystemConfigItem>(configItem), value.variant());
 }
 
 QDBusVariant NotificationManager::GetSystemInfo(uint configItem)
 {
-    return QDBusVariant();
+    qDebug(notifyServerLog) << "Get systemInfo" << configItem;
+    const auto value = m_notificationSetting->systemValue(static_cast<NotificationSetting::SystemConfigItem>(configItem));
+    return QDBusVariant(value);
 }
 
 bool NotificationManager::isDoNotDisturb() const
 {
-    if (!m_notificationSetting->getSystemSetting(NotificationSetting::DNDMode).toBool())
+    if (!m_notificationSetting->systemValue(NotificationSetting::DNDMode).toBool())
         return false;
 
     // 未点击按钮  任何时候都勿扰模式
-    if (!m_notificationSetting->getSystemSetting(NotificationSetting::OpenByTimeInterval).toBool() &&
-        !m_notificationSetting->getSystemSetting(NotificationSetting::LockScreenOpenDNDMode).toBool()) {
+    if (!m_notificationSetting->systemValue(NotificationSetting::OpenByTimeInterval).toBool() &&
+        !m_notificationSetting->systemValue(NotificationSetting::LockScreenOpenDNDMode).toBool()) {
         return true;
     }
 
     bool lockScreen = m_userSessionManager->locked();
     // 点击锁屏时 并且 锁屏状态 任何时候都勿扰模式
-    if (m_notificationSetting->getSystemSetting(NotificationSetting::LockScreenOpenDNDMode).toBool() && lockScreen)
+    if (m_notificationSetting->systemValue(NotificationSetting::LockScreenOpenDNDMode).toBool() && lockScreen)
         return true;
 
     QTime currentTime = QTime::fromString(QDateTime::currentDateTime().toString("hh:mm"));
-    QTime startTime = QTime::fromString(m_notificationSetting->getSystemSetting(NotificationSetting::StartTime).toString());
-    QTime endTime = QTime::fromString(m_notificationSetting->getSystemSetting(NotificationSetting::EndTime).toString());
+    QTime startTime = QTime::fromString(m_notificationSetting->systemValue(NotificationSetting::StartTime).toString());
+    QTime endTime = QTime::fromString(m_notificationSetting->systemValue(NotificationSetting::EndTime).toString());
 
     bool dndMode = false;
     if (startTime < endTime) {
@@ -268,7 +307,7 @@ bool NotificationManager::isDoNotDisturb() const
         dndMode = true;
     }
 
-    if (dndMode && m_notificationSetting->getSystemSetting(NotificationSetting::OpenByTimeInterval).toBool()) {
+    if (dndMode && m_notificationSetting->systemValue(NotificationSetting::OpenByTimeInterval).toBool()) {
         return dndMode;
     } else {
         return false;
@@ -285,7 +324,7 @@ void NotificationManager::tryPlayNotificationSound(const QString &appName, bool 
     bool playSound = true;
     bool systemNotification = IgnoreList.contains(appName);
     if (!systemNotification) {
-        playSound = m_notificationSetting->getAppSetting(appName, NotificationSetting::EnableSound).toBool();
+        playSound = m_notificationSetting->appValue(appName, NotificationSetting::EnableSound).toBool();
     }
 
     if (playSound && !dndMode) {
@@ -309,7 +348,7 @@ void NotificationManager::tryPlayNotificationSound(const QString &appName, bool 
 
 void NotificationManager::tryRecordEntity(const QString &appId, NotifyEntity &entity)
 {
-    bool showInNotificationCenter = m_notificationSetting->getAppSetting(appId, NotificationSetting::ShowInNotificationCenter).toBool();
+    bool showInNotificationCenter = m_notificationSetting->appValue(appId, NotificationSetting::ShowInNotificationCenter).toBool();
     if (!showInNotificationCenter) {
         return;
     }

@@ -74,7 +74,7 @@ private:
 
 private:
     DataAccessor *m_accessor = nullptr;
-    QMap<QString, bool> m_pinnedApps;
+    QStringList m_pinnedApps;
     QStringList m_apps;
     bool m_debugging = false;
 };

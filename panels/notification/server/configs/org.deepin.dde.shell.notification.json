@@ -24,11 +24,11 @@
       "permissions": "readwrite",
       "visibility": "public"
     },
-    "lockscreenOpenDndMode": {
+    "lockScreenOpenDndMode": {
       "value": false,
       "serial": 0,
       "flags": [],
-      "name": "lockscreenOpenDndMode",
+      "name": "lockScreenOpenDndMode",
       "name[zh_CN]": "锁屏时开启勿扰模式",
       "description": "Turn on Do Not Disturb mode when lock screen",
       "description[zh_CN]": "当锁屏时开启勿扰模式",
@@ -78,6 +78,28 @@
       "description[zh_CN]": "最大通知数量",
       "permissions": "readwrite",
       "visibility": "public"
+    },
+    "appsInfo": {
+      "value": {},
+      "serial": 0,
+      "flags": [],
+      "name": "applications information",
+      "name[zh_CN]": "应用信息",
+      "description": "Settings related to application notifications",
+      "description[zh_CN]": "应用通知相关的设置",
+      "permissions": "readwrite",
+      "visibility": "public"
+    },
+    "pinnedApps": {
+      "value": [],
+      "serial": 0,
+      "flags": [],
+      "name": "pinned applications",
+      "name[zh_CN]": "置顶应用列表",
+      "description": "pinned applications",
+      "description[zh_CN]": "置顶应用列表",
+      "permissions": "readwrite",
+      "visibility": "private"
     }
   }
 }
