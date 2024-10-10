@@ -78,7 +78,7 @@ bool AppItemModel::setData(const QModelIndex &index, const QVariant &value, int 
 QModelIndex AppItemModel::index(int row, int column, const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    if (row >= m_items.length()) {
+    if (row >= m_items.length() || row < 0) {
         return QModelIndex();
     }
 

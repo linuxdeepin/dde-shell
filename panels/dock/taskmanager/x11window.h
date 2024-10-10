@@ -21,7 +21,7 @@ public:
     ~X11Window();
     virtual uint32_t id() override;
     virtual pid_t pid() override;
-    virtual QString identity() override;
+    virtual QStringList identity() override;
     virtual QString icon() override;
     virtual QString title() override;
     virtual bool isActive() override;
@@ -69,7 +69,7 @@ private:
 private:
     xcb_window_t m_windowID;
     pid_t m_pid;
-    QString m_identity;
+    QStringList m_identity;
     QString m_icon;
     QString m_title;
 

@@ -64,7 +64,7 @@ void DesktopInfoAM::launch(const QString& action, const QStringList &fields, con
 
 QString DesktopInfoAM::desktopId() const
 {
-    return m_id + ".desktop";
+    return m_id;
 }
 
 QString DesktopInfoAM::name()

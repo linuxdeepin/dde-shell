@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 
+#include <QSignalSpy>
+
 #include "rolecombinemodel.h"
 #include "combinemodela.h"
 #include "combinemodelb.h"
@@ -59,6 +61,10 @@ TEST(RoleCombineModel, dataTest) {
         }
     );
 
+    QSignalSpy spyA(&modelA, &QAbstractItemModel::dataChanged);
+    QSignalSpy spyB(&modelB, &QAbstractItemModel::dataChanged);
+    QSignalSpy spy(&model, &QAbstractItemModel::dataChanged);
+
     modelA.addData(new DataA(0, "dataA0", &modelA));
     modelA.addData(new DataA(1, "dataA1", &modelA));
     modelA.addData(new DataA(3, "dataA3", &modelA));
@@ -89,4 +95,7 @@ TEST(RoleCombineModel, dataTest) {
 
     // below data are difference, because combine func can find id 2 for DataA;
     EXPECT_NE(model.index(2, 0).data(names2Role.value(roleNamesB.value(TestModelB::dataRole))), modelA.index(1, 0).data(TestModelB::dataRole));
+
+    modelB.setData(modelB.index(1), "dataB22");
+    EXPECT_EQ(model.index(1, 0).data(names2Role.value(roleNamesB.value(TestModelB::dataRole))), modelB.index(1, 0).data(TestModelB::dataRole));
 }

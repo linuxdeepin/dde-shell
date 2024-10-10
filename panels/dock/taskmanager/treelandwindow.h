@@ -75,7 +75,7 @@ public:
 
     uint32_t id() override;
     pid_t pid() override;
-    QString identity() override;
+    QStringList identity() override;
     QString icon() override;
     QString title() override;
     bool isActive() override;
