@@ -130,9 +130,9 @@ pid_t TreeLandWindow::pid()
     return m_foreignToplevelHandle ? m_foreignToplevelHandle->pid() : 0;
 }
 
-QString TreeLandWindow::identity()
+QStringList TreeLandWindow::identity()
 {
-    return m_foreignToplevelHandle ? m_foreignToplevelHandle->appid() : "";
+    return {m_foreignToplevelHandle ? m_foreignToplevelHandle->appid() : ""};
 }
 
 QString TreeLandWindow::icon()
