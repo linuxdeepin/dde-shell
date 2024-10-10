@@ -44,6 +44,11 @@ DDENotificationDbusAdaptor::DDENotificationDbusAdaptor(QObject *parent)
     : DbusAdaptor(parent)
 {
     setAutoRelaySignals(true);
+
+    connect(manager(), &NotificationManager::AppAdded, this, &DDENotificationDbusAdaptor::AppAdded);
+    connect(manager(), &NotificationManager::AppAdded, this, &DDENotificationDbusAdaptor::AppRemoved);
+    connect(manager(), &NotificationManager::AppInfoChanged, this, &DDENotificationDbusAdaptor::AppInfoChanged);
+    connect(manager(), &NotificationManager::SystemInfoChanged, this, &DDENotificationDbusAdaptor::SystemInfoChanged);
 }
 
 uint DDENotificationDbusAdaptor::recordCount() const
@@ -53,17 +58,17 @@ uint DDENotificationDbusAdaptor::recordCount() const
 
 QStringList DDENotificationDbusAdaptor::GetAppList()
 {
-    return QStringList();
+    return manager()->GetAppList();
 }
 
 QDBusVariant DDENotificationDbusAdaptor::GetAppInfo(const QString &appId, uint configItem)
 {
-    return QDBusVariant();
+    return manager()->GetAppInfo(appId, configItem);
 }
 
 void DDENotificationDbusAdaptor::SetAppInfo(const QString &appId, uint configItem, const QDBusVariant &value)
 {
-
+    return manager()->SetAppInfo(appId, configItem, value);
 }
 
 QString DDENotificationDbusAdaptor::GetAppSetting(const QString &appName)
@@ -78,12 +83,12 @@ void DDENotificationDbusAdaptor::SetAppSetting(const QString &settings)
 
 void DDENotificationDbusAdaptor::SetSystemInfo(uint configItem, const QDBusVariant &value)
 {
-
+    return manager()->SetSystemInfo(configItem, value);
 }
 
 QDBusVariant DDENotificationDbusAdaptor::GetSystemInfo(uint configItem)
 {
-    return QDBusVariant();
+    return manager()->GetSystemInfo(configItem);
 }
 
 } // notification

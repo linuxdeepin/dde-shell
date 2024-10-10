@@ -12,15 +12,18 @@
 #include <QProcess>
 #include <QElapsedTimer>
 #include <QDBusReply>
-#include <pluginloader.h>
-
 #include <QQueue>
+
+#include <DConfig>
+
+#include <pluginloader.h>
 #include <applet.h>
 #include <containment.h>
 
 #include "dataaccessor.h"
 
 DS_USE_NAMESPACE
+DCORE_USE_NAMESPACE
 
 namespace notifycenter {
 namespace {
@@ -31,6 +34,8 @@ static const QString DDENotifyDBusServer = "org.deepin.dde.Notification1";
 static const QString DDENotifyDBusInterface = "org.deepin.dde.Notification1";
 static const QString DDENotifyDBusPath = "/org/deepin/dde/Notification1";
 static const uint ShowNotificationTop = 7;
+static const QString InvalidApp {"DS-Invalid-Apps"};
+static const QStringList InvalidPinnedApps {InvalidApp};
 
 static QDBusInterface notifyCenterInterface()
 {
@@ -101,6 +106,7 @@ static QList<DApplet *> appletList(const QString &pluginId)
 }
 
 NotifyAccessor::NotifyAccessor(QObject *parent)
+    : m_pinnedApps(InvalidPinnedApps)
 {
     auto applets = appletList("org.deepin.ds.notificationserver");
     bool valid = false;
@@ -250,32 +256,28 @@ void NotifyAccessor::invokeAction(const NotifyEntity &entity, const QString &act
 void NotifyAccessor::pinApplication(const QString &appName, bool pin)
 {
     qDebug(notifyLog) << "Pin the application" << appName << pin;
-    QDBusReply<void> reply = notifyCenterInterface().call("SetAppInfo",
-                                 appName,
-                                 ShowNotificationTop,
-                                 QDBusVariant(pin).variant());
-    if (reply.error().isValid()) {
-        qWarning(notifyLog) << "Failed to set Pin of the application" << appName << pin << reply.error().message();
-        return;
+
+    if (!pin) {
+        m_pinnedApps.removeOne(appName);
+    } else {
+        if (!m_pinnedApps.contains(appName))
+            m_pinnedApps.append(appName);
     }
-    m_pinnedApps[appName] = pin;
+    QScopedPointer<DConfig> config(DConfig::create("org.deepin.dde.shell", "org.deepin.dde.shell.notification"));
+    config->setValue("pinnedApps", m_pinnedApps);
 }
 
 bool NotifyAccessor::applicationPin(const QString &appName) const
 {
-    if (auto iter = m_pinnedApps.find(appName); iter != m_pinnedApps.end())
-        return iter.value();
+    if (m_pinnedApps.contains(appName))
+        return true;
 
-    QDBusReply<QVariant> reply = notifyCenterInterface().call("GetAppInfo",
-                                 appName,
-                                 ShowNotificationTop);
-    if (reply.error().isValid()) {
-        qWarning(notifyLog) << "Failed to get Pin of the application" << appName << reply.error().message();
-        return false;
+    if (m_pinnedApps.contains(InvalidApp)) {
+        QScopedPointer<DConfig> config(DConfig::create("org.deepin.dde.shell", "org.deepin.dde.shell.notification"));
+        const_cast<NotifyAccessor*>(this)->m_pinnedApps = config->value("pinnedApps").toStringList();
     }
-    const auto data = reply.value().toBool();
-    const_cast<NotifyAccessor *>(this)->m_pinnedApps[appName] = data;
-    return data;
+
+    return m_pinnedApps.contains(appName);
 }
 
 void NotifyAccessor::openNotificationSetting()

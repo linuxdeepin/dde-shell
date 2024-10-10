@@ -61,9 +61,6 @@ public Q_SLOTS:
     void SetAppInfo(const QString &appId, uint configItem, const QDBusVariant &value);
     QDBusVariant GetAppInfo(const QString &appId, uint configItem);
 
-    QString GetAppSetting(const QString &appName);
-    void SetAppSetting(const QString &settings);
-
     void SetSystemInfo(uint configItem, const QDBusVariant &value);
     QDBusVariant GetSystemInfo(uint configItem);
 
