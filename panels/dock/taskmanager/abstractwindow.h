@@ -17,7 +17,7 @@ class AbstractWindow : public QObject
     Q_OBJECT
     Q_PROPERTY(uint32_t id READ id)
     Q_PROPERTY(pid_t pid READ pid NOTIFY pidChanged FINAL)
-    Q_PROPERTY(QString identity READ identity NOTIFY identityChanged FINAL)
+    Q_PROPERTY(QStringList identity READ identity NOTIFY identityChanged FINAL)
     Q_PROPERTY(QString icon READ icon NOTIFY iconChanged FINAL)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged FINAL)
     Q_PROPERTY(bool isActive READ isActive NOTIFY isActiveChanged FINAL)
@@ -39,7 +39,7 @@ public:
 
     virtual uint32_t id() = 0;
     virtual pid_t pid() = 0;
-    virtual QString identity() = 0;
+    virtual QStringList identity() = 0;
     virtual QString icon() = 0;
     virtual QString title() = 0;
     virtual bool isActive() = 0;
