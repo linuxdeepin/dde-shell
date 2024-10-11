@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include <QStandardItemModel>
+#include "constants.h"
 #include <QQmlEngine>
+#include <QStandardItemModel>
 
 namespace Dtk {
 namespace Core {
@@ -43,7 +44,7 @@ public:
         DelegateTypeRole,
         // this tray item cannot be drop (or moved in any form) to the given sections
         ForbiddenSectionsRole,
-        IsForceDockRole,
+        PluginFlagsRole,
         ModelExtendedRole = 0x1000
     };
     Q_ENUM(Roles)
@@ -86,10 +87,13 @@ private:
 
     QStandardItem * findItemByVisualIndex(int visualIndex, VisualSections visualSection) const;
     QStringList * getSection(const QString & sectionType);
-    QString findSection(const QString & surfaceId, const QString & fallback, const QStringList & forbiddenSections, bool isForceDock);
+    QString findSection(const QString &surfaceId, const QString &fallback, const QStringList &forbiddenSections, int pluginFlags);
     void registerToSection(const QString & surfaceId, const QString & sectionType);
-    QStandardItem * createTrayItem(const QString & name, const QString & sectionType,
-                                  const QString & delegateType, const QStringList & forbiddenSections = {}, bool isForceDock = false);
+    QStandardItem *createTrayItem(const QString &name,
+                                  const QString &sectionType,
+                                  const QString &delegateType,
+                                  const QStringList &forbiddenSections = {},
+                                  int pluginFlags = Dock::Attribute_Normal);
     void updateVisualIndexes();
     QString registerSurfaceId(const QVariantMap &surfaceData);
     void loadDataFromDConfig();
