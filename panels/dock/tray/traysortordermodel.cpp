@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "traysortordermodel.h"
+#include "constants.h"
 
 #include <QDebug>
 #include <DConfig>
@@ -240,7 +241,7 @@ QStringList *TraySortOrderModel::getSection(const QString &sectionType)
     return nullptr;
 }
 
-QString TraySortOrderModel::findSection(const QString & surfaceId, const QString & fallback, const QStringList & forbiddenSections, bool isForceDock)
+QString TraySortOrderModel::findSection(const QString &surfaceId, const QString &fallback, const QStringList &forbiddenSections, int pluginFlags)
 {
     QStringList * found = nullptr;
     QString result(fallback);
@@ -260,12 +261,13 @@ QString TraySortOrderModel::findSection(const QString & surfaceId, const QString
     }
 
     // 设置默认隐藏
-    if (!found &&                   // 不在列表中
-        !isForceDock &&             // 非 forceDock
-        result != SECTION_FIXED &&  // 非固定位置插件（时间）
-        !surfaceId.startsWith("internal/") &&       // 非内置插件
+    if (!found && // 不在列表中
+        !(pluginFlags & Dock::Attribute_ForceDock) && // 非 forceDock
+        (pluginFlags & Dock::Attribute_CanSetting) && // 可以在控制中心设置
+        result != SECTION_FIXED && // 非固定位置插件（时间）
+        !surfaceId.startsWith("internal/") && // 非内置插件
         !surfaceId.startsWith("application-tray::") // 非托盘图标
-        ) {
+    ) {
         if (!m_hiddenIds.contains(surfaceId)) {
             m_hiddenIds.append(surfaceId);
         }
@@ -296,11 +298,13 @@ void TraySortOrderModel::registerToSection(const QString & surfaceId, const QStr
     }
 }
 
-QStandardItem * TraySortOrderModel::createTrayItem(const QString & name, const QString & sectionType,
-                                                  const QString & delegateType, const QStringList &forbiddenSections,
-                                                  bool isForceDock)
+QStandardItem *TraySortOrderModel::createTrayItem(const QString &name,
+                                                  const QString &sectionType,
+                                                  const QString &delegateType,
+                                                  const QStringList &forbiddenSections,
+                                                  int pluginFlags)
 {
-    QString actualSectionType = findSection(name, sectionType, forbiddenSections, isForceDock);
+    QString actualSectionType = findSection(name, sectionType, forbiddenSections, pluginFlags);
     registerToSection(name, actualSectionType);
 
     qDebug() << actualSectionType << name << delegateType;
@@ -312,7 +316,7 @@ QStandardItem * TraySortOrderModel::createTrayItem(const QString & name, const Q
     item->setData(delegateType, TraySortOrderModel::DelegateTypeRole);
     item->setData(forbiddenSections, TraySortOrderModel::ForbiddenSectionsRole);
     item->setData(-1, TraySortOrderModel::VisualIndexRole);
-    item->setData(isForceDock, TraySortOrderModel::IsForceDockRole);
+    item->setData(pluginFlags, TraySortOrderModel::PluginFlagsRole);
 
     return item;
 }
@@ -339,7 +343,9 @@ void TraySortOrderModel::updateVisualIndexes()
         if (results.isEmpty()) continue;
         if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
         if (stashPlaceholder == results[0]) continue;
-        bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
+        // forcedock and can not setting plugin need always set to visible
+        auto pluginFlags = results[0]->data(TraySortOrderModel::PluginFlagsRole).toInt();
+        bool itemVisible = (pluginFlags & Dock::Attribute_ForceDock) || !(pluginFlags & Dock::Attribute_ForceDock) || !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_STASHED, TraySortOrderModel::SectionTypeRole);
         if (itemVisible) {
             showStashActionVisible = true;
@@ -366,7 +372,8 @@ void TraySortOrderModel::updateVisualIndexes()
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
         if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
-        bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
+        auto pluginFlags = results[0]->data(TraySortOrderModel::PluginFlagsRole).toInt();
+        bool itemVisible = (pluginFlags & Dock::Attribute_ForceDock) || !(pluginFlags & Dock::Attribute_CanSetting) || !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_COLLAPSABLE, TraySortOrderModel::SectionTypeRole);
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
         if (itemVisible) {
@@ -393,7 +400,8 @@ void TraySortOrderModel::updateVisualIndexes()
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
         if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
-        bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
+        auto flags = results[0]->data(TraySortOrderModel::PluginFlagsRole).toInt();
+        bool itemVisible = (flags & Dock::Attribute_ForceDock) || !(flags & Dock::Attribute_CanSetting) || !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_PINNED, TraySortOrderModel::SectionTypeRole);
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
         if (itemVisible) {
@@ -416,7 +424,8 @@ void TraySortOrderModel::updateVisualIndexes()
         QList<QStandardItem *> results = findItems(id);
         if (results.isEmpty()) continue;
         if (results[0]->data(TraySortOrderModel::VisualIndexRole).toInt() != -1) continue;
-        bool itemVisible = results[0]->data(TraySortOrderModel::IsForceDockRole).toBool() || !m_hiddenIds.contains(id);
+        auto flags = results[0]->data(TraySortOrderModel::PluginFlagsRole).toInt();
+        bool itemVisible = (flags & Dock::Attribute_ForceDock) || !(flags & Dock::Attribute_CanSetting) || !m_hiddenIds.contains(id);
         results[0]->setData(SECTION_FIXED, TraySortOrderModel::SectionTypeRole);
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
         if (itemVisible) {
@@ -437,7 +446,7 @@ QString TraySortOrderModel::registerSurfaceId(const QVariantMap & surfaceData)
     QString delegateType(surfaceData.value("delegateType", "legacy-tray-plugin").toString());
     QString preferredSection(surfaceData.value("sectionType", "collapsable").toString());
     QStringList forbiddenSections(surfaceData.value("forbiddenSections").toStringList());
-    bool isForceDock(surfaceData.value("isForceDock").toBool());
+    int pluginFlas(surfaceData.value("pluginFlags").toInt());
 
     QList<QStandardItem *> results = findItems(surfaceId);
     if (!results.isEmpty()) {
@@ -445,12 +454,12 @@ QString TraySortOrderModel::registerSurfaceId(const QVariantMap & surfaceData)
         // check if the item is currently in a forbidden zone
         QString currentSection(result->data(SectionTypeRole).toString());
         if (forbiddenSections.contains(currentSection)) {
-            result->setData(findSection(surfaceId, preferredSection, forbiddenSections, isForceDock), SectionTypeRole);
+            result->setData(findSection(surfaceId, preferredSection, forbiddenSections, pluginFlas), SectionTypeRole);
         }
         return surfaceId;
     }
 
-    appendRow(createTrayItem(surfaceId, preferredSection, delegateType, forbiddenSections, isForceDock));
+    appendRow(createTrayItem(surfaceId, preferredSection, delegateType, forbiddenSections, pluginFlas));
     return surfaceId;
 }
 
