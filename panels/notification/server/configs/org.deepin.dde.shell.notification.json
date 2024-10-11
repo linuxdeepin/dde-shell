@@ -100,6 +100,17 @@
       "description[zh_CN]": "置顶应用列表",
       "permissions": "readwrite",
       "visibility": "private"
+    },
+    "systemApps": {
+      "value": ["dde-control-center"],
+      "serial": 0,
+      "flags": [],
+      "name": "system applications",
+      "name[zh_CN]": "系统应用列表",
+      "description": "system applications",
+      "description[zh_CN]": "系统应用列表",
+      "permissions": "readwrite",
+      "visibility": "private"
     }
   }
 }

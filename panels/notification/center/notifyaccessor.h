@@ -53,6 +53,7 @@ signals:
 
 public slots:
     void addNotify(const QString &appName, const QString &content);
+    void fetchDataInfo();
 
 signals:
     void dataInfoChanged();
@@ -61,13 +62,11 @@ signals:
 
 private slots:
     void onReceivedRecordStateChanged(qint64 id, int processedType);
-    void onReceivedRecord(const QString& id);
     void onReceivedRecord(qint64 id);
 
 private:
     explicit NotifyAccessor(QObject *parent = nullptr);
 
-    void tryEmitAppsChanged(const QString &appName);
     QString dataInfo() const;
     QStringList apps() const;
     bool debugging() const;
@@ -77,5 +76,6 @@ private:
     QStringList m_pinnedApps;
     QStringList m_apps;
     bool m_debugging = false;
+    QString m_dataInfo;
 };
 }

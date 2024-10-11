@@ -58,20 +58,20 @@ public Q_SLOTS:
 
     // Extra DBus APIS
     QStringList GetAppList();
-    void SetAppInfo(const QString &appId, uint configItem, const QDBusVariant &value);
-    QDBusVariant GetAppInfo(const QString &appId, uint configItem);
+    void SetAppInfo(const QString &appId, uint configItem, const QVariant &value);
+    QVariant GetAppInfo(const QString &appId, uint configItem);
 
-    void SetSystemInfo(uint configItem, const QDBusVariant &value);
-    QDBusVariant GetSystemInfo(uint configItem);
+    void SetSystemInfo(uint configItem, const QVariant &value);
+    QVariant GetSystemInfo(uint configItem);
 
 private:
     bool isDoNotDisturb() const;
-    void tryPlayNotificationSound(const QString &appName, bool dndMode,
-                                  const QStringList &actions, const QVariantMap &hints) const;
-    void tryRecordEntity(const QString &appId, NotifyEntity &entity);
+    void tryPlayNotificationSound(const NotifyEntity &entity, const QString &appId, bool dndMode) const;
     void emitRecordCountChanged();
 
-    void pushPendingEntity(const NotifyEntity &entity);
+    void pushPendingEntity(const NotifyEntity &entity, int expireTimeout);
+    void updateEntityProcessed(qint64 id);
+    void updateEntityProcessed(const NotifyEntity &entity);
 
 private slots:
     void onHandingPendingEntities();
@@ -80,11 +80,12 @@ private:
     uint m_replacesCount = 0;
 
     DataAccessor *m_persistence = nullptr;
-    NotificationSetting *m_notificationSetting = nullptr;
+    NotificationSetting *m_setting = nullptr;
     UserSessionManager *m_userSessionManager = nullptr;
     QTimer *m_pendingTimeout = nullptr;
     qint64 m_lastTimeoutPoint = std::numeric_limits<qint64>::max();
     QMultiHash<qint64, NotifyEntity> m_pendingTimeoutEntities;
+    QStringList m_systemApps;
 };
 
 } // notification

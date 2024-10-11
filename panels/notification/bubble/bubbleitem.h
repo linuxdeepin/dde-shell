@@ -49,6 +49,9 @@ public:
     QString timeTip() const;
     void setTimeTip(const QString &timeTip);
 
+    bool enablePreview() const;
+    void setEnablePreview(bool enable);
+
 signals:
     void levelChanged();
     void timeTipChanged();
@@ -67,6 +70,7 @@ private:
     int m_urgency = NotifyEntity::Normal;
     QString m_timeTip;
     QString m_bodyImagePath;
+    bool m_enablePreview = true;
 };
 
 }

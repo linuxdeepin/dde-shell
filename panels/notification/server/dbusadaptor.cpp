@@ -63,12 +63,12 @@ QStringList DDENotificationDbusAdaptor::GetAppList()
 
 QDBusVariant DDENotificationDbusAdaptor::GetAppInfo(const QString &appId, uint configItem)
 {
-    return manager()->GetAppInfo(appId, configItem);
+    return QDBusVariant(manager()->GetAppInfo(appId, configItem));
 }
 
 void DDENotificationDbusAdaptor::SetAppInfo(const QString &appId, uint configItem, const QDBusVariant &value)
 {
-    return manager()->SetAppInfo(appId, configItem, value);
+    return manager()->SetAppInfo(appId, configItem, value.variant());
 }
 
 QString DDENotificationDbusAdaptor::GetAppSetting(const QString &appName)
@@ -83,12 +83,12 @@ void DDENotificationDbusAdaptor::SetAppSetting(const QString &settings)
 
 void DDENotificationDbusAdaptor::SetSystemInfo(uint configItem, const QDBusVariant &value)
 {
-    return manager()->SetSystemInfo(configItem, value);
+    return manager()->SetSystemInfo(configItem, value.variant());
 }
 
 QDBusVariant DDENotificationDbusAdaptor::GetSystemInfo(uint configItem)
 {
-    return manager()->GetSystemInfo(configItem);
+    return QDBusVariant(manager()->GetSystemInfo(configItem));
 }
 
 } // notification

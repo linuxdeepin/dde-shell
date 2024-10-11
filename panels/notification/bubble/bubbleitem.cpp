@@ -322,6 +322,16 @@ void BubbleItem::setTimeTip(const QString &timeTip)
     }
 }
 
+bool BubbleItem::enablePreview() const
+{
+    return m_enablePreview;
+}
+
+void BubbleItem::setEnablePreview(bool enable)
+{
+    m_enablePreview = enable;
+}
+
 int BubbleItem::defaultActionIdIndex() const
 {
     return m_entity.actions().indexOf("default");
@@ -341,7 +351,7 @@ QStringList BubbleItem::displayActions() const
     const auto defaultIndex = defaultActionIdIndex();
     if (defaultIndex >= 0) {
         auto tmp = m_entity.actions();
-        tmp.remove(defaultIndex, 2);
+        tmp.remove(defaultIndex, 1);
         return tmp;
     }
 
@@ -350,7 +360,7 @@ QStringList BubbleItem::displayActions() const
 
 QString BubbleItem::displayText() const
 {
-    return m_entity.enablePreview() ? m_entity.body() : tr("1 new message");
+    return m_enablePreview ? m_entity.body() : tr("1 new message");
 }
 
 }

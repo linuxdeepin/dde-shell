@@ -27,16 +27,22 @@ FocusScope {
 
     // test
     onHeaderClicked: function () {
+        dataPanelLoader.active = !dataPanelLoader.active
+        NotifyAccessor.fetchDataInfo()
         dataPanel.show()
     }
-    Window {
-        id: dataPanel
-        width: 360
-        height: 600
-        x: dataPanel.transientParent.x + root.Window.width + 10
-        y: dataPanel.transientParent.y
-        DataPanel {
-            notifyModel: root.notifyModel
+    Loader {
+        id: dataPanelLoader
+        active: false
+        sourceComponent: Window {
+            id: dataPanel
+            width: 360
+            height: 600
+            x: dataPanel.transientParent.x + root.Window.width + 10
+            y: dataPanel.transientParent.y
+            DataPanel {
+                notifyModel: root.notifyModel
+            }
         }
     }
 

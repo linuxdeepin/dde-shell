@@ -25,6 +25,7 @@ public Q_SLOTS:
     void actionInvoked(qint64 id, uint bubbleId, const QString &actionKey);
     void notificationClosed(qint64 id, uint bubbleId, uint reason);
     void notificationReplaced(qint64 id);
+    QVariant appValue(const QString &appId, int configItem);
 
 private:
     NotificationManager *m_manager = nullptr;
