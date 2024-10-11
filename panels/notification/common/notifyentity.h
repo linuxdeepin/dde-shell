@@ -53,6 +53,9 @@ public:
     QString appName() const;
     void setAppName(const QString &appName);
 
+    QString appId() const;
+    void setAppId(const QString &appId);
+
     QString body() const;
     void setBody(const QString &body);
 
@@ -73,9 +76,6 @@ public:
     uint replacesId() const;
     void setReplacesId(uint replacesId);
 
-    int expiredTimeout() const;
-    void setExpiredTimeout(int mSecs);
-
     qint64 cTime() const;
     void setCTime(qint64 cTime);
 
@@ -85,12 +85,6 @@ public:
 
     uint bubbleId() const;
     void setBubbleId(qint64 bubbleId);
-
-    bool enablePreview() const;
-    void setEnablePreview(bool enable);
-
-    static int processedValue();
-    static int removedValue();
 
 private:
     static QString convertHintsToString(const QVariantMap &map);

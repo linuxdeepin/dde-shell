@@ -66,11 +66,11 @@ void NotificationSetting::setAppValue(const QString &id, AppConfigItem item, con
         info["enableSound"] = value.toBool();
         break;
     }
-    case ShowInNotificationCenter: {
+    case ShowInCenter: {
         info["showInCenter"] = value.toBool();
         break;
     }
-    case LockScreenShowNotification: {
+    case ShowOnLockScreen: {
         info["showInLockScreen"] = value.toBool();
         break;
     }
@@ -109,10 +109,10 @@ QVariant NotificationSetting::appValue(const QString &id, AppConfigItem item)
     case EnableSound: {
         return info.value("enableSound", true);
     }
-    case ShowInNotificationCenter: {
+    case ShowInCenter: {
         return info.value("showInCenter", true);
     }
-    case LockScreenShowNotification: {
+    case ShowOnLockScreen: {
         return info.value("showInLockScreen", true);
     }
     default:
@@ -253,7 +253,7 @@ QVariantMap NotificationSetting::appInfo(const QString &id) const
 
 void NotificationSetting::onAppsChanged()
 {
-    const auto old = m_appItems;
+    const auto old = appItems();
     const auto current = appItemsImpl();
 
     QList<NotificationSetting::AppItem> added;

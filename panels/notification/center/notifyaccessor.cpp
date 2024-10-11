@@ -112,7 +112,11 @@ NotifyAccessor::NotifyAccessor(QObject *parent)
     bool valid = false;
     if (!applets.isEmpty()) {
         if (auto server = applets.first()) {
-            valid = QObject::connect(server, SIGNAL(notificationStateChanged(qint64, int)), this, SLOT(onReceivedRecordStateChanged(qint64, int)));
+            valid = QObject::connect(server,
+                                     SIGNAL(notificationStateChanged(qint64, int)),
+                                     this,
+                                     SLOT(onReceivedRecordStateChanged(qint64, int)),
+                                     Qt::QueuedConnection);
         }
     } else {
         // old interface by dbus
@@ -171,7 +175,7 @@ int NotifyAccessor::fetchEntityCount(const QString &appName) const
 {
     qDebug(notifyLog) << "Fetch entity count for the app" << appName;
     BENCHMARK();
-    auto ret = m_accessor->fetchEntityCount(appName, NotifyEntity::processedValue());
+    auto ret = m_accessor->fetchEntityCount(appName, NotifyEntity::Processed);
     return ret;
 }
 
@@ -179,14 +183,14 @@ NotifyEntity NotifyAccessor::fetchLastEntity(const QString &appName) const
 {
     qDebug(notifyLog) << "Fetch last entity for the app" << appName;
     BENCHMARK();
-    auto ret = m_accessor->fetchLastEntity(appName, NotifyEntity::processedValue());
+    auto ret = m_accessor->fetchLastEntity(appName, NotifyEntity::Processed);
     return ret;
 }
 
 QList<NotifyEntity> NotifyAccessor::fetchEntities(const QString &appName, int maxCount)
 {
     qDebug(notifyLog) << "Fetch entities for the app" << appName;
-    auto ret = m_accessor->fetchEntities(appName, NotifyEntity::processedValue(), maxCount);
+    auto ret = m_accessor->fetchEntities(appName, NotifyEntity::Processed, maxCount);
     return ret;
 }
 
@@ -204,9 +208,6 @@ void NotifyAccessor::removeEntity(qint64 id)
     BENCHMARK();
 
     m_accessor->removeEntity(id);
-
-    appsChanged();
-    dataInfoChanged();
 }
 
 void NotifyAccessor::removeEntityByApp(const QString &appName)
@@ -215,9 +216,6 @@ void NotifyAccessor::removeEntityByApp(const QString &appName)
     BENCHMARK();
 
     m_accessor->removeEntityByApp(appName);
-
-    appsChanged();
-    dataInfoChanged();
 }
 
 void NotifyAccessor::clear()
@@ -225,9 +223,6 @@ void NotifyAccessor::clear()
     qDebug(notifyLog) << "Remove all notify";
 
     m_accessor->clear();
-
-    appsChanged();
-    dataInfoChanged();
 }
 
 // don't need to emit ActionInvoked of protocol.
@@ -253,23 +248,23 @@ void NotifyAccessor::invokeAction(const NotifyEntity &entity, const QString &act
     }
 }
 
-void NotifyAccessor::pinApplication(const QString &appName, bool pin)
+void NotifyAccessor::pinApplication(const QString &appId, bool pin)
 {
-    qDebug(notifyLog) << "Pin the application" << appName << pin;
+    qDebug(notifyLog) << "Pin the application" << appId << pin;
 
     if (!pin) {
-        m_pinnedApps.removeOne(appName);
+        m_pinnedApps.removeOne(appId);
     } else {
-        if (!m_pinnedApps.contains(appName))
-            m_pinnedApps.append(appName);
+        if (!m_pinnedApps.contains(appId))
+            m_pinnedApps.append(appId);
     }
     QScopedPointer<DConfig> config(DConfig::create("org.deepin.dde.shell", "org.deepin.dde.shell.notification"));
     config->setValue("pinnedApps", m_pinnedApps);
 }
 
-bool NotifyAccessor::applicationPin(const QString &appName) const
+bool NotifyAccessor::applicationPin(const QString &appId) const
 {
-    if (m_pinnedApps.contains(appName))
+    if (m_pinnedApps.contains(appId))
         return true;
 
     if (m_pinnedApps.contains(InvalidApp)) {
@@ -277,7 +272,7 @@ bool NotifyAccessor::applicationPin(const QString &appName) const
         const_cast<NotifyAccessor*>(this)->m_pinnedApps = config->value("pinnedApps").toStringList();
     }
 
-    return m_pinnedApps.contains(appName);
+    return m_pinnedApps.contains(appId);
 }
 
 void NotifyAccessor::openNotificationSetting()
@@ -302,38 +297,9 @@ void NotifyAccessor::addNotify(const QString &appName, const QString &content)
     if (auto entity = fetchLastEntity(appName); entity.isValid()) {
         entityReceived(entity.id());
     }
-    tryEmitAppsChanged(appName);
-    dataInfoChanged();
 }
 
-void NotifyAccessor::onReceivedRecordStateChanged(qint64 id, int processedType)
-{
-    if (processedType == NotifyEntity::processedValue()) {
-        onReceivedRecord(id);
-    }
-}
-
-void NotifyAccessor::onReceivedRecord(const QString& id)
-{
-    dataInfoChanged();
-    emit entityReceived(id.toLongLong());
-}
-
-void NotifyAccessor::onReceivedRecord(qint64 id)
-{
-    dataInfoChanged();
-    emit entityReceived(id);
-}
-
-void NotifyAccessor::tryEmitAppsChanged(const QString &appName)
-{
-    const auto apps = fetchApps();
-    if (!apps.contains(appName)) {
-        appsChanged();
-    }
-}
-
-QString NotifyAccessor::dataInfo() const
+void NotifyAccessor::fetchDataInfo()
 {
     QStringList info;
     auto entityCount = fetchEntityCount();
@@ -343,7 +309,26 @@ QString NotifyAccessor::dataInfo() const
         info.append(QString("%1 -> %2").arg(item).arg(fetchEntityCount(item)));
     }
     QString ret = info.join("\n");
-    return ret;
+    m_dataInfo = ret;
+    dataInfoChanged();
+    appsChanged();
+}
+
+void NotifyAccessor::onReceivedRecordStateChanged(qint64 id, int processedType)
+{
+    if (processedType == NotifyEntity::Processed) {
+        onReceivedRecord(id);
+    }
+}
+
+void NotifyAccessor::onReceivedRecord(qint64 id)
+{
+    emit entityReceived(id);
+}
+
+QString NotifyAccessor::dataInfo() const
+{
+    return m_dataInfo;
 }
 
 QStringList NotifyAccessor::apps() const

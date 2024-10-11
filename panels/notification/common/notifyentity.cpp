@@ -21,6 +21,7 @@ public:
     {
     }
 
+    QString appId;
     QString appName;
     QString appIcon;
     QString summary;
@@ -34,7 +35,6 @@ public:
     qint64 id = -1;
     qint64 cTime = 0;
     int processedType = NotifyEntity::NotProcessed;
-    bool enablePreview = true;
 };
 
 NotifyEntity::NotifyEntity()
@@ -130,6 +130,16 @@ void NotifyEntity::setAppName(const QString &appName)
     d->appName = appName;
 }
 
+QString NotifyEntity::appId() const
+{
+    return d->appId;
+}
+
+void NotifyEntity::setAppId(const QString &appId)
+{
+    d->appId = appId;
+}
+
 QString NotifyEntity::body() const
 {
     return d->body;
@@ -200,16 +210,6 @@ void NotifyEntity::setReplacesId(uint replacesId)
     d->replacesId = replacesId;
 }
 
-int NotifyEntity::expiredTimeout() const
-{
-    return d->expireTimeout;
-}
-
-void NotifyEntity::setExpiredTimeout(int mSecs)
-{
-    d->expireTimeout = mSecs;
-}
-
 qint64 NotifyEntity::cTime() const
 {
     return d->cTime;
@@ -233,26 +233,6 @@ int NotifyEntity::processedType() const
 void NotifyEntity::setProcessedType(int type)
 {
     d->processedType = type;
-}
-
-bool NotifyEntity::enablePreview() const
-{
-    return d->enablePreview;
-}
-
-void NotifyEntity::setEnablePreview(bool enable)
-{
-    d->enablePreview = enable;
-}
-
-int NotifyEntity::processedValue()
-{
-    return NotifyEntity::Processed;
-}
-
-int NotifyEntity::removedValue()
-{
-    return NotifyEntity::Removed;
 }
 
 QString NotifyEntity::convertActionsToString(const QStringList &actions)
@@ -300,10 +280,14 @@ QString NotifyEntity::convertHintsToString(const QVariantMap &map)
 QStringList NotifyEntity::parseAction(const QString &action)
 {
     if (action.isEmpty())
-    return {};
+        return {};
 
     QStringList actions = action.split("|");
-    Q_ASSERT((actions.size() % 2) != 1);
+    const auto defaultIndex = actions.indexOf("default");
+    Q_ASSERT((defaultIndex % 2) != 1);
+    if (defaultIndex < 0)
+        Q_ASSERT((actions.size() % 2) != 1);
+
     return actions;
 }
 

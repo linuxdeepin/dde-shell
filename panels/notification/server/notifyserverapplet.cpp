@@ -6,7 +6,6 @@
 #include "notificationmanager.h"
 #include "dbusadaptor.h"
 #include "pluginfactory.h"
-#include "notifyentity.h"
 
 namespace notification {
 
@@ -53,6 +52,11 @@ void NotifyServerApplet::notificationClosed(qint64 id, uint bubbleId, uint reaso
 void NotifyServerApplet::notificationReplaced(qint64 id)
 {
     m_manager->notificationReplaced(id);
+}
+
+QVariant NotifyServerApplet::appValue(const QString &appId, int configItem)
+{
+    return m_manager->GetAppInfo(appId, configItem);
 }
 
 D_APPLET_CLASS(NotifyServerApplet)

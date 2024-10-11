@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QObject>
+#include <QTimer>
 #include <QVariantMap>
 
 namespace Dtk {
@@ -27,8 +28,8 @@ public:
         EnableNotification,
         EnablePreview,
         EnableSound,
-        ShowInNotificationCenter,
-        LockScreenShowNotification
+        ShowInCenter,
+        ShowOnLockScreen
     };
 
     enum SystemConfigItem {
