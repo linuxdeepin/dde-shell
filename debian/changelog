@@ -1,3 +1,9 @@
+dde-shell (1.99.0) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.0
+
+ -- tsic404 <liuheng@deepin.org>  Fri, 11 Oct 2024 16:43:51 +0800
+
 dde-shell (0.0.43) unstable; urgency=medium
 
   * bump version to 0.0.43
