@@ -141,7 +141,7 @@ AppletItem {
                     preferredSection = "pinned"
                 }
 
-                surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin", "sectionType": preferredSection, "forbiddenSections": forbiddenSections, "isForceDock": item.pluginFlags & 0x1000})
+                surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin", "sectionType": preferredSection, "forbiddenSections": forbiddenSections, "pluginFlags": item.pluginFlags})
             }
             // actually only for datetime plugin currently
             for (let i = 0; i < DockCompositor.fixedPluginSurfaces.count; i++) {
@@ -150,7 +150,7 @@ AppletItem {
                 let forbiddenSections = ["stashed", "collapsable", "pinned"]
                 let preferredSection = "fixed"
 
-                surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin", "sectionType": preferredSection, "forbiddenSections": forbiddenSections, "isForceDock": item.pluginFlags & 0x1000})
+                surfacesData.push({"surfaceId": surfaceId, "delegateType": "legacy-tray-plugin", "sectionType": preferredSection, "forbiddenSections": forbiddenSections, "pluginFlags": item.pluginFlags})
             }
             DDT.TraySortOrderModel.availableSurfaces = surfacesData
             console.log("onPluginSurfacesUpdated", surfacesData.length)
