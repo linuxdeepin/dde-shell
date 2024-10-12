@@ -40,7 +40,6 @@ public:
     QVariantList actions() const;
     void updateActions();
     void updateStrongInteractive();
-    void updateContentIcon();
 
     void refresh();
 
@@ -55,7 +54,6 @@ protected:
     NotifyEntity m_entity;
     bool m_pinned = false;
     bool m_strongInteractive = false;
-    QString m_contentIcon;
 };
 
 class OverlapAppNotifyItem : public AppNotifyItem

@@ -259,6 +259,17 @@ void NotifyEntity::setBubbleId(qint64 bubbleId)
     d->bubbleId = bubbleId;
 }
 
+// https://specifications.freedesktop.org/notification-spec/1.2/icons-and-images.html
+QString NotifyEntity::bodyIcon() const
+{
+    const auto hints = this->hints();
+    if (auto iter = hints.find("image-path"); iter != hints.end()) {
+        const auto path = iter.value().toString();
+        return path;
+    }
+    return QString();
+}
+
 QString NotifyEntity::convertHintsToString(const QVariantMap &map)
 {
     QString text;

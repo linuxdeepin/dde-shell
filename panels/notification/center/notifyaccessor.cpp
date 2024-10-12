@@ -10,7 +10,6 @@
 #include <QDBusInterface>
 #include <QDBusPendingReply>
 #include <QProcess>
-#include <QElapsedTimer>
 #include <QDBusReply>
 #include <QQueue>
 
@@ -48,27 +47,6 @@ static QDBusInterface controlCenterInterface()
                           "/org/deepin/dde/ControlCenter1",
                           "org.deepin.dde.ControlCenter1");
 }
-
-class Benchmark
-{
-public:
-    explicit Benchmark(const QString &msg)
-        : m_msg(msg)
-    {
-        m_timer.start();
-    }
-    ~Benchmark()
-    {
-        const auto time = m_timer.elapsed();
-        if (time > 10)
-            qWarning(notifyLog) << m_msg << " cost more time, elapsed:" << time;
-    }
-private:
-    QElapsedTimer m_timer;
-    QString m_msg;
-};
-#define BENCHMARK() \
-    Benchmark __benchmark__(__FUNCTION__);
 
 class EventFilter : public QObject
 {
@@ -166,7 +144,6 @@ void NotifyAccessor::setDataAccessor(DataAccessor *accessor)
 NotifyEntity NotifyAccessor::fetchEntity(qint64 id) const
 {
     qDebug(notifyLog) << "Fetch entity" << id;
-    BENCHMARK();
     auto ret = m_accessor->fetchEntity(id);
     return ret;
 }
@@ -174,7 +151,6 @@ NotifyEntity NotifyAccessor::fetchEntity(qint64 id) const
 int NotifyAccessor::fetchEntityCount(const QString &appName) const
 {
     qDebug(notifyLog) << "Fetch entity count for the app" << appName;
-    BENCHMARK();
     auto ret = m_accessor->fetchEntityCount(appName, NotifyEntity::Processed);
     return ret;
 }
@@ -182,7 +158,6 @@ int NotifyAccessor::fetchEntityCount(const QString &appName) const
 NotifyEntity NotifyAccessor::fetchLastEntity(const QString &appName) const
 {
     qDebug(notifyLog) << "Fetch last entity for the app" << appName;
-    BENCHMARK();
     auto ret = m_accessor->fetchLastEntity(appName, NotifyEntity::Processed);
     return ret;
 }
@@ -197,7 +172,6 @@ QList<NotifyEntity> NotifyAccessor::fetchEntities(const QString &appName, int ma
 QStringList NotifyAccessor::fetchApps(int maxCount) const
 {
     qDebug(notifyLog) << "Fetch apps count" << maxCount;
-    BENCHMARK();
     auto ret = m_accessor->fetchApps(maxCount);
     return ret;
 }
@@ -205,7 +179,6 @@ QStringList NotifyAccessor::fetchApps(int maxCount) const
 void NotifyAccessor::removeEntity(qint64 id)
 {
     qDebug(notifyLog) << "Remove notify" << id;
-    BENCHMARK();
 
     m_accessor->removeEntity(id);
 }
@@ -213,7 +186,6 @@ void NotifyAccessor::removeEntity(qint64 id)
 void NotifyAccessor::removeEntityByApp(const QString &appName)
 {
     qDebug(notifyLog) << "Remove notifies for the application" << appName;
-    BENCHMARK();
 
     m_accessor->removeEntityByApp(appName);
 }

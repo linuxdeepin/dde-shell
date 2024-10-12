@@ -69,7 +69,6 @@ private:
     int m_level = 0;
     int m_urgency = NotifyEntity::Normal;
     QString m_timeTip;
-    QString m_bodyImagePath;
     bool m_enablePreview = true;
 };
 

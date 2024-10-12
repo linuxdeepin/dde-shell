@@ -39,6 +39,17 @@ NotificationSetting::NotificationSetting(QObject *parent)
     connect(m_impl, &Dtk::Core::DConfig::valueChanged, this, [this] (const QString &key) {
         if (key == "appsInfo") {
             invalidAppItemCached();
+        } else {
+            static const QStringList keys {"dndMode",
+                                          "openByTimeInterval",
+                                          "lockScreenOpenDndMode",
+                                          "startTime",
+                                          "endTime",
+                                          "notificationClosed",
+                                          "maxCount"};
+            if (keys.contains(key)) {
+                m_systemInfo = {};
+            }
         }
     });
 }
@@ -149,37 +160,30 @@ void NotificationSetting::setSystemValue(NotificationSetting::SystemConfigItem i
     default:
         return;
     }
+    m_systemInfo = {};
     Q_EMIT systemValueChanged(item, value);
 }
 
 QVariant NotificationSetting::systemValue(NotificationSetting::SystemConfigItem item)
 {
-    QVariant result;
     switch (item) {
     case DNDMode:
-        result = m_impl->value("dndMode", true);
-        break;
+        return systemValue("dndMode", true);
     case LockScreenOpenDNDMode:
-        result = m_impl->value("lockScreenOpenDndMode", false);
-        break;
+        return systemValue("lockScreenOpenDndMode", false);
     case OpenByTimeInterval:
-        result = m_impl->value("openByTimeInterval", true);
-        break;
+        return systemValue("openByTimeInterval", true);
     case StartTime:
-        result = m_impl->value("startTime", "07:00");
-        break;
+        return systemValue("startTime", "07:00");
     case EndTime:
-        result = m_impl->value("endTime", "22:00");
-        break;
+        return systemValue("endTime", "22:00");
     case CloseNotification:
-        result = m_impl->value("notificationClosed", false);
-        break;
+        return systemValue("notificationClosed", false);
     case MaxCount:
-        result = m_impl->value("maxCount", 2000);
-        break;
+        return systemValue("maxCount", 2000);
     }
 
-    return result;
+    return {};
 }
 
 QStringList NotificationSetting::apps() const
@@ -293,6 +297,13 @@ void NotificationSetting::invalidAppItemCached()
 {
     m_appsInfo.clear();
     m_appsInfo[InvalidApp] = QVariant();
+}
+
+QVariant NotificationSetting::systemValue(const QString &key, const QVariant &fallback)
+{
+    if (!m_systemInfo.contains(key))
+        m_systemInfo[key] = m_impl->value(key, fallback);
+    return m_systemInfo[key];
 }
 
 } // notification

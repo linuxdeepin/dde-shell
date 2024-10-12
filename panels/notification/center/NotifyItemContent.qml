@@ -180,15 +180,15 @@ NotifyItem {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 Text {
-                    text: root.content
+                    Layout.alignment: Qt.AlignLeft
+                    Layout.fillWidth: true
                     visible: text !== ""
+                    text: root.content
                     maximumLineCount: 6
                     font: DTK.fontManager.t8
                     color: palette.windowText
                     wrapMode: Text.WordWrap
                     elide: Text.ElideRight
-                    Layout.alignment: Qt.AlignLeft
-                    Layout.fillWidth: true
                     linkColor: palette.highlight
                     onLinkActivated: function (link) {
                         root.linkActivated(link)
@@ -205,9 +205,11 @@ NotifyItem {
                     Layout.minimumWidth: 16
                     Layout.minimumHeight: 16
                     Layout.alignment: Qt.AlignRight
+                    active: root.contentIcon !== ""
                     // TODO DciIcon's bounding can't be limit by maximumWidth.
                     sourceComponent: Image {
                         anchors.fill: parent
+                        fillMode: Image.PreserveAspectFit
                         source: root.contentIcon
                     }
                 }

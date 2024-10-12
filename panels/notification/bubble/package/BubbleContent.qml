@@ -12,6 +12,7 @@ import org.deepin.dtk 1.0 as D
 D.Control {
     id: control
     property var bubble
+    property bool closeVisible: control.hovered || closePlaceHolder.hovered
 
     contentItem: RowLayout {
         Layout.minimumHeight: 40
@@ -60,7 +61,7 @@ D.Control {
                     id: timeTip
                     Layout.alignment: Qt.AlignRight
                     Layout.rightMargin: 5
-                    visible: !control.hovered
+                    visible: !control.closeVisible
                     elide: Text.ElideRight
                     text: bubble.timeTip
                     maximumLineCount: 1
@@ -95,14 +96,28 @@ D.Control {
                     Layout.fillWidth: true
                     maximumLineCount: 6
                     font: D.DTK.fontManager.t8
-                    textFormat: Text.PlainText
+                    color: palette.windowText
                     wrapMode: Text.WordWrap
+                    linkColor: palette.highlight
+                    onLinkActivated: function (link) {
+                        console.log("Link actived", link)
+                        D.ApplicationHelper.openUrl(link)
+                    }
+                }
+
+                Item {
+                    Layout.preferredHeight: 1
+                    Layout.fillWidth: true
                 }
 
                 Image {
+                    Layout.maximumWidth: 106
+                    Layout.maximumHeight: 106
+                    Layout.minimumWidth: 16
+                    Layout.minimumHeight: 16
                     visible: bubble.bodyImagePath !== ""
                     source: bubble.bodyImagePath
-                    Layout.alignment: Qt.AlignVCenter
+                    Layout.alignment: Qt.AlignRight
 
                     fillMode: Image.PreserveAspectFit
                 }
@@ -140,19 +155,29 @@ D.Control {
         }
     }
 
-    Button {
-         id: closeBtn
-         visible: control.hovered
-         width: 20
-         height: 20
-         icon.name: "window-close"
-         icon.width: 10
-         icon.height: 10
-         anchors.right: parent.right
-         anchors.top: parent.top
-         anchors.topMargin: -7
-         anchors.rightMargin: -7
-         z: control.z + 1
-         onClicked: Applet.delayProcess(bubble.index)
+    Control {
+        id: closePlaceHolder
+        focus: true
+        anchors {
+            top: parent.top
+            topMargin: -height / 2
+            right: parent.right
+            rightMargin: -width / 2
+        }
+        width: 20
+        height: 20
+        contentItem: Loader {
+            active: control.closeVisible
+            sourceComponent: D.Button {
+                id: closeBtn
+                icon.name: "window-close"
+                icon.width: 16
+                icon.height: 16
+                onClicked: Applet.delayProcess(bubble.index)
+                background: D.BoxPanel {
+                    radius: closeBtn.height / 2
+                }
+            }
+       }
     }
 }
