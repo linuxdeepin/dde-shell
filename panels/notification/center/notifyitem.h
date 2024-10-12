@@ -20,6 +20,7 @@ enum NotifyType {
 using namespace notification;
 class AppNotifyItem : public QObject
 {
+    Q_OBJECT
 public:
     AppNotifyItem(const NotifyEntity &entity);
 
