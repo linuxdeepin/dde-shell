@@ -45,18 +45,6 @@ FocusScope {
             height: Math.min(maxViewHeight, viewHeight)
             notifyModel: notifyModel
         }
-
-        NotifyBottom {
-            id: bottom
-            anchors {
-                top: view.bottom
-                topMargin: 20
-                horizontalCenter: parent.horizontalCenter
-            }
-
-            visible: notifyModel.collapse && notifyModel.remainCount > 0
-            notifyModel: notifyModel
-        }
     }
 }
 

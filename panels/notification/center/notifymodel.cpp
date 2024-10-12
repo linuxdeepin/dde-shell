@@ -76,8 +76,6 @@ void NotifyModel::expandApp(int row)
         }
         endInsertRows();
     }
-
-    refreshRemainCountState();
 }
 
 void NotifyModel::collapseApp(int row)
@@ -124,8 +122,6 @@ void NotifyModel::collapseApp(int row)
         m_appNotifies.insert(row, overlap);
         endInsertRows();
     }
-
-    refreshRemainCountState();
 }
 
 void NotifyModel::close()
@@ -141,15 +137,13 @@ void NotifyModel::close()
     qDeleteAll(m_appNotifies);
     m_appNotifies.clear();
     endResetModel();
-
-    refreshRemainCountState();
 }
 
 void NotifyModel::open()
 {
     qDebug(notifyLog) << "Open";
 
-    auto apps = fetchLastApps(3);
+    auto apps = fetchLastApps();
     for (auto appName : apps) {
         const auto tmp = m_accessor->fetchEntities(appName, 3);
         if (tmp.isEmpty())
@@ -183,8 +177,6 @@ void NotifyModel::open()
         m_refreshTimer = -1;
     }
     m_refreshTimer = startTimer(std::chrono::milliseconds(1000));
-
-    refreshRemainCountState();
 }
 
 void NotifyModel::append(const NotifyEntity &entity)
@@ -283,8 +275,6 @@ void NotifyModel::append(const NotifyEntity &entity)
         m_appNotifies.insert(start, notify);
         endInsertRows();
     }
-
-    refreshRemainCountState();
 }
 
 QList<QString> NotifyModel::fetchLastApps(int maxCount) const
@@ -369,15 +359,6 @@ int NotifyModel::lastNotifyIndex(const AppNotifyItem *item) const
 void NotifyModel::sortNotifies()
 {
     sort(0, Qt::DescendingOrder);
-}
-
-void NotifyModel::refreshRemainCountState()
-{
-    const int group = notifyCount(NotifyType::Group);
-    const int exist = m_appNotifies.size() - group;
-    const int all = m_accessor->fetchEntityCount();
-    int remain = all - exist;
-    setRemainCount(remain);
 }
 
 void NotifyModel::trayUpdateGroupLastEntity(const NotifyEntity &entity)
@@ -537,8 +518,6 @@ void NotifyModel::remove(qint64 id)
             endRemoveRows();
         }
     }
-
-    refreshRemainCountState();
 }
 
 void NotifyModel::removeByApp(const QString &appName)
@@ -581,8 +560,6 @@ void NotifyModel::removeByApp(const QString &appName)
     endRemoveRows();
 
     m_accessor->removeEntityByApp(appName);
-
-    refreshRemainCountState();
 }
 
 void NotifyModel::clear()
@@ -593,8 +570,6 @@ void NotifyModel::clear()
     endResetModel();
 
     m_accessor->clear();
-
-    refreshRemainCountState();
 }
 
 void NotifyModel::collapseAllApp()
@@ -602,8 +577,6 @@ void NotifyModel::collapseAllApp()
     close();
     open();
     setCollapse(true);
-
-    refreshRemainCountState();
 }
 
 void NotifyModel::expandAllApp()
@@ -645,8 +618,6 @@ void NotifyModel::expandAllApp()
         }
     }
     setCollapse(false);
-
-    refreshRemainCountState();
 }
 
 void NotifyModel::invokeAction(qint64 id, const QString &actionId)
@@ -681,8 +652,6 @@ void NotifyModel::pinApplication(const QString &appName, bool pin)
 
         // sort
         sortNotifies();
-
-        refreshRemainCountState();
     }
 }
 
@@ -852,18 +821,5 @@ void NotifyModel::setCollapse(bool newCollapse)
         return;
     m_collapse = newCollapse;
     emit collapseChanged();
-}
-
-void NotifyModel::setRemainCount(int count)
-{
-    if (count == m_remainCount)
-        return;
-    m_remainCount = count;
-    emit remainCountChanged();
-}
-
-int NotifyModel::remainCount() const
-{
-    return m_remainCount;
 }
 }

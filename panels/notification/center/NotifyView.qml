@@ -53,16 +53,16 @@ Control {
         //         NumberAnimation { properties: "y"; duration: 300 }
         //     }
         // }
-        addDisplaced: Transition {
-            ParallelAnimation {
-                NumberAnimation { properties: "y"; duration: 300 }
-            }
-        }
-        moveDisplaced: Transition {
-            ParallelAnimation {
-                NumberAnimation { properties: "y"; duration: 300 }
-            }
-        }
+        // addDisplaced: Transition {
+        //     ParallelAnimation {
+        //         NumberAnimation { properties: "y"; duration: 300 }
+        //     }
+        // }
+        // moveDisplaced: Transition {
+        //     ParallelAnimation {
+        //         NumberAnimation { properties: "y"; duration: 300 }
+        //     }
+        // }
     }
 
     background: BoundingRectangle {}
