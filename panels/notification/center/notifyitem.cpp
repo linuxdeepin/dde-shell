@@ -97,7 +97,9 @@ bool AppNotifyItem::strongInteractive() const
 
 QString AppNotifyItem::contentIcon() const
 {
-    return m_contentIcon;
+    Q_ASSERT(m_entity.isValid());
+    const auto path = m_entity.bodyIcon();
+    return path;
 }
 
 QString AppNotifyItem::defaultAction() const
@@ -149,29 +151,11 @@ void AppNotifyItem::updateStrongInteractive()
     m_strongInteractive = ret;
 }
 
-void AppNotifyItem::updateContentIcon()
-{
-    QMap<QString, QVariant> hints = m_entity.hints();
-    if (hints.isEmpty())
-        return;
-    QString ret;
-    QMap<QString, QVariant>::const_iterator i = hints.constBegin();
-    while (i != hints.constEnd()) {
-        if (i.key() == QLatin1String("icon")) {
-            ret = i.value().toString();
-            break;
-        }
-        ++i;
-    }
-    m_contentIcon = ret;
-}
-
 void AppNotifyItem::refresh()
 {
     updateTime();
     updateActions();
     updateStrongInteractive();
-    updateContentIcon();
 }
 
 bool AppNotifyItem::pinned() const

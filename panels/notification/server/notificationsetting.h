@@ -78,12 +78,14 @@ private slots:
 private:
     void updateAppItemValue(const QVariantMap &info, AppItem &app) const;
     void invalidAppItemCached();
+    QVariant systemValue(const QString &key, const QVariant &fallback);
 
 private:
     Dtk::Core::DConfig *m_impl = nullptr;
     QAbstractListModel *m_appAccessor = nullptr;
     QList<AppItem> m_appItems;
     QVariantMap m_appsInfo;
+    QVariantMap m_systemInfo;
 };
 
 } // notification

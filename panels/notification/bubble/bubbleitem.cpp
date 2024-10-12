@@ -175,10 +175,6 @@ void BubbleItem::setEntity(const NotifyEntity &entity)
     if (hints.contains("urgency")) {
         m_urgency = hints.value("urgency").toInt();
     }
-
-    if (entity.hints().contains("dde-body-image-path")) {
-        m_bodyImagePath = entity.hints().value("dde-body-image-path").toString();
-    }
 }
 
 qint64 BubbleItem::id() const
@@ -223,7 +219,7 @@ int BubbleItem::urgency() const
 
 QString BubbleItem::bodyImagePath() const
 {
-    return m_bodyImagePath;
+    return m_entity.bodyIcon();
 }
 
 qint64 BubbleItem::ctime() const

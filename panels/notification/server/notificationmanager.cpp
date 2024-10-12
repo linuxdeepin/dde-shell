@@ -152,7 +152,16 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
                                  const QString &body, const QStringList &actions, const QVariantMap &hints,
                                  int expireTimeout)
 {
-    qInfo() << "Notify" << appName << replacesId << appIcon << summary << body << actions << hints << expireTimeout;
+    qDebug(notifyServerLog) << "Notify"
+            << ", appName:" << appName
+            << ", summary:" << summary
+            << ", appIcon:" << appIcon
+            << ", body size:" << body.size()
+            << ", actions:" << actions
+            << ", hint: " << hints
+            << ", replaceId:" << replacesId
+            << ", expireTimeout:" << expireTimeout;
+
     if (calledFromDBus() && m_setting->systemValue(NotificationSetting::CloseNotification).toBool()) {
         return 0;
     }
@@ -181,13 +190,12 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     entity.setAppId(appId);
     entity.setProcessedType(NotifyEntity::None);
 
-    bool enablePreview = true, lockScreenShow = true;
+    bool lockScreenShow = true;
     bool dndMode = isDoNotDisturb();
     bool systemNotification = m_systemApps.contains(appName);
     bool lockScreen = m_userSessionManager->locked();
 
     if (!systemNotification) {
-        enablePreview = m_setting->appValue(appId, NotificationSetting::EnablePreview).toBool();
         lockScreenShow = m_setting->appValue(appId, NotificationSetting::ShowOnLockScreen).toBool();
     }
 

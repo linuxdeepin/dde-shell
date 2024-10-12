@@ -86,6 +86,8 @@ public:
     uint bubbleId() const;
     void setBubbleId(qint64 bubbleId);
 
+    QString bodyIcon() const;
+
 private:
     static QString convertHintsToString(const QVariantMap &map);
     static QString convertActionsToString(const QStringList &actions);
