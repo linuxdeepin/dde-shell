@@ -75,7 +75,10 @@ bool DockPanel::init()
                     qWarning() << "m_dockScreen" << m_dockScreen << m_dockScreen->name() << "window()->screen()" << window()->screen() << window()->screen()->name();
                     QTimer::singleShot(10, this, [this](){
                         window()->setScreen(m_dockScreen); 
+                        onWindowGeometryChanged();
                     });
+                } else {
+                    onWindowGeometryChanged();
                 }
             }else {
                 m_dockScreen = window()->screen();
