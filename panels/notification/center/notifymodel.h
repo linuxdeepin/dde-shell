@@ -21,7 +21,6 @@ class NotifyModel : public QAbstractListModel
     QML_ELEMENT
     Q_PROPERTY(QString dataInfo READ dataInfo NOTIFY dataInfoChanged FINAL)
     Q_PROPERTY(bool collapse READ collapse NOTIFY collapseChanged FINAL)
-    Q_PROPERTY(int remainCount READ remainCount NOTIFY remainCountChanged FINAL)
 public:
     enum NotifyRole {
         NotifyItemType = Qt::UserRole + 1,
@@ -59,12 +58,9 @@ public:
     bool collapse() const;
     void setCollapse(bool newCollapse);
 
-    int remainCount() const;
-    void setRemainCount(int count);
 signals:
     void dataInfoChanged();
     void collapseChanged();
-    void remainCountChanged();
     void countChanged();
 
 public:
@@ -93,7 +89,6 @@ private:
     int lastNotifyIndex(const NotifyEntity &entity) const;
     int lastNotifyIndex(const AppNotifyItem *item) const;
     void sortNotifies();
-    void refreshRemainCountState();
     void trayUpdateGroupLastEntity(const NotifyEntity &entity);
     void trayUpdateGroupLastEntity(const QString &appName);
 
@@ -102,6 +97,5 @@ private:
     QPointer<NotifyAccessor> m_accessor;
     int m_refreshTimer = -1;
     bool m_collapse = false;
-    int m_remainCount = 0;
 };
 }

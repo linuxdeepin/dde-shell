@@ -9,7 +9,6 @@ qt_add_qml_module(notificationcenterpanel
     QML_FILES
         NotifyCenter.qml
         NotifyHeader.qml
-        NotifyBottom.qml
         NotifyView.qml
         NotifyViewDelegate.qml
         NotifyItemBackground.qml
