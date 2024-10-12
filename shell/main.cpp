@@ -43,12 +43,6 @@ static void disableLogOutput()
     QLoggingCategory::setFilterRules("*.debug=false");
 }
 
-static void exitApp(int signal)
-{
-    Q_UNUSED(signal);
-    QCoreApplication::exit();
-}
-
 class AppletManager
 {
 public:
@@ -146,12 +140,6 @@ int main(int argc, char *argv[])
     Dtk::Core::DLogManager::registerFileAppender();
     Dtk::Core::DLogManager::registerJournalAppender();
     qCInfo(dsLog) << "Log path is:" << Dtk::Core::DLogManager::getlogFilePath();
-
-    // add signal handler, and call QCoreApplication::exit.
-    std::signal(SIGINT, exitApp);
-    std::signal(SIGABRT, exitApp);
-    std::signal(SIGTERM, exitApp);
-    std::signal(SIGKILL, exitApp);
 
     Shell shell;
     QString serviceName(parser.value(dbusServiceNameOption));
