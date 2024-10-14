@@ -102,7 +102,7 @@
       "visibility": "private"
     },
     "systemApps": {
-      "value": ["dde-control-center"],
+      "value": ["org.deepin.dde.control-center"],
       "serial": 0,
       "flags": [],
       "name": "system applications",

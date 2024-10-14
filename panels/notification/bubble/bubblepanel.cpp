@@ -144,7 +144,8 @@ void BubblePanel::addBubble(qint64 id)
 {
     const auto entity = m_accessor->fetchEntity(id);
     auto bubble = new BubbleItem(entity);
-
+    const auto enabled = enablePreview(entity.appId());
+    bubble->setEnablePreview(enabled);
     if (m_bubbles->isReplaceBubble(bubble)) {
         auto oldBubble = m_bubbles->replaceBubble(bubble);
         if (oldBubble) {
@@ -180,6 +181,15 @@ void BubblePanel::setVisible(const bool visible)
         return;
     m_visible = visible;
     Q_EMIT visibleChanged();
+}
+
+bool BubblePanel::enablePreview(const QString &appId) const
+{
+    static const int EnablePreview = 3;
+    QVariant value;
+    QMetaObject::invokeMethod(m_notificationServer, "appValue", Qt::DirectConnection,
+                              Q_RETURN_ARG(QVariant, value), Q_ARG(const QString &, appId), Q_ARG(int, EnablePreview));
+    return value.toBool();
 }
 
 BubbleItem *BubblePanel::bubbleItem(int index)

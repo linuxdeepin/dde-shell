@@ -52,6 +52,7 @@ private:
     void onActionInvoked(qint64 id, uint bubbleId, const QString &actionId);
     void onBubbleClosed(qint64 id, uint bubbleId, uint reason);
     void setVisible(const bool visible);
+    bool enablePreview(const QString &appId) const;
 
     BubbleItem *bubbleItem(int index);
 

@@ -24,7 +24,7 @@ Control {
         id: view
         spacing: 10
         // activeFocusOnTab: true
-        // ScrollBar.vertical: ScrollBar { }
+        ScrollBar.vertical: ScrollBar { }
 
         model: root.notifyModel
         delegate: NotifyViewDelegate {

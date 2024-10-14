@@ -173,7 +173,10 @@ D.Control {
                 icon.name: "window-close"
                 icon.width: 16
                 icon.height: 16
-                onClicked: Applet.delayProcess(bubble.index)
+                onClicked: {
+                    console.log("close process", bubble.index)
+                    Applet.close(bubble.index)
+                }
                 background: D.BoxPanel {
                     radius: closeBtn.height / 2
                 }
