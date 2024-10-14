@@ -119,7 +119,7 @@ uint NotificationManager::recordCount() const
 
 void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
 {
-    updateEntityProcessed(id);
+    updateEntityProcessed(id, NotifyEntity::Closed);
 
     Q_EMIT ActionInvoked(bubbleId, actionKey);
     Q_EMIT NotificationClosed(bubbleId, NotifyEntity::Closed);
@@ -127,17 +127,14 @@ void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString 
 
 void NotificationManager::notificationClosed(qint64 id, uint bubbleId, uint reason)
 {
-    updateEntityProcessed(id);
+    updateEntityProcessed(id, reason);
 
     Q_EMIT NotificationClosed(bubbleId, reason);
 }
 
 void NotificationManager::notificationReplaced(qint64 id)
 {
-    m_persistence->removeEntity(id);
-    Q_EMIT notificationStateChanged(id, NotifyEntity::Removed);
-
-    emitRecordCountChanged();
+    updateEntityProcessed(id, NotifyEntity::Closed);
 }
 
 QStringList NotificationManager::GetCapabilities()
@@ -166,8 +163,9 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
         return 0;
     }
 
-    QString appId;
-    if (calledFromDBus()) {
+    QString appId = appIdByAppName(appName);
+
+    if (appId.isEmpty() && calledFromDBus()) {
         QDBusReply<uint> reply = connection().interface()->servicePid(message().service());
         appId = DSGApplication::getId(reply.value());
     }
@@ -379,10 +377,15 @@ void NotificationManager::pushPendingEntity(const NotifyEntity &entity, int expi
     }
 }
 
-void NotificationManager::updateEntityProcessed(qint64 id)
+void NotificationManager::updateEntityProcessed(qint64 id, uint reason)
 {
-    const auto entity = m_persistence->fetchEntity(id);
+    auto entity = m_persistence->fetchEntity(id);
     if (entity.isValid()) {
+        if (reason == NotifyEntity::Closed && entity.processedType() == NotifyEntity::NotProcessed) {
+            entity.setProcessedType(NotifyEntity::Removed);
+        } else {
+            entity.setProcessedType(NotifyEntity::Processed);
+        }
         updateEntityProcessed(entity);
     }
 }
@@ -390,17 +393,28 @@ void NotificationManager::updateEntityProcessed(qint64 id)
 void NotificationManager::updateEntityProcessed(const NotifyEntity &entity)
 {
     const auto id = entity.id();
+    const bool removed = entity.processedType() == NotifyEntity::Removed;
     const auto showInCenter = m_setting->appValue(entity.appId(), NotificationSetting::ShowInCenter).toBool();
     // "cancel"表示正在发送蓝牙文件,不需要发送到通知中心
     const auto bluetooth = entity.body().contains("%") && entity.actions().contains("cancel");
-    if (!showInCenter || bluetooth) {
+    if (removed || !showInCenter || bluetooth) {
         m_persistence->removeEntity(id);
     } else {
-        m_persistence->updateEntityProcessedType(id, NotifyEntity::Processed);
-        Q_EMIT notificationStateChanged(id, NotifyEntity::Processed);
+        m_persistence->updateEntityProcessedType(id, entity.processedType());
+        Q_EMIT notificationStateChanged(id, entity.processedType());
     }
 
     emitRecordCountChanged();
+}
+
+QString NotificationManager::appIdByAppName(const QString &appName) const
+{
+    const auto items = m_setting->appItems();
+    for (const auto &item: items) {
+        if (item.id == appName || item.appName == appName)
+            return item.id;
+    }
+    return QString();
 }
 
 void NotificationManager::onHandingPendingEntities()

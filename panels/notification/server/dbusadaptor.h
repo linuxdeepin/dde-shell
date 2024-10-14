@@ -28,7 +28,7 @@ public Q_SLOTS: // methods
     void GetServerInformation(QString &name, QString &vendor, QString &version, QString &specVersion);
 
 
-protected:
+private:
     NotificationManager *manager() const;
 
 Q_SIGNALS:
@@ -37,7 +37,7 @@ Q_SIGNALS:
     // todo void ActivationToken(uint id, const QString &activationToken)
 };
 
-class DDENotificationDbusAdaptor : public DbusAdaptor
+class DDENotificationDbusAdaptor : public QDBusAbstractAdaptor
 {
     Q_OBJECT
     Q_PROPERTY(uint recordCount READ recordCount NOTIFY RecordCountChanged)
@@ -58,6 +58,9 @@ public Q_SLOTS: // methods
 
     void SetSystemInfo(uint configItem, const QDBusVariant &value);
     QDBusVariant GetSystemInfo(uint configItem);
+
+private:
+    NotificationManager *manager() const;
 
 Q_SIGNALS:
     void AppAdded(const QString &appId);

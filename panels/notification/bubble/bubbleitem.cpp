@@ -204,7 +204,7 @@ QString BubbleItem::summary() const
 
 QString BubbleItem::body() const
 {
-    return m_entity.body();
+    return enablePreview() ? m_entity.body() : tr("1 new message");
 }
 
 uint BubbleItem::replacesId() const

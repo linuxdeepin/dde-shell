@@ -40,12 +40,12 @@ Window {
     visible: Panel.visible
     flags: Qt.Tool
 
-    width: 380
+    width: 360 + notifyCenter.anchors.leftMargin + notifyCenter.anchors.rightMargin
     // height: 800
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorRight | DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom
     DLayerShellWindow.topMargin: windowMargin(0) + 10
-    DLayerShellWindow.rightMargin: windowMargin(1)
+    DLayerShellWindow.rightMargin: windowMargin(1) + 10
     DLayerShellWindow.bottomMargin: windowMargin(2) + 10
     ColorSelector.family: Palette.CrystalColor
     DWindow.enabled: true
@@ -73,11 +73,28 @@ Window {
         }
     }
 
+    // close Panel when click dock.
+    Connections {
+        target: DS.applet("org.deepin.ds.dock")
+        function onRequestClosePopup() {
+            Panel.close()
+        }
+    }
+
     NotifyCenter {
         id: notifyCenter
         anchors {
-            centerIn: parent
+            top: parent.top
+            left: parent.left
             margins: 10
+        }
+        Connections {
+            target: Panel
+            function onVisibleChanged() {
+                if (!Panel.visible) {
+                    notifyCenter.model.collapseAllApp()
+                }
+            }
         }
 
         width: 360

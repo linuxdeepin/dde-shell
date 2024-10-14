@@ -70,8 +70,10 @@ private:
     void emitRecordCountChanged();
 
     void pushPendingEntity(const NotifyEntity &entity, int expireTimeout);
-    void updateEntityProcessed(qint64 id);
+    void updateEntityProcessed(qint64 id, uint reason);
     void updateEntityProcessed(const NotifyEntity &entity);
+
+    QString appIdByAppName(const QString &appName) const;
 
 private slots:
     void onHandingPendingEntities();
