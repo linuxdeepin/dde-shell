@@ -146,7 +146,7 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
         desktopfile = DESKTOPFILEFACTORY::createById(res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString(), "amAPP");
     }
 
-    if (!desktopfile->isValied().first) {
+    if (desktopfile.isNull() || !desktopfile->isValied().first) {
         desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
     }
 
