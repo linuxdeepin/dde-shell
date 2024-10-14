@@ -59,7 +59,7 @@ private:
 
 private:
     QScopedPointer<AbstractWindowMonitor> m_windowMonitor;
-    RoleCombineModel *m_activeAppModel;
+    RoleCombineModel *m_activeAppModel = nullptr;
 };
 
 }
