@@ -31,6 +31,7 @@ FocusScope {
             height: 40
             width: parent.width
             notifyModel: notifyModel
+            z: 1
         }
 
         NotifyView {

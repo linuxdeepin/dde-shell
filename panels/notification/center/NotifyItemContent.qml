@@ -182,6 +182,7 @@ NotifyItem {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 Text {
+                    id: bodyText
                     Layout.alignment: Qt.AlignLeft
                     Layout.fillWidth: true
                     visible: text !== ""
@@ -194,6 +195,10 @@ NotifyItem {
                     linkColor: palette.highlight
                     onLinkActivated: function (link) {
                         root.linkActivated(link)
+                    }
+                    HoverHandler {
+                        enabled: bodyText.hoveredLink !== ""
+                        cursorShape: Qt.PointingHandCursor
                     }
                 }
                 Item {

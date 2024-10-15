@@ -91,8 +91,14 @@ QList<BubbleItem *> BubbleModel::items() const
 
 void BubbleModel::remove(int index)
 {
-    if (index < 0 || index >= displayRowCount())
+    if (index < 0 || index >= m_bubbles.size())
         return;
+
+    if (index >= rowCount(QModelIndex())) {
+        auto bubble = m_bubbles.takeAt(index);
+        bubble->deleteLater();
+        return;
+    }
 
     beginRemoveRows(QModelIndex(), index, index);
     auto bubble = m_bubbles.takeAt(index);

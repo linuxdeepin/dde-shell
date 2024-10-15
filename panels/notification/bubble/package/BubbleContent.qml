@@ -88,6 +88,7 @@ D.Control {
             // The third line: body and image
             RowLayout {
                 Text {
+                    id: bodyText
                     visible: bubble.body !== ""
                     Layout.alignment: Qt.AlignLeft
                     Layout.rightMargin: 5
@@ -102,6 +103,10 @@ D.Control {
                     onLinkActivated: function (link) {
                         console.log("Link actived", link)
                         D.ApplicationHelper.openUrl(link)
+                    }
+                    HoverHandler {
+                        enabled: bodyText.hoveredLink !== ""
+                        cursorShape: Qt.PointingHandCursor
                     }
                 }
 

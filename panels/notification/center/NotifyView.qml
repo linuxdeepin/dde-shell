@@ -23,6 +23,7 @@ Control {
     contentItem: ListView {
         id: view
         spacing: 10
+        snapMode: ListView.SnapToItem
         // activeFocusOnTab: true
         ScrollBar.vertical: ScrollBar { }
 
