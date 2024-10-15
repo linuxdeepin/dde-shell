@@ -3,7 +3,7 @@
 	"version": "1.0",
 	"contents": {
 		"Groups": {
-			"value": {},
+			"value": [],
 			"serial": 0,
 			"flags": [],
 			"name": "App Group",

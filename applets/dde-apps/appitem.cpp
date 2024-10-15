@@ -4,156 +4,178 @@
 
 #include "appitem.h"
 #include "appgroupmanager.h"
-#include "abstractdesktopinfo.h"
-#include "categoryutils.h"
-#include "appslaunchtimes.h"
+#include "appitemmodel.h"
 #include "appsdockedhelper.h"
+#include "appslaunchtimes.h"
 
-#include <QObject>
-#include <DUtil>
-
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
+#include <tuple>
 
 namespace apps {
-AppItem::AppItem(AbstractDesktopInfo* desktopInfo, QObject* parent)
-    : QObject(parent)
-    , m_desktopInfo(desktopInfo)
+AppItem::AppItem(const QString &appid)
 {
-    connect(m_desktopInfo, &AbstractDesktopInfo::nameChanged, this, &AppItem::nameChanged, Qt::UniqueConnection);
-    connect(m_desktopInfo, &AbstractDesktopInfo::iconNameChanged, this, &AppItem::iconNameChanged, Qt::UniqueConnection);
-    connect(m_desktopInfo, &AbstractDesktopInfo::nodisplayChanged, this, &AppItem::nodisplayChanged, Qt::UniqueConnection);
-    connect(m_desktopInfo, &AbstractDesktopInfo::categoriesChanged, this, &AppItem::ddeCategoriesChanged, Qt::UniqueConnection);
-    connect(m_desktopInfo, &AbstractDesktopInfo::actionsChanged, this, &AppItem::actionsChanged, Qt::UniqueConnection);
-    connect(m_desktopInfo, &AbstractDesktopInfo::lastLaunchedTimeChanged, this, &AppItem::lastLaunchedTimeChanged, Qt::UniqueConnection);
-    connect(m_desktopInfo, &AbstractDesktopInfo::installedTimeChanged, this, &AppItem::installedTimeChanged, Qt::UniqueConnection);
-    connect(m_desktopInfo, &AbstractDesktopInfo::autoStartChanged, this, &AppItem::autoStartChanged, Qt::UniqueConnection);
-    connect(m_desktopInfo, &AbstractDesktopInfo::onDesktopChanged, this, &AppItem::onDesktopChanged, Qt::UniqueConnection);
+    setAppId(appid);
+
+    int groupPos, pagePos, itemPos;
+    std::tie(groupPos, pagePos, itemPos) = AppGroupManager::instance()->getAppGroupInfo(appId());
+    QVariantList data = {groupPos, pagePos, itemPos};
+    setData(data, AppItemModel::GroupRole);
 }
 
-AppItem::~AppItem()
+void AppItem::launch(const QString &action, const QStringList &fields, const QVariantMap &options)
 {
-    m_desktopInfo->deleteLater();
+    Q_UNUSED(action)
+    Q_UNUSED(fields)
+    Q_UNUSED(options)
+
+    setLaunchedTimes(launchedTimes() + 1);
 }
 
-void AppItem::launch(const QString& action , const QStringList &fields, const QVariantMap &options)
+QString AppItem::appId() const
 {
-    m_desktopInfo->launch(action, fields, options);
-    auto count = AppsLaunchTimesHelper::instance()->getLauncheTimesFor(desktopId());
-    AppsLaunchTimesHelper::instance()->setLaunchTimesFor(desktopId(), count + 1);
+    return data(AppItemModel::DesktopIdRole).toString();
 }
 
-QString AppItem::desktopId() const
+void AppItem::setAppId(const QString &appid)
 {
-    return m_desktopInfo->desktopId();
+    return setData(appid, AppItemModel::DesktopIdRole);
 }
 
-QString AppItem::name() const
+QString AppItem::appName() const
 {
-    if (m_desktopInfo->deepinVendor() == "deepin" &&
-            !m_desktopInfo->genericName().isEmpty()) {
-        return m_desktopInfo->genericName();
-    }
-
-    return m_desktopInfo->name();
+    return data(AppItemModel::NameRole).toString();
 }
 
-QString AppItem::iconName() const
+void AppItem::setAppName(const QString &appName)
 {
-    // TODO: calendar and trash support
-    return m_desktopInfo->iconName();
+    return setData(appName, AppItemModel::NameRole);
+}
+
+QString AppItem::appIconName() const
+{
+    return data(AppItemModel::IconNameRole).toString();
+}
+
+void AppItem::setAppIconName(const QString &appIconName)
+{
+    return setData(appIconName, AppItemModel::IconNameRole);
 }
 
 QString AppItem::startupWMClass() const
 {
-    return m_desktopInfo->startupWMClass();
+    return data(AppItemModel::StartUpWMClassRole).toString();
 }
 
-bool AppItem::nodisplay() const
+void AppItem::setStartupWMclass(const QString &wmClass)
 {
-    return m_desktopInfo->nodisplay();
+    return setData(wmClass, AppItemModel::StartUpWMClassRole);
 }
 
-AppItem::DDECategories AppItem::ddeCategories() const
+bool AppItem::noDisplay() const
 {
-    return AppItem::DDECategories(CategoryUtils::parseBestMatchedCategory(m_desktopInfo->categories()));
+    return data(AppItemModel::NoDisplayRole).toBool();
+}
+
+void AppItem::setNoDisPlay(bool noDisplay)
+{
+    return setData(noDisplay, AppItemModel::NoDisplayRole);
+}
+
+AppItemModel::DDECategories AppItem::ddeCategories() const
+{
+    return data(AppItemModel::DDECategoryRole).value<AppItemModel::DDECategories>();
+}
+
+void AppItem::setDDECategories(const AppItemModel::DDECategories &categories)
+{
+    return setData(categories, AppItemModel::DDECategoryRole);
 }
 
 QString AppItem::actions() const
 {
-    QJsonArray array;
-    auto actions = m_desktopInfo->actions();
-    for (auto action : actions) {
-        QJsonObject menu;
-        menu["id"] = action.first;
-        menu["name"] = action.second;
-        array.append(menu);
-    }
+    return data(AppItemModel::ActionsRole).toString();
+}
 
-    return QJsonDocument(array).toJson();
+void AppItem::setActions(const QString &actions)
+{
+    return setData(actions, AppItemModel::ActionsRole);
 }
 
 quint64 AppItem::lastLaunchedTime() const
 {
-    // AM: manager lastLaunchedTime. it should be like launchtimes
-    return m_desktopInfo->lastLaunchedTime();
+    return AppsLaunchTimesHelper::instance()->getLaunchedTimesFor(appId());
+}
+
+void AppItem::setLastLaunchedTime(const quint64 &time)
+{
+    return AppsLaunchTimesHelper::instance()->setLaunchTimesFor(appId(), time);
 }
 
 quint64 AppItem::installedTime() const
 {
-    return m_desktopInfo->installedTime();
+    return data(AppItemModel::InstalledTimeRole).toULongLong();
+}
+
+void AppItem::setInstalledTime(const quint64 &time)
+{
+    return setData(time, AppItemModel::InstalledTimeRole);
 }
 
 quint64 AppItem::launchedTimes() const
 {
-    return AppsLaunchTimesHelper::instance()->getLauncheTimesFor(desktopId());
+    return data(AppItemModel::LaunchedTimesRole).toULongLong();
 }
 
-QString AppItem::deepinVendor() const
+void AppItem::setLaunchedTimes(const quint64 &actions)
 {
-    return m_desktopInfo->deepinVendor();
+    return setData(actions, AppItemModel::LaunchedTimesRole);
 }
 
-int AppItem::groupId() const
+QList<int> AppItem::group() const
 {
-    return AppGroupManager::instance()->getAppGroupForAppItemId(desktopId());
+    return data(AppItemModel::GroupRole).value<QList<int>>();
 }
 
-void AppItem::setGroupId(const uint &groupId, const int &pos)
+void AppItem::setGroup(const QList<int> &group)
 {
-    AppGroupManager::instance()->setGropForAppItemId(desktopId(), groupId, pos);
+    if (group.size() != 3)
+        return;
+    auto groupPos = group[0];
+    auto pagePos = group[1];
+    auto itemPos = group[2];
+    AppGroupManager::instance()->setAppGroupInfo(appId(), std::make_tuple(groupPos, pagePos, itemPos));
+    QVariantList data = {groupPos, pagePos, itemPos};
+    return setData(data, AppItemModel::GroupRole);
 }
 
 bool AppItem::docked() const
 {
-    return AppsDockedHelper::instance()->isDocked(desktopId());
+    return data(AppItemModel::DockedRole).toBool();
 }
 
-bool AppItem::autoStart() const
+void AppItem::setDocked(bool docked)
 {
-    return m_desktopInfo->autoStart();
+    AppsDockedHelper::instance()->setDocked(appId(), docked);
+    return setData(docked, AppItemModel::DockedRole);
 }
 
 bool AppItem::onDesktop() const
 {
-    return m_desktopInfo;
+    return data(AppItemModel::OnDesktopRole).toBool();
 }
 
-void AppItem::setOnDesktop(bool onDesktop)
+void AppItem::setOnDesktop(bool on)
 {
-    m_desktopInfo->setOnDesktop(onDesktop);
+    return setData(on, AppItemModel::OnDesktopRole);
 }
 
-
-void AppItem::setDocked(bool docked)
+bool AppItem::autoStart() const
 {
-    // TODO
+    return data(AppItemModel::AutoStartRole).toBool();
 }
 
-void AppItem::setAutoStart(bool autoStart)
+void AppItem::setAutoStart(bool start)
 {
-    m_desktopInfo->setAutoStart(autoStart);
+    return setData(start, AppItemModel::AutoStartRole);
 }
 
 }

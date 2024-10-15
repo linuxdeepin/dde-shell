@@ -16,7 +16,7 @@ class AppsLaunchTimesHelper : public QObject
 
 public:
     void setLaunchTimesFor(const QString &desktopId, quint64 launchTimes);
-    quint64 getLauncheTimesFor(const QString &desktopId);
+    quint64 getLaunchedTimesFor(const QString &desktopId);
     static AppsLaunchTimesHelper* instance();
 
 private:

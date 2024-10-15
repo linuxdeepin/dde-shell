@@ -64,5 +64,9 @@ bool AppsDockedHelper::isDocked(const QString &appItemId) const
     return m_dockedDesktopIDs.contains(appItemId.chopped(8));
 }
 
+void AppsDockedHelper::setDocked(const QString &appId, bool docked)
+{
+    // TODO
+}
 }
 
