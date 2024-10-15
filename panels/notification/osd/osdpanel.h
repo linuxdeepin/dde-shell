@@ -14,7 +14,7 @@ class OsdPanel : public DS_NAMESPACE::DPanel
     Q_OBJECT
     Q_PROPERTY(bool visible READ visible NOTIFY visibleChanged FINAL)
     Q_PROPERTY(QString osdType READ osdType NOTIFY osdTypeChanged FINAL)
-    Q_CLASSINFO("D-Bus Interface", "org.deepin.osdService")
+    Q_CLASSINFO("D-Bus Interface", "org.deepin.dde.shell.osd")
 public:
     explicit OsdPanel(QObject *parent = nullptr);
 
@@ -25,7 +25,7 @@ public:
     QString osdType() const;
 
 public Q_SLOTS:
-    void showText(const QString &text);
+    void ShowOSD(const QString &text);
 
 Q_SIGNALS:
     void visibleChanged();

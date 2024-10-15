@@ -4,7 +4,9 @@
 
 #include "osdpanel.h"
 
+#include "osddbusadaptor.h"
 #include "pluginfactory.h"
+#include <QDBusConnectionInterface>
 
 #include <QDBusConnection>
 #include <QTimer>
@@ -34,6 +36,14 @@ bool OsdPanel::init()
         return false;
     }
 
+    bus.interface()->registerService("org.deepin.dde.Osd1",
+                                            QDBusConnectionInterface::ReplaceExistingService,
+                                            QDBusConnectionInterface::AllowReplacement);
+    if (!bus.registerObject("/", "org.deepin.dde.Osd1", this, QDBusConnection::ExportAllSlots)) {
+        return false;
+    }
+    new OsdDBusAdaptor(this);
+
     m_osdTimer = new QTimer(this);
     m_osdTimer->setInterval(m_interval);
     m_osdTimer->setSingleShot(true);
@@ -53,7 +63,7 @@ bool OsdPanel::visible() const
     return m_visible;
 }
 
-void OsdPanel::showText(const QString &text)
+void OsdPanel::ShowOSD(const QString &text)
 {
     qCInfo(osdLog()) << "show text" << text;
     m_osdTimer->setInterval(text == "SwitchWM3D" ? 2000 : 1000);

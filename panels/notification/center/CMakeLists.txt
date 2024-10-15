@@ -29,6 +29,8 @@ qt_add_qml_module(notificationcenterpanel
         notificationcenterpanel.cpp
         notificationcenterproxy.h
         notificationcenterproxy.cpp
+        notificationcenterdbusadaptor.h
+        notificationcenterdbusadaptor.cpp
         notifyaccessor.h
         notifyaccessor.cpp
         notifymodel.h
