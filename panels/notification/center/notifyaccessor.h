@@ -33,6 +33,7 @@ public:
     static NotifyAccessor *create(QQmlEngine *, QJSEngine *);
 
     void setDataAccessor(DataAccessor *accessor);
+    void setDataUpdater(QObject *updater);
 
     void invokeAction(const NotifyEntity &entity, const QString &actionId);
     void pinApplication(const QString &appName, bool pin);
@@ -73,6 +74,7 @@ private:
 
 private:
     DataAccessor *m_accessor = nullptr;
+    QObject *m_dataUpdater = nullptr;
     QStringList m_pinnedApps;
     QStringList m_apps;
     bool m_debugging = false;

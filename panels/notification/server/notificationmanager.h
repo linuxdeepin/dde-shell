@@ -34,6 +34,10 @@ public:
     void notificationClosed(qint64 id, uint bubbleId, uint reason);
     void notificationReplaced(qint64 id);
 
+    void removeNotification(qint64 id);
+    void removeNotifications(const QString &appName);
+    void removeNotifications();
+
 Q_SIGNALS:
     // Standard Notifications dbus implementation
     void ActionInvoked(uint id, const QString &actionKey);

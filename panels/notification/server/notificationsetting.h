@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <QMutex>
 #include <QObject>
 #include <QTimer>
 #include <QVariantMap>
@@ -84,7 +85,9 @@ private:
     Dtk::Core::DConfig *m_impl = nullptr;
     QAbstractListModel *m_appAccessor = nullptr;
     QList<AppItem> m_appItems;
+    QMutex m_appItemsMutex;
     QVariantMap m_appsInfo;
+    QMutex m_appsInfoMutex;
     QVariantMap m_systemInfo;
 };
 

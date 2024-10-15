@@ -14,6 +14,7 @@ class NotifyServerApplet : public DS_NAMESPACE::DApplet
     Q_OBJECT
 public:
     explicit NotifyServerApplet(QObject *parent = nullptr);
+    ~NotifyServerApplet() override;
 
     bool load() override;
     bool init() override;
@@ -26,9 +27,13 @@ public Q_SLOTS:
     void notificationClosed(qint64 id, uint bubbleId, uint reason);
     void notificationReplaced(qint64 id);
     QVariant appValue(const QString &appId, int configItem);
+    void removeNotification(qint64 id);
+    void removeNotifications(const QString &appName);
+    void removeNotifications();
 
 private:
     NotificationManager *m_manager = nullptr;
+    QThread *m_worker = nullptr;
 };
 
 }

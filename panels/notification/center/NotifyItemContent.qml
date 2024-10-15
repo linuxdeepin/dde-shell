@@ -22,6 +22,8 @@ NotifyItem {
             right: parent.right
             rightMargin: -width / 2
         }
+        width: 20
+        height: 20
         contentItem: Loader {
             active: root.closeVisible || closePlaceHolder.hovered || closePlaceHolder.activeFocus || activeFocus
             sourceComponent: SettingActionButton {
