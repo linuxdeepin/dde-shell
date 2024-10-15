@@ -103,11 +103,13 @@ void NotifyModel::collapseApp(int row)
     beginRemoveRows(QModelIndex(), start, start + notifies.size());
     // remove group
     m_appNotifies.removeOne(notify);
+    notify->deleteLater();
 
     // remove normal
     for (int i = 0; i < notifies.size(); i++) {
         auto item = notifies[i];
         m_appNotifies.removeOne(item);
+        item->deleteLater();
     }
     endRemoveRows();
 
