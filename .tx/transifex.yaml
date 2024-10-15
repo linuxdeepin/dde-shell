@@ -1,15 +1,5 @@
 filters:
   - filter_type: file
-    source_file: panels/dock/clipboarditem/translations/org.deepin.ds.dock.clipboarditem.ts
-    file_format: QT
-    source_language: en_US
-    translation_files_expression: panels/dock/clipboarditem/translations/org.deepin.ds.dock.clipboarditem_<lang>.ts
-  - filter_type: file
-    source_file: panels/dock/searchitem/translations/org.deepin.ds.dock.searchitem.ts
-    file_format: QT
-    source_language: en_US
-    translation_files_expression: panels/dock/searchitem/translations/org.deepin.ds.dock.searchitem_<lang>.ts
-  - filter_type: file
     source_file: panels/dock/translations/org.deepin.ds.dock.ts
     file_format: QT
     source_language: en_US
