@@ -27,7 +27,7 @@ namespace notification {
 Q_LOGGING_CATEGORY(notifyServerLog, "dde.shell.notification.server")
 
 static const uint NoReplacesId = 0;
-const int DefaultTimeOutMSecs = 5000;
+static const int DefaultTimeOutMSecs = 5000;
 static const QString NotificationsDBusService = "org.freedesktop.Notifications";
 static const QString NotificationsDBusPath = "/org/freedesktop/Notifications";
 static const QString DDENotifyDBusServer = "org.deepin.dde.Notification1";
@@ -58,7 +58,7 @@ static QList<DApplet *> appletList(const QString &pluginId)
 
 NotificationManager::NotificationManager(QObject *parent)
     : QObject(parent)
-    , m_persistence(DBAccessor::instance())
+    , m_persistence(new DBAccessor("Manager"))
     , m_setting(new NotificationSetting(this))
     , m_userSessionManager(new UserSessionManager(SessionDBusService, SessionDaemonDBusPath, QDBusConnection::sessionBus(), this))
     , m_pendingTimeout(new QTimer(this))
@@ -135,6 +135,27 @@ void NotificationManager::notificationClosed(qint64 id, uint bubbleId, uint reas
 void NotificationManager::notificationReplaced(qint64 id)
 {
     updateEntityProcessed(id, NotifyEntity::Closed);
+}
+
+void NotificationManager::removeNotification(qint64 id)
+{
+    m_persistence->removeEntity(id);
+
+    emitRecordCountChanged();
+}
+
+void NotificationManager::removeNotifications(const QString &appName)
+{
+    m_persistence->removeEntityByApp(appName);
+
+    emitRecordCountChanged();
+}
+
+void NotificationManager::removeNotifications()
+{
+    m_persistence->clear();
+
+    emitRecordCountChanged();
 }
 
 QStringList NotificationManager::GetCapabilities()

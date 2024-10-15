@@ -89,8 +89,11 @@ void NotificationSetting::setAppValue(const QString &id, AppConfigItem item, con
         break;
     }
 
-    m_appsInfo[id] = info;
-    m_impl->setValue("appsInfo", m_appsInfo);
+    {
+        QMutexLocker locker(&m_appsInfoMutex);
+        m_appsInfo[id] = info;
+        m_impl->setValue("appsInfo", m_appsInfo);
+    }
 
     Q_EMIT appValueChanged(id, item, value);
 }
@@ -210,6 +213,7 @@ NotificationSetting::AppItem NotificationSetting::appItem(const QString &id) con
 
 QList<NotificationSetting::AppItem> NotificationSetting::appItems() const
 {
+    QMutexLocker locker(&(const_cast<NotificationSetting *>(this)->m_appItemsMutex));
     if (!m_appItems.isEmpty())
         return m_appItems;
 
@@ -246,6 +250,7 @@ QList<NotificationSetting::AppItem> NotificationSetting::appItemsImpl() const
 
 QVariantMap NotificationSetting::appInfo(const QString &id) const
 {
+    QMutexLocker locker(&(const_cast<NotificationSetting *>(this)->m_appsInfoMutex));
     if (m_appsInfo.contains(InvalidApp)) {
         const_cast<NotificationSetting *>(this)->m_appsInfo = m_impl->value("appsInfo").toMap();
     }
@@ -290,11 +295,15 @@ void NotificationSetting::onAppsChanged()
         Q_EMIT appRemoved(item.id);
     }
 
-    m_appItems = current;
+    {
+        QMutexLocker locker(&m_appItemsMutex);
+        m_appItems = current;
+    }
 }
 
 void NotificationSetting::invalidAppItemCached()
 {
+    QMutexLocker locker(&m_appsInfoMutex);
     m_appsInfo.clear();
     m_appsInfo[InvalidApp] = QVariant();
 }

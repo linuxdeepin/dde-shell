@@ -11,17 +11,11 @@
 #include <QDBusPendingReply>
 #include <QProcess>
 #include <QDBusReply>
-#include <QQueue>
 
 #include <DConfig>
 
-#include <pluginloader.h>
-#include <applet.h>
-#include <containment.h>
-
 #include "dataaccessor.h"
 
-DS_USE_NAMESPACE
 DCORE_USE_NAMESPACE
 
 namespace notifycenter {
@@ -29,17 +23,9 @@ namespace {
 Q_LOGGING_CATEGORY(notifyLog, "notify")
 }
 
-static const QString DDENotifyDBusServer = "org.deepin.dde.Notification1";
-static const QString DDENotifyDBusInterface = "org.deepin.dde.Notification1";
-static const QString DDENotifyDBusPath = "/org/deepin/dde/Notification1";
 static const uint ShowNotificationTop = 7;
 static const QString InvalidApp {"DS-Invalid-Apps"};
 static const QStringList InvalidPinnedApps {InvalidApp};
-
-static QDBusInterface notifyCenterInterface()
-{
-    return QDBusInterface(DDENotifyDBusServer, DDENotifyDBusPath, DDENotifyDBusInterface);
-}
 
 static QDBusInterface controlCenterInterface()
 {
@@ -62,50 +48,9 @@ public:
     }
 };
 
-static QList<DApplet *> appletList(const QString &pluginId)
-{
-    QList<DApplet *> ret;
-    auto rootApplet = DPluginLoader::instance()->rootApplet();
-    auto root = qobject_cast<DContainment *>(rootApplet);
-
-    QQueue<DContainment *> containments;
-    containments.enqueue(root);
-    while (!containments.isEmpty()) {
-        DContainment *containment = containments.dequeue();
-        for (const auto applet : containment->applets()) {
-            if (auto item = qobject_cast<DContainment *>(applet)) {
-                containments.enqueue(item);
-            }
-            if (applet->pluginId() == pluginId)
-                ret << applet;
-        }
-    }
-    return ret;
-}
-
 NotifyAccessor::NotifyAccessor(QObject *parent)
     : m_pinnedApps(InvalidPinnedApps)
 {
-    auto applets = appletList("org.deepin.ds.notificationserver");
-    bool valid = false;
-    if (!applets.isEmpty()) {
-        if (auto server = applets.first()) {
-            valid = QObject::connect(server,
-                                     SIGNAL(notificationStateChanged(qint64, int)),
-                                     this,
-                                     SLOT(onReceivedRecordStateChanged(qint64, int)),
-                                     Qt::QueuedConnection);
-        }
-    } else {
-        // old interface by dbus
-        auto connection = QDBusConnection::sessionBus();
-        valid = connection.connect(DDENotifyDBusServer, DDENotifyDBusPath, DDENotifyDBusInterface,
-                                        "RecordAdded", this, SLOT(onReceivedRecord(const QString &)));
-    }
-    if (!valid) {
-        qWarning() << "NotifyConnection is invalid, and can't receive RecordAdded signal.";
-    }
-
     if (!qEnvironmentVariableIsEmpty("DS_NOTIFICATION_DEBUG")) {
         const int value = qEnvironmentVariableIntValue("DS_NOTIFICATION_DEBUG");
         m_debugging = value;
@@ -139,6 +84,11 @@ void NotifyAccessor::setDataAccessor(DataAccessor *accessor)
         delete m_accessor;
     }
     m_accessor = accessor;
+}
+
+void NotifyAccessor::setDataUpdater(QObject *updater)
+{
+    m_dataUpdater = updater;
 }
 
 NotifyEntity NotifyAccessor::fetchEntity(qint64 id) const
@@ -179,22 +129,35 @@ QStringList NotifyAccessor::fetchApps(int maxCount) const
 void NotifyAccessor::removeEntity(qint64 id)
 {
     qDebug(notifyLog) << "Remove notify" << id;
-
-    m_accessor->removeEntity(id);
+    if (m_dataUpdater) {
+        QMetaObject::invokeMethod(m_dataUpdater, "removeNotification", Qt::DirectConnection,
+                                  Q_ARG(qint64, id));
+    } else {
+        m_accessor->removeEntity(id);
+    }
 }
 
 void NotifyAccessor::removeEntityByApp(const QString &appName)
 {
     qDebug(notifyLog) << "Remove notifies for the application" << appName;
 
-    m_accessor->removeEntityByApp(appName);
+    if (m_dataUpdater) {
+        QMetaObject::invokeMethod(m_dataUpdater, "removeNotifications", Qt::DirectConnection,
+                                  Q_ARG(const QString &, appName));
+    } else {
+        m_accessor->removeEntityByApp(appName);
+    }
 }
 
 void NotifyAccessor::clear()
 {
     qDebug(notifyLog) << "Remove all notify";
 
-    m_accessor->clear();
+    if (m_dataUpdater) {
+        QMetaObject::invokeMethod(m_dataUpdater, "removeNotifications", Qt::DirectConnection);
+    } else {
+        m_accessor->clear();
+    }
 }
 
 // don't need to emit ActionInvoked of protocol.
