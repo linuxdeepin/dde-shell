@@ -41,6 +41,8 @@ public:
     DApplet *loadApplet(const DAppletData &data);
     DApplet *rootApplet() const;
 
+    QList<DS_NAMESPACE::DApplet *> findApplets(const QString & pluginId);
+
     QList<DPluginMetaData> childrenPlugin(const QString &pluginId) const;
     DPluginMetaData parentPlugin(const QString &pluginId) const;
     DPluginMetaData plugin(const QString &pluginId) const;
