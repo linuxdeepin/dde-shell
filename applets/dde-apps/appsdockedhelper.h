@@ -17,7 +17,8 @@ class AppsDockedHelper : public QObject
 public:
     static AppsDockedHelper* instance();
 
-    bool isDocked(const QString &appItemId) const;
+    bool isDocked(const QString &appId) const;
+    void setDocked(const QString &appId, bool docked);
 
 private:
     AppsDockedHelper(QObject *parent = nullptr);

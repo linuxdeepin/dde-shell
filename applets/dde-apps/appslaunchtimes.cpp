@@ -42,9 +42,9 @@ void AppsLaunchTimesHelper::setLaunchTimesFor(const QString &desktopId, quint64 
     m_launchTimesConfig->setValue("appsLaunchedTimes", m_data);
 }
 
-quint64 AppsLaunchTimesHelper::getLauncheTimesFor(const QString &desktopId)
+quint64 AppsLaunchTimesHelper::getLaunchedTimesFor(const QString &desktopId)
 {
-    return m_data.value(desktopId, 0).toLongLong();
+    return m_data.value(desktopId, 0).toULongLong();
 }
 
 }

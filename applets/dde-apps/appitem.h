@@ -4,99 +4,60 @@
 
 #pragma once
 
-#include <QList>
-
-#include "abstractdesktopinfo.h"
+#include "appitemmodel.h"
+#include <QStandardItem>
 
 namespace apps {
-class AppItem : public QObject
+class AppItem : public QStandardItem
 {
-    Q_OBJECT
-
-    // READ Only from desktopfile
-    Q_PROPERTY(QString desktopId READ desktopId FINAL CONSTANT)
-    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
-    Q_PROPERTY(QString iconName READ iconName NOTIFY iconNameChanged)
-    Q_PROPERTY(QString startupWMClass READ startupWMClass NOTIFY startupWMClassChanged)
-    Q_PROPERTY(bool nodisplay READ nodisplay NOTIFY nodisplayChanged)
-    Q_PROPERTY(DDECategories ddeCategories READ ddeCategories NOTIFY ddeCategoriesChanged)
-    Q_PROPERTY(QString actions READ actions NOTIFY actionsChanged)
-    Q_PROPERTY(qint64 lastLaunchedTime READ lastLaunchedTime NOTIFY lastLaunchedTimeChanged)
-    Q_PROPERTY(qint64 installedTime READ installedTime NOTIFY installedTimeChanged)
-    Q_PROPERTY(qint64 launchedTimes READ launchedTimes NOTIFY launchedTimesChanged)
-
-    Q_PROPERTY(int groupId READ groupId NOTIFY groupIdChanged)
-    Q_PROPERTY(bool docked READ docked NOTIFY dockedChanged)
-
-    // READ and WRITE Status
-    Q_PROPERTY(bool onDesktop READ onDesktop WRITE setOnDesktop NOTIFY onDesktopChanged)
-    Q_PROPERTY(bool autoStart READ autoStart WRITE setAutoStart NOTIFY autoStartChanged)
-
 public:
-     // This is different from the menu-spec Main Categories list.
-    enum DDECategories {
-        Internet,               // 网络模式
-        Chat,                   // 社交模式
-        Music,                  // 音乐模式
-        Video,                  // 视频模式
-        Graphics,               // 图形图像
-        Game,                   //
-        Office,                 // 办公模式
-        Reading,                // 阅读模式
-        Development,            // 编程开发模式
-        System,                 // 系统管理模式
-        Others,
-    };
-    Q_ENUM(DDECategories)
+    AppItem(const QString &appid);
 
-public:
-    explicit AppItem(AbstractDesktopInfo * desktopInfo, QObject* parent = nullptr);
-    ~AppItem();
+    // action
+    virtual void launch(const QString &action = {}, const QStringList &fields = {}, const QVariantMap &options = {});
 
-    void launch(const QString& action = {}, const QStringList &fields = {}, const QVariantMap &options = {});
+    // desktop file static data
+    QString appId() const;
+    void setAppId(const QString &appid);
 
-    // desktop static info
-    QString desktopId() const;
-    QString name() const;
-    QString iconName() const;
-    bool nodisplay() const;
+    QString appName() const;
+    void setAppName(const QString &name);
+
+    QString appIconName() const;
+    void setAppIconName(const QString &appIconName);
+
     QString startupWMClass() const;
-    DDECategories ddeCategories() const;
+    void setStartupWMclass(const QString &wmClass);
+
+    bool noDisplay() const;
+    void setNoDisPlay(bool noDisplay);
+
+    AppItemModel::DDECategories ddeCategories() const;
+    void setDDECategories(const AppItemModel::DDECategories &categories);
+
     QString actions() const;
-    quint64 lastLaunchedTime() const;
-    quint64 installedTime() const;
-    quint64 launchedTimes() const;
-    QString deepinVendor() const;
-    bool autoStart() const;
-    void setAutoStart(bool autoStart);
+    void setActions(const QString &actions);
 
-    // shell runing data
-    int groupId() const;
-    void setGroupId(const uint &groudId, const int &pos);
+    // desktop file peripheral data
+    virtual quint64 lastLaunchedTime() const;
+    virtual void setLastLaunchedTime(const quint64 &time);
 
-    bool onDesktop() const;
-    void setOnDesktop(bool onDesktop);
+    virtual quint64 installedTime() const;
+    virtual void setInstalledTime(const quint64 &time);
 
-    bool docked() const;
-    void setDocked(bool docked);
+    virtual quint64 launchedTimes() const;
+    virtual void setLaunchedTimes(const quint64 &time);
 
-Q_SIGNALS:
-    void nameChanged(void);
-    void iconNameChanged(void);
-    void nodisplayChanged(void);
-    void startupWMClassChanged(void);
-    void ddeCategoriesChanged(void);
-    void actionsChanged(void);
-    void lastLaunchedTimeChanged(void);
-    void installedTimeChanged(void);
-    void autoStartChanged(void);
-    void onDesktopChanged(void);
+    virtual QList<int> group() const;
+    virtual void setGroup(const QList<int> &group);
 
-    void launchedTimesChanged(void);
-    void groupIdChanged(void);
-    void dockedChanged(void);
+    virtual bool docked() const;
+    virtual void setDocked(bool docked);
 
-private:
-    AbstractDesktopInfo *m_desktopInfo;
+    virtual bool onDesktop() const;
+    virtual void setOnDesktop(bool onDesktop);
+
+    virtual bool autoStart() const;
+    virtual void setAutoStart(bool autoStart);
 };
 }

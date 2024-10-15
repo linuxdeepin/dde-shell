@@ -33,7 +33,10 @@ qt_add_dbus_interfaces(
 
 
 add_library(dde-apps SHARED ${DBUS_INTERFACES}
-    abstractdesktopinfo.h
+    amappitem.cpp
+    amappitem.h
+    amappitemmodel.cpp
+    amappitemmodel.h
     appgroup.cpp
     appgroup.h
     appgroupmanager.cpp
@@ -50,8 +53,6 @@ add_library(dde-apps SHARED ${DBUS_INTERFACES}
     appslaunchtimes.h
     categoryutils.cpp
     categoryutils.h
-    desktopinfoam.cpp
-    desktopinfoam.h
 )
 
 target_link_libraries(dde-apps PRIVATE

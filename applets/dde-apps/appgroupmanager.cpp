@@ -8,6 +8,8 @@
 #include <QtConcurrent>
 
 namespace apps {
+static constexpr uint GROUP_MAX_ITEMS_PER_PAGE = 3 * 4;
+
 AppGroupManager* AppGroupManager::instance()
 {
     static AppGroupManager* _instance = nullptr;
@@ -17,9 +19,9 @@ AppGroupManager* AppGroupManager::instance()
 
     return _instance;
 }
-AppGroupManager::AppGroupManager(QObject* parent)
-    : QObject(parent)
-    , m_config(Dtk::Core::DConfig::create("org.deepin.dde.shell","org.deepin.ds.dde-apps","", this))
+AppGroupManager::AppGroupManager(QObject *parent)
+    : QStandardItemModel(parent)
+    , m_config(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dde-apps", "", this))
     , m_dumpTimer(new QTimer(this))
 {
     m_dumpTimer->setSingleShot(true);
@@ -28,83 +30,127 @@ AppGroupManager::AppGroupManager(QObject* parent)
         dumpAppGroupInfo();
     });
 
-    loadeAppGroupInfo();
+    connect(this, &AppGroupManager::dataChanged, this, &AppGroupManager::dumpAppGroupInfo);
+
+    loadAppGroupInfo();
 }
 
-uint AppGroupManager::getAppGroupForAppItemId(const QString &appItemId)
+QVariant AppGroupManager::data(const QModelIndex &index, int role) const
 {
-    auto it = std::find_if(m_groups.constBegin(), m_groups.constEnd(), [appItemId](AppGroup* const group){
-        return group->appItems().contains(appItemId);
-    });
+    if (!index.isValid())
+        return QVariant();
 
-    return it == m_groups.constEnd() ? 0 : (*it)->id();
+    if (role == GroupIdRole) {
+        return index.row();
+    }
+
+    return QStandardItemModel::data(index, role);
 }
 
-void AppGroupManager::setGropForAppItemId(const QString &appItemId, const uint &id, const uint &pos)
+std::tuple<int, int, int> AppGroupManager::getAppGroupInfo(const QString &appId)
 {
-    // remove appitemId from origin group
-    if (0 == id) {
-        auto it = std::find_if(m_groups.begin(), m_groups.end(), [appItemId](AppGroup* const group){
-            return group->appItems().contains(appItemId);
-        });
+    std::tuple<int, int, int> res = {-1, -1, -1};
+    do {
+        int groupPos, pagePos;
+        std::tie(groupPos, pagePos) = m_map.value(appId, std::make_tuple<int, int>(-1, -1));
+        auto groupIndex = index(groupPos, 0);
 
-        if ( m_groups.end() == it)
-            return;
+        if (!groupIndex.isValid())
+            break;
 
-        (*it)->removeItem(appItemId);
-        // 尺寸为 0 时而不是1，AppGroup 进行清理
-        if ((*it)->appItems().size() == 0) {
-            m_groups.removeAt(it - m_groups.begin());
-            (*it)->deleteLater();
-        }
+        auto pages = groupIndex.data(GroupAppItemsRole).toList();
+        if (pages.length() == 0)
+            break;
+
+        auto items = pages.value(pagePos).toStringList();
+        if (items.length() == 0)
+            break;
+
+        auto itemPos = items.indexOf(appId);
+        res = std::make_tuple(groupPos, pagePos, itemPos);
+    } while (0);
+
+    return res;
+}
+
+void AppGroupManager::setAppGroupInfo(const QString &appId, std::tuple<int, int, int> groupInfo)
+{
+    int groupPos, pagePos, itemPos;
+    std::tie(groupPos, pagePos, itemPos) = groupInfo;
+
+    auto groupIndex = index(groupPos, 0);
+    if (!groupIndex.isValid()) {
         return;
     }
 
-    auto it = std::find_if(m_groups.constBegin(), m_groups.constEnd(), [id](AppGroup* const group){
-        return group->id() == id;
+    auto appItems = groupIndex.data(GroupAppItemsRole).value<QList<QStringList>>();
+
+    for (int i = pagePos; i < appItems.length() - 1; i++) {
+        appItems[i].insert(itemPos, appId);
+        m_map.insert(appId, std::make_tuple(groupPos, pagePos));
+
+        // 本页最后一位元素插入到下页
+        if (appItems[i].length() > GROUP_MAX_ITEMS_PER_PAGE) {
+            auto item = appItems[i].takeLast();
+
+            appItems[i + 1].insert(0, item);
+            m_map.insert(item, std::make_tuple(groupPos, i + 1));
+        }
+    }
+
+    if (appItems.length() > 1 && appItems.last().length() > GROUP_MAX_ITEMS_PER_PAGE) {
+        auto item = appItems.last().takeLast();
+        appItems.append({item});
+    }
+
+    if (pagePos > appItems.length()) {
+        appItems.append({appId});
+    }
+
+    QVariantList data;
+    std::transform(appItems.begin(), appItems.end(), std::back_inserter(data), [](const QStringList &items) {
+        QVariantList tmp;
+        std::transform(items.begin(), items.end(), std::back_inserter(tmp), [](const auto &item) {
+            return QVariant::fromValue(item);
+        });
+        return tmp;
     });
 
-    if (it == m_groups.constEnd()) {
-        m_groups.append(new AppGroup(id, "",{appItemId}, {1}));
-    } else {
-        (*it)->instertItem(appItemId, pos);
-    }
-    
-    m_dumpTimer->start();
+    setData(groupIndex, data);
 }
 
-void AppGroupManager::loadeAppGroupInfo()
+void AppGroupManager::loadAppGroupInfo()
 {
-    m_groups.clear();
-    auto config = m_config->value("Groups").toMap();
-    for (auto c : config.keys()) {
-        bool ok = false;
-        auto id = c.toInt(&ok);
-        if (!ok) continue;
+    auto groups = m_config->value("Groups").toList();
+    for (int i = 0; i < groups.length(); i++) {
+        auto group = groups[i].toMap();
+        auto name = group.value("name", "").toString();
+        auto pages = group.value("appItems", QVariantList()).toList();
+        QList<QStringList> items;
 
-        auto groupData = config.value(c).toMap();
-        QString groupName = groupData["name"].toString();
-        QList<int> pages = groupData["pages"].value<QList<int>>();
-        QStringList itemIds = groupData["items"].toStringList();
-        m_groups.append(new AppGroup(id, groupName, itemIds, pages));
+        for (int j = 0; j < pages.length(); j++) {
+            auto page = pages[j].toStringList();
+            items << page;
+            std::for_each(page.begin(), page.end(), [this, i, j](const QString &item) {
+                m_map.insert(item, std::make_tuple(i, j));
+            });
+        }
+        auto p = new AppGroup(name, items);
+        appendRow(p);
     }
 }
 
 void AppGroupManager::dumpAppGroupInfo()
 {
-    QVariantMap res;
-    for (auto group : m_groups) {
-        QVariantMap groupData;
-        groupData["name"] = group->name();
-        QVariantList pages;
-        for (auto p : group->pages()) {
-            pages << p;
-        }
-        groupData["pages"] = pages;
-        groupData["items"] = group->appItems();
-        res[QString::number(group->id())] = groupData;
+    QVariantList list;
+    for (int i = 0; i < rowCount(); i++) {
+        auto data = index(i, 0);
+        QVariantMap valueMap;
+        valueMap.insert("name", data.data(GroupNameRole));
+        valueMap.insert("appItems", data.data(GroupAppItemsRole));
+        list << valueMap;
     }
 
-    m_config->setValue("Groups", res);
+    m_config->setValue("Groups", list);
 }
 }

@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "appitemmodel.h"
 #include "applet.h"
 #include "dsglobal.h"
 
@@ -17,7 +16,8 @@ class AppItem;
 class AppsApplet : public DApplet
 {
     Q_OBJECT
-    Q_PROPERTY(QAbstractListModel* appModel READ appModel CONSTANT FINAL)
+    Q_PROPERTY(QAbstractItemModel *appModel READ appModel CONSTANT FINAL)
+    Q_PROPERTY(QAbstractItemModel *appGroupModel READ groupModel CONSTANT FINAL)
 
 public:
     explicit AppsApplet(QObject *parent = nullptr);
@@ -25,9 +25,11 @@ public:
 
     bool load() override;
 
-    QAbstractListModel* appModel() const;
+    QAbstractItemModel *appModel() const;
+    QAbstractItemModel *groupModel() const;
 
 private:
-    AppItemModel* m_model;
+    QAbstractItemModel *m_groupModel;
+    QAbstractItemModel *m_appModel;
 };
 }
