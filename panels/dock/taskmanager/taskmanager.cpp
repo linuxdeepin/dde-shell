@@ -80,26 +80,7 @@ bool TaskManager::init()
 
     DApplet::init();
 
-    auto findApplet = [this](QString pluginId) {
-        QList<DS_NAMESPACE::DApplet *> ret;
-        auto root = qobject_cast<DS_NAMESPACE::DContainment *>(DS_NAMESPACE::DPluginLoader::instance()->rootApplet());
-
-        QQueue<DS_NAMESPACE::DContainment *> containments;
-        containments.enqueue(root);
-        while (!containments.isEmpty()) {
-            DS_NAMESPACE::DContainment *containment = containments.dequeue();
-            for (const auto applet : containment->applets()) {
-                if (auto item = qobject_cast<DS_NAMESPACE::DContainment *>(applet)) {
-                    containments.enqueue(item);
-                }
-                if (applet->pluginId() == pluginId)
-                    ret << applet;
-            }
-        }
-        return ret;
-    };
-
-    auto c = findApplet("org.deepin.ds.dde-apps");
+    auto c = DS_NAMESPACE::DPluginLoader::instance()->findApplets("org.deepin.ds.dde-apps");
     if (c.size() > 0) {
         auto model = c.first()->property("appModel").value<QAbstractItemModel *>();
         m_activeAppModel =
@@ -227,7 +208,7 @@ void TaskManager::loadDockedAppItems()
         if (appitem.isNull()) {
             appitem = new AppItem(appid);
         }
-    
+
         appitem->setDesktopFileParser(desktopfile);
         ItemModel::instance()->addItem(appitem);
     }
