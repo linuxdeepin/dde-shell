@@ -132,5 +132,9 @@ Item {
                 quickpanelModel.requestShowSubPlugin(popupSurface.pluginId, popupSurface)
             }
         }
+
+        function onPopupClosed() {
+            popup.close()
+        }
     }
 }

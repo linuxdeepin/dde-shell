@@ -46,6 +46,7 @@ public:
 
 Q_SIGNALS:
     void pluginPopupCreated(PluginPopup*);
+    void pluginCloseQuickPanelPopup();
     void pluginSurfaceCreated(PluginSurface*);
     void pluginSurfaceDestroyed(PluginSurface*);
     void messageRequest(PluginSurface *, const QString &msg);
@@ -131,6 +132,7 @@ signals:
 protected:
     virtual void plugin_mouse_event(Resource *resource, int32_t type) override;
     virtual void plugin_dcc_icon(Resource *resource, const QString &icon) override;
+    virtual void plugin_close_quick_panel(Resource *resource) override;
     virtual void plugin_destroy_resource(Resource *resource) override;
     virtual void plugin_destroy(Resource *resource) override;
 
