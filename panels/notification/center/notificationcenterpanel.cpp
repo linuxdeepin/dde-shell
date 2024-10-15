@@ -5,6 +5,7 @@
 #include "notificationcenterpanel.h"
 
 #include "notificationcenterproxy.h"
+#include "notificationcenterdbusadaptor.h"
 #include "notifyaccessor.h"
 #include "dbaccessor.h"
 
@@ -17,6 +18,7 @@
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QLoggingCategory>
+#include <QDBusConnectionInterface>
 
 DS_USE_NAMESPACE
 
@@ -77,6 +79,16 @@ bool NotificationCenterPanel::init()
         qWarning(notificationCenterLog) << QString("Can't register to the D-Bus object.");
         return false;
     }
+
+    // TODO compatible with old notification center
+    QDBusConnection connection = QDBusConnection::sessionBus();
+    connection.interface()->registerService("org.deepin.dde.Widgets1",
+                                            QDBusConnectionInterface::ReplaceExistingService,
+                                            QDBusConnectionInterface::AllowReplacement);
+    if (!connection.registerObject("/org/deepin/dde/Widgets1", m_proxy)) {
+        return false;
+    }
+    new NotificationCenterDBusAdaptor(m_proxy);
 
     DPanel::init();
 

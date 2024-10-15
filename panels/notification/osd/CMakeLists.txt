@@ -5,6 +5,8 @@
 add_library(osdpanel SHARED
     osdpanel.cpp
     osdpanel.h
+    osddbusadaptor.h
+    osddbusadaptor.cpp
     test.sh
 )
 
