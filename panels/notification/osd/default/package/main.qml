@@ -90,7 +90,8 @@ AppletItem {
 
         Text {
             Layout.fillWidth: true
-            Layout.leftMargin: 68
+            Layout.leftMargin: 20
+            Layout.rightMargin: 20
             font: D.DTK.fontManager.t4
             Layout.alignment: Qt.AlignVCenter
             visible: control.text

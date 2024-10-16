@@ -14,9 +14,16 @@ Window {
     visible: Applet.visible
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 18
-    DLayerShellWindow.bottomMargin: 400
+    D.DWindow.enableBlurWindow: true
+    color: "transparent"
+    DLayerShellWindow.bottomMargin: 140
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom
+    screen: Qt.application.screens[0]
+    // TODO `Qt.application.screens[0]` maybe invalid, why screen is changed.
+    onScreenChanged: {
+        root.screen = Qt.binding(function () { return Qt.application.screens[0]})
+    }
 
     width: osdView ? osdView.width : 100
     height: osdView ? osdView.height : 100
@@ -36,7 +43,10 @@ Window {
             sourceComponent: Control {
                 contentItem: model.data
                 padding: 10
-//                background: D.FloatingPanel { }
+                background: D.FloatingPanel {
+                    implicitWidth:  100
+                    implicitHeight: 40
+                }
             }
         }
     }
