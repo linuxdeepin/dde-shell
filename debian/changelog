@@ -1,3 +1,12 @@
+dde-shell (1.0.4) unstable; urgency=medium
+
+  * fix: stuck after the crash
+  * fix: WorkspaceItem preview image might be incorrect in screen change (#792)
+  * fix: plugin not show when not found in dconfig even it can not set visible
+  * i18n: Updates for project Deepin Desktop Environment (#743)
+
+ -- Yutao Meng <mengyutao@deepin.org>  Wed, 16 Oct 2024 15:22:02 +0800
+
 dde-shell (1.0.3) unstable; urgency=medium
 
   * treeland protocols rename.
