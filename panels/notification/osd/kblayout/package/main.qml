@@ -45,7 +45,7 @@ AppletItem {
                 font: D.DTK.fontManager.t4
                 Layout.alignment: Qt.AlignVCenter
                 text: model.text
-                color: Applet.currentLayout === model.key ? "blue" : "undefined"
+                color: Applet.currentLayout === model.key ? D.DTK.platformTheme.activeColor : "undefined"
             }
         }
     }

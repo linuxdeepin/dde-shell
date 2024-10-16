@@ -70,8 +70,11 @@ QString DPItem::key() const
 
 DisPlayModeApplet::DisPlayModeApplet(QObject *parent)
     : DApplet(parent)
+    , m_actionTimer(new QTimer(this))
 {
-
+    m_actionTimer->setSingleShot(true);
+    m_actionTimer->setInterval(2000);
+    QObject::connect(m_actionTimer, &QTimer::timeout, this, &DisPlayModeApplet::doAction);
 }
 
 int DisPlayModeApplet::state() const
@@ -99,13 +102,15 @@ QQmlListProperty<DPItem> DisPlayModeApplet::planItems()
 
 void DisPlayModeApplet::sync()
 {
-    fetchPlanItems();
-    auto current = fetchCurrentPlanItem();
-    setCurrentPlanItem(current);
+    if (!m_actionTimer->isActive()) {
+        fetchPlanItems();
+        auto current = fetchCurrentPlanItem();
+        setCurrentPlanItem(current);
+        Q_EMIT planItemsChanged();
+    }
     auto state = fetchState();
 
     setState(state);
-    Q_EMIT planItemsChanged();
 }
 
 void DisPlayModeApplet::next()
@@ -119,12 +124,23 @@ void DisPlayModeApplet::next()
         const auto item = m_planItems.at(nextIndex);
         Q_ASSERT(item);
         setCurrentPlanItem(item);
-        QDBusReply<void> reply = displayInter().method("SwitchMode").arg(item->mode()).arg(item->name()).call();
-        if (!reply.isValid()) {
-            qCWarning(osdDPLog) << "Failed to call SwitchMode" << reply.error();
-            return;
-        }
-        qCInfo(osdDPLog) << "next display mode" << item->name();
+        qCInfo(osdDPLog) << "next display mode" << item->mode() << item->name();
+        m_actionTimer->start();
+    }
+}
+
+void DisPlayModeApplet::doAction()
+{
+    const auto item = currentPlanItem();
+    if (!item)
+        return;
+
+    qCInfo(osdDPLog) << "Switch the mode" << item->mode() << item->name();
+
+    QDBusReply<void> reply = displayInter().method("SwitchMode").arg(static_cast<uchar>(item->mode())).arg(item->name()).call();
+    if (!reply.isValid()) {
+        qCWarning(osdDPLog) << "Failed to call SwitchMode" << reply.error();
+        return;
     }
 }
 
@@ -147,6 +163,7 @@ void DisPlayModeApplet::fetchPlanItems()
 
     qDeleteAll(m_planItems);
     m_planItems.clear();
+    m_currentPlanItem = nullptr;
 
     m_planItems << new DPItem(tr("Duplicate"), "osd_display_copy", DPItem::Merge, this);
     m_planItems << new DPItem(tr("Extend"), "osd_display_expansion", DPItem::Extend, this);

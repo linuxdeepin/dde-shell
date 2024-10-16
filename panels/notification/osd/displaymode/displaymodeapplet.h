@@ -7,6 +7,7 @@
 #include "applet.h"
 
 #include <QQmlListProperty>
+#include <QTimer>
 
 namespace osd {
 
@@ -22,9 +23,9 @@ public:
     DPItem(const QString &text, const QString &iconName, int mode, QObject *parent = nullptr);
     DPItem(const QString &text, const QString &name, const QString &iconName, int mode, QObject *parent = nullptr);
     enum DPMode{
-        Merge,
-        Extend,
-        Single
+        Merge = 1,
+        Extend = 2,
+        Single = 3
     };
     Q_ENUM(DPMode);
 
@@ -61,6 +62,7 @@ public:
 
     Q_INVOKABLE void sync();
     Q_INVOKABLE void next();
+    Q_INVOKABLE void doAction();
 
 Q_SIGNALS:
     void currentPlanItemChanged();
@@ -78,6 +80,7 @@ private:
     QList<DPItem *> m_planItems;
     DPItem *m_currentPlanItem = nullptr;
     int m_state;
+    QTimer *m_actionTimer = nullptr;
 };
 
 }

@@ -17,13 +17,15 @@ AppletItem {
 
     function update(osdType)
     {
+        Applet.sync()
         if (match(osdType)) {
-            Applet.sync()
 
             if (osdType === "DirectSwitchLayout") {
                 if (Applet.state !== 2) {
-                    Applet.next()
+                    Applet.doAction()
                 }
+            } else if (osdType === "SwitchMonitors") {
+                Applet.next()
             }
 
             return true
@@ -34,6 +36,7 @@ AppletItem {
     {
         return osdType === "SwitchMonitors" || osdType === "DirectSwitchLayout"
     }
+
     ListView {
         id: view
         width: 300
@@ -58,7 +61,7 @@ AppletItem {
                 font: D.DTK.fontManager.t4
                 Layout.alignment: Qt.AlignVCenter
                 text: model.text
-                color: Applet.currentPlanItem && Applet.currentPlanItem.key === model.key ? "blue" : "undefined"
+                color: Applet.currentPlanItem && Applet.currentPlanItem.key === model.key ? D.DTK.platformTheme.activeColor : "undefined"
             }
         }
     }
