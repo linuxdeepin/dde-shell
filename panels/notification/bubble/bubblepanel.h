@@ -18,6 +18,7 @@ class BubblePanel : public DS_NAMESPACE::DPanel
 {
     Q_OBJECT
     Q_PROPERTY(bool visible READ visible NOTIFY visibleChanged FINAL)
+    Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged FINAL)
     Q_PROPERTY(BubbleModel *bubbles READ bubbles CONSTANT FINAL)
 public:
     explicit BubblePanel(QObject *parent = nullptr);
@@ -29,14 +30,19 @@ public:
     bool visible() const;
     BubbleModel *bubbles() const;
 
+    bool enabled() const;
+
 public Q_SLOTS:
     void invokeDefaultAction(int bubbleIndex);
     void invokeAction(int bubbleIndex, const QString &actionId);
     void close(int bubbleIndex);
     void delayProcess(int bubbleIndex);
+    void setEnabled(bool newEnabled);
 
 Q_SIGNALS:
     void visibleChanged();
+
+    void enabledChanged();
 
 private Q_SLOTS:
     void onNotificationStateChanged(qint64 id, int processedType);
@@ -61,6 +67,7 @@ private:
     BubbleModel *m_bubbles = nullptr;
     DS_NAMESPACE::DApplet *m_notificationServer = nullptr;
     DataAccessor *m_accessor = nullptr;
+    bool m_enabled = true;
 };
 
 }

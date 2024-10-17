@@ -78,6 +78,7 @@ private:
     void updateEntityProcessed(const NotifyEntity &entity);
 
     QString appIdByAppName(const QString &appName) const;
+    void doActionInvoked(const NotifyEntity &entity, const QString &actionId);
 
 private slots:
     void onHandingPendingEntities();

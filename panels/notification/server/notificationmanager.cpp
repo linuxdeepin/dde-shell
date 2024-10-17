@@ -119,7 +119,12 @@ uint NotificationManager::recordCount() const
 
 void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
 {
-    updateEntityProcessed(id, NotifyEntity::Closed);
+    auto entity = m_persistence->fetchEntity(id);
+    if (entity.isValid()) {
+        entity.setProcessedType(NotifyEntity::Removed);
+        updateEntityProcessed(entity);
+    }
+    doActionInvoked(entity, actionKey);
 
     Q_EMIT ActionInvoked(bubbleId, actionKey);
     Q_EMIT NotificationClosed(bubbleId, NotifyEntity::Closed);
@@ -436,6 +441,24 @@ QString NotificationManager::appIdByAppName(const QString &appName) const
             return item.id;
     }
     return QString();
+}
+
+void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QString &actionId)
+{
+    qDebug(notifyServerLog) << "Invoke the notification:" << entity.id() << entity.appName() << actionId;
+    QMap<QString, QVariant> hints = entity.hints();
+    QMap<QString, QVariant>::const_iterator i = hints.constBegin();
+    while (i != hints.constEnd()) {
+        QStringList args = i.value().toString().split(",");
+        if (!args.isEmpty()) {
+            QString cmd = args.first(); //命令
+            args.removeFirst();
+            if (i.key() == "x-deepin-action-" + actionId) {
+                QProcess::startDetached(cmd, args); //执行相关命令
+            }
+        }
+        ++i;
+    }
 }
 
 void NotificationManager::onHandingPendingEntities()

@@ -218,13 +218,13 @@ int DBAccessor::fetchEntityCount(const QString &appName, int processedType) cons
     BENCHMARK();
 
     QSqlQuery query(m_connection);
-    if (!appName.isEmpty()) {
+    if (appName.isEmpty()) {
+        QString cmd = QString("SELECT COUNT(*) FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL)");
+        query.prepare(cmd);
+    } else {
         QString cmd = QString("SELECT COUNT(*) FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL)");
         query.prepare(cmd);
         query.bindValue(":appName", appName);
-    } else {
-        QString cmd = QString("SELECT COUNT(*) FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL)");
-        query.prepare(cmd);
     }
 
     query.bindValue(":processedType", processedType);
@@ -245,10 +245,16 @@ NotifyEntity DBAccessor::fetchLastEntity(const QString &appName, int processedTy
     BENCHMARK();
 
     QSqlQuery query(m_connection);
-    QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT 1").arg(EntityFields.join(","));
-    query.prepare(cmd);
-    query.bindValue(":appName", appName);
-    query.bindValue(":processedType", processedType);
+    if (appName.isEmpty()) {
+        QString cmd = QString("SELECT %1 FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT 1").arg(EntityFields.join(","));
+        query.prepare(cmd);
+        query.bindValue(":processedType", processedType);
+    } else {
+        QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT 1").arg(EntityFields.join(","));
+        query.prepare(cmd);
+        query.bindValue(":appName", appName);
+        query.bindValue(":processedType", processedType);
+    }
 
     if (!query.exec()) {
         qWarning() << "Query execution error:" << query.lastError().text();
@@ -269,15 +275,26 @@ QList<NotifyEntity> DBAccessor::fetchEntities(const QString &appName, int proces
     BENCHMARK();
 
     QSqlQuery query(m_connection);
-    if (maxCount >= 0) {
-        QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT :limit").arg(EntityFields.join(","));
-        query.prepare(cmd);
-        query.bindValue(":appName", appName);
-        query.bindValue(":limit", maxCount);
+    if (appName.isEmpty()) {
+        if (maxCount >= 0) {
+            QString cmd = QString("SELECT %1 FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT :limit").arg(EntityFields.join(","));
+            query.prepare(cmd);
+            query.bindValue(":limit", maxCount);
+        } else {
+            QString cmd = QString("SELECT %1 FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC").arg(EntityFields.join(","));
+            query.prepare(cmd);
+        }
     } else {
-        QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC").arg(EntityFields.join(","));
-        query.prepare(cmd);
-        query.bindValue(":appName", appName);
+        if (maxCount >= 0) {
+            QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT :limit").arg(EntityFields.join(","));
+            query.prepare(cmd);
+            query.bindValue(":appName", appName);
+            query.bindValue(":limit", maxCount);
+        } else {
+            QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC").arg(EntityFields.join(","));
+            query.prepare(cmd);
+            query.bindValue(":appName", appName);
+        }
     }
 
     query.bindValue(":processedType", processedType);

@@ -102,7 +102,7 @@ bool NotificationCenterPanel::init()
             valid = QObject::connect(server,
                                      SIGNAL(notificationStateChanged(qint64, int)),
                                      notifycenter::NotifyAccessor::instance(),
-                                     SLOT(onReceivedRecordStateChanged(qint64, int)),
+                                     SLOT(onNotificationStateChanged(qint64, int)),
                                      Qt::QueuedConnection);
             notifycenter::NotifyAccessor::instance()->setDataUpdater(server);
         }
@@ -129,6 +129,7 @@ void NotificationCenterPanel::setVisible(bool newVisible)
     if (m_visible == newVisible)
         return;
     m_visible = newVisible;
+    setBubblePanelEnabled(!m_visible);
     emit visibleChanged();
 }
 
@@ -136,6 +137,16 @@ void NotificationCenterPanel::close()
 {
     if (m_proxy) {
         m_proxy->Hide();
+    }
+}
+
+void NotificationCenterPanel::setBubblePanelEnabled(bool enabled)
+{
+    auto applets = appletList("org.deepin.ds.notificationbubble");
+    if (!applets.isEmpty()) {
+        if (auto applet = applets.first()) {
+            QMetaObject::invokeMethod(applet, "setEnabled", Q_ARG(bool, enabled));
+        }
     }
 }
 

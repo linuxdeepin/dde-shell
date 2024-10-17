@@ -49,8 +49,13 @@ public:
     void removeEntityByApp(const QString &appName);
     void clear();
 
+    void closeNotify(const NotifyEntity &entity);
+    void invokeNotify(const NotifyEntity &entity, const QString &actionId);
+
 signals:
     void entityReceived(qint64 id);
+    void stagingEntityReceived(qint64 id);
+    void stagingEntityClosed(qint64 id);
 
 public slots:
     void addNotify(const QString &appName, const QString &content);
@@ -62,8 +67,8 @@ signals:
     void debuggingChanged();
 
 private slots:
-    void onReceivedRecordStateChanged(qint64 id, int processedType);
-    void onReceivedRecord(qint64 id);
+    void onNotificationStateChanged(qint64 id, int processedType);
+    void onReceivedRecord(const QString &id);
 
 private:
     explicit NotifyAccessor(QObject *parent = nullptr);

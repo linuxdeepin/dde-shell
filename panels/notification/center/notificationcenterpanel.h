@@ -27,6 +27,9 @@ public:
 Q_SIGNALS:
     void visibleChanged();
 
+private slots:
+    void setBubblePanelEnabled(bool enabled);
+
 private:
     bool m_visible = false;
     NotificationCenterProxy *m_proxy = nullptr;

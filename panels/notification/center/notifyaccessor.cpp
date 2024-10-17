@@ -160,6 +160,28 @@ void NotifyAccessor::clear()
     }
 }
 
+void NotifyAccessor::closeNotify(const NotifyEntity &entity)
+{
+    if (!m_dataUpdater)
+        return;
+    const auto id = entity.id();
+    const auto bubbleId = entity.bubbleId();
+    QMetaObject::invokeMethod(m_dataUpdater, "notificationClosed", Qt::DirectConnection,
+                              Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(uint, NotifyEntity::Closed));
+}
+
+void NotifyAccessor::invokeNotify(const NotifyEntity &entity, const QString &actionId)
+{
+    if (!m_dataUpdater)
+        return;
+    const auto id = entity.id();
+    const auto bubbleId = entity.bubbleId();
+    qDebug(notifyLog) << "Invoke notify" << id << actionId;
+    QMetaObject::invokeMethod(m_dataUpdater, "actionInvoked", Qt::DirectConnection,
+                              Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(const QString&, actionId));
+
+}
+
 // don't need to emit ActionInvoked of protocol.
 void NotifyAccessor::invokeAction(const NotifyEntity &entity, const QString &actionId)
 {
@@ -249,16 +271,19 @@ void NotifyAccessor::fetchDataInfo()
     appsChanged();
 }
 
-void NotifyAccessor::onReceivedRecordStateChanged(qint64 id, int processedType)
+void NotifyAccessor::onNotificationStateChanged(qint64 id, int processedType)
 {
     if (processedType == NotifyEntity::Processed) {
-        onReceivedRecord(id);
+        emit entityReceived(id);
+        emit stagingEntityClosed(id);
+    } else if (processedType == NotifyEntity::NotProcessed) {
+        emit stagingEntityReceived(id);
     }
 }
 
-void NotifyAccessor::onReceivedRecord(qint64 id)
+void NotifyAccessor::onReceivedRecord(const QString &id)
 {
-    emit entityReceived(id);
+    emit entityReceived(id.toLongLong());
 }
 
 QString NotifyAccessor::dataInfo() const

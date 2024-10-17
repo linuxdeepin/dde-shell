@@ -46,71 +46,66 @@ FocusScope {
         }
     }
 
-    ColumnLayout {
-        objectName: "notificationHeader"
+    RowLayout {
         anchors.fill: parent
-        focus: false
-        RowLayout {
+        Text {
+            text: qsTr("Notification Center")
+            Layout.alignment: Qt.AlignLeft
+            Layout.leftMargin: 18
+            font {
+                pixelSize: DTK.fontManager.t4.pixelSize
+                family: DTK.fontManager.t4.family
+                bold: true
+            }
+            color: palette.windowText
+            MouseArea {
+                anchors.fill: parent
+                onDoubleClicked: {
+                    root.headerClicked()
+                }
+            }
+        }
+
+        Item {
             Layout.fillWidth: true
-            Text {
-                text: qsTr("Notification Center")
-                Layout.alignment: Qt.AlignLeft
-                Layout.leftMargin: 18
-                font {
-                    pixelSize: DTK.fontManager.t4.pixelSize
-                    family: DTK.fontManager.t4.family
-                    bold: true
-                }
-                color: palette.windowText
-                MouseArea {
-                    anchors.fill: parent
-                    onDoubleClicked: {
-                        root.headerClicked()
-                    }
-                }
+            Layout.preferredHeight: 1
+        }
+
+        SettingActionButton {
+            objectName: "collapse"
+            focus: true
+            visible: !notifyModel.collapse
+            Layout.alignment: Qt.AlignRight
+            icon.name: "fold"
+            onClicked: function () {
+                console.log("Clear all notify")
+                notifyModel.collapseAllApp()
             }
+        }
 
-            Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
+        SettingActionButton {
+            objectName: "more"
+            focus: true
+            Layout.alignment: Qt.AlignRight
+            icon.name: "more"
+            onClicked: function () {
+                console.log("Setting notify")
+                let pos = mapToItem(root, Qt.point(width / 2, height))
+                notifySetting.x = pos.x - notifySetting.width / 2
+                notifySetting.y = pos.y
+
+                notifySetting.toggle()
             }
+        }
 
-            SettingActionButton {
-                objectName: "collapse"
-                focus: true
-                visible: !notifyModel.collapse
-                Layout.alignment: Qt.AlignRight
-                icon.name: "fold"
-                onClicked: function () {
-                    console.log("Clear all notify")
-                    notifyModel.collapseAllApp()
-                }
-            }
-
-            SettingActionButton {
-                objectName: "more"
-                focus: true
-                Layout.alignment: Qt.AlignRight
-                icon.name: "more"
-                onClicked: function () {
-                    console.log("Setting notify")
-                    let pos = mapToItem(root, Qt.point(width / 2, height))
-                    notifySetting.x = pos.x - notifySetting.width / 2
-                    notifySetting.y = pos.y
-
-                    notifySetting.toggle()
-                }
-            }
-
-            AnimationSettingButton {
-                objectName: "closeAllNotify"
-                icon.name: "clean-all"
-                text: qsTr("Clear All")
-                Layout.alignment: Qt.AlignRight
-                onClicked: function () {
-                    console.log("Clear all notify")
-                    notifyModel.clear()
-                }
+        AnimationSettingButton {
+            objectName: "closeAllNotify"
+            icon.name: "clean-all"
+            text: qsTr("Clear All")
+            Layout.alignment: Qt.AlignRight
+            onClicked: function () {
+                console.log("Clear all notify")
+                notifyModel.clear()
             }
         }
     }
