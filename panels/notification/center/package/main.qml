@@ -4,6 +4,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import org.deepin.dtk 1.0
 import org.deepin.ds 1.0
 import org.deepin.ds.notificationcenter
@@ -40,7 +41,7 @@ Window {
     visible: Panel.visible
     flags: Qt.Tool
 
-    width: 360 + notifyCenter.anchors.leftMargin + notifyCenter.anchors.rightMargin
+    width: 360 + view.anchors.leftMargin + view.anchors.rightMargin
     // height: 800
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorRight | DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom
@@ -81,24 +82,34 @@ Window {
         }
     }
 
-    NotifyCenter {
-        id: notifyCenter
+    ColumnLayout {
+        id: view
+        width: parent.width
         anchors {
             top: parent.top
             left: parent.left
             margins: 10
         }
-        Connections {
-            target: Panel
-            function onVisibleChanged() {
-                if (!Panel.visible) {
-                    notifyCenter.model.collapseAllApp()
-                }
-            }
+
+        NotifyStaging {
+            id: notifyStaging
+            implicitWidth: 360
+
         }
 
-        width: 360
-        height: root.height
-        maxViewHeight: root.height
+        NotifyCenter {
+            id: notifyCenter
+            Connections {
+                target: Panel
+                function onVisibleChanged() {
+                    if (!Panel.visible) {
+                        notifyCenter.model.collapseAllApp()
+                    }
+                }
+            }
+
+            implicitWidth: 360
+            maxViewHeight: root.height
+        }
     }
 }

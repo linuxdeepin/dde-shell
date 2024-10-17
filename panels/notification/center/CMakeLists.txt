@@ -8,6 +8,7 @@ qt_add_qml_module(notificationcenterpanel
     VERSION 1.0
     QML_FILES
         NotifyCenter.qml
+        NotifyStaging.qml
         NotifyHeader.qml
         NotifyView.qml
         NotifyViewDelegate.qml
@@ -37,6 +38,8 @@ qt_add_qml_module(notificationcenterpanel
         notifymodel.cpp
         notifyitem.h
         notifyitem.cpp
+        notifystagingmodel.h
+        notifystagingmodel.cpp
     OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/notificationcenter/
 )

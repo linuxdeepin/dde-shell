@@ -130,11 +130,6 @@ void NotifyModel::close()
 {
     qDebug(notifyLog) << "close";
 
-    if (m_refreshTimer >= 0) {
-        killTimer(m_refreshTimer);
-        m_refreshTimer = -1;
-    }
-
     beginResetModel();
     qDeleteAll(m_appNotifies);
     m_appNotifies.clear();
@@ -173,12 +168,6 @@ void NotifyModel::open()
             endInsertRows();
         }
     }
-
-    if (m_refreshTimer >= 0) {
-        killTimer(m_refreshTimer);
-        m_refreshTimer = -1;
-    }
-    m_refreshTimer = startTimer(std::chrono::milliseconds(1000));
 }
 
 void NotifyModel::append(const NotifyEntity &entity)
@@ -276,6 +265,10 @@ void NotifyModel::append(const NotifyEntity &entity)
         auto notify = new AppNotifyItem(entity);
         m_appNotifies.insert(start, notify);
         endInsertRows();
+    }
+
+    if (m_refreshTimer < 0) {
+        m_refreshTimer = startTimer(std::chrono::milliseconds(1000));
     }
 }
 
@@ -796,6 +789,11 @@ void NotifyModel::timerEvent(QTimerEvent *event)
 {
     if (event->timerId() == m_refreshTimer) {
         updateTime();
+
+        if (m_appNotifies.isEmpty()) {
+            killTimer(m_refreshTimer);
+            m_refreshTimer = -1;
+        }
     }
     return QAbstractListModel::timerEvent(event);
 }

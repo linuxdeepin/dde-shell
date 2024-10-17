@@ -117,7 +117,7 @@ void BubblePanel::onNotificationStateChanged(qint64 id, int processedType)
 void BubblePanel::onBubbleCountChanged()
 {
     bool isEmpty = m_bubbles->items().isEmpty();
-    setVisible(!isEmpty);
+    setVisible(!isEmpty && enabled());
 }
 
 QList<DS_NAMESPACE::DApplet *> BubblePanel::appletList(const QString &pluginId) const
@@ -200,6 +200,22 @@ BubbleItem *BubblePanel::bubbleItem(int index)
 }
 
 D_APPLET_CLASS(BubblePanel)
+
+bool BubblePanel::enabled() const
+{
+    return m_enabled;
+}
+
+void BubblePanel::setEnabled(bool newEnabled)
+{
+    if (m_enabled == newEnabled)
+        return;
+    m_enabled = newEnabled;
+    emit enabledChanged();
+
+    bool isEmpty = m_bubbles->items().isEmpty();
+    setVisible(!isEmpty && enabled());
+}
 
 }
 
