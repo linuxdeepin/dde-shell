@@ -25,9 +25,12 @@ public:
     bool userData() const;
     void setUserData(bool newUserData);
 
+    Q_INVOKABLE QString call(const QString &id);
+
 Q_SIGNALS:
     void mainTextChanged();
     void userDataChanged();
+    void sendSignal(const QString &id);
 private:
     QString m_mainText;
     bool m_userData;
