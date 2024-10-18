@@ -116,10 +116,10 @@ ContainmentItem {
         DropArea {
             id: launcherDndDropArea
             anchors.fill: parent
-            keys: ["text/x-dde-launcher-dnd-desktopId"]
+            keys: ["text/x-dde-dock-dnd-appid"]
             property string launcherDndDesktopId: ""
             onEntered: function(drag) {
-                let desktopId = drag.getDataAsString("text/x-dde-launcher-dnd-desktopId")
+                let desktopId = drag.getDataAsString("text/x-dde-dock-dnd-appid")
                 launcherDndDesktopId = taskmanager.Applet.desktopIdToAppId(desktopId)
                 if (taskmanager.Applet.requestDockByDesktopId(desktopId) === false) {
                     launcherDndDesktopId = ""
