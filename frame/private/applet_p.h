@@ -5,6 +5,7 @@
 #pragma once
 
 #include "applet.h"
+#include "appletproxy.h"
 
 #include <dobject_p.h>
 #include <QVariant>
@@ -20,9 +21,12 @@ public:
     explicit DAppletPrivate(DApplet *qq);
     ~DAppletPrivate() override;
 
+    DAppletProxy *appletProxy() const;
+
     DPluginMetaData m_metaData;
     DAppletData m_data;
     QPointer<QObject> m_rootObject;
+    DAppletProxy *m_proxy = nullptr;
 
     D_DECLARE_PUBLIC(DApplet);
 };

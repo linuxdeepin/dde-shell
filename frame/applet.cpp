@@ -26,6 +26,15 @@ DAppletPrivate::~DAppletPrivate()
     }
 }
 
+DAppletProxy *DAppletPrivate::appletProxy() const
+{
+    if (!m_proxy) {
+        const_cast<DAppletPrivate *>(this)->m_proxy =
+                const_cast<DAppletPrivate *>(this)->q_func()->createProxy();
+    }
+    return m_proxy;
+}
+
 DApplet::DApplet(QObject *parent)
     : DApplet(*new DAppletPrivate(this), parent)
 {
@@ -107,6 +116,12 @@ bool DApplet::load()
 bool DApplet::init()
 {
     return true;
+}
+
+DAppletProxy *DApplet::createProxy()
+{
+    D_DC(DApplet);
+    return new DAppletMetaProxy(this, this);
 }
 
 DS_END_NAMESPACE
