@@ -5,6 +5,10 @@
 #include "dbusadaptor.h"
 #include "notificationmanager.h"
 
+#include <QLoggingCategory>
+namespace notification {
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
 namespace notification {
 
 DbusAdaptor::DbusAdaptor(QObject *parent)
@@ -15,7 +19,7 @@ DbusAdaptor::DbusAdaptor(QObject *parent)
 
 QStringList DbusAdaptor::GetCapabilities()
 {
-    qDebug() << "GetCapabilities";
+    qDebug(notifyLog) << "GetCapabilities";
     return manager()->GetCapabilities();
 }
 
@@ -28,13 +32,13 @@ uint DbusAdaptor::Notify(const QString &appName, uint replacesId, const QString 
 
 void DbusAdaptor::CloseNotification(uint id)
 {
-    qDebug() << "Close notification" << id;
+    qDebug(notifyLog) << "Close notification" << id;
     manager()->CloseNotification(id);
 }
 
 void DbusAdaptor::GetServerInformation(QString &name, QString &vendor, QString &version, QString &specVersion)
 {
-    qDebug() << "GetServerInformation";
+    qDebug(notifyLog) << "GetServerInformation";
     manager()->GetServerInformation(name, vendor, version, specVersion);
 }
 

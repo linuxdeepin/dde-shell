@@ -6,9 +6,13 @@
 
 #include <QVariant>
 #include <QAbstractListModel>
+#include <QLoggingCategory>
 
 #include <DConfig>
 
+namespace notification {
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
 namespace notification {
 
 static const QString InvalidApp {"DS-Invalid-Apps"};
@@ -276,7 +280,7 @@ void NotificationSetting::onAppsChanged()
         }
     }
     for (auto item : added) {
-        qDebug() << "Application added" << item.id;
+        qDebug(notifyLog) << "Application added" << item.id;
         Q_EMIT appAdded(item.id);
     }
 
@@ -291,7 +295,7 @@ void NotificationSetting::onAppsChanged()
         }
     }
     for (auto item : removed) {
-        qDebug() << "Application removed" << item.id;
+        qDebug(notifyLog) << "Application removed" << item.id;
         Q_EMIT appRemoved(item.id);
     }
 

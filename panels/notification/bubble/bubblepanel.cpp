@@ -13,8 +13,10 @@
 #include "dbaccessor.h"
 
 namespace notification {
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
 
-Q_LOGGING_CATEGORY(notificationLog, "dde.shell.notification")
+namespace notification {
 
 BubblePanel::BubblePanel(QObject *parent)
     : DPanel(parent)
@@ -38,7 +40,7 @@ bool BubblePanel::init()
 
     auto applets = appletList("org.deepin.ds.notificationserver");
     if (applets.isEmpty() || !applets.at(0)) {
-        qCWarning(notificationLog) << "Can't get notification server object";
+        qCWarning(notifyLog) << "Can't get notification server object";
         return false;
     }
 
@@ -106,10 +108,10 @@ void BubblePanel::delayProcess(int bubbleIndex)
 void BubblePanel::onNotificationStateChanged(qint64 id, int processedType)
 {
     if (processedType == NotifyEntity::NotProcessed) {
-        qDebug() << "Add bubble for the notification" << id;
+        qDebug(notifyLog) << "Add bubble for the notification" << id;
         addBubble(id);
     } else if (processedType == NotifyEntity::Processed) {
-        qDebug() << "Close bubble for the notification" << id;
+        qDebug(notifyLog) << "Close bubble for the notification" << id;
         closeBubble(id);
     }
 }

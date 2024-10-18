@@ -9,7 +9,7 @@
 #include "pluginfactory.h"
 
 DS_BEGIN_NAMESPACE
-Q_LOGGING_CATEGORY(notificationLog, "dde.shell.notification")
+Q_LOGGING_CATEGORY(notifyLog, "dde.shell.notification")
 
 NotificationContainment::NotificationContainment(QObject *parent)
     : DContainment(parent)
@@ -26,7 +26,7 @@ bool NotificationContainment::load()
     if (qEnvironmentVariableIntValue("DS_ENABLE_NOTIFICATION"))
         return DContainment::load();
 
-    qDebug(notificationLog) << "Don't enable notification plugin, we can enable it by DS_ENABLE_NOTIFICATION=1";
+    qDebug(notifyLog) << "Don't enable notification plugin, we can enable it by DS_ENABLE_NOTIFICATION=1";
     return false;
 }
 

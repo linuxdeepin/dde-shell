@@ -15,10 +15,10 @@
 #include <QElapsedTimer>
 
 namespace notification {
-
-namespace {
-Q_LOGGING_CATEGORY(notifyLog, "notify.db")
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
 }
+namespace notification {
+Q_LOGGING_CATEGORY(notifyDBLog, "dde.shell.notification.db", QtMsgType::QtWarningMsg)
 
 static const QString TableName = "notifications";
 static const QString TableName_v2 = "notifications2";
@@ -86,7 +86,7 @@ public:
     {
         const auto time = m_timer.elapsed();
         if (time > 10)
-            qWarning(notifyLog) << m_msg << " cost more time, elapsed:" << time;
+            qWarning(notifyDBLog) << m_msg << " cost more time, elapsed:" << time;
     }
 private:
     QElapsedTimer m_timer;
@@ -100,7 +100,7 @@ DBAccessor::DBAccessor(const QString &key)
     : m_key(key)
 {
     const auto dataPath = notificationDBPath();
-    qInfo() << "Accessor's key:" << m_key << ", dataPath:" << dataPath;
+    qInfo(notifyLog) << "DBAccessor's key:" << m_key;
     if (!dataPath.isEmpty() && open(dataPath)) {
         tryToCreateTable();
     }
@@ -122,7 +122,7 @@ bool DBAccessor::open(const QString &dataPath)
     qDebug(notifyLog) << "Open database path" << dataPath;
 
     if (!m_connection.open()) {
-        qWarning() << "Open database error" << m_connection.lastError().text();
+        qWarning(notifyLog) << "Open database error" << m_connection.lastError().text();
         return false;
     }
 
@@ -163,16 +163,14 @@ qint64 DBAccessor::addEntity(const NotifyEntity &entity)
     query.bindValue(":processedType", entity.processedType());
 
     if (!query.exec()) {
-        qWarning() << "insert value to database failed: " << query.lastError().text() << entity.bubbleId() << entity.cTime();
+        qWarning(notifyDBLog) << "insert value to database failed: " << query.lastError().text() << entity.bubbleId() << entity.cTime();
         return 0;
-    } else {
-#ifdef QT_DEBUG
-        qDebug() << "insert value done, time is:" << entity.cTime();
-#endif
     }
 
     // to get entity's id in database
     int storageId = query.lastInsertId().toLongLong();
+
+    qDebug(notifyDBLog) << "Insert entity bubbleId:" << entity.bubbleId() << ", id:" << storageId;
 
     return storageId;
 }
@@ -189,7 +187,7 @@ void DBAccessor::updateEntityProcessedType(qint64 id, int processedType)
     query.bindValue(":processed", processedType);
 
     if (!query.exec()) {
-        qWarning() << "update processed type execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "update processed type execution error:" << query.lastError().text();
     }
 }
 
@@ -203,7 +201,7 @@ NotifyEntity DBAccessor::fetchEntity(qint64 id)
     query.bindValue(":id", id);
 
     if (!query.exec()) {
-        qWarning() << "Query execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
         return {};
     }
 
@@ -230,7 +228,7 @@ int DBAccessor::fetchEntityCount(const QString &appName, int processedType) cons
     query.bindValue(":processedType", processedType);
 
     if (!query.exec()) {
-        qWarning() << "Query execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
         return {};
     }
 
@@ -257,14 +255,14 @@ NotifyEntity DBAccessor::fetchLastEntity(const QString &appName, int processedTy
     }
 
     if (!query.exec()) {
-        qWarning() << "Query execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
         return {};
     }
 
     if (query.next()) {
         auto entity = parseEntity(query);
 
-        qDebug(notifyLog) << "Fetched last entity" << entity.id();
+        qDebug(notifyDBLog) << "Fetched last entity" << entity.id();
         return entity;
     }
     return {};
@@ -300,7 +298,7 @@ QList<NotifyEntity> DBAccessor::fetchEntities(const QString &appName, int proces
     query.bindValue(":processedType", processedType);
 
     if (!query.exec()) {
-        qWarning() << "Query execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
         return {};
     }
 
@@ -312,7 +310,7 @@ QList<NotifyEntity> DBAccessor::fetchEntities(const QString &appName, int proces
         ret.append(entity);
     }
 
-    qDebug(notifyLog) << "Fetched entities size:" << ret.size();
+    qDebug(notifyDBLog) << "Fetched entities size:" << ret.size();
     return ret;
 }
 
@@ -326,14 +324,14 @@ NotifyEntity DBAccessor::fetchLastEntity(uint notifyId)
     query.bindValue(":notifyId", notifyId);
 
     if (!query.exec()) {
-        qWarning() << "Query execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
         return {};
     }
 
     if (query.next()) {
         auto entity = parseEntity(query);
 
-        qDebug(notifyLog) << "Fetched last entity " << entity.id() <<" by the notifyId" << notifyId;
+        qDebug(notifyDBLog) << "Fetched last entity " << entity.id() <<" by the notifyId" << notifyId;
         return entity;
     }
     return {};
@@ -354,7 +352,7 @@ QList<QString> DBAccessor::fetchApps(int maxCount) const
     }
 
     if (!query.exec()) {
-        qWarning() << "Query execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
         return {};
     }
 
@@ -364,7 +362,7 @@ QList<QString> DBAccessor::fetchApps(int maxCount) const
         ret.append(name);
     }
 
-    qDebug(notifyLog) << "Fetched apps count" << ret.size();
+    qDebug(notifyDBLog) << "Fetched apps count" << ret.size();
 
     return ret;
 }
@@ -380,11 +378,11 @@ void DBAccessor::removeEntity(qint64 id)
     query.bindValue(":id", id);
 
     if (!query.exec()) {
-        qWarning() << "Query execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
         return;
     }
 
-    qDebug() << "Delete notify count" << query.numRowsAffected();
+    qDebug(notifyDBLog) << "Delete notify count" << query.numRowsAffected();
 }
 
 void DBAccessor::removeEntityByApp(const QString &appName)
@@ -398,11 +396,11 @@ void DBAccessor::removeEntityByApp(const QString &appName)
     query.bindValue(":appName", appName);
 
     if (!query.exec()) {
-        qWarning() << "Query execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
         return;
     }
 
-    qDebug() << "Delete notify count" << query.numRowsAffected();
+    qDebug(notifyDBLog) << "Delete notify count" << query.numRowsAffected();
 }
 
 void DBAccessor::clear()
@@ -415,11 +413,11 @@ void DBAccessor::clear()
     query.prepare(cmd);
 
     if (!query.exec()) {
-        qWarning() << "Query execution error:" << query.lastError().text();
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
         return;
     }
 
-    qDebug() << "Delete notify count" << query.numRowsAffected();
+    qDebug(notifyDBLog) << "Delete notify count" << query.numRowsAffected();
 }
 
 void DBAccessor::tryToCreateTable()
@@ -444,7 +442,7 @@ void DBAccessor::tryToCreateTable()
     query.prepare(sql);
 
     if (!query.exec()) {
-        qWarning() << "create table failed" << query.lastError().text();
+        qWarning(notifyDBLog) << "create table failed" << query.lastError().text();
     }
 
     // add new columns in history
@@ -486,14 +484,14 @@ bool DBAccessor::isAttributeValid(const QString &tableName, const QString &attri
                     return true;
                 }
             } else {
-                qDebug() << sqlCmd << ",lastError:" << query.lastError().text();
+                qDebug(notifyDBLog) << sqlCmd << ",lastError:" << query.lastError().text();
                 return false;
             }
         } else { // table not exist
             return false;
         }
     } else { // sql error
-        qDebug() << sqlCmd << ",lastError:" << query.lastError().text();
+        qDebug(notifyDBLog) << sqlCmd << ",lastError:" << query.lastError().text();
         return false;
     }
 }
@@ -518,7 +516,7 @@ void DBAccessor::updateProcessTypeValue()
             .arg(TableName_v2, NotifyEntity::Processed);
 
     if (!query.exec(updateCmd)) {
-        qWarning() << "Failed to update ProcessedType NULL values:" << query.lastError();
+        qWarning(notifyDBLog) << "Failed to update ProcessedType NULL values:" << query.lastError();
     }
 }
 

@@ -9,8 +9,10 @@
 
 #include "notifyaccessor.h"
 
-namespace notifycenter {
+namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
+namespace notifycenter {
 
 AppNotifyItem::AppNotifyItem(const NotifyEntity &entity)
     : m_appId(entity.appName())

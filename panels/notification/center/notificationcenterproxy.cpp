@@ -9,7 +9,9 @@
 #include <QLoggingCategory>
 
 namespace notification {
-Q_DECLARE_LOGGING_CATEGORY(notificationCenterLog)
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
+namespace notification {
 
 NotificationCenterProxy::NotificationCenterProxy(QObject *parent)
     : QObject(parent)
@@ -31,13 +33,13 @@ void NotificationCenterProxy::Toggle()
 
 void NotificationCenterProxy::Show()
 {
-    qDebug(notificationCenterLog) << "Show notificationcenter";
+    qDebug(notifyLog) << "Show notificationcenter";
     panel()->setVisible(true);
 }
 
 void NotificationCenterProxy::Hide()
 {
-    qDebug(notificationCenterLog) << "Hide notificationcenter";
+    qDebug(notifyLog) << "Hide notificationcenter";
     panel()->setVisible(false);
 }
 

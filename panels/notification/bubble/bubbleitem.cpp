@@ -14,8 +14,10 @@
 #include <DIconTheme>
 
 namespace notification {
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
 
-Q_DECLARE_LOGGING_CATEGORY(notificationLog)
+namespace notification {
 
 static inline void copyLineRGB32(QRgb *dst, const char *src, int width)
 {
@@ -43,11 +45,11 @@ static QImage decodeImageFromDBusArgument(const QDBusArgument &arg)
     arg.beginStructure();
     arg >> width >> height >> rowStride >> hasAlpha >> bitsPerSample >> channels >> pixels;
     arg.endStructure();
-    //qDebug() << width << height << rowStride << hasAlpha << bitsPerSample << channels;
+    //qDebug(notifyLog) << width << height << rowStride << hasAlpha << bitsPerSample << channels;
 
 #define SANITY_CHECK(condition) \
 if (!(condition)) { \
-    qWarning() << "Sanity check failed on" << #condition; \
+    qWarning(notifyLog) << "Sanity check failed on" << #condition; \
     return QImage(); \
 }
 
@@ -71,7 +73,7 @@ if (!(condition)) { \
         }
     }
     if (format == QImage::Format_Invalid) {
-        qWarning() << "Unsupported image format (hasAlpha:" << hasAlpha << "bitsPerSample:" << bitsPerSample << "channels:" << channels << ")";
+        qWarning(notifyLog) << "Unsupported image format (hasAlpha:" << hasAlpha << "bitsPerSample:" << bitsPerSample << "channels:" << channels << ")";
         return QImage();
     }
 
@@ -80,7 +82,7 @@ if (!(condition)) { \
     end = ptr + pixels.length();
     for (int y = 0; y < height; ++y, ptr += rowStride) {
         if (ptr + channels * width > end) {
-            qWarning() << "Image data is incomplete. y:" << y << "height:" << height;
+            qWarning(notifyLog) << "Image data is incomplete. y:" << y << "height:" << height;
             break;
         }
         fcn((QRgb *)image.scanLine(y), ptr, width);
@@ -147,7 +149,7 @@ static QString imagePathOfNotification(const QVariantMap &hints, const QString &
     }
     QIcon icon = decodeIconFromPath(imageData, appName);
     if (icon.isNull()) {
-        qCWarning(notificationLog) << "Can't get icon for notification, appName:" << appName;
+        qCWarning(notifyLog) << "Can't get icon for notification, appName:" << appName;
     }
     return icon.name();
 }

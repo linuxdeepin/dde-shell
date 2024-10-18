@@ -23,8 +23,9 @@ DCORE_USE_NAMESPACE
 DS_USE_NAMESPACE
 
 namespace notification {
-
-Q_LOGGING_CATEGORY(notifyServerLog, "dde.shell.notification.server")
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
+namespace notification {
 
 static const uint NoReplacesId = 0;
 static const int DefaultTimeOutMSecs = 5000;
@@ -175,7 +176,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
                                  const QString &body, const QStringList &actions, const QVariantMap &hints,
                                  int expireTimeout)
 {
-    qDebug(notifyServerLog) << "Notify"
+    qDebug(notifyLog) << "Notify"
             << ", appName:" << appName
             << ", summary:" << summary
             << ", appIcon:" << appIcon
@@ -289,7 +290,7 @@ void NotificationManager::GetServerInformation(QString &name, QString &vendor, Q
 
 QStringList NotificationManager::GetAppList()
 {
-    qDebug(notifyServerLog) << "Get appList";
+    qDebug(notifyLog) << "Get appList";
     return m_setting->apps();
 }
 
@@ -300,19 +301,19 @@ QVariant NotificationManager::GetAppInfo(const QString &appId, uint configItem)
 
 void NotificationManager::SetAppInfo(const QString &appId, uint configItem, const QVariant &value)
 {
-    qDebug(notifyServerLog) << "Set appInfo" << appId << configItem << value;
+    qDebug(notifyLog) << "Set appInfo" << appId << configItem << value;
     return m_setting->setAppValue(appId, static_cast<NotificationSetting::AppConfigItem>(configItem), value);
 }
 
 void NotificationManager::SetSystemInfo(uint configItem, const QVariant &value)
 {
-    qDebug(notifyServerLog) << "Set systemInfo" << configItem << value;
+    qDebug(notifyLog) << "Set systemInfo" << configItem << value;
     return m_setting->setSystemValue(static_cast<NotificationSetting::SystemConfigItem>(configItem), value);
 }
 
 QVariant NotificationManager::GetSystemInfo(uint configItem)
 {
-    qDebug(notifyServerLog) << "Get systemInfo" << configItem;
+    qDebug(notifyLog) << "Get systemInfo" << configItem;
     return m_setting->systemValue(static_cast<NotificationSetting::SystemConfigItem>(configItem));
 }
 
@@ -445,7 +446,7 @@ QString NotificationManager::appIdByAppName(const QString &appName) const
 
 void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QString &actionId)
 {
-    qDebug(notifyServerLog) << "Invoke the notification:" << entity.id() << entity.appName() << actionId;
+    qDebug(notifyLog) << "Invoke the notification:" << entity.id() << entity.appName() << actionId;
     QMap<QString, QVariant> hints = entity.hints();
     QMap<QString, QVariant>::const_iterator i = hints.constBegin();
     while (i != hints.constEnd()) {
@@ -493,7 +494,7 @@ void NotificationManager::onHandingPendingEntities()
     }
 
     for (const auto item : timeoutEntities) {
-        qDebug(notifyServerLog) << "Expired for the notification " << item.id() << item.appName();
+        qDebug(notifyLog) << "Expired for the notification " << item.id() << item.appName();
         notificationClosed(item.id(), item.bubbleId(), NotifyEntity::Expired);
     }
 }

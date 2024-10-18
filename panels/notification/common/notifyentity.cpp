@@ -6,8 +6,10 @@
 
 #include <QDateTime>
 #include <QStringList>
+#include <QLoggingCategory>
 
 namespace notification {
+Q_LOGGING_CATEGORY(notifyLog, "dde.shell.notification")
 
 #define ACTION_SEGMENT ("|")
 #define HINT_SEGMENT ("|")

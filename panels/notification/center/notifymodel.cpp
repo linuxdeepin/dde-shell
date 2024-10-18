@@ -11,8 +11,10 @@
 #include "notifyitem.h"
 #include "notifyaccessor.h"
 
+namespace notification {
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
 namespace notifycenter {
-Q_LOGGING_CATEGORY(notifyLog, "notify.model")
 
 NotifyModel::NotifyModel(QObject *parent)
     : QAbstractListModel(parent)

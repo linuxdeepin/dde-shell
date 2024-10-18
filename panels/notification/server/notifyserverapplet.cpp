@@ -8,8 +8,10 @@
 #include "pluginfactory.h"
 
 namespace notification {
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
 
-Q_LOGGING_CATEGORY(notificationLog, "dde.shell.notification")
+namespace notification {
 
 NotifyServerApplet::NotifyServerApplet(QObject *parent)
         : DApplet(parent)
@@ -19,7 +21,7 @@ NotifyServerApplet::NotifyServerApplet(QObject *parent)
 
 NotifyServerApplet::~NotifyServerApplet()
 {
-    qDebug(notificationLog) << "Exit notification server.";
+    qDebug(notifyLog) << "Exit notification server.";
     if (m_manager) {
         m_manager->deleteLater();
     }
@@ -42,7 +44,7 @@ bool NotifyServerApplet::init()
     m_manager = new NotificationManager();
 
     if (!m_manager->registerDbusService()) {
-        qWarning(notificationLog) << QString("Can't register Notifications to the D-Bus object.");
+        qWarning(notifyLog) << QString("Can't register Notifications to the D-Bus object.");
         return false;
     }
 
