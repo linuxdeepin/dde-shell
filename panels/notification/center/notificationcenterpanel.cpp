@@ -23,7 +23,9 @@
 DS_USE_NAMESPACE
 
 namespace notification {
-Q_LOGGING_CATEGORY(notificationCenterLog, "dde.shell.notificationcenter")
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
+namespace notification {
 
 static const QString DDENotifyDBusServer = "org.deepin.dde.Notification1";
 static const QString DDENotifyDBusInterface = "org.deepin.dde.Notification1";
@@ -76,7 +78,7 @@ bool NotificationCenterPanel::init()
                             "org.deepin.dde.shell.notification.center",
                             m_proxy,
                             QDBusConnection::ExportAllSlots)) {
-        qWarning(notificationCenterLog) << QString("Can't register to the D-Bus object.");
+        qWarning(notifyLog) << QString("Can't register to the D-Bus object.");
         return false;
     }
 
@@ -113,7 +115,7 @@ bool NotificationCenterPanel::init()
                                    "RecordAdded", this, SLOT(onReceivedRecord(const QString &)));
     }
     if (!valid) {
-        qWarning() << "NotifyConnection is invalid, and can't receive RecordAdded signal.";
+        qWarning(notifyLog) << "NotifyConnection is invalid, and can't receive RecordAdded signal.";
     }
 
     return true;

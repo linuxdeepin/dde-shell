@@ -13,8 +13,10 @@
 #include <QUrl>
 
 namespace notification {
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
 
-Q_DECLARE_LOGGING_CATEGORY(notificationLog)
+namespace notification {
 
 BubbleModel::BubbleModel(QObject *parent)
     : QAbstractListModel(parent)

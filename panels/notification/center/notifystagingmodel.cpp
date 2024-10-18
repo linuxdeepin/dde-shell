@@ -12,8 +12,10 @@
 #include "notifyaccessor.h"
 #include "dbaccessor.h"
 
-namespace notifycenter {
+namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
+}
+namespace notifycenter {
 
 NotifyStagingModel::NotifyStagingModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -137,7 +139,7 @@ void NotifyStagingModel::remove(qint64 id)
                 newEntity = newEntities.first();
             }
 
-            qDebug() << "Insert notify" << newEntity.id();
+            qDebug(notifyLog) << "Insert notify" << newEntity.id();
             beginInsertRows(QModelIndex(), insertedIndex, insertedIndex);
             auto notify = new AppNotifyItem(newEntity);
             m_appNotifies.insert(insertedIndex, notify);

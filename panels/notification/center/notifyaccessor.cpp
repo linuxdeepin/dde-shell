@@ -18,10 +18,10 @@
 
 DCORE_USE_NAMESPACE
 
-namespace notifycenter {
-namespace {
-Q_LOGGING_CATEGORY(notifyLog, "notify")
+namespace notification {
+Q_DECLARE_LOGGING_CATEGORY(notifyLog)
 }
+namespace notifycenter {
 
 static const uint ShowNotificationTop = 7;
 static const QString InvalidApp {"DS-Invalid-Apps"};
