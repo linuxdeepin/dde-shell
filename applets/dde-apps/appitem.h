@@ -46,7 +46,7 @@ public:
     virtual void setInstalledTime(const quint64 &time);
 
     virtual quint64 launchedTimes() const;
-    virtual void setLaunchedTimes(const quint64 &time);
+    virtual void setLaunchedTimes(const quint64 &times);
 
     virtual QList<int> group() const;
     virtual void setGroup(const QList<int> &group);
