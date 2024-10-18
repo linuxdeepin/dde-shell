@@ -8,6 +8,21 @@
 
 DS_USE_NAMESPACE
 
+class ExampleAppletProxy : public QObject
+{
+    Q_OBJECT
+public:
+    ExampleAppletProxy(QObject *parent = nullptr)
+        : QObject(parent)
+    {
+
+    }
+    Q_INVOKABLE QString call(const QString &id)
+    {
+        return id + QString("-done");
+    }
+};
+
 class ExampleContainment : public DContainment
 {
     Q_OBJECT
@@ -16,6 +31,8 @@ public:
     ~ExampleContainment();
 
     virtual bool load() override;
+protected:
+    virtual QObject *createProxyMeta() override;
 private:
     DPluginMetaData targetPlugin() const;
 };

@@ -11,6 +11,8 @@ set(PUBLIC_HEADERS
     appletdata.h
     containment.h
     panel.h
+    appletproxy.h
+    appletbridge.h
     qmlengine.h
     layershell/dlayershellwindow.h
     dsutility.h
@@ -21,6 +23,8 @@ set(PRIVATE_HEADERS
     private/containment_p.h
     private/panel_p.h
     private/appletitem_p.h
+    private/appletproxy_p.h
+    private/appletbridge_p.h
     private/dsqmlglobal_p.h
     layershell/qwaylandlayershellsurface_p.h
     layershell/qwaylandlayershellintegration_p.h
@@ -50,6 +54,8 @@ add_library(dde-shell-frame SHARED
     applet.cpp
     containment.cpp
     panel.cpp
+    appletproxy.cpp
+    appletbridge.cpp
     appletitem.cpp
     containmentitem.cpp
     qmlengine.cpp

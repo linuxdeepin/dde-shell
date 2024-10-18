@@ -6,6 +6,7 @@
 
 #include "pluginfactory.h"
 #include "pluginloader.h"
+#include "appletproxy.h"
 #include <DConfig>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -65,6 +66,11 @@ bool ExampleContainment::load()
     setAppletData(data);
 
     return DApplet::load();
+}
+
+QObject *ExampleContainment::createProxyMeta()
+{
+    return new ExampleAppletProxy(this);
 }
 
 DPluginMetaData ExampleContainment::targetPlugin() const

@@ -17,4 +17,8 @@ public:
     virtual bool load() override;
 
     virtual bool init() override;
+
+private slots:
+    void onReceivedSignal(const QString &id);
+
 };

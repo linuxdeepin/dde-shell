@@ -25,7 +25,7 @@ bool ExampleApplet::load()
 {
     DCORE_USE_NAMESPACE;
     std::unique_ptr<DConfig> config(DConfig::create("org.deepin.dde.shell", "org.deepin.ds.example"));
-    return config->value("loadAppletExampleData").toBool();
+    return config->value("loadAppletExampleData", true).toBool();
 }
 
 bool ExampleApplet::init()
@@ -54,6 +54,11 @@ void ExampleApplet::setUserData(bool newUserData)
         return;
     m_userData = newUserData;
     emit userDataChanged();
+}
+
+QString ExampleApplet::call(const QString &id)
+{
+    return id + QString("-done");
 }
 
 D_APPLET_CLASS(ExampleApplet)

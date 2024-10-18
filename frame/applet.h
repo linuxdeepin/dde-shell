@@ -17,6 +17,7 @@ DS_BEGIN_NAMESPACE
  */
 class DAppletPrivate;
 class DPluginLoader;
+class DAppletBridge;
 class DS_SHARE DApplet : public QObject, public DTK_CORE_NAMESPACE::DObject
 {
     Q_OBJECT
@@ -26,6 +27,7 @@ class DS_SHARE DApplet : public QObject, public DTK_CORE_NAMESPACE::DObject
     Q_PROPERTY(QObject *rootObject READ rootObject NOTIFY rootObjectChanged)
     D_DECLARE_PRIVATE(DApplet)
     friend class DPluginLoader;
+    friend class DAppletBridge;
 public:
     explicit DApplet(QObject *parent = nullptr);
     virtual ~DApplet() override;
@@ -48,6 +50,7 @@ Q_SIGNALS:
 
 protected:
     explicit DApplet(DAppletPrivate &dd, QObject *parent = nullptr);
+    virtual QObject *createProxyMeta();
 
 private:
     void setMetaData(const DPluginMetaData &metaData);

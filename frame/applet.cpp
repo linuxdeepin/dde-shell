@@ -4,6 +4,7 @@
 
 #include "applet.h"
 #include "private/applet_p.h"
+#include "private/appletproxy_p.h"
 
 #include <QLoggingCategory>
 #include <QUuid>
@@ -24,6 +25,16 @@ DAppletPrivate::~DAppletPrivate()
     if (m_rootObject) {
         m_rootObject->deleteLater();
     }
+}
+
+DAppletProxy *DAppletPrivate::appletProxy() const
+{
+    if (!m_proxy) {
+        auto meta = const_cast<DAppletPrivate *>(this)->q_func()->createProxyMeta();
+        const_cast<DAppletPrivate *>(this)->m_proxy =
+                new DAppletMetaProxy(meta, const_cast<DAppletPrivate *>(this)->q_func());
+    }
+    return m_proxy;
 }
 
 DApplet::DApplet(QObject *parent)
@@ -107,6 +118,12 @@ bool DApplet::load()
 bool DApplet::init()
 {
     return true;
+}
+
+QObject *DApplet::createProxyMeta()
+{
+    D_DC(DApplet);
+    return this;
 }
 
 DS_END_NAMESPACE
