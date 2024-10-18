@@ -19,6 +19,9 @@ AppItem::AppItem(const QString &appid)
     std::tie(groupPos, pagePos, itemPos) = AppGroupManager::instance()->getAppGroupInfo(appId());
     QVariantList data = {groupPos, pagePos, itemPos};
     setData(data, AppItemModel::GroupRole);
+
+    auto launchedTimes = AppsLaunchTimesHelper::instance()->getLaunchedTimesFor(appId());
+    setData(launchedTimes, AppItemModel::LaunchedTimesRole);
 }
 
 void AppItem::launch(const QString &action, const QStringList &fields, const QVariantMap &options)
@@ -102,12 +105,12 @@ void AppItem::setActions(const QString &actions)
 
 quint64 AppItem::lastLaunchedTime() const
 {
-    return AppsLaunchTimesHelper::instance()->getLaunchedTimesFor(appId());
+    return data(AppItemModel::LastLaunchedTimeRole).toULongLong();
 }
 
 void AppItem::setLastLaunchedTime(const quint64 &time)
 {
-    return AppsLaunchTimesHelper::instance()->setLaunchTimesFor(appId(), time);
+    return setData(time, AppItemModel::LastLaunchedTimeRole);
 }
 
 quint64 AppItem::installedTime() const
@@ -125,9 +128,10 @@ quint64 AppItem::launchedTimes() const
     return data(AppItemModel::LaunchedTimesRole).toULongLong();
 }
 
-void AppItem::setLaunchedTimes(const quint64 &actions)
+void AppItem::setLaunchedTimes(const quint64 &times)
 {
-    return setData(actions, AppItemModel::LaunchedTimesRole);
+    AppsLaunchTimesHelper::instance()->setLaunchTimesFor(appId(), times);
+    return setData(times, AppItemModel::LaunchedTimesRole);
 }
 
 QList<int> AppItem::group() const
