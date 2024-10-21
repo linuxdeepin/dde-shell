@@ -13,6 +13,7 @@
 #include <pluginloader.h>
 #include <applet.h>
 #include <containment.h>
+#include <appletbridge.h>
 
 #include <QQueue>
 #include <QDBusConnection>
@@ -34,26 +35,6 @@ static const QString DDENotifyDBusPath = "/org/deepin/dde/Notification1";
 static QDBusInterface notifyCenterInterface()
 {
     return QDBusInterface(DDENotifyDBusServer, DDENotifyDBusPath, DDENotifyDBusInterface);
-}
-static QList<DApplet *> appletList(const QString &pluginId)
-{
-    QList<DApplet *> ret;
-    auto rootApplet = DPluginLoader::instance()->rootApplet();
-    auto root = qobject_cast<DContainment *>(rootApplet);
-
-    QQueue<DContainment *> containments;
-    containments.enqueue(root);
-    while (!containments.isEmpty()) {
-        DContainment *containment = containments.dequeue();
-        for (const auto applet : containment->applets()) {
-            if (auto item = qobject_cast<DContainment *>(applet)) {
-                containments.enqueue(item);
-            }
-            if (applet->pluginId() == pluginId)
-                ret << applet;
-        }
-    }
-    return ret;
 }
 
 NotificationCenterPanel::NotificationCenterPanel(QObject *parent)
@@ -97,17 +78,15 @@ bool NotificationCenterPanel::init()
     auto accessor = notification::DBAccessor::instance();
     notifycenter::NotifyAccessor::instance()->setDataAccessor(accessor);
 
-    auto applets = appletList("org.deepin.ds.notificationserver");
     bool valid = false;
-    if (!applets.isEmpty()) {
-        if (auto server = applets.first()) {
-            valid = QObject::connect(server,
-                                     SIGNAL(notificationStateChanged(qint64, int)),
-                                     notifycenter::NotifyAccessor::instance(),
-                                     SLOT(onNotificationStateChanged(qint64, int)),
-                                     Qt::QueuedConnection);
-            notifycenter::NotifyAccessor::instance()->setDataUpdater(server);
-        }
+    DAppletBridge bridge("org.deepin.ds.notificationserver");
+    if (auto server = bridge.applet()) {
+        valid = QObject::connect(server,
+                                 SIGNAL(notificationStateChanged(qint64, int)),
+                                 notifycenter::NotifyAccessor::instance(),
+                                 SLOT(onNotificationStateChanged(qint64, int)),
+                                 Qt::QueuedConnection);
+        notifycenter::NotifyAccessor::instance()->setDataUpdater(server);
     } else {
         // old interface by dbus
         auto connection = QDBusConnection::sessionBus();
@@ -144,12 +123,9 @@ void NotificationCenterPanel::close()
 
 void NotificationCenterPanel::setBubblePanelEnabled(bool enabled)
 {
-    auto applets = appletList("org.deepin.ds.notificationbubble");
-    if (!applets.isEmpty()) {
-        if (auto applet = applets.first()) {
-            QMetaObject::invokeMethod(applet, "setEnabled", Q_ARG(bool, enabled));
-        }
-    }
+    DAppletBridge bridge("org.deepin.ds.notificationbubble");
+    if (auto applet = bridge.applet())
+        QMetaObject::invokeMethod(applet, "setEnabled", Qt::DirectConnection, Q_ARG(bool, enabled));
 }
 
 D_APPLET_CLASS(NotificationCenterPanel)

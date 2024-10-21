@@ -5,7 +5,7 @@
 #include "private/dsqmlglobal_p.h"
 
 #include "applet.h"
-#include "containment.h"
+#include "appletbridge.h"
 #include "pluginloader.h"
 
 #include <QLoggingCategory>
@@ -46,34 +46,16 @@ DQmlGlobal::~DQmlGlobal()
 {
 }
 
-DApplet *DQmlGlobal::applet(const QString &pluginId) const
+DAppletProxy *DQmlGlobal::applet(const QString &pluginId) const
 {
-    D_DC(DQmlGlobal);
-    const auto list = appletList(pluginId);
-    if (!list.isEmpty())
-        return list.first();
-    return nullptr;
+    DAppletBridge bridge(pluginId);
+    return bridge.applet();
 }
 
-QList<DApplet *> DQmlGlobal::appletList(const QString &pluginId) const
+QList<DAppletProxy *> DQmlGlobal::appletList(const QString &pluginId) const
 {
-    D_DC(DQmlGlobal);
-    QList<DApplet *> ret;
-    auto root = qobject_cast<DContainment *>(rootApplet());
-
-    QQueue<DContainment *> containments;
-    containments.enqueue(root);
-    while (!containments.isEmpty()) {
-        DContainment *containment = containments.dequeue();
-        for (const auto applet : containment->applets()) {
-            if (auto item = qobject_cast<DContainment *>(applet)) {
-                containments.enqueue(item);
-            }
-            if (applet->pluginId() == pluginId)
-                ret << applet;
-        }
-    }
-    return ret;
+    DAppletBridge bridge(pluginId);
+    return bridge.applets();
 }
 
 QList<QWindow *> DQmlGlobal::allChildrenWindows(QWindow *target)
