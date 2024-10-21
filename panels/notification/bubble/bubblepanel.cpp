@@ -9,6 +9,7 @@
 
 #include <QLoggingCategory>
 #include <QQueue>
+#include <appletbridge.h>
 
 #include "dbaccessor.h"
 
@@ -37,16 +38,15 @@ bool BubblePanel::load()
 bool BubblePanel::init()
 {
     DPanel::init();
-
-    auto applets = appletList("org.deepin.ds.notificationserver");
-    if (applets.isEmpty() || !applets.at(0)) {
+    DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.notificationserver");
+    m_notificationServer = bridge.applet();
+    if (!m_notificationServer) {
         qCWarning(notifyLog) << "Can't get notification server object";
         return false;
     }
 
     m_accessor = DBAccessor::instance();
 
-    m_notificationServer = applets.at(0);
     connect(m_notificationServer, SIGNAL(notificationStateChanged(qint64, int)), this, SLOT(onNotificationStateChanged(qint64, int)));
 
     connect(m_bubbles, &BubbleModel::rowsInserted, this, &BubblePanel::onBubbleCountChanged);
@@ -120,26 +120,6 @@ void BubblePanel::onBubbleCountChanged()
 {
     bool isEmpty = m_bubbles->items().isEmpty();
     setVisible(!isEmpty && enabled());
-}
-
-QList<DS_NAMESPACE::DApplet *> BubblePanel::appletList(const QString &pluginId) const
-{
-    QList<DS_NAMESPACE::DApplet *> ret;
-    auto root = qobject_cast<DS_NAMESPACE::DContainment *>(parent());
-
-    QQueue<DS_NAMESPACE::DContainment *> containments;
-    containments.enqueue(root);
-    while (!containments.isEmpty()) {
-        DS_NAMESPACE::DContainment *containment = containments.dequeue();
-        for (const auto applet : containment->applets()) {
-            if (auto item = qobject_cast<DS_NAMESPACE::DContainment *>(applet)) {
-                containments.enqueue(item);
-            }
-            if (applet->pluginId() == pluginId)
-                ret << applet;
-        }
-    }
-    return ret;
 }
 
 void BubblePanel::addBubble(qint64 id)

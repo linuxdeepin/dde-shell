@@ -12,7 +12,6 @@
 #include "globals.h"
 #include "itemmodel.h"
 #include "pluginfactory.h"
-#include "pluginloader.h"
 #include "rolecombinemodel.h"
 #include "taskmanager.h"
 #include "taskmanageradaptor.h"
@@ -21,6 +20,8 @@
 
 #include <QGuiApplication>
 #include <QStringLiteral>
+
+#include <appletbridge.h>
 
 #ifdef BUILD_WITH_X11
 #include "x11windowmonitor.h"
@@ -80,9 +81,9 @@ bool TaskManager::init()
 
     DApplet::init();
 
-    auto c = DS_NAMESPACE::DPluginLoader::instance()->findApplets("org.deepin.ds.dde-apps");
-    if (c.size() > 0) {
-        auto model = c.first()->property("appModel").value<QAbstractItemModel *>();
+    DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dde-apps");
+    if (auto applet = bridge.applet()) {
+        auto model = applet->property("appModel").value<QAbstractItemModel *>();
         m_activeAppModel =
             new RoleCombineModel(m_windowMonitor.data(), model, AbstractWindow::identityRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
                 auto roleNames = model->roleNames();

@@ -16,8 +16,7 @@
 #include <DConfig>
 
 #include <applet.h>
-#include <containment.h>
-#include <pluginloader.h>
+#include <appletbridge.h>
 
 DCORE_USE_NAMESPACE
 DS_USE_NAMESPACE
@@ -36,27 +35,6 @@ static const QString DDENotifyDBusPath = "/org/deepin/dde/Notification1";
 static const QString SessionDBusService = "org.deepin.dde.SessionManager1";
 static const QString SessionDaemonDBusPath = "/org/deepin/dde/SessionManager1";
 
-static QList<DApplet *> appletList(const QString &pluginId)
-{
-    QList<DApplet *> ret;
-    auto rootApplet = DPluginLoader::instance()->rootApplet();
-    auto root = qobject_cast<DContainment *>(rootApplet);
-
-    QQueue<DContainment *> containments;
-    containments.enqueue(root);
-    while (!containments.isEmpty()) {
-        DContainment *containment = containments.dequeue();
-        for (const auto applet : containment->applets()) {
-            if (auto item = qobject_cast<DContainment *>(applet)) {
-                containments.enqueue(item);
-            }
-            if (applet->pluginId() == pluginId)
-                ret << applet;
-        }
-    }
-    return ret;
-}
-
 NotificationManager::NotificationManager(QObject *parent)
     : QObject(parent)
     , m_persistence(new DBAccessor("Manager"))
@@ -67,12 +45,10 @@ NotificationManager::NotificationManager(QObject *parent)
     m_pendingTimeout->setSingleShot(true);
     connect(m_pendingTimeout, &QTimer::timeout, this, &NotificationManager::onHandingPendingEntities);
 
-    auto applets = appletList("org.deepin.ds.dde-apps");
-    if (!applets.isEmpty()) {
-        if (auto apps = applets.first()) {
-            if (auto model = apps->property("appModel").value<QAbstractListModel*>()) {
-                m_setting->setAppAccessor(model);
-            }
+    DAppletBridge bridge("org.deepin.ds.dde-apps");
+    if (auto apps = bridge.applet()) {
+        if (auto model = apps->property("appModel").value<QAbstractListModel*>()) {
+            m_setting->setAppAccessor(model);
         }
     }
     connect(m_setting, &NotificationSetting::appAdded, this, &NotificationManager::AppAdded);

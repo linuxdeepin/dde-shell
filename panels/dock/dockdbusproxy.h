@@ -9,6 +9,8 @@
 #include "constants.h"
 #include "dockiteminfo.h"
 
+#include <appletproxy.h>
+
 #include <QObject>
 #include <QDBusContext>
 #include <QDBusArgument>
@@ -78,15 +80,11 @@ Q_SIGNALS:
 private:
     DockPanel* parent() const;
     QString getAppID(const QString &desktopfile);
-    QList<DS_NAMESPACE::DApplet *> appletList(const QString &pluginId) const;
-    DS_NAMESPACE::DApplet *applet(const QString &pluginId) const;
     void setPluginVisible(const QString &pluginId, const QVariantMap &pluginsVisible);
 
-    DS_NAMESPACE::DApplet *m_oldDockApplet;
-    DS_NAMESPACE::DApplet *m_clipboardApplet;
-    DS_NAMESPACE::DApplet *m_searchApplet;
-    DS_NAMESPACE::DApplet *m_multitaskviewApplet;
-    DS_NAMESPACE::DApplet *m_trayApplet;
+    DS_NAMESPACE::DAppletProxy *m_oldDockApplet;
+    DS_NAMESPACE::DAppletProxy *m_multitaskviewApplet;
+    DS_NAMESPACE::DAppletProxy *m_trayApplet;
 };
 }
 

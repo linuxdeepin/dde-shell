@@ -6,6 +6,8 @@
 
 #include "panel.h"
 #include "dataaccessor.h"
+#include <appletproxy.h>
+
 #include <QQuickItem>
 
 namespace notification {
@@ -51,9 +53,6 @@ private Q_SLOTS:
     void onBubbleCountChanged();
 
 private:
-    QList<DS_NAMESPACE::DApplet *> appletList(const QString &pluginId) const;
-
-private:
     void onBubbleExpired(BubbleItem *);
     void onActionInvoked(qint64 id, uint bubbleId, const QString &actionId);
     void onBubbleClosed(qint64 id, uint bubbleId, uint reason);
@@ -65,7 +64,7 @@ private:
 private:
     bool m_visible = false;
     BubbleModel *m_bubbles = nullptr;
-    DS_NAMESPACE::DApplet *m_notificationServer = nullptr;
+    DS_NAMESPACE::DAppletProxy *m_notificationServer = nullptr;
     DataAccessor *m_accessor = nullptr;
     bool m_enabled = true;
 };

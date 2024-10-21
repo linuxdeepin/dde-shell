@@ -11,47 +11,40 @@
 #include <QObject>
 
 #include <DWindowManagerHelper>
+#include <appletbridge.h>
 
 DGUI_USE_NAMESPACE
+DS_USE_NAMESPACE
 
 namespace dock {
 DockDBusProxy::DockDBusProxy(DockPanel* parent)
     : QObject(parent)
     , m_oldDockApplet(nullptr)
-    , m_clipboardApplet(nullptr)
-    , m_searchApplet(nullptr)
     , m_multitaskviewApplet(nullptr)
     , m_trayApplet(nullptr)
 {
     registerPluginInfoMetaType();
 
     connect(DockSettings::instance(), &DockSettings::pluginsVisibleChanged, this, [this] (const QVariantMap &pluginsVisible) {
-        setPluginVisible("org.deepin.ds.dock.clipboarditem", pluginsVisible);
-        setPluginVisible("org.deepin.ds.dock.searchitem", pluginsVisible);
         setPluginVisible("org.deepin.ds.dock.multitaskview", pluginsVisible);
     });
     connect(parent, &DockPanel::rootObjectChanged, this, [this]() {
         auto pluginsVisible = DockSettings::instance()->pluginsVisible();
-        setPluginVisible("org.deepin.ds.dock.clipboarditem", pluginsVisible);
-        setPluginVisible("org.deepin.ds.dock.searchitem", pluginsVisible);
         setPluginVisible("org.deepin.ds.dock.multitaskview", pluginsVisible);
     });
 
     // Communicate with the other module
     auto getOtherApplet = [ = ] {
-        QList<DS_NAMESPACE::DApplet *> list = appletList("org.deepin.ds.dock.tray");
-        if (!list.isEmpty()) m_trayApplet = list.first();
+        {
+            DAppletBridge bridge("org.deepin.ds.dock.tray");
+            m_trayApplet = bridge.applet();
+        }
+        {
+            DAppletBridge bridge("org.deepin.ds.dock.multitaskview");
+            m_multitaskviewApplet = bridge.applet();
+        }
 
-        list = appletList("org.deepin.ds.dock.clipboarditem");
-        if (!list.isEmpty()) m_clipboardApplet = list.first();
-
-        list = appletList("org.deepin.ds.dock.searchitem");
-        if (!list.isEmpty()) m_searchApplet = list.first();
-
-        list = appletList("org.deepin.ds.dock.multitaskview");
-        if (!list.isEmpty()) m_multitaskviewApplet = list.first();
-
-        return m_trayApplet && m_clipboardApplet && m_searchApplet && m_multitaskviewApplet;
+        return m_trayApplet && m_multitaskviewApplet;
     };
 
     // TODO: DQmlGlobal maybe missing a  signal which named `appletListChanged`?
@@ -78,34 +71,6 @@ QString DockDBusProxy::getAppID(const QString &desktopfile)
     return desktopfile.mid(desktopfile.lastIndexOf(desktopLeft) + desktopLeft.size(), desktopfile.lastIndexOf(desktopSuffix) - desktopfile.lastIndexOf(desktopLeft) - desktopLeft.size());
 }
 
-QList<DS_NAMESPACE::DApplet *> DockDBusProxy::appletList(const QString &pluginId) const
-{
-    QList<DS_NAMESPACE::DApplet *> ret;
-    auto root = qobject_cast<DS_NAMESPACE::DContainment *>(parent());
-
-    QQueue<DS_NAMESPACE::DContainment *> containments;
-    containments.enqueue(root);
-    while (!containments.isEmpty()) {
-        DS_NAMESPACE::DContainment *containment = containments.dequeue();
-        for (const auto applet : containment->applets()) {
-            if (auto item = qobject_cast<DS_NAMESPACE::DContainment *>(applet)) {
-                containments.enqueue(item);
-            }
-            if (applet->pluginId() == pluginId)
-                ret << applet;
-        }
-    }
-    return ret;
-}
-
-DS_NAMESPACE::DApplet *DockDBusProxy::applet(const QString &pluginId) const
-{
-    const auto list = appletList(pluginId);
-    if (!list.isEmpty())
-        return list.first();
-    return nullptr;
-}
-
 QRect DockDBusProxy::geometry()
 {
     return parent()->window() ? parent()->window()->geometry() : QRect();
@@ -113,7 +78,7 @@ QRect DockDBusProxy::geometry()
 
 void DockDBusProxy::setPluginVisible(const QString &pluginId, const QVariantMap &pluginsVisible)
 {
-    if (auto item = applet(pluginId)) {
+    if (DAppletBridge bridge(pluginId); auto item = bridge.applet()) {
         DockItemInfo itemInfo;
         QMetaObject::invokeMethod(item, "dockItemInfo", Qt::DirectConnection, qReturnArg(itemInfo));
         QString itemKey = itemInfo.itemKey;
@@ -194,7 +159,8 @@ bool DockDBusProxy::RequestDock(const QString &desktopFile, int index) {
     if (id.isEmpty())
         return false;
 
-    auto appletItem = applet("org.deepin.ds.dock.taskmanager");
+    DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
+    auto appletItem = bridge.applet();
     if (nullptr == appletItem)
         return false;
     bool res = true;
@@ -208,7 +174,8 @@ bool DockDBusProxy::IsDocked(const QString &desktopFile)
     if (id.isEmpty())
         return false;
 
-    auto appletItem = applet("org.deepin.ds.dock.taskmanager");
+    DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
+    auto appletItem = bridge.applet();
     if (nullptr == appletItem)
         return false;
     bool res = true;
@@ -219,7 +186,8 @@ bool DockDBusProxy::IsDocked(const QString &desktopFile)
 bool DockDBusProxy::RequestUndock(const QString &desktopFile)
 {
     QString id = getAppID(desktopFile);
-    auto appletItem = applet("org.deepin.ds.dock.taskmanager");
+    DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
+    auto appletItem = bridge.applet();
     if (nullptr == appletItem)
         return false;
     bool res = true;
@@ -238,19 +206,6 @@ DockItemInfos DockDBusProxy::plugins()
     DockItemInfos iteminfos;
     if (m_trayApplet) {
         QMetaObject::invokeMethod(m_trayApplet, "dockItemInfos", Qt::DirectConnection, qReturnArg(iteminfos));
-    }
-
-    if (m_clipboardApplet) {
-        DockItemInfo info;
-        if (QMetaObject::invokeMethod(m_clipboardApplet, "dockItemInfo", Qt::DirectConnection, qReturnArg(info))) {
-            iteminfos.append(info);
-        }
-    }
-
-    if (m_searchApplet) {
-        DockItemInfo info;
-        if (QMetaObject::invokeMethod(m_searchApplet, "dockItemInfo", Qt::DirectConnection, qReturnArg(info)))
-            iteminfos.append(info);
     }
 
     if (m_multitaskviewApplet && DWindowManagerHelper::instance()->hasComposite()) {
@@ -274,17 +229,7 @@ void DockDBusProxy::callShow()
 
 void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible)
 {
-    if (itemKey == "clipboard" && m_clipboardApplet) {
-        QMetaObject::invokeMethod(m_clipboardApplet, "setVisible", Qt::QueuedConnection, visible);
-        auto pluginsVisible = DockSettings::instance()->pluginsVisible();
-        pluginsVisible[itemKey] = visible;
-        DockSettings::instance()->setPluginsVisible(pluginsVisible);
-    } else if (itemKey == "search" && m_searchApplet) {
-        QMetaObject::invokeMethod(m_searchApplet, "setVisible", Qt::QueuedConnection, visible);
-        auto pluginsVisible = DockSettings::instance()->pluginsVisible();
-        pluginsVisible[itemKey] = visible;
-        DockSettings::instance()->setPluginsVisible(pluginsVisible);
-    } else if (itemKey == "multitasking-view" && m_multitaskviewApplet) {
+    if (itemKey == "multitasking-view" && m_multitaskviewApplet) {
         QMetaObject::invokeMethod(m_multitaskviewApplet, "setVisible", Qt::QueuedConnection, visible);
         auto pluginsVisible = DockSettings::instance()->pluginsVisible();
         pluginsVisible[itemKey] = visible;

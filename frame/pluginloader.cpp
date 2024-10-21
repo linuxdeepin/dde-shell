@@ -358,26 +358,6 @@ DApplet *DPluginLoader::rootApplet() const
     return d->m_rootApplet.data();
 }
 
-QList<DS_NAMESPACE::DApplet *> DPluginLoader::findApplets(const QString & pluginId)
-{
-    QList<DS_NAMESPACE::DApplet *> ret;
-    auto root = qobject_cast<DS_NAMESPACE::DContainment *>(rootApplet());
-
-    QQueue<DS_NAMESPACE::DContainment *> containments;
-    containments.enqueue(root);
-    while (!containments.isEmpty()) {
-        DS_NAMESPACE::DContainment *containment = containments.dequeue();
-        for (const auto applet : containment->applets()) {
-            if (auto item = qobject_cast<DS_NAMESPACE::DContainment *>(applet)) {
-                containments.enqueue(item);
-            }
-            if (applet->pluginId() == pluginId)
-                ret << applet;
-        }
-    }
-    return ret;
-}
-
 QList<DPluginMetaData> DPluginLoader::childrenPlugin(const QString &pluginId) const
 {
     D_DC(DPluginLoader);
