@@ -31,8 +31,12 @@ DAppletProxy *DAppletPrivate::appletProxy() const
 {
     if (!m_proxy) {
         auto meta = const_cast<DAppletPrivate *>(this)->q_func()->createProxyMeta();
+        // TODO DAppletMetaProxy can't router all operator of QMetaObject::invokeMethod,
+        // so DAppletProxy is createProxyMeta's object temporally.
+        // const_cast<DAppletPrivate *>(this)->m_proxy =
+        //         new DAppletMetaProxy(meta, const_cast<DAppletPrivate *>(this)->q_func());
         const_cast<DAppletPrivate *>(this)->m_proxy =
-                new DAppletMetaProxy(meta, const_cast<DAppletPrivate *>(this)->q_func());
+                reinterpret_cast<DAppletProxy *>(meta);
     }
     return m_proxy;
 }
