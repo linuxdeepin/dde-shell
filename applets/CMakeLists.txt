@@ -4,3 +4,4 @@
 
 add_subdirectory(dde-am)
 add_subdirectory(dde-appearance)
+add_subdirectory(dde-apps)
