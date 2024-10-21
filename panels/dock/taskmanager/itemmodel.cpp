@@ -76,6 +76,8 @@ QVariant ItemModel::data(const QModelIndex &index, int role) const
 void ItemModel::moveTo(const QString &id, int dIndex)
 {
     auto sItem = getItemById(id);
+    // FIXME: Somehow, the dIndex value can go beyond m_item.size().
+    dIndex = qMin(dIndex, m_items.size() - 1);
     auto dItem = m_items.at(dIndex);
 
     int sIndex = m_items.indexOf(sItem);
