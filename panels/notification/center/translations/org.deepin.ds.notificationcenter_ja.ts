@@ -40,7 +40,7 @@
     <message>
         <location filename="../NotifySetting.qml" line="26"/>
         <source>Notification Setting</source>
-        <translation type="unfinished"/>
+        <translation>通知の設定</translation>
     </message>
 </context>
 <context>
