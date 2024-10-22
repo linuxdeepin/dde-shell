@@ -41,7 +41,8 @@ Window {
     visible: Applet.visible
     width: 380
     height: Math.max(10, bubbleView.height + bubbleView.anchors.topMargin + bubbleView.anchors.bottomMargin)
-    DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
+    DLayerShellWindow.layer: DLayerShellWindow.LayerOSD
+    flags: Qt.Tool
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
     DLayerShellWindow.topMargin: windowMargin(0)
     DLayerShellWindow.rightMargin: windowMargin(1)
