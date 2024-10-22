@@ -22,7 +22,7 @@
     <message>
         <location filename="../NotifyHeader.qml" line="108"/>
         <source>Clear All</source>
-        <translation type="unfinished"/>
+        <translation>Alles leeren</translation>
     </message>
 </context>
 <context>
