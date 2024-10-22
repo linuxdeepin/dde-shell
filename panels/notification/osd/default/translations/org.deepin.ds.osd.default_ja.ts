@@ -54,7 +54,7 @@
     <message>
         <location filename="../package/main.qml" line="64"/>
         <source>Airplane mode on</source>
-        <translation type="unfinished"/>
+        <translation>機内モード on</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="65"/>
