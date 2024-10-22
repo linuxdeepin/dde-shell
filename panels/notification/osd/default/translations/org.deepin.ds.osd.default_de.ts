@@ -44,12 +44,12 @@
     <message>
         <location filename="../package/main.qml" line="62"/>
         <source>Touchpad toggle</source>
-        <translation type="unfinished"/>
+        <translation>Tastfeld-Umschalter</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="63"/>
         <source>Fn toggle</source>
-        <translation type="unfinished"/>
+        <translation>Fn-Umschalter</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="64"/>
