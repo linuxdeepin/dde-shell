@@ -44,7 +44,7 @@
     <message>
         <location filename="../package/main.qml" line="62"/>
         <source>Touchpad toggle</source>
-        <translation type="unfinished"/>
+        <translation>タッチパッド トグル</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="63"/>
