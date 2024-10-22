@@ -5,7 +5,7 @@
         <location filename="../bubbleitem.cpp" line="158"/>
         <location filename="../bubbleitem.cpp" line="165"/>
         <source>just now</source>
-        <translation type="unfinished"/>
+        <translation>Há pouco</translation>
     </message>
     <message>
         <location filename="../bubbleitem.cpp" line="363"/>
