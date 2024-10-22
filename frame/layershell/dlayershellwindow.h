@@ -34,6 +34,7 @@ class DS_SHARE DLayerShellWindow : public QObject
 public:
     ~DLayerShellWindow() override;
 
+    // clang-format off
     /**
      * This enum type is used to specify the position where to anchor
      */
@@ -56,6 +57,8 @@ public:
         LayerButtom     = 1,
         LayerTop        = 2,
         LayerOverlay    = 3,
+        LayerExtension  = 8,
+        LayerOSD
     };
 
     Q_ENUM(Layer)
@@ -83,6 +86,7 @@ public:
     };
 
     Q_ENUM(KeyboardInteractivity)
+    // clang-format on
 
     void setAnchors(Anchors anchor);
     Anchors anchors() const;
