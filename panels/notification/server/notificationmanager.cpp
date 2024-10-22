@@ -47,9 +47,12 @@ NotificationManager::NotificationManager(QObject *parent)
 
     DAppletBridge bridge("org.deepin.ds.dde-apps");
     if (auto apps = bridge.applet()) {
-        if (auto model = apps->property("appModel").value<QAbstractListModel*>()) {
+        if (auto model = apps->property("appModel").value<QAbstractItemModel *>()) {
             m_setting->setAppAccessor(model);
         }
+    }
+    if (!m_setting->appAccessor()) {
+        qWarning(notifyLog) << "It's not exist appModel for the applet:" << bridge.pluginId();
     }
     connect(m_setting, &NotificationSetting::appAdded, this, &NotificationManager::AppAdded);
     connect(m_setting, &NotificationSetting::appRemoved, this, &NotificationManager::AppRemoved);
@@ -228,7 +231,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
 
         emitRecordCountChanged();
 
-        Q_EMIT notificationStateChanged(entity.id(), entity.processedType());
+        Q_EMIT NotificationStateChanged(entity.id(), entity.processedType());
 
         bool critical = false;
         if (auto iter = hints.find("urgency"); iter != hints.end()) {
@@ -249,7 +252,7 @@ void NotificationManager::CloseNotification(uint id)
     // TODO If the notification no longer exists, an empty D-BUS Error message is sent back.
     const auto entity = m_persistence->fetchLastEntity(id);
     if (entity.isValid()) {
-        Q_EMIT notificationStateChanged(entity.id(), entity.processedType());
+        Q_EMIT NotificationStateChanged(entity.id(), entity.processedType());
     }
 
     Q_EMIT NotificationClosed(id, NotifyEntity::Closed);
@@ -404,7 +407,7 @@ void NotificationManager::updateEntityProcessed(const NotifyEntity &entity)
         m_persistence->removeEntity(id);
     } else {
         m_persistence->updateEntityProcessedType(id, entity.processedType());
-        Q_EMIT notificationStateChanged(id, entity.processedType());
+        Q_EMIT NotificationStateChanged(id, entity.processedType());
     }
 
     emitRecordCountChanged();

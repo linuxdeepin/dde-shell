@@ -51,7 +51,7 @@ bool NotifyServerApplet::init()
     new DbusAdaptor(m_manager);
     new DDENotificationDbusAdaptor(m_manager);
 
-    connect(m_manager, &NotificationManager::notificationStateChanged, this, &NotifyServerApplet::notificationStateChanged);
+    connect(m_manager, &NotificationManager::NotificationStateChanged, this, &NotifyServerApplet::notificationStateChanged);
 
     m_worker = new QThread();
     m_manager->moveToThread(m_worker);
