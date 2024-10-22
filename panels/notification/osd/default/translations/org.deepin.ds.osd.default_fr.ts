@@ -84,7 +84,7 @@
     <message>
         <location filename="../package/main.qml" line="70"/>
         <source>High performance</source>
-        <translation type="unfinished"/>
+        <translation>Mode haute performance</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="71"/>
