@@ -14,12 +14,12 @@
     <message>
         <location filename="../package/main.qml" line="56"/>
         <source>Caps Lock on</source>
-        <translation>Feststelltaste eingeschaltet</translation>
+        <translation>Feststelltaste ein</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="57"/>
         <source>Caps Lock off</source>
-        <translation>Feststelltaste ausgeschaltet</translation>
+        <translation>Feststelltaste aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="58"/>
@@ -29,7 +29,7 @@
     <message>
         <location filename="../package/main.qml" line="59"/>
         <source>Numeric keypad off</source>
-        <translation type="unfinished"/>
+        <translation>Ziffernblock aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="60"/>
