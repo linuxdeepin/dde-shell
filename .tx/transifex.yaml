@@ -10,19 +10,24 @@ filters:
     source_language: en_US
     translation_files_expression: panels/dock/taskmanager/translations/org.deepin.ds.dock.taskmanager.ts_<lang>.ts
   - filter_type: file
-    source_file: panels/notification/translations/org.deepin.ds.notification.ts
+    source_file: panels/notification/bubble/translations/org.deepin.ds.notificationbubble.ts
     file_format: QT
     source_language: en_US
-    translation_files_expression: panels/notification/translations/org.deepin.ds.notification_<lang>.ts
+    translation_files_expression: panels/notification/bubble/translations/org.deepin.ds.notificationbubble_<lang>.ts
   - filter_type: file
-    source_file: panels/osd/default/translations/org.deepin.ds.osd.default.ts
+    source_file: panels/notification/center/translations/org.deepin.ds.notificationcenter.ts
     file_format: QT
     source_language: en_US
-    translation_files_expression: panels/osd/default/translations/org.deepin.ds.osd.default_<lang>.ts
+    translation_files_expression: panels/notification/center/translations/org.deepin.ds.notificationcenter_<lang>.ts
   - filter_type: file
-    source_file: panels/osd/displaymode/translations/org.deepin.ds.osd.displaymode.ts
+    source_file: panels/notification/osd/default/translations/org.deepin.ds.osd.default.ts
     file_format: QT
     source_language: en_US
-    translation_files_expression: panels/osd/displaymode/translations/org.deepin.ds.osd.displaymode_<lang>.ts
+    translation_files_expression: panels/notification/osd/default/translations/org.deepin.ds.osd.default_<lang>.ts
+  - filter_type: file
+    source_file: panels/notification/osd/displaymode/translations/org.deepin.ds.osd.displaymode.ts
+    file_format: QT
+    source_language: en_US
+    translation_files_expression: panels/notification/osd/displaymode/translations/org.deepin.ds.osd.displaymode_<lang>.ts
 settings:
   pr_branch_name: transifex_update_<br_unique_id>
