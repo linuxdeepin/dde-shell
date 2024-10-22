@@ -173,6 +173,7 @@ Item {
             console.log("dropped", currentItemIndex, isBefore)
             DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
             DDT.TraySortOrderModel.actionsAlwaysVisible = false
+            dropHoverIndex = -1
         }
 
         Timer {
