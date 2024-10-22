@@ -89,7 +89,7 @@
     <message>
         <location filename="../package/main.qml" line="71"/>
         <source>Window effect enabled</source>
-        <translation type="unfinished"/>
+        <translation>ウィンドウ エフェクトが有効化されました</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="72"/>
