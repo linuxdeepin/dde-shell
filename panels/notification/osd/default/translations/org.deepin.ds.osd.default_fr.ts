@@ -64,12 +64,12 @@
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation type="unfinished"/>
+        <translation>Sourdine activée</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation type="unfinished"/>
+        <translation>Sourdine désactivée</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
