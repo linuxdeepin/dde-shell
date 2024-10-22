@@ -14,17 +14,6 @@ FocusScope {
     required property NotifyModel notifyModel
     signal headerClicked()
 
-    NotifySettingMenu {
-        id: notifySetting
-        MenuItem {
-            text: qsTr("Notification Setting")
-            onClicked: {
-                console.log("Notify setting")
-                NotifyAccessor.openNotificationSetting()
-            }
-        }
-    }
-
     // test
     onHeaderClicked: function () {
         dataPanelLoader.active = !dataPanelLoader.active
@@ -78,7 +67,7 @@ FocusScope {
             Layout.alignment: Qt.AlignRight
             icon.name: "fold"
             onClicked: function () {
-                console.log("Clear all notify")
+                console.log("Collapse all notify")
                 notifyModel.collapseAllApp()
             }
         }
@@ -89,12 +78,8 @@ FocusScope {
             Layout.alignment: Qt.AlignRight
             icon.name: "more"
             onClicked: function () {
-                console.log("Setting notify")
-                let pos = mapToItem(root, Qt.point(width / 2, height))
-                notifySetting.x = pos.x - notifySetting.width / 2
-                notifySetting.y = pos.y
-
-                notifySetting.toggle()
+                console.log("Notify setting")
+                NotifyAccessor.openNotificationSetting()
             }
         }
 

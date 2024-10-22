@@ -23,7 +23,7 @@ NotifyModel::NotifyModel(QObject *parent)
     connect(m_accessor, &NotifyAccessor::entityReceived, this, &NotifyModel::doEntityReceived);
     connect(this, &NotifyModel::countChanged, this, &NotifyModel::onCountChanged);
 
-    setCollapse(true);
+    updateCollapseStatus();
 
     static const struct {
         const char *signalName;
@@ -382,6 +382,15 @@ void NotifyModel::trayUpdateGroupLastEntity(const QString &appName)
     }
 }
 
+void NotifyModel::updateCollapseStatus()
+{
+    auto iter = std::find_if(m_appNotifies.begin(), m_appNotifies.end(), [](const AppNotifyItem *item) {
+        return item->type() == NotifyType::Group;
+    });
+    const bool existGroup = iter != m_appNotifies.end();
+    setCollapse(!existGroup);
+}
+
 bool NotifyModel::greaterNotify(const AppNotifyItem *item1, const AppNotifyItem *item2) const
 {
     const auto entity1 = greaterNotifyEntity(item1);
@@ -573,7 +582,6 @@ void NotifyModel::collapseAllApp()
 {
     close();
     open();
-    setCollapse(true);
 }
 
 void NotifyModel::expandAllApp()
@@ -614,7 +622,6 @@ void NotifyModel::expandAllApp()
             endInsertRows();
         }
     }
-    setCollapse(false);
 }
 
 void NotifyModel::invokeAction(qint64 id, const QString &actionId)
@@ -768,6 +775,7 @@ void NotifyModel::doEntityReceived(qint64 id)
 
 void NotifyModel::onCountChanged()
 {
+    updateCollapseStatus();
     emit dataInfoChanged();
 }
 
