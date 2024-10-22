@@ -12,7 +12,7 @@
     <message>
         <location filename="../NotifyHeader.qml" line="20"/>
         <source>Notification Setting</source>
-        <translation>Értesítési beállítások</translation>
+        <translation>Értesítési Beállítások</translation>
     </message>
     <message>
         <location filename="../NotifyHeader.qml" line="56"/>
@@ -48,7 +48,7 @@
     <message>
         <location filename="../notifyitem.cpp" line="76"/>
         <source>Just now</source>
-        <translation type="unfinished"/>
+        <translation>Csak most</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="78"/>
