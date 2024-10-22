@@ -78,7 +78,8 @@ void BubbleModel::clear()
 {
     if (m_bubbles.count() <= 0)
         return;
-    beginRemoveRows(QModelIndex(), 0, m_bubbles.count() - 1);
+    beginResetModel();
+    qDeleteAll(m_bubbles);
     m_bubbles.clear();
     endResetModel();
 
