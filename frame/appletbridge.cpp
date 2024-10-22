@@ -65,6 +65,12 @@ bool DAppletBridge::isValid() const
     return plugin.isValid();
 }
 
+QString DAppletBridge::pluginId() const
+{
+    D_DC(DAppletBridge);
+    return d->m_pluginId;
+}
+
 QList<DAppletProxy *> DAppletBridge::applets() const
 {
     D_DC(DAppletBridge);

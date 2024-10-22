@@ -18,7 +18,7 @@ namespace notification {
 static const QString InvalidApp {"DS-Invalid-Apps"};
 namespace {
 enum Roles {
-    DesktopIdRole = Qt::UserRole + 1,
+    DesktopIdRole = 0x1000,
     NameRole,
     IconNameRole,
     StartUpWMClassRole,
@@ -31,7 +31,7 @@ enum Roles {
     DockedRole,
     OnDesktopRole,
     AutoStartRole,
-    ModelExtendedRole = 0x1000
+    GroupRole,
 };
 }
 
@@ -58,11 +58,16 @@ NotificationSetting::NotificationSetting(QObject *parent)
     });
 }
 
-void NotificationSetting::setAppAccessor(QAbstractListModel *model)
+void NotificationSetting::setAppAccessor(QAbstractItemModel *model)
 {
     m_appAccessor = model;
     QObject::connect(m_appAccessor, &QAbstractItemModel::rowsInserted, this, &NotificationSetting::onAppsChanged);
     QObject::connect(m_appAccessor, &QAbstractItemModel::rowsRemoved, this, &NotificationSetting::onAppsChanged);
+}
+
+QAbstractItemModel *NotificationSetting::appAccessor() const
+{
+    return m_appAccessor;
 }
 
 void NotificationSetting::setAppValue(const QString &id, AppConfigItem item, const QVariant &value)
@@ -234,7 +239,7 @@ QList<NotificationSetting::AppItem> NotificationSetting::appItemsImpl() const
     QList<NotificationSetting::AppItem> apps;
     apps.reserve(m_appAccessor->rowCount());
     for (int i = 0; i < m_appAccessor->rowCount(); i++) {
-        const auto index = m_appAccessor->index(i);
+        const auto index = m_appAccessor->index(i, 0);
         const auto nodisplay = m_appAccessor->data(index, NoDisplayRole).toBool();
         if (nodisplay)
             continue;

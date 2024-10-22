@@ -51,11 +51,6 @@ DDENotificationDbusAdaptor::DDENotificationDbusAdaptor(QObject *parent)
     : QDBusAbstractAdaptor(parent)
 {
     setAutoRelaySignals(true);
-
-    connect(manager(), &NotificationManager::AppAdded, this, &DDENotificationDbusAdaptor::AppAdded);
-    connect(manager(), &NotificationManager::AppAdded, this, &DDENotificationDbusAdaptor::AppRemoved);
-    connect(manager(), &NotificationManager::AppInfoChanged, this, &DDENotificationDbusAdaptor::AppInfoChanged);
-    connect(manager(), &NotificationManager::SystemInfoChanged, this, &DDENotificationDbusAdaptor::SystemInfoChanged);
 }
 
 NotificationManager *DDENotificationDbusAdaptor::manager() const

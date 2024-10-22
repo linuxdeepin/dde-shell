@@ -15,7 +15,7 @@ namespace Core {
 }
 }
 
-class QAbstractListModel;
+class QAbstractItemModel;
 namespace notification {
 
 class NotificationSetting : public QObject
@@ -52,7 +52,8 @@ public:
 public:
     explicit NotificationSetting(QObject *parent = nullptr);
 
-    void setAppAccessor(QAbstractListModel *model);
+    void setAppAccessor(QAbstractItemModel *model);
+    QAbstractItemModel *appAccessor() const;
 
     void setAppValue(const QString &id, AppConfigItem item, const QVariant &value);
     QVariant appValue(const QString &id, AppConfigItem item);
@@ -83,7 +84,7 @@ private:
 
 private:
     Dtk::Core::DConfig *m_impl = nullptr;
-    QAbstractListModel *m_appAccessor = nullptr;
+    QAbstractItemModel *m_appAccessor = nullptr;
     QList<AppItem> m_appItems;
     QMutex m_appItemsMutex;
     QVariantMap m_appsInfo;

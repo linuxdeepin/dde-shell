@@ -50,8 +50,7 @@ Q_SIGNALS:
     void AppAdded(const QString &id);
     void AppRemoved(const QString &id);
 
-signals:
-    void notificationStateChanged(qint64 id, int processedType);
+    void NotificationStateChanged(qint64 id, int processedType);
 
 public Q_SLOTS:
     // Standard Notifications dbus implementation

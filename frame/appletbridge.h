@@ -24,6 +24,7 @@ public:
     virtual ~DAppletBridge() override;
 
     bool isValid() const;
+    QString pluginId() const;
 
     QList<DAppletProxy *> applets() const;
     DAppletProxy *applet() const;

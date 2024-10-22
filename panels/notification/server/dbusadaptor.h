@@ -71,7 +71,7 @@ Q_SIGNALS:
     void SystemSettingChanged(const QString &settings);
     void SystemInfoChanged(uint configItem, const QDBusVariant &value);
 
-    void RecordAdded(const QString &storageId);
+    void NotificationStateChanged(qint64 id, int processedType);
     void RecordCountChanged(uint count);
 };
 
