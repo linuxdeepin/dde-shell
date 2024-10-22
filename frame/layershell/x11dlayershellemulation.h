@@ -27,6 +27,7 @@ private slots:
     void onPositionChanged();
     void onExclusionZoneChanged();
     // void onKeyboardInteractivityChanged();
+    void doRaiseWindow();
 
 private:
     QWindow* m_window;
