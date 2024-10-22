@@ -91,6 +91,7 @@ private:
     void sortNotifies();
     void trayUpdateGroupLastEntity(const NotifyEntity &entity);
     void trayUpdateGroupLastEntity(const QString &appName);
+    void updateCollapseStatus();
 
 private:
     QList<AppNotifyItem *> m_appNotifies;
