@@ -59,7 +59,7 @@
     <message>
         <location filename="../package/main.qml" line="65"/>
         <source>Airplane mode off</source>
-        <translation type="unfinished"/>
+        <translation>Mode avion désactivé</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="66"/>
