@@ -14,12 +14,12 @@
     <message>
         <location filename="../package/main.qml" line="56"/>
         <source>Caps Lock on</source>
-        <translation type="unfinished"/>
+        <translation>Feststelltaste eingeschaltet</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="57"/>
         <source>Caps Lock off</source>
-        <translation type="unfinished"/>
+        <translation>Feststelltaste ausgeschaltet</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="58"/>
