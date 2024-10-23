@@ -48,7 +48,7 @@
     <message>
         <location filename="../notifyitem.cpp" line="76"/>
         <source>Just now</source>
-        <translation type="unfinished"/>
+        <translation>Ara mateix</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="78"/>
