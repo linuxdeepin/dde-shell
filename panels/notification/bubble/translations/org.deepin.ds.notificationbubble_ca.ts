@@ -18,7 +18,7 @@
     <message>
         <location filename="../bubblemodel.cpp" line="263"/>
         <source>%1 minutes ago</source>
-        <translation type="unfinished"/>
+        <translation>fa %1 minuts</translation>
     </message>
 </context>
 </TS>
