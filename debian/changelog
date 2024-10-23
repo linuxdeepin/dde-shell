@@ -1,3 +1,9 @@
+dde-shell (1.99.1) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.1
+
+ -- YeShanShan <yeshanshan@deepin.org>  Wed, 23 Oct 2024 10:04:25 +0800
+
 dde-shell (1.99.0) UNRELEASED; urgency=medium
 
   * bump version to 1.99.0
