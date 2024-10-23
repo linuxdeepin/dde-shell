@@ -96,6 +96,7 @@ public:
     X11DockHelper(DockPanel* panel);
     HideState hideState() override;
     QList<DockTriggerArea*> triggerAreas() const { return m_areas; }
+    xcb_window_t dockerWinid() { return m_dockWinid; }
 
 public Q_SLOTS:
     void updateDockTriggerArea() override;
@@ -134,6 +135,7 @@ private:
     dock::HideState m_smartHideState;
     QHash<xcb_window_t, WindowData*> m_windows;
     XcbEventFilter *m_xcbHelper;
+    xcb_window_t m_dockWinid;
 };
 }
 
