@@ -64,7 +64,7 @@
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation>Ativar mudo</translation>
+        <translation>Mudo ativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
