@@ -17,7 +17,7 @@
     <message>
         <location filename="../NotifyHeader.qml" line="56"/>
         <source>Notification Center</source>
-        <translation>Centro de Notificações</translation>
+        <translation>Central de Notificações</translation>
     </message>
     <message>
         <location filename="../NotifyHeader.qml" line="108"/>
