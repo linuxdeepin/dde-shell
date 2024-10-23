@@ -4,7 +4,7 @@
     <message>
         <location filename="../GroupNotify.qml" line="50"/>
         <source>Clear All</source>
-        <translation>Limpar Tudo</translation>
+        <translation>Limpar tudo</translation>
     </message>
 </context>
 <context>
