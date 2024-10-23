@@ -86,6 +86,10 @@ void XcbEventFilter::processEnterLeave(xcb_window_t win, bool enter)
         }
     }
 
+    if (m_helper->dockerWinid() != win) {
+        return;
+    }
+
 // dock enter/leave
     m_helper->updateEnterState(enter);
 }
@@ -101,7 +105,7 @@ bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *messag
         auto eN = reinterpret_cast<xcb_enter_notify_event_t *>(xcb_event);
         qCDebug(dockX11Log) << "enter event winId:" << eN->event;
         if (m_timer->isActive()) {
-            if (!inTriggerArea(eN->event)) {
+            if (m_helper->dockerWinid() == eN->event && !inTriggerArea(eN->event)) {
                 m_timer->stop();
                 break;
             }
@@ -364,6 +368,7 @@ X11DockHelper::X11DockHelper(DockPanel* panel)
     connect(panel, &DockPanel::showInPrimaryChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::dockScreenChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::rootObjectChanged, this, [ this, panel ] {
+        m_dockWinid = panel->window()->winId();
         connect(panel->window(), &QWindow::visibleChanged, this, &X11DockHelper::updateWindowState, Qt::UniqueConnection);
         updateWindowState();
     });
