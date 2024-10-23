@@ -30,12 +30,12 @@
     <message>
         <location filename="../NotifySetting.qml" line="18"/>
         <source>Unpin</source>
-        <translation type="unfinished"/>
+        <translation>Odepnij</translation>
     </message>
     <message>
         <location filename="../NotifySetting.qml" line="18"/>
         <source>Pin</source>
-        <translation type="unfinished"/>
+        <translation>Przypnij</translation>
     </message>
     <message>
         <location filename="../NotifySetting.qml" line="26"/>
