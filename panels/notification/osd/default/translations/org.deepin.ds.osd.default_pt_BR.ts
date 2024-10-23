@@ -4,7 +4,7 @@
     <message>
         <location filename="../package/main.qml" line="54"/>
         <source>WLAN on</source>
-        <translation>WLAN ligada</translation>
+        <translation>Wi-Fi ativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="55"/>
