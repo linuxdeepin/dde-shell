@@ -12,7 +12,7 @@
     <message>
         <location filename="../NotifyHeader.qml" line="20"/>
         <source>Notification Setting</source>
-        <translation>Configuració de la notificació</translation>
+        <translation>Configuració de les notificacions</translation>
     </message>
     <message>
         <location filename="../NotifyHeader.qml" line="56"/>
@@ -40,7 +40,7 @@
     <message>
         <location filename="../NotifySetting.qml" line="26"/>
         <source>Notification Setting</source>
-        <translation type="unfinished"/>
+        <translation>Configuració de les notificacions</translation>
     </message>
 </context>
 <context>
