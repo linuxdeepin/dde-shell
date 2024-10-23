@@ -23,11 +23,7 @@ NotificationContainment::~NotificationContainment()
 
 bool NotificationContainment::load()
 {
-    if (qEnvironmentVariableIntValue("DS_ENABLE_NOTIFICATION"))
-        return DContainment::load();
-
-    qDebug(notifyLog) << "Don't enable notification plugin, we can enable it by DS_ENABLE_NOTIFICATION=1";
-    return false;
+    return DContainment::load();
 }
 
 D_APPLET_CLASS(NotificationContainment)
