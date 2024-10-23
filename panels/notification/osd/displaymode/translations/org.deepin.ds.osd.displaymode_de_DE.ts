@@ -14,7 +14,7 @@
     <message>
         <location filename="../displaymodeapplet.cpp" line="157"/>
         <source>Only on %1</source>
-        <translation type="unfinished"/>
+        <translation>Nur auf %1</translation>
     </message>
 </context>
 </TS>
