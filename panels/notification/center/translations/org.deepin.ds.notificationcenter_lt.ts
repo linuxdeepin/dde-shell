@@ -58,12 +58,12 @@
     <message>
         <location filename="../notifyitem.cpp" line="80"/>
         <source>%1 hours ago</source>
-        <translation type="unfinished"/>
+        <translation>prieš %1 val.</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="83"/>
         <source>Yesterday </source>
-        <translation type="unfinished"/>
+        <translation>Vakar</translation>
     </message>
 </context>
 </TS>
