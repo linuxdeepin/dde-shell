@@ -9,7 +9,7 @@
     <message>
         <location filename="../displaymodeapplet.cpp" line="152"/>
         <source>Extend</source>
-        <translation>Extender</translation>
+        <translation>Extendida</translation>
     </message>
     <message>
         <location filename="../displaymodeapplet.cpp" line="157"/>
