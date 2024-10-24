@@ -1,17 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="pt_BR">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pt_BR">
 <context>
     <name>main</name>
     <message>
         <location filename="../package/main.qml" line="54"/>
         <source>WLAN on</source>
-        <translation>WLAN ligada</translation>
+        <translation>Wi-Fi ativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="55"/>
         <source>WLAN off</source>
-        <translation>WLAN desligada</translation>
+        <translation>Wi-Fi desativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="56"/>
@@ -66,12 +64,12 @@
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation>Ativar mudo</translation>
+        <translation>Mudo ativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation>Desativar mudo</translation>
+        <translation>Mudo desativado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
