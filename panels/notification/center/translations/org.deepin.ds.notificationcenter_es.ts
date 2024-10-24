@@ -30,7 +30,7 @@
     <message>
         <location filename="../NotifySetting.qml" line="18"/>
         <source>Unpin</source>
-        <translation type="unfinished"/>
+        <translation>Desfijar</translation>
     </message>
     <message>
         <location filename="../NotifySetting.qml" line="18"/>
