@@ -1,3 +1,13 @@
+dde-shell (1.0.5) unstable; urgency=medium
+
+  * fix: tray is popped up when a plugin's visible changes
+  * fix: task isn't hidden when it's in hidden mode
+  * feat: add new model for all application
+  * feat: use rolecombine model for window identify
+  * fix: differ text rendering effect between qml and widget
+
+ -- xionglinlin <xionglinlin@uniontech.com>  Thu, 24 Oct 2024 10:49:24 +0800
+
 dde-shell (1.0.4) unstable; urgency=medium
 
   * fix: stuck after the crash
