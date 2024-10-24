@@ -53,12 +53,12 @@
     <message>
         <location filename="../notifyitem.cpp" line="78"/>
         <source>%1 minutes ago</source>
-        <translation type="unfinished"/>
+        <translation>%1 хвилин тому</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="80"/>
         <source>%1 hours ago</source>
-        <translation type="unfinished"/>
+        <translation>%1 годин тому</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="83"/>
