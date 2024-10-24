@@ -35,7 +35,7 @@
     <message>
         <location filename="../NotifySetting.qml" line="18"/>
         <source>Pin</source>
-        <translation type="unfinished"/>
+        <translation>Fijar</translation>
     </message>
     <message>
         <location filename="../NotifySetting.qml" line="26"/>
