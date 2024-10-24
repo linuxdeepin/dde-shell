@@ -53,7 +53,7 @@
     <message>
         <location filename="../notifyitem.cpp" line="78"/>
         <source>%1 minutes ago</source>
-        <translation type="unfinished"/>
+        <translation>Hace %1 minutos</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="80"/>
