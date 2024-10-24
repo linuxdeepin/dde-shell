@@ -63,7 +63,7 @@
     <message>
         <location filename="../notifyitem.cpp" line="83"/>
         <source>Yesterday </source>
-        <translation type="unfinished"/>
+        <translation>Ayer </translation>
     </message>
 </context>
 </TS>
