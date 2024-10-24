@@ -115,6 +115,11 @@ void PluginSurface::plugin_dcc_icon(Resource *resource, const QString &icon)
     m_dccIcon = icon;
 }
 
+void PluginSurface::plugin_close_quick_panel(Resource *resource) {
+    qInfo() << "close_quick_panel";
+    Q_EMIT m_manager->pluginCloseQuickPanelPopup();
+}
+
 void PluginSurface::plugin_destroy_resource(Resource *resource)
 {
     Q_UNUSED(resource);
