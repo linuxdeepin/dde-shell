@@ -42,24 +42,28 @@ Item {
     property size fallbackIconSize: Qt.size(16, 16)
 
     property Component overlayWindow: QuickDragWindow {
+        id: overlayWindow
         property size dragItemSize
         property point startDragPoint
         property point currentDragPoint
         property int endDragPointArea
+        // This no longer changes window size (due to visual artifacts), but rather controls component image size.
+        property real overlayWindowHeight: getHeight()
         property bool isFallbackIcon: {
-            return height <= root.fallbackIconSize.height
+            return overlayWindowHeight <= root.fallbackIconSize.height
         }
 
         startDragPoint: dragItem.DQuickDrag.startDragPoint
         currentDragPoint: dragItem.DQuickDrag.currentDragPoint
         dragItemSize: Qt.size(dragItem.width, dragItem.height)
         endDragPointArea: {
-            return Panel.rootObject.y - root.fallbackIconSize.height * dragItem.DQuickDrag.hotSpotScale.height
+            return Panel.rootObject.y - (root.fallbackIconSize.height + dragItem.height) * dragItem.DQuickDrag.hotSpotScale.height
         }
 
         // Height and position follow linear transformation, y = k * h + b.
         // and (y, h) exist two rules, (start.y, drag.h) and (end.y, 16)
         function getHeight() {
+            console.log(currentDragPoint)
             if (currentDragPoint.y < startDragPoint.y)
                 return dragItemSize.height
             if (currentDragPoint.y > endDragPointArea)
@@ -71,31 +75,46 @@ Item {
             return h
         }
 
-        // TODO: turn on this can cause DnD drag event get rejected, it's likely a dxcb bug.
+        // FIXME: Since we attempted fixing the drag jitter of quick controls (caused by the constantly changing window
+        // size & position, and the composition delays following that) by using a fixed window size and change only
+        // the drag image size, the old blur-behind implementation will no longer work (blur area will be larger than
+        // the drag image). Using StyledBehindWindowBlur to fill the Image component will result in inconsistent corner
+        // radius, so that part is also not enabled in the code.
+        // TODO: turning this on results in the input transparency property of the drag window not being respected,
+        // causing DnD events being delivered to not the tray, but the drag window itself. Using StyledBehindWindowBlur
+        // to fill the Image component also causes this bug, so blur-behind is currently not enabled.
         // DWindow.enabled: true
         // DWindow.enableBlurWindow: !isFallbackIcon
         // DWindow.shadowRadius: 0
         // DWindow.borderWidth: 0
         ColorSelector.family: Palette.CrystalColor
 
-        height: getHeight()
-        width: !isFallbackIcon ? (dragItemSize.width * 1.0 / dragItemSize.height) * height : root.fallbackIconSize.width
+        height: dragItemSize.height
+        width: dragItemSize.width
+
 
         Loader {
             active: !isFallbackIcon
-            anchors.fill: parent
-
+            anchors.centerIn: parent
             sourceComponent: Image {
                 source: root.draggingImage
+                height: overlayWindow.overlayWindowHeight
+                width: (dragItemSize.width * 1.0 / dragItemSize.height) * height
+
+                // StyledBehindWindowBlur {
+                //     control: parent
+                //     anchors.fill: parent
+                // }
             }
         }
 
         Loader {
             active: isFallbackIcon && root.dragItem.DQuickDrag.isDragging
-            anchors.fill: parent
+            anchors.centerIn: parent
             sourceComponent: ShellSurfaceItemProxy {
-                anchors.centerIn: parent
                 shellSurface: root.fallbackDragImage
+                width: root.fallbackIconSize.width
+                height: root.fallbackIconSize.height
             }
         }
     }
