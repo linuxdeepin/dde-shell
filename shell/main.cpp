@@ -7,8 +7,9 @@
 #include <QCommandLineParser>
 #include <QStandardPaths>
 
-#include <DLog>
 #include <DGuiApplicationHelper>
+#include <DLog>
+#include <QQuickWindow>
 #include <QWindow>
 
 #include <csignal>
@@ -95,6 +96,11 @@ int main(int argc, char *argv[])
     setenv("DSG_APP_ID", "org.deepin.dde.shell", 0);
     DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
     QApplication a(argc, argv);
+    // dde-shell contains UI controls based on QML and Widget technologies.
+    // Due to the inconsistency of the default font rendering methods of different schemes,
+    // the font effects are not uniform.
+    // In order to ensure the same rendering effect, QML text rendering is changed to Native mode.
+    QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
     a.setOrganizationName("deepin");
     a.setApplicationName("org.deepin.dde-shell");
     a.setApplicationVersion(QT_STRINGIFY(DS_VERSION));
