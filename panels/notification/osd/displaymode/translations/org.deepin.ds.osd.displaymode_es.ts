@@ -4,7 +4,7 @@
     <message>
         <location filename="../displaymodeapplet.cpp" line="151"/>
         <source>Duplicate</source>
-        <translation>Duplicado</translation>
+        <translation>Duplicada</translation>
     </message>
     <message>
         <location filename="../displaymodeapplet.cpp" line="152"/>
