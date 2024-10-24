@@ -40,7 +40,7 @@
     <message>
         <location filename="../NotifySetting.qml" line="26"/>
         <source>Notification Setting</source>
-        <translation type="unfinished"/>
+        <translation>Ilmoitusten asetukset</translation>
     </message>
 </context>
 <context>
@@ -48,7 +48,7 @@
     <message>
         <location filename="../notifyitem.cpp" line="76"/>
         <source>Just now</source>
-        <translation type="unfinished"/>
+        <translation>Juuri nyt</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="78"/>
