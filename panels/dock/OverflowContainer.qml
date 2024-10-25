@@ -52,13 +52,15 @@ Item {
         for (let child of listView.contentItem.visibleChildren) {
             width = calculateImplicitWidth(width, child.implicitWidth)
         }
-        return width
+        // TODO: abvoe qt6.8 implicitSize to 0 will make size to 0 default.
+        // so make minimum implicitSize to 1, find why and remove below
+        return Math.max(width, 1)
     }
     implicitHeight: {
         let height = 0
         for (let child of listView.contentItem.visibleChildren) {
             height = calculateImplicitHeight(height, child.implicitHeight)
         }
-        return height
+        return Math.max(height, 1)
     }
 }
