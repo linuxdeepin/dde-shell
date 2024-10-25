@@ -91,6 +91,10 @@ bool TaskManager::init()
 
                 auto indentifies = data.toStringList();
                 for (auto id : indentifies) {
+                    if (id.isEmpty()) {
+                        continue;
+                    }
+
                     for (auto identifiedOrder : identifiedOrders) {
                         auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id);
                         if (res.size() > 0 && res.first().isValid()) {
