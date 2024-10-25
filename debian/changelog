@@ -1,3 +1,9 @@
+dde-shell (1.0.6) unstable; urgency=medium
+
+  * fix: update translations
+
+ -- xionglinlin <xionglinlin@uniontech.com>  Fri, 25 Oct 2024 11:52:49 +0800
+
 dde-shell (1.0.5) unstable; urgency=medium
 
   * fix: tray is popped up when a plugin's visible changes
