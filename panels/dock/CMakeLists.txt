@@ -9,7 +9,7 @@ configure_file(environments.h.in environments.h @ONLY)
 find_package(PkgConfig REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS Core DBus Gui Qml WaylandCompositor Widgets WaylandClient)
 find_package(DdeTrayLoader REQUIRED)
-find_package(TreeLandProtocols REQUIRED)
+find_package(TreelandProtocols REQUIRED)
 pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
 
 file(

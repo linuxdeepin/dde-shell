@@ -4,7 +4,7 @@
 
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS DBus WaylandClient)
 find_package(yaml-cpp REQUIRED)
-find_package(TreeLandProtocols REQUIRED)
+find_package(TreelandProtocols REQUIRED)
 
 set_source_files_properties(
     ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ApplicationManager1.Application.xml
