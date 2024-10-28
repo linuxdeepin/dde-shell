@@ -94,6 +94,8 @@ add_subdirectory(taskmanager)
 add_subdirectory(tray)
 add_subdirectory(multitaskview)
 
+#add_subdirectory(appruntimeitem)
+
 # dock qml element(include Dock.xx defines and DockCompositor)
 file(
     GLOB plugin_sources

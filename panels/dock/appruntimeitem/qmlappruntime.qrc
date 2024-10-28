@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/ddeshell">
+        <file>package/icons/appruntime.svg</file>
+        <file>package/ShowRuntimeMenu.qml</file>
+    </qresource>
+</RCC>
