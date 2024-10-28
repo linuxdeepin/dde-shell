@@ -198,10 +198,12 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     bool dndMode = isDoNotDisturb();
     bool systemNotification = m_systemApps.contains(appName);
     bool lockScreen = m_userSessionManager->locked();
+    const bool desktopScreen = !lockScreen;
 
     if (!systemNotification) {
         lockScreenShow = m_setting->appValue(appId, NotificationSetting::ShowOnLockScreen).toBool();
     }
+    const bool onDesktopShow = m_setting->appValue(appId, NotificationSetting::ShowOnDesktop).toBool();
 
     tryPlayNotificationSound(entity, appId, dndMode);
 
@@ -212,6 +214,8 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
         if (systemNotification) { // 系统通知
             entity.setProcessedType(NotifyEntity::NotProcessed);
         } else if (lockScreen && !lockScreenShow) { // 锁屏不显示通知
+            entity.setProcessedType(NotifyEntity::Processed);
+        } else if (desktopScreen && !onDesktopShow) { // 桌面不显示通知
             entity.setProcessedType(NotifyEntity::Processed);
         } else { // 锁屏显示通知或者未锁屏状态
             if (!systemNotification && !dndMode && enableAppNotification) { // 普通应用非勿扰模式并且开启通知选项

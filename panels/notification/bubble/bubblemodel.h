@@ -61,6 +61,7 @@ public:
 
     int displayRowCount() const;
     int overlayCount() const;
+    void setBubbleCount(int count);
 
 private:
     int replaceBubbleIndex(const BubbleItem *bubble) const;
@@ -70,7 +71,7 @@ private:
 private:
     QTimer *m_updateTimeTipTimer = nullptr;
     QList<BubbleItem *> m_bubbles;
-    const int BubbleMaxCount{3};
+    int BubbleMaxCount{3};
     const int LastBubbleMaxIndex{BubbleMaxCount - 1};
     const int OverlayMaxCount{2};
     const int NoReplaceId{0};

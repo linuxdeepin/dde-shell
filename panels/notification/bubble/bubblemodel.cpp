@@ -226,6 +226,11 @@ int BubbleModel::overlayCount() const
     return qMin(m_bubbles.count() - displayRowCount(), OverlayMaxCount);
 }
 
+void BubbleModel::setBubbleCount(int count)
+{
+    BubbleMaxCount = count;
+}
+
 int BubbleModel::replaceBubbleIndex(const BubbleItem *bubble) const
 {
     if (bubble->replacesId() != NoReplaceId) {
