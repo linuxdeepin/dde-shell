@@ -10,6 +10,14 @@
 
 #include <QQuickItem>
 
+namespace Dtk
+{
+namespace Core
+{
+class DConfig;
+}
+}
+
 namespace notification {
 
 class NotifyEntity;
@@ -62,6 +70,8 @@ private:
 
     BubbleItem *bubbleItem(int index);
 
+    void updateMaxBubbleCount();
+
 private:
     bool m_visible = false;
     BubbleModel *m_bubbles = nullptr;
@@ -69,6 +79,7 @@ private:
     DataAccessor *m_accessor = nullptr;
     bool m_enabled = true;
     bool m_locked = false;
+    Dtk::Core::DConfig *m_setting = nullptr;
 };
 
 }

@@ -23,6 +23,7 @@ class NotificationSetting : public QObject
     Q_OBJECT
 
 public:
+    // clang-format off
     enum AppConfigItem {
         AppName,
         AppIcon,
@@ -30,7 +31,8 @@ public:
         EnablePreview,
         EnableSound,
         ShowInCenter,
-        ShowOnLockScreen
+        ShowOnLockScreen,
+        ShowOnDesktop
     };
 
     enum SystemConfigItem {
@@ -40,7 +42,8 @@ public:
         StartTime,
         EndTime,
         CloseNotification,
-        MaxCount
+        MaxCount,
+        BubbleCount
     };
 
     struct AppItem {
@@ -48,6 +51,7 @@ public:
         QString appName;
         QString appIcon;
     };
+    // clang-format on
 
 public:
     explicit NotificationSetting(QObject *parent = nullptr);

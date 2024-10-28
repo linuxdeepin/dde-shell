@@ -79,6 +79,17 @@
       "permissions": "readwrite",
       "visibility": "public"
     },
+    "bubbleCount": {
+      "value": 3,
+      "serial": 0,
+      "flags": [],
+      "name": "max notification bubble count",
+      "name[zh_CN]": "最大通知横幅数量",
+      "description": "max notification bubble count, the value should be greater than 0",
+      "description[zh_CN]": "最大通知横幅数量, 数值应该大于0",
+      "permissions": "readwrite",
+      "visibility": "public"
+    },
     "appsInfo": {
       "value": {},
       "serial": 0,

@@ -44,13 +44,8 @@ NotificationSetting::NotificationSetting(QObject *parent)
         if (key == "appsInfo") {
             invalidAppItemCached();
         } else {
-            static const QStringList keys {"dndMode",
-                                          "openByTimeInterval",
-                                          "lockScreenOpenDndMode",
-                                          "startTime",
-                                          "endTime",
-                                          "notificationClosed",
-                                          "maxCount"};
+            static const QStringList
+                keys{"dndMode", "openByTimeInterval", "lockScreenOpenDndMode", "startTime", "endTime", "notificationClosed", "maxCount", "bubbleCount"};
             if (keys.contains(key)) {
                 m_systemInfo = {};
             }
@@ -91,7 +86,11 @@ void NotificationSetting::setAppValue(const QString &id, AppConfigItem item, con
         break;
     }
     case ShowOnLockScreen: {
-        info["showInLockScreen"] = value.toBool();
+        info["showOnLockScreen"] = value.toBool();
+        break;
+    }
+    case ShowOnDesktop: {
+        info["showOnDesktop"] = value.toBool();
         break;
     }
     default:
@@ -136,7 +135,10 @@ QVariant NotificationSetting::appValue(const QString &id, AppConfigItem item)
         return info.value("showInCenter", true);
     }
     case ShowOnLockScreen: {
-        return info.value("showInLockScreen", true);
+        return info.value("showOnLockScreen", true);
+    }
+    case ShowOnDesktop: {
+        return info.value("showOnDesktop", true);
     }
     default:
         break;
@@ -169,6 +171,9 @@ void NotificationSetting::setSystemValue(NotificationSetting::SystemConfigItem i
     case MaxCount:
         m_impl->setValue("maxCount", value);
         break;
+    case BubbleCount:
+        m_impl->setValue("bubbleCount", value);
+        break;
     default:
         return;
     }
@@ -193,6 +198,8 @@ QVariant NotificationSetting::systemValue(NotificationSetting::SystemConfigItem 
         return systemValue("notificationClosed", false);
     case MaxCount:
         return systemValue("maxCount", 2000);
+    case BubbleCount:
+        return systemValue("bubbleCount", 3);
     }
 
     return {};
