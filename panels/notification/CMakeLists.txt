@@ -18,6 +18,10 @@ add_library(ds-notification-shared SHARED
     ${CMAKE_SOURCE_DIR}/panels/notification/common/dbaccessor.cpp
 )
 
+set_target_properties(ds-notification-shared PROPERTIES
+    VERSION ${CMAKE_PROJECT_VERSION}
+    SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR}
+)
 target_include_directories(ds-notification-shared PUBLIC
     ${CMAKE_SOURCE_DIR}/panels/notification/common
 )

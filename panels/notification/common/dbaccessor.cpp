@@ -5,14 +5,15 @@
 #include "dbaccessor.h"
 #include "notifyentity.h"
 
-#include <QLoggingCategory>
-#include <QStandardPaths>
+#include <QCoreApplication>
 #include <QDir>
+#include <QElapsedTimer>
+#include <QLoggingCategory>
 #include <QSqlDatabase>
 #include <QSqlError>
-#include <QSqlRecord>
 #include <QSqlQuery>
-#include <QElapsedTimer>
+#include <QSqlRecord>
+#include <QStandardPaths>
 
 namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
@@ -61,11 +62,22 @@ static QString notificationDBPath()
     if (dataPaths.isEmpty()) {
         const QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
         QDir dir(dataDir);
+        const auto dbSubfix = QString("%1/%2/data.db").arg(qApp->organizationName()).arg(qApp->applicationName());
+        const auto appPath = dir.absoluteFilePath(dbSubfix);
+        dataPaths << appPath;
         QString path = dir.absoluteFilePath("deepin/dde-osd/data.db");
         dataPaths << path;
     }
 
     for (auto path : dataPaths) {
+        QFile file(path);
+        if (!file.exists()) {
+            QDir().mkpath(QFileInfo(file.fileName()).path());
+        }
+        if (!file.open(QIODevice::ReadWrite)) {
+            qDebug(notifyLog) << "Falied on open the data path:" << path << ", error:" << file.errorString();
+            continue;
+        }
         if (QFileInfo::exists(path)) {
             return path;
         }
