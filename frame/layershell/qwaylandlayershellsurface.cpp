@@ -6,8 +6,6 @@
 #include "dlayershellwindow.h"
 #include "qwaylandlayershellsurface_p.h"
 
-#include <qnamespace.h>
-#include <qobjectdefs.h>
 #include <qwayland-wlr-layer-shell-unstable-v1.h>
 #include <wayland-wlr-layer-shell-unstable-v1-client-protocol.h>
 
