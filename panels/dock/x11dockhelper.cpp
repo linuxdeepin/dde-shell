@@ -2,10 +2,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "constants.h"
-#include "dsglobal.h"
-#include "dockpanel.h"
 #include "x11dockhelper.h"
+#include "constants.h"
+#include "dockpanel.h"
 
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -363,16 +362,6 @@ X11DockHelper::X11DockHelper(DockPanel* panel)
     connect(panel, &DockPanel::geometryChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::showInPrimaryChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::dockScreenChanged, this, &X11DockHelper::updateDockArea);
-    connect(panel, &DockPanel::rootObjectChanged, this, [ this, panel ] {
-        connect(panel->window(), &QWindow::visibleChanged, this, &X11DockHelper::updateWindowState, Qt::UniqueConnection);
-        updateWindowState();
-    });
-
-    if (panel->rootObject()) {
-        connect(panel->window(), &QWindow::visibleChanged, this, &X11DockHelper::updateWindowState, Qt::UniqueConnection);
-        updateDockArea();
-        updateWindowState();
-    }
 
     qGuiApp->installNativeEventFilter(m_xcbHelper);
     onHideModeChanged(panel->hideMode());
@@ -562,16 +551,6 @@ void X11DockHelper::updateDockArea()
             updateWindowHideState(it.key());
         }
         delayedUpdateState();
-    }
-}
-
-void X11DockHelper::updateWindowState()
-{
-    if (parent()->window()->isVisible()) {
-        xcb_atom_t atoms[] = {
-            m_xcbHelper->getAtomByName("_NET_WM_STATE_ABOVE")
-        };
-        m_xcbHelper->setWindowState(parent()->window()->winId(), sizeof(atoms) / sizeof(atoms[0]), atoms);
     }
 }
 

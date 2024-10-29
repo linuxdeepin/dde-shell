@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
+#pragma once
 
 #include "dockhelper.h"
-#include "dsglobal.h"
 #include <xcb/xcb.h>
-#include <xcb/xproto.h>
 #include <xcb/xcb_ewmh.h>
-
+#include <xcb/xproto.h>
 
 namespace dock {
 class X11DockHelper;
@@ -116,7 +115,6 @@ private Q_SLOTS:
     void updateDockHideState();
     void delayedUpdateState();
     void updateDockArea();
-    void updateWindowState();
 
 private:
     inline void updateWakeArea();

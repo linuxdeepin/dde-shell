@@ -2,15 +2,14 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "panel.h"
-#include "constants.h"
 #include "dockpanel.h"
+#include "constants.h"
 #include "dockadaptor.h"
-#include "environments.h"
 #include "docksettings.h"
+#include "panel.h"
 #include "pluginfactory.h"
-#include "x11dockhelper.h"
 #include "waylanddockhelper.h"
+#include "x11dockhelper.h"
 
 // for old api compatible
 #include "dockdbusproxy.h"
@@ -101,6 +100,7 @@ bool DockPanel::init()
     connect(SETTINGS, &DockSettings::showInPrimaryChanged, this, [this, dockDaemonAdaptor](){
         updateDockScreen();
         Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
+        Q_EMIT showInPrimaryChanged(showInPrimary());
     });
 
     connect(this, &DockPanel::frontendWindowRectChanged, dockDaemonAdaptor, &DockDaemonAdaptor::FrontendWindowRectChanged);
@@ -126,7 +126,7 @@ bool DockPanel::init()
     QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
         if (rootObject()) {
             // those connections need connect after DPanel::init() which create QQuickWindow
-            // xChanged yChanged not woker on wayland, so use above positionChanged instead
+            // xChanged yChanged not worked on wayland, so use above positionChanged instead
             // connect(window(), &QQuickWindow::xChanged, this, &DockPanel::onWindowGeometryChanged);
             // connect(window(), &QQuickWindow::yChanged, this, &DockPanel::onWindowGeometryChanged);
             connect(window(), &QQuickWindow::widthChanged, this, &DockPanel::onWindowGeometryChanged);
@@ -134,6 +134,9 @@ bool DockPanel::init()
             QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
             if (showInPrimary())
                 updateDockScreen();
+            else {
+                m_dockScreen = window()->screen();
+            }
         }
     });
 
@@ -369,7 +372,6 @@ void DockPanel::setShowInPrimary(bool newShowInPrimary)
         connect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockPanel::updateDockScreen, Qt::UniqueConnection);
     else
         disconnect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockPanel::updateDockScreen);
-    Q_EMIT showInPrimaryChanged(showInPrimary());
 }
 
 D_APPLET_CLASS(DockPanel)
