@@ -6,6 +6,8 @@
 #include "dlayershellwindow.h"
 #include "qwaylandlayershellsurface_p.h"
 
+#include <qnamespace.h>
+#include <qobjectdefs.h>
 #include <qwayland-wlr-layer-shell-unstable-v1.h>
 #include <wayland-wlr-layer-shell-unstable-v1-client-protocol.h>
 
@@ -30,7 +32,13 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
         auto waylandScreen = dynamic_cast<QtWaylandClient::QWaylandScreen*>(window->window()->screen()->handle());
         connect(window->window(), &QWindow::screenChanged, this, [window](){
             window->reset();
-            window->reinit();
+            // make sure window has been cleaned completed
+            QMetaObject::invokeMethod(
+                window,
+                [window]() {
+                    window->reinit();
+                },
+                Qt::QueuedConnection);
         });
         if (!waylandScreen) {
             qCWarning(layershellsurface) << "failed to get screen for wayland";
