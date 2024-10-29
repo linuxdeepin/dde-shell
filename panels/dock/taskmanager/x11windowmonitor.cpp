@@ -48,7 +48,7 @@ X11WindowMonitor::X11WindowMonitor(QObject* parent)
 {
     monitor = this;
     connect(this, &X11WindowMonitor::windowMapped, this, &X11WindowMonitor::onWindowMapped);
-    connect(this, &X11WindowMonitor::windowDestoried, this, &X11WindowMonitor::onWindowDestoried);
+    connect(this, &X11WindowMonitor::windowDestroyed, this, &X11WindowMonitor::onWindowDestroyed);
     connect(this, &X11WindowMonitor::windowPropertyChanged, this, &X11WindowMonitor::onWindowPropertyChanged);
 }
 
@@ -155,7 +155,7 @@ void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)
     Q_EMIT AbstractWindowMonitor::windowAdded(static_cast<QPointer<AbstractWindow>>(window.get()));
 }
 
-void X11WindowMonitor::onWindowDestoried(xcb_window_t xcb_window)
+void X11WindowMonitor::onWindowDestroyed(xcb_window_t xcb_window)
 {
     auto window = m_windows.value(xcb_window, nullptr);
     if (window) {
@@ -219,7 +219,7 @@ void X11WindowMonitor::handleRootWindowClientListChanged()
 
     for (auto alreadyOpenedWindow : m_windows.keys()) {
         if (!currentOpenedWindowList.contains(alreadyOpenedWindow)) {
-            windowDestoried(alreadyOpenedWindow);
+            Q_EMIT windowDestroyed(alreadyOpenedWindow);
         }
     }
 

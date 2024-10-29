@@ -91,6 +91,10 @@ bool TaskManager::init()
 
                 auto indentifies = data.toStringList();
                 for (auto id : indentifies) {
+                    if (id.isEmpty()) {
+                        continue;
+                    }
+
                     for (auto identifiedOrder : identifiedOrders) {
                         auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id);
                         if (res.size() > 0 && res.first().isValid()) {
@@ -129,7 +133,11 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     }
 
     if (desktopfile.isNull() || !desktopfile->isValied().first) {
-        desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+        if (res.size() > 0) {
+            desktopfile = DESKTOPFILEFACTORY::createById(res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString(), "asbtractAPP");
+        } else {
+            desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+        }
     }
 
     auto appitem = desktopfile->getAppItem();

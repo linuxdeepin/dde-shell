@@ -48,6 +48,7 @@ QStringList X11Window::identity()
 {
     if (m_identity.isEmpty()) {
         m_identity = X11->getWindowWMClass(m_windowID);
+        m_identity.append(QString::number(pid()));
     }
 
     return m_identity;
@@ -167,11 +168,12 @@ void X11Window::updatePid()
 
 void X11Window::updateIdentify()
 {
-    auto newWmclas = X11->getWindowWMClass(m_windowID);
-    if (newWmclas == m_identity)
+    auto newWMclass = X11->getWindowWMClass(m_windowID);
+    newWMclass.append(QString::number(pid()));
+    if (newWMclass == m_identity)
         return;
 
-    m_identity = newWmclas;
+    m_identity = newWMclass;
     Q_EMIT identityChanged();
 }
 
