@@ -133,7 +133,11 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     }
 
     if (desktopfile.isNull() || !desktopfile->isValied().first) {
-        desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+        if (res.size() > 0) {
+            desktopfile = DESKTOPFILEFACTORY::createById(res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString(), "asbtractAPP");
+        } else {
+            desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+        }
     }
 
     auto appitem = desktopfile->getAppItem();
