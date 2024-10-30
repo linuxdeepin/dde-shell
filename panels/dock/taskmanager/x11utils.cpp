@@ -271,6 +271,78 @@ QStringList X11Utils::getWindowWMClass(const xcb_window_t &window)
     return {};
 }
 
+QRect X11Utils::getWindowGeometry(const xcb_window_t &window)
+{
+    QRect geometry;
+    xcb_get_geometry_cookie_t cookie = xcb_get_geometry(m_connection, window);
+    xcb_get_geometry_reply_t *geom = xcb_get_geometry_reply(m_connection, cookie, nullptr);
+    if (geom) {
+        int x = geom->x, y = geom->y;
+        xcb_translate_coordinates_reply_t *trans =
+            xcb_translate_coordinates_reply(m_connection, xcb_translate_coordinates(m_connection, window, m_rootWindow, 0, 0), nullptr);
+        if (trans) {
+            x = trans->dst_x;
+            y = trans->dst_y;
+            free(trans);
+        }
+        geometry.setRect(x, y, geom->width, geom->height);
+
+        xcb_window_t dwin = getDecorativeWindow(window);
+        if (dwin == 0) {
+            return QRect();
+        }
+        xcb_get_geometry_reply_t *dgeom = xcb_get_geometry_reply(m_connection, xcb_get_geometry(m_connection, dwin), nullptr);
+        if (dgeom) {
+            if (geometry.x() == dgeom->x && geometry.y() == dgeom->y) {
+                // 无标题栏窗口,比如 deepin-editor, dconf-editor
+                xcb_get_property_reply_t *pro =
+                    xcb_get_property_reply(m_connection, xcb_get_property(m_connection, false, window, getAtomByName("_NET_FRAME_EXTENTS"), 6, 0, 4), nullptr);
+                if (pro) {
+                    if (pro->format == 0) {
+                        free(pro);
+                        pro = xcb_get_property_reply(m_connection,
+                                                     xcb_get_property(m_connection, false, window, getAtomByName("_GTK_FRAME_EXTENTS"), 6, 0, 4),
+                                                     nullptr);
+                    }
+                    if (pro && pro->format == 32) {
+                        uint32_t values[4];
+                        memcpy(values, xcb_get_property_value(pro), sizeof(values));
+                        geometry.setRect(geometry.x() + values[0],
+                                         geometry.y() + values[2],
+                                         geometry.width() - values[0] - values[1],
+                                         geometry.height() - values[2] - values[3]);
+                    }
+                    free(pro);
+                }
+            } else {
+                geometry.setRect(dgeom->x, dgeom->y, dgeom->width, dgeom->height);
+            }
+            free(dgeom);
+        }
+        free(geom);
+    }
+    return geometry;
+}
+
+xcb_window_t X11Utils::getDecorativeWindow(const xcb_window_t &window)
+{
+    xcb_window_t win = window;
+    for (int i = 0; i < 10; i++) {
+        xcb_query_tree_reply_t *qTree = xcb_query_tree_reply(m_connection, xcb_query_tree(m_connection, win), nullptr);
+        if (!qTree) {
+            free(qTree);
+            return 0;
+        }
+        if (qTree->root == qTree->parent) {
+            free(qTree);
+            return win;
+        }
+        win = qTree->parent;
+        free(qTree);
+    }
+    return 0;
+}
+
 QList<xcb_atom_t> X11Utils::getWindowTypes(const xcb_window_t &window)
 {
     QList<xcb_atom_t> ret;

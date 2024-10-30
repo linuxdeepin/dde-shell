@@ -4,11 +4,13 @@
 
 #include "x11dockhelper.h"
 #include "constants.h"
+#include "dockhelper.h"
 #include "dockpanel.h"
 
+#include <algorithm>
+#include <xcb/res.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
-#include <xcb/res.h>
 
 #include <QAbstractNativeEventFilter>
 #include <QGuiApplication>
@@ -20,16 +22,17 @@ Q_LOGGING_CATEGORY(dockX11Log, "dde.shell.dock.x11")
 const uint16_t monitorSize = 15;
 const uint32_t allWorkspace = 0xffffffff;
 
+// TODO: use taskmanager window data
 struct WindowData
 {
     QRect rect;
     bool isMinimized;
-    HideState state;
+    bool overlap;
     uint32_t workspace;
 
     WindowData()
         : isMinimized(false)
-        , state(Unknown)
+        , overlap(false)
         , workspace(0)
     {
     }
@@ -39,13 +42,6 @@ XcbEventFilter::XcbEventFilter(X11DockHelper *helper)
     : m_helper(helper)
     , m_currentWorkspace(0)
 {
-    m_timer = new QTimer(this);
-    m_timer->setSingleShot(true);
-    m_timer->setInterval(200);
-
-    connect(m_timer, &QTimer::timeout, this, [this]() {
-        m_helper->updateEnterState(false);
-    });
     auto *x11Application = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
     m_connection = x11Application->connection();
     xcb_ewmh_init_atoms_replies(&m_ewmh, xcb_ewmh_init_atoms(m_connection, &m_ewmh), nullptr);
@@ -63,30 +59,18 @@ XcbEventFilter::XcbEventFilter(X11DockHelper *helper)
 
 bool XcbEventFilter::inTriggerArea(xcb_window_t win) const
 {
-    for (auto area: m_helper->m_areas) {
-        if (area->triggerWindow() == win)
-            return true;
-    }
-    return false;
+    return m_helper->m_areas.contains(win);
 }
 
 void XcbEventFilter::processEnterLeave(xcb_window_t win, bool enter)
 {
-    qCDebug(dockX11Log) << "process enter and leave event, isEnter:" << enter
-                        << ", winId:" << win;
-    for (auto area: m_helper->m_areas) {
-        if (area->triggerWindow() == win) {
-            if (enter) {
-                area->mouseEnter();
-            } else {
-                area->mouseLeave();
-            }
-            return;
+    if (inTriggerArea(win)) {
+        if (enter) {
+            m_helper->enterScreen(m_helper->m_areas.value(win)->screen());
+        } else {
+            m_helper->leaveScreen();
         }
     }
-
-// dock enter/leave
-    m_helper->updateEnterState(enter);
 }
 
 bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *message, qintptr *)
@@ -98,23 +82,11 @@ bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *messag
     switch (xcb_event->response_type & ~0x80) {
     case XCB_ENTER_NOTIFY: {
         auto eN = reinterpret_cast<xcb_enter_notify_event_t *>(xcb_event);
-        qCDebug(dockX11Log) << "enter event winId:" << eN->event;
-        if (m_timer->isActive()) {
-            if (!inTriggerArea(eN->event)) {
-                m_timer->stop();
-                break;
-            }
-        }
         processEnterLeave(eN->event, true);
         break;
     }
     case XCB_LEAVE_NOTIFY: {
         auto lN = reinterpret_cast<xcb_leave_notify_event_t *>(xcb_event);
-        qCDebug(dockX11Log) << "leave event winId:" << lN->event;
-        if (!inTriggerArea(lN->event)) {
-            m_timer->start();
-            break;
-        }
         processEnterLeave(lN->event, false);
         break;
     }
@@ -346,15 +318,7 @@ void XcbEventFilter::setWindowState(const xcb_window_t& window, uint32_t list_le
 X11DockHelper::X11DockHelper(DockPanel* panel)
     : DockHelper(panel)
     , m_xcbHelper(new XcbEventFilter(this))
-    , m_hideState(Show)
-    , m_smartHideState(Unknown)
-    , m_enter(true)
 {
-    connect(parent(), &DockPanel::rootObjectChanged, this, &X11DockHelper::updateWakeArea);
-    connect(qApp, &QGuiApplication::screenAdded, this, &X11DockHelper::updateWakeArea);
-    connect(qApp, &QGuiApplication::screenRemoved, this, &X11DockHelper::updateWakeArea);
-    connect(panel, &DockPanel::hideStateChanged, this, &X11DockHelper::updateDockTriggerArea);
-    connect(panel, &DockPanel::showInPrimaryChanged, this, &X11DockHelper::updateDockTriggerArea);
     connect(panel, &DockPanel::hideModeChanged, this, &X11DockHelper::onHideModeChanged);
     connect(panel, &DockPanel::rootObjectChanged, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::positionChanged, this, &X11DockHelper::updateDockArea);
@@ -367,26 +331,27 @@ X11DockHelper::X11DockHelper(DockPanel* panel)
     onHideModeChanged(panel->hideMode());
 }
 
-void X11DockHelper::updateDockTriggerArea()
+[[nodiscard]] DockWakeUpArea *X11DockHelper::createArea(QScreen *screen)
 {
-    for (auto area: m_areas) {
-        area->updateDockTriggerArea();
-    }
+    auto area = new X11DockWakeUpArea(screen, this);
+    m_areas.insert(area->m_triggerWindow, area);
+    return area;
 }
 
-void X11DockHelper::updateEnterState(bool enter)
+void X11DockHelper::destroyArea(DockWakeUpArea *area)
 {
-    if(m_enter!= enter) {
-        m_enter = enter;
-        updateHideState();
-    }
+    auto x11Area = static_cast<X11DockWakeUpArea *>(area);
+    if (!x11Area)
+        return;
+
+    m_areas.remove(x11Area->m_triggerWindow);
+    x11Area->deleteLater();
 }
 
 void X11DockHelper::onHideModeChanged(HideMode mode)
 {
     // 会收到重复信号，因此每次都清理下数据
     disconnect(m_xcbHelper, nullptr, this, nullptr);
-    m_smartHideState = Unknown;
     for (auto &&data : m_windows) {
         delete data;
     }
@@ -398,8 +363,22 @@ void X11DockHelper::onHideModeChanged(HideMode mode)
         connect(m_xcbHelper, &XcbEventFilter::windowClientListChanged, this, &X11DockHelper::onWindowClientListChanged);
         connect(m_xcbHelper, &XcbEventFilter::windowPropertyChanged, this, &X11DockHelper::onWindowPropertyChanged);
         connect(m_xcbHelper, &XcbEventFilter::windowGeometryChanged, this, &X11DockHelper::onWindowGeometryChanged);
-        connect(m_xcbHelper, &XcbEventFilter::currentWorkspaceChanged, this, &X11DockHelper::updateDockHideState, Qt::QueuedConnection);
-        delayedUpdateState();
+        connect(m_xcbHelper, &XcbEventFilter::currentWorkspaceChanged, this, [this]() {
+            static bool updating = false;
+            if (updating)
+                return;
+
+            updating = true;
+            int currentWorkspace = m_xcbHelper->getCurrentWorkspace();
+            for (auto &&data : m_windows) {
+                if (data->overlap && (data->workspace == currentWorkspace || data->workspace == allWorkspace)) {
+                    Q_EMIT isWindowOverlapChanged(isWindowOverlap());
+                    updating = false;
+                    return;
+                }
+            }
+            updating = false;
+        });
     } break;
     case KeepShowing:
     case KeepHidden:
@@ -423,7 +402,6 @@ void X11DockHelper::onWindowClientListChanged()
         if (!windows.contains(it.key())) {
             delete it.value();
             it = m_windows.erase(it);
-            delayedUpdateState();
         } else {
             it++;
         }
@@ -462,7 +440,6 @@ void X11DockHelper::onWindowWorkspaceChanged(xcb_window_t window)
 {
     if (m_windows.contains(window)) {
         m_windows[window]->workspace = m_xcbHelper->getWindowWorkspace(window);
-        delayedUpdateState();
     }
 }
 
@@ -472,50 +449,13 @@ void X11DockHelper::updateWindowHideState(xcb_window_t window)
         return;
     }
     WindowData *data = m_windows.value(window);
-    HideState oldHideState = data->state;
-    HideState newHideState = Show;
-    if (!data->isMinimized && data->rect.intersects(m_dockArea)) {
-        newHideState = Hide;
+    bool oldOverlap = data->overlap;
+    if (!data->isMinimized) {
+        data->overlap = data->rect.intersects(m_dockArea);
     }
-    if (newHideState != oldHideState) {
-        data->state = newHideState;
-        delayedUpdateState();
-    }
-}
 
-void X11DockHelper::updateSmartHideState(const HideState &state)
-{
-    if (m_smartHideState != state) {
-        m_smartHideState = state;
-        qCDebug(dockX11Log) << "smart hide state:" << m_smartHideState;
-        if (parent()->hideMode() == SmartHide) {
-            updateHideState();
-        }
-    }
-}
-
-void X11DockHelper::updateDockHideState()
-{
-    if (!m_needUpdateState)
-        return;
-
-    int currentWorkspace = m_xcbHelper->getCurrentWorkspace();
-    for (auto &&data : m_windows) {
-        if (data->state == Hide && (data->workspace == currentWorkspace || data->workspace == allWorkspace)) {
-            updateSmartHideState(Hide);
-            m_needUpdateState = false;
-            return;
-        }
-    }
-    updateSmartHideState(Show);
-    m_needUpdateState = false;
-}
-
-void X11DockHelper::delayedUpdateState()
-{
-    if (!m_needUpdateState) {
-        m_needUpdateState = true;
-        QMetaObject::invokeMethod(this, &X11DockHelper::updateDockHideState, Qt::QueuedConnection);
+    if (oldOverlap != data->overlap) {
+        Q_EMIT isWindowOverlapChanged(isWindowOverlap());
     }
 }
 
@@ -550,121 +490,73 @@ void X11DockHelper::updateDockArea()
         for (auto it = m_windows.cbegin(); it != m_windows.cend(); ++it) {
             updateWindowHideState(it.key());
         }
-        delayedUpdateState();
     }
 }
 
-HideState X11DockHelper::hideState()
+bool X11DockHelper::currentActiveWindowMaximized()
 {
-    return m_hideState;
+    return false;
 }
 
-void X11DockHelper::updateHideState()
+bool X11DockHelper::isWindowOverlap()
 {
-    auto hideState = Show;
-    if (m_enter) {
-        hideState = Show;
-    } else {
-        if (parent()->hideMode() == HideMode::SmartHide && m_smartHideState == Show) {
-            hideState = Show;
-        } else {
-            hideState = Hide;
-        }
-    }
-    if (m_hideState != hideState) {
-        m_hideState = hideState;
-        Q_EMIT hideStateChanged();
-    }
+    // any widnow overlap
+    bool overlap = false;
+    std::for_each(m_windows.begin(), m_windows.end(), [&overlap](const auto &window) {
+        return overlap |= window->overlap;
+    });
+    return overlap;
 }
 
-void X11DockHelper::updateWakeArea()
+X11DockWakeUpArea::X11DockWakeUpArea(QScreen *screen, X11DockHelper *helper)
+    : QObject(helper)
+    , DockWakeUpArea(screen, helper)
 {
-    auto screens = qApp->screens();
-    for (auto it = m_areas.begin(); it != m_areas.end();) {
-        if (screens.contains((*it)->screen())) {
-            screens.removeOne((*it)->screen());
-            ++it;
-        } else {
-            delete (*it);
-            it = m_areas.erase(it);
-        }
-    }
-
-    for (auto screen : screens) {
-        DockTriggerArea *area = new DockTriggerArea(parent(), this, screen);
-        m_areas.append(area);
-    }
-}
-
-DockTriggerArea::DockTriggerArea(DockPanel *panel, X11DockHelper *helper, QScreen *qScreen)
-    : QObject(panel)
-    , m_panel(panel)
-    , m_helper(helper)
-    , m_screen(qScreen)
-    , m_enableWakeArea(false)
-    , m_triggerTimer(new QTimer(this))
-    , m_holdingTimer(new QTimer(this))
-{
-    m_triggerTimer->setSingleShot(true);
-    m_triggerTimer->setInterval(1500);
-    m_holdingTimer->setSingleShot(true);
-    m_holdingTimer->setInterval(200);
-
-    connect(m_triggerTimer, &QTimer::timeout, this, &DockTriggerArea::onTriggerTimer);
-    connect(m_holdingTimer, &QTimer::timeout, this, &DockTriggerArea::onHoldingTimer);
-    connect(panel, &DockPanel::positionChanged, this, &DockTriggerArea::updateDockTriggerArea);
     m_connection = qGuiApp->nativeInterface<QNativeInterface::QX11Application>()->connection();
-    xcb_screen_t* screen = xcb_setup_roots_iterator(xcb_get_setup(m_connection)).data;
-    m_rootWindow = screen->root;
+    xcb_screen_t *xcbScreen = xcb_setup_roots_iterator(xcb_get_setup(m_connection)).data;
+    m_rootWindow = xcbScreen->root;
     m_triggerWindow = xcb_generate_id(m_connection);
     xcb_flush(m_connection);
-    updateDockTriggerArea();
 }
 
-DockTriggerArea::~DockTriggerArea()
+X11DockWakeUpArea::~X11DockWakeUpArea()
 {
-    disableWakeArea();
 }
 
-void DockTriggerArea::enableWakeArea()
+void X11DockWakeUpArea::open()
 {
-    if (m_enableWakeArea)
-        return;
     uint32_t values_list[] = {1};
-    QRect rect = matchDockTriggerArea();
-    xcb_create_window(m_connection, XCB_COPY_FROM_PARENT, m_triggerWindow, m_rootWindow, rect.x(), rect.y(), rect.width(), rect.height(), 0, XCB_WINDOW_CLASS_INPUT_ONLY, XCB_COPY_FROM_PARENT, XCB_CW_OVERRIDE_REDIRECT, values_list);
+    xcb_create_window(m_connection,
+                      XCB_COPY_FROM_PARENT,
+                      m_triggerWindow,
+                      m_rootWindow,
+                      1,
+                      1,
+                      1,
+                      1,
+                      0,
+                      XCB_WINDOW_CLASS_INPUT_ONLY,
+                      XCB_COPY_FROM_PARENT,
+                      XCB_CW_OVERRIDE_REDIRECT,
+                      values_list);
     uint32_t values[] = {XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW};
     xcb_change_window_attributes(m_connection, m_triggerWindow, XCB_CW_EVENT_MASK, values);
     xcb_map_window(m_connection, m_triggerWindow);
-    m_enableWakeArea = true;
 }
 
-void DockTriggerArea::disableWakeArea()
+void X11DockWakeUpArea::close()
 {
-    if (!m_enableWakeArea || m_holdingTimer->isActive())
-        return;
     xcb_destroy_window(m_connection, m_triggerWindow);
-    m_enableWakeArea = false;
 }
 
-void DockTriggerArea::mouseEnter()
-{
-    m_triggerTimer->start();
-}
-
-void DockTriggerArea::mouseLeave()
-{
-    m_triggerTimer->stop();
-}
-
-const QRect DockTriggerArea::matchDockTriggerArea()
+void X11DockWakeUpArea::updateDockWakeArea(Position pos)
 {
     QRect triggerArea;
-    auto rect = m_screen->geometry();
+    auto rect = screen()->geometry();
 
     // map geometry to Native
     const auto factor = m_screen->devicePixelRatio();
-    switch (m_panel->position()) {
+    switch (pos) {
     case Top: {
         triggerArea.setX(rect.left());
         triggerArea.setY(rect.top());
@@ -696,49 +588,8 @@ const QRect DockTriggerArea::matchDockTriggerArea()
     }
 
     triggerArea = QRect(triggerArea.topLeft(), triggerArea.size() * factor);
-    return triggerArea;
-}
-
-void DockTriggerArea::updateDockTriggerArea()
-{
-    auto isDockAllowedShownOnThisScreen = [this]() -> bool {
-        return (m_panel->showInPrimary() && m_screen == qApp->primaryScreen()) || !m_panel->showInPrimary();
-    };
-
-    auto isDockShownThisScreen = [this]() -> bool {
-        return m_panel->dockScreen() == m_screen && m_panel->hideState() == Show;
-    };
-
-    if (isDockAllowedShownOnThisScreen() && !isDockShownThisScreen()) {
-        enableWakeArea();
-    } else {
-        disableWakeArea();
-        return;
-    }
-
-    QRect rect = matchDockTriggerArea();
-    qCDebug(dockX11Log) << "update dock trigger area" << rect;
-    auto connection = qGuiApp->nativeInterface<QNativeInterface::QX11Application>()->connection();
-    int values[4] = {rect.x(), rect.y(), rect.width(), rect.height()};
-
-    xcb_configure_window(connection, m_triggerWindow, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, values);
-    xcb_flush(connection);
-}
-void DockTriggerArea::onTriggerTimer()
-{
-    m_holdingTimer->start();
-    if (m_panel->dockScreen() != m_screen) {
-        m_panel->setDockScreen(m_screen);
-        m_helper->updateDockTriggerArea();
-    }
-    m_helper->updateEnterState(true);
-}
-void DockTriggerArea::onHoldingTimer()
-{
-    if (m_panel->dockScreen() == m_screen && m_panel->hideState() == Show) {
-      disableWakeArea();
-    } else {
-      enableWakeArea();
-    }
+    int values[4] = {triggerArea.x(), triggerArea.y(), triggerArea.width(), triggerArea.height()};
+    xcb_configure_window(m_connection, m_triggerWindow, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, values);
+    xcb_flush(m_connection);
 }
 } // namespace dock

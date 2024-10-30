@@ -4,11 +4,13 @@
 #pragma once
 
 #include "dockhelper.h"
+
 #include <xcb/xcb.h>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xproto.h>
 
 namespace dock {
+class X11DockWakeUpArea;
 class X11DockHelper;
 struct WindowData;
 
@@ -44,7 +46,6 @@ private:
     void processEnterLeave(xcb_window_t win, bool enter);
 
     QPointer<X11DockHelper> m_helper;
-    QTimer *m_timer;
     QMap<QString, xcb_atom_t> m_atoms;
     xcb_connection_t* m_connection;
     xcb_window_t m_rootWindow;
@@ -52,56 +53,21 @@ private:
     uint32_t m_currentWorkspace;
 };
 
-class DockTriggerArea : public QObject
-{
-    Q_OBJECT
-
-public:
-    DockTriggerArea(DockPanel *panel, X11DockHelper *helper, QScreen *qScreen);
-    ~DockTriggerArea();
-
-    xcb_window_t triggerWindow() const { return m_triggerWindow; }
-    QScreen *screen() const { return m_screen; }
-    void enableWakeArea();
-    void disableWakeArea();
-    void mouseEnter();
-    void mouseLeave();
-public Q_SLOTS:
-    void updateDockTriggerArea();
-    void onTriggerTimer();
-    void onHoldingTimer();
-
-private:
-    const QRect matchDockTriggerArea();
-
-    DockPanel *m_panel;
-    X11DockHelper *m_helper;
-    QScreen *m_screen;
-    xcb_window_t m_triggerWindow;
-    xcb_window_t m_rootWindow;
-    xcb_connection_t *m_connection;
-    bool m_enableWakeArea;
-
-    QTimer* m_triggerTimer;
-    QTimer* m_holdingTimer;
-};
-
-
 class X11DockHelper : public DockHelper
 {
     Q_OBJECT
 
 public:
-    X11DockHelper(DockPanel* panel);
-    HideState hideState() override;
-    QList<DockTriggerArea*> triggerAreas() const { return m_areas; }
+    X11DockHelper(DockPanel *panel);
 
-public Q_SLOTS:
-    void updateDockTriggerArea() override;
-    void updateEnterState(bool enter);
+protected:
+    bool currentActiveWindowMaximized() override;
+    bool isWindowOverlap() override;
+
+    [[nodiscard]] DockWakeUpArea *createArea(QScreen *screen) override;
+    void destroyArea(DockWakeUpArea *area) override;
 
 private Q_SLOTS:
-    void updateHideState();
     void onHideModeChanged(HideMode mode);
 
     void onWindowClientListChanged();
@@ -111,27 +77,36 @@ private Q_SLOTS:
     void onWindowWorkspaceChanged(xcb_window_t window);
 
     void updateWindowHideState(xcb_window_t window);
-    void updateSmartHideState(const dock::HideState &state);
-    void updateDockHideState();
-    void delayedUpdateState();
-    void updateDockArea();
 
-private:
-    inline void updateWakeArea();
+    void updateDockArea();
 
 private:
     friend class XcbEventFilter;
 
 private:
-    dock::HideState m_hideState;
-    QString m_registerKey;
-    QList<DockTriggerArea*> m_areas;
+    QHash<xcb_window_t, X11DockWakeUpArea *> m_areas;
     QRect m_dockArea;
-    bool m_needUpdateState;
-    bool m_enter;
-    dock::HideState m_smartHideState;
     QHash<xcb_window_t, WindowData*> m_windows;
     XcbEventFilter *m_xcbHelper;
+};
+
+class X11DockWakeUpArea : public QObject, public DockWakeUpArea
+{
+    Q_OBJECT
+
+private:
+    X11DockWakeUpArea(QScreen *screen, X11DockHelper *helper);
+    ~X11DockWakeUpArea();
+
+    void open() override;
+    void close() override;
+    void updateDockWakeArea(Position pos) override;
+
+private:
+    friend class X11DockHelper;
+    xcb_window_t m_triggerWindow;
+    xcb_window_t m_rootWindow;
+    xcb_connection_t *m_connection;
 };
 }
 

@@ -30,10 +30,10 @@ Q_LOGGING_CATEGORY(dockLog, "dde.shell.dock")
 
 namespace dock {
 
-DockPanel::DockPanel(QObject * parent)
+DockPanel::DockPanel(QObject *parent)
     : DPanel(parent)
     , m_theme(ColorTheme::Dark)
-    , m_hideState(Hide)
+    , m_hideState(Show)
     , m_dockScreen(nullptr)
     , m_loadTrayPlugins(new LoadTrayPlugins(this))
     , m_compositorReady(false)
@@ -153,17 +153,7 @@ bool DockPanel::init()
         m_helper = new X11DockHelper(this);
     }
 
-
-    connect(m_helper, &DockHelper::hideStateChanged, this, [this](){
-        if (hideMode() == KeepShowing || m_launcherShown) return;
-        m_hideState = m_helper->hideState();
-        Q_EMIT hideStateChanged(m_hideState);
-    });
-
     QMetaObject::invokeMethod(this, [this, dockDaemonAdaptor]() {
-        m_hideState = hideMode() == KeepShowing ? Show : m_helper->hideState();
-        Q_EMIT hideStateChanged(m_hideState);
-
         Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
     });
 
@@ -301,6 +291,10 @@ void DockPanel::setCompositorReady(bool ready)
 
 HideState DockPanel::hideState()
 {
+    if (m_launcherShown) {
+        return Show;
+    }
+
     return m_hideState;
 }
 
@@ -339,15 +333,7 @@ void DockPanel::launcherVisibleChanged(bool visible)
     if (visible == m_launcherShown) return;
 
     m_launcherShown = visible;
-    if (m_launcherShown) {
-        setHideState(Show);
-    } else {
-        if (hideMode() != KeepShowing) {
-            setHideState(m_helper->hideState());
-        } else {
-            setHideState(Show);
-        }
-    }
+    Q_EMIT hideStateChanged(hideState());
 }
 
 void DockPanel::updateDockScreen() 

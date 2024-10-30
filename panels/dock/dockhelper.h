@@ -16,35 +16,35 @@ class DockHelper : public QObject
     Q_OBJECT
 
 public:
-    [[nodiscard]] DockHelper* getHelper(DockPanel* parent);
-
-    virtual HideState hideState()
-    {
-        return Show;
-    }
-
+    DockHelper(DockPanel *parent);
     bool eventFilter(QObject *watched, QEvent *event) override;
 
-public Q_SLOTS:
     void enterScreen(QScreen *screen);
     void leaveScreen();
 
-    virtual void updateDockTriggerArea() = 0;
-
 Q_SIGNALS:
-    void hideStateChanged();
+    void isWindowOverlapChanged(bool overlap);
+    void currentActiveWindowMaximizedChanged(bool maximized);
 
 protected:
-    bool wakeUpAreaNeedShowOnThisScreen(QScreen *screen);
-    [[nodiscard]] virtual DockWakeUpArea *createArea(QScreen *screen);
-    virtual void destroyArea(DockWakeUpArea *area);
+    DockPanel *parent();
+    [[nodiscard]] virtual DockWakeUpArea *createArea(QScreen *screen) = 0;
+    virtual void destroyArea(DockWakeUpArea *area) = 0;
+
+    virtual bool currentActiveWindowMaximized() = 0;
+    virtual bool isWindowOverlap() = 0;
 
 private:
+    bool wakeUpAreaNeedShowOnThisScreen(QScreen *screen);
+
     void updateAllDockWakeArea();
 
-protected:
-    DockHelper(DockPanel* parent);
-    DockPanel* parent();
+private Q_SLOTS:
+    void checkNeedHideOrNot();
+    void checkNeedShowOrNot();
+
+private:
+    void initAreas();
 
 private:
     QHash<QScreen *, DockWakeUpArea *> m_areas;
@@ -56,12 +56,13 @@ private:
 class DockWakeUpArea
 {
 public:
-    virtual void open();
-    virtual void close();
+    QScreen *screen();
+    virtual void open() = 0;
+    virtual void close() = 0;
 
 protected:
     explicit DockWakeUpArea(QScreen *screen, DockHelper *helper);
-    virtual void updateDockWakeArea(Position pos);
+    virtual void updateDockWakeArea(Position pos) = 0;
 
 protected:
     friend class DockHelper;
