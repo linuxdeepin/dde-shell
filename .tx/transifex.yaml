@@ -29,5 +29,10 @@ filters:
     file_format: QT
     source_language: en_US
     translation_files_expression: panels/notification/osd/displaymode/translations/org.deepin.ds.osd.displaymode_<lang>.ts
+  - filter_type: file
+    source_file: panels/dock/dcc-dock-plugin/translations/dock.ts
+    file_format: QT
+    source_language: en_US
+    translation_files_expression: panels/dock/dcc-dock-plugin/translations/dock_<lang>.ts
 settings:
   pr_branch_name: transifex_update_<br_unique_id>
