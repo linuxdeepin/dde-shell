@@ -56,6 +56,8 @@ public:
     QList<xcb_atom_t> getWindowAllowedActions(const xcb_window_t &window);
     MotifWMHints getWindowMotifWMHints(const xcb_window_t &window);
     QStringList getWindowWMClass(const xcb_window_t &window);
+    QRect getWindowGeometry(const xcb_window_t &window);
+    xcb_window_t getDecorativeWindow(const xcb_window_t &window);
 
     void minimizeWindow(const xcb_window_t &window);
     void maxmizeWindow(const xcb_window_t &window);

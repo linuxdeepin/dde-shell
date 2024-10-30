@@ -13,10 +13,14 @@
 
 #include <QtWaylandClient/QWaylandClientExtension>
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
+#include <qscopedpointer.h>
 
 namespace dock {
 class WallpaperColorManager;
 class TreeLandDockTriggerArea;
+class TreeLandDDEShellManager;
+class TreeLandWindowOverlapChecker;
+
 class WaylandDockHelper : public DockHelper
 {
     Q_OBJECT
@@ -28,14 +32,22 @@ public:
     QString dockScreenName();
 
 protected:
+    bool currentActiveWindowMaximized() override;
+    bool isWindowOverlap() override;
     [[nodiscard]] virtual DockWakeUpArea *createArea(QScreen *screen) override;
-
-public Q_SLOTS:
-    void updateDockTriggerArea() override;
+    void destroyArea(DockWakeUpArea *area) override;
 
 private:
+    void updateOverlapCheckerPos();
+
+private:
+    friend class TreeLandWindowOverlapChecker;
+    bool m_isWindowOverlap;
+    bool m_isCurrentActiveWindowMaximized;
     DockPanel *m_panel;
     QScopedPointer<WallpaperColorManager> m_wallpaperColorManager;
+    QScopedPointer<TreeLandWindowOverlapChecker> m_overlapChecker;
+    QScopedPointer<TreeLandDDEShellManager> m_ddeShellManager;
 };
 
 class WallpaperColorManager : public QWaylandClientExtensionTemplate<WallpaperColorManager>, public QtWayland::treeland_wallpaper_color_manager_v1
@@ -67,19 +79,22 @@ class TreeLandWindowOverlapChecker : public QWaylandClientExtensionTemplate<Tree
     Q_OBJECT
 
 public:
-    TreeLandWindowOverlapChecker(QtWaylandClient::QWaylandWindow *window, struct ::treeland_window_overlap_checker *);
+    TreeLandWindowOverlapChecker(WaylandDockHelper *helper, struct ::treeland_window_overlap_checker *);
     ~TreeLandWindowOverlapChecker();
 
 protected:
     void treeland_window_overlap_checker_enter() override;
     void treeland_window_overlap_checker_leave() override;
+
+private:
+    WaylandDockHelper *m_helper;
 };
 
 class TreeLandDockWakeUpArea : public QWidget, public DockWakeUpArea
 {
     Q_OBJECT
 public:
-    explicit TreeLandDockWakeUpArea(QScreen *screen, WaylandDockHelper *helper, DockPanel *panel);
+    explicit TreeLandDockWakeUpArea(QScreen *screen, WaylandDockHelper *helper);
 
 public:
     void open() override;

@@ -7,6 +7,7 @@
 #include "dockhelper.h"
 #include "dockpanel.h"
 #include "layershell/dlayershellwindow.h"
+#include "qwayland-treeland-dde-shell-v1.h"
 #include "wayland-treeland-dde-shell-v1-client-protocol.h"
 
 #include <QtWaylandClient/private/qwaylandscreen_p.h>
@@ -17,8 +18,11 @@ namespace dock {
 WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     : DockHelper(panel)
     , m_panel(panel)
+    , m_isWindowOverlap(false)
+    , m_isCurrentActiveWindowMaximized(false)
 {
     m_wallpaperColorManager.reset(new WallpaperColorManager(this));
+    m_ddeShellManager.reset(new TreeLandDDEShellManager());
 
     connect(m_panel, &DockPanel::rootObjectChanged, this, [this]() {
         m_wallpaperColorManager->watchScreen(dockScreenName());
@@ -30,18 +34,78 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
         }
     });
 
+    connect(m_panel, &DockPanel::positionChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
+    connect(m_panel, &DockPanel::dockSizeChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
+    connect(m_panel, &DockPanel::rootObjectChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
+
+    connect(m_ddeShellManager.get(), &TreeLandDDEShellManager::activeChanged, this, [this]() {
+        if (m_panel->hideMode() == HideMode::SmartHide && m_ddeShellManager->isActive()) {
+            m_overlapChecker.reset(new TreeLandWindowOverlapChecker(this, m_ddeShellManager->get_window_overlap_checker()));
+            updateOverlapCheckerPos();
+        } else {
+            m_overlapChecker.reset(nullptr);
+        }
+    });
+
+    connect(m_panel, &DockPanel::hideModeChanged, this, [this](HideMode mode) {
+        if (mode == HideMode::SmartHide && m_ddeShellManager->isActive()) {
+            m_overlapChecker.reset(new TreeLandWindowOverlapChecker(this, m_ddeShellManager->get_window_overlap_checker()));
+            updateOverlapCheckerPos();
+        } else {
+            m_overlapChecker.reset(nullptr);
+        }
+    });
+
     if (m_panel->rootObject() != nullptr) {
         m_wallpaperColorManager->watchScreen(dockScreenName());
     }
+
+    // TODO: get taskmanager applet and use it to update m_isCurrentActiveWindowMaximized.
+}
+
+void WaylandDockHelper::updateOverlapCheckerPos()
+{
+    if (!m_overlapChecker)
+        return;
+
+    if (!m_panel->rootObject())
+        return;
+
+    auto waylandScreen = dynamic_cast<QtWaylandClient::QWaylandScreen *>(m_panel->window()->screen()->handle());
+    if (!waylandScreen)
+        return;
+
+    uint32_t anchor;
+    switch (m_panel->position()) {
+    case Top:
+        anchor = QtWayland::treeland_window_overlap_checker::anchor_top;
+        break;
+    case Bottom:
+        anchor = QtWayland::treeland_window_overlap_checker::anchor_bottom;
+        break;
+    case Left:
+        anchor = QtWayland::treeland_window_overlap_checker::anchor_left;
+        break;
+    case Right:
+        anchor = QtWayland::treeland_window_overlap_checker::anchor_right;
+        break;
+    }
+
+    m_overlapChecker->update(m_panel->dockSize(), m_panel->dockSize(), anchor, waylandScreen->output());
 }
 
 DockWakeUpArea *WaylandDockHelper::createArea(QScreen *screen)
 {
-    return new TreeLandDockWakeUpArea(screen, this, m_panel);
+    return new TreeLandDockWakeUpArea(screen, this);
 }
 
-void WaylandDockHelper::updateDockTriggerArea()
+void WaylandDockHelper::destroyArea(DockWakeUpArea *area)
 {
+    auto waylandArea = static_cast<TreeLandDockWakeUpArea *>(area);
+    if (waylandArea) {
+        waylandArea->close();
+        waylandArea->deleteLater();
+    }
 }
 
 QString WaylandDockHelper::dockScreenName()
@@ -50,6 +114,16 @@ QString WaylandDockHelper::dockScreenName()
         return m_panel->dockScreen()->name();
 
     return {};
+}
+
+bool WaylandDockHelper::currentActiveWindowMaximized()
+{
+    return m_isCurrentActiveWindowMaximized;
+}
+
+bool WaylandDockHelper::isWindowOverlap()
+{
+    return m_isWindowOverlap;
 }
 
 void WaylandDockHelper::setDockColorTheme(const ColorTheme &theme)
@@ -82,29 +156,40 @@ TreeLandDDEShellManager::TreeLandDDEShellManager()
 {
 }
 
-TreeLandWindowOverlapChecker::TreeLandWindowOverlapChecker(QtWaylandClient::QWaylandWindow *window, struct ::treeland_window_overlap_checker *checker)
+TreeLandWindowOverlapChecker::TreeLandWindowOverlapChecker(WaylandDockHelper *helper, struct ::treeland_window_overlap_checker *checker)
     : QWaylandClientExtensionTemplate<TreeLandWindowOverlapChecker>(treeland_dde_shell_manager_v1_interface.version)
+    , m_helper(helper)
 {
+    setParent(helper);
     init(checker);
-    auto waylandScreen = dynamic_cast<QtWaylandClient::QWaylandScreen *>(window->window()->screen()->handle());
-    update(100, 100, anchor_right | anchor_left | anchor_bottom, waylandScreen->output());
+}
+
+TreeLandWindowOverlapChecker::~TreeLandWindowOverlapChecker()
+{
+    destroy();
 }
 
 void TreeLandWindowOverlapChecker::treeland_window_overlap_checker_enter()
 {
+    m_helper->m_isWindowOverlap = true;
+    Q_EMIT m_helper->isWindowOverlapChanged(m_helper->m_isWindowOverlap);
 }
 
 void TreeLandWindowOverlapChecker::treeland_window_overlap_checker_leave()
 {
+    m_helper->m_isWindowOverlap = false;
+    Q_EMIT m_helper->isWindowOverlapChanged(m_helper->m_isWindowOverlap);
 }
 
-TreeLandDockWakeUpArea::TreeLandDockWakeUpArea(QScreen *screen, WaylandDockHelper *helper, DockPanel *panel)
+TreeLandDockWakeUpArea::TreeLandDockWakeUpArea(QScreen *screen, WaylandDockHelper *helper)
     : QWidget()
     , DockWakeUpArea(screen, helper)
 {
+    // force create windowHandle for layershell.
     winId();
     window()->setScreen(screen);
     window()->resize(QSize(15, 15));
+    setAttribute(Qt::WA_TranslucentBackground, true);
 
     auto window = ds::DLayerShellWindow::get(windowHandle());
     window->setLayer(ds::DLayerShellWindow::LayerOverlay);
@@ -150,14 +235,9 @@ void TreeLandDockWakeUpArea::updateDockWakeArea(Position pos)
     window->setAnchors(anchors);
 }
 
-TreeLandWindowOverlapChecker::~TreeLandWindowOverlapChecker()
-{
-    destroy();
-}
-
 void TreeLandDockWakeUpArea::enterEvent(QEnterEvent *event)
 {
-    m_helper->enterScreen(screen());
+    m_helper->enterScreen(QWidget::screen());
 }
 
 void TreeLandDockWakeUpArea::leaveEvent(QEvent *event)
