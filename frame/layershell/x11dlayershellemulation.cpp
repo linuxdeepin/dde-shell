@@ -43,6 +43,9 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     // qml height or width may update later, need to update anchor postion and exclusion zone
     connect(m_window, &QWindow::widthChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
     connect(m_window, &QWindow::widthChanged, this, &LayerShellEmulation::onPositionChanged);
+    // (x,y) wasn't set correctly by xcb_configure_window, TODO using EventFilter to update positions.
+    connect(m_window, &QWindow::xChanged, this, &LayerShellEmulation::onPositionChanged);
+    connect(m_window, &QWindow::yChanged, this, &LayerShellEmulation::onPositionChanged);
 
     connect(m_window, &QWindow::heightChanged, this, &LayerShellEmulation::onExclusionZoneChanged);
     connect(m_window, &QWindow::heightChanged, this, &LayerShellEmulation::onPositionChanged);
