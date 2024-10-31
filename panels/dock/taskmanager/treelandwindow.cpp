@@ -95,7 +95,7 @@ void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_state(wl_array *
         m_states.append(items[i]);
     }
 
-    Q_EMIT isActiveChanged();
+    Q_EMIT stateChanged();
 }
 
 void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_done()
@@ -219,7 +219,7 @@ void TreeLandWindow::setForeignToplevelHandle(ForeignToplevelHandle* handle)
     connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::appidChanged, this, &AbstractWindow::identityChanged);
     connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::pidChanged, this, &AbstractWindow::pidChanged);
     connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::titleChanged, this, &AbstractWindow::titleChanged);
-    connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::isActiveChanged, this, &AbstractWindow::isActiveChanged);
+    connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::stateChanged, this, &AbstractWindow::stateChanged);
 }
 
 }

@@ -36,7 +36,7 @@ Q_SIGNALS:
     void appidChanged();
     void pidChanged();
     void titleChanged();
-    void isActiveChanged();
+    void stateChanged();
 
 protected:
     void treeland_foreign_toplevel_handle_v1_pid(uint32_t pid) override;
