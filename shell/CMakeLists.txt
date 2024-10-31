@@ -2,7 +2,10 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Widgets Gui WaylandClient)
+find_package(TreelandProtocols REQUIRED)
+pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
+
 if (NOT DEFINED SYSTEMD_USER_UNIT_DIR)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(Systemd REQUIRED systemd)
@@ -15,8 +18,15 @@ add_executable(dde-shell
     appletloader.cpp
     shell.h
     shell.cpp
+    treelandoutputwatcher.h
+    treelandoutputwatcher.cpp
     dde-shell.qrc
     override_dtkdeclarative_qml.qrc
+)
+
+qt_generate_wayland_protocol_client_sources(dde-shell
+    FILES
+        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-output-manager-v1.xml
 )
 
 target_compile_definitions(dde-shell
@@ -27,9 +37,12 @@ PRIVATE
 target_link_libraries(dde-shell PRIVATE
     dde-shell-frame
     Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::GuiPrivate
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::WaylandClient
     Dtk${DTK_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::DBus
+    PkgConfig::WaylandClient
 )
 
 configure_file(${CMAKE_SOURCE_DIR}/misc/dde-shell-plugin@.service.in

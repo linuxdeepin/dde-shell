@@ -3,14 +3,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "shell.h"
+#include "treelandoutputwatcher.h"
 
-#include <memory>
 #include <DConfig>
-#include <QLoggingCategory>
-#include <QQmlAbstractUrlInterceptor>
-#include <qmlengine.h>
 #include <QDBusConnection>
 #include <QDBusError>
+#include <QGuiApplication>
+#include <QLoggingCategory>
+#include <QQmlAbstractUrlInterceptor>
+#include <memory>
+#include <qmlengine.h>
 
 DS_BEGIN_NAMESPACE
 
@@ -39,7 +41,13 @@ public:
 Shell::Shell(QObject *parent)
     : QObject(parent)
 {
+    // Since Wayland has no concept of primaryScreen, it is necessary to rely on wayland private protocols
+    // to update the client's primaryScreen information
 
+    auto platformName = QGuiApplication::platformName();
+    if (QStringLiteral("wayland") == platformName) {
+        new TreelandOutputWatcher(this);
+    }
 }
 
 void Shell::installDtkInterceptor()
