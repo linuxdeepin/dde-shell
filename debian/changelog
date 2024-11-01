@@ -1,3 +1,9 @@
+dde-shell (1.0.7) unstable; urgency=medium
+
+  * feat: Receive close quick panel requests from plugins
+
+ -- Wu Haotian <wuhaotian@uniontech.com>  Fri, 01 Nov 2024 10:32:33 +0800
+
 dde-shell (1.0.6) unstable; urgency=medium
 
   * fix: update translations
