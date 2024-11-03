@@ -15,6 +15,7 @@ set(PUBLIC_HEADERS
     appletbridge.h
     qmlengine.h
     layershell/dlayershellwindow.h
+    models/listtotableproxymodel.h
     dsutility.h
 )
 
@@ -28,6 +29,7 @@ set(PRIVATE_HEADERS
     private/dsqmlglobal_p.h
     layershell/qwaylandlayershellsurface_p.h
     layershell/qwaylandlayershellintegration_p.h
+    models/kextracolumnsproxymodel.h
     quick/dsquickdrag_p.h
 )
 set(PRIVATE_SOURCES "")
@@ -65,9 +67,15 @@ add_library(dde-shell-frame SHARED
     layershell/dlayershellwindow.cpp
     layershell/qwaylandlayershellsurface.cpp
     layershell/qwaylandlayershellintegration.cpp
+    models/kextracolumnsproxymodel.cpp
+    models/listtotableproxymodel.cpp
     quick/dsquickdrag.cpp
     ddeshell_qml.qrc
     dsutility.cpp
+)
+
+set_target_properties(dde-shell-frame PROPERTIES
+    PUBLIC_HEADER ${PUBLIC_HEADERS}
 )
 
 qt_generate_wayland_protocol_client_sources(dde-shell-frame FILES
@@ -120,8 +128,7 @@ PRIVATE
     DS_LIB
 )
 
-install(FILES ${PUBLIC_HEADERS} DESTINATION "${INCLUDE_INSTALL_DIR}")
-install(TARGETS dde-shell-frame EXPORT DDEShellTargets DESTINATION "${LIB_INSTALL_DIR}")
+install(TARGETS dde-shell-frame EXPORT DDEShellTargets DESTINATION "${LIB_INSTALL_DIR}" PUBLIC_HEADER DESTINATION "${INCLUDE_INSTALL_DIR}")
 install(EXPORT DDEShellTargets NAMESPACE Dde:: FILE DDEShellTargets.cmake DESTINATION "${CONFIG_INSTALL_DIR}")
 
 add_subdirectory(plugin)
