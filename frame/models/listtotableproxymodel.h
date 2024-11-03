@@ -10,7 +10,6 @@
 class ListToTableProxyModel : public KExtraColumnsProxyModel
 {
     Q_OBJECT
-    QML_ELEMENT
 
     Q_PROPERTY(QList<int> roles MEMBER m_roles NOTIFY rolesChanged)
     Q_PROPERTY(int sourceColumn MEMBER m_sourceColumn NOTIFY sourceColumnChanged)

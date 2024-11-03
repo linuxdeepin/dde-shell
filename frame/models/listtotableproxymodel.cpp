@@ -37,5 +37,5 @@ QVariant ListToTableProxyModel::extraColumnData(const QModelIndex &parent, int r
 {
     QVariant result(data(index(row, m_sourceColumn, parent), m_roles[extraColumn]));
     if (!result.isValid()) return QStringLiteral("<invalid>");
-    return data(index(row, m_sourceColumn, parent), m_roles[extraColumn]);
+    return result.userType() == QMetaType::QVariantList ? result.toStringList().join(',') : result;
 }

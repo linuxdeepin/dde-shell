@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+find_package(DDEShell REQUIRED)
+
+add_library(shell-apps-bridge-example SHARED
+    exampleappletitem.cpp
+    exampleappletitem.h
+)
+
+target_link_libraries(shell-apps-bridge-example PRIVATE
+    dde-shell-frame
+)
+
+ds_install_package(PACKAGE org.deepin.ds.example.bridge TARGET shell-apps-bridge-example)

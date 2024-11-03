@@ -11,6 +11,7 @@
 #include "private/dsqmlglobal_p.h"
 #include "quick/dsquickdrag_p.h"
 #include "layershell/dlayershellwindow.h"
+#include "models/listtotableproxymodel.h"
 
 #include <qqml.h>
 
@@ -43,6 +44,7 @@ void QmlpluginPlugin::registerTypes(const char *uri)
     qmlRegisterType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow");
     qmlRegisterUncreatableType<DLayerShellWindow>(uri, 1, 0, "DLayerShellWindow","LayerShell Attached");
     qmlRegisterUncreatableType<DQuickDrag>(uri, 1, 0, "DQuickDrag","DQuickDrag Attached");
+    qmlRegisterType<ListToTableProxyModel>(uri, 1, 0, "DListToTableProxyModel");
 
     dsRegisterType(uri, 1, 0, "PanelPopup");
     dsRegisterType(uri, 1, 0, "PanelToolTip");
