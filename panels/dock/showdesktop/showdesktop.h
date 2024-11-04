@@ -6,6 +6,7 @@
 
 #include "applet.h"
 #include "dsglobal.h"
+#include "treelandwindowmanager.h"
 
 namespace dock {
 
@@ -19,6 +20,9 @@ public:
 
     Q_INVOKABLE void toggleShowDesktop();
     Q_INVOKABLE bool checkNeedShowDesktop();
+
+private:
+    TreelandWindowManager *m_windowManager;
 };
 
 }
