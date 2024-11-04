@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "applet.h"
 #include "showdesktop.h"
+#include "applet.h"
 #include "pluginfactory.h"
+#include "treelandwindowmanager.h"
 
 #include <QProcess>
 #include <QGuiApplication>
@@ -17,23 +18,32 @@ namespace dock {
 
 ShowDesktop::ShowDesktop(QObject *parent)
     : DApplet(parent)
+    , m_windowManager(nullptr)
 {
 
 }
 
 bool ShowDesktop::load()
 {
-    return QStringLiteral("xcb") == QGuiApplication::platformName();
+    return true;
 }
 
 bool ShowDesktop::init()
 {
+    if (QStringLiteral("wayland") == QGuiApplication::platformName()) {
+        m_windowManager = new TreelandWindowManager(this);
+    }
     DApplet::init();
     return true;
 }
 
 void ShowDesktop::toggleShowDesktop()
 {
+    if (m_windowManager) {
+        m_windowManager->desktopToggle();
+        return;
+    }
+
     QProcess::startDetached("/usr/lib/deepin-daemon/desktop-toggle", QStringList());
 }
 
