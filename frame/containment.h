@@ -6,8 +6,6 @@
 
 #include "applet.h"
 
-Q_MOC_INCLUDE(<appletitemmodel.h>)
-
 #include <DObject>
 #include <QVariant>
 
@@ -44,3 +42,5 @@ protected:
 };
 
 DS_END_NAMESPACE
+
+Q_DECLARE_OPAQUE_POINTER(DS_NAMESPACE::DAppletItemModel *)
