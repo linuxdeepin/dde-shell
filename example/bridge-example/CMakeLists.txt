@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-find_package(DDEShell REQUIRED)
-
 add_library(shell-apps-bridge-example SHARED
     exampleappletitem.cpp
     exampleappletitem.h
