@@ -45,15 +45,15 @@
     </message>
     <message>
         <source>Dock size</source>
-        <translation type="unfinished"/>
+        <translation>Mida de l&apos;acoblador</translation>
     </message>
     <message>
         <source>Small</source>
-        <translation type="unfinished"/>
+        <translation>Petita</translation>
     </message>
     <message>
         <source>Large</source>
-        <translation type="unfinished"/>
+        <translation>Grossa</translation>
     </message>
     <message>
         <source>Position on the screen</source>
