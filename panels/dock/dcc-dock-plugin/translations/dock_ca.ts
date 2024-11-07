@@ -113,7 +113,7 @@
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Seleccioneu quines icones apareixen a l&apos;acoblador.</translation>
     </message>
 </context>
 </TS>
