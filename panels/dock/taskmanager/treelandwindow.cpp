@@ -202,6 +202,9 @@ void TreeLandWindow::killClient()
 void TreeLandWindow::setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry)
 {
     auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(baseWindow->handle());
+    if (waylandWindow->surface() == nullptr || gemeotry.isEmpty())
+        return;
+
     m_foreignToplevelHandle->set_rectangle(waylandWindow->surface(), gemeotry.x(), gemeotry.y(), gemeotry.width(), gemeotry.height());
 }
 
