@@ -7,14 +7,14 @@
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Wählen Sie aus, welche Symbole im Dock erscheinen sollen</translation>
     </message>
 </context>
 <context>
     <name>dock</name>
     <message>
         <source>Desktop and taskbar</source>
-        <translation type="unfinished"/>
+        <translation>Desktop und Taskleiste</translation>
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
