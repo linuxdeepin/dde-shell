@@ -113,7 +113,7 @@
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Válassza ki, hogy mely ikonok jelenjenek meg a dokkolóban</translation>
     </message>
 </context>
 </TS>
