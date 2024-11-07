@@ -37,7 +37,7 @@
     </message>
     <message>
         <source>Efficient-left</source>
-        <translation type="unfinished"/>
+        <translation>Effizient-links</translation>
     </message>
     <message>
         <source>Efficient-center</source>
