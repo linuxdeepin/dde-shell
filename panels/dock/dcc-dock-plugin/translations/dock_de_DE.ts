@@ -41,7 +41,7 @@
     </message>
     <message>
         <source>Efficient-center</source>
-        <translation type="unfinished"/>
+        <translation>Effizient-mittig</translation>
     </message>
     <message>
         <source>Dock size</source>
