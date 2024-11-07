@@ -81,11 +81,11 @@
     </message>
     <message>
         <source>Keep shown</source>
-        <translation type="unfinished"/>
+        <translation>Mantén-lo visible</translation>
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation type="unfinished"/>
+        <translation>Mantén-lo amagat</translation>
     </message>
     <message>
         <source>Smart hide</source>
