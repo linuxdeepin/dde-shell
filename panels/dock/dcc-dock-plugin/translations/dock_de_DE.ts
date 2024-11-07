@@ -89,7 +89,7 @@
     </message>
     <message>
         <source>Smart hide</source>
-        <translation type="unfinished"/>
+        <translation>Schlaues Ausblenden</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
