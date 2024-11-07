@@ -18,7 +18,7 @@
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation type="unfinished"/>
+        <translation>Legen Sie die Anzeige und Größe von Symbolen auf dem Desktop fest</translation>
     </message>
 </context>
 <context>
@@ -33,7 +33,7 @@
     </message>
     <message>
         <source>Fashion</source>
-        <translation type="unfinished"/>
+        <translation>Design</translation>
     </message>
     <message>
         <source>Efficient-left</source>
