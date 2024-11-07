@@ -113,7 +113,7 @@
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Përzgjidhni cilat ikona shfaqen te Paneli</translation>
     </message>
 </context>
 </TS>
