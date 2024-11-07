@@ -101,7 +101,7 @@
     </message>
     <message>
         <source>Only on main</source>
-        <translation type="unfinished"/>
+        <translation>Només a la principal</translation>
     </message>
     <message>
         <source>On screen where the cursor is</source>
