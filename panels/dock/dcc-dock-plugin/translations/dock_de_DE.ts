@@ -53,7 +53,7 @@
     </message>
     <message>
         <source>Large</source>
-        <translation type="unfinished"/>
+        <translation>Groß</translation>
     </message>
     <message>
         <source>Position on the screen</source>
