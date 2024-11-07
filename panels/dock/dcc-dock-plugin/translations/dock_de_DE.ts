@@ -93,7 +93,7 @@
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation type="unfinished"/>
+        <translation>Mehrere Bildschirme</translation>
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
