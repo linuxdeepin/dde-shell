@@ -57,7 +57,7 @@
     </message>
     <message>
         <source>Position on the screen</source>
-        <translation type="unfinished"/>
+        <translation>Posició a la pantalla</translation>
     </message>
     <message>
         <source>Top</source>
