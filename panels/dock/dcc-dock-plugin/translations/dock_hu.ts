@@ -45,15 +45,15 @@
     </message>
     <message>
         <source>Dock size</source>
-        <translation type="unfinished"/>
+        <translation>Dokkoló mérete</translation>
     </message>
     <message>
         <source>Small</source>
-        <translation type="unfinished"/>
+        <translation>Kicsi</translation>
     </message>
     <message>
         <source>Large</source>
-        <translation type="unfinished"/>
+        <translation>Nagy</translation>
     </message>
     <message>
         <source>Position on the screen</source>
