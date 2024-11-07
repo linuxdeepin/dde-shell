@@ -85,7 +85,7 @@
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation type="unfinished"/>
+        <translation>Ausgeblendet lassen</translation>
     </message>
     <message>
         <source>Smart hide</source>
