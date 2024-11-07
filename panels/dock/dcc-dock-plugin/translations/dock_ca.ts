@@ -97,7 +97,7 @@
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation>Establiu la posició de la barra de tasques a la pantalla</translation>
+        <translation>Establiu la posició de la barra de tasques a la pantalla.</translation>
     </message>
     <message>
         <source>Only on main</source>
