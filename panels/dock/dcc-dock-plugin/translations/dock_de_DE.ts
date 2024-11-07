@@ -97,7 +97,7 @@
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation>Position der Taskbar am Bildschirm bestimmen</translation>
+        <translation>Position der Aufgabenleiste am Bildschirm bestimmen</translation>
     </message>
     <message>
         <source>Only on main</source>
