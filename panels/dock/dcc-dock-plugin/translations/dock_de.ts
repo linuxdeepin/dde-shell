@@ -18,7 +18,7 @@
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation>Legen Sie die Anzeige und Größe von Symbolen auf dem Desktop fest</translation>
+        <translation>Festlegen der Anzeige und Größe von Symbolen auf dem Desktop</translation>
     </message>
 </context>
 <context>
@@ -97,7 +97,7 @@
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation type="unfinished"/>
+        <translation>Festlegen der Position der Taskleiste auf dem Bildschirm</translation>
     </message>
     <message>
         <source>Only on main</source>
