@@ -57,7 +57,7 @@
     </message>
     <message>
         <source>Position on the screen</source>
-        <translation type="unfinished"/>
+        <translation>Képernyőn való pozíció</translation>
     </message>
     <message>
         <source>Top</source>
@@ -81,7 +81,7 @@
     </message>
     <message>
         <source>Keep shown</source>
-        <translation type="unfinished"/>
+        <translation>Megjelenítve tartás</translation>
     </message>
     <message>
         <source>Keep hidden</source>
