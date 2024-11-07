@@ -109,7 +109,7 @@
     </message>
     <message>
         <source>Plugin Area</source>
-        <translation type="unfinished"/>
+        <translation>Àrea de connectors</translation>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
