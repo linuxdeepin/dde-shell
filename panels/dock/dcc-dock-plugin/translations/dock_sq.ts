@@ -81,7 +81,7 @@
     </message>
     <message>
         <source>Keep shown</source>
-        <translation type="unfinished"/>
+        <translation>Mbaje të shfaqur</translation>
     </message>
     <message>
         <source>Keep hidden</source>
