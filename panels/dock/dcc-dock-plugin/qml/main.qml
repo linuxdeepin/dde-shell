@@ -55,8 +55,8 @@ DccObject {
                         ColumnLayout {
                             Item {
                                 id: borderRect
-                                Layout.preferWidth: 206
-                                Layout.preferHeight: 100
+                                Layout.preferredWidth: 206
+                                Layout.preferredHeight: 100
                                 Layout.alignment: Qt.AlignHCenter
 
                                 Rectangle {
