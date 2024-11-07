@@ -89,11 +89,11 @@
     </message>
     <message>
         <source>Smart hide</source>
-        <translation type="unfinished"/>
+        <translation>Ocultació intel·ligent</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation type="unfinished"/>
+        <translation>Pantalles múltiples</translation>
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
