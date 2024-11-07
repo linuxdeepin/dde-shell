@@ -85,15 +85,15 @@
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation type="unfinished"/>
+        <translation>Maradjon rejtett</translation>
     </message>
     <message>
         <source>Smart hide</source>
-        <translation type="unfinished"/>
+        <translation>Intelligens elrejtés</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation type="unfinished"/>
+        <translation>Többképernyős mód</translation>
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
