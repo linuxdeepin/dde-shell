@@ -97,11 +97,11 @@
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation type="unfinished"/>
+        <translation>Caktoni pozicionin në ekran të panelit të punëve</translation>
     </message>
     <message>
         <source>Only on main</source>
-        <translation type="unfinished"/>
+        <translation>Vetëm te kryesore</translation>
     </message>
     <message>
         <source>On screen where the cursor is</source>
