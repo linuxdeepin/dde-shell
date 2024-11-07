@@ -85,11 +85,11 @@
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation type="unfinished"/>
+        <translation>Mbaje të fshehur</translation>
     </message>
     <message>
         <source>Smart hide</source>
-        <translation type="unfinished"/>
+        <translation>Fshehje e mençur</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
