@@ -105,11 +105,11 @@
     </message>
     <message>
         <source>On screen where the cursor is</source>
-        <translation type="unfinished"/>
+        <translation>Te ekrani ku gjendet kursori</translation>
     </message>
     <message>
         <source>Plugin Area</source>
-        <translation type="unfinished"/>
+        <translation>Zonë Shtojcash</translation>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
