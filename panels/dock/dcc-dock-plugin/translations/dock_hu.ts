@@ -101,7 +101,7 @@
     </message>
     <message>
         <source>Only on main</source>
-        <translation type="unfinished"/>
+        <translation>Megjelenítés csak a Főképernyőn</translation>
     </message>
     <message>
         <source>On screen where the cursor is</source>
