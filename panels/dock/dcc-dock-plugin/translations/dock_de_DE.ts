@@ -14,7 +14,7 @@
     <name>dock</name>
     <message>
         <source>Desktop and taskbar</source>
-        <translation type="unfinished"/>
+        <translation>Effizient-links</translation>
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
