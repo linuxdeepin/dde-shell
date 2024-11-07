@@ -105,7 +105,7 @@
     </message>
     <message>
         <source>On screen where the cursor is</source>
-        <translation type="unfinished"/>
+        <translation>A la pantalla on hi ha el cursor</translation>
     </message>
     <message>
         <source>Plugin Area</source>
