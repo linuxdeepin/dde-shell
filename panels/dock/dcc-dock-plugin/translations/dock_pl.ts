@@ -97,7 +97,7 @@
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation type="unfinished"/>
+        <translation>Ustaw położenie paska zadań na ekranie</translation>
     </message>
     <message>
         <source>Only on main</source>
