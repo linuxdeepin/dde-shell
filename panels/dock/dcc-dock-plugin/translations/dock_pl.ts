@@ -93,7 +93,7 @@
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation type="unfinished"/>
+        <translation>Wiele ekranów</translation>
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
@@ -101,7 +101,7 @@
     </message>
     <message>
         <source>Only on main</source>
-        <translation type="unfinished"/>
+        <translation>Tylko na głównym</translation>
     </message>
     <message>
         <source>On screen where the cursor is</source>
