@@ -114,7 +114,7 @@ bool TaskManager::init()
                         continue;
 
                     for (auto identifiedOrder : identifiedOrders) {
-                        auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id);
+                        auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id, 1, Qt::MatchExactly | Qt::MatchWrap);
                         if (res.size() > 0 && res.first().isValid()) {
                             return res.first();
                         }
