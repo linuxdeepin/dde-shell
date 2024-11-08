@@ -81,15 +81,15 @@
     </message>
     <message>
         <source>Keep shown</source>
-        <translation type="unfinished"/>
+        <translation>Zawsze wyświetlaj</translation>
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation type="unfinished"/>
+        <translation>Zawsze ukrywaj</translation>
     </message>
     <message>
         <source>Smart hide</source>
-        <translation type="unfinished"/>
+        <translation>Inteligentne ukrywanie</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
