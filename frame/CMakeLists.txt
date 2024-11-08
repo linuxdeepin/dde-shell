@@ -75,7 +75,7 @@ add_library(dde-shell-frame SHARED
 )
 
 set_target_properties(dde-shell-frame PROPERTIES
-    PUBLIC_HEADER ${PUBLIC_HEADERS}
+    PUBLIC_HEADER "${PUBLIC_HEADERS}"
 )
 
 qt_generate_wayland_protocol_client_sources(dde-shell-frame FILES
