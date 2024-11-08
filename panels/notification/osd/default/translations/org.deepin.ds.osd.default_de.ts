@@ -14,22 +14,22 @@
     <message>
         <location filename="../package/main.qml" line="56"/>
         <source>Caps Lock on</source>
-        <translation type="unfinished"/>
+        <translation>Feststelltaste ein</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="57"/>
         <source>Caps Lock off</source>
-        <translation type="unfinished"/>
+        <translation>Feststelltaste aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="58"/>
         <source>Numeric keypad on</source>
-        <translation type="unfinished"/>
+        <translation>Ziffernblock ein</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="59"/>
         <source>Numeric keypad off</source>
-        <translation type="unfinished"/>
+        <translation>Ziffernblock aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="60"/>
@@ -44,12 +44,12 @@
     <message>
         <location filename="../package/main.qml" line="62"/>
         <source>Touchpad toggle</source>
-        <translation type="unfinished"/>
+        <translation>Tastfeld-Umschalter</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="63"/>
         <source>Fn toggle</source>
-        <translation type="unfinished"/>
+        <translation>Fn-Umschalter</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="64"/>
@@ -64,22 +64,22 @@
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation type="unfinished"/>
+        <translation>Stummschalten ein</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation type="unfinished"/>
+        <translation>Stummschalten aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
         <source>Balanced power</source>
-        <translation type="unfinished"/>
+        <translation>Ausgeglichene Leistung</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="69"/>
         <source>Power saver</source>
-        <translation type="unfinished"/>
+        <translation>Energiesparen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="70"/>
