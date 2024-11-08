@@ -21,7 +21,6 @@
 
 #include <QGuiApplication>
 #include <QStringLiteral>
-#include <qtimer.h>
 
 #ifdef BUILD_WITH_X11
 #include "x11windowmonitor.h"
@@ -114,7 +113,7 @@ bool TaskManager::init()
                         continue;
 
                     for (auto identifiedOrder : identifiedOrders) {
-                        auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id, 1, Qt::MatchExactly | Qt::MatchWrap);
+                        auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id, 1, Qt::MatchFixedString | Qt::MatchWrap);
                         if (res.size() > 0 && res.first().isValid()) {
                             return res.first();
                         }
