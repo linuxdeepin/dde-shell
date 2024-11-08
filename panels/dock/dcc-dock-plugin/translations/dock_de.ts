@@ -1,119 +1,119 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ca">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="de">
 <context>
     <name>PluginArea</name>
     <message>
         <source>Plugin Area</source>
-        <translation>Àrea de connectors</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation>Seleccioneu quines icones apareixen a l&apos;acoblador.</translation>
+        <translation>Wählen Sie aus, welche Symbole im Dock erscheinen sollen</translation>
     </message>
 </context>
 <context>
     <name>dock</name>
     <message>
         <source>Desktop and taskbar</source>
-        <translation>Escriptori i barra de tasques</translation>
+        <translation>Desktop und Taskleiste</translation>
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation>Establiu la visualització i la mida de les icones a l&apos;escriptori.</translation>
+        <translation>Festlegen der Anzeige und Größe von Symbolen auf dem Desktop</translation>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
         <source>Dock</source>
-        <translation>Acoblador</translation>
+        <translation>Dock</translation>
     </message>
     <message>
         <source>Mode</source>
-        <translation>Mode</translation>
+        <translation>Modus</translation>
     </message>
     <message>
         <source>Fashion</source>
-        <translation>Moda</translation>
+        <translation>Design</translation>
     </message>
     <message>
         <source>Efficient-left</source>
-        <translation>Eficient a l&apos;esquerra</translation>
+        <translation>Effizient-links</translation>
     </message>
     <message>
         <source>Efficient-center</source>
-        <translation>Eficient al mig</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Dock size</source>
-        <translation>Mida de l&apos;acoblador</translation>
+        <translation>Dockgröße</translation>
     </message>
     <message>
         <source>Small</source>
-        <translation>Petita</translation>
+        <translation>Klein</translation>
     </message>
     <message>
         <source>Large</source>
-        <translation>Grossa</translation>
+        <translation>Groß</translation>
     </message>
     <message>
         <source>Position on the screen</source>
-        <translation>Posició a la pantalla</translation>
+        <translation>Position auf dem Bildschirm</translation>
     </message>
     <message>
         <source>Top</source>
-        <translation>A dalt</translation>
+        <translation>Oben</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation>A baix</translation>
+        <translation>Unten</translation>
     </message>
     <message>
         <source>Left</source>
-        <translation>A l&apos;esquerra</translation>
+        <translation>Links</translation>
     </message>
     <message>
         <source>Right</source>
-        <translation>A la dreta</translation>
+        <translation>Rechts</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation>Estat</translation>
+        <translation>Status</translation>
     </message>
     <message>
         <source>Keep shown</source>
-        <translation>Mantén-lo visible</translation>
+        <translation>Angezeigt lassen</translation>
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation>Mantén-lo amagat</translation>
+        <translation>Ausgeblendet lassen</translation>
     </message>
     <message>
         <source>Smart hide</source>
-        <translation>Ocultació intel·ligent</translation>
+        <translation>Intelligentes Ausblenden</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation>Pantalles múltiples</translation>
+        <translation>Mehrere Bildschirme</translation>
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation>Establiu la posició de la barra de tasques a la pantalla.</translation>
+        <translation>Festlegen der Position der Taskleiste auf dem Bildschirm</translation>
     </message>
     <message>
         <source>Only on main</source>
-        <translation>Només a la principal</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>On screen where the cursor is</source>
-        <translation>A la pantalla on hi ha el cursor</translation>
+        <translation>Auf dem Bildschirm, wo sich der Zeiger befindet</translation>
     </message>
     <message>
         <source>Plugin Area</source>
-        <translation>Àrea de connectors</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation>Seleccioneu quines icones apareixen a l&apos;acoblador.</translation>
+        <translation>Wählen Sie aus, welche Symbole im Dock erscheinen sollen</translation>
     </message>
 </context>
 </TS>

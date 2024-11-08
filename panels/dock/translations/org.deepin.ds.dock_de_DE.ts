@@ -74,7 +74,7 @@
     <message>
         <location filename="../package/main.qml" line="224"/>
         <source>Keep Hidden</source>
-        <translation>Immer ausblenden</translation>
+        <translation>Ausgeblendet lassen</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="230"/>

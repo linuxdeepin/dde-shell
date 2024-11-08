@@ -1,119 +1,119 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ca">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="sq">
 <context>
     <name>PluginArea</name>
     <message>
         <source>Plugin Area</source>
-        <translation>Àrea de connectors</translation>
+        <translation>Zonë Shtojcash</translation>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation>Seleccioneu quines icones apareixen a l&apos;acoblador.</translation>
+        <translation>Përzgjidhni cilat ikona shfaqen te Paneli</translation>
     </message>
 </context>
 <context>
     <name>dock</name>
     <message>
         <source>Desktop and taskbar</source>
-        <translation>Escriptori i barra de tasques</translation>
+        <translation>Desktop dhe panel punësh</translation>
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation>Establiu la visualització i la mida de les icones a l&apos;escriptori.</translation>
+        <translation>Caktoni shfaqjen dhe madhësinë e ikonave në desktop</translation>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
         <source>Dock</source>
-        <translation>Acoblador</translation>
+        <translation>Panel</translation>
     </message>
     <message>
         <source>Mode</source>
-        <translation>Mode</translation>
+        <translation>Mënyrë</translation>
     </message>
     <message>
         <source>Fashion</source>
-        <translation>Moda</translation>
+        <translation>Modë</translation>
     </message>
     <message>
         <source>Efficient-left</source>
-        <translation>Eficient a l&apos;esquerra</translation>
+        <translation>Efikase, majtas</translation>
     </message>
     <message>
         <source>Efficient-center</source>
-        <translation>Eficient al mig</translation>
+        <translation>Efikase, në qendër</translation>
     </message>
     <message>
         <source>Dock size</source>
-        <translation>Mida de l&apos;acoblador</translation>
+        <translation>Madhësi paneli</translation>
     </message>
     <message>
         <source>Small</source>
-        <translation>Petita</translation>
+        <translation>E vogël</translation>
     </message>
     <message>
         <source>Large</source>
-        <translation>Grossa</translation>
+        <translation>E madhe</translation>
     </message>
     <message>
         <source>Position on the screen</source>
-        <translation>Posició a la pantalla</translation>
+        <translation>Pozicion në ekran</translation>
     </message>
     <message>
         <source>Top</source>
-        <translation>A dalt</translation>
+        <translation>Në krye</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation>A baix</translation>
+        <translation>Në fund</translation>
     </message>
     <message>
         <source>Left</source>
-        <translation>A l&apos;esquerra</translation>
+        <translation>Majtas</translation>
     </message>
     <message>
         <source>Right</source>
-        <translation>A la dreta</translation>
+        <translation>Djathtas</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation>Estat</translation>
+        <translation>Gjendje</translation>
     </message>
     <message>
         <source>Keep shown</source>
-        <translation>Mantén-lo visible</translation>
+        <translation>Mbaje të shfaqur</translation>
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation>Mantén-lo amagat</translation>
+        <translation>Mbaje të fshehur</translation>
     </message>
     <message>
         <source>Smart hide</source>
-        <translation>Ocultació intel·ligent</translation>
+        <translation>Fshehje e mençur</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation>Pantalles múltiples</translation>
+        <translation>Disa Ekrane</translation>
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation>Establiu la posició de la barra de tasques a la pantalla.</translation>
+        <translation>Caktoni pozicionin në ekran të panelit të punëve</translation>
     </message>
     <message>
         <source>Only on main</source>
-        <translation>Només a la principal</translation>
+        <translation>Vetëm te kryesore</translation>
     </message>
     <message>
         <source>On screen where the cursor is</source>
-        <translation>A la pantalla on hi ha el cursor</translation>
+        <translation>Te ekrani ku gjendet kursori</translation>
     </message>
     <message>
         <source>Plugin Area</source>
-        <translation>Àrea de connectors</translation>
+        <translation>Zonë Shtojcash</translation>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation>Seleccioneu quines icones apareixen a l&apos;acoblador.</translation>
+        <translation>Përzgjidhni cilat ikona shfaqen te Paneli</translation>
     </message>
 </context>
 </TS>
