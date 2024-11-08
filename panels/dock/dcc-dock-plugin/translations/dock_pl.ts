@@ -18,7 +18,7 @@
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation type="unfinished"/>
+        <translation>Ustaw ekran i rozmiar ikon na pulpicie</translation>
     </message>
 </context>
 <context>
