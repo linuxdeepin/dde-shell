@@ -14,11 +14,11 @@
     <name>dock</name>
     <message>
         <source>Desktop and taskbar</source>
-        <translation type="unfinished"/>
+        <translation>Desktop e barra de tarefas</translation>
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation type="unfinished"/>
+        <translation>Defina a exibição e o tamanho dos ícones na área de trabalho</translation>
     </message>
 </context>
 <context>
@@ -33,15 +33,15 @@
     </message>
     <message>
         <source>Fashion</source>
-        <translation type="unfinished"/>
+        <translation>Estilo</translation>
     </message>
     <message>
         <source>Efficient-left</source>
-        <translation type="unfinished"/>
+        <translation>Eficiente-esquerda</translation>
     </message>
     <message>
         <source>Efficient-center</source>
-        <translation type="unfinished"/>
+        <translation>Eficiente-Centro</translation>
     </message>
     <message>
         <source>Dock size</source>
