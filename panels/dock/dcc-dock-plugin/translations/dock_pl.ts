@@ -1,121 +1,119 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pl">
 <context>
     <name>PluginArea</name>
     <message>
         <source>Plugin Area</source>
-        <translation type="unfinished"></translation>
+        <translation>Strefa wtyczek</translation>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation type="unfinished"></translation>
+        <translation>Wybierz, które wtyczki pojawią się w doku</translation>
     </message>
 </context>
 <context>
     <name>dock</name>
     <message>
         <source>Desktop and taskbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Pulpit i pasek zadań</translation>
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation type="unfinished"></translation>
+        <translation>Ustaw ekran i rozmiar ikon na pulpicie</translation>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"></translation>
+        <translation>Dok</translation>
     </message>
     <message>
         <source>Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Tryb</translation>
     </message>
     <message>
         <source>Fashion</source>
-        <translation type="unfinished"></translation>
+        <translation>Modny</translation>
     </message>
     <message>
         <source>Efficient-left</source>
-        <translation type="unfinished"></translation>
+        <translation>Wydajny-lewo</translation>
     </message>
     <message>
         <source>Efficient-center</source>
-        <translation type="unfinished"></translation>
+        <translation>Wydajny-środek</translation>
     </message>
     <message>
         <source>Dock size</source>
-        <translation type="unfinished"></translation>
+        <translation>Rozmiar doku</translation>
     </message>
     <message>
         <source>Small</source>
-        <translation type="unfinished"></translation>
+        <translation>Mały</translation>
     </message>
     <message>
         <source>Large</source>
-        <translation type="unfinished"></translation>
+        <translation>Duży</translation>
     </message>
     <message>
         <source>Position on the screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Pozycja na ekranie</translation>
     </message>
     <message>
         <source>Top</source>
-        <translation type="unfinished"></translation>
+        <translation>Góra</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation type="unfinished"></translation>
+        <translation>Dół</translation>
     </message>
     <message>
         <source>Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Lewo</translation>
     </message>
     <message>
         <source>Right</source>
-        <translation type="unfinished"></translation>
+        <translation>Prawo</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation>Status</translation>
     </message>
     <message>
         <source>Keep shown</source>
-        <translation type="unfinished"></translation>
+        <translation>Zawsze wyświetlaj</translation>
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation type="unfinished"></translation>
+        <translation>Zawsze ukrywaj</translation>
     </message>
     <message>
         <source>Smart hide</source>
-        <translation type="unfinished"></translation>
+        <translation>Inteligentne ukrywanie</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation type="unfinished"></translation>
+        <translation>Wiele ekranów</translation>
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Ustaw położenie paska zadań na ekranie</translation>
     </message>
     <message>
         <source>Only on main</source>
-        <translation type="unfinished"></translation>
+        <translation>Tylko na głównym</translation>
     </message>
     <message>
         <source>On screen where the cursor is</source>
-        <translation type="unfinished"></translation>
+        <translation>Na ekranie, tam gdzie jest kursor</translation>
     </message>
     <message>
         <source>Plugin Area</source>
-        <translation type="unfinished"></translation>
+        <translation>Strefa wtyczek</translation>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation type="unfinished"></translation>
+        <translation>Wybierz, które ikony pojawią się w doku</translation>
     </message>
 </context>
 </TS>
