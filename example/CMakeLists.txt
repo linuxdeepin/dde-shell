@@ -6,9 +6,12 @@ find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Co
 
 add_subdirectory(applet-example)
 add_subdirectory(applet-example-data)
-add_subdirectory(bridge-example)
 add_subdirectory(containment-example)
 add_subdirectory(panel-example)
 add_subdirectory(layershell-example)
 add_subdirectory(osd-example)
 add_subdirectory(drag-example)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_subdirectory(bridge-example)
+endif()
