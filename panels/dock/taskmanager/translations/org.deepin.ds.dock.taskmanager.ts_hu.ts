@@ -2,32 +2,32 @@
 <context>
     <name>dock::AppItem</name>
     <message>
-        <location filename="../appitem.cpp" line="84"/>
+        <location filename="../appitem.cpp" line="83"/>
         <source>Open</source>
         <translation>Megnyitás</translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="100"/>
+        <location filename="../appitem.cpp" line="99"/>
         <source>All Windows</source>
         <translation>Összes ablak</translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="106"/>
+        <location filename="../appitem.cpp" line="105"/>
         <source>Undock</source>
         <translation>Eltávolítás a Dokkolóról</translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="106"/>
+        <location filename="../appitem.cpp" line="105"/>
         <source>Dock</source>
         <translation>Kitűzés a Dokkra</translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="112"/>
+        <location filename="../appitem.cpp" line="111"/>
         <source>Force Quit</source>
         <translation>Kényszerített kilépés</translation>
     </message>
     <message>
-        <location filename="../appitem.cpp" line="119"/>
+        <location filename="../appitem.cpp" line="118"/>
         <source>Close All</source>
         <translation>Összes bezárása</translation>
     </message>
