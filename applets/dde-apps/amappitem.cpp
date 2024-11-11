@@ -19,7 +19,7 @@ static const QString DEFAULT_KEY = "default";
 static QString locale = QLocale::system().name();
 
 AMAppItem::AMAppItem(const QDBusObjectPath &path, QObject *parent)
-    : AppItem(DUtil::unescapeFromObjectPath(path.path().split('/').last()))
+    : AppItem(DUtil::unescapeFromObjectPath(path.path().split('/').last()), AppItemModel::AppItemType)
     , Application(AM_DBUS_SERVICE, path.path(), QDBusConnection::sessionBus(), parent)
 {
 }

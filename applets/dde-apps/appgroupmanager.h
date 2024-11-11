@@ -13,6 +13,7 @@
 #include <tuple>
 
 namespace apps {
+class AMAppItemModel;
 class AppGroup;
 /*! \brief AppGroupManager is a interface to manager all groups.
  *
@@ -25,12 +26,11 @@ class AppGroupManager : public QStandardItemModel
 public:
     enum Roles {
         GroupIdRole = Qt::UserRole + 1,
-        GroupNameRole,
+        GroupItemsPerPageRole,
         GroupAppItemsRole,
         ExtendRole = 0x1000,
     };
-
-    static AppGroupManager* instance();
+    explicit AppGroupManager(AMAppItemModel * referenceModel, QObject* parent = nullptr);
 
     QVariant data(const QModelIndex &index, int role = GroupIdRole) const override;
 
@@ -38,11 +38,12 @@ public:
     void setAppGroupInfo(const QString &appId, std::tuple<int, int, int> groupInfo);
 
 private:
-    AppGroupManager(QObject* parent = nullptr);
     void loadAppGroupInfo();
     void dumpAppGroupInfo();
+    QString assignGroupId() const;
 
 private:
+    AMAppItemModel * m_referenceModel;
     QHash<QString, std::tuple<int, int>> m_map;
     QTimer* m_dumpTimer;
     Dtk::Core::DConfig *m_config;

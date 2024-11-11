@@ -9,7 +9,6 @@ namespace apps {
 AppItemModel::AppItemModel(QObject *parent)
     : QStandardItemModel(parent)
 {
-    AppGroupManager::instance();
 }
 
 QHash<int, QByteArray> AppItemModel::roleNames() const
@@ -27,6 +26,6 @@ QHash<int, QByteArray> AppItemModel::roleNames() const
             {AppItemModel::DockedRole, QByteArrayLiteral("docked")},
             {AppItemModel::OnDesktopRole, QByteArrayLiteral("onDesktop")},
             {AppItemModel::AutoStartRole, QByteArrayLiteral("autoStart")},
-            {AppItemModel::GroupRole, QByteArrayLiteral("group")}};
+            {AppItemModel::AppTypeRole, QByteArrayLiteral("appType")}};
 }
 }

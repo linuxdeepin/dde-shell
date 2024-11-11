@@ -57,9 +57,6 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
             auto path = app.key();
             if (!path.path().isEmpty()) {
                 auto c = new AMAppItem(path, app.value());
-                if (auto group = AppGroupManager::instance()->getAppGroupInfo(c->appId()); group != std::make_tuple(-1, -1, -1)) {
-                    c->setGroup({std::get<0>(group), std::get<1>(group), std::get<2>(group)});
-                }
                 appendRow(c);
             }
         }

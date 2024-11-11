@@ -4,6 +4,7 @@
 
 #include "appgroup.h"
 #include "appgroupmanager.h"
+#include "appitemmodel.h"
 
 #include <QLoggingCategory>
 #include <algorithm>
@@ -11,21 +12,16 @@
 Q_LOGGING_CATEGORY(appGroupLog, "org.deepin.ds.dde-apps.appgroup")
 
 namespace apps {
-AppGroup::AppGroup(const QString &name, const QList<QStringList> &appIDs)
-    : QStandardItem()
+AppGroup::AppGroup(const QString &groupId, const QString &name, const QList<QStringList> &appIDs)
+    : AppItem(groupId, AppItemModel::FolderItemType)
 {
-    setName(name);
+    if (groupId == QStringLiteral("internal/folder/0")) {
+        setItemsPerPage(4 * 8);
+    } else {
+        setItemsPerPage(3 * 4);
+    }
+    setAppName(name);
     setAppItems(appIDs);
-}
-
-QString AppGroup::name() const
-{
-    return data(AppGroupManager::GroupNameRole).toString();
-}
-
-void AppGroup::setName(const QString &name)
-{
-    return setData(name, AppGroupManager::GroupNameRole);
 }
 
 QList<QStringList> AppGroup::appItems() const
@@ -51,5 +47,11 @@ void AppGroup::setAppItems(const QList<QStringList> &items)
     });
     return setData(data, AppGroupManager::GroupAppItemsRole);
 }
+
+void AppGroup::setItemsPerPage(int number)
+{
+    return setData(number, AppGroupManager::GroupItemsPerPageRole);
+}
+
 }
 

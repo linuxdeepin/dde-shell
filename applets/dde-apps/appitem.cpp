@@ -11,14 +11,10 @@
 #include <tuple>
 
 namespace apps {
-AppItem::AppItem(const QString &appid)
+AppItem::AppItem(const QString &appid, AppItemModel::AppTypes appType)
 {
     setAppId(appid);
-
-    int groupPos, pagePos, itemPos;
-    std::tie(groupPos, pagePos, itemPos) = AppGroupManager::instance()->getAppGroupInfo(appId());
-    QVariantList data = {groupPos, pagePos, itemPos};
-    setData(data, AppItemModel::GroupRole);
+    setAppType(appType);
 
     auto launchedTimes = AppsLaunchTimesHelper::instance()->getLaunchedTimesFor(appId());
     setData(launchedTimes, AppItemModel::LaunchedTimesRole);
@@ -41,6 +37,16 @@ QString AppItem::appId() const
 void AppItem::setAppId(const QString &appid)
 {
     return setData(appid, AppItemModel::DesktopIdRole);
+}
+
+AppItemModel::AppTypes AppItem::appType() const
+{
+    return data(AppItemModel::AppTypeRole).value<AppItemModel::AppTypes>();
+}
+
+void AppItem::setAppType(AppItemModel::AppTypes appType)
+{
+    return setData(appType, AppItemModel::AppTypeRole);
 }
 
 QString AppItem::appName() const
@@ -132,23 +138,6 @@ void AppItem::setLaunchedTimes(const quint64 &times)
 {
     AppsLaunchTimesHelper::instance()->setLaunchTimesFor(appId(), times);
     return setData(times, AppItemModel::LaunchedTimesRole);
-}
-
-QList<int> AppItem::group() const
-{
-    return data(AppItemModel::GroupRole).value<QList<int>>();
-}
-
-void AppItem::setGroup(const QList<int> &group)
-{
-    if (group.size() != 3)
-        return;
-    auto groupPos = group[0];
-    auto pagePos = group[1];
-    auto itemPos = group[2];
-    AppGroupManager::instance()->setAppGroupInfo(appId(), std::make_tuple(groupPos, pagePos, itemPos));
-    QVariantList data = {groupPos, pagePos, itemPos};
-    return setData(data, AppItemModel::GroupRole);
 }
 
 bool AppItem::docked() const

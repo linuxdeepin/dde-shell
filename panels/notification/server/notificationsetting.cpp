@@ -31,7 +31,7 @@ enum Roles {
     DockedRole,
     OnDesktopRole,
     AutoStartRole,
-    GroupRole,
+    AppTypeRole,
 };
 }
 
