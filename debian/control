@@ -73,7 +73,7 @@ Multi-Arch: same
 Description: DDE Shell example
  This package contains some plugins based on dde-shell plugin system.
 
-Package: dcc-dock-plugin
+Package: dde-dock-dcc-plugin
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Multi-Arch: same
