@@ -14,8 +14,8 @@ namespace apps
 {
 AppsApplet::AppsApplet(QObject *parent)
     : DApplet(parent)
-    , m_groupModel(AppGroupManager::instance())
     , m_appModel(new AMAppItemModel(this))
+    , m_groupModel(new AppGroupManager(m_appModel, this))
 {
 }
 
@@ -31,7 +31,7 @@ bool AppsApplet::load()
 
 QAbstractItemModel *AppsApplet::groupModel() const
 {
-    return AppGroupManager::instance();
+    return m_groupModel;
 }
 
 QAbstractItemModel *AppsApplet::appModel() const

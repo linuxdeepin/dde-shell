@@ -12,6 +12,7 @@
 DS_USE_NAMESPACE
 
 namespace apps {
+class AMAppItemModel;
 class AppItem;
 class AppsApplet : public DApplet
 {
@@ -29,7 +30,7 @@ public:
     QAbstractItemModel *groupModel() const;
 
 private:
+    AMAppItemModel *m_appModel;
     QAbstractItemModel *m_groupModel;
-    QAbstractItemModel *m_appModel;
 };
 }

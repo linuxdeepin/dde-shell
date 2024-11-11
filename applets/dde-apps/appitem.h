@@ -11,7 +11,7 @@ namespace apps {
 class AppItem : public QStandardItem
 {
 public:
-    AppItem(const QString &appid);
+    AppItem(const QString &appid, AppItemModel::AppTypes appType);
 
     // action
     virtual void launch(const QString &action = {}, const QStringList &fields = {}, const QVariantMap &options = {});
@@ -19,6 +19,9 @@ public:
     // desktop file static data
     QString appId() const;
     void setAppId(const QString &appid);
+
+    AppItemModel::AppTypes appType() const;
+    void setAppType(AppItemModel::AppTypes appType);
 
     QString appName() const;
     void setAppName(const QString &name);

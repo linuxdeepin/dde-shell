@@ -25,9 +25,15 @@ public:
         DockedRole,
         OnDesktopRole,
         AutoStartRole,
-        GroupRole,
+        AppTypeRole,
     };
     Q_ENUM(Roles)
+
+    enum AppTypes {
+        AppItemType,
+        FolderItemType,
+    };
+    Q_ENUM(AppTypes)
 
     // This is different from the menu-spec Main Categories list.
     enum DDECategories {

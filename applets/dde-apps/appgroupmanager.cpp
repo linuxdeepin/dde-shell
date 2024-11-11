@@ -4,35 +4,27 @@
 
 #include "appgroupmanager.h"
 #include "appgroup.h"
+#include "amappitemmodel.h"
 
 #include <QtConcurrent>
 
 namespace apps {
-static constexpr uint GROUP_MAX_ITEMS_PER_PAGE = 3 * 4;
 
-AppGroupManager* AppGroupManager::instance()
-{
-    static AppGroupManager* _instance = nullptr;
-    if (_instance == nullptr) {
-        _instance = new AppGroupManager;
-    }
-
-    return _instance;
-}
-AppGroupManager::AppGroupManager(QObject *parent)
+AppGroupManager::AppGroupManager(AMAppItemModel * referenceModel, QObject *parent)
     : QStandardItemModel(parent)
+    , m_referenceModel(referenceModel)
     , m_config(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dde-apps", "", this))
     , m_dumpTimer(new QTimer(this))
 {
     m_dumpTimer->setSingleShot(true);
     m_dumpTimer->setInterval(1000);
+
+    loadAppGroupInfo();
+
     connect(m_dumpTimer, &QTimer::timeout, this, [this](){
         dumpAppGroupInfo();
     });
-
     connect(this, &AppGroupManager::dataChanged, this, &AppGroupManager::dumpAppGroupInfo);
-
-    loadAppGroupInfo();
 }
 
 QVariant AppGroupManager::data(const QModelIndex &index, int role) const
@@ -84,13 +76,14 @@ void AppGroupManager::setAppGroupInfo(const QString &appId, std::tuple<int, int,
     }
 
     auto appItems = groupIndex.data(GroupAppItemsRole).value<QList<QStringList>>();
+    int groupItemsPerPage = groupIndex.data(GroupItemsPerPageRole).toInt();
 
     for (int i = pagePos; i < appItems.length() - 1; i++) {
         appItems[i].insert(itemPos, appId);
         m_map.insert(appId, std::make_tuple(groupPos, pagePos));
 
         // 本页最后一位元素插入到下页
-        if (appItems[i].length() > GROUP_MAX_ITEMS_PER_PAGE) {
+        if (appItems[i].length() > groupItemsPerPage) {
             auto item = appItems[i].takeLast();
 
             appItems[i + 1].insert(0, item);
@@ -98,7 +91,7 @@ void AppGroupManager::setAppGroupInfo(const QString &appId, std::tuple<int, int,
         }
     }
 
-    if (appItems.length() > 1 && appItems.last().length() > GROUP_MAX_ITEMS_PER_PAGE) {
+    if (appItems.length() > 1 && appItems.last().length() > groupItemsPerPage) {
         auto item = appItems.last().takeLast();
         appItems.append({item});
     }
@@ -124,6 +117,7 @@ void AppGroupManager::loadAppGroupInfo()
     auto groups = m_config->value("Groups").toList();
     for (int i = 0; i < groups.length(); i++) {
         auto group = groups[i].toMap();
+        auto folderId = group.value("folderId", "").toString();
         auto name = group.value("name", "").toString();
         auto pages = group.value("appItems", QVariantList()).toList();
         QList<QStringList> items;
@@ -135,7 +129,11 @@ void AppGroupManager::loadAppGroupInfo()
                 m_map.insert(item, std::make_tuple(i, j));
             });
         }
-        auto p = new AppGroup(name, items);
+
+        if (folderId.isEmpty()) {
+            folderId = assignGroupId();
+        }
+        auto p = new AppGroup(folderId, name, items);
         appendRow(p);
     }
 }
@@ -146,11 +144,29 @@ void AppGroupManager::dumpAppGroupInfo()
     for (int i = 0; i < rowCount(); i++) {
         auto data = index(i, 0);
         QVariantMap valueMap;
-        valueMap.insert("name", data.data(GroupNameRole));
+        valueMap.insert("name", data.data(AppItemModel::NameRole));
+        valueMap.insert("folderId", data.data(AppItemModel::DesktopIdRole));
         valueMap.insert("appItems", data.data(GroupAppItemsRole));
         list << valueMap;
     }
 
     m_config->setValue("Groups", list);
 }
+
+QString AppGroupManager::assignGroupId() const
+{
+    QStringList knownGroupIds;
+    for (int i = 0; i < rowCount(); i++) {
+        auto group = index(i, 0);
+        knownGroupIds.append(group.data(AppItemModel::DesktopIdRole).toString());
+    }
+
+    int idNumber = 0;
+    while (knownGroupIds.contains(QString("internal/group/%1").arg(idNumber))) {
+        idNumber++;
+    }
+
+    return QString("internal/group/%1").arg(idNumber);
+}
+
 }
