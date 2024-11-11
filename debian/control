@@ -34,7 +34,7 @@ Build-Depends:
  libyaml-cpp-dev,
  qtbase5-dev, qtbase5-private-dev, qtwayland5-dev-tools, qtwayland5-private-dev, libdtkgui-dev, libdtkwidget-dev, libdtkcore5-bin,
  qt6-l10n-tools, qt6-svg-dev, dde-tray-loader-dev (>= 0.0.11),
- dde-application-manager-api (>= 1.2.16), dde-control-center-dev
+ dde-application-manager-api (>= 1.2.16), dde-control-center-dev (>= 6.0.73)
 Standards-Version: 3.9.8
 Homepage: http://www.deepin.org
 
