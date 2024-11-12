@@ -51,9 +51,6 @@ public:
     virtual quint64 launchedTimes() const;
     virtual void setLaunchedTimes(const quint64 &times);
 
-    virtual QList<int> group() const;
-    virtual void setGroup(const QList<int> &group);
-
     virtual bool docked() const;
     virtual void setDocked(bool docked);
 
