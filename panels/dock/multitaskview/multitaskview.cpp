@@ -23,6 +23,10 @@ MultiTaskView::MultiTaskView(QObject *parent)
     , m_iconName("deepin-multitasking-view")
 {
     connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, &MultiTaskView::visibleChanged);
+    auto platformName = QGuiApplication::platformName();
+    if (QStringLiteral("wayland") == platformName) {
+        m_multitaskview.reset(new TreeLandMultitaskview);
+    }
 }
 
 bool MultiTaskView::init()
@@ -33,6 +37,11 @@ bool MultiTaskView::init()
 
 void MultiTaskView::openWorkspace()
 {
+    if (m_multitaskview) {
+        m_multitaskview->toggle();
+        return;
+    }
+
     DDBusSender()
         .service("com.deepin.wm")
         .path("/com/deepin/wm")

@@ -4,9 +4,10 @@
 
 #pragma once
 
+#include "../dockiteminfo.h"
 #include "applet.h"
 #include "dsglobal.h"
-#include "../dockiteminfo.h"
+#include "treelandmultitaskview.h"
 
 namespace dock {
 
@@ -37,6 +38,7 @@ Q_SIGNALS:
 private:
     bool m_visible;
     QString m_iconName;
+    QScopedPointer<TreeLandMultitaskview> m_multitaskview;
 };
 
 }
