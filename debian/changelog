@@ -1,3 +1,12 @@
+dde-shell (1.0.8) unstable; urgency=medium
+
+  * fix: correct window recognition errors
+  * fix: dock with no item inside
+  * chore: rename TreeLand to Treeland
+  * fix: Some windows cannot be recognized
+
+ -- xionglinlin <xionglinlin@uniontech.com>  Wed, 13 Nov 2024 10:43:01 +0800
+
 dde-shell (1.0.7) unstable; urgency=medium
 
   * feat: Receive close quick panel requests from plugins
