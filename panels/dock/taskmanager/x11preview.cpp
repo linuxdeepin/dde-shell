@@ -261,8 +261,8 @@ public:
         QPen pen;
         if (WM_HELPER->hasComposite()) {
             auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
-            auto size = calSize(pixmap.size()); 
-            auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            auto size = calSize(pixmap.size());
+            auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::FastTransformation);
             scaledPixmap.setDevicePixelRatio(qApp->devicePixelRatio());
 
             DStyleHelper dstyle(m_listView->style());
