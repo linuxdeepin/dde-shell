@@ -32,7 +32,7 @@ NotifyItem {
     }
 
     contentItem: NotifyItemContent {
-
+        width: parent.width
         appName: root.appName
         iconName: root.iconName
         content: root.content
