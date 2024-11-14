@@ -20,7 +20,7 @@ Control {
         height: 30
         NotifyActionButton {
             actionData: actions[0]
-            Layout.maximumWidth: 60
+            Layout.maximumWidth: 120
             Layout.preferredHeight: 30
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignHCenter
@@ -29,7 +29,7 @@ Control {
         Loader {
             active: actions.length === 2
             visible: active
-            Layout.maximumWidth: 60
+            Layout.maximumWidth: 120
             Layout.preferredHeight: 30
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignHCenter
@@ -41,7 +41,7 @@ Control {
         Loader {
             active: actions.length > 2
             visible: active
-            Layout.maximumWidth: 80
+            Layout.maximumWidth: 120
             Layout.alignment: Qt.AlignHCenter
             sourceComponent: ComboBox {
                 property var expandActions: actions.slice(1)
@@ -75,22 +75,13 @@ Control {
             actionInvoked(actionData.id)
         }
 
-        background: DP.ButtonPanel {
+        background: NotifyItemBackground {
             implicitHeight: 30
             implicitWidth: 50
-            button: actionButton
-            color1: Palette {
-                normal {
-                    common: ("transparent")
-                    crystal: Qt.rgba(0 / 255.0, 0 / 255.0, 0 / 255.0, 0.15)
-                }
-                normalDark {
-                    crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 1)
-                }
-            }
-            color2: color1
-            insideBorderColor: null
+            radius: 6
             outsideBorderColor: null
+            insideBorderColor: null
+            anchors.fill: parent
         }
     }
 }

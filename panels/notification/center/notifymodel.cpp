@@ -681,6 +681,8 @@ QVariant NotifyModel::data(const QModelIndex &index, int role) const
     } else if (role == NotifyRole::NotifyId) {
         return notify->id();
     } else if (role == NotifyRole::NotifyAppId) {
+        return notify->appId();
+    } else if (role == NotifyRole::NotifyAppName) {
         return notify->appName();
     } else if (role == NotifyRole::NotifyIconName) {
         return notify->entity().appIcon();
@@ -692,11 +694,11 @@ QVariant NotifyModel::data(const QModelIndex &index, int role) const
         return notify->actions();
     } else if (role == NotifyRole::NotifyDefaultAction) {
         return notify->defaultAction();
-    }  else if (role == NotifyRole::NotifyTime) {
+    } else if (role == NotifyRole::NotifyTime) {
         return notify->time();
     } else if (role == NotifyRole::NotifyPinned) {
         return notify->pinned();
-    }  else if (role == NotifyRole::NotifyStrongInteractive) {
+    } else if (role == NotifyRole::NotifyStrongInteractive) {
         return notify->strongInteractive();
     } else if (role == NotifyRole::NotifyContentIcon) {
         return notify->contentIcon();
@@ -744,21 +746,20 @@ void NotifyModel::updateTime()
 
 QHash<int, QByteArray> NotifyModel::roleNames() const
 {
-    static const QHash<int, QByteArray> roles {
-        {NotifyItemType, "type"},
-        {NotifyId, "id"},
-        {NotifyAppId, "appName"},
-        {NotifyIconName, "iconName"},
-        {NotifyActions, "actions"},
-        {NotifyDefaultAction, "defaultAction"},
-        {NotifyTime, "time"},
-        {NotifyTitle, "title"},
-        {NotifyContent, "content"},
-        {NotifyPinned, "pinned"},
-        {NotifyStrongInteractive, "strongInteractive"},
-        {NotifyContentIcon, "contentIcon"},
-        {NotifyOverlapCount, "overlapCount"}
-    };
+    static const QHash<int, QByteArray> roles{{NotifyItemType, "type"},
+                                              {NotifyId, "id"},
+                                              {NotifyAppId, "appId"},
+                                              {NotifyAppName, "appName"},
+                                              {NotifyIconName, "iconName"},
+                                              {NotifyActions, "actions"},
+                                              {NotifyDefaultAction, "defaultAction"},
+                                              {NotifyTime, "time"},
+                                              {NotifyTitle, "title"},
+                                              {NotifyContent, "content"},
+                                              {NotifyPinned, "pinned"},
+                                              {NotifyStrongInteractive, "strongInteractive"},
+                                              {NotifyContentIcon, "contentIcon"},
+                                              {NotifyOverlapCount, "overlapCount"}};
     return roles;
 }
 

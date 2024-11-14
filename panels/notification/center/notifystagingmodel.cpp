@@ -57,7 +57,7 @@ void NotifyStagingModel::push(const NotifyEntity &entity)
     }
     {
         // update count
-        auto count = m_accessor->fetchEntityCount("", NotifyEntity::NotProcessed);
+        auto count = m_accessor->fetchEntityCount(DataAccessor::AllApp(), NotifyEntity::NotProcessed);
         updateOverlapCount(count);
     }
 
@@ -96,7 +96,7 @@ void NotifyStagingModel::remove(qint64 id)
         break;
     }
 
-    auto entities = m_accessor->fetchEntities("", NotifyEntity::NotProcessed, BubbleMaxCount + OverlayMaxCount);
+    auto entities = m_accessor->fetchEntities(DataAccessor::AllApp(), NotifyEntity::NotProcessed, BubbleMaxCount + OverlayMaxCount);
 
     if (row >= 0) {
         auto notify = m_appNotifies[row];
@@ -153,7 +153,7 @@ void NotifyStagingModel::open()
 {
     qDebug(notifyLog) << "Open staging model";
 
-    auto entities = m_accessor->fetchEntities("", NotifyEntity::NotProcessed, BubbleMaxCount + OverlayMaxCount);
+    auto entities = m_accessor->fetchEntities(DataAccessor::AllApp(), NotifyEntity::NotProcessed, BubbleMaxCount + OverlayMaxCount);
 
     qDebug(notifyLog) << "Fetched staging size" << entities.size();
     if (entities.size() <= 0)
@@ -186,6 +186,8 @@ QVariant NotifyStagingModel::data(const QModelIndex &index, int role) const
     if (role == NotifyRole::NotifyId) {
         return notify->id();
     } else if (role == NotifyRole::NotifyAppId) {
+        return notify->appId();
+    } else if (role == NotifyRole::NotifyAppName) {
         return notify->appName();
     } else if (role == NotifyRole::NotifyIconName) {
         return notify->entity().appIcon();
@@ -197,7 +199,7 @@ QVariant NotifyStagingModel::data(const QModelIndex &index, int role) const
         return notify->actions();
     } else if (role == NotifyRole::NotifyDefaultAction) {
         return notify->defaultAction();
-    }  else if (role == NotifyRole::NotifyTime) {
+    } else if (role == NotifyRole::NotifyTime) {
         return notify->time();
     } else if (role == NotifyRole::NotifyStrongInteractive) {
         return notify->strongInteractive();
@@ -237,20 +239,19 @@ NotifyEntity NotifyStagingModel::notifyById(qint64 id) const
 
 QHash<int, QByteArray> NotifyStagingModel::roleNames() const
 {
-    static const QHash<int, QByteArray> roles {
-        {NotifyItemType, "type"},
-        {NotifyId, "id"},
-        {NotifyAppId, "appName"},
-        {NotifyIconName, "iconName"},
-        {NotifyActions, "actions"},
-        {NotifyDefaultAction, "defaultAction"},
-        {NotifyTime, "time"},
-        {NotifyTitle, "title"},
-        {NotifyContent, "content"},
-        {NotifyStrongInteractive, "strongInteractive"},
-        {NotifyContentIcon, "contentIcon"},
-        {NotifyOverlapCount, "overlapCount"}
-    };
+    static const QHash<int, QByteArray> roles{{NotifyItemType, "type"},
+                                              {NotifyId, "id"},
+                                              {NotifyAppName, "appName"},
+                                              {NotifyAppId, "appId"},
+                                              {NotifyIconName, "iconName"},
+                                              {NotifyActions, "actions"},
+                                              {NotifyDefaultAction, "defaultAction"},
+                                              {NotifyTime, "time"},
+                                              {NotifyTitle, "title"},
+                                              {NotifyContent, "content"},
+                                              {NotifyStrongInteractive, "strongInteractive"},
+                                              {NotifyContentIcon, "contentIcon"},
+                                              {NotifyOverlapCount, "overlapCount"}};
     return roles;
 }
 

@@ -18,7 +18,7 @@ FocusScope {
     onHeaderClicked: function () {
         dataPanelLoader.active = !dataPanelLoader.active
         NotifyAccessor.fetchDataInfo()
-        dataPanel.show()
+        dataPanelLoader.item.show()
     }
     Loader {
         id: dataPanelLoader

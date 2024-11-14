@@ -269,7 +269,7 @@ void NotifyAccessor::addNotify(const QString &appName, const QString &content)
 void NotifyAccessor::fetchDataInfo()
 {
     QStringList info;
-    auto entityCount = fetchEntityCount();
+    auto entityCount = fetchEntityCount(DataAccessor::AllApp());
     auto apps = fetchApps();
     info.append(QString("notifyCount: %1, appCount: %2").arg(entityCount).arg(apps.size()));
     for (auto item : apps) {

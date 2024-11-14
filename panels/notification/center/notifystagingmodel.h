@@ -25,6 +25,7 @@ public:
         NotifyItemType = Qt::UserRole + 1,
         NotifyId,
         NotifyAppId,
+        NotifyAppName,
         NotifyIconName,
         NotifyActions,
         NotifyDefaultAction,

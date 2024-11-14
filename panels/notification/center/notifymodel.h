@@ -25,6 +25,7 @@ public:
     enum NotifyRole {
         NotifyItemType = Qt::UserRole + 1,
         NotifyId,
+        NotifyAppName,
         NotifyAppId,
         NotifyIconName,
         NotifyActions,

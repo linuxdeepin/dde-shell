@@ -104,13 +104,6 @@ NotifyItem {
             onActionInvoked: function (actionId) {
                 root.actionInvoked(actionId)
             }
-            background: NotifyItemBackground {
-                radius: 6
-                implicitHeight: 30
-                implicitWidth: 50
-                outsideBorderColor: null
-                insideBorderColor: null
-            }
         }
     }
 
