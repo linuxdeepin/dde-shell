@@ -1,3 +1,9 @@
+dde-shell (1.99.6) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.6
+
+ -- Wang Zichong <wangzichong@deepin.org>  Thu, 14 Nov 2024 10:20:16 +0800
+
 dde-shell (1.99.5) UNRELEASED; urgency=medium
 
   * bump version to 1.99.5
