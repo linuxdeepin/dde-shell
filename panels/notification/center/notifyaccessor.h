@@ -35,6 +35,9 @@ public:
     void setDataAccessor(DataAccessor *accessor);
     void setDataUpdater(QObject *updater);
 
+    bool enabled() const;
+    void setEnabled(bool enabled);
+
     void invokeAction(const NotifyEntity &entity, const QString &actionId);
     void pinApplication(const QString &appName, bool pin);
     bool applicationPin(const QString &appName) const;
@@ -84,5 +87,6 @@ private:
     QStringList m_apps;
     bool m_debugging = false;
     QString m_dataInfo;
+    bool m_enabled = false;
 };
 }

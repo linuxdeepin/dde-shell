@@ -94,7 +94,16 @@ Window {
         NotifyStaging {
             id: notifyStaging
             implicitWidth: 360
-
+            Connections {
+                target: Panel
+                function onVisibleChanged() {
+                    if (Panel.visible) {
+                        notifyStaging.model.open()
+                    } else {
+                        notifyStaging.model.close()
+                    }
+                }
+            }
         }
 
         NotifyCenter {
@@ -102,8 +111,10 @@ Window {
             Connections {
                 target: Panel
                 function onVisibleChanged() {
-                    if (!Panel.visible) {
-                        notifyCenter.model.collapseAllApp()
+                    if (Panel.visible) {
+                        notifyCenter.model.open()
+                    } else {
+                        notifyCenter.model.close()
                     }
                 }
             }

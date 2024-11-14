@@ -19,9 +19,6 @@ FocusScope {
     NotifyModel {
         id: notifyModel
     }
-    Component.onCompleted: {
-        notifyModel.open()
-    }
 
     Item {
         objectName: "notificationCenter"
