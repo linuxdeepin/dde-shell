@@ -91,6 +91,16 @@ void NotifyAccessor::setDataUpdater(QObject *updater)
     m_dataUpdater = updater;
 }
 
+bool NotifyAccessor::enabled() const
+{
+    return m_enabled;
+}
+
+void NotifyAccessor::setEnabled(bool enabled)
+{
+    m_enabled = enabled;
+}
+
 NotifyEntity NotifyAccessor::fetchEntity(qint64 id) const
 {
     qDebug(notifyLog) << "Fetch entity" << id;
@@ -273,6 +283,8 @@ void NotifyAccessor::fetchDataInfo()
 
 void NotifyAccessor::onNotificationStateChanged(qint64 id, int processedType)
 {
+    if (!enabled())
+        return;
     if (processedType == NotifyEntity::Processed) {
         emit entityReceived(id);
         emit stagingEntityClosed(id);

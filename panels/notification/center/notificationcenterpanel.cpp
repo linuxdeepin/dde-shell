@@ -87,6 +87,7 @@ bool NotificationCenterPanel::init()
                                  SLOT(onNotificationStateChanged(qint64, int)),
                                  Qt::QueuedConnection);
         notifycenter::NotifyAccessor::instance()->setDataUpdater(server);
+        notifycenter::NotifyAccessor::instance()->setEnabled(visible());
     } else {
         // old interface by dbus
         auto connection = QDBusConnection::sessionBus();
@@ -110,6 +111,7 @@ void NotificationCenterPanel::setVisible(bool newVisible)
     if (m_visible == newVisible)
         return;
     m_visible = newVisible;
+    notifycenter::NotifyAccessor::instance()->setEnabled(m_visible);
     setBubblePanelEnabled(!m_visible);
     emit visibleChanged();
 }

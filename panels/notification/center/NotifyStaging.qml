@@ -12,12 +12,10 @@ FocusScope {
 
     implicitWidth: 360
     implicitHeight: view.height
+    property var model: notifyModel
 
     NotifyStagingModel {
         id: notifyModel
-        Component.onCompleted: {
-            notifyModel.open()
-        }
     }
 
     ListView {
