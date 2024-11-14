@@ -46,5 +46,8 @@ NotifyItem {
         onRemove: function () {
             root.state = "removing"
         }
+        onActionInvoked: function (actionId) {
+            root.actionInvoked(actionId)
+        }
     }
 }
