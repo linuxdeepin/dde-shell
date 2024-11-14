@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <iterator>
 
-
 namespace dock {
 ForeignToplevelManager::ForeignToplevelManager(TreeLandWindowMonitor* monitor)
     : QWaylandClientExtensionTemplate<ForeignToplevelManager>(1)
@@ -126,6 +125,9 @@ void TreeLandWindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObje
 
         auto context = m_foreignToplevelManager->get_dock_preview_context(waylandWindow->wlSurface());
         m_dockPreview.reset(new TreeLandDockPreviewContext(context));
+        connect(window, &QWindow::visibleChanged, m_dockPreview.get(), [this]() {
+            m_dockPreview.reset();
+        });
     }
 
     auto windows = item->getAppendWindows();
