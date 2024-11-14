@@ -6,12 +6,17 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import org.deepin.dtk 1.0
+import org.deepin.dtk.style 1.0 as DStyle
 import org.deepin.ds.notificationcenter
 
 NotifyItem {
     id: root
 
+    implicitHeight:Math.max(DStyle.Style.control.implicitHeight(root),
+                             actionPlaceHolder.active ? root.miniContentHeight + actionPlaceHolder.height : 0)
     property bool closeVisible: root.hovered || root.activeFocus
+    property int miniContentHeight: NotifyStyle.contentItem.miniHeight
+
     // placeHolder to receive MouseEvent
     Control {
         id: closePlaceHolder
@@ -111,6 +116,12 @@ NotifyItem {
 
     contentItem: RowLayout {
         spacing: 0
+        Binding {
+            target: root
+            property: "miniContentHeight"
+            value: 26 + NotifyStyle.contentItem.topMargin + NotifyStyle.contentItem.bottomMargin
+        }
+
         DciIcon {
             name: root.iconName
             sourceSize: Qt.size(24, 24)
@@ -127,13 +138,14 @@ NotifyItem {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.rightMargin: 10
             Layout.leftMargin: 10
-            Layout.topMargin: 4
-            Layout.bottomMargin: 8
+            Layout.topMargin: NotifyStyle.contentItem.topMargin
+            Layout.bottomMargin: NotifyStyle.contentItem.bottomMargin
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: 40
+            Layout.minimumHeight: NotifyStyle.contentItem.miniHeight
             Layout.maximumHeight: 240
             RowLayout {
+                id: firstLine
                 spacing: 0
                 Layout.fillWidth: true
                 Layout.preferredHeight: 24
@@ -213,6 +225,7 @@ NotifyItem {
                     Layout.minimumHeight: 16
                     Layout.alignment: Qt.AlignRight
                     active: root.contentIcon !== ""
+                    visible: active
                     // TODO DciIcon's bounding can't be limit by maximumWidth.
                     sourceComponent: Image {
                         anchors.fill: parent
