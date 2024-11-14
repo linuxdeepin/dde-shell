@@ -44,7 +44,7 @@ public:
     Q_INVOKABLE void openNotificationSetting();
 
     NotifyEntity fetchEntity(qint64 id) const;
-    int fetchEntityCount(const QString &appName = QString()) const;
+    int fetchEntityCount(const QString &appName) const;
     NotifyEntity fetchLastEntity(const QString &appName) const;
     QList<NotifyEntity> fetchEntities(const QString &appName, int maxCount = -1);
     QStringList fetchApps(int maxCount = -1) const;

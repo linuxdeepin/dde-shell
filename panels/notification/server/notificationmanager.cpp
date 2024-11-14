@@ -94,7 +94,7 @@ bool NotificationManager::registerDbusService()
 
 uint NotificationManager::recordCount() const
 {
-    return m_persistence->fetchEntityCount(QLatin1String(), NotifyEntity::Processed);
+    return m_persistence->fetchEntityCount(DataAccessor::AllApp(), NotifyEntity::Processed);
 }
 
 void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
@@ -112,6 +112,7 @@ void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString 
 
 void NotificationManager::notificationClosed(qint64 id, uint bubbleId, uint reason)
 {
+    qDebug(notifyLog) << "Close notification id" << id << ", reason" << reason;
     updateEntityProcessed(id, reason);
 
     Q_EMIT NotificationClosed(bubbleId, reason);
@@ -166,6 +167,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
             << ", expireTimeout:" << expireTimeout;
 
     if (calledFromDBus() && m_setting->systemValue(NotificationSetting::CloseNotification).toBool()) {
+        qDebug(notifyLog) << "Notify has been disabled by CloseNotification setting.";
         return 0;
     }
 
@@ -196,7 +198,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
 
     bool lockScreenShow = true;
     bool dndMode = isDoNotDisturb();
-    bool systemNotification = m_systemApps.contains(appName);
+    bool systemNotification = m_systemApps.contains(appId);
     bool lockScreen = m_userSessionManager->locked();
     const bool desktopScreen = !lockScreen;
 
@@ -368,7 +370,7 @@ void NotificationManager::tryPlayNotificationSound(const NotifyEntity &entity, c
 
 void NotificationManager::emitRecordCountChanged()
 {
-    const auto count = m_persistence->fetchEntityCount(QLatin1String(), NotifyEntity::Processed);
+    const auto count = m_persistence->fetchEntityCount(DataAccessor::AllApp(), NotifyEntity::Processed);
     emit RecordCountChanged(count);
 }
 

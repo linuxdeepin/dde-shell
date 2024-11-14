@@ -228,7 +228,7 @@ int DBAccessor::fetchEntityCount(const QString &appName, int processedType) cons
     BENCHMARK();
 
     QSqlQuery query(m_connection);
-    if (appName.isEmpty()) {
+    if (appName == DataAccessor::AllApp()) {
         QString cmd = QString("SELECT COUNT(*) FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL)");
         query.prepare(cmd);
     } else {
@@ -255,16 +255,13 @@ NotifyEntity DBAccessor::fetchLastEntity(const QString &appName, int processedTy
     BENCHMARK();
 
     QSqlQuery query(m_connection);
-    if (appName.isEmpty()) {
-        QString cmd = QString("SELECT %1 FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT 1").arg(EntityFields.join(","));
-        query.prepare(cmd);
-        query.bindValue(":processedType", processedType);
-    } else {
-        QString cmd = QString("SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT 1").arg(EntityFields.join(","));
-        query.prepare(cmd);
-        query.bindValue(":appName", appName);
-        query.bindValue(":processedType", processedType);
-    }
+    QString cmd =
+        QString(
+            "SELECT %1 FROM notifications2 WHERE AppName = :appName AND (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT 1")
+            .arg(EntityFields.join(","));
+    query.prepare(cmd);
+    query.bindValue(":appName", appName);
+    query.bindValue(":processedType", processedType);
 
     if (!query.exec()) {
         qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
@@ -285,7 +282,7 @@ QList<NotifyEntity> DBAccessor::fetchEntities(const QString &appName, int proces
     BENCHMARK();
 
     QSqlQuery query(m_connection);
-    if (appName.isEmpty()) {
+    if (appName == DataAccessor::AllApp()) {
         if (maxCount >= 0) {
             QString cmd = QString("SELECT %1 FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL) ORDER BY CTime DESC LIMIT :limit").arg(EntityFields.join(","));
             query.prepare(cmd);

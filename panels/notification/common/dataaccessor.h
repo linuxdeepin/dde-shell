@@ -34,6 +34,10 @@ public:
     virtual void removeEntity(qint64 id) { Q_UNUSED(id); }
     virtual void removeEntityByApp(const QString &appName) { Q_UNUSED(appName); }
     virtual void clear() {}
+    inline static QString AllApp()
+    {
+        return QLatin1String("AllApp");
+    }
 };
 
 }
