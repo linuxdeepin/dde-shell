@@ -25,6 +25,10 @@ FocusScope {
         anchors.fill: parent
         NotifyHeader {
             id: header
+            anchors {
+                top: parent.top
+                left: parent.left
+            }
             height: 40
             width: parent.width
             notifyModel: notifyModel
@@ -37,6 +41,7 @@ FocusScope {
                 left: parent.left
                 top: header.bottom
                 topMargin: 10
+                bottom: parent.bottom
             }
 
             width: parent.width
@@ -45,4 +50,3 @@ FocusScope {
         }
     }
 }
-
