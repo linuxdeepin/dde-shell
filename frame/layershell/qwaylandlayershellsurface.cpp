@@ -45,11 +45,11 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
         }
     }
 
-    init(shell->get_layer_surface(window->waylandSurface()->object(), output, shellLayer(), m_dlayerShellWindow->scope()));
+    init(shell->get_layer_surface(window->waylandSurface()->object(), output, m_dlayerShellWindow->layer(), m_dlayerShellWindow->scope()));
 
-    set_layer(shellLayer());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, [this, window]() {
-        set_layer(shellLayer());
+    set_layer(m_dlayerShellWindow->layer());
+    connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, [this, window](){
+        set_layer(m_dlayerShellWindow->layer());
         window->waylandSurface()->commit();
     });
 
@@ -123,15 +123,6 @@ void QWaylandLayerShellSurface::trySetAnchorsAndSize()
         set_size(m_requestSize.width(), m_requestSize.height());
         window()->waylandSurface()->commit();
     }
-}
-
-DLayerShellWindow::Layer QWaylandLayerShellSurface::shellLayer() const
-{
-    const auto layer = m_dlayerShellWindow->layer();
-    if (layer >= DLayerShellWindow::LayerExtension)
-        return DLayerShellWindow::LayerOverlay;
-
-    return layer;
 }
 
 void QWaylandLayerShellSurface::zwlr_layer_surface_v1_configure(uint32_t serial, uint32_t width, uint32_t height)

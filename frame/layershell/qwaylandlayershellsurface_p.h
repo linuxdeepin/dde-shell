@@ -36,7 +36,6 @@ private:
     void calcAndSetRequestSize(QSize requestSize);
     bool anchorsSizeConflict() const;
     void trySetAnchorsAndSize();
-    DLayerShellWindow::Layer shellLayer() const;
 
     DLayerShellWindow* m_dlayerShellWindow;
     QSize m_pendingSize;
