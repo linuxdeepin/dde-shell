@@ -7,7 +7,6 @@
 #include "pluginfactory.h"
 #include "bubbleitem.h"
 
-#include "sessionmanager1interface.h"
 #include <QLoggingCategory>
 #include <QQueue>
 
@@ -21,9 +20,8 @@ namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
 }
 
-namespace notification {
-static const QString SessionDBusService = "org.deepin.dde.SessionManager1";
-static const QString SessionDaemonDBusPath = "/org/deepin/dde/SessionManager1";
+namespace notification
+{
 
 BubblePanel::BubblePanel(QObject *parent)
     : DPanel(parent)
@@ -66,15 +64,6 @@ bool BubblePanel::init()
     updateMaxBubbleCount();
     connect(m_bubbles, &BubbleModel::rowsInserted, this, &BubblePanel::onBubbleCountChanged);
     connect(m_bubbles, &BubbleModel::rowsRemoved, this, &BubblePanel::onBubbleCountChanged);
-    connect(m_bubbles, &BubbleModel::modelReset, this, &BubblePanel::onBubbleCountChanged);
-
-    auto sessionManager = new org::deepin::dde::SessionManager1(SessionDBusService, SessionDaemonDBusPath, QDBusConnection::sessionBus(), this);
-    if (!sessionManager->isValid()) {
-        qWarning(notifyLog) << "Failed to connect SessionManager1:" << sessionManager->lastError().message();
-    } else {
-        m_locked = sessionManager->locked();
-        QObject::connect(sessionManager, &org::deepin::dde::SessionManager1::LockedChanged, this, &BubblePanel::onLockedChanged);
-    }
 
     return true;
 }
@@ -143,16 +132,7 @@ void BubblePanel::onNotificationStateChanged(qint64 id, int processedType)
 void BubblePanel::onBubbleCountChanged()
 {
     bool isEmpty = m_bubbles->items().isEmpty();
-    const bool visible = !isEmpty && enabled();
-    setVisible(visible);
-}
-
-void BubblePanel::onLockedChanged(bool locked)
-{
-    m_locked = locked;
-    if (m_locked) {
-        m_bubbles->clear();
-    }
+    setVisible(!isEmpty && enabled());
 }
 
 void BubblePanel::addBubble(qint64 id)

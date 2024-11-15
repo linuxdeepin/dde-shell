@@ -59,7 +59,6 @@ private Q_SLOTS:
     void addBubble(qint64 id);
     void closeBubble(qint64 id);
     void onBubbleCountChanged();
-    void onLockedChanged(bool locked);
 
 private:
     void onBubbleExpired(BubbleItem *);
@@ -78,7 +77,6 @@ private:
     DS_NAMESPACE::DAppletProxy *m_notificationServer = nullptr;
     DataAccessor *m_accessor = nullptr;
     bool m_enabled = true;
-    bool m_locked = false;
     Dtk::Core::DConfig *m_setting = nullptr;
 };
 
