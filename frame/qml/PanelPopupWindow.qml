@@ -54,7 +54,7 @@ Window {
     width: 10
     height: 10
     // TODO: it's a qt bug which make Qt.Popup can not get input focus
-    flags: Qt.platform.pluginName === "xcb" ? Qt.Tool : Qt.ToolTip
+    flags: (Qt.platform.pluginName === "xcb" ? Qt.Tool : Qt.ToolTip) | Qt.WindowStaysOnTopHint
     D.DWindow.enabled: true
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableSystemResize: false
