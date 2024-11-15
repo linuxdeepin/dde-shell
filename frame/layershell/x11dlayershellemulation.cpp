@@ -105,12 +105,6 @@ void LayerShellEmulation::onLayerChanged()
             xcbWindow->setWindowType(QNativeInterface::Private::QXcbWindow::Notification);
             break;
         }
-        case DLayerShellWindow::LayerOSD: {
-            // FIXME: To display on top of lock for notification.
-            m_window->setFlags(m_window->flags() & ~Qt::WindowStaysOnBottomHint | Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
-            QObject::connect(m_window, &QWindow::visibleChanged, this, &LayerShellEmulation::doRaiseWindow, Qt::UniqueConnection);
-            break;
-        }
     }
 }
 
@@ -233,13 +227,6 @@ void LayerShellEmulation::onExclusionZoneChanged()
                         << ", (left, right, top, bottom)"
                         << strut_partial.left << strut_partial.right << strut_partial.top << strut_partial.bottom;
     xcb_ewmh_set_wm_strut_partial(&ewmh_connection, m_window->winId(), strut_partial);
-}
-
-void LayerShellEmulation::doRaiseWindow()
-{
-    if (m_window && m_window->isVisible()) {
-        m_window->raise();
-    }
 }
 
 // void X11Emulation::onKeyboardInteractivityChanged()
