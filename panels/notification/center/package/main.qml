@@ -82,17 +82,22 @@ Window {
         }
     }
 
-    ColumnLayout {
+    Item {
         id: view
         width: parent.width
         anchors {
             top: parent.top
             left: parent.left
             margins: 10
+            bottom: parent.bottom
         }
 
         NotifyStaging {
             id: notifyStaging
+            anchors {
+                top: parent.top
+                left: parent.left
+            }
             implicitWidth: 360
             Connections {
                 target: Panel
@@ -108,6 +113,12 @@ Window {
 
         NotifyCenter {
             id: notifyCenter
+            anchors {
+                top: notifyStaging.bottom
+                left: parent.left
+                bottom: parent.bottom
+            }
+
             Connections {
                 target: Panel
                 function onVisibleChanged() {
