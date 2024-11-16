@@ -382,6 +382,14 @@ void DockPanel::setDockScreen(QScreen *screen)
     m_dockScreen = screen;
     window()->setScreen(m_dockScreen);
     Q_EMIT dockScreenChanged(m_dockScreen);
+    Q_EMIT screenNameChanged();
+}
+
+QString DockPanel::screenName() const
+{
+    if (!m_dockScreen)
+        return {};
+    return m_dockScreen->name();
 }
 }
 

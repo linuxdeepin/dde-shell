@@ -17,24 +17,16 @@ Window {
         if (!dockApplet)
             return 0
 
-        let dockRect = dockApplet.frontendWindowRect
-        let rect = Qt.rect(root.screen.virtualX, root.screen.virtualY, root.screen.width, root.screen.height)
-        if (!containsPos(rect, Qt.point(dockRect.x, dockRect.y)))
+        let dockScreen = dockApplet.screenName
+        let screen = root.screen.name
+        let dockHideState = dockApplet.hideState
+        let dockIsHide = dockHideState === 2
+        if (dockScreen !== screen || dockIsHide)
             return 0
 
         let dockSize = dockApplet.dockSize
         let dockPosition = dockApplet.position
         return dockPosition === position ? dockSize : 0
-    }
-
-    function containsPos(rect1, pos) {
-        if (rect1.x <= pos.x &&
-                rect1.y <= pos.y &&
-                (rect1.x + rect1.width > pos.x) &&
-                (rect1.y + rect1.height > pos.y)) {
-            return true
-        }
-        return false
     }
 
     // visible: true
