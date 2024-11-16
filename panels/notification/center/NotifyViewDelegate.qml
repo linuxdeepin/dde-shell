@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Controls
 import Qt.labs.qmlmodels
 import org.deepin.dtk 1.0
+import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 DelegateChooser {

@@ -33,6 +33,7 @@ target_link_libraries(ds-notification-shared PUBLIC
 install(TARGETS ds-notification-shared DESTINATION "${LIB_INSTALL_DIR}")
 ds_install_package(PACKAGE org.deepin.ds.notification TARGET ds-notification)
 
+add_subdirectory(plugin)
 add_subdirectory(bubble)
 add_subdirectory(center)
 add_subdirectory(osd)

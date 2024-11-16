@@ -34,14 +34,9 @@ public:
     QString bodyImagePath() const;
     qint64 ctime() const;
 
-    bool hasDisplayAction() const;
-    bool hasDefaultAction() const;
-    QString defaultActionText() const;
-    QString defaultActionId() const;
-    QString firstActionText() const;
-    QString firstActionId() const;
-    QStringList actionTexts() const;
-    QStringList actionIds() const;
+    QString defaultAction() const;
+    QVariantList actions() const;
+    void updateActions();
 
     int level() const;
     void setLevel(int level);
@@ -57,19 +52,16 @@ signals:
     void timeTipChanged();
 
 private:
-    int defaultActionIdIndex() const;
-    int defaultActionTextIndex() const;
-    QStringList displayActions() const;
     QString displayText() const;
 
 private:
     NotifyEntity m_entity;
-
-private:
     int m_level = 0;
     int m_urgency = NotifyEntity::Normal;
     QString m_timeTip;
     bool m_enablePreview = true;
+    QVariantList m_actions;
+    QString m_defaultAction;
 };
 
 }

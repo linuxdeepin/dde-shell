@@ -2,31 +2,21 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-set_source_files_properties(NotifyStyle.qml PROPERTIES
-    QT_QML_SINGLETON_TYPE TRUE
-)
-
 qt_add_qml_module(notificationcenterpanel
     PLUGIN_TARGET notificationcenterpanelplugin
     URI org.deepin.ds.notificationcenter
     VERSION 1.0
     QML_FILES
         NotifyCenter.qml
-        NotifyStyle.qml
         NotifyStaging.qml
         NotifyHeader.qml
         NotifyView.qml
         NotifyViewDelegate.qml
-        NotifyItemBackground.qml
-        NotifyItem.qml
-        NotifyItemContent.qml
         NormalNotify.qml
         OverlapNotify.qml
         GroupNotify.qml
-        NotifyAction.qml
         NotifySetting.qml
         NotifySettingMenu.qml
-        SettingActionButton.qml
         AnimationSettingButton.qml
         BoundingRectangle.qml
         DataPanel.qml

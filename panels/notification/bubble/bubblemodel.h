@@ -27,13 +27,8 @@ public:
         TimeTip,
         BodyImagePath,
         OverlayCount,
-        hasDefaultAction,
-        hasDisplayAction,
-        FirstActionText,
-        FirstActionId,
-        DefaultActionId,
-        ActionTexts,
-        ActionIds,
+        DefaultAction,
+        Actions,
         Urgency,
     } BubbleRole;
 

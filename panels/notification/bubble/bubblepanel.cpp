@@ -78,16 +78,6 @@ BubbleModel *BubblePanel::bubbles() const
     return m_bubbles;
 }
 
-void BubblePanel::invokeDefaultAction(int bubbleIndex)
-{
-    auto bubble = bubbleItem(bubbleIndex);
-    if (!bubble)
-        return;
-
-    m_bubbles->remove(bubbleIndex);
-    onActionInvoked(bubble->id(), bubble->bubbleId(), bubble->defaultActionId());
-}
-
 void BubblePanel::invokeAction(int bubbleIndex, const QString &actionId)
 {
     auto bubble = bubbleItem(bubbleIndex);

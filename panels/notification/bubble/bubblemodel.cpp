@@ -174,18 +174,10 @@ QVariant BubbleModel::data(const QModelIndex &index, int role) const
         return m_bubbles[row]->bodyImagePath();
     case BubbleModel::OverlayCount:
         return overlayCount();
-    case BubbleModel::hasDefaultAction:
-        return m_bubbles[row]->hasDefaultAction();
-    case BubbleModel::hasDisplayAction:
-        return m_bubbles[row]->hasDisplayAction();
-    case BubbleModel::FirstActionText:
-        return m_bubbles[row]->firstActionText();
-    case BubbleModel::FirstActionId:
-        return m_bubbles[row]->firstActionId();
-    case BubbleModel::ActionTexts:
-        return m_bubbles[row]->actionTexts();
-    case BubbleModel::ActionIds:
-        return m_bubbles[row]->actionIds();
+    case BubbleModel::DefaultAction:
+        return m_bubbles[row]->defaultAction();
+    case BubbleModel::Actions:
+        return m_bubbles[row]->actions();
     case BubbleModel::Urgency:
         return m_bubbles[row]->urgency();
     default:
@@ -207,12 +199,8 @@ QHash<int, QByteArray> BubbleModel::roleNames() const
     mapRoleNames[BubbleModel::Urgency] = "urgency";
     mapRoleNames[BubbleModel::BodyImagePath] = "bodyImagePath";
     mapRoleNames[BubbleModel::OverlayCount] = "overlayCount";
-    mapRoleNames[BubbleModel::hasDefaultAction] = "hasDefaultAction";
-    mapRoleNames[BubbleModel::hasDisplayAction] = "hasDisplayAction";
-    mapRoleNames[BubbleModel::FirstActionText] = "firstActionText";
-    mapRoleNames[BubbleModel::FirstActionId] = "firstActionId";
-    mapRoleNames[BubbleModel::ActionTexts] = "actionTexts";
-    mapRoleNames[BubbleModel::ActionIds] = "actionIds";
+    mapRoleNames[BubbleModel::DefaultAction] = "defaultAction";
+    mapRoleNames[BubbleModel::Actions] = "actions";
     return mapRoleNames;
 }
 

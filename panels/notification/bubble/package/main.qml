@@ -50,6 +50,7 @@ Window {
     DWindow.enabled: true
     DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
     color: "transparent"
+    DWindow.windowRadius: 0
     // DWindow.enableBlurWindow: true
     screen: Qt.application.screens[0]
     // TODO `Qt.application.screens[0]` maybe invalid, why screen is changed.
