@@ -38,7 +38,7 @@ public:
     } BubbleRole;
 
     explicit BubbleModel(QObject *parent = nullptr);
-    ~BubbleModel();
+    ~BubbleModel() override;
 
 public:
     void push(BubbleItem *bubble);

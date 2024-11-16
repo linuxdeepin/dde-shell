@@ -41,8 +41,8 @@ public:
 private:
     void tryToCreateTable();
 
-    bool isAttributeValid(const QString &tableName, const QString &attributeName);
-    bool addAttributeToTable(const QString &tableName, const QString &attributeName, const QString &type);
+    bool isAttributeValid(const QString &tableName, const QString &attributeName) const;
+    bool addAttributeToTable(const QString &tableName, const QString &attributeName, const QString &type) const;
     void updateProcessTypeValue();
 
 private:

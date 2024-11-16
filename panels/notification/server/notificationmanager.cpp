@@ -322,20 +322,14 @@ bool NotificationManager::isDoNotDisturb() const
     QTime startTime = QTime::fromString(m_setting->systemValue(NotificationSetting::StartTime).toString());
     QTime endTime = QTime::fromString(m_setting->systemValue(NotificationSetting::EndTime).toString());
 
-    bool dndMode = false;
+    bool dndMode = true;
     if (startTime < endTime) {
         dndMode = startTime <= currentTime && endTime >= currentTime;
     } else if (startTime > endTime) {
         dndMode = startTime <= currentTime || endTime >= currentTime;
-    } else {
-        dndMode = true;
     }
 
-    if (dndMode && m_setting->systemValue(NotificationSetting::OpenByTimeInterval).toBool()) {
-        return dndMode;
-    } else {
-        return false;
-    }
+    return dndMode && m_setting->systemValue(NotificationSetting::OpenByTimeInterval).toBool();
 }
 
 void NotificationManager::tryPlayNotificationSound(const NotifyEntity &entity, const QString &appId, bool dndMode) const
@@ -437,8 +431,7 @@ void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QStr
     while (i != hints.constEnd()) {
         QStringList args = i.value().toString().split(",");
         if (!args.isEmpty()) {
-            QString cmd = args.first(); //命令
-            args.removeFirst();
+            QString cmd = args.takeFirst(); //命令
             if (i.key() == "x-deepin-action-" + actionId) {
                 QProcess::startDetached(cmd, args); //执行相关命令
             }
@@ -478,7 +471,7 @@ void NotificationManager::onHandingPendingEntities()
         m_lastTimeoutPoint = std::numeric_limits<qint64>::max();
     }
 
-    for (const auto item : timeoutEntities) {
+    for (const auto &item : timeoutEntities) {
         qDebug(notifyLog) << "Expired for the notification " << item.id() << item.appName();
         notificationClosed(item.id(), item.bubbleId(), NotifyEntity::Expired);
     }

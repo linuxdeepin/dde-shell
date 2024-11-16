@@ -236,7 +236,7 @@ int BubbleModel::replaceBubbleIndex(const BubbleItem *bubble) const
     if (bubble->replacesId() != NoReplaceId) {
         for (int i = 0; i < m_bubbles.size(); i++) {
             auto item = m_bubbles[i];
-            if (item->appName() != item->appName())
+            if (item->appName() != bubble->appName())
                 continue;
 
             const bool firstItem = item->replacesId() == NoReplaceId && item->bubbleId() == bubble->replacesId();
