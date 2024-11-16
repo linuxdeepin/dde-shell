@@ -172,6 +172,7 @@ BubbleItem::BubbleItem(const NotifyEntity &entity, QObject *parent)
 void BubbleItem::setEntity(const NotifyEntity &entity)
 {
     m_entity = entity;
+    updateActions();
 
     QVariantMap hints = entity.hints();
     if (hints.contains("urgency")) {
@@ -229,68 +230,36 @@ qint64 BubbleItem::ctime() const
     return m_entity.cTime();
 }
 
-bool BubbleItem::hasDisplayAction() const
+QString BubbleItem::defaultAction() const
 {
-    return displayActions().count() >= 2;
+    return m_defaultAction;
 }
 
-bool BubbleItem::hasDefaultAction() const
+QVariantList BubbleItem::actions() const
 {
-    return defaultActionIdIndex() >= 0;
+    return m_actions;
 }
 
-QString BubbleItem::defaultActionText() const
+void BubbleItem::updateActions()
 {
-    const auto index = defaultActionTextIndex();
-    if (index < 0)
-        return QString();
+    QStringList actions = m_entity.actions();
+    const auto defaultIndex = actions.indexOf(QLatin1String("default"));
+    if (defaultIndex >= 0) {
+        actions.remove(defaultIndex, 2);
+        m_defaultAction = QLatin1String("default");
+    }
 
-    return m_entity.actions().at(index);
-}
+    QVariantList array;
+    for (int i = 0; i < actions.size(); i += 2) {
+        const auto id = actions[i];
+        const auto text = actions[i + 1];
+        QVariantMap item;
+        item["id"] = id;
+        item["text"] = text;
+        array.append(item);
+    }
 
-QString BubbleItem::defaultActionId() const
-{
-    const auto index = defaultActionIdIndex();
-    if (index < 0)
-        return QString();
-
-    return m_entity.actions().at(index);
-}
-
-QString BubbleItem::firstActionText() const
-{
-    if (!hasDisplayAction())
-        return QString();
-
-    return displayActions().at(1);
-}
-
-QString BubbleItem::firstActionId() const
-{
-    if (!hasDisplayAction())
-        return QString();
-
-    return displayActions().at(0);
-}
-
-QStringList BubbleItem::actionTexts() const
-{
-    QStringList res;
-    const auto tmp = displayActions();
-    for (int i = 3; i < tmp.count(); i += 2)
-        res << tmp[i];
-
-    return res;
-}
-
-QStringList BubbleItem::actionIds() const
-{
-    QStringList res;
-    const auto tmp = displayActions();
-    for (int i = 2; i < tmp.count(); i += 2)
-        res << tmp[i];
-
-    return res;
+    m_actions = array;
 }
 
 int BubbleItem::level() const
@@ -328,32 +297,6 @@ bool BubbleItem::enablePreview() const
 void BubbleItem::setEnablePreview(bool enable)
 {
     m_enablePreview = enable;
-}
-
-int BubbleItem::defaultActionIdIndex() const
-{
-    return m_entity.actions().indexOf("default");
-}
-
-int BubbleItem::defaultActionTextIndex() const
-{
-    const auto index = defaultActionIdIndex();
-    if (index >= 0)
-        return index + 1;
-
-    return -1;
-}
-
-QStringList BubbleItem::displayActions() const
-{
-    const auto defaultIndex = defaultActionIdIndex();
-    if (defaultIndex >= 0) {
-        auto tmp = m_entity.actions();
-        tmp.remove(defaultIndex, 1);
-        return tmp;
-    }
-
-    return m_entity.actions();
 }
 
 QString BubbleItem::displayText() const
