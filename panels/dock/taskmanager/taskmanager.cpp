@@ -84,6 +84,7 @@ bool TaskManager::init()
     DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dde-apps");
     if (auto applet = bridge.applet()) {
         auto model = applet->property("appModel").value<QAbstractItemModel *>();
+        Q_ASSERT(model);
         m_activeAppModel =
             new RoleCombineModel(m_windowMonitor.data(), model, AbstractWindow::identityRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
                 auto roleNames = model->roleNames();
