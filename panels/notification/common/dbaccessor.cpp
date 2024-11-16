@@ -62,8 +62,8 @@ static QString notificationDBPath()
     if (dataPaths.isEmpty()) {
         const QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
         QDir dir(dataDir);
-        const auto dbSubfix = QString("%1/%2/data.db").arg(qApp->organizationName()).arg(qApp->applicationName());
-        const auto appPath = dir.absoluteFilePath(dbSubfix);
+        const auto dbSubFix = QString("%1/%2/data.db").arg(qApp->organizationName()).arg(qApp->applicationName());
+        const auto appPath = dir.absoluteFilePath(dbSubFix);
         dataPaths << appPath;
         QString path = dir.absoluteFilePath("deepin/dde-osd/data.db");
         dataPaths << path;
@@ -75,7 +75,7 @@ static QString notificationDBPath()
             QDir().mkpath(QFileInfo(file.fileName()).path());
         }
         if (!file.open(QIODevice::ReadWrite)) {
-            qDebug(notifyLog) << "Falied on open the data path:" << path << ", error:" << file.errorString();
+            qDebug(notifyLog) << "Failed on open the data path:" << path << ", error:" << file.errorString();
             continue;
         }
         if (QFileInfo::exists(path)) {
@@ -83,7 +83,7 @@ static QString notificationDBPath()
         }
     }
     qWarning(notifyLog) << "Doesn't exist the data path" << dataPaths;
-    return QString();
+    return {};
 }
 
 class Benchmark
@@ -147,19 +147,24 @@ qint64 DBAccessor::addEntity(const NotifyEntity &entity)
 
     QSqlQuery query(m_connection);
 
-    QString sqlCmd =  QString("INSERT INTO %1 (").arg(TableName_v2);
-    sqlCmd += ColumnIcon + ",";
-    sqlCmd += ColumnSummary + ",";
-    sqlCmd += ColumnBody + ",";
-    sqlCmd += ColumnAppName + ",";
-    sqlCmd += ColumnAppId + ",";
-    sqlCmd += ColumnCTime + ",";
-    sqlCmd += ColumnAction + ",";
-    sqlCmd += ColumnHint + ",";
-    sqlCmd += ColumnReplacesId + ",";
-    sqlCmd += ColumnNotifyId + ",";
-    sqlCmd += ColumnProcessedType + ")";
-    sqlCmd += "VALUES (:icon, :summary, :body, :appName, :appId, :ctime, :action, :hint, :replacesId, :notifyId, :processedType)";
+    QString columns = QStringList{
+            ColumnIcon,
+            ColumnSummary,
+            ColumnBody,
+            ColumnAppName,
+            ColumnAppId,
+            ColumnCTime,
+            ColumnAction,
+            ColumnHint,
+            ColumnReplacesId,
+            ColumnNotifyId,
+            ColumnProcessedType
+    }.join(", ");
+
+    QString sqlCmd = QString("INSERT INTO %1 (%2) VALUES (%3)")
+            .arg(TableName_v2)
+            .arg(columns)
+            .arg(":icon, :summary, :body, :appName, :appId, :ctime, :action, :hint, :replacesId, :notifyId, :processedType");
 
     query.prepare(sqlCmd);
     query.bindValue(":icon", entity.appIcon());
@@ -180,7 +185,7 @@ qint64 DBAccessor::addEntity(const NotifyEntity &entity)
     }
 
     // to get entity's id in database
-    int storageId = query.lastInsertId().toLongLong();
+    qint64 storageId = query.lastInsertId().toLongLong();
 
     qDebug(notifyDBLog) << "Insert entity bubbleId:" << entity.bubbleId() << ", id:" << storageId;
 
@@ -433,20 +438,25 @@ void DBAccessor::tryToCreateTable()
 {
     QSqlQuery query(m_connection);
 
-    QString sql = QString("CREATE TABLE IF NOT EXISTS %1("
-                           "%2 INTEGER PRIMARY KEY AUTOINCREMENT,").arg(TableName_v2, ColumnId);
-    sql += ColumnIcon + " TEXT,";
-    sql += ColumnSummary + " TEXT,";
-    sql += ColumnBody + " TEXT,";
-    sql += ColumnAppName + " TEXT,";
-    sql += ColumnAppId + " TEXT,";
-    sql += ColumnCTime + " TEXT,";
-    sql += ColumnAction + " TEXT,";
-    sql += ColumnHint + " TEXT,";
-    sql += ColumnReplacesId + " TEXT,";
-    sql += ColumnNotifyId + " TEXT,";
-    sql += ColumnTimeout + " TEXT,";
-    sql += ColumnProcessedType + " INTEGER)";
+    QStringList columns = {
+            QString("%1 INTEGER PRIMARY KEY AUTOINCREMENT").arg(ColumnId),
+            QString("%1 TEXT").arg(ColumnIcon),
+            QString("%1 TEXT").arg(ColumnSummary),
+            QString("%1 TEXT").arg(ColumnBody),
+            QString("%1 TEXT").arg(ColumnAppName),
+            QString("%1 TEXT").arg(ColumnAppId),
+            QString("%1 TEXT").arg(ColumnCTime),
+            QString("%1 TEXT").arg(ColumnAction),
+            QString("%1 TEXT").arg(ColumnHint),
+            QString("%1 TEXT").arg(ColumnReplacesId),
+            QString("%1 TEXT").arg(ColumnNotifyId),
+            QString("%1 TEXT").arg(ColumnTimeout),
+            QString("%1 INTEGER").arg(ColumnProcessedType)
+    };
+
+    QString sql = QString("CREATE TABLE IF NOT EXISTS %1(%2)")
+            .arg(TableName_v2)
+            .arg(columns.join(", "));
 
     query.prepare(sql);
 
@@ -476,7 +486,7 @@ void DBAccessor::tryToCreateTable()
     }
 }
 
-bool DBAccessor::isAttributeValid(const QString &tableName, const QString &attributeName)
+bool DBAccessor::isAttributeValid(const QString &tableName, const QString &attributeName) const
 {
     QSqlQuery query(m_connection);
 
@@ -487,25 +497,20 @@ bool DBAccessor::isAttributeValid(const QString &tableName, const QString &attri
             if (query.exec(sqlCmd)) {
                 QSqlRecord record = query.record();
                 int index = record.indexOf(attributeName);
-                if (index == -1) {
-                    return false;
-                } else {
-                    return true;
-                }
-            } else {
-                qDebug(notifyDBLog) << sqlCmd << ",lastError:" << query.lastError().text();
-                return false;
+                return index != -1;
             }
-        } else { // table not exist
+            qDebug(notifyDBLog) << sqlCmd << ",lastError:" << query.lastError().text();
             return false;
         }
-    } else { // sql error
-        qDebug(notifyDBLog) << sqlCmd << ",lastError:" << query.lastError().text();
+        // table not exist
         return false;
     }
+    // sql error
+    qDebug(notifyDBLog) << sqlCmd << ",lastError:" << query.lastError().text();
+    return false;
 }
 
-bool DBAccessor::addAttributeToTable(const QString &tableName, const QString &attributeName, const QString &type)
+bool DBAccessor::addAttributeToTable(const QString &tableName, const QString &attributeName, const QString &type) const
 {
     QSqlQuery query(m_connection);
 

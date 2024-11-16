@@ -6,7 +6,7 @@
       "value": true,
       "serial": 0,
       "flags": [],
-      "name": "dndode",
+      "name": "dndMode",
       "name[zh_CN]": "勿扰模式",
       "description": "System notification do not disturb mode",
       "description[zh_CN]": "系统通知勿扰模式",

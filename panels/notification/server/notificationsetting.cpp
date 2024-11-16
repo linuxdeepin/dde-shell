@@ -37,7 +37,7 @@ enum Roles {
 
 NotificationSetting::NotificationSetting(QObject *parent)
     : QObject(parent)
-    , m_impl(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.dde.shell.notification"))
+    , m_impl(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.dde.shell.notification", QString(), this))
 {
     invalidAppItemCached();
     connect(m_impl, &Dtk::Core::DConfig::valueChanged, this, [this] (const QString &key) {
