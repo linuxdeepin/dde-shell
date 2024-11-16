@@ -53,6 +53,8 @@ add_library(dde-apps SHARED ${DBUS_INTERFACES}
     appslaunchtimes.h
     categoryutils.cpp
     categoryutils.h
+    itemspage.cpp
+    itemspage.h
 )
 
 target_link_libraries(dde-apps PRIVATE

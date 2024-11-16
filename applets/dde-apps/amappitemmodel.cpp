@@ -10,7 +10,6 @@
 
 #include <DUtil>
 #include <QtConcurrent>
-#include <tuple>
 
 Q_LOGGING_CATEGORY(appsLog, "dde.shell.dde-apps.amappitemmodel")
 

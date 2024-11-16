@@ -5,6 +5,7 @@
 #include "appgroup.h"
 #include "appgroupmanager.h"
 #include "appitemmodel.h"
+#include "itemspage.h"
 
 #include <QLoggingCategory>
 #include <algorithm>
@@ -14,43 +15,46 @@ Q_LOGGING_CATEGORY(appGroupLog, "org.deepin.ds.dde-apps.appgroup")
 namespace apps {
 AppGroup::AppGroup(const QString &groupId, const QString &name, const QList<QStringList> &appIDs)
     : AppItem(groupId, AppItemModel::FolderItemType)
+    , m_itemsPage(new ItemsPage(name, groupId == QStringLiteral("internal/folder/0") ? (4 * 8) : (3 * 4)))
 {
-    if (groupId == QStringLiteral("internal/folder/0")) {
-        setItemsPerPage(4 * 8);
-    } else {
-        setItemsPerPage(3 * 4);
+    setItemsPerPage(m_itemsPage->maxItemCountPerPage());
+    setAppName(m_itemsPage->name());
+    // folder id is a part of its groupId: "internal/folder/{folderId}"
+    setFolderId(groupId.section('/', -1).toInt());
+
+    for (const QStringList &items : appIDs) {
+        m_itemsPage->appendPage(items);
     }
-    setAppName(name);
-    setAppItems(appIDs);
 }
 
-QList<QStringList> AppGroup::appItems() const
+AppGroup::~AppGroup()
 {
-    QList<QStringList> res;
-    auto pages = data(AppGroupManager::GroupAppItemsRole).toList();
-    std::transform(pages.begin(), pages.end(), std::back_inserter(res), [](const QVariant &data) {
-        return data.toStringList();
-    });
-
-    return res;
+    delete m_itemsPage;
 }
 
-void AppGroup::setAppItems(const QList<QStringList> &items)
+int AppGroup::folderId() const
 {
-    QVariantList data;
-    std::transform(items.begin(), items.end(), std::back_inserter(data), [](const QStringList &c) {
-        QVariantList tmp;
-        std::transform(c.begin(), c.end(), std::back_inserter(tmp), [](const QString &s) {
-            return s;
-        });
-        return tmp;
-    });
-    return setData(data, AppGroupManager::GroupAppItemsRole);
+    return data(AppGroupManager::GroupIdRole).toInt();
+}
+
+QList<QStringList> AppGroup::pages() const
+{
+    return m_itemsPage->allPagedItems();
+}
+
+ItemsPage *AppGroup::itemsPage()
+{
+    return m_itemsPage;
 }
 
 void AppGroup::setItemsPerPage(int number)
 {
     return setData(number, AppGroupManager::GroupItemsPerPageRole);
+}
+
+void AppGroup::setFolderId(int folderId)
+{
+    setData(folderId, AppGroupManager::GroupIdRole);
 }
 
 }

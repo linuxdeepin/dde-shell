@@ -12,6 +12,7 @@
 #include <QStandardItemModel>
 #include <tuple>
 
+class ItemsPage;
 namespace apps {
 class AMAppItemModel;
 class AppGroup;
@@ -27,24 +28,32 @@ public:
     enum Roles {
         GroupIdRole = Qt::UserRole + 1,
         GroupItemsPerPageRole,
-        GroupAppItemsRole,
         ExtendRole = 0x1000,
     };
     explicit AppGroupManager(AMAppItemModel * referenceModel, QObject* parent = nullptr);
 
     QVariant data(const QModelIndex &index, int role = GroupIdRole) const override;
 
-    std::tuple<int, int, int> getAppGroupInfo(const QString &appId);
-    void setAppGroupInfo(const QString &appId, std::tuple<int, int, int> groupInfo);
+    std::tuple<int, int, int> findItem(const QString &appId, int folderId = -1);
+    void appendItemToGroup(const QString &appId, int groupId);
+    bool removeItemFromGroup(const QString &appId, int groupId);
+    QModelIndex groupIndexById(int groupId);
+    AppGroup * group(int groupId);
+    AppGroup * group(QModelIndex idx);
+    void appendAppToGroup(const QString &appId, int groupId);
+
+    static QVariantList fromListOfStringList(const QList<QStringList> & list);
 
 private:
+    void onReferenceModelChanged();
+
     void loadAppGroupInfo();
-    void dumpAppGroupInfo();
+    void saveAppGroupInfo();
     QString assignGroupId() const;
 
 private:
+    bool m_appGroupInitialized;
     AMAppItemModel * m_referenceModel;
-    QHash<QString, std::tuple<int, int>> m_map;
     QTimer* m_dumpTimer;
     Dtk::Core::DConfig *m_config;
 };

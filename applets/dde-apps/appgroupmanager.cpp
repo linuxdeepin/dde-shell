@@ -4,9 +4,10 @@
 
 #include "appgroupmanager.h"
 #include "appgroup.h"
+#include "itemspage.h"
 #include "amappitemmodel.h"
 
-#include <QtConcurrent>
+#define TOPLEVEL_FOLDERID 0
 
 namespace apps {
 
@@ -21,10 +22,18 @@ AppGroupManager::AppGroupManager(AMAppItemModel * referenceModel, QObject *paren
 
     loadAppGroupInfo();
 
-    connect(m_dumpTimer, &QTimer::timeout, this, [this](){
-        dumpAppGroupInfo();
+    connect(m_referenceModel, &AMAppItemModel::rowsInserted, this, [this](){
+        onReferenceModelChanged();
+        saveAppGroupInfo();
     });
-    connect(this, &AppGroupManager::dataChanged, this, &AppGroupManager::dumpAppGroupInfo);
+    connect(m_referenceModel, &AMAppItemModel::rowsRemoved, this, [this](){
+        onReferenceModelChanged();
+        saveAppGroupInfo();
+    });
+    connect(m_dumpTimer, &QTimer::timeout, this, [this](){
+        saveAppGroupInfo();
+    });
+    connect(this, &AppGroupManager::dataChanged, this, &AppGroupManager::saveAppGroupInfo);
 }
 
 QVariant AppGroupManager::data(const QModelIndex &index, int role) const
@@ -39,85 +48,134 @@ QVariant AppGroupManager::data(const QModelIndex &index, int role) const
     return QStandardItemModel::data(index, role);
 }
 
-std::tuple<int, int, int> AppGroupManager::getAppGroupInfo(const QString &appId)
+// Find the item's location. If folderId is -1, search all folders.
+std::tuple<int, int, int> AppGroupManager::findItem(const QString &appId, int folderId)
 {
-    std::tuple<int, int, int> res = {-1, -1, -1};
-    do {
-        int groupPos, pagePos;
-        std::tie(groupPos, pagePos) = m_map.value(appId, std::make_tuple<int, int>(-1, -1));
-        auto groupIndex = index(groupPos, 0);
+    int page, idx;
 
-        if (!groupIndex.isValid())
-            break;
-
-        auto pages = groupIndex.data(GroupAppItemsRole).toList();
-        if (pages.length() == 0)
-            break;
-
-        auto items = pages.value(pagePos).toStringList();
-        if (items.length() == 0)
-            break;
-
-        auto itemPos = items.indexOf(appId);
-        res = std::make_tuple(groupPos, pagePos, itemPos);
-    } while (0);
-
-    return res;
-}
-
-void AppGroupManager::setAppGroupInfo(const QString &appId, std::tuple<int, int, int> groupInfo)
-{
-    int groupPos, pagePos, itemPos;
-    std::tie(groupPos, pagePos, itemPos) = groupInfo;
-
-    auto groupIndex = index(groupPos, 0);
-    if (!groupIndex.isValid()) {
-        return;
-    }
-
-    auto appItems = groupIndex.data(GroupAppItemsRole).value<QList<QStringList>>();
-    int groupItemsPerPage = groupIndex.data(GroupItemsPerPageRole).toInt();
-
-    for (int i = pagePos; i < appItems.length() - 1; i++) {
-        appItems[i].insert(itemPos, appId);
-        m_map.insert(appId, std::make_tuple(groupPos, pagePos));
-
-        // 本页最后一位元素插入到下页
-        if (appItems[i].length() > groupItemsPerPage) {
-            auto item = appItems[i].takeLast();
-
-            appItems[i + 1].insert(0, item);
-            m_map.insert(item, std::make_tuple(groupPos, i + 1));
+    for (int i = 0; i < rowCount(); i++) {
+        auto group = static_cast<AppGroup*>(itemFromIndex(index(i, 0)));
+        if (folderId >= 0 && group->folderId() != folderId) {
+            continue;
+        }
+        std::tie(page, idx) = group->itemsPage()->findItem(appId);
+        if (page != -1) {
+            return std::make_tuple(group->folderId(), page, idx);
         }
     }
 
-    if (appItems.length() > 1 && appItems.last().length() > groupItemsPerPage) {
-        auto item = appItems.last().takeLast();
-        appItems.append({item});
-    }
+    return std::make_tuple(-1, -1, -1);
+}
 
-    if (pagePos > appItems.length()) {
-        appItems.append({appId});
-    }
+void AppGroupManager::appendItemToGroup(const QString &appId, int groupId)
+{
+    auto folder = group(groupId);
+    Q_CHECK_PTR(folder);
+    folder->itemsPage()->appendItem(appId);
+}
 
+bool AppGroupManager::removeItemFromGroup(const QString &appId, int groupId)
+{
+    auto folder = group(groupId);
+    Q_CHECK_PTR(folder);
+    return folder->itemsPage()->removeItem(appId);
+}
+
+QModelIndex AppGroupManager::groupIndexById(int groupId)
+{
+    for (int i = 0; i < rowCount(); i++) {
+        auto groupIndex = index(i, 0);
+        auto data = groupIndex.data(GroupIdRole);
+        if (data.toInt() == groupId) {
+            return groupIndex;
+        }
+    }
+    return QModelIndex();
+}
+
+AppGroup * AppGroupManager::group(int groupId)
+{
+    auto groupIndex = groupIndexById(groupId);
+    if (!groupIndex.isValid()) {
+        return nullptr;
+    }
+    auto group = static_cast<AppGroup*>(itemFromIndex(groupIndex));
+    return group;
+}
+
+AppGroup * AppGroupManager::group(QModelIndex idx)
+{
+    if (!idx.isValid()) {
+        return nullptr;
+    }
+    auto group = static_cast<AppGroup*>(itemFromIndex(idx));
+    return group;
+}
+
+QVariantList AppGroupManager::fromListOfStringList(const QList<QStringList> & list)
+{
     QVariantList data;
-    std::transform(appItems.begin(), appItems.end(), std::back_inserter(data), [](const QStringList &items) {
+    std::transform(list.begin(), list.end(), std::back_inserter(data), [](const QStringList &items) {
         QVariantList tmp;
         std::transform(items.begin(), items.end(), std::back_inserter(tmp), [](const auto &item) {
             return QVariant::fromValue(item);
         });
-        return tmp;
+        return items;
     });
 
-    setData(groupIndex, data);
+    return data;
+}
+
+// On AM model changed, add newly installed apps to group (if any) and remove apps that are no longer exists.
+void AppGroupManager::onReferenceModelChanged()
+{
+    // Avoid remove all existing records when first time (AM model is not ready).
+    if (m_referenceModel->rowCount() == 0) {
+        qDebug() << "referenceModel not ready, wait for next time";
+        return;
+    }
+
+    QSet<QString> appSet;
+    for (int i = 0; i < m_referenceModel->rowCount(); i++) {
+        const auto modelIndex = m_referenceModel->index(i, 0);
+        const bool noDisplay = m_referenceModel->data(modelIndex, AppItemModel::NoDisplayRole).toBool();
+        if (noDisplay) {
+            continue;
+        }
+        const QString & desktopId = m_referenceModel->data(m_referenceModel->index(i, 0), AppItemModel::DesktopIdRole).toString();
+        appSet.insert(desktopId);
+        // add all existing ones if they are not already in
+        int folder, page, idx;
+        std::tie(folder, std::ignore, std::ignore) = findItem(desktopId);
+        if (folder == -1) {
+            appendItemToGroup(desktopId, TOPLEVEL_FOLDERID);
+        }
+    }
+
+    // remove all non-existing ones
+    for (int i = rowCount() - 1; i >= 0; i--) {
+        auto folder = group(index(i, 0));
+        Q_CHECK_PTR(folder);
+        folder->itemsPage()->removeItemsNotIn(appSet);
+        // check if group itself is also empty, remove them too.
+        if (folder->itemsPage()->itemCount() == 0 && folder->folderId() != TOPLEVEL_FOLDERID) {
+            QString groupId = folder->appId();
+            removeRow(i);
+            removeItemFromGroup(groupId, TOPLEVEL_FOLDERID);
+        }
+    }
+
+    // TODO: emit datachanged signal?
+    // TODO: save item arrangement to user data?
 }
 
 void AppGroupManager::loadAppGroupInfo()
 {
     auto groups = m_config->value("Groups").toList();
+
     for (int i = 0; i < groups.length(); i++) {
         auto group = groups[i].toMap();
-        auto folderId = group.value("folderId", "").toString();
+        auto groupId = group.value("groupId", "").toString();
         auto name = group.value("name", "").toString();
         auto pages = group.value("appItems", QVariantList()).toList();
         QList<QStringList> items;
@@ -125,28 +183,32 @@ void AppGroupManager::loadAppGroupInfo()
         for (int j = 0; j < pages.length(); j++) {
             auto page = pages[j].toStringList();
             items << page;
-            std::for_each(page.begin(), page.end(), [this, i, j](const QString &item) {
-                m_map.insert(item, std::make_tuple(i, j));
-            });
         }
 
-        if (folderId.isEmpty()) {
-            folderId = assignGroupId();
+        if (groupId.isEmpty()) {
+            groupId = assignGroupId();
         }
-        auto p = new AppGroup(folderId, name, items);
+        auto p = new AppGroup(groupId, name, items);
+        appendRow(p);
+    }
+
+    // always ensure top-level group exists
+    if (rowCount() == 0) {
+        auto p = new AppGroup(assignGroupId(), "Top Level", {});
+        Q_ASSERT(p->folderId() == TOPLEVEL_FOLDERID);
         appendRow(p);
     }
 }
 
-void AppGroupManager::dumpAppGroupInfo()
+void AppGroupManager::saveAppGroupInfo()
 {
     QVariantList list;
     for (int i = 0; i < rowCount(); i++) {
-        auto data = index(i, 0);
+        auto folder = group(index(i, 0));
         QVariantMap valueMap;
-        valueMap.insert("name", data.data(AppItemModel::NameRole));
-        valueMap.insert("folderId", data.data(AppItemModel::DesktopIdRole));
-        valueMap.insert("appItems", data.data(GroupAppItemsRole));
+        valueMap.insert("name", folder->data(AppItemModel::NameRole));
+        valueMap.insert("groupId", folder->appId());
+        valueMap.insert("appItems", fromListOfStringList(folder->pages()));
         list << valueMap;
     }
 

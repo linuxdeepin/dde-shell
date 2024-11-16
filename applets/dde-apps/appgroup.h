@@ -6,18 +6,22 @@
 
 #include "appitem.h"
 
+class ItemsPage;
 namespace apps {
 class AppGroup : public AppItem
 {
 public:
     explicit AppGroup(const QString &groupId, const QString &name, const QList<QStringList> &appItemIDs);
+    ~AppGroup() override;
 
-    QString name() const;
-    void setName(const QString &name);
+    int folderId() const;
+    QList<QStringList> pages() const;
+    ItemsPage * itemsPage();
 
-    QList<QStringList> appItems() const;
-    void setAppItems(const QList<QStringList> &items);
-
+private:
     void setItemsPerPage(int number);
+    void setFolderId(int folderId);
+
+    ItemsPage * m_itemsPage;
 };
 }
