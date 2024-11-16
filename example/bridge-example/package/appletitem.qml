@@ -38,7 +38,6 @@ AppletItem {
         height: 480
         popupX: DockPanelPositioner.x
         popupY: DockPanelPositioner.y
-        DockPanelPositioner.bounding: Qt.rect(popupX, popupY, width, height)
 
         Control {
             anchors.fill: parent
@@ -100,6 +99,8 @@ AppletItem {
         TapHandler {
             acceptedButtons: Qt.LeftButton
             onTapped: {
+                let rect = Qt.rect(launcherDebuggerPanel.popupX, launcherDebuggerPanel.popupY, launcherDebuggerPanel.width, launcherDebuggerPanel.height)
+                launcherDebuggerPanel.DockPanelPositioner.bounding = rect
                 launcherDebuggerPanel.open()
             }
         }
