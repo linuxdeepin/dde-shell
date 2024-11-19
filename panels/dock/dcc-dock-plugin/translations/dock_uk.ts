@@ -32,18 +32,6 @@
         <translation>Режим</translation>
     </message>
     <message>
-        <source>Fashion</source>
-        <translation>Мода</translation>
-    </message>
-    <message>
-        <source>Efficient-left</source>
-        <translation>Практика-ліворуч</translation>
-    </message>
-    <message>
-        <source>Efficient-center</source>
-        <translation>Практика-центр</translation>
-    </message>
-    <message>
         <source>Dock size</source>
         <translation>Розмір панелі</translation>
     </message>
@@ -114,6 +102,18 @@
     <message>
         <source>Select which icons appear in the Dock</source>
         <translation>Виберіть, які піктограми буде показано на бічній панелі</translation>
+    </message>
+    <message>
+        <source>Classic Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Centered Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Fashion Mode</source>
+        <translation>Модний режим</translation>
     </message>
 </context>
 </TS>
