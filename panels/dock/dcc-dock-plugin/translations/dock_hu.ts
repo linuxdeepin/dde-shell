@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="hu">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="hu">
 <context>
     <name>PluginArea</name>
     <message>
@@ -30,18 +32,6 @@
     <message>
         <source>Mode</source>
         <translation>Mód</translation>
-    </message>
-    <message>
-        <source>Fashion</source>
-        <translation>Stílusos mód</translation>
-    </message>
-    <message>
-        <source>Efficient-left</source>
-        <translation>Hatékony mód - bal</translation>
-    </message>
-    <message>
-        <source>Efficient-center</source>
-        <translation>Hatékony mód - közép</translation>
     </message>
     <message>
         <source>Dock size</source>
@@ -114,6 +104,18 @@
     <message>
         <source>Select which icons appear in the Dock</source>
         <translation>Válassza ki, hogy mely ikonok jelenjenek meg a dokkolóban</translation>
+    </message>
+    <message>
+        <source>Classic Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Centered Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fashion Mode</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

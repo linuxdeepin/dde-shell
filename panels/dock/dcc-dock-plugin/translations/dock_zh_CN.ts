@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1">
+<TS version="2.1" language="zh_CN">
 <context>
     <name>PluginArea</name>
     <message>
@@ -34,16 +34,16 @@
         <translation>模式</translation>
     </message>
     <message>
-        <source>Fashion</source>
-        <translation>时尚</translation>
+        <source>Classic Mode</source>
+        <translation>经典模式</translation>
     </message>
     <message>
-        <source>Efficient-left</source>
-        <translation>高效-居左</translation>
+        <source>Centered Mode</source>
+        <translation>居中模式</translation>
     </message>
     <message>
-        <source>Efficient-center</source>
-        <translation>高效-居中</translation>
+        <source>Fashion Mode</source>
+        <translation>时尚模式</translation>
     </message>
     <message>
         <source>Dock size</source>
