@@ -32,18 +32,6 @@
         <translation>Tryb</translation>
     </message>
     <message>
-        <source>Fashion</source>
-        <translation>Modny</translation>
-    </message>
-    <message>
-        <source>Efficient-left</source>
-        <translation>Wydajny-lewo</translation>
-    </message>
-    <message>
-        <source>Efficient-center</source>
-        <translation>Wydajny-środek</translation>
-    </message>
-    <message>
         <source>Dock size</source>
         <translation>Rozmiar doku</translation>
     </message>
@@ -114,6 +102,18 @@
     <message>
         <source>Select which icons appear in the Dock</source>
         <translation>Wybierz, które ikony pojawią się w doku</translation>
+    </message>
+    <message>
+        <source>Classic Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Centered Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Fashion Mode</source>
+        <translation>Tryb modny</translation>
     </message>
 </context>
 </TS>
