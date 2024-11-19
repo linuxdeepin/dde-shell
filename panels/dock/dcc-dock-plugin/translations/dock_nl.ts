@@ -32,18 +32,6 @@
         <translation>Modus</translation>
     </message>
     <message>
-        <source>Fashion</source>
-        <translation>Modern</translation>
-    </message>
-    <message>
-        <source>Efficient-left</source>
-        <translation>Effciënt (links)</translation>
-    </message>
-    <message>
-        <source>Efficient-center</source>
-        <translation>Efficiënt (midden)</translation>
-    </message>
-    <message>
         <source>Dock size</source>
         <translation>Dockgrootte</translation>
     </message>
@@ -114,6 +102,18 @@
     <message>
         <source>Select which icons appear in the Dock</source>
         <translation>Geef aan welke pictogrammen op het dock moeten worden getoond</translation>
+    </message>
+    <message>
+        <source>Classic Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Centered Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Fashion Mode</source>
+        <translation>Moderne modus</translation>
     </message>
 </context>
 </TS>
