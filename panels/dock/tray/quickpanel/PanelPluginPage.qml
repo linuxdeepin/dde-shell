@@ -58,7 +58,12 @@ Item {
                 icon.name: "quickpanel-power"
                 onClicked: function () {
                     console.log("clicked shutdown")
-                    model.openShutdownScreen()
+                    var shutdown = DS.applet("org.deepin.ds.dde-shutdown")
+                    if (shutdown) {
+                        shutdown.requestShutdown()
+                    } else {
+                        console.warn("shutdown applet not found")
+                    }
                 }
             }
         }
