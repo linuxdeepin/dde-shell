@@ -32,18 +32,6 @@
         <translation>Mode</translation>
     </message>
     <message>
-        <source>Fashion</source>
-        <translation>Moderne</translation>
-    </message>
-    <message>
-        <source>Efficient-left</source>
-        <translation>Productif, à gauche</translation>
-    </message>
-    <message>
-        <source>Efficient-center</source>
-        <translation>Productif, centré</translation>
-    </message>
-    <message>
         <source>Dock size</source>
         <translation>Taille du lanceur</translation>
     </message>
@@ -114,6 +102,18 @@
     <message>
         <source>Select which icons appear in the Dock</source>
         <translation>Sélectionner les icônes qui apparaissent dans le lanceur</translation>
+    </message>
+    <message>
+        <source>Classic Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Centered Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Fashion Mode</source>
+        <translation>Mode fashion</translation>
     </message>
 </context>
 </TS>
