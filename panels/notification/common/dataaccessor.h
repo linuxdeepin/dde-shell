@@ -14,6 +14,9 @@ namespace notification {
 class DataAccessor
 {
 public:
+    virtual ~DataAccessor()
+    {
+    }
     virtual qint64 addEntity(const NotifyEntity &entity) { Q_UNUSED(entity); return 0; }
 
     virtual void updateEntityProcessedType(qint64 id, int processedType) { Q_UNUSED(id); Q_UNUSED(processedType); }

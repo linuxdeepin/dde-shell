@@ -19,6 +19,7 @@ class DBAccessor : public DataAccessor
 {
 public:
     explicit DBAccessor(const QString &key);
+    ~DBAccessor() override;
 
     static DBAccessor *instance();
 

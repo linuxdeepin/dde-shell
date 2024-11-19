@@ -118,6 +118,13 @@ DBAccessor::DBAccessor(const QString &key)
     }
 }
 
+DBAccessor::~DBAccessor()
+{
+    if (m_connection.isOpen()) {
+        m_connection.close();
+    }
+}
+
 DBAccessor *DBAccessor::instance()
 {
     static DBAccessor *instance = nullptr;

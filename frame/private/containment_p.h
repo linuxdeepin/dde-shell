@@ -20,9 +20,14 @@ class DContainmentPrivate : public DAppletPrivate
 public:
     explicit DContainmentPrivate(DContainment *qq)
         : DAppletPrivate(qq)
-        , m_model(new DAppletItemModel())
     {
-
+    }
+    DAppletItemModel *model() const
+    {
+        if (!m_model) {
+            const_cast<DContainmentPrivate *>(this)->m_model = new DAppletItemModel(const_cast<DContainment *>(q_func()));
+        }
+        return m_model;
     }
     QList<DAppletData> groupList(const DAppletData &data) const;
     QList<DApplet *> m_applets;

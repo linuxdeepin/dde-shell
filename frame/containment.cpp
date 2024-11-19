@@ -50,10 +50,10 @@ DApplet *DContainment::createApplet(const DAppletData &data)
     QObject::connect(applet, &DApplet::rootObjectChanged, this, [this, applet]() {
         if (auto object = applet->rootObject()) {
             D_D(DContainment);
-            d->m_model->append(object);
+            d->model()->append(object);
             QObject::connect(object, &QObject::destroyed, this, [this, object]() {
                 D_D(DContainment);
-                d->m_model->remove(object);
+                d->model()->remove(object);
             });
         }
     });
@@ -70,7 +70,7 @@ void DContainment::removeApplet(DApplet *applet)
         d->m_applets.removeOne(applet);
     }
     if (auto view = applet->rootObject()) {
-        d->m_model->remove(view);
+        d->model()->remove(view);
     }
     applet->deleteLater();
 }
@@ -85,14 +85,14 @@ QList<QObject *> DContainment::appletItems()
 {
     D_D(DContainment);
 
-    return d->m_model->rootObjects();
+    return d->model()->rootObjects();
 }
 
 DAppletItemModel *DContainment::appletItemModel() const
 {
     D_DC(DContainment);
 
-    return d->m_model;
+    return d->model();
 }
 
 DApplet *DContainment::applet(const QString &id) const
