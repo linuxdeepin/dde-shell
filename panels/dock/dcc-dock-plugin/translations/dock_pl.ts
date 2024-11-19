@@ -105,7 +105,7 @@
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation type="unfinished"/>
+        <translation>Tryb klasyczny</translation>
     </message>
     <message>
         <source>Centered Mode</source>
