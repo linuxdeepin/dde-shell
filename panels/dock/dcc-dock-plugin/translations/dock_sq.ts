@@ -105,11 +105,11 @@
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation type="unfinished"/>
+        <translation>Mënyra Klasike</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation type="unfinished"/>
+        <translation>Mënyra e Qendërzuar</translation>
     </message>
     <message>
         <source>Fashion Mode</source>
