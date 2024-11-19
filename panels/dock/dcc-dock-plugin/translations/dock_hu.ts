@@ -32,18 +32,6 @@
         <translation>Mód</translation>
     </message>
     <message>
-        <source>Fashion</source>
-        <translation>Stílusos mód</translation>
-    </message>
-    <message>
-        <source>Efficient-left</source>
-        <translation>Hatékony mód - bal</translation>
-    </message>
-    <message>
-        <source>Efficient-center</source>
-        <translation>Hatékony mód - közép</translation>
-    </message>
-    <message>
         <source>Dock size</source>
         <translation>Dokkoló mérete</translation>
     </message>
@@ -114,6 +102,18 @@
     <message>
         <source>Select which icons appear in the Dock</source>
         <translation>Válassza ki, hogy mely ikonok jelenjenek meg a dokkolóban</translation>
+    </message>
+    <message>
+        <source>Classic Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Centered Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Fashion Mode</source>
+        <translation>Stílusos mód</translation>
     </message>
 </context>
 </TS>
