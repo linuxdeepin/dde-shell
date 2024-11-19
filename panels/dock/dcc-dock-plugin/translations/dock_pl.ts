@@ -109,7 +109,7 @@
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation type="unfinished"/>
+        <translation>Tryb wyśrodkowany</translation>
     </message>
     <message>
         <source>Fashion Mode</source>
