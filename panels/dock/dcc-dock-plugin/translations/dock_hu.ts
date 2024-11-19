@@ -105,11 +105,11 @@
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation type="unfinished"/>
+        <translation>Klasszikus mód</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation type="unfinished"/>
+        <translation>Középre igazított mód</translation>
     </message>
     <message>
         <source>Fashion Mode</source>
