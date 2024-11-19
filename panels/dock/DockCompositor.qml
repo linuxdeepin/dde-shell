@@ -27,6 +27,7 @@ Item {
 
     signal pluginSurfacesUpdated()
     signal popupCreated(var popup)
+    signal requestShutdown()
 
     function removeDockPluginSurface(model, object) {
         for (var i = 0; i < model.count; ++i) {
@@ -100,6 +101,10 @@ Item {
             onPluginPopupCreated: (popup) => {
                 console.log("plugin popup created", popup.pluginId, popup.itemKey, popup.popupType)
                 dockCompositor.popupCreated(popup)
+            }
+
+            onRequestShutdown: {
+                dockCompositor.requestShutdown()
             }
         }
     }

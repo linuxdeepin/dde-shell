@@ -156,6 +156,15 @@ AppletItem {
             DDT.TraySortOrderModel.availableSurfaces = surfacesData
             console.log("onPluginSurfacesUpdated", surfacesData.length)
         }
+
+        function onRequestShutdown() {
+            var shutdown = DS.applet("org.deepin.ds.dde-shutdown")
+            if (shutdown) {
+                shutdown.requestShutdown()
+            } else {
+                console.warn("shutdown applet not found")
+            }
+        }
     }
 
     WaylandOutput {

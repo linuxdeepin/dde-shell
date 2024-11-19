@@ -54,16 +54,6 @@ void QuickPanelProxyModel::openSystemSettings()
         .call();
 }
 
-void QuickPanelProxyModel::openShutdownScreen()
-{
-    DDBusSender()
-        .service("org.deepin.dde.ShutdownFront1")
-        .interface("org.deepin.dde.ShutdownFront1")
-        .path("/org/deepin/dde/ShutdownFront1")
-        .method("Show")
-        .call();
-}
-
 QVariant QuickPanelProxyModel::data(const QModelIndex &index, int role) const
 {
     const auto sourceIndex = mapToSource(index);

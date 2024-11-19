@@ -115,6 +115,12 @@ void PluginSurface::plugin_dcc_icon(Resource *resource, const QString &icon)
     m_dccIcon = icon;
 }
 
+void PluginSurface::plugin_request_shutdown(Resource *resource)
+{
+    Q_UNUSED(resource);
+    Q_EMIT m_manager->requestShutdown();
+}
+
 void PluginSurface::plugin_destroy_resource(Resource *resource)
 {
     Q_UNUSED(resource);
