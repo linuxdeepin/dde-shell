@@ -45,7 +45,7 @@ DccObject {
                 property real iconSize: 16
                 parentName: "personalization/taskBar/pluginArea/pluginAreaView"
                 weight: 10 + index * 10
-                hasBackground: true
+                backgroundType: DccObject.Normal
                 icon: model.icon
                 displayName: model.displayName
                 pageType: DccObject.Editor
