@@ -45,9 +45,9 @@ DccObject {
 
                     ListModel {
                         id: modeData
-                        ListElement { text: qsTr("Fashion"); icon: "fashion"; value: 2 }
-                        ListElement { text: qsTr("Efficient-left"); icon: "effcient_left"; value: 1 }
-                        ListElement { text: qsTr("Efficient-center"); icon: "effcient_center"; value: 0 }
+                        ListElement { text: qsTr("Classic Mode"); icon: "effcient_left"; value: 1 }
+                        ListElement { text: qsTr("Centered Mode"); icon: "effcient_center"; value: 0 }
+                        // ListElement { text: qsTr("Fashion Mode"); icon: "fashion"; value: 2 }
                     }
 
                     Repeater {
