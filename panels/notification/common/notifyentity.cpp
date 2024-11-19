@@ -46,7 +46,7 @@ NotifyEntity::NotifyEntity()
 }
 
 NotifyEntity::NotifyEntity(qint64 id, const QString &appName)
-    : d(new NotifyData())
+    : NotifyEntity()
 {
     d->id = id;
     d->appName = appName;

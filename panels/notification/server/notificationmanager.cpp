@@ -69,6 +69,10 @@ NotificationManager::NotificationManager(QObject *parent)
 
 NotificationManager::~NotificationManager()
 {
+    if (m_persistence) {
+        delete m_persistence;
+        m_persistence = nullptr;
+    }
 }
 
 bool NotificationManager::registerDbusService()

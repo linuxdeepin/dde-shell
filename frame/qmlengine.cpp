@@ -36,6 +36,7 @@ public:
         static QQmlEngine *s_engine = nullptr;
         if (!s_engine) {
             s_engine = new QQmlEngine();
+            QObject::connect(s_engine, &QQmlEngine::quit, qApp, &QCoreApplication::quit);
             auto paths = s_engine->importPathList();
             // high priority for builtin plugin.
             paths.prepend(DDE_SHELL_QML_INSTALL_DIR);
