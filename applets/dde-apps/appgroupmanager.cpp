@@ -6,6 +6,7 @@
 #include "appgroup.h"
 #include "itemspage.h"
 #include "amappitemmodel.h"
+#include "amappitem.h"
 
 #define TOPLEVEL_FOLDERID 0
 
@@ -20,6 +21,7 @@ AppGroupManager::AppGroupManager(AMAppItemModel * referenceModel, QObject *paren
     m_dumpTimer->setSingleShot(true);
     m_dumpTimer->setInterval(1000);
 
+    launchpadArrangementConfigMigration();
     loadAppGroupInfo();
 
     connect(m_referenceModel, &AMAppItemModel::rowsInserted, this, [this](){
@@ -49,7 +51,7 @@ QVariant AppGroupManager::data(const QModelIndex &index, int role) const
 }
 
 // Find the item's location. If folderId is -1, search all folders.
-std::tuple<int, int, int> AppGroupManager::findItem(const QString &appId, int folderId)
+ItemPosition AppGroupManager::findItem(const QString &appId, int folderId)
 {
     int page, idx;
 
@@ -60,11 +62,11 @@ std::tuple<int, int, int> AppGroupManager::findItem(const QString &appId, int fo
         }
         std::tie(page, idx) = group->itemsPage()->findItem(appId);
         if (page != -1) {
-            return std::make_tuple(group->folderId(), page, idx);
+            return ItemPosition(group->folderId(), page, idx);
         }
     }
 
-    return std::make_tuple(-1, -1, -1);
+    return ItemPosition();
 }
 
 void AppGroupManager::appendItemToGroup(const QString &appId, int groupId)
@@ -112,6 +114,115 @@ AppGroup * AppGroupManager::group(QModelIndex idx)
     return group;
 }
 
+ItemsPage * AppGroupManager::groupPages(int groupId)
+{
+    AppGroup * folder = group(groupId);
+    if (!folder) return nullptr;
+    return folder->itemsPage();
+}
+
+void AppGroupManager::bringToFromt(const QString & id)
+{
+    const ItemPosition origPos = findItem(id);
+
+    // can only bring top-level item to front
+    Q_ASSERT(origPos.group() != TOPLEVEL_FOLDERID);
+    if (origPos.group() != TOPLEVEL_FOLDERID) {
+        return;
+    }
+
+    // already at front
+    if (origPos.page() == 0 && origPos.pos() == 0) {
+        return;
+    }
+
+    auto * topLevel = groupPages(0);
+    topLevel->moveItemPosition(origPos.page(), origPos.pos(), 0, 0, false);
+
+    saveAppGroupInfo();
+
+    // TODO: emit signal to refresh the view
+}
+
+void AppGroupManager::commitRearrangeOperation(const QString & dragId, const QString & dropId, DndOperation operation, int pageHint)
+{
+    if (dragId == dropId) return;
+
+    const ItemPosition dragOrigPos = findItem(dragId);
+    const ItemPosition dropOrigPos = findItem(dropId);
+
+    Q_ASSERT(dragOrigPos.group() != -1);
+    if (dragOrigPos.group() == -1) {
+        qWarning() << "Cannot found" << dragId << "in current item arrangement.";
+        return;
+    }
+
+    if (operation != DndOperation::DndJoin) {
+        // move to dropId's front or back
+        if (dragOrigPos.group() == dropOrigPos.group()) {
+            // same folder item re-arrangement
+            ItemsPage * folder = groupPages(dropOrigPos.group());
+            folder->moveItemPosition(dragOrigPos.page(), dragOrigPos.pos(), dropOrigPos.page(), dropOrigPos.pos(), operation == DndOperation::DndAppend);
+        } else {
+            // different folder item arrangement
+            ItemsPage * srcFolder = groupPages(dragOrigPos.group());
+            ItemsPage * dstFolder = groupPages(dropOrigPos.group());
+            srcFolder->removeItem(dragId);
+            if (srcFolder->pageCount() == 0 && srcFolder != dstFolder) {
+                removeGroup(dragOrigPos.group());
+            }
+            dstFolder->insertItem(dropId, dropOrigPos.page(), dropOrigPos.pos());
+        }
+    } else {
+        if (AppGroup::idIsFolder(dragId) && dropId != "internal/folders/0") return; // cannot drag folder onto something
+        if (dropOrigPos.group() != TOPLEVEL_FOLDERID && dropId != "internal/folders/0") return; // folder inside folder is not allowed
+
+        // the source item will be inside a new folder anyway.
+        ItemsPage * srcFolder = groupPages(dragOrigPos.group());
+    
+        if (AppGroup::idIsFolder(dropId)) {
+            // drop into existing folder
+            ItemsPage * dstFolder = groupPages(AppGroup::parseGroupId(dropId));
+            const int fromPage = dragOrigPos.page();
+            const int toPage = pageHint;
+            if (srcFolder == dstFolder) {
+                if (srcFolder->pageCount() == 1 ||
+                    (fromPage == toPage && srcFolder->itemCount(fromPage) == 1)) { // dnd the only item to the same page
+                    return;
+                }
+            }
+
+            // hold the empty page avoid access out of page range!
+            srcFolder->removeItem(dragId, false);
+            if (srcFolder->itemCount() == 0 && srcFolder != dstFolder) {
+                removeGroup(dragOrigPos.group());
+            }
+            dstFolder->insertItemToPage(dragId, toPage);
+
+            // clear empty page
+            srcFolder->removeEmptyPages();
+        } else {
+            srcFolder->removeItem(dragId);
+            // we need the app info for the new folder name...
+            AMAppItem * item = m_referenceModel->appItem(dropId);
+            AppItemModel::DDECategories dropCategories = item ? item->ddeCategories() : AppItemModel::Others;
+            // make a new folder, move two items into the folder
+            QString dstFolderId = assignGroupId();
+            appendGroup(dstFolderId, "internal/category/" + QString::number(dropCategories), {{dragId, dropId}});
+            if (srcFolder->pageCount() == 0 && dragOrigPos.group() != 0) {
+                removeGroup(dragOrigPos.group());
+            }
+            auto * topLevel = groupPages(0);
+            topLevel->insertItem(dstFolderId, dropOrigPos.page(), dropOrigPos.pos());
+            topLevel->removeItem(dropId);
+        }
+    }
+
+    saveAppGroupInfo();
+
+    // TODO: emit signal to refresh the view
+}
+
 QVariantList AppGroupManager::fromListOfStringList(const QList<QStringList> & list)
 {
     QVariantList data;
@@ -145,9 +256,8 @@ void AppGroupManager::onReferenceModelChanged()
         const QString & desktopId = m_referenceModel->data(m_referenceModel->index(i, 0), AppItemModel::DesktopIdRole).toString();
         appSet.insert(desktopId);
         // add all existing ones if they are not already in
-        int folder, page, idx;
-        std::tie(folder, std::ignore, std::ignore) = findItem(desktopId);
-        if (folder == -1) {
+        ItemPosition itemPos = findItem(desktopId);
+        if (itemPos.group() == -1) {
             appendItemToGroup(desktopId, TOPLEVEL_FOLDERID);
         }
     }
@@ -169,6 +279,52 @@ void AppGroupManager::onReferenceModelChanged()
     // TODO: save item arrangement to user data?
 }
 
+void AppGroupManager::launchpadArrangementConfigMigration()
+{
+    const QString arrangementSettingBasePath(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation));
+    const QString arrangementSettingPath(QDir(arrangementSettingBasePath).absoluteFilePath("deepin/dde-launchpad/item-arrangement.ini"));
+    if (!QFile::exists(arrangementSettingPath)) return;
+    QSettings itemArrangementSettings(arrangementSettingPath, QSettings::NativeFormat);
+
+    itemArrangementSettings.beginGroup("fullscreen");
+    const QStringList folderGroups(itemArrangementSettings.childGroups());
+
+    QVariantList list;
+
+    for (const QString & groupName : folderGroups) {
+        itemArrangementSettings.beginGroup(groupName);
+        QString folderName = itemArrangementSettings.value("name", QString()).toString();
+        int pageCount = itemArrangementSettings.value("pageCount", 0).toInt();
+        bool isTopLevel = groupName == "toplevel";
+
+        QVariantMap valueMap;
+        valueMap.insert("name", folderName);
+        valueMap.insert("groupId", groupName.toInt());
+
+        QList<QStringList> pages;
+        for (int i = 0; i < pageCount; i++) {
+            QStringList items = itemArrangementSettings.value(QString::asprintf("pageItems/%d", i)).toStringList();
+            // check if items have ".desktop" suffix, and remove the suffix
+            std::transform(items.begin(), items.end(), items.begin(), [](QString &item) {
+                if (item.endsWith(".desktop")) {
+                    item.remove(".desktop");
+                }
+                return item;
+            });
+            pages.append(items);
+        }
+
+        valueMap.insert("appItems", fromListOfStringList(pages));
+        list.append(valueMap);
+
+        itemArrangementSettings.endGroup();
+    }
+
+    m_config->setValue("Groups", list);
+
+    // TODO: delete the old configuration file
+}
+
 void AppGroupManager::loadAppGroupInfo()
 {
     auto groups = m_config->value("Groups").toList();
@@ -188,15 +344,13 @@ void AppGroupManager::loadAppGroupInfo()
         if (groupId.isEmpty()) {
             groupId = assignGroupId();
         }
-        auto p = new AppGroup(groupId, name, items);
-        appendRow(p);
+        auto p = appendGroup(groupId, name, items);
     }
 
     // always ensure top-level group exists
     if (rowCount() == 0) {
-        auto p = new AppGroup(assignGroupId(), "Top Level", {});
+        auto p = appendGroup(assignGroupId(), "Top Level", {});
         Q_ASSERT(p->folderId() == TOPLEVEL_FOLDERID);
-        appendRow(p);
     }
 }
 
@@ -229,6 +383,26 @@ QString AppGroupManager::assignGroupId() const
     }
 
     return QString("internal/group/%1").arg(idNumber);
+}
+
+AppGroup * AppGroupManager::appendGroup(int groupId, QString groupName, const QList<QStringList> &appItemIDs)
+{
+    Q_ASSERT(!groupIndexById(groupId).isValid());
+    return appendGroup(AppGroup::groupIdFromNumber(groupId), groupName, appItemIDs);
+}
+
+AppGroup * AppGroupManager::appendGroup(QString groupId, QString groupName, const QList<QStringList> &appItemIDs)
+{
+    auto p = new AppGroup(groupId, groupName, appItemIDs);
+    appendRow(p);
+    return p;
+}
+
+void AppGroupManager::removeGroup(int groupId)
+{
+    auto groupIndex = groupIndexById(groupId);
+    Q_ASSERT(groupIndex.isValid());
+    removeRow(groupIndex.row());
 }
 
 }

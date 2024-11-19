@@ -20,7 +20,7 @@ AppGroup::AppGroup(const QString &groupId, const QString &name, const QList<QStr
     setItemsPerPage(m_itemsPage->maxItemCountPerPage());
     setAppName(m_itemsPage->name());
     // folder id is a part of its groupId: "internal/folder/{folderId}"
-    setFolderId(groupId.section('/', -1).toInt());
+    setFolderId(parseGroupId(groupId));
 
     for (const QStringList &items : appIDs) {
         m_itemsPage->appendPage(items);
@@ -45,6 +45,23 @@ QList<QStringList> AppGroup::pages() const
 ItemsPage *AppGroup::itemsPage()
 {
     return m_itemsPage;
+}
+
+bool AppGroup::idIsFolder(const QString & id)
+{
+    return id.startsWith(QStringLiteral("internal/folder/"));
+}
+
+QString AppGroup::groupIdFromNumber(int groupId)
+{
+    return QStringLiteral("internal/folder/%1").arg(groupId);
+}
+
+int AppGroup::parseGroupId(const QString & id)
+{
+    using namespace std::string_view_literals;
+    constexpr size_t len = "internal/folder/"sv.size();
+    return QStringView{id}.mid(len + 1).toInt();
 }
 
 void AppGroup::setItemsPerPage(int number)

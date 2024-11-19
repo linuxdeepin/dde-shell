@@ -18,6 +18,10 @@ public:
     QList<QStringList> pages() const;
     ItemsPage * itemsPage();
 
+    static bool idIsFolder(const QString & id);
+    static QString groupIdFromNumber(int groupId);
+    static int parseGroupId(const QString & id);
+
 private:
     void setItemsPerPage(int number);
     void setFolderId(int folderId);
