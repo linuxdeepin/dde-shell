@@ -61,4 +61,15 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
         }
     });
 }
+
+AMAppItem * AMAppItemModel::appItem(const QString &id)
+{
+    for (int i = 0; i < rowCount(); i++) {
+        auto app = item(i);
+        if (app->data(AppItemModel::DesktopIdRole).toString() == id)
+            return static_cast<AMAppItem *>(app);
+    }
+    return nullptr;
+}
+
 }

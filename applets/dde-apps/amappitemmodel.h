@@ -9,12 +9,15 @@
 
 namespace apps
 {
+class AMAppItem;
 class AMAppItemModel : public AppItemModel
 {
     Q_OBJECT
 
 public:
     explicit AMAppItemModel(QObject *parent = nullptr);
+
+    AMAppItem * appItem(const QString &id);
 
 private:
     ObjectManager *m_manager;
