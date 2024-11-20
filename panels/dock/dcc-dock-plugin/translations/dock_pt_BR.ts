@@ -105,11 +105,11 @@
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation type="unfinished"/>
+        <translation>Modo clássico</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation type="unfinished"/>
+        <translation>Modo centralizado</translation>
     </message>
     <message>
         <source>Fashion Mode</source>
