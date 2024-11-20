@@ -565,7 +565,7 @@ NotifyEntity DBAccessor::parseEntity(const QSqlQuery &query)
     entity.setHintString(hint);
     entity.setActionString(action);
     entity.setProcessedType(processedType);
-    entity.setBubbleId(id);
+    entity.setBubbleId(notifyId);
     entity.setReplacesId(replacesId);
 
     return entity;
