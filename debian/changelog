@@ -1,3 +1,18 @@
+dde-shell (1.99.7) UNRELEASED; urgency=medium
+
+  * fix: can't response action for notification(Bug: 284861)
+  * fix: incomplete display of time for notification(Bug: 283509)
+  * fix: error displayed in stage for notification(Bug: 283969)
+  * fix: empty string can't represent AllApp for notification(Task: 366403)
+  * fix: change notification's layer for notification(Bug: 284425)
+  * fix: incorrect height of notificationCenter for notification(Bug: 283749)
+  * refact: extract notifyItem content for notification(Task: 366403)
+  * fix: incorrect position of panel for notification(Bug: 284191)
+  * fix(dcc-dock-plugin): Interface description text error(Bug: 286501)
+  * fix: ActionInvoked returned wrong id (#894)(Bug: 283561)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Wed, 20 Nov 2024 14:08:41 +0800
+
 dde-shell (1.99.6) UNRELEASED; urgency=medium
 
   * bump version to 1.99.6
