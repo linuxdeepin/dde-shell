@@ -62,6 +62,7 @@ public:
 
 protected:
     explicit DockWakeUpArea(QScreen *screen, DockHelper *helper);
+    virtual ~DockWakeUpArea() = default;
     virtual void updateDockWakeArea(Position pos) = 0;
 
 protected:
