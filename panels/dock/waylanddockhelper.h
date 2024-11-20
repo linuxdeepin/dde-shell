@@ -96,7 +96,6 @@ class TreeLandDockWakeUpArea : public QWidget, public DockWakeUpArea
 public:
     explicit TreeLandDockWakeUpArea(QScreen *screen, WaylandDockHelper *helper);
 
-public:
     void open() override;
     void close() override;
 

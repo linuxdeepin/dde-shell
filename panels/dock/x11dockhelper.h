@@ -96,7 +96,7 @@ class X11DockWakeUpArea : public QObject, public DockWakeUpArea
 
 private:
     X11DockWakeUpArea(QScreen *screen, X11DockHelper *helper);
-    ~X11DockWakeUpArea();
+    ~X11DockWakeUpArea() override;
 
     void open() override;
     void close() override;
