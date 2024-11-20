@@ -64,6 +64,12 @@ AMAppItem::AMAppItem(const QDBusObjectPath &path, const ObjectInterfaceMap &sour
 
     auto isOnDesktop = appInfo.value(u8"OnDesktop").toBool();
     AppItem::setOnDesktop(isOnDesktop);
+
+    PropMap actionName;
+    appInfo.value(u8"ActionName").value<QDBusArgument>() >> actionName;
+
+    auto actions = appInfo.value(u8"Actions").toStringList();
+    updateActions(actions, actionName);
 }
 
 void AMAppItem::launch(const QString &action, const QStringList &fields, const QVariantMap &options)
@@ -125,5 +131,24 @@ void AMAppItem::onPropertyChanged(const QDBusMessage &msg)
     AppItem::setStartupWMclass(Application::startupWMClass());
     AppItem::setAutoStart(Application::autoStart());
     AppItem::setOnDesktop(Application::isOnDesktop());
+
+    auto actions = Application::actions();
+    auto actionName = Application::actionName();
+    updateActions(actions, actionName);
+}
+
+void AMAppItem::updateActions(const QStringList &actions, const PropMap &actionName)
+{
+    QJsonArray actionsArray;
+    for (auto action : actions) {
+        auto localeNames = actionName.value(action);
+        QJsonObject actionObject;
+        actionObject.insert(QStringLiteral("id"), action);
+        actionObject.insert(QStringLiteral("name"), getLocaleOrDefaultValue(localeNames, action, DEFAULT_KEY));
+        actionsArray.append(actionObject);
+    }
+    if (actions.size() > 0) {
+        AppItem::setActions(QJsonDocument(actionsArray).toJson());
+    }
 }
 }

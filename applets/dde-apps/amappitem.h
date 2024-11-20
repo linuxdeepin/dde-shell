@@ -23,6 +23,7 @@ public:
 
 private:
     QString getLocaleOrDefaultValue(const QStringMap &value, const QString &targetKey, const QString &fallbackKey);
+    void updateActions(const QStringList &actions, const PropMap &actionName);
 
 private Q_SLOTS:
     void onPropertyChanged(const QDBusMessage &msg);
