@@ -4,13 +4,19 @@
 
 #pragma once
 
+#include "constants.h"
+#include <dsglobal.h>
+
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QWindow>
 
+DS_BEGIN_NAMESPACE
+class DPanel;
+DS_END_NAMESPACE
+
 namespace dock {
 
-class DockPanel;
 class DockPositioner : public QObject
 {
     Q_OBJECT
@@ -21,7 +27,7 @@ class DockPositioner : public QObject
     QML_UNCREATABLE("DockPositioner is only available via attached properties.")
     QML_ATTACHED(DockPositioner)
 public:
-    explicit DockPositioner(DockPanel *panel, QObject *parent = nullptr);
+    explicit DockPositioner(DS_NAMESPACE::DPanel *panel, QObject *parent = nullptr);
     virtual ~DockPositioner() override;
 
     static DockPositioner *qmlAttachedProperties(QObject *object);
@@ -30,7 +36,8 @@ public:
     void setBounding(const QRect &newBounding);
     int x() const;
     int y() const;
-    QWindow *window() const;
+    QRect dockGeometry() const;
+    Position dockPosition() const;
 
     void setX(int x);
     void setY(int y);
@@ -44,7 +51,7 @@ signals:
     void yChanged();
 
 protected:
-    DockPanel *m_panel = nullptr;
+    QPointer<DS_NAMESPACE::DPanel> m_panel;
     QRect m_bounding {};
     int m_x = 0;
     int m_y = 0;
@@ -60,7 +67,7 @@ class DockPanelPositioner : public DockPositioner
     QML_UNCREATABLE("DockPanelPositioner is only available via attached properties.")
     QML_ATTACHED(DockPanelPositioner)
 public:
-    explicit DockPanelPositioner(DockPanel *panel, QObject *parent = nullptr);
+    explicit DockPanelPositioner(DS_NAMESPACE::DPanel *panel, QObject *parent = nullptr);
     virtual ~DockPanelPositioner() override;
 
     static DockPanelPositioner *qmlAttachedProperties(QObject *object);

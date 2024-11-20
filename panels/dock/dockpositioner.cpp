@@ -3,25 +3,28 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "dockpositioner.h"
-#include "dockpanel.h"
+#include <panel.h>
 
-#include <QQuickWindow>
 #include <QLoggingCategory>
 #include <QQuickItem>
+#include <QQuickWindow>
+#include <QTimer>
+
+DS_USE_NAMESPACE
 
 namespace dock {
 
-static DockPanel *isInDockPanel(QObject *object)
+static DPanel *isInDockPanel(QObject *object)
 {
-    auto dockPanel = qobject_cast<DockPanel*>(DockPanel::qmlAttachedProperties(object));
-    if (!dockPanel) {
+    auto dockPanel = qobject_cast<DPanel *>(DPanel::qmlAttachedProperties(object));
+    if (!dockPanel || dockPanel->pluginId() != "org.deepin.ds.dock") {
         qWarning() << "only used in DockPanel.";
         return nullptr;
     }
     return dockPanel;
 }
 
-DockPositioner::DockPositioner(DockPanel *panel, QObject *parent)
+DockPositioner::DockPositioner(DPanel *panel, QObject *parent)
     : QObject(parent)
     , m_panel(panel)
     , m_positionTimer(new QTimer(this))
@@ -31,8 +34,8 @@ DockPositioner::DockPositioner(DockPanel *panel, QObject *parent)
     connect(m_positionTimer, &QTimer::timeout, this, &DockPositioner::updatePosition);
 
     Q_ASSERT(m_panel);
-    connect(m_panel, &DockPanel::positionChanged, this, &DockPositioner::update);
-    connect(m_panel, &DockPanel::geometryChanged, this, &DockPositioner::update);
+    connect(m_panel, SIGNAL(positionChanged(Position)), this, SLOT(update()));
+    connect(m_panel, SIGNAL(geometryChanged(QRect)), this, SLOT(update()));
     connect(this, &DockPositioner::boundingChanged, this, &DockPositioner::update);
 }
 
@@ -72,9 +75,14 @@ int DockPositioner::y() const
     return m_y;
 }
 
-QWindow *DockPositioner::window() const
+QRect DockPositioner::dockGeometry() const
 {
-    return m_panel->window();
+    return m_panel ? m_panel->property("geometry").toRect() : QRect();
+}
+
+Position DockPositioner::dockPosition() const
+{
+    return m_panel ? static_cast<Position>(m_panel->property("position").toInt()) : Position::Top;
 }
 
 void DockPositioner::setX(int x)
@@ -102,7 +110,7 @@ void DockPositioner::updatePosition()
 {
     int xPosition = 0;
     int yPosition = 0;
-    switch(m_panel->position()) {
+    switch (dockPosition()) {
     case dock::Top: {
         xPosition = m_bounding.x();
         yPosition = m_bounding.y();
@@ -131,7 +139,7 @@ void DockPositioner::updatePosition()
     setY(yPosition);
 }
 
-DockPanelPositioner::DockPanelPositioner(DockPanel *panel, QObject *parent)
+DockPanelPositioner::DockPanelPositioner(DPanel *panel, QObject *parent)
     : DockPositioner(panel, parent)
 {
     connect(this, &DockPanelPositioner::horizontalOffsetChanged, this, &DockPanelPositioner::update);
@@ -188,12 +196,12 @@ void DockPanelPositioner::resetVertialOffset()
 
 void DockPanelPositioner::updatePosition()
 {
-    const auto dockWindowRect = window()->geometry();
+    const auto dockWindowRect = dockGeometry();
     int xPosition = 0;
     int yPosition = 0;
     int horizontalOffset = m_horizontalOffset == -1 ? m_bounding.width() / 2 : m_horizontalOffset;
     int vertialOffset = m_vertialOffset == -1 ? m_bounding.height() / 2 : m_vertialOffset;
-    switch(m_panel->position()) {
+    switch (dockPosition()) {
     case dock::Top: {
         xPosition = m_bounding.x() - horizontalOffset;
         yPosition = dockWindowRect.height() + 10;
