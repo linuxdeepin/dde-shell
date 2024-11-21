@@ -58,6 +58,11 @@ bool DockHelper::eventFilter(QObject *watched, QEvent *event)
         return false;
     }
 
+    // not dock panel or dock popup has a enter event
+    if (window != parent()->rootObject() && window->transientParent() != parent()->rootObject()) {
+        return false;
+    }
+
     switch (event->type()) {
     case QEvent::Enter: {
         m_enters.insert(window, true);
