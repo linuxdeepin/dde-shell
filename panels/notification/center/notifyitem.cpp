@@ -117,10 +117,16 @@ QVariantList AppNotifyItem::actions() const
 void AppNotifyItem::updateActions()
 {
     QStringList actions = m_entity.actions();
-    const auto defaultIndex = actions.indexOf(QLatin1String("default"));
-    if (defaultIndex >= 0) {
-        actions.remove(defaultIndex, 2);
+    if (actions.contains(QLatin1String("default"))) {
+        actions.removeAll(QLatin1String("default"));
         m_defaultAction = QLatin1String("default");
+    }
+
+    Q_ASSERT(actions.size() % 2 != 1);
+    if (actions.size() % 2 == 1) {
+        qWarning(notifyLog) << "Actions must be an even number except for default, The notify appName:" << m_entity.appName()
+                            << ", actions:" << m_entity.actions();
+        return;
     }
 
     QVariantList array;
