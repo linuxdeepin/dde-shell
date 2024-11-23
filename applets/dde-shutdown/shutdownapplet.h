@@ -8,6 +8,7 @@
 
 DS_BEGIN_NAMESPACE
 namespace shutdown {
+class TreeLandLockScreen;
 class ShutdownApplet : public DApplet
 {
     Q_OBJECT
@@ -19,6 +20,11 @@ public:
 
 public Q_SLOTS:
     bool requestShutdown();
+    bool requestLock();
+    bool requestSwitchUser();
+
+private:
+    QScopedPointer<TreeLandLockScreen> m_lockscreen;
 };
 
 }

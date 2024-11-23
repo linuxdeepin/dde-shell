@@ -11,6 +11,7 @@ add_subdirectory(panel-example)
 add_subdirectory(layershell-example)
 add_subdirectory(osd-example)
 add_subdirectory(drag-example)
+add_subdirectory(lockscreen-example)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_subdirectory(bridge-example)
