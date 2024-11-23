@@ -43,6 +43,10 @@ Window {
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
 
+    property int showPosition: (Panel.position == Dock.Top || Panel.position == Dock.Left) ? 0 : (Panel.position == Dock.Bottom ? Screen.height - dockSize : Screen.width - dockSize)
+    property int hidePosition: (Panel.position == Dock.Top || Panel.position == Dock.Left) ? showPosition - dockSize : showPosition + dockSize
+
+
     function blendColorAlpha(fallback) {
         var appearance = DS.applet("org.deepin.ds.dde-appearance")
         if (!appearance || appearance.opacity < 0)
@@ -102,9 +106,9 @@ Window {
     PropertyAnimation {
         id: hideShowAnimation;
         target: dock;
-        property: useColumnLayout ? "width" : "height";
-        to: Panel.hideState != Dock.Hide ? Panel.dockSize : 0;
-        duration: 500
+        property: useColumnLayout ? "x" : "y";
+        to: Panel.hideState != Dock.Hide ?  showPosition : hidePosition;
+        duration: 300
         onStarted: {
             dock.visible = true
         }
