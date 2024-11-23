@@ -105,7 +105,7 @@
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation type="unfinished"/>
+        <translation>Klasikinė veiksena</translation>
     </message>
     <message>
         <source>Centered Mode</source>
@@ -113,7 +113,7 @@
     </message>
     <message>
         <source>Fashion Mode</source>
-        <translation type="unfinished"/>
+        <translation>Madinga veiksena</translation>
     </message>
 </context>
 </TS>
