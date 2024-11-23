@@ -3,12 +3,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "shutdownapplet.h"
-#include "pluginfactory.h"
+#include "treelandlockscreen.h"
 
 #include <QDebug>
 #include <QGuiApplication>
 
 #include <DDBusSender>
+
+#include <pluginfactory.h>
 DCORE_USE_NAMESPACE
 
 DS_BEGIN_NAMESPACE
@@ -25,13 +27,18 @@ ShutdownApplet::~ShutdownApplet()
 
 bool ShutdownApplet::load()
 {
+    auto platformName = QGuiApplication::platformName();
+    if (QStringLiteral("wayland") == platformName) {
+        m_lockscreen.reset(new TreeLandLockScreen);
+    }
     return true;
 }
 
 bool ShutdownApplet::requestShutdown()
 {
-    if (QStringLiteral("wayland") == QGuiApplication::platformName()) {
-        qDebug() << "request treeland shutdown";
+    qDebug() << "request shutdown";
+    if (m_lockscreen) {
+        m_lockscreen->shutdown();
     } else {
         DDBusSender()
             .service("org.deepin.dde.ShutdownFront1")
@@ -41,6 +48,22 @@ bool ShutdownApplet::requestShutdown()
             .call();
     }
 
+    return true;
+}
+
+bool ShutdownApplet::requestLock()
+{
+    if (m_lockscreen) {
+        m_lockscreen->lock();
+    }
+    return true;
+}
+
+bool ShutdownApplet::requestSwitchUser()
+{
+    if (m_lockscreen) {
+        m_lockscreen->switchUser();
+    }
     return true;
 }
 
