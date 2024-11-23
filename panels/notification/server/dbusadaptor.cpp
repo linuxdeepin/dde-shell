@@ -53,6 +53,28 @@ DDENotificationDbusAdaptor::DDENotificationDbusAdaptor(QObject *parent)
     setAutoRelaySignals(true);
 }
 
+QStringList DDENotificationDbusAdaptor::GetCapabilities()
+{
+    return manager()->GetCapabilities();
+}
+
+uint DDENotificationDbusAdaptor::Notify(const QString &appName, uint replacesId, const QString &appIcon,
+    const QString &summary, const QString &body, const QStringList &actions, const QVariantMap &hints,
+    int expireTimeout)
+{
+    return manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
+}
+
+void DDENotificationDbusAdaptor::CloseNotification(uint id)
+{
+    manager()->CloseNotification(id);
+}
+
+void DDENotificationDbusAdaptor::GetServerInformation(QString &name, QString &vendor, QString &version, QString &specVersion)
+{
+    manager()->GetServerInformation(name, vendor, version, specVersion);
+}
+
 NotificationManager *DDENotificationDbusAdaptor::manager() const
 {
     return qobject_cast<NotificationManager *>(parent());
