@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "dsglobal.h"
-
 #include <QDBusVariant>
 #include <QDBusAbstractAdaptor>
 
@@ -45,6 +43,18 @@ class DDENotificationDbusAdaptor : public QDBusAbstractAdaptor
 
 public:
     explicit DDENotificationDbusAdaptor(QObject *parent = nullptr);
+
+public Q_SLOTS: // methods
+    QStringList GetCapabilities();
+    uint Notify(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary,
+                const QString &body, const QStringList &actions, const QVariantMap &hints, int expireTimeout);
+    void CloseNotification(uint id);
+    void GetServerInformation(QString &name, QString &vendor, QString &version, QString &specVersion);
+
+Q_SIGNALS:
+    void ActionInvoked(uint id, const QString &actionKey);
+    void NotificationClosed(uint id, uint reason);
+    // todo void ActivationToken(uint id, const QString &activationToken)
 
 public Q_SLOTS: // methods
     uint recordCount() const;
