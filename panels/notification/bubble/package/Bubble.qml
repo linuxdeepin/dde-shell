@@ -11,6 +11,13 @@ import org.deepin.dtk 1.0 as D
 D.Control {
     id: control
     property var bubble
+    onHoveredChanged: function () {
+        if (control.hovered) {
+            Applet.bubbles.delayRemovedBubble = bubble.id
+        } else {
+            Applet.bubbles.delayRemovedBubble = -1
+        }
+    }
 
     contentItem:  Loader {
         sourceComponent: bubble.level <= 1 ? normalCom : overlayCom

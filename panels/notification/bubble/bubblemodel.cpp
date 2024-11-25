@@ -82,6 +82,8 @@ void BubbleModel::clear()
     qDeleteAll(m_bubbles);
     m_bubbles.clear();
     endResetModel();
+    m_delayBubbles.clear();
+    m_delayRemovedBubble = -1;
 
     updateLevel();
     m_updateTimeTipTimer->stop();
@@ -111,8 +113,8 @@ void BubbleModel::remove(int index)
     if (m_bubbles.count() >= BubbleMaxCount) {
         beginInsertRows(QModelIndex(), displayRowCount() - 1, displayRowCount() - 1);
         endInsertRows();
-        updateLevel();
     }
+    updateLevel();
 }
 
 void BubbleModel::remove(const BubbleItem *bubble)
@@ -125,8 +127,16 @@ void BubbleModel::remove(const BubbleItem *bubble)
 
 BubbleItem *BubbleModel::removeById(qint64 id)
 {
+    if (id == m_delayRemovedBubble) {
+        // Delayed remove
+        if (!m_delayBubbles.contains(id)) {
+            m_delayBubbles.append(id);
+        }
+        return nullptr;
+    }
     for (const auto &item : m_bubbles) {
         if (item->id() == id) {
+            m_delayBubbles.removeAll(id);
             remove(m_bubbles.indexOf(item));
             return item;
         }
@@ -158,6 +168,8 @@ QVariant BubbleModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case BubbleModel::AppName:
         return m_bubbles[row]->appName();
+    case BubbleModel::Id:
+        return m_bubbles[row]->id();
     case BubbleModel::Body:
         return m_bubbles[row]->body();
     case BubbleModel::Summary:
@@ -190,6 +202,7 @@ QHash<int, QByteArray> BubbleModel::roleNames() const
 {
     QHash<int, QByteArray> mapRoleNames;
     mapRoleNames[BubbleModel::AppName] = "appName";
+    mapRoleNames[BubbleModel::Id] = "id";
     mapRoleNames[BubbleModel::Body] = "body";
     mapRoleNames[BubbleModel::Summary] = "summary";
     mapRoleNames[BubbleModel::IconName] = "iconName";
@@ -217,6 +230,27 @@ int BubbleModel::overlayCount() const
 void BubbleModel::setBubbleCount(int count)
 {
     BubbleMaxCount = count;
+}
+
+qint64 BubbleModel::delayRemovedBubble() const
+{
+    return m_delayRemovedBubble;
+}
+
+void BubbleModel::setDelayRemovedBubble(qint64 newDelayRemovedBubble)
+{
+    if (m_delayRemovedBubble == newDelayRemovedBubble)
+        return;
+    const auto oldDelayRemovedBubble = m_delayRemovedBubble;
+    if (m_delayBubbles.contains(oldDelayRemovedBubble)) {
+        // Remove last delayed bubble.
+        QTimer::singleShot(DelayRemovBubbleTime, this, [this, oldDelayRemovedBubble]() {
+            removeById(oldDelayRemovedBubble);
+        });
+    }
+
+    m_delayRemovedBubble = newDelayRemovedBubble;
+    emit delayRemovedBubbleChanged();
 }
 
 int BubbleModel::replaceBubbleIndex(const BubbleItem *bubble) const
