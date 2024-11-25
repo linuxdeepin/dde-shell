@@ -10,7 +10,7 @@ import org.deepin.dtk 1.0 as D
 PanelPopupWindow {
     id: root
 
-    flags: (Qt.platform.pluginName === "xcb" ? Qt.Tool : Qt.ToolTip) | Qt.WindowStaysOnTopHint
+    flags: Qt.ToolTip | Qt.WindowStaysOnTopHint
     D.DWindow.windowRadius: 8
     D.DWindow.shadowRadius: 8
 }
