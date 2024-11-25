@@ -16,9 +16,11 @@ class BubbleItem;
 class BubbleModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(qint64 delayRemovedBubble READ delayRemovedBubble WRITE setDelayRemovedBubble NOTIFY delayRemovedBubbleChanged FINAL)
 public:
     enum {
         AppName = Qt::UserRole + 1,
+        Id,
         Body,
         Summary,
         IconName,
@@ -58,6 +60,12 @@ public:
     int overlayCount() const;
     void setBubbleCount(int count);
 
+    qint64 delayRemovedBubble() const;
+    void setDelayRemovedBubble(qint64 newDelayRemovedBubble);
+
+signals:
+    void delayRemovedBubbleChanged();
+
 private:
     int replaceBubbleIndex(const BubbleItem *bubble) const;
     void updateLevel();
@@ -70,6 +78,9 @@ private:
     const int LastBubbleMaxIndex{BubbleMaxCount - 1};
     const int OverlayMaxCount{2};
     const int NoReplaceId{0};
+    QList<qint64> m_delayBubbles;
+    qint64 m_delayRemovedBubble{-1};
+    const int DelayRemovBubbleTime{1000};
 };
 
 }
