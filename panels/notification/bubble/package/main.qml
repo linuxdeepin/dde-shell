@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Window 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Window
+import QtQuick.Layouts
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0
@@ -38,6 +38,7 @@ Window {
     DLayerShellWindow.topMargin: windowMargin(0)
     DLayerShellWindow.rightMargin: windowMargin(1)
     DLayerShellWindow.bottomMargin: windowMargin(2)
+    palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
     DWindow.enabled: true
     DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
