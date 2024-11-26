@@ -58,8 +58,13 @@ bool DockHelper::eventFilter(QObject *watched, QEvent *event)
         return false;
     }
 
+    auto topTransientParent = window;
+    while (topTransientParent->transientParent()) {
+        topTransientParent = topTransientParent->transientParent();
+    }
+
     // not dock panel or dock popup has a enter event
-    if (window != parent()->rootObject() && window->transientParent() != parent()->rootObject()) {
+    if (window != parent()->rootObject() && topTransientParent != parent()->rootObject()) {
         return false;
     }
 
