@@ -14,6 +14,8 @@ usr/lib/*/dde-shell/org.deepin.ds.dde-am*
 usr/share/dde-shell/org.deepin.ds.dde-am*/
 usr/lib/*/dde-shell/org.deepin.ds.dde-apps*
 usr/share/dde-shell/org.deepin.ds.dde-apps*/
+usr/lib/*/dde-shell/org.deepin.ds.dde-shutdown*
+usr/share/dde-shell/org.deepin.ds.dde-shutdown*/
 usr/share/dsg/configs/org.deepin.ds.dock/
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.dde.shell.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.tray.json
