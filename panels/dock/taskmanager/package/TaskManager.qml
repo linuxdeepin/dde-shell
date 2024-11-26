@@ -12,7 +12,7 @@ import org.deepin.dtk 1.0 as D
 ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.position % 2
-    property int dockOrder: 15
+    property int dockOrder: 16
 
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : appContainer.implicitWidth
     implicitHeight: useColumnLayout ? appContainer.implicitHeight : Panel.rootObject.dockSize

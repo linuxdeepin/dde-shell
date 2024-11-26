@@ -98,6 +98,7 @@ add_subdirectory(tray)
 add_subdirectory(multitaskview)
 add_subdirectory(dcc-dock-plugin)
 
+add_subdirectory(searchitem)
 #add_subdirectory(appruntimeitem)
 
 # dock qml element(include Dock.xx defines and DockCompositor)
