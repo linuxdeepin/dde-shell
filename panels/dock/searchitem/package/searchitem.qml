@@ -10,9 +10,8 @@ import org.deepin.dtk 1.0 as D
 import org.deepin.ds.dock 1.0
 
 AppletItem {
-    id: toggleworkspace
     property bool useColumnLayout: Panel.position % 2
-    property int dockOrder: 15
+    property int dockOrder: Panel.itemAlignment === Dock.CenterAlignment ? 5 : 14
     property bool shouldVisible: Applet.visible
     // 1:4 the distance between app : dock height; get width/height≈0.8
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : Panel.rootObject.dockItemMaxSize * 0.8
@@ -20,7 +19,7 @@ AppletItem {
 
     PanelToolTip {
         id: toolTip
-        text: qsTr("Multitasking View")
+        text: qsTr("GrandSearch")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
     }
@@ -28,7 +27,7 @@ AppletItem {
     D.DciIcon {
         id: icon
         anchors.centerIn: parent
-        name: Applet.iconName
+        name: "dde-grand-search"
         scale: Panel.rootObject.dockItemMaxSize * 9 / 14 / Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
         // 9:14 (iconSize/dockHeight)
         sourceSize: Qt.size(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE, Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE)
@@ -44,7 +43,7 @@ AppletItem {
         TapHandler {
             acceptedButtons: Qt.LeftButton
             onTapped: {
-                Applet.openWorkspace()
+                Applet.toggleGrandSearch()
                 toolTip.close()
             }
         }
