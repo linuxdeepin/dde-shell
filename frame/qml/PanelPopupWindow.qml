@@ -53,7 +53,7 @@ Window {
 
     width: 10
     height: 10
-    flags: Qt.Popup
+    flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint) : Qt.Popup) 
     D.DWindow.enabled: true
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableSystemResize: false
