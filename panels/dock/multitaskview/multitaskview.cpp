@@ -15,8 +15,12 @@
 #include <DGuiApplicationHelper>
 
 DGUI_USE_NAMESPACE
+DCORE_USE_NAMESPACE
 
 namespace dock {
+
+constexpr int KWinOptimalPerformance = 4;
+const QString windowEffectTypeKey = QStringLiteral("user_type");
 
 MultiTaskView::MultiTaskView(QObject *parent)
     : DApplet(parent)
@@ -26,6 +30,19 @@ MultiTaskView::MultiTaskView(QObject *parent)
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
         m_multitaskview.reset(new TreeLandMultitaskview);
+    } else {
+        m_kWinCompositingConfig = DConfig::create("org.kde.kwin", "org.kde.kwin.compositing", QString(), this);
+        m_kWinEffect = m_kWinCompositingConfig->value(windowEffectTypeKey).toInt() != KWinOptimalPerformance;
+
+        connect(m_kWinCompositingConfig, &DConfig::valueChanged, this, [=] (const QString &key) {
+            if (key == windowEffectTypeKey) {
+                bool kWinEffect = m_kWinCompositingConfig->value(windowEffectTypeKey).toInt() != KWinOptimalPerformance;
+                if (kWinEffect != m_kWinEffect) {
+                    m_kWinEffect = kWinEffect;
+                    Q_EMIT visibleChanged();
+                }
+            }
+        });
     }
 }
 
@@ -65,7 +82,7 @@ void MultiTaskView::setIconName(const QString& iconName)
 
 bool MultiTaskView::visible() const
 {
-    return m_visible && DWindowManagerHelper::instance()->hasComposite();
+    return m_kWinEffect && m_visible && DWindowManagerHelper::instance()->hasComposite();
 }
 
 DockItemInfo MultiTaskView::dockItemInfo()
