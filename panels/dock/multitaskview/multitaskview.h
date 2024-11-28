@@ -9,6 +9,8 @@
 #include "dsglobal.h"
 #include "treelandmultitaskview.h"
 
+#include <DConfig>
+
 namespace dock {
 
 class MultiTaskView : public DS_NAMESPACE::DApplet
@@ -36,9 +38,11 @@ Q_SIGNALS:
     void visibleChanged();
 
 private:
-    bool m_visible;
+    bool m_visible = true;
+    bool m_kWinEffect = true;
     QString m_iconName;
     QScopedPointer<TreeLandMultitaskview> m_multitaskview;
+    Dtk::Core::DConfig *m_kWinCompositingConfig = nullptr;
 };
 
 }
