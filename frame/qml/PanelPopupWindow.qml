@@ -57,6 +57,7 @@ Window {
     D.DWindow.enabled: true
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableSystemResize: false
+    D.DWindow.enableSystemMove: false
     D.DWindow.enableBlurWindow: true
     // TODO set shadowOffset maunally.
     D.DWindow.shadowOffset: Qt.point(0, 25)
