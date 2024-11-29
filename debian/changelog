@@ -1,3 +1,10 @@
+dde-shell (1.99.8) UNRELEASED; urgency=medium
+
+  * fix: Adjust the effects level of kwin to Optimal-performance, multiTasks plugin can not hide(Bug: 286871)
+  * fix: Display bubble icon normally(Bug: 286813)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 29 Nov 2024 11:14:42 +0800
+
 dde-shell (1.99.7) UNRELEASED; urgency=medium
 
   * fix: can't response action for notification(Bug: 284861)
