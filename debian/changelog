@@ -1,5 +1,11 @@
 dde-shell (1.99.8) UNRELEASED; urgency=medium
 
+  * fix popup can not hide on treeland
+
+ -- tsic404 <liuheng@depein.org>  Fri, 29 Nov 2024 17:30:18 +0800
+
+dde-shell (1.99.8) UNRELEASED; urgency=medium
+
   * fix: Adjust the effects level of kwin to Optimal-performance, multiTasks plugin can not hide(Bug: 286871)
   * fix: Display bubble icon normally(Bug: 286813)
 
