@@ -121,8 +121,6 @@ static QString imagePathOfNotification(const QVariantMap &hints, const QString &
     static const QStringList HintsOrder {
             "desktop-entry",
             "image-data",
-            "image-path",
-            "image_path",
             "icon_data"
     };
 
@@ -147,10 +145,9 @@ static QString imagePathOfNotification(const QVariantMap &hints, const QString &
         img.save(file.fileName());
         return file.fileName();
     }
-    QIcon icon = decodeIconFromPath(imageData, appName);
-    if (icon.isNull()) {
-        qCWarning(notifyLog) << "Can't get icon for notification, appName:" << appName;
-    }
+
+    DGUI_USE_NAMESPACE;
+    auto icon = DIconTheme::findQIcon(appName, DIconTheme::findQIcon("application-x-desktop"));
     return icon.name();
 }
 
@@ -197,6 +194,10 @@ QString BubbleItem::appName() const
 
 QString BubbleItem::appIcon() const
 {
+    if (!m_entity.appIcon().isEmpty()) {
+        return m_entity.appIcon();
+    }
+
     return imagePathOfNotification(m_entity.hints(), m_entity.appIcon(), m_entity.appName());
 }
 
