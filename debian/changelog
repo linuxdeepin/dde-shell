@@ -1,4 +1,4 @@
-dde-shell (1.99.8) UNRELEASED; urgency=medium
+dde-shell (1.99.9) UNRELEASED; urgency=medium
 
   * fix popup can not hide on treeland
 
