@@ -8,7 +8,7 @@ import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
 import org.deepin.dtk.style 1.0 as DStyle
 
-Window {
+PopupWindow {
     id: root
 
     property real xOffset: 0
@@ -53,7 +53,7 @@ Window {
 
     width: 10
     height: 10
-    flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint) : Qt.Popup) 
+    flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint) : Qt.Popup)
     D.DWindow.enabled: true
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableSystemResize: false

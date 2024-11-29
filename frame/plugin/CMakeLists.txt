@@ -12,6 +12,8 @@ add_library(dde-shell-plugin SHARED
 target_link_libraries(dde-shell-plugin
 PUBLIC
     dde-shell-frame
+PRIVATE
+    Qt${QT_VERSION_MAJOR}::QuickPrivate
 )
 
 string(REPLACE "." "/" URI_PATH ${URI})

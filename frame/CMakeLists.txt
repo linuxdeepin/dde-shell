@@ -70,6 +70,8 @@ add_library(dde-shell-frame SHARED
     models/kextracolumnsproxymodel.cpp
     models/listtotableproxymodel.cpp
     quick/dsquickdrag.cpp
+    popupwindow.h
+    popupwindow.cpp
     ddeshell_qml.qrc
     dsutility.cpp
 )
@@ -98,6 +100,7 @@ PUBLIC
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Quick
 PRIVATE
+    Qt${QT_VERSION_MAJOR}::QuickPrivate
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::GuiPrivate
     Qt${QT_VERSION_MAJOR}::WaylandClientPrivate
