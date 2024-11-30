@@ -40,6 +40,7 @@ namespace dock {
 
 TaskManager::TaskManager(QObject* parent)
     : DContainment(parent)
+    , m_windowFullscreen(false)
 {
     qRegisterMetaType<ObjectInterfaceMap>();
     qDBusRegisterMetaType<ObjectInterfaceMap>();
@@ -110,6 +111,11 @@ bool TaskManager::init()
 
     if (m_windowMonitor)
         m_windowMonitor->start();
+
+    connect(m_windowMonitor.data(), &AbstractWindowMonitor::windowFullscreenChanged, this, [this] (bool isFullscreen) {
+        m_windowFullscreen = isFullscreen;
+        emit windowFullscreenChanged(isFullscreen);
+    });
     return true;
 }
 
@@ -297,6 +303,11 @@ bool TaskManager::RequestUndock(QString appID)
 bool TaskManager::windowSplit()
 {
     return Settings->isWindowSplit();
+}
+
+bool TaskManager::windowFullscreen()
+{
+    return m_windowFullscreen;
 }
 
 D_APPLET_CLASS(TaskManager)

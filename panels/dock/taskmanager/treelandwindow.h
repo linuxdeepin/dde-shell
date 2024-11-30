@@ -81,6 +81,7 @@ public:
     bool isActive() override;
     bool shouldSkip() override;
     bool isMinimized() override;
+    bool isFullscreen();
     bool allowClose() override;
     bool isAttention() override;
 

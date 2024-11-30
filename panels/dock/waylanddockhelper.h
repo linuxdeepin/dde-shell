@@ -32,10 +32,13 @@ public:
     QString dockScreenName();
 
 protected:
-    bool currentActiveWindowMaximized() override;
+    bool currentActiveWindowFullscreened() override;
     bool isWindowOverlap() override;
     [[nodiscard]] virtual DockWakeUpArea *createArea(QScreen *screen) override;
     void destroyArea(DockWakeUpArea *area) override;
+
+protected Q_SLOTS:
+    void setCurrentActiveWindowFullscreened(bool);
 
 private:
     void updateOverlapCheckerPos();
@@ -43,7 +46,7 @@ private:
 private:
     friend class TreeLandWindowOverlapChecker;
     bool m_isWindowOverlap;
-    bool m_isCurrentActiveWindowMaximized;
+    bool m_isCurrentActiveWindowFullscreened;
     DockPanel *m_panel;
     QScopedPointer<WallpaperColorManager> m_wallpaperColorManager;
     QScopedPointer<TreeLandWindowOverlapChecker> m_overlapChecker;

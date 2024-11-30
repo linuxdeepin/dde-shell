@@ -24,14 +24,14 @@ public:
 
 Q_SIGNALS:
     void isWindowOverlapChanged(bool overlap);
-    void currentActiveWindowMaximizedChanged(bool maximized);
+    void currentActiveWindowFullscreenChanged(bool fullscreen);
 
 protected:
     DockPanel *parent();
     [[nodiscard]] virtual DockWakeUpArea *createArea(QScreen *screen) = 0;
     virtual void destroyArea(DockWakeUpArea *area) = 0;
 
-    virtual bool currentActiveWindowMaximized() = 0;
+    virtual bool currentActiveWindowFullscreened() = 0;
     virtual bool isWindowOverlap() = 0;
 
 private:

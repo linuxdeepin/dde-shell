@@ -79,6 +79,7 @@ void TreeLandDockPreviewContext::treeland_dock_preview_context_v1_leave()
 
 TreeLandWindowMonitor::TreeLandWindowMonitor(QObject* parent)
     :AbstractWindowMonitor(parent)
+    , m_fullscreenState(false)
 {
 }
 
@@ -169,6 +170,20 @@ void TreeLandWindowMonitor::handleForeignToplevelHandleAdded()
         window = QSharedPointer<TreeLandWindow>(new TreeLandWindow(id));
         m_windows.insert(id, window);
     }
+
+    connect(window.data(), &AbstractWindow::stateChanged, this, [=] {
+        for (auto w: m_windows) {
+            if (w->isFullscreen() && !m_fullscreenState) {
+                m_fullscreenState = true;
+                emit windowFullscreenChanged(true);
+                return;
+            }
+        }
+        if (m_fullscreenState) {
+            m_fullscreenState = false;
+            emit windowFullscreenChanged(false);
+        }
+    });
 
     window->setForeignToplevelHandle(handle);
 

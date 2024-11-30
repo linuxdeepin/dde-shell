@@ -45,6 +45,13 @@ DockHelper::DockHelper(DockPanel *parent)
             m_showTimer->start();
         }
     });
+    connect(this, &DockHelper::currentActiveWindowFullscreenChanged, this, [this] (bool isFullscreen) {
+        if (isFullscreen) {
+            checkNeedHideOrNot();
+        } else {
+            checkNeedShowOrNot();
+        }
+    });
 }
 
 bool DockHelper::eventFilter(QObject *watched, QEvent *event)
@@ -154,8 +161,8 @@ void DockHelper::checkNeedHideOrNot()
     bool needHide;
     switch (parent()->hideMode()) {
     case KeepShowing: {
-        // KeepShow. current activeWindow is maximized.
-        needHide = currentActiveWindowMaximized();
+        // KeepShow. current activeWindow is fullscreend.
+        needHide = currentActiveWindowFullscreened();
         break;
     }
     case SmartHide: {
@@ -184,8 +191,8 @@ void DockHelper::checkNeedShowOrNot()
     bool needShow;
     switch (parent()->hideMode()) {
     case KeepShowing: {
-        // KeepShow. currentWindow is not maximized.
-        needShow = !currentActiveWindowMaximized();
+        // KeepShow. currentWindow is not fullscreened.
+        needShow = !currentActiveWindowFullscreened();
         break;
     }
     case SmartHide: {

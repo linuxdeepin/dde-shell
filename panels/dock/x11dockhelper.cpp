@@ -493,7 +493,7 @@ void X11DockHelper::updateDockArea()
     }
 }
 
-bool X11DockHelper::currentActiveWindowMaximized()
+bool X11DockHelper::currentActiveWindowFullscreened()
 {
     return false;
 }
