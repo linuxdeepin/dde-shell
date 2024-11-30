@@ -129,16 +129,17 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     }
 
     QSharedPointer<DesktopfileAbstractParser> desktopfile = nullptr;
+    QString desktopId;
     if (res.size() > 0) {
-        desktopfile = DESKTOPFILEFACTORY::createById(res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString(), "amAPP");
+        desktopId = res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString();
+    }
+
+    if (!desktopId.isEmpty()) {
+        desktopfile = DESKTOPFILEFACTORY::createById(desktopId, "amAPP");
     }
 
     if (desktopfile.isNull() || !desktopfile->isValied().first) {
-        if (res.size() > 0) {
-            desktopfile = DESKTOPFILEFACTORY::createById(res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString(), "asbtractAPP");
-        } else {
-            desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
-        }
+        desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
     }
 
     auto appitem = desktopfile->getAppItem();
