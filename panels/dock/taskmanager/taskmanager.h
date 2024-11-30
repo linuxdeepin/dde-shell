@@ -21,6 +21,7 @@ class TaskManager : public DS_NAMESPACE::DContainment
     Q_PROPERTY(ItemModel* dataModel READ dataModel NOTIFY dataModelChanged)
 
     Q_PROPERTY(bool windowSplit READ windowSplit NOTIFY windowSplitChanged)
+    Q_PROPERTY(bool windowFullscreen READ windowFullscreen NOTIFY windowFullscreenChanged)
     Q_PROPERTY(bool allowForceQuit READ allowForceQuit NOTIFY allowedForceQuitChanged)
 
 public:
@@ -32,6 +33,7 @@ public:
     virtual bool load() override;
 
     bool windowSplit();
+    bool windowFullscreen();
     bool allowForceQuit();
 
     Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId);
@@ -49,6 +51,7 @@ public:
 Q_SIGNALS:
     void dataModelChanged();
     void windowSplitChanged();
+    void windowFullscreenChanged(bool);
     void allowedForceQuitChanged();
 
 private Q_SLOTS:
@@ -60,6 +63,7 @@ private:
 private:
     QScopedPointer<AbstractWindowMonitor> m_windowMonitor;
     RoleCombineModel *m_activeAppModel = nullptr;
+    bool m_windowFullscreen;
 };
 
 }

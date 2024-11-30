@@ -160,6 +160,11 @@ bool TreeLandWindow::isMinimized()
     return m_foreignToplevelHandle->state().contains(Minimized);
 }
 
+bool TreeLandWindow::isFullscreen()
+{
+    return m_foreignToplevelHandle->state().contains(Fullscreen);
+}
+
 bool TreeLandWindow::allowClose()
 {
     return true;

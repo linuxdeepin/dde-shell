@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "waylanddockhelper.h"
+#include "appletbridge.h"
 #include "constants.h"
 #include "dockhelper.h"
 #include "dockpanel.h"
@@ -19,10 +20,14 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     : DockHelper(panel)
     , m_panel(panel)
     , m_isWindowOverlap(false)
-    , m_isCurrentActiveWindowMaximized(false)
+    , m_isCurrentActiveWindowFullscreened(false)
 {
     m_wallpaperColorManager.reset(new WallpaperColorManager(this));
     m_ddeShellManager.reset(new TreeLandDDEShellManager());
+    DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
+    if (auto applet = bridge.applet()) {
+        connect(applet, SIGNAL(windowFullscreenChanged(bool)), this, SLOT(setCurrentActiveWindowFullscreened(bool)));
+    }
 
     connect(m_panel, &DockPanel::rootObjectChanged, this, [this]() {
         m_wallpaperColorManager->watchScreen(dockScreenName());
@@ -59,8 +64,6 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     if (m_panel->rootObject() != nullptr) {
         m_wallpaperColorManager->watchScreen(dockScreenName());
     }
-
-    // TODO: get taskmanager applet and use it to update m_isCurrentActiveWindowMaximized.
 }
 
 void WaylandDockHelper::updateOverlapCheckerPos()
@@ -116,9 +119,15 @@ QString WaylandDockHelper::dockScreenName()
     return {};
 }
 
-bool WaylandDockHelper::currentActiveWindowMaximized()
+bool WaylandDockHelper::currentActiveWindowFullscreened()
 {
-    return m_isCurrentActiveWindowMaximized;
+    return m_isCurrentActiveWindowFullscreened;
+}
+
+void WaylandDockHelper::setCurrentActiveWindowFullscreened(bool isFullscreen)
+{
+    m_isCurrentActiveWindowFullscreened = isFullscreen;
+    emit currentActiveWindowFullscreenChanged(isFullscreen);
 }
 
 bool WaylandDockHelper::isWindowOverlap()

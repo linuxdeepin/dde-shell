@@ -84,5 +84,6 @@ private:
     QScopedPointer<ForeignToplevelManager> m_foreignToplevelManager;
     QScopedPointer<TreeLandDockPreviewContext> m_dockPreview;
 
+    bool m_fullscreenState;
 };
 }

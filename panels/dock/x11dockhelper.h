@@ -61,7 +61,7 @@ public:
     X11DockHelper(DockPanel *panel);
 
 protected:
-    bool currentActiveWindowMaximized() override;
+    bool currentActiveWindowFullscreened() override;
     bool isWindowOverlap() override;
 
     [[nodiscard]] DockWakeUpArea *createArea(QScreen *screen) override;

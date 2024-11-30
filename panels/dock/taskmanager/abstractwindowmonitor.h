@@ -40,6 +40,8 @@ public:
 
 Q_SIGNALS:
     void windowAdded(QPointer<AbstractWindow> window);
+    // true -> At least one window is at fullscreen state. false -> none of the windows is at fullscreen state.
+    void windowFullscreenChanged(bool);
     void WindowMonitorShutdown();
 
 private:
