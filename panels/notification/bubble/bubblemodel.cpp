@@ -292,9 +292,10 @@ void BubbleModel::updateLevel()
     if (m_bubbles.isEmpty())
         return;
 
+    int lastBubbleMaxIndex = BubbleMaxCount - 1;
     for (int i = 0; i < displayRowCount(); i++) {
         auto item = m_bubbles.at(i);
-        item->setLevel(i == LastBubbleMaxIndex ? 1 + overlayCount() : 1);
+        item->setLevel(i == lastBubbleMaxIndex ? 1 + overlayCount() : 1);
     }
     Q_EMIT dataChanged(index(0), index(displayRowCount() - 1), {BubbleModel::Level});
 }
