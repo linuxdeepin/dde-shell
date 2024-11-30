@@ -229,7 +229,23 @@ int BubbleModel::overlayCount() const
 
 void BubbleModel::setBubbleCount(int count)
 {
+    if (count == BubbleMaxCount)
+        return;
+
+    int currentRowCount = rowCount(QModelIndex());
+
+    if (count < currentRowCount) {
+        beginRemoveRows(QModelIndex(), count, currentRowCount - 1);
+        endRemoveRows();
+    } else if (count > currentRowCount) {
+        int maxInsertCount = std::min(count, (int)m_bubbles.size());
+        beginInsertRows(QModelIndex(), currentRowCount, maxInsertCount - 1);
+        endInsertRows();
+    }
+
     BubbleMaxCount = count;
+
+    updateLevel();
 }
 
 qint64 BubbleModel::delayRemovedBubble() const
