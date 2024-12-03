@@ -3,7 +3,7 @@
   "version": "1.0",
   "contents": {
     "dndMode": {
-      "value": true,
+      "value": false,
       "serial": 0,
       "flags": [],
       "name": "dndMode",
@@ -14,7 +14,7 @@
       "visibility": "public"
     },
     "openByTimeInterval": {
-      "value": true,
+      "value": false,
       "serial": 0,
       "flags": [],
       "name": "openByTimeInterval",
