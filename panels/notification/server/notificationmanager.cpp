@@ -411,8 +411,8 @@ void NotificationManager::updateEntityProcessed(const NotifyEntity &entity)
         m_persistence->removeEntity(id);
     } else {
         m_persistence->updateEntityProcessedType(id, entity.processedType());
-        Q_EMIT NotificationStateChanged(id, entity.processedType());
     }
+    Q_EMIT NotificationStateChanged(id, entity.processedType());
 
     emitRecordCountChanged();
 }
