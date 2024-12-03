@@ -113,7 +113,7 @@ void BubblePanel::onNotificationStateChanged(qint64 id, int processedType)
     if (processedType == NotifyEntity::NotProcessed) {
         qDebug(notifyLog) << "Add bubble for the notification" << id;
         addBubble(id);
-    } else if (processedType == NotifyEntity::Processed) {
+    } else if (processedType == NotifyEntity::Processed || processedType == NotifyEntity::Removed) {
         qDebug(notifyLog) << "Close bubble for the notification" << id;
         closeBubble(id);
     }
