@@ -58,7 +58,7 @@ QVariant AbstractWindowMonitor::data(const QModelIndex &index, int role) const
 
 void AbstractWindowMonitor::trackWindow(AbstractWindow* window)
 {
-    beginInsertRows(QModelIndex(), m_trackedWindows.size(), m_trackedWindows.size() + 1);
+    beginInsertRows(QModelIndex(), m_trackedWindows.size(), m_trackedWindows.size());
     m_trackedWindows.append(window);
     endInsertRows();
 
