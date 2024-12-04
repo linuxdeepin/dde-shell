@@ -96,7 +96,12 @@ add_subdirectory(showdesktop)
 add_subdirectory(taskmanager)
 add_subdirectory(tray)
 add_subdirectory(multitaskview)
-add_subdirectory(dcc-dock-plugin)
+
+find_package(DdeControlCenter)
+
+if (DdeControlCenter_FOUND)
+    add_subdirectory(dcc-dock-plugin)
+endif()
 
 add_subdirectory(searchitem)
 #add_subdirectory(appruntimeitem)
