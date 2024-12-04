@@ -237,6 +237,10 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
 
     if (entity.processedType() != NotifyEntity::None) {
         qint64 id = m_persistence->addEntity(entity);
+        if (id == -1) {
+            return std::numeric_limits<uint>::max();
+        }
+
         entity.setId(id);
 
         emitRecordCountChanged();
