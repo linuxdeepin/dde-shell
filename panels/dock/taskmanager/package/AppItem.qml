@@ -28,8 +28,8 @@ Item {
 
     Drag.active: mouseArea.drag.active
     Drag.source: root
-    Drag.hotSpot.x: icon.width / 2
-    Drag.hotSpot.y: icon.height / 2
+    Drag.hotSpot.x: icon.width * icon.scale / 2
+    Drag.hotSpot.y: icon.height * icon.scale / 2
     Drag.dragType: Drag.Automatic
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId }
 
@@ -72,7 +72,7 @@ Item {
 
         WindowIndicator {
             id: windowIndicator
-            dotWidth: root.useColumnLayout  ? Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 16, 2) : Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 3, 2) 
+            dotWidth: root.useColumnLayout  ? Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 16, 2) : Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 3, 2)
             dotHeight: root.useColumnLayout ? Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 3, 2) : Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 16, 2)
             windows: root.windows
             displayMode: root.displayMode
@@ -308,7 +308,7 @@ Item {
             if (mouse.button === Qt.LeftButton) {
                 icon.grabToImage(function(result) {
                     root.Drag.imageSource = result.url;
-                })
+                }, Qt.size(icon.sourceSize.width * iconScale, icon.sourceSize.height * iconScale))
             }
             toolTip.close()
             closeItemPreview()
