@@ -1,3 +1,10 @@
+dde-shell (1.0.9) unstable; urgency=medium
+
+  * fix: WeChat and WXChat are recognized as the same
+  * fix: empty icon on task manager in some cases
+
+ -- tsic404 <liuheng@depein.org>  Wed, 04 Dec 2024 15:17:13 +0800
+
 dde-shell (1.0.8) unstable; urgency=medium
 
   * fix: correct window recognition errors
