@@ -26,6 +26,11 @@ private slots:
     void handleProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
+    QString loaderPath() const;
+    QStringList allPluginPaths() const;
+    QMap<QString, QString> groupPlugins(const QStringList &pluginPaths) const;
+
+    void startProcess(const QString &loaderPath, const QString &pluginPath, const QString &groupName);
     void setProcessEnv(QProcess *process);
 
 private:

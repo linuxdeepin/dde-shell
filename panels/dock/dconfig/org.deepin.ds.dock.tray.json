@@ -76,6 +76,38 @@
             "description[zh_CN]": "托盘折叠区域当前的状态",
             "permissions": "readwrite",
             "visibility": "private"
+        },
+        "selfMaintenanceTrayPlugins": {
+            "value": ["libapplication-tray.so", "libbrightness.so", "libdatetime.so", "libdnd-mode.so", "libeye-comfort-mode.so", "libmedia.so", "libnotification.so", "libonboard.so", "libshutdown.so", "libairplane-mode.so", "libbluetooth.so", "libdock-tray-network-plugin.so", "libdock-wirelesscasting-plugin.so", "libkeyboard-layout.so", "libpower.so", "libsound.so"],
+            "serial": 0,
+            "flags": [],
+            "name": "self maintenance plugins",
+            "name[zh_CN]": "自维护托盘插件",
+            "description": "self maintenance plugins",
+            "description[zh_CN]": "自维护托盘插件",
+            "permissions": "readonly",
+            "visibility": "private"
+        },
+        "subprojectTrayPlugins": {
+            "value": ["libdock-clipboard-plugin.so", "libddegrandsearch_dockplugin.so", "libdeepin-screen-recorder-plugin.so", "libdeepin-system-monitor-plugin.so", "libshot-start-plugin.so", "libshot-start-record-plugin.so", "libdde-disk-mount-plugin.so"],
+            "serial": 0,
+            "flags": [],
+            "name": "subproject tray plugins",
+            "name[zh_CN]": "子项目托盘插件",
+            "description": "subproject tray plugins",
+            "description[zh_CN]": "子项目托盘插件",
+            "permissions": "readwrite",
+            "visibility": "private"
+        },
+        "crashProneTrayPlugins": {
+            "value": [],
+            "serial": 0,
+            "flags": [],
+            "name": "crash-prone tray plugins",
+            "name[zh_CN]": "易于崩溃的托盘插件",
+            "description": "crash-prone tray plugins",
+            "description[zh_CN]": "易于崩溃的托盘插件",
+            "permissions": "readwrite"
         }
     }
 }
