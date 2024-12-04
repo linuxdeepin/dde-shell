@@ -213,7 +213,7 @@ DccObject {
             pageType: DccObject.Editor
             page: CustomComBobox {
                 flat: true
-                model: showModeMode
+                model: showModeModel
                 currentIndex: indexByValue(dccData.dockInter.showInPrimary)
 
                 ListModel {
