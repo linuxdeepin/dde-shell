@@ -25,7 +25,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
 
     connect(sourceModel(), &QAbstractItemModel::rowsInserted, this, [this, majorRoles, func](const QModelIndex &parent, int first, int last) {
         beginInsertRows(index(parent.row(), parent.column()), first, last);
-        for (int i = first; i < last; i++) {
+        for (int i = first; i <= last; i++) {
             QModelIndex majorIndex = sourceModel()->index(i, 0);
             QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
             if (majorIndex.isValid() && minorIndex.isValid())
@@ -35,7 +35,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     });
     connect(sourceModel(), &QAbstractItemModel::columnsInserted, this, [this, majorRoles, func](const QModelIndex &parent, int first, int last) {
         beginInsertColumns(index(parent.row(), parent.column()), first, last);
-        for (int j = first; j < last; j++) {
+        for (int j = first; j <= last; j++) {
             QModelIndex majorIndex = sourceModel()->index(0, j);
             QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
             if (majorIndex.isValid() && minorIndex.isValid())
@@ -46,7 +46,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
 
     connect(sourceModel(), &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
         beginRemoveRows(index(parent.row(), parent.column()), first, last);
-        for (int i = first; i < last; i++) {
+        for (int i = first; i <= last; i++) {
             if (m_indexMap.contains(qMakePair(i, 0))) {
                 m_indexMap.remove(qMakePair(i, 0));
             }
@@ -55,7 +55,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     });
     connect(sourceModel(), &QAbstractItemModel::columnsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
         beginRemoveColumns(index(parent.row(), parent.column()), first, last);
-        for (int j = first; j < last; j++) {
+        for (int j = first; j <= last; j++) {
             if (m_indexMap.contains(qMakePair(0, j))) {
                 m_indexMap.remove(qMakePair(0, j));
             }
