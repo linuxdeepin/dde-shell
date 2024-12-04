@@ -27,7 +27,15 @@ uint DbusAdaptor::Notify(const QString &appName, uint replacesId, const QString 
                          const QString &body, const QStringList &actions, const QVariantMap &hints,
                          int expireTimeout)
 {
-    return manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
+    uint id = manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
+    if (id == std::numeric_limits<uint>::max()) {
+        QDBusError error(QDBusError::InternalError, "Notify failed.");
+        QDBusMessage reply = QDBusMessage::createError(error);
+
+        return QDBusConnection::sessionBus().send(reply);
+    }
+
+    return id;
 }
 
 void DbusAdaptor::CloseNotification(uint id)
@@ -62,7 +70,15 @@ uint DDENotificationDbusAdaptor::Notify(const QString &appName, uint replacesId,
     const QString &summary, const QString &body, const QStringList &actions, const QVariantMap &hints,
     int expireTimeout)
 {
-    return manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
+    uint id = manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
+    if (id == std::numeric_limits<uint>::max()) {
+        QDBusError error(QDBusError::InternalError, "Notify failed.");
+        QDBusMessage reply = QDBusMessage::createError(error);
+
+        return QDBusConnection::sessionBus().send(reply);
+    }
+
+    return id;
 }
 
 void DDENotificationDbusAdaptor::CloseNotification(uint id)

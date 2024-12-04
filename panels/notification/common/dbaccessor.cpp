@@ -111,10 +111,31 @@ private:
 DBAccessor::DBAccessor(const QString &key)
     : m_key(key)
 {
-    const auto dataPath = notificationDBPath();
+    auto dataPath = notificationDBPath();
     qInfo(notifyLog) << "DBAccessor's key:" << m_key;
+
+    auto isDatabaseCorrupted = [this]() {
+        QSqlQuery query(m_connection);
+        if (!query.exec("SELECT 1")) {
+            qDebug() << "Database maybe corrupted, cannot execute basic query!";
+            m_connection.close();
+            return true;
+        }
+        return false;
+    };
+
     if (!dataPath.isEmpty() && open(dataPath)) {
-        tryToCreateTable();
+        bool dbOpened = true;
+        if (isDatabaseCorrupted()) {
+            QString dirPath = dataPath.left(dataPath.lastIndexOf('/'));
+            dataPath = dirPath + "/" + "data_new_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".db";
+            qWarning() << "original database maybe corrupted, create new one:" << dataPath;
+            dbOpened = open(dataPath);
+        }
+
+        if (dbOpened) {
+            tryToCreateTable();
+        }
     }
 }
 
@@ -187,8 +208,8 @@ qint64 DBAccessor::addEntity(const NotifyEntity &entity)
     query.bindValue(":processedType", entity.processedType());
 
     if (!query.exec()) {
-        qWarning(notifyDBLog) << "insert value to database failed: " << query.lastError().text() << entity.bubbleId() << entity.cTime();
-        return 0;
+        qWarning(notifyDBLog) << "insert value to database failed: " << query.lastError().text() << query.lastQuery() << entity.bubbleId() << entity.cTime();
+        return -1;
     }
 
     // to get entity's id in database
