@@ -206,6 +206,11 @@ void TraySortOrderModel::setSurfaceVisible(const QString &surfaceId, bool visibl
     updateVisualIndexes();
 }
 
+bool TraySortOrderModel::isDisplayedSurface(const QString &surfaceId) const
+{
+    return !m_hiddenIds.contains(surfaceId);
+}
+
 QStandardItem *TraySortOrderModel::findItemByVisualIndex(int visualIndex, VisualSections visualSection) const
 {
     QStandardItem * result = nullptr;

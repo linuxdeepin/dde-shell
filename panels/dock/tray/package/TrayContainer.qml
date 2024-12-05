@@ -142,7 +142,13 @@ Item {
         anchors.fill: parent
         keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
         onEntered: function (dragEvent) {
-            console.log(dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId"))
+            let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            console.log(surfaceId)
+            if (DDT.TraySortOrderModel.isDisplayedSurface(surfaceId)) {
+                dragEvent.accepted = false
+            } else {
+                dragEvent.accepted = true
+            }
         }
 
         onPositionChanged: function (dragEvent) {
