@@ -8,6 +8,8 @@ DS_BEGIN_NAMESPACE
 PopupWindow::PopupWindow(QWindow *parent)
     : QQuickWindowQmlImpl(parent)
 {
+    setMinimumHeight(10);
+    setMinimumWidth(10);
 }
 
 void PopupWindow::mouseReleaseEvent(QMouseEvent *event)
