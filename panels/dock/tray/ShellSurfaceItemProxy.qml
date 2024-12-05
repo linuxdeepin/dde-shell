@@ -16,13 +16,12 @@ Item {
     property bool hovered: hoverHandler.hovered
     property bool pressed: tapHandler.pressed
 
-    width: impl.width
-    height: impl.height
-    implicitWidth: width
-    implicitHeight: height
+    implicitWidth: shellSurface.width
+    implicitHeight: shellSurface.height
 
     ShellSurfaceItem {
         id: impl
+        anchors.fill: parent
         shellSurface: root.shellSurface
         inputEventsEnabled: root.inputEventsEnabled
 

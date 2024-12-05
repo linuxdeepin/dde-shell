@@ -118,9 +118,6 @@ void LoadTrayPlugins::setProcessEnv(QProcess *process)
     if (!process) return;
 
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert("QT_SCALE_FACTOR", QString::number(qApp->devicePixelRatio()));
-    env.insert("D_DXCB_DISABLE_OVERRIDE_HIDPI", "1");
-
     // TODO: use protocols to determine the environment instead of environment variables
     env.remove("DDE_CURRENT_COMPOSITOR");
 

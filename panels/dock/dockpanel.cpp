@@ -137,6 +137,8 @@ bool DockPanel::init()
             else {
                 m_dockScreen = window()->screen();
             }
+            rootObject()->installEventFilter(this);
+            Q_EMIT devicePixelRatioChanged(window()->devicePixelRatio());
         }
     });
 
@@ -390,6 +392,22 @@ QString DockPanel::screenName() const
     if (!m_dockScreen)
         return {};
     return m_dockScreen->name();
+}
+
+qreal DockPanel::devicePixelRatio() const
+{
+    if (!window())
+        return 1.0;
+    return window()->devicePixelRatio();
+}
+
+bool DockPanel::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == window() && event->type() == QEvent::DevicePixelRatioChange) {
+        Q_EMIT devicePixelRatioChanged(window()->devicePixelRatio());
+    }
+
+    return false;
 }
 }
 

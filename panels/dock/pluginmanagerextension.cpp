@@ -15,6 +15,74 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 
+PluginScaleManager::PluginScaleManager(QWaylandCompositor *compositor)
+    : QWaylandCompositorExtensionTemplate(compositor)
+    , m_compositor(compositor)
+{
+}
+
+void PluginScaleManager::setPluginScale(const uint32_t &scale)
+{
+    if (scale == m_scale)
+        return;
+    m_scale = scale;
+    if (!m_compositor)
+        return;
+
+    auto outputs = m_compositor->outputs();
+    std::for_each(outputs.begin(), outputs.end(), [this](auto *output) {
+        // 120 is base of fractional scale.
+        output->setScaleFactor(std::ceil(m_scale / 120));
+    });
+
+    Q_EMIT pluginScaleChanged(m_scale);
+}
+
+uint32_t PluginScaleManager::pluginScale()
+{
+    return m_scale;
+}
+
+void PluginScaleManager::initialize()
+{
+    QWaylandCompositorExtensionTemplate::initialize();
+    QWaylandCompositor *compositor = static_cast<QWaylandCompositor *>(extensionContainer());
+    Q_ASSERT(compositor);
+
+    init(compositor->display(), 1);
+    m_compositor = compositor;
+    connect(compositor, &QWaylandCompositor::outputAdded, this, [this](auto *output) {
+        output->setScaleFactor(std::ceil(m_scale / 120));
+    });
+}
+
+void PluginScaleManager::wp_fractional_scale_manager_v1_get_fractional_scale(Resource *resource, uint32_t id, struct ::wl_resource *surface)
+{
+    QWaylandSurface *qwaylandSurface = QWaylandSurface::fromResource(surface);
+    QWaylandResource shellSurfaceResource(
+        wl_resource_create(resource->client(), &::wp_fractional_scale_v1_interface, wl_resource_get_version(resource->handle), id));
+    auto pluginScale = new PluginScale(this, qwaylandSurface, shellSurfaceResource);
+    pluginScale->send_preferred_scale(m_scale);
+}
+
+PluginScale::PluginScale(PluginScaleManager *manager, QWaylandSurface *surface, const QWaylandResource &resource)
+{
+    setParent(manager);
+    init(resource.resource());
+    setExtensionContainer(surface);
+    QWaylandCompositorExtension::initialize();
+
+    connect(manager, &PluginScaleManager::pluginScaleChanged, this, [this](uint32_t scale) {
+        send_preferred_scale(scale);
+    });
+}
+
+void PluginScale::wp_fractional_scale_v1_destroy(Resource *resource)
+{
+    Q_UNUSED(resource)
+    deleteLater();
+}
+
 PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, const QString& itemKey, const QString &displayName, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)
@@ -29,8 +97,6 @@ PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, co
     init(resource.resource());
     setExtensionContainer(surface);
     QWaylandCompositorExtension::initialize();
-
-    connect(surface, &QWaylandSurface::bufferSizeChanged, this, &PluginSurface::sizeChanged);
 }
 
 QWaylandQuickShellIntegration* PluginSurface::createIntegration(QWaylandQuickShellSurfaceItem *item)
@@ -73,9 +139,14 @@ uint32_t PluginSurface::pluginSizePolicy () const
     return m_sizePolicy;
 }
 
-QSize PluginSurface::pluginSize() const
+int PluginSurface::height() const
 {
-    return m_surface->bufferSize() / qApp->devicePixelRatio();
+    return m_height;
+}
+
+int PluginSurface::width() const
+{
+    return m_width;
 }
 
 QString PluginSurface::dccIcon() const
@@ -151,6 +222,23 @@ void PluginSurface::setGlobalPos(const QPoint &pos)
     send_raw_global_pos(p.x(), p.y());
 }
 
+void PluginSurface::plugin_source_size(Resource *resource, int32_t width, int32_t height)
+{
+    Q_UNUSED(resource);
+    if (width == 0 || height == 0)
+        return;
+
+    if (height != m_height) {
+        m_height = height;
+        Q_EMIT heightChanged();
+    }
+
+    if (width != m_width) {
+        m_width = width;
+        Q_EMIT widthChanged();
+    }
+}
+
 PluginPopup::PluginPopup(PluginManager* manager, const QString &pluginId, const QString &itemKey, int x, int y, int popupType, QWaylandSurface *surface, const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)
@@ -215,6 +303,16 @@ void PluginPopup::setY(int32_t y)
     Q_EMIT yChanged();
 }
 
+int PluginPopup::height() const
+{
+    return m_height;
+}
+
+int PluginPopup::width() const
+{
+    return m_width;
+}
+
 int32_t PluginPopup::popupType() const
 {
     return m_popupType;
@@ -238,6 +336,24 @@ void PluginPopup::plugin_popup_destroy(Resource *resource)
 {
     wl_resource_destroy(resource->handle);
 }
+
+void PluginPopup::plugin_popup_source_size(Resource *resource, int32_t width, int32_t height)
+{
+    Q_UNUSED(resource);
+    if (width == 0 || height == 0)
+        return;
+
+    if (height != m_height) {
+        m_height = height;
+        Q_EMIT heightChanged();
+    }
+
+    if (width != m_width) {
+        m_width = width;
+        Q_EMIT widthChanged();
+    }
+}
+
 PluginManager::PluginManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
 {

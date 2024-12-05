@@ -11,10 +11,42 @@
 #include <QtWaylandCompositor/QWaylandResource>
 #include <cstdint>
 
+#include "qwayland-server-fractional-scale-v1.h"
 #include "qwayland-server-plugin-manager-v1.h"
 
 class PluginSurface;
 class PluginPopup;
+class PluginScale;
+class PluginScaleManager : public QWaylandCompositorExtensionTemplate<PluginScaleManager>, public QtWaylandServer::wp_fractional_scale_manager_v1
+{
+    Q_OBJECT
+    QML_ELEMENT
+    Q_PROPERTY(uint32_t pluginScale READ pluginScale WRITE setPluginScale NOTIFY pluginScaleChanged)
+
+public:
+    PluginScaleManager(QWaylandCompositor *compositor = nullptr);
+    uint32_t pluginScale();
+    void setPluginScale(const uint32_t &scale);
+
+    void initialize() override;
+    void wp_fractional_scale_manager_v1_get_fractional_scale(Resource *resource, uint32_t id, struct ::wl_resource *surface) override;
+
+Q_SIGNALS:
+    void pluginScaleChanged(uint32_t scale);
+
+private:
+    uint32_t m_scale;
+    QWaylandCompositor *m_compositor;
+};
+
+class PluginScale : public QWaylandCompositorExtensionTemplate<PluginScale>, public QtWaylandServer::wp_fractional_scale_v1
+{
+    Q_OBJECT
+public:
+    PluginScale(PluginScaleManager *manager, QWaylandSurface *surface, const QWaylandResource &resource);
+    void wp_fractional_scale_v1_destroy(Resource *resource) override;
+};
+
 class PluginManager : public QWaylandCompositorExtensionTemplate<PluginManager>, public QtWaylandServer::plugin_manager_v1
 {
     Q_OBJECT
@@ -83,7 +115,8 @@ class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public
     Q_PROPERTY(uint32_t pluginType READ pluginType CONSTANT)
     Q_PROPERTY(uint32_t pluginSizePolicy READ pluginSizePolicy CONSTANT)
     Q_PROPERTY(QString displayName READ displayName CONSTANT)
-    Q_PROPERTY(QSize size READ pluginSize NOTIFY sizeChanged)
+    Q_PROPERTY(int height READ height NOTIFY heightChanged)
+    Q_PROPERTY(int width READ width NOTIFY widthChanged)
     Q_PROPERTY(bool isItemActive WRITE setItemActive READ isItemActive NOTIFY itemActiveChanged)
     Q_PROPERTY(QString dccIcon READ dccIcon CONSTANT)
     Q_PROPERTY(int margins READ margins WRITE setMargins NOTIFY marginsChanged FINAL)
@@ -109,8 +142,11 @@ public:
     uint32_t pluginType() const;
     uint32_t pluginFlags() const;
     uint32_t pluginSizePolicy() const;
-    QSize pluginSize() const;
+
     QString dccIcon() const;
+
+    int height() const;
+    int width() const;
 
     void setItemActive(bool isActive);
     bool isItemActive() const;
@@ -123,7 +159,8 @@ public:
 
 signals:
     void itemActiveChanged();
-    void sizeChanged();
+    void heightChanged();
+    void widthChanged();
     void recvMouseEvent(QEvent::Type type);
 
     void marginsChanged();
@@ -135,6 +172,7 @@ protected:
     virtual void plugin_request_shutdown(Resource *resource) override;
     virtual void plugin_destroy_resource(Resource *resource) override;
     virtual void plugin_destroy(Resource *resource) override;
+    virtual void plugin_source_size(Resource *resource, int32_t width, int32_t height) override;
 
 private:
     PluginManager* m_manager;
@@ -151,6 +189,8 @@ private:
 
     bool m_isItemActive = false;
     int m_margins = 0;
+    int m_height;
+    int m_width;
 };
 
 class PluginPopup : public QWaylandShellSurfaceTemplate<PluginPopup>, public QtWaylandServer::plugin_popup
@@ -161,6 +201,8 @@ class PluginPopup : public QWaylandShellSurfaceTemplate<PluginPopup>, public QtW
     Q_PROPERTY(QString pluginId READ pluginId)
     Q_PROPERTY(QString itemKey READ itemKey)
     Q_PROPERTY(int32_t popupType READ popupType)
+    Q_PROPERTY(int height READ height NOTIFY heightChanged)
+    Q_PROPERTY(int width READ width NOTIFY widthChanged)
 
 public:
     PluginPopup(PluginManager* shell, const QString &pluginId, const QString &itemKey, int x, int y, int popupType,
@@ -184,6 +226,9 @@ public:
 
     int32_t popupType() const;
 
+    int height() const;
+    int width() const;
+
 signals:
     void aboutToDestroy();
 
@@ -191,10 +236,13 @@ protected:
     virtual void plugin_popup_set_position(Resource *resource, int32_t x, int32_t y) override;
     virtual void plugin_popup_destroy_resource(Resource *resource) override;
     virtual void plugin_popup_destroy(Resource *resource) override;
+    virtual void plugin_popup_source_size(Resource *resource, int32_t width, int32_t height) override;
 
 Q_SIGNALS:
     void xChanged();
     void yChanged();
+    void heightChanged();
+    void widthChanged();
 
 private:
     PluginManager* m_manager;
@@ -206,6 +254,9 @@ private:
 
     int32_t m_x;
     int32_t m_y;
+    int m_height;
+    int m_width;
 };
 
 Q_COMPOSITOR_DECLARE_QUICK_EXTENSION_CLASS(PluginManager)
+Q_COMPOSITOR_DECLARE_QUICK_EXTENSION_CLASS(PluginScaleManager)

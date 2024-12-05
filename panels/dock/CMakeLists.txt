@@ -148,6 +148,7 @@ qt_add_qml_module(dock-plugin
 qt_generate_wayland_protocol_server_sources(dock-plugin
     FILES
         ${DDE_TRAY_LOADER_PROTOCOL}
+        ${WaylandProtocols_DATADIR}/staging/fractional-scale/fractional-scale-v1.xml
 )
 
 target_link_libraries(dock-plugin PUBLIC
