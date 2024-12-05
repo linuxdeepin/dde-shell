@@ -57,6 +57,9 @@ void AppearanceApplet::initDBusProxy()
         m_interface.reset();
         return;
     }
+
+    m_interface->setSync(false);
+    m_interface->setUseCache(true);
     QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::OpacityChanged, this, &AppearanceApplet::opacityChanged);
 }
 
