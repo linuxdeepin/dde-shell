@@ -33,6 +33,8 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
     Q_PROPERTY(QString screenName READ screenName NOTIFY screenNameChanged FINAL)
 
+    Q_PROPERTY(qreal devicePixelRatio READ devicePixelRatio NOTIFY devicePixelRatioChanged FINAL)
+
     Q_PROPERTY(bool debugMode READ debugMode FINAL CONSTANT)
 
 public:
@@ -82,6 +84,11 @@ public:
     void setDockScreen(QScreen *screen);
     QString screenName() const;
 
+    qreal devicePixelRatio() const;
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private Q_SLOTS:
     void onWindowGeometryChanged();
     void launcherVisibleChanged(bool visible);
@@ -103,6 +110,7 @@ Q_SIGNALS:
     void dockScreenChanged(QScreen *screen);
     void screenNameChanged();
     void requestClosePopup();
+    void devicePixelRatioChanged(qreal ratio);
 
 private:
     ColorTheme m_theme;

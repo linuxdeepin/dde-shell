@@ -24,6 +24,7 @@ Item {
     property ListModel fixedPluginSurfaces: ListModel {}
 
     property var compositor: waylandCompositor
+    property var panelScale: 1.0
 
     signal pluginSurfacesUpdated()
     signal popupCreated(var popup)
@@ -106,6 +107,11 @@ Item {
             onRequestShutdown: {
                 dockCompositor.requestShutdown()
             }
+        }
+
+        PluginScaleManager{
+            id: pluginScaleManager
+            pluginScale: dockCompositor.panelScale * 120
         }
     }
 }

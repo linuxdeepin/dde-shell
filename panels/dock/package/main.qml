@@ -552,6 +552,10 @@ Window {
             return Qt.size(Panel.frontendWindowRect.width, Panel.frontendWindowRect.height)
         })
 
+        DockCompositor.panelScale = Qt.binding(function(){
+            return Panel.devicePixelRatio
+        })
+
         dock.itemIconSizeBase = dock.dockItemMaxSize
         dock.visible = Panel.hideState !== Dock.Hide
         changeDragAreaAnchor()
