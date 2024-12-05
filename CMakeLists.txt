@@ -4,7 +4,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
-set(DS_VERSION "0.0.34" CACHE STRING "Define project version")
+set(DS_VERSION "1.99.0" CACHE STRING "Define project version")
 project(DDEShell
     VERSION "${DS_VERSION}"
     DESCRIPTION "dde-shell"
