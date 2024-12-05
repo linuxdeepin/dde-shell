@@ -51,6 +51,20 @@ PopupWindow {
         return value
     }
 
+    // FIXME: The contentItem of QQuickWindow originally maintains the same size as the Window in the resizeEvent of QQuickWindow,
+    // but there will be inconsistencies under Wayland. Maybe it is a bug of QtWayland.
+    Binding {
+        target: root.contentItem
+        property: "width"
+        value: root.width
+    }
+
+    Binding {
+        target: root.contentItem
+        property: "height"
+        value: root.height
+    }
+
     width: 10
     height: 10
     flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint) : Qt.Popup)
