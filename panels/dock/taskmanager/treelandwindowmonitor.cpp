@@ -118,6 +118,10 @@ void TreeLandWindowMonitor::presentWindows(QList<uint32_t> windows)
 
 void TreeLandWindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
+    if (!m_foreignToplevelManager->isActive()) {
+        return;
+    }
+
     if (m_dockPreview.isNull()) {
         auto window = qobject_cast<QWindow*>(relativePositionItem);
         if (!window) return;
