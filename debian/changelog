@@ -1,3 +1,16 @@
+dde-shell (1.99.10) UNRELEASED; urgency=medium
+
+  * feat: Auto hide dde-dock on window fullscreen in Wayland(BUG: 263325, 278961)
+  * fix: Modifying notifications number, old notifications are displayed after new notifications are added.(Bug: 290209)
+  * fix: Setting notifications number less than 3, do not display overlay(Bug: 290185)
+  * fix: Closing notification when it was closed or invoked from notification-center.(Bug: 290009)
+  * fix: Modify 'dndMode' and 'openByTimeInterval' setting default value(Bug: 289603)
+  * fix: Disable dropping of already displayed plugin.(Bug: 266651)
+  * chore: Modify professional os taskManager fixed application(Bug: 266869)
+  * chore: TrayLoader single process support to start multiple plugins(Bug: 283901)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 06 Dec 2024 15:19:20 +0800
+
 dde-shell (1.99.9) UNRELEASED; urgency=medium
 
   * fix popup can not hide on treeland
