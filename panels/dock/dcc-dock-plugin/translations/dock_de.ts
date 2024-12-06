@@ -32,18 +32,6 @@
         <translation>Modus</translation>
     </message>
     <message>
-        <source>Fashion</source>
-        <translation>Design</translation>
-    </message>
-    <message>
-        <source>Efficient-left</source>
-        <translation>Effizient-links</translation>
-    </message>
-    <message>
-        <source>Efficient-center</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <source>Dock size</source>
         <translation>Dockgröße</translation>
     </message>
@@ -114,6 +102,18 @@
     <message>
         <source>Select which icons appear in the Dock</source>
         <translation>Wählen Sie aus, welche Symbole im Dock erscheinen sollen</translation>
+    </message>
+    <message>
+        <source>Classic Mode</source>
+        <translation>Klassischer Modus</translation>
+    </message>
+    <message>
+        <source>Centered Mode</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Fashion Mode</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
