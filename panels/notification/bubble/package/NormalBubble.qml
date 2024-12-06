@@ -9,40 +9,26 @@ import org.deepin.ds 1.0
 import org.deepin.ds.notification 1.0
 import org.deepin.dtk 1.0 as D
 
-D.Control {
+NotifyItemContent {
     id: control
     property var bubble
 
-    contentItem: NotifyItemContent {
-        width: 360
-        appName: bubble.appName
-        iconName: bubble.iconName
-        date: bubble.timeTip
-        actions: bubble.actions
-        title: bubble.summary
-        content: bubble.body
-        strongInteractive: bubble.urgency === 2
-        contentIcon: bubble.bodyImagePath
-        onRemove: function () {
-            console.log("remove notify", bubble.appName)
-            Applet.close(bubble.index)
-        }
-        onActionInvoked: function (actionId) {
-            console.log("action notify", bubble.appName, actionId)
-            Applet.invokeAction(bubble.index, actionId)
-        }
+    width: 360
+    appName: bubble.appName
+    iconName: bubble.iconName
+    date: bubble.timeTip
+    actions: bubble.actions
+    title: bubble.summary
+    content: bubble.body
+    strongInteractive: bubble.urgency === 2
+    contentIcon: bubble.bodyImagePath
+    onRemove: function () {
+        console.log("remove notify", bubble.appName)
+        Applet.close(bubble.index)
     }
-
-    z: bubble.level <= 1 ? 0 : 1 - bubble.level
-
-    background: Rectangle {
-        width: 360
-        radius: 12
-        opacity: {
-            if (bubble.level === 1)
-                return 0.8
-            return 1
-        }
+    onActionInvoked: function (actionId) {
+        console.log("action notify", bubble.appName, actionId)
+        Applet.invokeAction(bubble.index, actionId)
     }
 
     MouseArea {

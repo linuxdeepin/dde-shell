@@ -82,28 +82,4 @@ NotifyItem {
     }
     Keys.onEnterPressed: root.expand()
     Keys.onReturnPressed: root.expand()
-
-    component OverlapIndicator: Control {
-        id: overlap
-
-        required property var count
-
-        contentItem: ColumnLayout {
-            spacing: 0
-            Repeater {
-                model: overlap.count
-
-                delegate: NotifyItemBackground {
-                    Layout.topMargin: -overlapItemRadius
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.preferredWidth: overlap.width - (index) * overlapItemRadius *2
-                    Layout.preferredHeight: overlapItemRadius * 2
-                    radius: overlapItemRadius
-                    z: -index
-                }
-            }
-        }
-
-        background: BoundingRectangle {}
-    }
 }
