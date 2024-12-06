@@ -9,6 +9,7 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QLoggingCategory>
+#include <QMutexLocker>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -173,6 +174,7 @@ qint64 DBAccessor::addEntity(const NotifyEntity &entity)
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
 
     QString columns = QStringList{
@@ -224,6 +226,7 @@ void DBAccessor::updateEntityProcessedType(qint64 id, int processedType)
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
 
     QString cmd = QString("UPDATE %1 SET ProcessedType = :processed WHERE ID = :id").arg(TableName_v2);
@@ -240,6 +243,7 @@ NotifyEntity DBAccessor::fetchEntity(qint64 id)
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
     QString cmd = QString("SELECT %1 FROM notifications2 WHERE ID = :id").arg(EntityFields.join(","));
     query.prepare(cmd);
@@ -260,6 +264,7 @@ int DBAccessor::fetchEntityCount(const QString &appName, int processedType) cons
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
     if (appName == DataAccessor::AllApp()) {
         QString cmd = QString("SELECT COUNT(*) FROM notifications2 WHERE (ProcessedType = :processedType OR ProcessedType IS NULL)");
@@ -287,6 +292,7 @@ NotifyEntity DBAccessor::fetchLastEntity(const QString &appName, int processedTy
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
     QString cmd =
         QString(
@@ -314,6 +320,7 @@ QList<NotifyEntity> DBAccessor::fetchEntities(const QString &appName, int proces
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
     if (appName == DataAccessor::AllApp()) {
         if (maxCount >= 0) {
@@ -360,6 +367,7 @@ NotifyEntity DBAccessor::fetchLastEntity(uint notifyId)
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
     QString cmd = QString("SELECT %1 FROM notifications2 WHERE notifyId = :notifyId ORDER BY CTime DESC LIMIT 1").arg(EntityFields.join(","));
     query.prepare(cmd);
@@ -383,6 +391,7 @@ QList<QString> DBAccessor::fetchApps(int maxCount) const
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
     if (maxCount >= 0) {
         QString cmd("SELECT DISTINCT AppName FROM notifications2 ORDER BY CTime DESC LIMIT :limit");
@@ -413,6 +422,7 @@ void DBAccessor::removeEntity(qint64 id)
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
 
     QString cmd("DELETE FROM notifications2 WHERE ID = :id");
@@ -431,6 +441,7 @@ void DBAccessor::removeEntityByApp(const QString &appName)
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
 
     QString cmd("DELETE FROM notifications2 WHERE AppName = :appName");
@@ -449,6 +460,7 @@ void DBAccessor::clear()
 {
     BENCHMARK();
 
+    QMutexLocker locker(&m_mutex);
     QSqlQuery query(m_connection);
 
     QString cmd("DELETE FROM notifications2");

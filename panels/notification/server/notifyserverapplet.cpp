@@ -61,17 +61,17 @@ bool NotifyServerApplet::init()
 
 void NotifyServerApplet::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
 {
-    m_manager->actionInvoked(id, bubbleId, actionKey);
+    QMetaObject::invokeMethod(m_manager, "actionInvoked", Qt::AutoConnection, Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(QString, actionKey));
 }
 
 void NotifyServerApplet::notificationClosed(qint64 id, uint bubbleId, uint reason)
 {
-    m_manager->notificationClosed(id, bubbleId, reason);
+    QMetaObject::invokeMethod(m_manager, "notificationClosed", Qt::AutoConnection, Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(uint, reason));
 }
 
 void NotifyServerApplet::notificationReplaced(qint64 id)
 {
-    m_manager->notificationReplaced(id);
+    QMetaObject::invokeMethod(m_manager, "notificationReplaced", Qt::AutoConnection, Q_ARG(qint64, id));
 }
 
 QVariant NotifyServerApplet::appValue(const QString &appId, int configItem)
