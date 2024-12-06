@@ -12,7 +12,7 @@ import org.deepin.ds.notification
 NotifyItem {
     id: root
 
-    implicitHeight:Math.max(DStyle.Style.control.implicitHeight(root),
+    height:Math.max(DStyle.Style.control.implicitHeight(root),
                              actionPlaceHolder.active ? root.miniContentHeight + actionPlaceHolder.height : 0)
     property bool closeVisible: root.hovered || root.activeFocus
     property int miniContentHeight: NotifyStyle.contentItem.miniHeight
@@ -88,7 +88,8 @@ NotifyItem {
             }
         }
     }
-    Loader {
+
+    Control {
         id: actionPlaceHolder
         anchors {
             bottom: parent.bottom
@@ -96,13 +97,13 @@ NotifyItem {
             right: parent.right
             rightMargin: 8
         }
-
-        active: !root.strongInteractive && root.actions.length > 0
-        visible: active
-        sourceComponent: NotifyAction {
-            actions: root.actions
-            onActionInvoked: function (actionId) {
-                root.actionInvoked(actionId)
+        contentItem: Loader {
+            active: !root.strongInteractive && root.actions.length > 0 && root.hovered
+            sourceComponent: NotifyAction {
+                actions: root.actions
+                onActionInvoked: function (actionId) {
+                    root.actionInvoked(actionId)
+                }
             }
         }
     }
@@ -242,7 +243,5 @@ NotifyItem {
         }
     }
 
-    background: Rectangle {
-        color: Qt.rgba(0, 0, 0, 0.3)
-    }
+    background: NotifyItemBackground { }
 }

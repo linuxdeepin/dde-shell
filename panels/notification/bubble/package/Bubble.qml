@@ -8,8 +8,9 @@ import QtQuick.Controls 2.15
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
 
-D.Control {
+Control {
     id: control
+    height: loader.height
     property var bubble
     onHoveredChanged: function () {
         if (control.hovered) {
@@ -19,7 +20,9 @@ D.Control {
         }
     }
 
-    contentItem:  Loader {
+    Loader {
+        id: loader
+        width: control.width
         sourceComponent: bubble.level <= 1 ? normalCom : overlayCom
     }
     Component {
@@ -34,8 +37,4 @@ D.Control {
             bubble: control.bubble
         }
     }
-
-    z: bubble.level <= 1 ? 0 : 1 - bubble.level
-
-    // background: D.FloatingPanel { }
 }

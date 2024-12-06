@@ -75,6 +75,16 @@ Control {
             actionInvoked(actionData.id)
         }
 
+        Loader {
+            anchors.fill: parent
+            active: actionButton.activeFocus
+
+            sourceComponent: FocusBoxBorder {
+                radius: 6
+                color: palette.highlight
+            }
+        }
+
         background: NotifyItemBackground {
             implicitHeight: 30
             implicitWidth: 50

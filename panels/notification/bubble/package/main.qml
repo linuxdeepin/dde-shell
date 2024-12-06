@@ -40,10 +40,10 @@ Window {
     DLayerShellWindow.bottomMargin: windowMargin(2)
     palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
-    DWindow.enabled: true
     DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
     color: "transparent"
     DWindow.windowRadius: 0
+    DWindow.enabled: false
     // DWindow.enableBlurWindow: true
     screen: Qt.application.screens[0]
     // TODO `Qt.application.screens[0]` maybe invalid, why screen is changed.
@@ -58,6 +58,7 @@ Window {
         anchors {
             centerIn: parent
             margins: 10
+            topMargin: 15
         }
 
         spacing: 10
