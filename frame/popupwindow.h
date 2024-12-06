@@ -19,5 +19,11 @@ public:
 
 protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+
+private:
+    bool m_dragging;
+    bool m_pressing;
 };
 DS_END_NAMESPACE

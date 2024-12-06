@@ -16,9 +16,25 @@ void PopupWindow::mouseReleaseEvent(QMouseEvent *event)
 {
     QQuickWindowQmlImpl::mouseReleaseEvent(event);
     auto rect = geometry();
-    if (!rect.contains(event->globalPosition().toPoint())) {
+    if (!m_dragging && !rect.contains(event->globalPosition().toPoint()) && type() == Qt::Popup) {
         close();
     }
+    m_dragging = false;
+    m_pressing = false;
+}
+
+void PopupWindow::mousePressEvent(QMouseEvent *event)
+{
+    m_pressing = true;
+    return QQuickWindowQmlImpl::mousePressEvent(event);
+}
+
+void PopupWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    if (m_pressing) {
+        m_dragging = true;
+    }
+    return QQuickWindowQmlImpl::mouseMoveEvent(event);
 }
 
 DS_END_NAMESPACE
