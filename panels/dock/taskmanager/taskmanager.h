@@ -37,7 +37,8 @@ public:
     bool allowForceQuit();
 
     Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId);
-    Q_INVOKABLE bool requestDockByDesktopId(const QString& appID);
+    Q_INVOKABLE bool requestDockByDesktopId(const QString& desktopID);
+    Q_INVOKABLE bool requestUndockByDesktopId(const QString& desktopID);
     Q_INVOKABLE bool RequestDock(QString appID);
     Q_INVOKABLE bool IsDocked(QString appID);
     Q_INVOKABLE bool RequestUndock(QString appID);

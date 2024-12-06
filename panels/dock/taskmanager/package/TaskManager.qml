@@ -59,7 +59,7 @@ ContainmentItem {
                 required property list<string> windows
                 keys: ["text/x-dde-dock-dnd-appid"]
                 z: attention ? -1 : 0
-                property bool visibility: itemId !== launcherDndDropArea.launcherDndDesktopId
+                property bool visibility: itemId !== taskmanager.Applet.desktopIdToAppId(launcherDndDropArea.launcherDndDesktopId)
 
                 states: [
                     State {
@@ -100,13 +100,12 @@ ContainmentItem {
                     menus: delegateRoot.menus
                     windows: delegateRoot.windows
                     visualIndex: delegateRoot.visualIndex
+                    ListView.delayRemove: Drag.active
                     Component.onCompleted: {
                         clickItem.connect(taskmanager.Applet.clickItem)
                     }
-
                     onDragFinished: function() {
-                        // 就算在非法区域松开也更新 Model
-                        taskmanager.Applet.dataModel.moveTo(itemId, visualIndex)
+                        launcherDndDropArea.resetDndState()
                     }
                     anchors.fill: parent // This is mandatory for draggable item center in drop area
                 }
@@ -118,11 +117,19 @@ ContainmentItem {
             anchors.fill: parent
             keys: ["text/x-dde-dock-dnd-appid"]
             property string launcherDndDesktopId: ""
+            property string launcherDndDragSource: ""
+
+            function resetDndState() {
+                launcherDndDesktopId = ""
+                launcherDndDragSource = ""
+            }
+
             onEntered: function(drag) {
                 let desktopId = drag.getDataAsString("text/x-dde-dock-dnd-appid")
-                launcherDndDesktopId = taskmanager.Applet.desktopIdToAppId(desktopId)
+                launcherDndDragSource = drag.getDataAsString("text/x-dde-dock-dnd-source")
+                launcherDndDesktopId = desktopId
                 if (taskmanager.Applet.requestDockByDesktopId(desktopId) === false) {
-                    launcherDndDesktopId = ""
+                    resetDndState()
                 }
             }
 
@@ -132,8 +139,8 @@ ContainmentItem {
                 curX *= Screen.devicePixelRatio
                 let cellWidth = Panel.rootObject.dockItemMaxSize
                 let curCell = curX / cellWidth
-                let left = (curX % cellWidth) < (cellWidth / 2)
-                taskmanager.Applet.dataModel.moveTo(launcherDndDesktopId, curCell)
+                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
+                taskmanager.Applet.dataModel.moveTo(appId, curCell)
             }
 
             onDropped: function(drop) {
@@ -142,13 +149,16 @@ ContainmentItem {
                 curX *= Screen.devicePixelRatio
                 let cellWidth = Panel.rootObject.dockItemMaxSize
                 let curCell = curX / cellWidth
-                let left = (curX % cellWidth) < (cellWidth / 2)
-                taskmanager.Applet.dataModel.moveTo(launcherDndDesktopId, curCell)
-                launcherDndDesktopId = ""
+                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
+                taskmanager.Applet.dataModel.moveTo(appId, curCell)
+                resetDndState()
             }
 
             onExited: function() {
-                launcherDndDesktopId = ""
+                if (launcherDndDesktopId !== "" && launcherDndDragSource !== "taskbar") {
+                    taskmanager.Applet.requestUndockByDesktopId(launcherDndDesktopId)
+                }
+                resetDndState()
             }
         }
     }

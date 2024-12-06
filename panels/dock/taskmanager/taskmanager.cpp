@@ -241,10 +241,16 @@ QString TaskManager::desktopIdToAppId(const QString& desktopId)
     return Q_LIKELY(desktopId.endsWith(".desktop")) ? desktopId.chopped(8) : desktopId;
 }
 
-bool TaskManager::requestDockByDesktopId(const QString& appID)
+bool TaskManager::requestDockByDesktopId(const QString& desktopID)
 {
-    if (appID.startsWith("internal/")) return false;
-    return RequestDock(desktopIdToAppId(appID));
+    if (desktopID.startsWith("internal/")) return false;
+    return RequestDock(desktopIdToAppId(desktopID));
+}
+
+bool TaskManager::requestUndockByDesktopId(const QString& desktopID)
+{
+    if (desktopID.startsWith("internal/")) return false;
+    return RequestUndock(desktopIdToAppId(desktopID));
 }
 
 bool TaskManager::RequestDock(QString appID)
