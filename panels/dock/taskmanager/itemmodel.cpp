@@ -74,6 +74,11 @@ QVariant ItemModel::data(const QModelIndex &index, int role) const
 
 void ItemModel::moveTo(const QString &id, int dIndex)
 {
+    // simply do nothing if dIndex is invalid
+    if (dIndex >= m_items.size() || dIndex < 0) {
+        return;
+    }
+
     auto sItem = getItemById(id);
     auto dItem = m_items.at(dIndex);
 
