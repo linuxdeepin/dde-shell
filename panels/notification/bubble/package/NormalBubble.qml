@@ -52,8 +52,8 @@ D.Control {
             if (!bubble.defaultAction)
                 return
 
-            console.log("default action", bubble.index)
-            Applet.invokeDefaultAction(bubble.index, bubble.defaultAction)
+            console.log("default action notify", bubble.appName, bubble.defaultAction)
+            Applet.invokeAction(bubble.index, bubble.defaultAction)
         }
         property bool longPressed
         onPressAndHold: {

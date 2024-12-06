@@ -81,6 +81,7 @@ private:
 
 private slots:
     void onHandingPendingEntities();
+    void removePendingEntity(const NotifyEntity &entity);
 
 private:
     uint m_replacesCount = 0;
