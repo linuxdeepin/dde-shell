@@ -44,6 +44,7 @@ public:
     NotifyEntity &operator=(NotifyEntity &&other);
 
     bool operator==(const NotifyEntity &other) const;
+    bool operator!=(const NotifyEntity &other) const;
 
     bool isValid() const;
 

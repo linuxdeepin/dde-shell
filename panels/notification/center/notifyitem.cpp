@@ -117,9 +117,14 @@ QVariantList AppNotifyItem::actions() const
 void AppNotifyItem::updateActions()
 {
     QStringList actions = m_entity.actions();
-    if (actions.contains(QLatin1String("default"))) {
-        actions.removeAll(QLatin1String("default"));
-        m_defaultAction = QLatin1String("default");
+    const auto index = actions.indexOf(QLatin1String("default"));
+    if (index >= 0) {
+        // default Action maybe have text.
+        if (actions.size() % 2 == 1) {
+            actions.remove(index);
+        } else {
+            actions.remove(index, 2);
+        }
     }
 
     Q_ASSERT(actions.size() % 2 != 1);

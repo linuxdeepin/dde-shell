@@ -107,6 +107,11 @@ bool NotifyEntity::operator==(const NotifyEntity &other) const
     return false;
 }
 
+bool NotifyEntity::operator!=(const NotifyEntity &other) const
+{
+    return !(operator==(other));
+}
+
 bool NotifyEntity::isValid() const
 {
     return d && d->id > 0;

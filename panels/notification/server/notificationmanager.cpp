@@ -103,12 +103,14 @@ uint NotificationManager::recordCount() const
 
 void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
 {
+    qInfo(notifyLog) << "Action invoked, bubbleId:" << bubbleId << ", id:" << id << ", actionKey" << actionKey;
     auto entity = m_persistence->fetchEntity(id);
     if (entity.isValid()) {
+        doActionInvoked(entity, actionKey);
+
         entity.setProcessedType(NotifyEntity::Removed);
         updateEntityProcessed(entity);
     }
-    doActionInvoked(entity, actionKey);
 
     Q_EMIT ActionInvoked(bubbleId, actionKey);
     Q_EMIT NotificationClosed(bubbleId, NotifyEntity::Closed);
@@ -257,19 +259,22 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
         }
     }
 
+    qInfo(notifyLog) << "Notify done, bubbleId:" << entity.bubbleId() << ", id:" << entity.id();
+
     // If replaces_id is 0, the return value is a UINT32 that represent the notification.
     // If replaces_id is not 0, the returned value is the same value as replaces_id.
-    return replacesId == 0 ? entity.bubbleId() : replacesId;
+    return entity.bubbleId();
 }
 void NotificationManager::CloseNotification(uint id)
 {
-    // TODO If the notification no longer exists, an empty D-BUS Error message is sent back.
-    const auto entity = m_persistence->fetchLastEntity(id);
+    auto entity = m_persistence->fetchLastEntity(id);
     if (entity.isValid()) {
-        Q_EMIT NotificationStateChanged(entity.id(), entity.processedType());
+        entity.setProcessedType(NotifyEntity::Removed);
+        updateEntityProcessed(entity);
     }
 
     Q_EMIT NotificationClosed(id, NotifyEntity::Closed);
+    qDebug(notifyLog) << "Close notify, bubbleId" << id << ", id:" << entity.id();
 }
 
 void NotificationManager::GetServerInformation(QString &name, QString &vendor, QString &version, QString &specVersion)
@@ -413,6 +418,7 @@ void NotificationManager::updateEntityProcessed(const NotifyEntity &entity)
     const auto bluetooth = entity.body().contains("%") && entity.actions().contains("cancel");
     if (removed || !showInCenter || bluetooth) {
         m_persistence->removeEntity(id);
+        removePendingEntity(entity);
     } else {
         m_persistence->updateEntityProcessedType(id, entity.processedType());
     }
@@ -482,6 +488,20 @@ void NotificationManager::onHandingPendingEntities()
     for (const auto &item : timeoutEntities) {
         qDebug(notifyLog) << "Expired for the notification " << item.id() << item.appName();
         notificationClosed(item.id(), item.bubbleId(), NotifyEntity::Expired);
+    }
+}
+
+void NotificationManager::removePendingEntity(const NotifyEntity &entity)
+{
+    for (auto iter = m_pendingTimeoutEntities.begin(); iter != m_pendingTimeoutEntities.end();) {
+        const auto item = iter.value();
+        if (item != entity) {
+            iter++;
+            continue;
+        }
+        m_pendingTimeoutEntities.erase(iter);
+        onHandingPendingEntities();
+        break;
     }
 }
 
