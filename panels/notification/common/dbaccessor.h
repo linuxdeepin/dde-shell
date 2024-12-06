@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <QMutex>
 #include <QObject>
 #include <QSqlDatabase>
 
@@ -50,6 +51,7 @@ private:
     NotifyEntity parseEntity(const QSqlQuery &query);
 
 private:
+    mutable QMutex m_mutex;
     QSqlDatabase m_connection;
     QString m_key;
 };
