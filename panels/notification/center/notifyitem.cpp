@@ -120,6 +120,7 @@ void AppNotifyItem::updateActions()
     const auto index = actions.indexOf(QLatin1String("default"));
     if (index >= 0) {
         // default Action maybe have text.
+        m_defaultAction = QLatin1String("default");
         if (actions.size() % 2 == 1) {
             actions.remove(index);
         } else {

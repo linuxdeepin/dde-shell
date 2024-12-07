@@ -34,6 +34,7 @@ NotifyItemContent {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
+        z: -1 // default action
         onClicked: {
             if (!bubble.defaultAction)
                 return
