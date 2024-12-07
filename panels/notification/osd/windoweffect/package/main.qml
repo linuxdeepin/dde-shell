@@ -28,6 +28,7 @@ AppletItem {
 
     Connections {
         target: control.Panel
+        enabled: match(control.Panel.osdType)
         function onVisibleChanged() {
             if (!control.Panel.visible) {
                 Applet.effectType = effectModel.get(selectIndex).value
@@ -46,13 +47,12 @@ AppletItem {
 
     function update(osdType)
     {
-        if (selectIndex === effectModel.count - 1) {
-            selectIndex = 0
-        } else {
-            selectIndex++
-        }
-
         if (match(osdType)) {
+            if (selectIndex === effectModel.count - 1) {
+                selectIndex = 0
+            } else {
+                selectIndex++
+            }
             return true
         }
         return false
