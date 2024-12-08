@@ -34,17 +34,17 @@
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Align Left</source>
-        <translation>Ustaw do lewej</translation>
+        <translation>Wyrównaj do lewej</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="181"/>
         <source>Align Top</source>
-        <translation>Ustaw do góry</translation>
+        <translation>Wyrównaj do góry</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="188"/>
         <source>Align Center</source>
-        <translation>Ustaw do środka</translation>
+        <translation>Wyrównaj do środka</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="196"/>

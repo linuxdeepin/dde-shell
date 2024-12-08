@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="pl">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pl">
 <context>
     <name>PluginArea</name>
     <message>
@@ -107,15 +105,15 @@
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Tryb klasyczny</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Tryb wyśrodkowany</translation>
     </message>
     <message>
         <source>Fashion Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Tryb modny</translation>
     </message>
 </context>
 </TS>
