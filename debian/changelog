@@ -1,3 +1,12 @@
+dde-shell (1.99.11) UNRELEASED; urgency=medium
+
+  * fix: popup can not hide while click twice on treeland
+  * fix: action can't work
+  * fix: adjust ui for notification
+  * fix: windoweffect osd triggered abnormally
+
+ -- tsic404 <liuheng@depein.org>  Mon, 09 Dec 2024 13:39:32 +0800
+
 dde-shell (1.99.10) UNRELEASED; urgency=medium
 
   * feat: Auto hide dde-dock on window fullscreen in Wayland(BUG: 263325, 278961)
