@@ -17,7 +17,7 @@ void PopupWindow::mouseReleaseEvent(QMouseEvent *event)
     QQuickWindowQmlImpl::mouseReleaseEvent(event);
     auto rect = geometry();
     if (!m_dragging && !rect.contains(event->globalPosition().toPoint()) && type() == Qt::Popup) {
-        close();
+        QMetaObject::invokeMethod(this, &QWindow::close, Qt::QueuedConnection);
     }
     m_dragging = false;
     m_pressing = false;
