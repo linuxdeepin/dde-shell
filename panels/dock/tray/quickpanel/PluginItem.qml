@@ -27,7 +27,7 @@ Control {
         anchors.fill: parent
         dragItem: root
         dragTextData: `${root.pluginId}::${root.itemKey}`
-        fallbackIconSize: traySurface ? traySurface.size : Qt.size(16, 16)
+        fallbackIconSize: traySurface ? Qt.size(traySurface.width, traySurface.height) : Qt.size(16, 16)
         enabledDrag: canDrag
     }
 
