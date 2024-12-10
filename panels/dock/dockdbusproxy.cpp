@@ -234,6 +234,7 @@ void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &item
         auto pluginsVisible = DockSettings::instance()->pluginsVisible();
         pluginsVisible[itemKey] = visible;
         DockSettings::instance()->setPluginsVisible(pluginsVisible);
+        Q_EMIT pluginVisibleChanged(itemKey, visible);
     } else if (m_trayApplet) {
         Q_EMIT pluginVisibleChanged(itemKey, visible);
         QMetaObject::invokeMethod(m_trayApplet, "setItemOnDock", Qt::QueuedConnection, settingKey, itemKey, visible);
