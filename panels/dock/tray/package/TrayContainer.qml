@@ -143,8 +143,9 @@ Item {
         keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
         onEntered: function (dragEvent) {
             let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
-            console.log(surfaceId)
-            if (DDT.TraySortOrderModel.isDisplayedSurface(surfaceId)) {
+            let source = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-source")
+            console.log(surfaceId, source)
+            if (source !== "" && DDT.TraySortOrderModel.isDisplayedSurface(surfaceId)) {
                 dragEvent.accepted = false
             } else {
                 dragEvent.accepted = true

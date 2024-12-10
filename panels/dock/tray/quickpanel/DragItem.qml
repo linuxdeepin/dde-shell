@@ -22,7 +22,8 @@ Item {
     Component.onCompleted: {
         dragItem.Drag.mimeData = Qt.binding(function () {
             return {
-                "text/x-dde-shell-tray-dnd-surfaceId": root.dragTextData
+                "text/x-dde-shell-tray-dnd-surfaceId": root.dragTextData,
+                "text/x-dde-shell-tray-dnd-source": "quickPanel"
             }
         })
         dragItem.Drag.dragType = Drag.Automatic
