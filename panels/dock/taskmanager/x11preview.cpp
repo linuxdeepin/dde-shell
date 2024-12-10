@@ -259,7 +259,7 @@ public:
         QRect hoverRect = option.rect;
 
         QPen pen;
-        if (WM_HELPER->hasComposite()) {
+        if (WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
             auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
             auto size = calSize(pixmap.size()); 
             auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -334,7 +334,7 @@ public:
 
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        if (!WM_HELPER->hasComposite()) {
+        if (!WM_HELPER->hasComposite() || !WM_HELPER->hasBlurWindow()) {
             return QSize(PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2);
         }
 
@@ -458,7 +458,7 @@ void X11WindowPreviewContainer::showPreview(const QPointer<AppItem> &item, const
 void X11WindowPreviewContainer::updateOrientation()
 {
 
-    if (m_direction % 2 == 0 && WM_HELPER->hasComposite()) {
+    if (m_direction % 2 == 0 && WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
         m_view->setFlow(QListView::LeftToRight);
     } else {
         m_view->setFlow(QListView::TopToBottom);
