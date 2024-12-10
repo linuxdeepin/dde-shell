@@ -134,8 +134,6 @@ void BubblePanel::addBubble(qint64 id)
     if (m_bubbles->isReplaceBubble(bubble)) {
         auto oldBubble = m_bubbles->replaceBubble(bubble);
         if (oldBubble) {
-            QMetaObject::invokeMethod(m_notificationServer, "notificationReplaced", Qt::DirectConnection,
-                                      Q_ARG(qint64, oldBubble->id()));
             oldBubble->deleteLater();
         }
     } else {

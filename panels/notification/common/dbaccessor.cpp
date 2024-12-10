@@ -222,6 +222,52 @@ qint64 DBAccessor::addEntity(const NotifyEntity &entity)
     return storageId;
 }
 
+qint64 DBAccessor::replaceEntity(qint64 id, const NotifyEntity &entity)
+{
+    BENCHMARK();
+
+    QMutexLocker locker(&m_mutex);
+    QSqlQuery query(m_connection);
+
+    QString columns = QStringList{QString("%1 = :icon").arg(ColumnIcon),
+                                  QString("%1 = :summary").arg(ColumnSummary),
+                                  QString("%1 = :body").arg(ColumnBody),
+                                  QString("%1 = :appName").arg(ColumnAppName),
+                                  QString("%1 = :appId").arg(ColumnAppId),
+                                  QString("%1 = :ctime").arg(ColumnCTime),
+                                  QString("%1 = :action").arg(ColumnAction),
+                                  QString("%1 = :hint").arg(ColumnHint),
+                                  QString("%1 = :replacesId").arg(ColumnReplacesId),
+                                  QString("%1 = :notifyId").arg(ColumnNotifyId),
+                                  QString("%1 = :processedType").arg(ColumnProcessedType)}
+                          .join(", ");
+
+    QString sqlCmd = QString("UPDATE %1 SET %2 WHERE ID = :id").arg(TableName_v2).arg(columns);
+
+    query.prepare(sqlCmd);
+    query.bindValue(":icon", entity.appIcon());
+    query.bindValue(":summary", entity.summary());
+    query.bindValue(":body", entity.body());
+    query.bindValue(":appName", entity.appName());
+    query.bindValue(":appId", entity.appId());
+    query.bindValue(":ctime", entity.cTime());
+    query.bindValue(":action", entity.actionsString());
+    query.bindValue(":hint", entity.hintsString());
+    query.bindValue(":replacesId", entity.replacesId());
+    query.bindValue(":notifyId", entity.bubbleId());
+    query.bindValue(":processedType", entity.processedType());
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qWarning(notifyDBLog) << "Update value to database failed: " << query.lastError().text() << query.lastQuery() << entity.bubbleId() << entity.cTime();
+        return -1;
+    }
+
+    qDebug(notifyDBLog) << "Update entity bubbleId:" << entity.bubbleId() << ", id:" << id << ", affected rows:" << query.numRowsAffected();
+
+    return id;
+}
+
 void DBAccessor::updateEntityProcessedType(qint64 id, int processedType)
 {
     BENCHMARK();

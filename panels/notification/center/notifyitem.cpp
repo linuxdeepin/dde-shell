@@ -157,7 +157,7 @@ void AppNotifyItem::updateStrongInteractive()
     QMap<QString, QVariant>::const_iterator i = hints.constBegin();
     while (i != hints.constEnd()) {
         if (i.key() == QLatin1String("urgency")) {
-            ret = i.value().toString() == QLatin1String("SOH");
+            ret = i.value().toUInt() == NotifyEntity::Critical;
             break;
         }
         ++i;

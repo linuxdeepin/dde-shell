@@ -76,7 +76,6 @@ private:
     QList<BubbleItem *> m_bubbles;
     int BubbleMaxCount{3};
     const int OverlayMaxCount{2};
-    const int NoReplaceId{0};
     QList<qint64> m_delayBubbles;
     qint64 m_delayRemovedBubble{-1};
     const int DelayRemovBubbleTime{1000};

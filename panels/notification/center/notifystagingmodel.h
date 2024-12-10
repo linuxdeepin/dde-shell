@@ -54,6 +54,7 @@ public:
 
 private slots:
     void push(const NotifyEntity &entity);
+    void replace(const NotifyEntity &entity);
     void doEntityReceived(qint64 id);
     void onEntityClosed(qint64 id);
 

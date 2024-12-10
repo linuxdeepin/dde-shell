@@ -201,6 +201,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     NotifyEntity entity(appName, replacesId, strIcon, summary, strBody, actions, hints, expireTimeout);
     entity.setAppId(appId);
     entity.setProcessedType(NotifyEntity::None);
+    entity.setReplacesId(replacesId);
 
     bool lockScreenShow = true;
     bool dndMode = isDoNotDisturb();
@@ -238,7 +239,20 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     }
 
     if (entity.processedType() != NotifyEntity::None) {
-        qint64 id = m_persistence->addEntity(entity);
+        qint64 id = -1;
+        if (entity.isReplace()) {
+            auto lastEntity = m_persistence->fetchLastEntity(entity.bubbleId());
+            if (lastEntity.isValid()) {
+                removePendingEntity(entity);
+                id = m_persistence->replaceEntity(lastEntity.id(), entity);
+            } else {
+                qWarning() << "Not exist notification to replace for the replaceId" << replacesId;
+            }
+        }
+        if (id == -1) {
+            id = m_persistence->addEntity(entity);
+        }
+
         if (id == -1) {
             qWarning(notifyLog) << "Failed on saving DB, bubbleId:" << entity.bubbleId() << ", appName" << appName;
             return 0;
@@ -260,7 +274,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
         }
     }
 
-    qInfo(notifyLog) << "Notify done, bubbleId:" << entity.bubbleId() << ", id:" << entity.id();
+    qInfo(notifyLog) << "Notify done, bubbleId:" << entity.bubbleId() << ", id:" << entity.id() << ", type:" << entity.processedType();
 
     // If replaces_id is 0, the return value is a UINT32 that represent the notification.
     // If replaces_id is not 0, the returned value is the same value as replaces_id.

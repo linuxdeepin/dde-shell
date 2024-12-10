@@ -216,6 +216,11 @@ uint BubbleItem::replacesId() const
     return m_entity.replacesId();
 }
 
+bool BubbleItem::isReplace() const
+{
+    return m_entity.isReplace();
+}
+
 int BubbleItem::urgency() const
 {
     return m_urgency;

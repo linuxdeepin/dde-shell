@@ -30,6 +30,7 @@ public:
     QString summary() const;
     QString body() const;
     uint replacesId() const;
+    bool isReplace() const;
     int urgency() const;
     QString bodyImagePath() const;
     qint64 ctime() const;
