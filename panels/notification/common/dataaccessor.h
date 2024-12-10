@@ -18,6 +18,12 @@ public:
     {
     }
     virtual qint64 addEntity(const NotifyEntity &entity) { Q_UNUSED(entity); return 0; }
+    virtual qint64 replaceEntity(qint64 id, const NotifyEntity &entity)
+    {
+        Q_UNUSED(id);
+        Q_UNUSED(entity);
+        return 0;
+    }
 
     virtual void updateEntityProcessedType(qint64 id, int processedType) { Q_UNUSED(id); Q_UNUSED(processedType); }
 

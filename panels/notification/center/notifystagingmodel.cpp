@@ -237,6 +237,19 @@ NotifyEntity NotifyStagingModel::notifyById(qint64 id) const
     return {};
 }
 
+void NotifyStagingModel::replace(const NotifyEntity &entity)
+{
+    for (int i = 0; i < m_appNotifies.size(); i++) {
+        auto item = m_appNotifies[i];
+        if (item->entity().id() == entity.id()) {
+            item->setEntity(entity);
+            const auto index = this->index(i, 0, {});
+            dataChanged(index, index);
+            break;
+        }
+    }
+}
+
 QHash<int, QByteArray> NotifyStagingModel::roleNames() const
 {
     static const QHash<int, QByteArray> roles{{NotifyItemType, "type"},
@@ -281,7 +294,11 @@ void NotifyStagingModel::doEntityReceived(qint64 id)
         qWarning(notifyLog) << "Received invalid entity:" << id << ", appName:" << entity.appName();
         return;
     }
-    push(entity);
+    if (entity.isReplace() && notifyById(id).isValid()) {
+        replace(entity);
+    } else {
+        push(entity);
+    }
 }
 
 void NotifyStagingModel::onEntityClosed(qint64 id)

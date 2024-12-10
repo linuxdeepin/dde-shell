@@ -76,6 +76,7 @@ public:
 
     uint replacesId() const;
     void setReplacesId(uint replacesId);
+    bool isReplace() const;
 
     qint64 cTime() const;
     void setCTime(qint64 cTime);

@@ -15,6 +15,8 @@ Q_LOGGING_CATEGORY(notifyLog, "dde.shell.notification")
 #define HINT_SEGMENT ("|")
 #define KEY_VALUE_SEGMENT ("!!!")
 
+static const uint NoReplaceId = 0;
+
 class NotifyData : public QSharedData
 {
 public:
@@ -31,7 +33,7 @@ public:
     QStringList actions;
     QVariantMap hints;
     uint bubbleId = 0;
-    uint replacesId = 0;
+    uint replacesId = NoReplaceId;
     int expireTimeout = 0;
 
     qint64 id = -1;
@@ -215,6 +217,11 @@ uint NotifyEntity::replacesId() const
 void NotifyEntity::setReplacesId(uint replacesId)
 {
     d->replacesId = replacesId;
+}
+
+bool NotifyEntity::isReplace() const
+{
+    return d->replacesId != NoReplaceId;
 }
 
 qint64 NotifyEntity::cTime() const
