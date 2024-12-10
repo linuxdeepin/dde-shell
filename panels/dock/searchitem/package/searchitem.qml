@@ -9,6 +9,8 @@ import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
 import org.deepin.ds.dock 1.0
 
+import Qt.labs.platform 1.1 as LP
+
 AppletItem {
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: Panel.itemAlignment === Dock.CenterAlignment ? 5 : 14
@@ -57,6 +59,28 @@ AppletItem {
                     }
 
                     toolTip.close()
+                }
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: {
+                platformMenuLoader.active = true
+                platformMenuLoader.item.open()
+            }
+        }
+    }
+
+    Loader {
+        id: platformMenuLoader
+        active: false
+        sourceComponent: LP.Menu {
+            id: platformMenu
+            LP.MenuItem {
+                text: qsTr("SearchConfig")
+                onTriggered: {
+                    Applet.toggleGrandSearchConfig()
                 }
             }
         }
