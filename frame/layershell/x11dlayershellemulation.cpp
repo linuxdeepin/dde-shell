@@ -11,9 +11,6 @@
 #include <QGuiApplication>
 #include <QLoggingCategory>
 
-#include <private/qhighdpiscaling_p.h>
-#include <qpa/qplatformscreen.h>
-#include <qpa/qplatformscreen_p.h>
 #include <qpa/qplatformwindow.h>
 #include <qpa/qplatformwindow_p.h>
 
@@ -110,72 +107,42 @@ void LayerShellEmulation::onLayerChanged()
 
 void LayerShellEmulation::onPositionChanged()
 {
-    // Work around QPA abstraction so we can use physical pixels, not logical pixels after Qt DPI transformation
-    auto platformScreen = m_window->screen()->handle();
-    qreal factor = QHighDpiScaling::factor(platformScreen);
-
-    // These geometries are in physical pixels
-    auto windowGeometry = m_window->handle()->geometry();
-    auto screenGeom = platformScreen->geometry();
-
     auto anchors = m_dlayerShellWindow->anchors();
-    auto x = screenGeom.left() + (screenGeom.width() - windowGeometry.width()) / 2;
-    auto y = screenGeom.top() + (screenGeom.height() - windowGeometry.height()) / 2;
-
-    // Set
+    auto screen = m_window->screen();
+    auto screenRect = screen->geometry();
+    auto x = screenRect.left() + (screenRect.width() - m_window->width()) / 2;
+    auto y = screenRect.top() + (screenRect.height() - m_window->height()) / 2;
     if (anchors & DLayerShellWindow::AnchorRight) {
         // https://doc.qt.io/qt-6/qrect.html#right
-        x = (screenGeom.right() + 1 - windowGeometry.width() - qRound(m_dlayerShellWindow->rightMargin() * factor));
+        x = (screen->geometry().right() + 1 - m_window->width() - m_dlayerShellWindow->rightMargin());
     }
 
     if (anchors & DLayerShellWindow::AnchorBottom) {
         // https://doc.qt.io/qt-6/qrect.html#bottom
-        y = (screenGeom.bottom() + 1 - windowGeometry.height() - qRound(m_dlayerShellWindow->bottomMargin() * factor));
+        y = (screen->geometry().bottom() + 1 - m_window->height() - m_dlayerShellWindow->bottomMargin());
     }
     if (anchors & DLayerShellWindow::AnchorLeft) {
-        x = (screenGeom.left() + qRound(m_dlayerShellWindow->leftMargin() * factor));
+        x = (screen->geometry().left() + m_dlayerShellWindow->leftMargin());
     }
     if (anchors & DLayerShellWindow::AnchorTop) {
-        y = (screenGeom.top() + qRound(m_dlayerShellWindow->topMargin() * factor));
+        y = (screen->geometry().top() + m_dlayerShellWindow->topMargin());
     }
 
-    QRect rect(x, y, windowGeometry.width(), windowGeometry.height());
+    QRect rect(x, y, m_window->width(), m_window->height());
 
     const bool horizontallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorLeft, DLayerShellWindow::AnchorRight});
     const bool verticallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorTop, DLayerShellWindow::AnchorBottom});
 
     if (horizontallyConstrained) {
-        rect.setX(screenGeom.left() + qRound(m_dlayerShellWindow->leftMargin() * factor));
-        rect.setWidth(screenGeom.width() - qRound((m_dlayerShellWindow->leftMargin() + m_dlayerShellWindow->rightMargin()) * factor));
+        rect.setX(screen->geometry().left() + m_dlayerShellWindow->leftMargin());
+        rect.setWidth(screen->geometry().width() - m_dlayerShellWindow->leftMargin() - m_dlayerShellWindow->rightMargin());
     }
     if (verticallyConstrained) {
-        rect.setY(screenGeom.top() + qRound(m_dlayerShellWindow->topMargin() * factor));
-        rect.setHeight(screenGeom.height() - qRound((m_dlayerShellWindow->topMargin() + m_dlayerShellWindow->bottomMargin()) * factor));
+        rect.setY(screen->geometry().top() + m_dlayerShellWindow->topMargin());
+        rect.setHeight(screen->geometry().height() - m_dlayerShellWindow->topMargin() - m_dlayerShellWindow->bottomMargin());
     }
 
-    // Configure window geometry via XCB interface
-    auto x11App = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
-    auto xcbConnection = x11App->connection();
-    auto xcbWindow = m_window->winId();
-    uint16_t mask = 0;
-    struct {
-        int32_t x;
-        int32_t y;
-        uint32_t width;
-        uint32_t height;
-    } targetWindowRect;
-
-    targetWindowRect.x = rect.x();
-    targetWindowRect.y = rect.y();
-    targetWindowRect.width = rect.width();
-    targetWindowRect.height = rect.height();
-    mask |= XCB_CONFIG_WINDOW_X;
-    mask |= XCB_CONFIG_WINDOW_Y;
-    mask |= XCB_CONFIG_WINDOW_WIDTH;
-    mask |= XCB_CONFIG_WINDOW_HEIGHT;
-
-    xcb_configure_window(xcbConnection, xcbWindow, mask, &targetWindowRect);
-    xcb_flush(xcbConnection);
+    m_window->setGeometry(rect);
 }
 
 /**
