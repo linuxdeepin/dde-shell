@@ -6,15 +6,12 @@
 #include "bubblemodel.h"
 #include "pluginfactory.h"
 #include "bubbleitem.h"
+#include "dbaccessor.h"
 
 #include <QLoggingCategory>
 #include <QQueue>
 
-#include <DConfig>
-
 #include <appletbridge.h>
-
-#include "dbaccessor.h"
 
 namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
@@ -31,9 +28,7 @@ BubblePanel::BubblePanel(QObject *parent)
 
 BubblePanel::~BubblePanel()
 {
-    if (m_setting) {
-        m_setting->deleteLater();
-    }
+
 }
 
 bool BubblePanel::load()
@@ -55,13 +50,6 @@ bool BubblePanel::init()
 
     connect(m_notificationServer, SIGNAL(notificationStateChanged(qint64, int)), this, SLOT(onNotificationStateChanged(qint64, int)));
 
-    m_setting = Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.dde.shell.notification");
-    QObject::connect(m_setting, &Dtk::Core::DConfig::valueChanged, this, [this](const QString &key) {
-        if (key == "bubbleCount") {
-            updateMaxBubbleCount();
-        }
-    });
-    updateMaxBubbleCount();
     connect(m_bubbles, &BubbleModel::rowsInserted, this, &BubblePanel::onBubbleCountChanged);
     connect(m_bubbles, &BubbleModel::rowsRemoved, this, &BubblePanel::onBubbleCountChanged);
 
@@ -180,16 +168,6 @@ BubbleItem *BubblePanel::bubbleItem(int index)
     if (index < 0 || index >= m_bubbles->items().count())
         return nullptr;
     return m_bubbles->items().at(index);
-}
-
-void BubblePanel::updateMaxBubbleCount()
-{
-    const auto count = m_setting->value("bubbleCount", 3).toInt();
-    if (count < 1) {
-        qWarning(notifyLog) << "Invalid settings of bubbleCount:" << count << ", it should be greater than 0";
-        return;
-    }
-    m_bubbles->setBubbleCount(count);
 }
 
 D_APPLET_CLASS(BubblePanel)

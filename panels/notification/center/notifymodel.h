@@ -36,7 +36,8 @@ public:
         NotifyPinned,
         NotifyStrongInteractive,
         NotifyContentIcon,
-        NotifyOverlapCount
+        NotifyOverlapCount,
+        NotifyContentRowCount
     };
     NotifyModel(QObject *parent = nullptr);
 
@@ -93,11 +94,13 @@ private:
     void trayUpdateGroupLastEntity(const NotifyEntity &entity);
     void trayUpdateGroupLastEntity(const QString &appName);
     void updateCollapseStatus();
+    void updateContentRowCount(int rowCount);
 
 private:
     QList<AppNotifyItem *> m_appNotifies;
     QPointer<NotifyAccessor> m_accessor;
     int m_refreshTimer = -1;
     bool m_collapse = false;
+    int m_contentRowCount = 6;
 };
 }

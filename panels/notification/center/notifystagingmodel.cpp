@@ -11,6 +11,7 @@
 #include "notifyitem.h"
 #include "notifyaccessor.h"
 #include "dbaccessor.h"
+#include "notifysetting.h"
 
 namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
@@ -23,6 +24,7 @@ NotifyStagingModel::NotifyStagingModel(QObject *parent)
 {
     connect(NotifyAccessor::instance(), &NotifyAccessor::stagingEntityReceived, this, &NotifyStagingModel::doEntityReceived);
     connect(NotifyAccessor::instance(), &NotifyAccessor::stagingEntityClosed, this, &NotifyStagingModel::onEntityClosed);
+    connect(NotifySetting::instance(), &NotifySetting::contentRowCountChanged, this, &NotifyStagingModel::updateContentRowCount);
 }
 
 void NotifyStagingModel::close()
@@ -211,6 +213,8 @@ QVariant NotifyStagingModel::data(const QModelIndex &index, int role) const
         } else {
             return std::min(OverlayMaxCount, overlapCount());
         }
+    } else if (role == NotifyRole::NotifyContentRowCount) {
+        return NotifySetting::instance()->contentRowCount();
     }
     return QVariant::fromValue(notify);
 }
@@ -264,7 +268,8 @@ QHash<int, QByteArray> NotifyStagingModel::roleNames() const
                                               {NotifyContent, "content"},
                                               {NotifyStrongInteractive, "strongInteractive"},
                                               {NotifyContentIcon, "contentIcon"},
-                                              {NotifyOverlapCount, "overlapCount"}};
+                                              {NotifyOverlapCount, "overlapCount"},
+                                              {NotifyContentRowCount, "contentRowCount"}};
     return roles;
 }
 
@@ -317,4 +322,15 @@ void NotifyStagingModel::updateOverlapCount(int count)
     }
 }
 
+void NotifyStagingModel::updateContentRowCount(int rowCount)
+{
+    if (m_contentRowCount == rowCount)
+        return;
+
+    m_contentRowCount = rowCount;
+
+    if (!m_appNotifies.isEmpty()) {
+        dataChanged(index(0), index(m_appNotifies.size() - 1), {NotifyRole::NotifyContentRowCount});
+    }
+}
 }

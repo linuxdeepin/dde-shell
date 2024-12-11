@@ -23,6 +23,7 @@ Control {
     ]
     property bool strongInteractive: false
     property string contentIcon: "deepin-editor"
+    property int contentRowCount: 6
 
     signal remove()
     signal setting(var pos)
