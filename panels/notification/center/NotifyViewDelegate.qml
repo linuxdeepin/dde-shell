@@ -72,6 +72,7 @@ DelegateChooser {
             content: model.content
             strongInteractive: model.strongInteractive
             contentIcon: model.contentIcon
+            contentRowCount: model.contentRowCount
             property string defaultAction: model.defaultAction
 
             function invokeAction(actionId) {
@@ -139,6 +140,7 @@ DelegateChooser {
             content: model.content
             strongInteractive: model.strongInteractive
             contentIcon: model.contentIcon
+            contentRowCount: model.contentRowCount
 
             Loader {
                 anchors.fill: parent

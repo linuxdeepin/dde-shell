@@ -34,7 +34,8 @@ public:
         NotifyContent,
         NotifyStrongInteractive,
         NotifyContentIcon,
-        NotifyOverlapCount
+        NotifyOverlapCount,
+        NotifyContentRowCount
     };
     NotifyStagingModel(QObject *parent = nullptr);
 
@@ -51,6 +52,7 @@ public:
 
     int overlapCount() const;
     void updateOverlapCount(int count);
+    void updateContentRowCount(int rowCount);
 
 private slots:
     void push(const NotifyEntity &entity);
@@ -70,5 +72,6 @@ private:
     int m_refreshTimer = -1;
     DataAccessor *m_accessor = nullptr;
     int m_overlapCount = 0;
+    int m_contentRowCount = 6;
 };
 }

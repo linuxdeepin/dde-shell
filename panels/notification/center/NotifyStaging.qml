@@ -44,6 +44,7 @@ FocusScope {
             content: model.content
             strongInteractive: model.strongInteractive
             contentIcon: model.contentIcon
+            contentRowCount: model.contentRowCount
 
             onRemove: function () {
                 console.log("remove overlap", model.id)

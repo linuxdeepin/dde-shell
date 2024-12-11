@@ -22,6 +22,7 @@ NotifyItemContent {
     content: bubble.body
     strongInteractive: bubble.urgency === 2
     contentIcon: bubble.bodyImagePath
+    contentRowCount: bubble.contentRowCount
     onRemove: function () {
         console.log("remove notify", bubble.appName)
         Applet.close(bubble.index)

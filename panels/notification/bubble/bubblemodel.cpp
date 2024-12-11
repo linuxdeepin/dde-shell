@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "bubblemodel.h"
+
+#include <notifysetting.h>
+
 #include "bubbleitem.h"
 
 #include <QTimer>
@@ -24,7 +27,11 @@ BubbleModel::BubbleModel(QObject *parent)
 {
     m_updateTimeTipTimer->setInterval(1000);
     m_updateTimeTipTimer->setSingleShot(false);
+    BubbleMaxCount = NotifySetting::instance()->bubbleCount();
+
     connect(m_updateTimeTipTimer, &QTimer::timeout, this, &BubbleModel::updateBubbleTimeTip);
+    connect(NotifySetting::instance(), &NotifySetting::contentRowCountChanged, this, &BubbleModel::updateContentRowCount);
+    connect(NotifySetting::instance(), &NotifySetting::bubbleCountChanged, this, &BubbleModel::updateBubbleCount);
 }
 
 BubbleModel::~BubbleModel()
@@ -192,6 +199,8 @@ QVariant BubbleModel::data(const QModelIndex &index, int role) const
         return m_bubbles[row]->actions();
     case BubbleModel::Urgency:
         return m_bubbles[row]->urgency();
+    case BubbleModel::ContentRowCount:
+        return NotifySetting::instance()->contentRowCount();
     default:
         break;
     }
@@ -214,6 +223,7 @@ QHash<int, QByteArray> BubbleModel::roleNames() const
     mapRoleNames[BubbleModel::OverlayCount] = "overlayCount";
     mapRoleNames[BubbleModel::DefaultAction] = "defaultAction";
     mapRoleNames[BubbleModel::Actions] = "actions";
+    mapRoleNames[BubbleModel::ContentRowCount] = "contentRowCount";
     return mapRoleNames;
 }
 
@@ -227,7 +237,7 @@ int BubbleModel::overlayCount() const
     return qMin(m_bubbles.count() - displayRowCount(), OverlayMaxCount);
 }
 
-void BubbleModel::setBubbleCount(int count)
+void BubbleModel::updateBubbleCount(int count)
 {
     if (count == BubbleMaxCount)
         return;
@@ -245,6 +255,7 @@ void BubbleModel::setBubbleCount(int count)
 
     BubbleMaxCount = count;
 
+    layoutChanged();
     updateLevel();
 }
 
@@ -317,4 +328,15 @@ void BubbleModel::updateBubbleTimeTip()
     }
 }
 
+void BubbleModel::updateContentRowCount(int rowCount)
+{
+    if (m_contentRowCount == rowCount)
+        return;
+
+    m_contentRowCount = rowCount;
+
+    if (!m_bubbles.isEmpty()) {
+        Q_EMIT dataChanged(index(0), index(m_bubbles.size() - 1), {BubbleModel::ContentRowCount});
+    }
+}
 }

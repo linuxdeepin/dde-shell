@@ -172,7 +172,7 @@ NotifyItem {
                     Layout.fillWidth: true
                     visible: text !== ""
                     text: root.content
-                    maximumLineCount: 6
+                    maximumLineCount: root.contentRowCount
                     font: DTK.fontManager.t8
                     color: palette.windowText
                     wrapMode: Text.WordWrap

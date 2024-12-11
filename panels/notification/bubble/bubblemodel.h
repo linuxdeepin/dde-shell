@@ -32,6 +32,7 @@ public:
         DefaultAction,
         Actions,
         Urgency,
+        ContentRowCount
     } BubbleRole;
 
     explicit BubbleModel(QObject *parent = nullptr);
@@ -58,7 +59,6 @@ public:
 
     int displayRowCount() const;
     int overlayCount() const;
-    void setBubbleCount(int count);
 
     qint64 delayRemovedBubble() const;
     void setDelayRemovedBubble(qint64 newDelayRemovedBubble);
@@ -67,14 +67,17 @@ signals:
     void delayRemovedBubbleChanged();
 
 private:
+    void updateBubbleCount(int count);
     int replaceBubbleIndex(const BubbleItem *bubble) const;
     void updateLevel();
     void updateBubbleTimeTip();
+    void updateContentRowCount(int rowCount);
 
 private:
     QTimer *m_updateTimeTipTimer = nullptr;
     QList<BubbleItem *> m_bubbles;
     int BubbleMaxCount{3};
+    int m_contentRowCount{6};
     const int OverlayMaxCount{2};
     QList<qint64> m_delayBubbles;
     qint64 m_delayRemovedBubble{-1};

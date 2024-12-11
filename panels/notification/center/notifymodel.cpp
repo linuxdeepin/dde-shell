@@ -10,6 +10,7 @@
 #include "notifyentity.h"
 #include "notifyitem.h"
 #include "notifyaccessor.h"
+#include "notifysetting.h"
 
 namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
@@ -22,6 +23,7 @@ NotifyModel::NotifyModel(QObject *parent)
 {
     connect(m_accessor, &NotifyAccessor::entityReceived, this, &NotifyModel::doEntityReceived);
     connect(this, &NotifyModel::countChanged, this, &NotifyModel::onCountChanged);
+    connect(NotifySetting::instance(), &NotifySetting::contentRowCountChanged, this, &NotifyModel::updateContentRowCount);
 
     updateCollapseStatus();
 
@@ -391,6 +393,17 @@ void NotifyModel::updateCollapseStatus()
     setCollapse(!existGroup);
 }
 
+void NotifyModel::updateContentRowCount(int rowCount)
+{
+    if (m_contentRowCount == rowCount)
+        return;
+    m_contentRowCount = rowCount;
+
+    if (!m_appNotifies.isEmpty()) {
+        dataChanged(index(0), index(m_appNotifies.size() - 1), {NotifyRole::NotifyContentRowCount});
+    }
+}
+
 bool NotifyModel::greaterNotify(const AppNotifyItem *item1, const AppNotifyItem *item2) const
 {
     const auto entity1 = greaterNotifyEntity(item1);
@@ -706,6 +719,8 @@ QVariant NotifyModel::data(const QModelIndex &index, int role) const
         if (auto item = dynamic_cast<OverlapAppNotifyItem *>(notify)) {
             return item->count();
         }
+    } else if (role == NotifyRole::NotifyContentRowCount) {
+        return NotifySetting::instance()->contentRowCount();
     }
     return QVariant::fromValue(notify);
 }
@@ -759,7 +774,8 @@ QHash<int, QByteArray> NotifyModel::roleNames() const
                                               {NotifyPinned, "pinned"},
                                               {NotifyStrongInteractive, "strongInteractive"},
                                               {NotifyContentIcon, "contentIcon"},
-                                              {NotifyOverlapCount, "overlapCount"}};
+                                              {NotifyOverlapCount, "overlapCount"},
+                                              {NotifyContentRowCount, "contentRowCount"}};
     return roles;
 }
 

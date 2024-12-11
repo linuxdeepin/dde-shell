@@ -43,6 +43,7 @@ NotifyItem {
         closeVisible: root.hovered || root.activeFocus
         strongInteractive: root.strongInteractive
         contentIcon: root.contentIcon
+        contentRowCount: root.contentRowCount
 
         onRemove: function () {
             root.state = "removing"

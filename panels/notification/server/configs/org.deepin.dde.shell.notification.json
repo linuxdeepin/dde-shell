@@ -90,6 +90,17 @@
       "permissions": "readwrite",
       "visibility": "public"
     },
+    "bubbleContentRowCount": {
+      "value": 6,
+      "serial": 0,
+      "flags": [],
+      "name": "notification bubble content row count",
+      "name[zh_CN]": "通知内容行数",
+      "description": "notification bubble content row count, the value should be greater than 0",
+      "description[zh_CN]": "通知内容行数, 数值应该大于0",
+      "permissions": "readwrite",
+      "visibility": "public"
+    },
     "appsInfo": {
       "value": {},
       "serial": 0,

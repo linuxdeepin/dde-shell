@@ -10,14 +10,6 @@
 
 #include <QQuickItem>
 
-namespace Dtk
-{
-namespace Core
-{
-class DConfig;
-}
-}
-
 namespace notification {
 
 class NotifyEntity;
@@ -68,15 +60,12 @@ private:
 
     BubbleItem *bubbleItem(int index);
 
-    void updateMaxBubbleCount();
-
 private:
     bool m_visible = false;
     BubbleModel *m_bubbles = nullptr;
     DS_NAMESPACE::DAppletProxy *m_notificationServer = nullptr;
     DataAccessor *m_accessor = nullptr;
     bool m_enabled = true;
-    Dtk::Core::DConfig *m_setting = nullptr;
 };
 
 }
