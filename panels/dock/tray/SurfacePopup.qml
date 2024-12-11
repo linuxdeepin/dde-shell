@@ -72,8 +72,18 @@ Item {
                 menu.close()
             }
         }
+
+        onMenuVisibleChanged: {
+            if (menuVisible) {
+                subMenuLoader.active = true
+            } else {
+                subMenuLoaderDelayTimer.start()
+            }
+        }
+
         Loader {
-            active: menu.menuVisible
+            id: subMenuLoader
+            active: false
             sourceComponent: SurfaceSubPopup {
                 objectName: "stashed's subPopup"
                 transientParent: menuWindow
@@ -81,6 +91,17 @@ Item {
                     if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
                         return false
                     return true
+                }
+            }
+
+            // Avoid protocol errors caused by d
+            Timer {
+                id: subMenuLoaderDelayTimer
+                interval: 1000
+                repeat: false
+                running: false
+                onTriggered: function () {
+                    subMenuLoader.active = false
                 }
             }
         }
