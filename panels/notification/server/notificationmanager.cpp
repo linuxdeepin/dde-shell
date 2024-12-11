@@ -153,7 +153,7 @@ void NotificationManager::removeNotifications()
 QStringList NotificationManager::GetCapabilities()
 {
     QStringList result;
-    result << "action-icons" << "actions" << "body" << "body-hyperlinks" << "body-markup" << "body-images" << "persistence";
+    result << "action-icons" << "actions" << "body" << "body-hyperlinks" << "body-markup" << "body-image" << "enable-sound" << "persistence";
 
     return result;
 }
@@ -362,6 +362,12 @@ bool NotificationManager::isDoNotDisturb() const
 
 void NotificationManager::tryPlayNotificationSound(const NotifyEntity &entity, const QString &appId, bool dndMode) const
 {
+    const auto hints = entity.hints();
+    if (!hints.isEmpty() && (!hints.value("enable-sound", true).toBool() ||
+        !hints.value("x-deepin-PlaySound", true).toBool())) {
+        return;
+    }
+
     bool playSoundTip = false;
     bool playSound = true;
     bool systemNotification = m_systemApps.contains(appId);
@@ -372,7 +378,6 @@ void NotificationManager::tryPlayNotificationSound(const NotifyEntity &entity, c
         const auto actions = entity.actions();
         //接收蓝牙文件时，只在发送完成后才有提示音,"cancel"表示正在发送文件
         if (actions.contains("cancel")) {
-            const auto hints = entity.hints();
             if (auto iter = hints.find("x-deepin-action-_view"); iter != hints.end()) {
                 const auto action = iter.value().toString();
                 if (action.contains("xdg-open"))
