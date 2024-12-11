@@ -35,7 +35,7 @@ Item {
 
     property bool useColumnLayout: Panel.position % 2
     property int statusIndicatorSize: useColumnLayout ? root.width * 0.72 : root.height * 0.72
-    property real iconScale: Panel.rootObject.dockItemMaxSize * 9 / 14 / Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
+    property int iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
 
     property var iconGlobalPoint: {
         var a = icon
@@ -72,8 +72,8 @@ Item {
 
         WindowIndicator {
             id: windowIndicator
-            dotWidth: root.useColumnLayout  ? Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 16, 2) : Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 3, 2)
-            dotHeight: root.useColumnLayout ? Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 3, 2) : Math.max(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale / 16, 2)
+            dotWidth: root.useColumnLayout  ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2)
+            dotHeight: root.useColumnLayout ? Math.max(iconSize / 3, 2) : Math.max(iconSize / 16, 2)
             windows: root.windows
             displayMode: root.displayMode
             useColumnLayout: root.useColumnLayout
@@ -92,36 +92,29 @@ Item {
                 windowIndicator.anchors.horizontalCenter = undefined
                 windowIndicator.anchors.verticalCenter = undefined
 
-                let fixedDistance = 2
-                if (Panel.position === Dock.Top || Panel.position === Dock.Bottom) {
-                    fixedDistance = (root.height - Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale) / 2 / 3
-                } else {
-                    fixedDistance = (root.width - Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * iconScale) / 2 / 3
-                }
-
                 switch(Panel.position) {
                 case Dock.Top: {
                     windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
                     windowIndicator.anchors.top = parent.top
-                    windowIndicator.anchors.topMargin = fixedDistance
+                    windowIndicator.anchors.topMargin = Qt.binding(() => {return (root.height - iconSize) / 2 / 3})
                     return
                 }
                 case Dock.Bottom: {
                     windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
                     windowIndicator.anchors.bottom = parent.bottom
-                    windowIndicator.anchors.bottomMargin = fixedDistance
+                    windowIndicator.anchors.bottomMargin = Qt.binding(() => {return (root.height - iconSize) / 2 / 3})
                     return
                 }
                 case Dock.Left: {
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
                     windowIndicator.anchors.left = parent.left
-                    windowIndicator.anchors.leftMargin = fixedDistance
+                    windowIndicator.anchors.leftMargin = Qt.binding(() => {return (root.width - iconSize) / 2 / 3})
                     return
                 }
                 case Dock.Right:{
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
                     windowIndicator.anchors.right = parent.right
-                    windowIndicator.anchors.rightMargin = fixedDistance
+                    windowIndicator.anchors.rightMargin = Qt.binding(() => {return (root.width - iconSize) / 2 / 3})
                     return
                 }
                 }
@@ -163,9 +156,12 @@ Item {
         D.DciIcon {
             id: icon
             name: root.iconName
-            sourceSize: Qt.size(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE, Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE)
+            height: iconSize
+            width: iconSize
+            sourceSize: Qt.size(iconSize, iconSize)
             anchors.centerIn: parent
-            scale: Panel.rootObject.isDragging ? iconScale : iconScale
+            retainWhileLoading: true
+            scale: Panel.rootObject.isDragging ? 1.0 : 1.0
 
             LaunchAnimation {
                 id: launchAnimation
@@ -173,11 +169,10 @@ Item {
                     switch (Panel.position) {
                     case Dock.Top:
                     case Dock.Bottom:
-                    // todo: use icon.height * iconScale is not good
-                    return (root.height - icon.height * iconScale) / 2
+                    return (root.height - icon.height) / 2
                     case Dock.Left:
                     case Dock.Right:
-                        return (root.width - icon.width * iconScale) / 2
+                        return (root.width - icon.width) / 2
                     }
                 }
 
@@ -209,7 +204,7 @@ Item {
                 Rectangle {
                     id: rect
                     required property int index
-                    property var originSize: Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE * 1.2 * iconScale
+                    property var originSize: iconSize
 
                     width: originSize * (index - 1)
                     height: width
@@ -234,14 +229,14 @@ Item {
                         ParallelAnimation {
                             NumberAnimation { target: rect; property: "width"; from: Math.max(originSize * (index - 1), 0); to: originSize * (index); duration: 1200 }
                             ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
-                            NumberAnimation { target: icon; property: "scale"; from: iconScale; to: iconScale * 1.15; duration: 1200; easing.type: Easing.OutElastic; easing.amplitude: 1; easing.period: 0.2 }
+                            NumberAnimation { target: icon; property: "scale"; from: 1.0; to: 1.15; duration: 1200; easing.type: Easing.OutElastic; easing.amplitude: 1; easing.period: 0.2 }
                         }
 
                         // 收缩
                         ParallelAnimation {
                             NumberAnimation { target: rect; property: "width"; from: originSize * (index); to: originSize * (index + 1); duration: 1200 }
                             ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
-                            NumberAnimation { target: icon; property: "scale"; from: iconScale * 1.15; to: iconScale; duration: 1200; easing.type: Easing.OutElastic; easing.amplitude: 1; easing.period: 0.2 }
+                            NumberAnimation { target: icon; property: "scale"; from: 1.15; to: 1.0; duration: 1200; easing.type: Easing.OutElastic; easing.amplitude: 1; easing.period: 0.2 }
                         }
 
                         // 停顿
@@ -275,7 +270,7 @@ Item {
         onTriggered: {
             var pos = icon.mapToItem(null, 0, 0)
             taskmanager.Applet.setAppItemWindowIconGeometry(root.itemId, Panel.rootObject, pos.x, pos.y,
-                pos.x + icon.width * iconScale, pos.y + icon.height * iconScale)
+                pos.x + icon.width, pos.y + icon.height)
         }
     }
 
@@ -393,9 +388,5 @@ Item {
 
     onIconGlobalPointChanged: {
         updateWindowIconGeometryTimer.start()
-    }
-
-    onIconScaleChanged: {
-        windowIndicator.updateIndicatorAnchors()
     }
 }
