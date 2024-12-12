@@ -28,7 +28,7 @@ NotifyItem {
         width: 20
         height: 20
         contentItem: Loader {
-            active: root.closeVisible || closePlaceHolder.hovered || closePlaceHolder.activeFocus || activeFocus
+            active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered || closePlaceHolder.activeFocus || activeFocus)
             sourceComponent: SettingActionButton {
                 id: closeBtn
                 objectName: "closeNotify-" + root.appName
