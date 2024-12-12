@@ -133,6 +133,17 @@
       "description[zh_CN]": "系统应用列表",
       "permissions": "readwrite",
       "visibility": "private"
+    },
+    "AppNamesMap": {
+      "value": {"dde-control-center":"org.deepin.dde.control-center"},
+      "serial": 0,
+      "flags": [],
+      "name": "app names map",
+      "name[zh_CN]": "应用名称映射",
+      "description": "app names map",
+      "description[zh_CN]": "应用名称映射",
+      "permissions": "readwrite",
+      "visibility": "private"
     }
   }
 }

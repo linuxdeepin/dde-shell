@@ -93,6 +93,7 @@ private:
     qint64 m_lastTimeoutPoint = std::numeric_limits<qint64>::max();
     QMultiHash<qint64, NotifyEntity> m_pendingTimeoutEntities;
     QStringList m_systemApps;
+    QMap<QString, QVariant> m_appNamesMap;
 };
 
 } // notification

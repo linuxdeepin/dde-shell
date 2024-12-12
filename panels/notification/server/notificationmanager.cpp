@@ -65,6 +65,8 @@ NotificationManager::NotificationManager(QObject *parent)
 
     QScopedPointer<DConfig> config(DConfig::create("org.deepin.dde.shell", "org.deepin.dde.shell.notification"));
     m_systemApps = config->value("systemApps").toStringList();
+    // TODO temporary fix for AppNamesMap
+    m_appNamesMap = config->value("AppNamesMap").toMap();
 }
 
 NotificationManager::~NotificationManager()
@@ -192,13 +194,15 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
         return 0;
     }
 
+    QString tsAppName = m_setting->appValue(appId, NotificationSetting::AppName).toString();
+
     QString strBody = body;
     strBody.replace(QLatin1String("\\\\"), QLatin1String("\\"), Qt::CaseInsensitive);
 
     QString strIcon = appIcon;
     if (strIcon.isEmpty())
         strIcon = m_setting->appValue(appId, NotificationSetting::AppIcon).toString();
-    NotifyEntity entity(appName, replacesId, strIcon, summary, strBody, actions, hints, expireTimeout);
+    NotifyEntity entity(tsAppName, replacesId, strIcon, summary, strBody, actions, hints, expireTimeout);
     entity.setAppId(appId);
     entity.setProcessedType(NotifyEntity::None);
     entity.setReplacesId(replacesId);
@@ -454,6 +458,11 @@ QString NotificationManager::appIdByAppName(const QString &appName) const
         if (item.id == appName || item.appName == appName)
             return item.id;
     }
+
+    if (m_appNamesMap.contains(appName)) {
+        return m_appNamesMap.value(appName).toString();
+    }
+
     return QString();
 }
 
