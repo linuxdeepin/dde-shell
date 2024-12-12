@@ -83,6 +83,7 @@ void NotifyStagingModel::invokeNotify(qint64 id, const QString &actionId)
     if (entity.isValid()) {
         NotifyAccessor::instance()->invokeNotify(entity, actionId);
     }
+    remove(id);
 }
 
 void NotifyStagingModel::remove(qint64 id)
