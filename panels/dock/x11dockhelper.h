@@ -88,6 +88,7 @@ private:
     QRect m_dockArea;
     QHash<xcb_window_t, WindowData*> m_windows;
     XcbEventFilter *m_xcbHelper;
+    QTimer *m_updateDockAreaTimer;
 };
 
 class X11DockWakeUpArea : public QObject, public DockWakeUpArea

@@ -315,17 +315,22 @@ void XcbEventFilter::setWindowState(const xcb_window_t& window, uint32_t list_le
     xcb_ewmh_set_wm_state(&m_ewmh, window, list_len, state);
 }
 
-X11DockHelper::X11DockHelper(DockPanel* panel)
+X11DockHelper::X11DockHelper(DockPanel *panel)
     : DockHelper(panel)
     , m_xcbHelper(new XcbEventFilter(this))
+    , m_updateDockAreaTimer(new QTimer(this))
 {
+    m_updateDockAreaTimer->setSingleShot(true);
+    m_updateDockAreaTimer->setInterval(100);
+
+    connect(m_updateDockAreaTimer, &QTimer::timeout, this, &X11DockHelper::updateDockArea);
     connect(panel, &DockPanel::hideModeChanged, this, &X11DockHelper::onHideModeChanged);
-    connect(panel, &DockPanel::rootObjectChanged, this, &X11DockHelper::updateDockArea);
-    connect(panel, &DockPanel::positionChanged, this, &X11DockHelper::updateDockArea);
-    connect(panel, &DockPanel::dockSizeChanged, this, &X11DockHelper::updateDockArea);
-    connect(panel, &DockPanel::geometryChanged, this, &X11DockHelper::updateDockArea);
-    connect(panel, &DockPanel::showInPrimaryChanged, this, &X11DockHelper::updateDockArea);
-    connect(panel, &DockPanel::dockScreenChanged, this, &X11DockHelper::updateDockArea);
+    connect(panel, &DockPanel::rootObjectChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(panel, &DockPanel::positionChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(panel, &DockPanel::dockSizeChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(panel, &DockPanel::geometryChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(panel, &DockPanel::showInPrimaryChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(panel, &DockPanel::dockScreenChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
 
     qGuiApp->installNativeEventFilter(m_xcbHelper);
     onHideModeChanged(panel->hideMode());
@@ -485,6 +490,18 @@ void X11DockHelper::updateDockArea()
     default:
         break;
     }
+
+    // Since the position of other windows are obtained through the xcb interface without scaling
+    // the rect of the dock needs to be changed to the original size of the original xcb.
+    QScreen *screen = parent()->dockScreen();
+    if (screen != nullptr) {
+        auto screenRect = screen->geometry();
+        rect.setSize(rect.size() * parent()->devicePixelRatio());
+        auto x = (rect.x() - screenRect.x()) * parent()->devicePixelRatio() + screenRect.x();
+        auto y = (rect.y() - screenRect.y()) * parent()->devicePixelRatio() + screenRect.y();
+        rect.moveTo(x, y);
+    }
+
     if (m_dockArea != rect) {
         m_dockArea = rect;
         for (auto it = m_windows.cbegin(); it != m_windows.cend(); ++it) {

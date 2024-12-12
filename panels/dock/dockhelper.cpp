@@ -27,6 +27,8 @@ DockHelper::DockHelper(DockPanel *parent)
     connect(parent, &DockPanel::rootObjectChanged, this, &DockHelper::initAreas);
     connect(parent, &DockPanel::showInPrimaryChanged, this, &DockHelper::updateAllDockWakeArea);
     connect(parent, &DockPanel::hideStateChanged, this, &DockHelper::updateAllDockWakeArea);
+    connect(parent, &DockPanel::hideModeChanged, m_hideTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(parent, &DockPanel::hideModeChanged, m_showTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(parent, &DockPanel::positionChanged, this, [this](Position pos) {
         std::for_each(m_areas.begin(), m_areas.end(), [pos](const auto &area) {
             if (!area)
