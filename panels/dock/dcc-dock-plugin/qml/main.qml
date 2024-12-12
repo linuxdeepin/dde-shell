@@ -14,20 +14,20 @@ DccObject {
     DccTitleObject {
         name: "taskBarTitle"
         weight: 500
-        parentName: "personalization/taskBar"
+        parentName: "personalization/dock"
         displayName: qsTr("Dock")
     }
 
     DccObject {
         name: "taskBarModeGroup"
-        parentName: "personalization/taskBar"
+        parentName: "personalization/dock"
         weight: 600
         pageType: DccObject.Item
         page: DccGroupView {}
 
         DccObject {
             name: "dockmode"
-            parentName: "personalization/taskBar/taskBarModeGroup"
+            parentName: "personalization/dock/taskBarModeGroup"
             displayName: qsTr("Mode")
             weight: 10
             pageType: DccObject.Item
@@ -99,14 +99,14 @@ DccObject {
 
     DccObject {
         name: "dockSettingsGroup"
-        parentName: "personalization/taskBar"
+        parentName: "personalization/dock"
         weight: 700
         pageType: DccObject.Item
         page: DccGroupView {}
 
         DccObject {
             name: "docksize"
-            parentName: "personalization/taskBar/dockSettingsGroup"
+            parentName: "personalization/dock/dockSettingsGroup"
             displayName: qsTr("Dock size")
             weight: 10
             pageType: DccObject.Editor
@@ -146,7 +146,7 @@ DccObject {
 
         DccObject {
             name: "positionInScreen"
-            parentName: "personalization/taskBar/dockSettingsGroup"
+            parentName: "personalization/dock/dockSettingsGroup"
             displayName: qsTr("Position on the screen")
             weight: 100
             pageType: DccObject.Editor
@@ -172,7 +172,7 @@ DccObject {
 
         DccObject {
             name: "positionInScreen"
-            parentName: "personalization/taskBar/dockSettingsGroup"
+            parentName: "personalization/dock/dockSettingsGroup"
             displayName: qsTr("Status")
             weight: 200
             pageType: DccObject.Editor
@@ -198,14 +198,14 @@ DccObject {
 
     DccObject {
         name: "multiscreenGroup"
-        parentName: "personalization/taskBar"
+        parentName: "personalization/dock"
         weight: 800
         pageType: DccObject.Item
         page: DccGroupView {}
 
         DccObject {
             name: "multiscreenItem"
-            parentName: "personalization/taskBar/multiscreenGroup"
+            parentName: "personalization/dock/multiscreenGroup"
             displayName: qsTr("Multiple Displays")
             description: qsTr("Set the position of the taskbar on the screen")
             visible: Qt.application.screens.length > 1
@@ -234,7 +234,7 @@ DccObject {
         name: "pluginArea"
         weight:900
         icon: "plugin"
-        parentName: "personalization/taskBar"
+        parentName: "personalization/dock"
         displayName: qsTr("Plugin Area")
         description: qsTr("Select which icons appear in the Dock")
 

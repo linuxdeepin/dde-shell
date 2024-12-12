@@ -326,7 +326,7 @@ void DockPanel::openDockSettings() const
         .path(QStringLiteral("/org/deepin/dde/ControlCenter1"))
         .interface(QStringLiteral("org.deepin.dde.ControlCenter1"))
         .method(QStringLiteral("ShowPage"))
-        .arg(QStringLiteral("personalization/desktop/dock"))
+        .arg(QStringLiteral("personalization/dock"))
         .call();
 }
 

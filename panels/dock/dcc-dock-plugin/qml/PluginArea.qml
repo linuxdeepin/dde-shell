@@ -14,7 +14,7 @@ DccObject {
     DccObject {
         name: "pluginAreaTitle"
         weight: 10
-        parentName: "personalization/taskBar/pluginArea"
+        parentName: "personalization/dock/pluginArea"
         pageType: DccObject.Item
         displayName: qsTr("Plugin Area")
         description: qsTr("Select which icons appear in the Dock")
@@ -33,7 +33,7 @@ DccObject {
 
     DccObject {
         name: "pluginAreaView"
-        parentName: "personalization/taskBar/pluginArea"
+        parentName: "personalization/dock/pluginArea"
         weight: 100
         pageType: DccObject.Item
         page: DccGroupView {}
@@ -43,7 +43,7 @@ DccObject {
             delegate: DccObject {
                 name: "plugin" + model.itemKey
                 property real iconSize: 16
-                parentName: "personalization/taskBar/pluginArea/pluginAreaView"
+                parentName: "personalization/dock/pluginArea/pluginAreaView"
                 weight: 10 + index * 10
                 backgroundType: DccObject.Normal
                 icon: model.icon

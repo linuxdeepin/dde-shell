@@ -10,6 +10,7 @@
 
     <qresource prefix="/dsg">
         <file>icons/plugin.dci</file>
+        <file>icons/dock.dci</file>
     </qresource>
 
     <qresource prefix="/icons/deepin/builtin">

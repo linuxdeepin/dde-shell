@@ -11,10 +11,10 @@ import org.deepin.dcc 1.0
 import org.deepin.dtk 1.0 as D
 
 DccObject {
-    name: "taskBar"
+    name: "dock"
     parentName: "personalization"
     displayName: qsTr("Desktop and taskbar")
     description: qsTr("Set the display and size of icons on the desktop")
-    icon: "taskbar"
+    icon: "dock"
     weight: 100
 }
