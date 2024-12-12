@@ -55,13 +55,6 @@ void BubbleModel::push(BubbleItem *bubble)
     m_bubbles.prepend(bubble);
     endInsertRows();
 
-    connect(bubble, &BubbleItem::timeTipChanged, this, [this, bubble] {
-        const auto row = m_bubbles.indexOf(bubble);
-        if (row <= displayRowCount()) {
-            Q_EMIT dataChanged(index(row), index(row), {BubbleModel::TimeTip});
-        }
-    });
-
     updateLevel();
 }
 
@@ -313,19 +306,20 @@ void BubbleModel::updateBubbleTimeTip()
 {
     if (m_bubbles.isEmpty()) {
         m_updateTimeTipTimer->stop();
+        return;
     }
 
-    for (int i = 0; i < displayRowCount(); i++) {
-        auto item = m_bubbles.at(i);
-
+    for (auto item : m_bubbles) {
         qint64 diff = QDateTime::currentMSecsSinceEpoch() - item->ctime();
         diff /= 1000; // secs
-        QString timeTip;
         if (diff >= 60) {
+            QString timeTip;
             timeTip = tr("%1 minutes ago").arg(diff / 60);
             item->setTimeTip(timeTip);
         };
     }
+
+    Q_EMIT dataChanged(index(0), index(m_bubbles.size() - 1), {BubbleModel::TimeTip});
 }
 
 void BubbleModel::updateContentRowCount(int rowCount)
