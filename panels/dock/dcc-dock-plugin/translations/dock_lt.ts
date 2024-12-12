@@ -1,4 +1,4 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="de">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="lt">
 <context>
     <name>PluginArea</name>
     <message>
@@ -7,93 +7,93 @@
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation>Wählen Sie aus, welche Symbole im Dock erscheinen sollen</translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
     <name>dock</name>
     <message>
         <source>Desktop and taskbar</source>
-        <translation>Desktop und Taskleiste</translation>
+        <translation>Darbalaukis ir užduočių juosta</translation>
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation>Festlegen der Anzeige und Größe von Symbolen auf dem Desktop</translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
         <source>Dock</source>
-        <translation>Dock</translation>
+        <translation>Dokas</translation>
     </message>
     <message>
         <source>Mode</source>
-        <translation>Modus</translation>
+        <translation>Veiksena</translation>
     </message>
     <message>
         <source>Dock size</source>
-        <translation>Dockgröße</translation>
+        <translation>Doko dydis</translation>
     </message>
     <message>
         <source>Small</source>
-        <translation>Klein</translation>
+        <translation>Mažas</translation>
     </message>
     <message>
         <source>Large</source>
-        <translation>Groß</translation>
+        <translation>Didelis</translation>
     </message>
     <message>
         <source>Position on the screen</source>
-        <translation>Position auf dem Bildschirm</translation>
+        <translation>Vieta ekrane</translation>
     </message>
     <message>
         <source>Top</source>
-        <translation>Oben</translation>
+        <translation>Viršus</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation>Unten</translation>
+        <translation>Apačia</translation>
     </message>
     <message>
         <source>Left</source>
-        <translation>Links</translation>
+        <translation>Kairė</translation>
     </message>
     <message>
         <source>Right</source>
-        <translation>Rechts</translation>
+        <translation>Dešinė</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation>Status</translation>
+        <translation>Būsena</translation>
     </message>
     <message>
         <source>Keep shown</source>
-        <translation>Angezeigt lassen</translation>
+        <translation>Laikyti rodomą</translation>
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation>Ausgeblendet lassen</translation>
+        <translation>Laikyti paslėptą</translation>
     </message>
     <message>
         <source>Smart hide</source>
-        <translation>Intelligentes Ausblenden</translation>
+        <translation>Išmaniai slėpti</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation>Mehrere Bildschirme</translation>
-    </message>
-    <message>
-        <source>Set the position of the taskbar on the screen</source>
-        <translation>Festlegen der Position der Taskleiste auf dem Bildschirm</translation>
-    </message>
-    <message>
-        <source>Only on main</source>
         <translation type="unfinished"/>
     </message>
     <message>
+        <source>Set the position of the taskbar on the screen</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Only on main</source>
+        <translation>Tik pagrindiniame</translation>
+    </message>
+    <message>
         <source>On screen where the cursor is</source>
-        <translation>Auf dem Bildschirm, wo sich der Zeiger befindet</translation>
+        <translation>Ekrane, kuriame yra pelės žymeklis</translation>
     </message>
     <message>
         <source>Plugin Area</source>
@@ -101,11 +101,11 @@
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation>Wählen Sie aus, welche Symbole im Dock erscheinen sollen</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation>Klassischer Modus</translation>
+        <translation>Klasikinė veiksena</translation>
     </message>
     <message>
         <source>Centered Mode</source>
@@ -113,7 +113,7 @@
     </message>
     <message>
         <source>Fashion Mode</source>
-        <translation type="unfinished"/>
+        <translation>Madinga veiksena</translation>
     </message>
 </context>
 </TS>

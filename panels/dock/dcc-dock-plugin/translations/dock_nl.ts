@@ -1,24 +1,24 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="de">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="nl">
 <context>
     <name>PluginArea</name>
     <message>
         <source>Plugin Area</source>
-        <translation type="unfinished"/>
+        <translation>Systeemvak</translation>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation>Wählen Sie aus, welche Symbole im Dock erscheinen sollen</translation>
+        <translation>Geef aan welke pictogrammen op het dock moeten worden getoond</translation>
     </message>
 </context>
 <context>
     <name>dock</name>
     <message>
         <source>Desktop and taskbar</source>
-        <translation>Desktop und Taskleiste</translation>
+        <translation>Bureaublad en taakbalk</translation>
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation>Festlegen der Anzeige und Größe von Symbolen auf dem Desktop</translation>
+        <translation>Stel de weergave en grootte van bureaubladpictogrammen in</translation>
     </message>
 </context>
 <context>
@@ -33,7 +33,7 @@
     </message>
     <message>
         <source>Dock size</source>
-        <translation>Dockgröße</translation>
+        <translation>Dockgrootte</translation>
     </message>
     <message>
         <source>Small</source>
@@ -41,19 +41,19 @@
     </message>
     <message>
         <source>Large</source>
-        <translation>Groß</translation>
+        <translation>Groot</translation>
     </message>
     <message>
         <source>Position on the screen</source>
-        <translation>Position auf dem Bildschirm</translation>
+        <translation>Schermlocatie</translation>
     </message>
     <message>
         <source>Top</source>
-        <translation>Oben</translation>
+        <translation>Bovenaan</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation>Unten</translation>
+        <translation>Onderaan</translation>
     </message>
     <message>
         <source>Left</source>
@@ -69,51 +69,51 @@
     </message>
     <message>
         <source>Keep shown</source>
-        <translation>Angezeigt lassen</translation>
+        <translation>Altijd tonen</translation>
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation>Ausgeblendet lassen</translation>
+        <translation>Altijd verbergen</translation>
     </message>
     <message>
         <source>Smart hide</source>
-        <translation>Intelligentes Ausblenden</translation>
+        <translation>Slim verbergen</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation>Mehrere Bildschirme</translation>
+        <translation>Meerdere beeldschermen</translation>
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation>Festlegen der Position der Taskleiste auf dem Bildschirm</translation>
+        <translation>Stel de locatie van de taakbalk in</translation>
     </message>
     <message>
         <source>Only on main</source>
-        <translation type="unfinished"/>
+        <translation>Alleen op hoofdscherm</translation>
     </message>
     <message>
         <source>On screen where the cursor is</source>
-        <translation>Auf dem Bildschirm, wo sich der Zeiger befindet</translation>
+        <translation>Op scherm waar de cursor is</translation>
     </message>
     <message>
         <source>Plugin Area</source>
-        <translation type="unfinished"/>
+        <translation>Systeemvak</translation>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation>Wählen Sie aus, welche Symbole im Dock erscheinen sollen</translation>
+        <translation>Geef aan welke pictogrammen op het dock moeten worden getoond</translation>
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation>Klassischer Modus</translation>
+        <translation>Klassieke modus</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation type="unfinished"/>
+        <translation>Gecentreerde modus</translation>
     </message>
     <message>
         <source>Fashion Mode</source>
-        <translation type="unfinished"/>
+        <translation>Moderne modus</translation>
     </message>
 </context>
 </TS>

@@ -32,18 +32,6 @@
         <translation>Mënyrë</translation>
     </message>
     <message>
-        <source>Fashion</source>
-        <translation>Modë</translation>
-    </message>
-    <message>
-        <source>Efficient-left</source>
-        <translation>Efikase, majtas</translation>
-    </message>
-    <message>
-        <source>Efficient-center</source>
-        <translation>Efikase, në qendër</translation>
-    </message>
-    <message>
         <source>Dock size</source>
         <translation>Madhësi paneli</translation>
     </message>
@@ -114,6 +102,18 @@
     <message>
         <source>Select which icons appear in the Dock</source>
         <translation>Përzgjidhni cilat ikona shfaqen te Paneli</translation>
+    </message>
+    <message>
+        <source>Classic Mode</source>
+        <translation>Mënyra Klasike</translation>
+    </message>
+    <message>
+        <source>Centered Mode</source>
+        <translation>Mënyra e Qendërzuar</translation>
+    </message>
+    <message>
+        <source>Fashion Mode</source>
+        <translation>Mënyra Modë</translation>
     </message>
 </context>
 </TS>
