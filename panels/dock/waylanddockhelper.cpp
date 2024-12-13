@@ -39,6 +39,10 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
         }
     });
 
+    connect(m_panel, &DockPanel::dockScreenChanged, this, [this]() {
+        m_wallpaperColorManager->watchScreen(dockScreenName());
+    });
+
     connect(m_panel, &DockPanel::positionChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
     connect(m_panel, &DockPanel::dockSizeChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
     connect(m_panel, &DockPanel::rootObjectChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
@@ -113,7 +117,7 @@ void WaylandDockHelper::destroyArea(DockWakeUpArea *area)
 
 QString WaylandDockHelper::dockScreenName()
 {
-    if (m_panel->dockScreen())
+    if (m_panel->dockScreen() && m_panel->dockScreen()->handle())
         return m_panel->dockScreen()->name();
 
     return {};
