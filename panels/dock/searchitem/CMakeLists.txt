@@ -21,4 +21,4 @@ target_link_libraries(dock-searchitem PRIVATE
 ds_install_package(PACKAGE org.deepin.ds.dock.searchitem TARGET dock-searchitem)
 ds_handle_package_translation(PACKAGE org.deepin.ds.dock.searchitem)
 
-install(FILES "package/icons/search.svg" DESTINATION share/dde-dock/icons/dcc-setting)
+install(FILES "package/icons/search.dci" DESTINATION share/dde-dock/icons/dcc-setting RENAME dcc-search.dci)
