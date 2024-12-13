@@ -41,7 +41,7 @@ DccObject {
         DccRepeater {
             model: dccData.pluginModel
             delegate: DccObject {
-                name: "plugin" + model.itemKey
+                name: "plugin" + model.key
                 property real iconSize: 16
                 parentName: "personalization/dock/pluginArea/pluginAreaView"
                 weight: 10 + index * 10

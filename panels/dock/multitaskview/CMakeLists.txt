@@ -35,4 +35,4 @@ target_link_libraries(dock-multitaskview PRIVATE
 ds_install_package(PACKAGE org.deepin.ds.dock.multitaskview TARGET dock-multitaskview)
 ds_handle_package_translation(PACKAGE org.deepin.ds.dock.multitaskview)
 
-install(FILES "package/icons/multitasking-view.svg" DESTINATION share/dde-dock/icons/dcc-setting)
+install(FILES "package/icons/dcc-view.dci" DESTINATION share/dde-dock/icons/dcc-setting RENAME dcc-multitasking-view.dci)

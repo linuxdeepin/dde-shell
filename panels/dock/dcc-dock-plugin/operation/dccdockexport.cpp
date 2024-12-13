@@ -8,6 +8,13 @@
 #include "dccdockexport.h"
 #include <QFile>
 #include <QIcon>
+#include <QDir>
+
+#include <DIconTheme>
+
+constexpr auto PLUGIN_ICON_DIR = "/usr/share/dde-dock/icons/dcc-setting";
+constexpr auto PLUGIN_ICON_PREFIX = "dcc-";
+constexpr auto PLUGIN_ICON_DEFAULT = "dcc_dock_plug_in";
 
 static const QMap<QString, QString> pluginIconMap = {
     {"AiAssistant",    "dcc_dock_assistant"}
@@ -23,6 +30,8 @@ static const QMap<QString, QString> pluginIconMap = {
     , {"shot-start-plugin",  "dcc_dock_shot_start_plugin"}
 };
 
+DGUI_USE_NAMESPACE;
+
 DccDockExport::DccDockExport(QObject *parent) 
 : QObject(parent)
 , m_pluginModel(new DockPluginModel(this))
@@ -35,20 +44,28 @@ void DccDockExport::initData()
 {
     QDBusPendingReply<DockItemInfos> pluginInfos = m_dockDbusProxy->plugins();
     auto infos = pluginInfos.value();
+
+    auto dciPaths = DIconTheme::dciThemeSearchPaths();
+    dciPaths.push_back(PLUGIN_ICON_DIR);
+    DIconTheme::setDciThemeSearchPaths(dciPaths);
+
     for (auto &info : infos) {
-        QString pluginIconStr;
-        if (QFile::exists(info.dcc_icon)) {
+        QString pluginIconStr{};
+        if (QFile::exists(QString(PLUGIN_ICON_DIR) + QDir::separator() + PLUGIN_ICON_PREFIX + info.name + ".dci")) {
+            pluginIconStr = PLUGIN_ICON_PREFIX + info.name;
+        } else if (QFile::exists(QString(PLUGIN_ICON_DIR) + QDir::separator() + info.name + ".dci")) {
+            pluginIconStr =  info.name;
+        } else if (QFile::exists(info.dcc_icon)) {
             pluginIconStr = info.dcc_icon;
         } else if (pluginIconMap.contains(info.itemKey)) {
             pluginIconStr = pluginIconMap.value(info.itemKey);
-        } else {
-            pluginIconStr = info.itemKey;
         }
-        QIcon tmpIcon = QIcon::fromTheme(pluginIconStr);
 
+        QIcon tmpIcon = QIcon::fromTheme(pluginIconStr);
         if (tmpIcon.isNull()) {
-            pluginIconStr = "dcc_dock_plug_in";
+            pluginIconStr = PLUGIN_ICON_DEFAULT;
         }
+
         info.dcc_icon = pluginIconStr;
     }
     m_pluginModel->resetData(infos);
