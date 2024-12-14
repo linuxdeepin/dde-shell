@@ -1,3 +1,9 @@
+dde-shell (1.99.12) UNRELEASED; urgency=medium
+
+  * UNRELEASED bump version to 1.99.12
+
+ -- Deepin Packages Builder <packages@deepin.org>  Sat, 14 Dec 2024 14:46:32 +0800
+
 dde-shell (1.99.11) UNRELEASED; urgency=medium
 
   * fix: popup can not hide while click twice on treeland
