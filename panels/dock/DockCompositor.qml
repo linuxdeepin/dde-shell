@@ -28,7 +28,7 @@ Item {
 
     signal pluginSurfacesUpdated()
     signal popupCreated(var popup)
-    signal requestShutdown()
+    signal requestShutdown(var type)
 
     function removeDockPluginSurface(model, object) {
         for (var i = 0; i < model.count; ++i) {
@@ -104,8 +104,8 @@ Item {
                 dockCompositor.popupCreated(popup)
             }
 
-            onRequestShutdown: {
-                dockCompositor.requestShutdown()
+            onRequestShutdown: (type) => {
+                dockCompositor.requestShutdown(type)
             }
         }
 

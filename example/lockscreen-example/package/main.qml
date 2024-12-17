@@ -27,7 +27,7 @@ AppletItem {
             onClicked: {
                 let lockscreen = lockscreenApplet()
                 if (lockscreen) {
-                    lockscreen.requestLock()
+                    lockscreen.requestShutdown("Lock")
                 }
             }
         }
@@ -36,7 +36,7 @@ AppletItem {
             onClicked: {
                 let lockscreen = lockscreenApplet()
                 if (lockscreen) {
-                    lockscreen.requestShutdown()
+                    lockscreen.requestShutdown("Shutdown")
                 }
             }
         }
@@ -45,7 +45,7 @@ AppletItem {
             onClicked: {
                 let lockscreen = lockscreenApplet()
                 if (lockscreen) {
-                    lockscreen.requestSwitchUser()
+                    lockscreen.requestShutdown("SwitchUser")
                 }
             }
         }

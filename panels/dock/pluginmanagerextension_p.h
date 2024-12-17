@@ -82,7 +82,7 @@ Q_SIGNALS:
     void pluginSurfaceDestroyed(PluginSurface*);
     void messageRequest(PluginSurface *, const QString &msg);
     void dockSizeChanged();
-    void requestShutdown();
+    void requestShutdown(const QString &type);
 
 protected:
     virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg) override;
@@ -169,7 +169,7 @@ signals:
 protected:
     virtual void plugin_mouse_event(Resource *resource, int32_t type) override;
     virtual void plugin_dcc_icon(Resource *resource, const QString &icon) override;
-    virtual void plugin_request_shutdown(Resource *resource) override;
+    virtual void plugin_request_shutdown(Resource *resource, const QString &type) override;
     virtual void plugin_destroy_resource(Resource *resource) override;
     virtual void plugin_destroy(Resource *resource) override;
     virtual void plugin_source_size(Resource *resource, int32_t width, int32_t height) override;

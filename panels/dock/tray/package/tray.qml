@@ -157,10 +157,10 @@ AppletItem {
             console.log("onPluginSurfacesUpdated", surfacesData.length)
         }
 
-        function onRequestShutdown() {
+        function onRequestShutdown(type) {
             var shutdown = DS.applet("org.deepin.ds.dde-shutdown")
             if (shutdown) {
-                shutdown.requestShutdown()
+                shutdown.requestShutdown(type)
             } else {
                 console.warn("shutdown applet not found")
             }
