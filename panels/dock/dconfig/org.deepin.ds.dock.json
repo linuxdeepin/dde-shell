@@ -33,7 +33,7 @@
 			"visibility": "private"
 		},
 		"Item_Alignment": {
-			"value": "center",
+			"value": "left",
 			"serial": 0,
 			"flags": [],
 			"name": "Item_Alignment",
