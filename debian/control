@@ -32,7 +32,7 @@ Build-Depends:
  libqt6svg6,
  libdtk6declarative, qml6-module-qtquick-controls2-styles-chameleon, qt6-declarative-private-dev,
  libyaml-cpp-dev,
- qt6-l10n-tools, qt6-svg-dev, dde-tray-loader-dev (> 1.99.6),
+ qt6-l10n-tools, qt6-svg-dev, dde-tray-loader-dev (> 1.99.8),
  dde-application-manager-api (>= 1.2.16), dde-control-center-dev (>= 6.0.73)
 Standards-Version: 3.9.8
 Homepage: http://www.deepin.org
@@ -60,7 +60,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, libdde-shell( =${binary:Version}),
   libdtk6declarative, qml6-module-qtquick-controls2-styles-chameleon,
   qml6-module-qtquick-layouts, qml6-module-qtquick-window,
   qml6-module-qt-labs-platform, qml6-module-qt-labs-qmlmodels,
-  dde-tray-loader (> 1.99.6)
+  dde-tray-loader (> 1.99.8)
 Multi-Arch: same
 Description: An wrapper for developed based on dde-shell plugin system
 

@@ -19,9 +19,7 @@ public:
     virtual bool load() override;
 
 public Q_SLOTS:
-    bool requestShutdown();
-    bool requestLock();
-    bool requestSwitchUser();
+    bool requestShutdown(const QString &type);
 
 private:
     QScopedPointer<TreeLandLockScreen> m_lockscreen;

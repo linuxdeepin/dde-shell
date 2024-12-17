@@ -60,7 +60,8 @@ Item {
                     console.log("clicked shutdown")
                     var shutdown = DS.applet("org.deepin.ds.dde-shutdown")
                     if (shutdown) {
-                        shutdown.requestShutdown()
+                        // type is empty: just show shutdown page
+                        shutdown.requestShutdown("")
                     } else {
                         console.warn("shutdown applet not found")
                     }

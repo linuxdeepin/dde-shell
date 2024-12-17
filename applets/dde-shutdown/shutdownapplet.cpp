@@ -34,11 +34,25 @@ bool ShutdownApplet::load()
     return true;
 }
 
-bool ShutdownApplet::requestShutdown()
+bool ShutdownApplet::requestShutdown(const QString &type)
 {
-    qDebug() << "request shutdown";
+    qDebug() << "request shutdown:" << type;
     if (m_lockscreen) {
-        m_lockscreen->shutdown();
+        if (type.isEmpty()) {
+            // TODO: left mouse clicked, show shutdown page
+            m_lockscreen->shutdown();
+        } else if (type == QStringLiteral("Shutdown")) {
+            m_lockscreen->shutdown();
+        } else if (type == QStringLiteral("Lock")) {
+            m_lockscreen->lock();
+        } else if (type == QStringLiteral("SwitchUser")) {
+            m_lockscreen->switchUser();
+        } else if (type == QStringLiteral("UpdateAndShutdown") || type == QStringLiteral("UpdateAndReboot") ||
+            type == QStringLiteral("Suspend") || type == QStringLiteral("Hibernate") ||
+            type == QStringLiteral("Restart") || type == QStringLiteral("Logout")) {
+            // TODO: implement these types
+            m_lockscreen->shutdown();
+        }
     } else {
         DDBusSender()
             .service("org.deepin.dde.ShutdownFront1")
@@ -48,22 +62,6 @@ bool ShutdownApplet::requestShutdown()
             .call();
     }
 
-    return true;
-}
-
-bool ShutdownApplet::requestLock()
-{
-    if (m_lockscreen) {
-        m_lockscreen->lock();
-    }
-    return true;
-}
-
-bool ShutdownApplet::requestSwitchUser()
-{
-    if (m_lockscreen) {
-        m_lockscreen->switchUser();
-    }
     return true;
 }
 
