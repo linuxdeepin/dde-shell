@@ -56,18 +56,57 @@ bool ShutdownApplet::requestShutdown(const QString &type)
         }
     } else {
         if (type == QStringLiteral("Lock")) {
-            QProcess::execute("bash -c \"originmap=$(setxkbmap -query | grep option | awk -F ' ' '{print $2}');/usr/bin/setxkbmap -option grab:break_actions&&/usr/bin/xdotool key XF86Ungrab&&dbus-send --print-reply --dest=org.deepin.dde.LockFront1 /org/deepin/dde/LockFront1 org.deepin.dde.LockFront1.Show&&setxkbmap -option $originmap\"");
+            x11LockScreen();
         } else {
+            QString method = type.isEmpty() ? "Show" : type;
             DDBusSender()
             .service("org.deepin.dde.ShutdownFront1")
             .interface("org.deepin.dde.ShutdownFront1")
             .path("/org/deepin/dde/ShutdownFront1")
-            .method(type)
+            .method(method)
             .call();
         }
     }
 
     return true;
+}
+
+void ShutdownApplet::x11LockScreen()
+{
+    QProcess process;
+    QString originMap;
+
+    // Step 1: get current keyboard options
+    process.start("bash", {"-c", "/usr/bin/setxkbmap -query | grep option | awk -F ' ' '{print $2}'"});
+    process.waitForFinished();
+    originMap = QString::fromUtf8(process.readAllStandardOutput()).trimmed();
+
+    // Step 2: set keyboard options to un grab
+    process.start("/usr/bin/setxkbmap", {"-option", "grab:break_actions"});
+    if (!process.waitForFinished()) {
+        qWarning() << "Failed to set keyboard options!";
+    }
+
+    // Step 3: analog keys xf86ungrab
+    process.start("/usr/bin/xdotool", {"key", "XF86Ungrab"});
+    if (!process.waitForFinished()) {
+        qWarning() << "Failed to simulate XF86Ungrab key!";
+    }
+
+    // Step 4: call the lock screen via dbus
+    process.start("dbus-send", {
+        "--print-reply",
+        "--dest=org.deepin.dde.LockFront1",
+        "/org/deepin/dde/LockFront1",
+        "org.deepin.dde.LockFront1.Show"
+    });
+    process.waitForFinished();
+
+    // Step 5: restore original keyboard options
+    if (!originMap.isEmpty()) {
+        process.start("/usr/bin/setxkbmap", {"-option", originMap});
+        process.waitForFinished();
+    }
 }
 
 D_APPLET_CLASS(ShutdownApplet)
