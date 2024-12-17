@@ -6,6 +6,7 @@
 #include "treelandlockscreen.h"
 
 #include <QDebug>
+#include <QProcess>
 #include <QGuiApplication>
 
 #include <DDBusSender>
@@ -54,12 +55,16 @@ bool ShutdownApplet::requestShutdown(const QString &type)
             m_lockscreen->shutdown();
         }
     } else {
-        DDBusSender()
+        if (type == QStringLiteral("Lock")) {
+            QProcess::execute("bash -c \"originmap=$(setxkbmap -query | grep option | awk -F ' ' '{print $2}');/usr/bin/setxkbmap -option grab:break_actions&&/usr/bin/xdotool key XF86Ungrab&&dbus-send --print-reply --dest=org.deepin.dde.LockFront1 /org/deepin/dde/LockFront1 org.deepin.dde.LockFront1.Show&&setxkbmap -option $originmap\"");
+        } else {
+            DDBusSender()
             .service("org.deepin.dde.ShutdownFront1")
             .interface("org.deepin.dde.ShutdownFront1")
             .path("/org/deepin/dde/ShutdownFront1")
-            .method("Show")
+            .method(type)
             .call();
+        }
     }
 
     return true;
