@@ -30,11 +30,8 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, &LayerShellEmulation::onLayerChanged);
 
     onPositionChanged();
-    m_positionChangedTimer.setSingleShot(true);
-    m_positionChangedTimer.setInterval(100);
-    connect(&m_positionChangedTimer, &QTimer::timeout, this, &LayerShellEmulation::onPositionChanged);
-    connect(m_dlayerShellWindow, &DLayerShellWindow::anchorsChanged, &m_positionChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
-    connect(m_dlayerShellWindow, &DLayerShellWindow::marginsChanged, &m_positionChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(m_dlayerShellWindow, &DLayerShellWindow::anchorsChanged, this, &LayerShellEmulation::onPositionChanged);
+    connect(m_dlayerShellWindow, &DLayerShellWindow::marginsChanged, this, &LayerShellEmulation::onPositionChanged);
 
     onExclusionZoneChanged();
     m_exclusionZoneChangedTimer.setSingleShot(true);
@@ -45,23 +42,23 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
 
     // qml height or width may update later, need to update anchor postion and exclusion zone
     connect(m_window, &QWindow::widthChanged, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
-    connect(m_window, &QWindow::widthChanged, &m_positionChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(m_window, &QWindow::widthChanged, this, &LayerShellEmulation::onPositionChanged);
     connect(m_window, &QWindow::heightChanged, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
-    connect(m_window, &QWindow::heightChanged, &m_positionChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
-    connect(m_window, &QWindow::xChanged, &m_positionChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
-    connect(m_window, &QWindow::yChanged, &m_positionChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(m_window, &QWindow::heightChanged, this, &LayerShellEmulation::onPositionChanged);
+    connect(m_window, &QWindow::xChanged, this, &LayerShellEmulation::onPositionChanged);
+    connect(m_window, &QWindow::yChanged, this, &LayerShellEmulation::onPositionChanged);
 
     for (auto screen : qApp->screens()) {
-        connect(screen, &QScreen::geometryChanged, &m_positionChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+        connect(screen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
         connect(screen, &QScreen::geometryChanged, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     }
     connect(qApp, &QGuiApplication::screenAdded, this, [this] (const QScreen *newScreen) {
-        connect(newScreen, &QScreen::geometryChanged, &m_positionChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+        connect(newScreen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
         connect(newScreen, &QScreen::geometryChanged, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     });
     connect(qApp, &QGuiApplication::primaryScreenChanged, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(m_window, &QWindow::screenChanged, this, [this](QScreen *nowScreen){
-        m_positionChangedTimer.start();
+        onPositionChanged();
         m_exclusionZoneChangedTimer.start();
     });
 
