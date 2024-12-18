@@ -1,3 +1,9 @@
+dde-shell (1.0.10) unstable; urgency=medium
+
+  * fix: protocol error caused by frequent creation and destruction of WaylandOutput 
+
+ -- tsic404 <liuheng@depein.org>  Wed, 18 Dec 2024 11:35:55 +0800
+
 dde-shell (1.0.9) unstable; urgency=medium
 
   * fix: WeChat and WXChat are recognized as the same
