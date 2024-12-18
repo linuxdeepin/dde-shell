@@ -55,6 +55,14 @@ Item {
         menuX: DockPositioner.x
         menuY: DockPositioner.y
 
+        onMenuVisibleChanged: {
+            if (menuVisible) {
+                subMenuLoader.active = true
+            } else {
+                subMenuLoaderDelayTimer.start()
+            }
+        }
+
         Item {
             anchors.fill: parent
             ShellSurfaceItemProxy {
@@ -65,8 +73,20 @@ Item {
                     popupMenu.close()
                 }
             }
+
+            // Avoid protocol errors caused by frequent creation and destruction of WaylandOutput.
+            Timer {
+                id: subMenuLoaderDelayTimer
+                interval: 1000
+                repeat: false
+                running: false
+                onTriggered: function () {
+                    subMenuLoader.active = false
+                }
+            }
             Loader {
-                active: popupMenu.menuVisible
+                id: subMenuLoader
+                active: false
                 sourceComponent: SurfaceSubPopup {
                     objectName: "tray's subPopup"
                     transientParent: popupMenu.menuWindow
