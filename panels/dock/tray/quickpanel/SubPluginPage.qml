@@ -14,7 +14,7 @@ Item {
     implicitWidth: 330
     implicitHeight: contentHeight
 
-    readonly property int contentHeight: Math.min(Math.max(subPluginMinHeight, subPluginView.height), 600)
+    readonly property int contentHeight: Math.min(Math.max(subPluginMinHeight, subPluginView.height), 600 + titleLayer.height + headerMargin)
     required property var pluginId
     property alias shellSurface: surfaceLayer.shellSurface
     required property var model
