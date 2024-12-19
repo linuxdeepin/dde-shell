@@ -40,6 +40,7 @@ Window {
     DLayerShellWindow.topMargin: windowMargin(0) + 10
     DLayerShellWindow.rightMargin: windowMargin(1) + 10
     DLayerShellWindow.bottomMargin: windowMargin(2) + 10
+    DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
     palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
     DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
