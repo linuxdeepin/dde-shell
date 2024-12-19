@@ -1,3 +1,10 @@
+dde-shell (1.99.13) UNRELEASED; urgency=medium
+
+  * fix: Remove position change timer on X11Emulation
+  * fix: Shutdown plugin miss menu function(Bug: 294875)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 19 Dec 2024 10:24:00 +0800
+
 dde-shell (1.99.12) UNRELEASED; urgency=medium
 
   * UNRELEASED bump version to 1.99.12
