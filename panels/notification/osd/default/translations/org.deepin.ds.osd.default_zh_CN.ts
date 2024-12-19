@@ -14,7 +14,7 @@
     <message>
         <location filename="../package/main.qml" line="56"/>
         <source>Caps Lock on</source>
-        <translation type="unfinished"/>
+        <translation>大写</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="57"/>
