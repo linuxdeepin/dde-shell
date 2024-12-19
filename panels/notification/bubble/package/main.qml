@@ -38,12 +38,13 @@ Window {
     DLayerShellWindow.topMargin: windowMargin(0)
     DLayerShellWindow.rightMargin: windowMargin(1)
     DLayerShellWindow.bottomMargin: windowMargin(2)
+    DLayerShellWindow.exclusionZone: -1
     palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
-    DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
+    // DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
     color: "transparent"
-    DWindow.windowRadius: 0
-    DWindow.enabled: false
+    // DWindow.windowRadius: 0
+    // DWindow.enabled: false
     // DWindow.enableBlurWindow: true
     screen: Qt.application.screens[0]
     // TODO `Qt.application.screens[0]` maybe invalid, why screen is changed.
