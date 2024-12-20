@@ -73,12 +73,7 @@ DelegateChooser {
             strongInteractive: model.strongInteractive
             contentIcon: model.contentIcon
             contentRowCount: model.contentRowCount
-            property string defaultAction: model.defaultAction
-
-            function invokeAction(actionId) {
-                console.log("action normal", model.id, actionId)
-                notifyModel.invokeAction(model.id, actionId)
-            }
+            defaultAction: model.defaultAction
 
             Loader {
                 anchors.fill: parent
@@ -98,13 +93,6 @@ DelegateChooser {
                 }
             }
 
-            // default action
-            TapHandler {
-                enabled: model.defaultAction !== ""
-                acceptedButtons: Qt.LeftButton
-                onTapped: invokeAction(model.defaultAction)
-            }
-
             onSetting: function (pos) {
                 let tmp = mapToItem(root.view, pos)
                 root.setting(tmp, {
@@ -116,8 +104,13 @@ DelegateChooser {
                 console.log("remove normal", model.id)
                 notifyModel.remove(model.id)
             }
+            onDismiss: function () {
+                console.log("dismiss normal", model.id)
+                notifyModel.remove(model.id)
+            }
             onActionInvoked: function (actionId) {
-                invokeAction(actionId)
+                console.log("action normal", model.id, actionId)
+                notifyModel.invokeAction(model.id, actionId)
             }
         }
     }
@@ -141,6 +134,7 @@ DelegateChooser {
             strongInteractive: model.strongInteractive
             contentIcon: model.contentIcon
             contentRowCount: model.contentRowCount
+            enableDismissed: false
 
             Loader {
                 anchors.fill: parent

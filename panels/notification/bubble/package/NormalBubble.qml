@@ -18,6 +18,7 @@ NotifyItemContent {
     iconName: bubble.iconName
     date: bubble.timeTip
     actions: bubble.actions
+    defaultAction: bubble.defaultAction
     title: bubble.summary
     content: bubble.body
     strongInteractive: bubble.urgency === 2
@@ -25,34 +26,14 @@ NotifyItemContent {
     contentRowCount: bubble.contentRowCount
     onRemove: function () {
         console.log("remove notify", bubble.appName)
-        Applet.close(bubble.index)
+        Applet.close(bubble.index, NotifyItem.Closed)
+    }
+    onDismiss: function () {
+        console.log("dismiss notify", bubble.appName)
+        Applet.close(bubble.index, NotifyItem.Dismissed)
     }
     onActionInvoked: function (actionId) {
         console.log("action notify", bubble.appName, actionId)
         Applet.invokeAction(bubble.index, actionId)
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
-        z: -1 // default action
-        onClicked: {
-            if (!bubble.defaultAction)
-                return
-
-            console.log("default action notify", bubble.appName, bubble.defaultAction)
-            Applet.invokeAction(bubble.index, bubble.defaultAction)
-        }
-        property bool longPressed
-        onPressAndHold: {
-            longPressed = true
-        }
-        onPositionChanged: {
-            if (longPressed) {
-                longPressed = false
-                console.log("delay process", bubble.index)
-                Applet.delayProcess(bubble.index)
-            }
-        }
     }
 }

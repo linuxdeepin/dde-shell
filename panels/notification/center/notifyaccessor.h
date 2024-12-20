@@ -52,7 +52,7 @@ public:
     void removeEntityByApp(const QString &appName);
     void clear();
 
-    void closeNotify(const NotifyEntity &entity);
+    void closeNotify(const NotifyEntity &entity, NotifyEntity::ClosedReason reason);
     void invokeNotify(const NotifyEntity &entity, const QString &actionId);
 
 signals:

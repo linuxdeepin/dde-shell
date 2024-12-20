@@ -40,6 +40,7 @@ FocusScope {
             iconName: model.iconName
             date: model.time
             actions: model.actions
+            defaultAction: model.defaultAction
             title: model.title
             content: model.content
             strongInteractive: model.strongInteractive
@@ -48,7 +49,11 @@ FocusScope {
 
             onRemove: function () {
                 console.log("remove overlap", model.id)
-                notifyModel.closeNotify(model.id)
+                notifyModel.closeNotify(model.id, NotifyItem.Closed)
+            }
+            onDismiss: function () {
+                console.log("dismiss overlap", model.id)
+                notifyModel.closeNotify(model.id, NotifyItem.Dismissed)
             }
             onActionInvoked: function (actionId) {
                 console.log("action overlap", model.id, actionId)

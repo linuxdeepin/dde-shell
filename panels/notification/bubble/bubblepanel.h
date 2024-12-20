@@ -36,7 +36,7 @@ public:
 
 public Q_SLOTS:
     void invokeAction(int bubbleIndex, const QString &actionId);
-    void close(int bubbleIndex);
+    void close(int bubbleIndex, int reason);
     void delayProcess(int bubbleIndex);
     void setEnabled(bool newEnabled);
 

@@ -170,14 +170,13 @@ void NotifyAccessor::clear()
     }
 }
 
-void NotifyAccessor::closeNotify(const NotifyEntity &entity)
+void NotifyAccessor::closeNotify(const NotifyEntity &entity, NotifyEntity::ClosedReason reason)
 {
     if (!m_dataUpdater)
         return;
     const auto id = entity.id();
     const auto bubbleId = entity.bubbleId();
-    QMetaObject::invokeMethod(m_dataUpdater, "notificationClosed", Qt::DirectConnection,
-                              Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(uint, NotifyEntity::Closed));
+    QMetaObject::invokeMethod(m_dataUpdater, "notificationClosed", Qt::DirectConnection, Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(uint, reason));
 }
 
 void NotifyAccessor::invokeNotify(const NotifyEntity &entity, const QString &actionId)
