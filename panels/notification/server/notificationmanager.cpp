@@ -194,7 +194,11 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
         return 0;
     }
 
-    QString tsAppName = m_setting->appValue(appId, NotificationSetting::AppName).toString();
+    QString tsAppName{appName};
+    auto appNameValue = m_setting->appValue(appId, NotificationSetting::AppName);
+    if (!appNameValue.isNull()) {
+        tsAppName = appNameValue.toString();
+    }
 
     QString strBody = body;
     strBody.replace(QLatin1String("\\\\"), QLatin1String("\\"), Qt::CaseInsensitive);
