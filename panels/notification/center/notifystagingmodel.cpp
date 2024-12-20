@@ -68,11 +68,11 @@ void NotifyStagingModel::push(const NotifyEntity &entity)
     }
 }
 
-void NotifyStagingModel::closeNotify(qint64 id)
+void NotifyStagingModel::closeNotify(qint64 id, int reason)
 {
     auto entity = m_accessor->fetchEntity(id);
     if (entity.isValid()) {
-        NotifyAccessor::instance()->closeNotify(entity);
+        NotifyAccessor::instance()->closeNotify(entity, static_cast<NotifyEntity::ClosedReason>(reason));
     }
     remove(id);
 }

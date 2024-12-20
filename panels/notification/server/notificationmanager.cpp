@@ -194,10 +194,9 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
         return 0;
     }
 
-    QString tsAppName{appName};
-    auto appNameValue = m_setting->appValue(appId, NotificationSetting::AppName);
-    if (!appNameValue.isNull()) {
-        tsAppName = appNameValue.toString();
+    auto tsAppName = m_setting->appValue(appId, NotificationSetting::AppName).toString();
+    if (tsAppName.isEmpty()) {
+        tsAppName = appName;
     }
 
     QString strBody = body;
@@ -428,7 +427,7 @@ void NotificationManager::updateEntityProcessed(qint64 id, uint reason)
 {
     auto entity = m_persistence->fetchEntity(id);
     if (entity.isValid()) {
-        if (reason == NotifyEntity::Closed && entity.processedType() == NotifyEntity::NotProcessed) {
+        if ((reason == NotifyEntity::Closed || reason == NotifyEntity::Dismissed) && entity.processedType() == NotifyEntity::NotProcessed) {
             entity.setProcessedType(NotifyEntity::Removed);
         } else {
             entity.setProcessedType(NotifyEntity::Processed);

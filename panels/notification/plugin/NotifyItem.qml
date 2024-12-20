@@ -11,6 +11,13 @@ import org.deepin.ds.notification
 Control {
     id: root
 
+    enum CloseReason {
+        Expired = 1,
+        Dismissed = 2,
+        Closed = 3,
+        Unknown = 4
+    }
+
     property string appName: "deepin-editor"
     property string iconName: "deepin-editor"
     property string content: "content"
@@ -21,11 +28,13 @@ Control {
         {text: "close", id: "close"},
         {text: "exec", id: "exec"}
     ]
+    property string defaultAction
     property bool strongInteractive: false
     property string contentIcon: "deepin-editor"
     property int contentRowCount: 6
 
     signal remove()
+    signal dismiss()
     signal setting(var pos)
     signal actionInvoked(var actionId)
     signal linkActivated(var link)

@@ -14,6 +14,32 @@ NotifyItem {
 
     property bool closeVisible: root.hovered || root.activeFocus
     property int miniContentHeight: NotifyStyle.contentItem.miniHeight
+    property bool enableDismissed: true
+
+    Item {
+        anchors.fill: parent
+        z: -1
+        enabled: root.enableDismissed
+        TapHandler {
+            property bool isLongPressed
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onCanceled: function () {
+                if (isLongPressed) {
+                    console.log("Dissmiss notify", root.appName, isLongPressed)
+                    root.dismiss()
+                }
+                isLongPressed = false
+            }
+            onLongPressed: isLongPressed = true
+            onTapped: function () {
+                if (!root.defaultAction)
+                    return
+
+                console.log("Click default action notify", root.appName, root.defaultAction)
+                root.actionInvoked(root.defaultAction)
+            }
+        }
+    }
 
     // placeHolder to receive MouseEvent
     Control {

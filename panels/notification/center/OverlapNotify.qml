@@ -14,6 +14,8 @@ NotifyItem {
 
     property int count: 1
     readonly property int overlapItemRadius: 12
+    property bool enableDismissed: true
+    property var removedCallback
 
     signal expand()
 
@@ -31,8 +33,9 @@ NotifyItem {
             NumberAnimation { properties: "opacity"; duration: 300; easing.type: Easing.Linear }
         }
         onRunningChanged: {
-            if (!running) {
-                root.remove()
+            if (!running && root.removedCallback) {
+                root.removedCallback()
+                root.removedCallback = undefined
             }
         }
     }
@@ -49,12 +52,23 @@ NotifyItem {
             title: root.title
             date: root.date
             actions: root.actions
+            defaultAction: root.defaultAction
             closeVisible: root.hovered || root.activeFocus
             strongInteractive: root.strongInteractive
             contentIcon: root.contentIcon
             contentRowCount: root.contentRowCount
+            enableDismissed: root.enableDismissed
 
             onRemove: function () {
+                root.removedCallback = function () {
+                    root.remove()
+                }
+                root.state = "removing"
+            }
+            onDismiss: function () {
+                root.removedCallback = function () {
+                    root.dismiss()
+                }
                 root.state = "removing"
             }
             onActionInvoked: function (actionId) {
@@ -78,6 +92,7 @@ NotifyItem {
 
     // expand
     TapHandler {
+        enabled: !root.enableDismissed
         acceptedButtons: Qt.LeftButton
         onTapped: root.expand()
     }

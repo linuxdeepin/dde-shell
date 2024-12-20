@@ -76,14 +76,14 @@ void BubblePanel::invokeAction(int bubbleIndex, const QString &actionId)
     onActionInvoked(bubble->id(), bubble->bubbleId(), actionId);
 }
 
-void BubblePanel::close(int bubbleIndex)
+void BubblePanel::close(int bubbleIndex, int reason)
 {
     auto bubble = bubbleItem(bubbleIndex);
     if (!bubble)
         return;
 
     m_bubbles->remove(bubbleIndex);
-    onBubbleClosed(bubble->id(), bubble->bubbleId(), NotifyEntity::Closed);
+    onBubbleClosed(bubble->id(), bubble->bubbleId(), reason);
 }
 
 void BubblePanel::delayProcess(int bubbleIndex)

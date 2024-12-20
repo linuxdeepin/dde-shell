@@ -39,7 +39,7 @@ public:
     };
     NotifyStagingModel(QObject *parent = nullptr);
 
-    Q_INVOKABLE void closeNotify(qint64 id);
+    Q_INVOKABLE void closeNotify(qint64 id, int reason);
     Q_INVOKABLE void invokeNotify(qint64 id, const QString &actionId);
     Q_INVOKABLE void open();
     Q_INVOKABLE void close();
