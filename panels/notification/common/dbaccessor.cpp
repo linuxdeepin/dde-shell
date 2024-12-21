@@ -170,6 +170,12 @@ bool DBAccessor::open(const QString &dataPath)
     return true;
 }
 
+bool DBAccessor::isValid() const
+{
+    QMutexLocker locker(&m_mutex);
+    return !m_connection.lastError().isValid();
+}
+
 qint64 DBAccessor::addEntity(const NotifyEntity &entity)
 {
     BENCHMARK();

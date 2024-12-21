@@ -4,10 +4,10 @@
 
 #include "notificationcenterpanel.h"
 
-#include "notificationcenterproxy.h"
+#include "dataaccessorproxy.h"
 #include "notificationcenterdbusadaptor.h"
+#include "notificationcenterproxy.h"
 #include "notifyaccessor.h"
-#include "dbaccessor.h"
 
 #include <pluginfactory.h>
 #include <pluginloader.h>
@@ -75,7 +75,7 @@ bool NotificationCenterPanel::init()
 
     DPanel::init();
 
-    auto accessor = notification::DBAccessor::instance();
+    auto accessor = notification::DataAccessorProxy::instance();
     notifycenter::NotifyAccessor::instance()->setDataAccessor(accessor);
 
     bool valid = false;

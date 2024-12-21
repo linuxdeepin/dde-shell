@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "bubblepanel.h"
-#include "bubblemodel.h"
-#include "pluginfactory.h"
 #include "bubbleitem.h"
-#include "dbaccessor.h"
+#include "bubblemodel.h"
+#include "dataaccessorproxy.h"
+#include "pluginfactory.h"
 
 #include <QLoggingCategory>
 #include <QQueue>
@@ -46,7 +46,7 @@ bool BubblePanel::init()
         return false;
     }
 
-    m_accessor = DBAccessor::instance();
+    m_accessor = DataAccessorProxy::instance();
 
     connect(m_notificationServer, SIGNAL(notificationStateChanged(qint64, int)), this, SLOT(onNotificationStateChanged(qint64, int)));
 
@@ -131,6 +131,11 @@ void BubblePanel::addBubble(qint64 id)
 
 void BubblePanel::closeBubble(qint64 id)
 {
+    const auto entity = m_accessor->fetchEntity(id);
+    if (!entity.isValid())
+        return;
+
+    id = entity.bubbleId();
     m_bubbles->removeById(id);
 }
 

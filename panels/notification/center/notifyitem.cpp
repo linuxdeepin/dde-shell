@@ -233,4 +233,15 @@ NotifyEntity AppGroupNotifyItem::lastEntity() const
 {
     return m_lastEntity;
 }
+
+BubbleNotifyItem::BubbleNotifyItem(const NotifyEntity &entity)
+    : AppNotifyItem(entity)
+{
+}
+
+qint64 BubbleNotifyItem::id() const
+{
+    Q_ASSERT(m_entity.isValid());
+    return m_entity.bubbleId();
+}
 }

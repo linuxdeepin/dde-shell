@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "notificationmanager.h"
+#include "dataaccessorproxy.h"
+#include "dbaccessor.h"
 #include "notificationsetting.h"
 #include "notifyentity.h"
-#include "dbaccessor.h"
 
 #include <QDateTime>
 #include <DDesktopServices>
@@ -37,13 +38,15 @@ static const QString SessionDaemonDBusPath = "/org/deepin/dde/SessionManager1";
 
 NotificationManager::NotificationManager(QObject *parent)
     : QObject(parent)
-    , m_persistence(new DBAccessor("Manager"))
+    , m_persistence(DataAccessorProxy::instance())
     , m_setting(new NotificationSetting(this))
     , m_userSessionManager(new UserSessionManager(SessionDBusService, SessionDaemonDBusPath, QDBusConnection::sessionBus(), this))
     , m_pendingTimeout(new QTimer(this))
 {
     m_pendingTimeout->setSingleShot(true);
     connect(m_pendingTimeout, &QTimer::timeout, this, &NotificationManager::onHandingPendingEntities);
+
+    DataAccessorProxy::instance()->setSource(DBAccessor::instance());
 
     DAppletBridge bridge("org.deepin.ds.dde-apps");
     if (auto apps = bridge.applet()) {
@@ -449,7 +452,7 @@ void NotificationManager::updateEntityProcessed(const NotifyEntity &entity)
     } else {
         m_persistence->updateEntityProcessedType(id, entity.processedType());
     }
-    Q_EMIT NotificationStateChanged(id, entity.processedType());
+    Q_EMIT NotificationStateChanged(entity.id(), entity.processedType());
 
     emitRecordCountChanged();
 }
