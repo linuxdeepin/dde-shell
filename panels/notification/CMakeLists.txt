@@ -14,6 +14,10 @@ target_link_libraries(ds-notification PRIVATE
 add_library(ds-notification-shared SHARED
     ${CMAKE_SOURCE_DIR}/panels/notification/common/notifyentity.h
     ${CMAKE_SOURCE_DIR}/panels/notification/common/notifyentity.cpp
+    ${CMAKE_SOURCE_DIR}/panels/notification/common/dataaccessorproxy.h
+    ${CMAKE_SOURCE_DIR}/panels/notification/common/dataaccessorproxy.cpp
+    ${CMAKE_SOURCE_DIR}/panels/notification/common/memoryaccessor.h
+    ${CMAKE_SOURCE_DIR}/panels/notification/common/memoryaccessor.cpp
     ${CMAKE_SOURCE_DIR}/panels/notification/common/dbaccessor.h
     ${CMAKE_SOURCE_DIR}/panels/notification/common/dbaccessor.cpp
     ${CMAKE_SOURCE_DIR}/panels/notification/common/notifysetting.h

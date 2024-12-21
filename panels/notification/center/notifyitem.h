@@ -22,7 +22,7 @@ class AppNotifyItem : public QObject
 {
     Q_OBJECT
 public:
-    AppNotifyItem(const NotifyEntity &entity);
+    explicit AppNotifyItem(const NotifyEntity &entity);
 
     void setEntity(const NotifyEntity &entity);
     NotifyEntity entity() const;
@@ -30,7 +30,7 @@ public:
     virtual NotifyType type() const;
     QString appName() const;
     QString appId() const;
-    qint64 id() const;
+    virtual qint64 id() const;
     QString time() const;
     void updateTime();
     bool strongInteractive() const;
@@ -56,10 +56,17 @@ protected:
     bool m_strongInteractive = false;
 };
 
+class BubbleNotifyItem : public AppNotifyItem
+{
+public:
+    explicit BubbleNotifyItem(const NotifyEntity &entity);
+    qint64 id() const override;
+};
+
 class OverlapAppNotifyItem : public AppNotifyItem
 {
 public:
-    OverlapAppNotifyItem(const NotifyEntity &entity);
+    explicit OverlapAppNotifyItem(const NotifyEntity &entity);
     virtual NotifyType type()const override;
     // source 3 -> overlap 2, 2 -> overlap 1, 1-> 0.
     void updateCount(int source);
@@ -78,7 +85,7 @@ private:
 class AppGroupNotifyItem : public AppNotifyItem
 {
 public:
-    AppGroupNotifyItem(const QString &appName);
+    explicit AppGroupNotifyItem(const QString &appName);
     virtual NotifyType type() const override;
 
     void updateLastEntity(const NotifyEntity& entity);

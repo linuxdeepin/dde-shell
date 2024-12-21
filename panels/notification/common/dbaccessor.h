@@ -26,6 +26,8 @@ public:
 
     bool open(const QString &dataPath);
 
+    bool isValid() const override;
+
     qint64 addEntity(const NotifyEntity &entity) override;
     qint64 replaceEntity(qint64 id, const NotifyEntity &entity) override;
     void updateEntityProcessedType(qint64 id, int processedType) override;

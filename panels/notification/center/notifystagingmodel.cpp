@@ -7,10 +7,10 @@
 #include <QTimerEvent>
 #include <QLoggingCategory>
 
+#include "dataaccessorproxy.h"
+#include "notifyaccessor.h"
 #include "notifyentity.h"
 #include "notifyitem.h"
-#include "notifyaccessor.h"
-#include "dbaccessor.h"
 #include "notifysetting.h"
 
 namespace notification {
@@ -20,7 +20,7 @@ namespace notifycenter {
 
 NotifyStagingModel::NotifyStagingModel(QObject *parent)
     : QAbstractListModel(parent)
-    , m_accessor(DBAccessor::instance())
+    , m_accessor(DataAccessorProxy::instance())
 {
     connect(NotifyAccessor::instance(), &NotifyAccessor::stagingEntityReceived, this, &NotifyStagingModel::doEntityReceived);
     connect(NotifyAccessor::instance(), &NotifyAccessor::stagingEntityClosed, this, &NotifyStagingModel::onEntityClosed);
@@ -142,9 +142,9 @@ void NotifyStagingModel::remove(qint64 id)
                 newEntity = newEntities.first();
             }
 
-            qDebug(notifyLog) << "Insert notify" << newEntity.id();
+            qDebug(notifyLog) << "Insert notify" << newEntity.bubbleId();
             beginInsertRows(QModelIndex(), insertedIndex, insertedIndex);
-            auto notify = new AppNotifyItem(newEntity);
+            auto notify = new BubbleNotifyItem(newEntity);
             m_appNotifies.insert(insertedIndex, notify);
             endInsertRows();
         }
@@ -166,7 +166,7 @@ void NotifyStagingModel::open()
 
     const auto count = std::min(static_cast<int>(entities.size()), BubbleMaxCount);
     for (int i = 0; i < count; i++) {
-        auto notify = new AppNotifyItem(entities.at(i));
+        auto notify = new BubbleNotifyItem(entities.at(i));
         m_appNotifies << notify;
     }
     updateOverlapCount(entities.size());
@@ -246,7 +246,7 @@ void NotifyStagingModel::replace(const NotifyEntity &entity)
 {
     for (int i = 0; i < m_appNotifies.size(); i++) {
         auto item = m_appNotifies[i];
-        if (item->entity().id() == entity.id()) {
+        if (item->id() == entity.bubbleId()) {
             item->setEntity(entity);
             const auto index = this->index(i, 0, {});
             dataChanged(index, index);
@@ -309,6 +309,10 @@ void NotifyStagingModel::doEntityReceived(qint64 id)
 
 void NotifyStagingModel::onEntityClosed(qint64 id)
 {
+    auto entity = m_accessor->fetchEntity(id);
+    if (!entity.isValid())
+        return;
+    id = entity.bubbleId();
     remove(id);
 }
 

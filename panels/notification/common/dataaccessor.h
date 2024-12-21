@@ -17,6 +17,10 @@ public:
     virtual ~DataAccessor()
     {
     }
+    virtual bool isValid() const
+    {
+        return true;
+    }
     virtual qint64 addEntity(const NotifyEntity &entity) { Q_UNUSED(entity); return 0; }
     virtual qint64 replaceEntity(qint64 id, const NotifyEntity &entity)
     {

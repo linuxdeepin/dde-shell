@@ -135,7 +135,7 @@ BubbleItem *BubbleModel::removeById(qint64 id)
         return nullptr;
     }
     for (const auto &item : m_bubbles) {
-        if (item->id() == id) {
+        if (item->bubbleId() == id) {
             m_delayBubbles.removeAll(id);
             remove(m_bubbles.indexOf(item));
             return item;
@@ -169,7 +169,7 @@ QVariant BubbleModel::data(const QModelIndex &index, int role) const
     case BubbleModel::AppName:
         return m_bubbles[row]->appName();
     case BubbleModel::Id:
-        return m_bubbles[row]->id();
+        return m_bubbles[row]->bubbleId();
     case BubbleModel::Body:
         return m_bubbles[row]->body();
     case BubbleModel::Summary:
@@ -281,7 +281,7 @@ int BubbleModel::replaceBubbleIndex(const BubbleItem *bubble) const
             if (item->appName() != bubble->appName())
                 continue;
 
-            if (item->id() == bubble->id()) {
+            if (item->bubbleId() == bubble->bubbleId()) {
                 return i;
             }
         }
