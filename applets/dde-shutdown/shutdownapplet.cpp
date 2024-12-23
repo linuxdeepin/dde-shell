@@ -35,6 +35,11 @@ bool ShutdownApplet::load()
     return true;
 }
 
+bool ShutdownApplet::requestShutdown()
+{
+    return requestShutdown({});
+}
+
 bool ShutdownApplet::requestShutdown(const QString &type)
 {
     qDebug() << "request shutdown:" << type;

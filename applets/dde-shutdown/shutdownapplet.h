@@ -19,6 +19,7 @@ public:
     virtual bool load() override;
 
 public Q_SLOTS:
+    bool requestShutdown();
     bool requestShutdown(const QString &type);
 
 private:
