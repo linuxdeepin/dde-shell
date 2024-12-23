@@ -1,3 +1,10 @@
+dde-shell (1.99.15) UNRELEASED; urgency=medium
+
+  * fix: Video memory explosion caused by randomly clicking on dock plugins
+  * chore: update section to shells in debian/control
+
+ -- Deepin Packages Builder <packages@deepin.org>  Mon, 23 Dec 2024 15:30:15 +0800
+
 dde-shell (1.99.14) UNRELEASED; urgency=medium
 
   * fix: incorrect margin in treeland for notification
