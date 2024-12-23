@@ -1,105 +1,105 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_CN">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ar">
 <context>
     <name>main</name>
     <message>
         <location filename="../package/main.qml" line="54"/>
         <source>WLAN on</source>
-        <translation>打开wifi</translation>
+        <translation>واي فاي eingeschaltet</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="55"/>
         <source>WLAN off</source>
-        <translation>关闭wifi</translation>
+        <translation>واي فاي ausgeschaltet</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="56"/>
         <source>Caps Lock on</source>
-        <translation>大写</translation>
+        <translation>Caps Lock an</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="57"/>
         <source>Caps Lock off</source>
-        <translation>小写</translation>
+        <translation>Caps Lock aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="58"/>
         <source>Numeric keypad on</source>
-        <translation>打开数字键盘</translation>
+        <translation>numerische Tastatur an</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="59"/>
         <source>Numeric keypad off</source>
-        <translation>关闭数字键盘</translation>
+        <translation>numerische Tastatur aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="60"/>
         <source>Touchpad on</source>
-        <translation>打开触控板</translation>
+        <translation>Touchpad an</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="61"/>
         <source>Touchpad off</source>
-        <translation>关闭触控板</translation>
+        <translation>Touchpad aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="62"/>
         <source>Touchpad toggle</source>
-        <translation>触摸板切换</translation>
+        <translation>Touchpad umschalten</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="63"/>
         <source>Fn toggle</source>
-        <translation>Fn切换</translation>
+        <translation>Fn umschalten</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="64"/>
         <source>Airplane mode on</source>
-        <translation>打开飞行模式</translation>
+        <translation>Flugzeugmodus an</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="65"/>
         <source>Airplane mode off</source>
-        <translation>关闭飞行模式</translation>
+        <translation>Flugzeugmodus aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation>开启静音</translation>
+        <translation>Stummschaltung an</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation>关闭静音</translation>
+        <translation>Stummschaltung aus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
         <source>Balanced power</source>
-        <translation>平衡模式</translation>
+        <translation>ausgewogene Leistung</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="69"/>
         <source>Power saver</source>
-        <translation>省电模式</translation>
+        <translation>Energiesparmodus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="70"/>
         <source>High performance</source>
-        <translation>性能模式</translation>
+        <translation>Hochleistungsmodus</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="71"/>
         <source>Window effect enabled</source>
-        <translation>开启窗口特效</translation>
+        <translation>Fenster-Effekt aktiviert</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="72"/>
         <source>Window effect disabled</source>
-        <translation>关闭窗口特效</translation>
+        <translation>Fenster-Effekt deaktiviert</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="73"/>
         <source>Failed to enable window effects</source>
-        <translation>打开窗口特效失败</translation>
+        <translation>Konnte Fenster-Effekte nicht aktivieren</translation>
     </message>
 </context>
 </TS>
