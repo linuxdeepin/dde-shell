@@ -1,5 +1,5 @@
 Source: dde-shell
-Section: shells
+Section: DDE
 Priority: optional
 Maintainer: Deepin Packages Builder <packages@deepin.com>
 Build-Depends:
