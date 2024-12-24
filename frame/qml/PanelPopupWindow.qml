@@ -80,8 +80,11 @@ PopupWindow {
 
     color: "transparent"
     onVisibleChanged: function (arg) {
-        if (!arg)
+        if (!arg) {
             currentItem = null
+            root.width = 10
+            root.height = 10
+        }
         if (!arg)
             DS.closeChildrenWindows(root)
     }
