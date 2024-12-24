@@ -1,3 +1,9 @@
+dde-shell (1.99.16) UNRELEASED; urgency=medium
+
+  * fix: notification-center auto hide when clicked other window as title(Bug: 294647)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Tue, 24 Dec 2024 20:35:07 +0800
+
 dde-shell (1.99.15) UNRELEASED; urgency=medium
 
   * fix: Video memory explosion caused by randomly clicking on dock plugins
