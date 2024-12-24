@@ -41,6 +41,7 @@ Window {
     DLayerShellWindow.rightMargin: windowMargin(1)
     DLayerShellWindow.bottomMargin: windowMargin(2)
     DLayerShellWindow.exclusionZone: -1
+    DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
     palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
     // DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
