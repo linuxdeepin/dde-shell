@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QWindow>
+#include <QTimer>
 
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -31,5 +32,7 @@ private slots:
 private:
     QWindow* m_window;
     DLayerShellWindow* m_dlayerShellWindow;
+    QTimer m_positionChangedTimer;
+    QTimer m_exclusionZoneChangedTimer;
 };
 DS_END_NAMESPACE
