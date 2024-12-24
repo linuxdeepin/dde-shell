@@ -1,3 +1,26 @@
+dde-shell (1.99.15) UNRELEASED; urgency=medium
+
+  * fix: Video memory explosion caused by randomly clicking on dock plugins
+  * chore: update section to shells in debian/control
+
+ -- Deepin Packages Builder <packages@deepin.org>  Mon, 23 Dec 2024 15:30:15 +0800
+
+dde-shell (1.99.14) UNRELEASED; urgency=medium
+
+  * fix: incorrect margin in treeland for notification
+  * fix: error max height of embed plugin popup
+  * fix: can't query Notify for notification
+  * fix: missing default action for shutdown
+
+ -- YeShanShan <yeshanshan@deepin.org>  Mon, 23 Dec 2024 10:49:38 +0800
+
+dde-shell (1.99.13) UNRELEASED; urgency=medium
+
+  * fix: Remove position change timer on X11Emulation
+  * fix: Shutdown plugin miss menu function(Bug: 294875)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 19 Dec 2024 10:24:00 +0800
+
 dde-shell (1.99.12) UNRELEASED; urgency=medium
 
   * UNRELEASED bump version to 1.99.12

@@ -8,8 +8,20 @@ DS_BEGIN_NAMESPACE
 PopupWindow::PopupWindow(QWindow *parent)
     : QQuickWindowQmlImpl(parent)
 {
-    setMinimumHeight(10);
-    setMinimumWidth(10);
+    // minimum size is 1x1 to prevent protocols error on wayland
+    setMinimumSize(QSize(1, 1));
+
+    // maximum size is the screen size, to prevent the window from being too large and causing
+    // the video memory to explode
+    auto setMaximumSize = [this]() {
+        auto screen = QWindow::screen();
+        if (screen) {
+            this->setMaximumSize(screen->size());
+        }
+    };
+
+    connect(this, &QWindow::screenChanged, this, setMaximumSize);
+    setMaximumSize();
 }
 
 void PopupWindow::mouseReleaseEvent(QMouseEvent *event)

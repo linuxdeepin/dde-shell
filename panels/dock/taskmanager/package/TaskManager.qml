@@ -48,6 +48,8 @@ ContainmentItem {
         model: DelegateModel {
             id: visualModel
             model: taskmanager.Applet.dataModel
+            // 1:4 the distance between app : dock height; get width/height≈0.8
+            property real cellWidth: Panel.rootObject.dockItemMaxSize * 0.8
             delegate: DropArea {
                 id: delegateRoot
                 required property bool active
@@ -78,9 +80,8 @@ ContainmentItem {
                 Behavior on scale { NumberAnimation { duration: 200 } }
 
                 // TODO: 临时溢出逻辑，待后面修改
-                // 1:4 the distance between app : dock height; get width/height≈0.8
-                implicitWidth: useColumnLayout ? Panel.rootObject.dockItemMaxSize : Panel.rootObject.dockItemMaxSize * 0.8
-                implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 0.8 : Panel.rootObject.dockItemMaxSize
+                implicitWidth: useColumnLayout ? Panel.rootObject.dockItemMaxSize : visualModel.cellWidth
+                implicitHeight: useColumnLayout ? visualModel.cellWidth : Panel.rootObject.dockItemMaxSize
 
                 onEntered: function(drag) {
                     visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)
@@ -136,8 +137,7 @@ ContainmentItem {
             onPositionChanged: function(drag) {
                 if (launcherDndDesktopId === "") return
                 let curX = taskmanager.useColumnLayout ? drag.y : drag.x
-                curX *= Screen.devicePixelRatio
-                let cellWidth = Panel.rootObject.dockItemMaxSize
+                let cellWidth = visualModel.cellWidth
                 let curCell = curX / cellWidth
                 let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
                 taskmanager.Applet.dataModel.moveTo(appId, curCell)
@@ -146,8 +146,7 @@ ContainmentItem {
             onDropped: function(drop) {
                 if (launcherDndDesktopId === "") return
                 let curX = taskmanager.useColumnLayout ? drop.y : drop.x
-                curX *= Screen.devicePixelRatio
-                let cellWidth = Panel.rootObject.dockItemMaxSize
+                let cellWidth = visualModel.cellWidth
                 let curCell = curX / cellWidth
                 let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
                 taskmanager.Applet.dataModel.moveTo(appId, curCell)

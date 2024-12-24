@@ -83,7 +83,15 @@ void PluginScale::wp_fractional_scale_v1_destroy(Resource *resource)
     deleteLater();
 }
 
-PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, const QString& itemKey, const QString &displayName, int pluginFlags, int pluginType, int sizePolicy, QWaylandSurface *surface, const QWaylandResource &resource)
+PluginSurface::PluginSurface(PluginManager *manager,
+                             const QString &pluginId,
+                             const QString &itemKey,
+                             const QString &displayName,
+                             int pluginFlags,
+                             int pluginType,
+                             int sizePolicy,
+                             QWaylandSurface *surface,
+                             const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)
     , m_itemKey(itemKey)
@@ -93,6 +101,8 @@ PluginSurface::PluginSurface(PluginManager* manager, const QString& pluginId, co
     , m_pluginType(pluginType)
     , m_sizePolicy(sizePolicy)
     , m_margins(0)
+    , m_height(1)
+    , m_width(1)
 {
     init(resource.resource());
     setExtensionContainer(surface);
@@ -239,12 +249,21 @@ void PluginSurface::plugin_source_size(Resource *resource, int32_t width, int32_
     }
 }
 
-PluginPopup::PluginPopup(PluginManager* manager, const QString &pluginId, const QString &itemKey, int x, int y, int popupType, QWaylandSurface *surface, const QWaylandResource &resource)
+PluginPopup::PluginPopup(PluginManager *manager,
+                         const QString &pluginId,
+                         const QString &itemKey,
+                         int x,
+                         int y,
+                         int popupType,
+                         QWaylandSurface *surface,
+                         const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)
     , m_pluginId(pluginId)
     , m_itemKey(itemKey)
     , m_popupType(popupType)
+    , m_height(1)
+    , m_width(1)
 {
     init(resource.resource());
     setExtensionContainer(surface);

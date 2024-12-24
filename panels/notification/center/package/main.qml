@@ -37,18 +37,20 @@ Window {
     // height: 800
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorRight | DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom
-    DLayerShellWindow.topMargin: windowMargin(0) + 10
-    DLayerShellWindow.rightMargin: windowMargin(1) + 10
-    DLayerShellWindow.bottomMargin: windowMargin(2) + 10
+    DLayerShellWindow.topMargin: windowMargin(0)
+    DLayerShellWindow.rightMargin: windowMargin(1)
+    DLayerShellWindow.bottomMargin: windowMargin(2)
+    DLayerShellWindow.exclusionZone: -1
     DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
+
     palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
-    DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
+    // DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
     // DWindow.windowRadius: DTK.platformTheme.windowRadius
     // DWindow.enableSystemResize: false
     // DWindow.enableSystemMove: false
-    DWindow.windowRadius: 0
-    DWindow.enabled: false
+    // DWindow.windowRadius: 0
+    // DWindow.enabled: false
     color: "transparent"
     // DWindow.enableBlurWindow: true
     screen: Qt.application.screens[0]
@@ -84,6 +86,7 @@ Window {
             top: parent.top
             left: parent.left
             margins: 10
+            rightMargin: 20
             bottom: parent.bottom
         }
 
