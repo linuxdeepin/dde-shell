@@ -59,7 +59,7 @@ Window {
         anchors {
             centerIn: parent
             margins: 10
-            topMargin: 15
+            topMargin: 20
         }
 
         spacing: 10
