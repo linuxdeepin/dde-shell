@@ -38,10 +38,12 @@ DccObject {
                     text: dccObj.displayName
                     Layout.leftMargin: 10
                 }
-                GridLayout {
+                Flow {
                     id: modeLayout
-                    rows: 1
+                    spacing: 10
+                    Layout.fillWidth: true
                     Layout.bottomMargin: 10
+                    Layout.leftMargin: 10
 
                     ListModel {
                         id: modeData
@@ -55,13 +57,14 @@ DccObject {
                         ColumnLayout {
                             Item {
                                 id: borderRect
-                                Layout.preferredWidth: 206
-                                Layout.preferredHeight: 100
+                                Layout.preferredWidth: 144
+                                Layout.preferredHeight: 70
                                 Layout.alignment: Qt.AlignHCenter
+                                Layout.margins: 0
 
                                 Rectangle {
                                     anchors.fill: parent
-                                    radius: 12
+                                    radius: 8
                                     color: "transparent"
                                     border.width: 2
                                     border.color: D.DTK.platformTheme.activeColor
@@ -87,6 +90,7 @@ DccObject {
                                 Layout.fillWidth: true
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
+                                font: D.DTK.fontManager.t9
                                 color: dccData.dockInter.DisplayMode === model.value ? 
                                     D.DTK.platformTheme.activeColor : this.palette.windowText
                             }
