@@ -51,6 +51,14 @@ Item {
         if (!popupWindow)
             return
 
+        // The popup is being displayed. If you click on other plugin at this time,
+        // the popup content of the previous plugin will be displayed first,
+        // and the wrong popup size will cause the window size to change and flicker.
+        if (popupWindow.visible) {
+            popupWindow.close()
+            popupWindow.currentItem = null
+        }
+
         readyBinding = Qt.binding(function () {
             return popupWindow && popupWindow.currentItem === control
         })
