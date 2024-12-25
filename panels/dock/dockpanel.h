@@ -60,7 +60,7 @@ public:
     HideMode hideMode();
     void setHideMode(const HideMode& mode);
 
-    Position position();
+    Position position() const;
     void setPosition(const Position& position);
 
     ItemAlignment itemAlignment();
@@ -75,6 +75,7 @@ public:
     bool debugMode() const;
 
     Q_INVOKABLE void openDockSettings() const;
+    Q_INVOKABLE void startSystemResize() const;
 
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);

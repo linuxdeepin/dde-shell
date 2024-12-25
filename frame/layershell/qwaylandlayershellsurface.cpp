@@ -11,9 +11,11 @@
 
 #include <QLoggingCategory>
 
+#include <QtWaylandClient/private/qwaylandinputdevice_p.h>
 #include <QtWaylandClient/private/qwaylandscreen_p.h>
 #include <QtWaylandClient/private/qwaylandsurface_p.h>
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
+#include <private/qwaylandnativeinterface_p.h>
 
 Q_LOGGING_CATEGORY(layershellsurface, "dde.shell.layershell.surface")
 
@@ -45,7 +47,8 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
         }
     }
 
-    init(shell->get_layer_surface(window->waylandSurface()->object(), output, m_dlayerShellWindow->layer(), m_dlayerShellWindow->scope()));
+    m_surface = window->waylandSurface()->object();
+    init(shell->get_layer_surface(m_surface, output, m_dlayerShellWindow->layer(), m_dlayerShellWindow->scope()));
 
     set_layer(m_dlayerShellWindow->layer());
     connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, [this, window](){
@@ -80,6 +83,7 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
     if (m_requestSize.isValid()) {
         set_size(m_requestSize.width(), m_requestSize.height());
     }
+    m_ddeShellSurface.reset(TreeLandDDEShellManager::instance()->getDDEShellSurface(m_surface));
 }
 
 QWaylandLayerShellSurface::~QWaylandLayerShellSurface()
@@ -164,6 +168,49 @@ void QWaylandLayerShellSurface::attachPopup(QtWaylandClient::QWaylandShellSurfac
     } else {
         qCWarning(layershellsurface) << "Cannot attach popup of unknown type";
     }
+}
+
+bool QWaylandLayerShellSurface::resize(QtWaylandClient::QWaylandInputDevice *inputDevice, Qt::Edges edges)
+{
+    if (!m_ddeShellSurface) {
+        m_ddeShellSurface.reset(TreeLandDDEShellManager::instance()->getDDEShellSurface(m_surface));
+    }
+
+    if (TreeLandDDEShellManager::instance()->isActive() && m_ddeShellSurface) {
+        m_ddeShellSurface->resize(inputDevice->wl_seat(), inputDevice->serial(), 1);
+        return true;
+    }
+
+    return false;
+}
+
+TreeLandDDEShellManager::TreeLandDDEShellManager()
+    : QWaylandClientExtensionTemplate<TreeLandDDEShellManager>(treeland_dde_shell_manager_v1_interface.version)
+{
+}
+
+TreeLandDDEShellManager *TreeLandDDEShellManager::instance()
+{
+    static TreeLandDDEShellManager _instance;
+    return &_instance;
+}
+
+DDEShellSurface *TreeLandDDEShellManager::getDDEShellSurface(struct ::wl_surface *surface)
+{
+    if (isActive())
+        return new DDEShellSurface(this->get_shell_surface(surface));
+    return nullptr;
+}
+
+DDEShellSurface::DDEShellSurface(struct ::treeland_dde_shell_surface_v1 *object)
+    : QWaylandClientExtensionTemplate<DDEShellSurface>(treeland_dde_shell_surface_v1_interface.version)
+    , treeland_dde_shell_surface_v1(object)
+{
+}
+
+DDEShellSurface::~DDEShellSurface()
+{
+    destroy();
 }
 
 DS_END_NAMESPACE
