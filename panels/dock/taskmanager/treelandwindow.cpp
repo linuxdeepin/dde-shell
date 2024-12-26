@@ -118,6 +118,7 @@ TreeLandWindow::TreeLandWindow(uint32_t id, QObject *parent)
 TreeLandWindow::~TreeLandWindow()
 {
     qCDebug(waylandwindowLog()) << "wayland window destoryed";
+    emit stateChanged();
 }
 
 uint32_t TreeLandWindow::id()
