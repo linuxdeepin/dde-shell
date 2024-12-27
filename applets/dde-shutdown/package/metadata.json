@@ -2,6 +2,7 @@
     "Plugin": {
         "Version": "1.0",
         "Id": "org.deepin.ds.dde-shutdown",
-        "Category": "DDE"
+        "Category": "DDE",
+        "Visibility": "Public"
     }
 }

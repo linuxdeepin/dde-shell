@@ -78,6 +78,7 @@ private:
 
     QString appIdByAppName(const QString &appName) const;
     void doActionInvoked(const NotifyEntity &entity, const QString &actionId);
+    bool invokeShellAction(const QString &data);
 
 private slots:
     void onHandingPendingEntities();
