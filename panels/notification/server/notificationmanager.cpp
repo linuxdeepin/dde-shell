@@ -16,8 +16,12 @@
 
 #include <DConfig>
 
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <applet.h>
 #include <appletbridge.h>
+#include <pluginloader.h>
 
 DCORE_USE_NAMESPACE
 DS_USE_NAMESPACE
@@ -478,15 +482,76 @@ void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QStr
     QMap<QString, QVariant> hints = entity.hints();
     QMap<QString, QVariant>::const_iterator i = hints.constBegin();
     while (i != hints.constEnd()) {
-        QStringList args = i.value().toString().split(",");
-        if (!args.isEmpty()) {
-            QString cmd = args.takeFirst(); //命令
-            if (i.key() == "x-deepin-action-" + actionId) {
+        if (i.key() == "x-deepin-action-" + actionId) {
+            QStringList args = i.value().toString().split(",");
+            if (!args.isEmpty()) {
+                QString cmd = args.takeFirst(); // 命令
                 QProcess::startDetached(cmd, args); //执行相关命令
+            }
+        } else if (i.key() == "deepin-dde-shell-action-" + actionId) {
+            const QString data(i.value().toString());
+            if (!invokeShellAction(data)) {
+                qWarning(notifyLog) << "Failed to invoke the action" << actionId;
             }
         }
         ++i;
     }
+}
+
+// Helper function to convert QList to variadic parameters.
+template<typename... Args, std::size_t... Is>
+static bool invokeMethodWithListImpl(QObject *obj, const char *member, Qt::ConnectionType c, const QList<QGenericArgument> &list, std::index_sequence<Is...>)
+{
+    return QMetaObject::invokeMethod(obj, member, c, list[Is]...);
+}
+
+static bool invokeMethodWithList(QObject *obj, const char *member, Qt::ConnectionType c, const QVariantList &list)
+{
+    const int MaxArgumentCount = 9;
+    QList<QGenericArgument> args;
+    args.resize(MaxArgumentCount);
+    for (int i = 0; i < list.size(); i++) {
+        const auto &item = list.at(i);
+        args[i] = QGenericArgument{item.typeName(), item.data()};
+    }
+    return invokeMethodWithListImpl(obj, member, c, args, std::make_index_sequence<MaxArgumentCount>());
+}
+
+bool NotificationManager::invokeShellAction(const QString &data)
+{
+    QJsonParseError error;
+    auto doc = QJsonDocument::fromJson(data.toLocal8Bit(), &error);
+    if (error.error != QJsonParseError::NoError || doc.isNull() || !doc.isObject()) {
+        qWarning(notifyLog) << "Failed to parse data" << error.errorString();
+        return false;
+    }
+    const QString PluginId("pluginId");
+    const QString Method("method");
+    QJsonObject root(doc.object());
+    if (!root.contains(PluginId) || !root.contains(Method)) {
+        qWarning(notifyLog) << "Incorrect format, missing 'pluginId' or 'method' keyword";
+        return false;
+    }
+    const auto pluginId = root[PluginId].toString();
+    DAppletBridge bridge(pluginId);
+    if (!bridge.isValid()) {
+        qWarning(notifyLog) << "Doesn't exit the applet" << pluginId;
+        return false;
+    }
+
+    auto meta = DS_NAMESPACE::DPluginLoader::instance()->plugin(pluginId);
+    const auto visiblity = meta.value("Visibility");
+    if (visiblity != "Public") {
+        qWarning(notifyLog) << "Can't access the applet" << pluginId;
+        return false;
+    }
+
+    const auto method = root[Method].toString();
+    const QVariantList arguments = root["arguments"].toArray().toVariantList();
+    if (auto applet = bridge.applet()) {
+        return invokeMethodWithList(applet, method.toStdString().c_str(), Qt::DirectConnection, arguments);
+    }
+    return false;
 }
 
 void NotificationManager::onHandingPendingEntities()
