@@ -41,18 +41,17 @@ Control {
         Loader {
             active: actions.length > 2
             visible: active
-            Layout.maximumWidth: 120
+            Layout.maximumWidth: 200
             Layout.alignment: Qt.AlignHCenter
             sourceComponent: ComboBox {
                 property var expandActions: actions.slice(1)
                 textRole: "text"
-                padding: 0
                 implicitHeight: 30
-                implicitWidth: 60
+                implicitWidth: 160
                 model: expandActions
                 delegate: NotifyActionButton {
                     required property int index
-
+                    width: parent.width
                     actionData: expandActions[index]
                 }
             }
@@ -67,7 +66,7 @@ Control {
         bottomPadding: undefined
         leftPadding: undefined
         rightPadding: undefined
-        padding: 0
+        padding: 6
         spacing: 0
         font: DTK.fontManager.t6
         onClicked: {
