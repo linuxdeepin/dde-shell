@@ -240,7 +240,7 @@ void DockPanel::setHideMode(const HideMode& mode)
     Q_EMIT hideStateChanged(hideState());
 }
 
-Position DockPanel::position()
+Position DockPanel::position() const
 {
     return SETTINGS->position();
 }
@@ -328,6 +328,26 @@ void DockPanel::openDockSettings() const
         .method(QStringLiteral("ShowPage"))
         .arg(QStringLiteral("personalization/dock"))
         .call();
+}
+
+void DockPanel::startSystemResize() const
+{
+    Qt::Edge edge;
+    switch (position()) {
+    case Position::Top:
+        edge = Qt::BottomEdge;
+        break;
+    case Position::Bottom:
+        edge = Qt::TopEdge;
+        break;
+    case Position::Left:
+        edge = Qt::RightEdge;
+        break;
+    case Position::Right:
+        edge = Qt::LeftEdge;
+        break;
+    }
+    window()->startSystemResize(edge);
 }
 
 void DockPanel::launcherVisibleChanged(bool visible)
