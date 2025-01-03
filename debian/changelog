@@ -1,3 +1,9 @@
+dde-shell (1.99.17) UNRELEASED; urgency=medium
+
+  * UNRELEASED
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 03 Jan 2025 13:29:38 +0800
+
 dde-shell (1.99.16) UNRELEASED; urgency=medium
 
   * fix: notification-center auto hide when clicked other window as title(Bug: 294647)
