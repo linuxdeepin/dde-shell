@@ -141,9 +141,15 @@ Item {
         id: dropArea
         anchors.fill: parent
         keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
+        property bool isDropped: false
+        property bool dragExited: false
+        property string source: ""
+        property string surfaceId: ""
         onEntered: function (dragEvent) {
-            let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
-            let source = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-source")
+            dragExited = false
+            isDropped = false
+            surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            source = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-source")
             console.log(surfaceId, source)
             if (source !== "" && DDT.TraySortOrderModel.isDisplayedSurface(surfaceId)) {
                 dragEvent.accepted = false
@@ -164,6 +170,7 @@ Item {
             if (!isStash) {
                 if (dropHoverIndex !== 0) {
                     dropTrayTimer.handleDrop = function() {
+                        if (isDropped || dragExited) return
                         DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
                     }
                     dropTrayTimer.start()
@@ -173,6 +180,7 @@ Item {
             }
         }
         onDropped: function (dropEvent) {
+            isDropped = true
             let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
             let dropIdx = DDT.TrayItemPositionManager.itemIndexByPoint(Qt.point(drag.x, drag.y))
             let currentItemIndex = dropIdx.index
@@ -180,6 +188,15 @@ Item {
             console.log("dropped", currentItemIndex, isBefore)
             DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
             DDT.TraySortOrderModel.actionsAlwaysVisible = false
+        }
+
+        onExited: function () {
+            dragExited = true
+            // dragging from quickPanel, entered trayContainer, but not dropped in this area
+            if (source !== "" && !isDropped) {
+                dropTrayTimer.stop()
+                DDT.TraySortOrderModel.setSurfaceVisible(surfaceId, false)
+            }
         }
 
         Timer {
