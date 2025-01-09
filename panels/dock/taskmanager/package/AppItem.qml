@@ -196,6 +196,14 @@ Item {
 
         // TODO: value can set during debugPanel
         Loader {
+            id: aniamtionRoot
+            function blendColorAlpha(fallback) {
+                var appearance = DS.applet("org.deepin.ds.dde-appearance")
+                if (!appearance || appearance.opacity < 0)
+                    return fallback
+                return appearance.opacity
+            }
+            property real blendOpacity: blendColorAlpha(D.DTK.themeType === D.ApplicationHelper.DarkType ? 0.25 : 1.0)
             anchors.fill: icon
             z: -1
             active: root.attention && !Panel.rootObject.isDragging
@@ -212,14 +220,7 @@ Item {
                     color: Qt.rgba(1, 1, 1, 0.1)
 
                     anchors.centerIn: parent
-                    opacity: Math.min(3 - width / originSize, blendColorAlpha(D.DTK.themeType === D.ApplicationHelper.DarkType ? 0.25 : 1.0))
-
-                    function blendColorAlpha(fallback) {
-                        var appearance = DS.applet("org.deepin.ds.dde-appearance")
-                        if (!appearance || appearance.opacity < 0 || appearance.opacity > fallback || appearance.opacity < fallback)
-                            return fallback
-                        return appearance.opacity
-                    }
+                    opacity: Math.min(3 - width / originSize, aniamtionRoot.blendOpacity)
 
                     SequentialAnimation {
                         running: true
@@ -244,19 +245,20 @@ Item {
                             NumberAnimation { target: rect; property: "width"; from: originSize * (index + 1); to: originSize * (index + 2); duration: 1200 }
                             ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
                         }
-                    }
+                    } 
 
-                    D.BoxShadow {
-                        visible: rect.visible
-                        anchors.fill: rect
-                        z: -2
-                        shadowBlur: 20
-                        shadowColor : Qt.rgba(0, 0, 0, 0.05)
-                        shadowOffsetX : 0
-                        shadowOffsetY : 0
-                        cornerRadius: rect.radius
-                        hollow: true
-                    }
+                    // TODO Remove it because of consuming performance.
+                    // D.BoxShadow {
+                    //     visible: rect.visible
+                    //     anchors.fill: rect
+                    //     z: -2
+                    //     shadowBlur: 20
+                    //     shadowColor : Qt.rgba(0, 0, 0, 0.05)
+                    //     shadowOffsetX : 0
+                    //     shadowOffsetY : 0
+                    //     cornerRadius: rect.radius
+                    //     hollow: true
+                    // }
                 }
             }
         }
