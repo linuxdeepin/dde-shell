@@ -1,3 +1,11 @@
+dde-shell (1.99.18) UNRELEASED; urgency=medium
+
+  * fix: plugin docked into tray area (#1007)
+  * fix: drop BoxShadow for Attention animation
+  * chore: Add the qt6-wayland running dependency
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 09 Jan 2025 20:34:48 +0800
+
 dde-shell (1.99.17) UNRELEASED; urgency=medium
 
   * UNRELEASED
