@@ -24,16 +24,12 @@ Window {
         (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth)
     // TODO
     signal dockCenterPartPosChanged()
-    signal pressedAndDragging(bool isDragging)
 
     property int dockCenterPartCount: dockCenterPartModel.count
 
     property int dockSize: Applet.dockSize
     property int dockItemMaxSize: dockSize
-    property int itemIconSizeBase: 0
     property int itemSpacing: 0
-
-    property bool isDragging: false
 
     property real dockItemIconSize: dockItemMaxSize * 9 / 14
 
@@ -42,6 +38,16 @@ Window {
     height: Panel.position == Dock.Left || Panel.position == Dock.Right ? -1 : dockSize
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
+    maximumHeight: useColumnLayout ? Screen.height : Dock.MAX_DOCK_SIZE
+    minimumHeight: useColumnLayout? Screen.height : Dock.MIN_DOCK_SIZE
+    maximumWidth: useColumnLayout ? Dock.MAX_DOCK_SIZE : Screen.width
+    minimumWidth: useColumnLayout ? Dock.MIN_DOCK_SIZE : Screen.width
+
+    Binding {
+        target: Applet
+        property: "dockSize"
+        value: useColumnLayout ? width : height
+    }
 
     function blendColorAlpha(fallback) {
         var appearance = DS.applet("org.deepin.ds.dde-appearance")
@@ -70,12 +76,6 @@ Window {
         } else {
             Panel.indicatorStyle = Dock.Fashion
         }
-    }
-
-    Binding on itemIconSizeBase {
-        when: !isDragging
-        value: dockItemMaxSize
-        restoreMode: Binding.RestoreNone
     }
 
     // only add blendColor effect when DWindow.enableBlurWindow is true,
@@ -360,10 +360,6 @@ Window {
 
     MouseArea {
         id: dragArea
-        property point oldMousePos: Qt.point(0, 0)
-        property int oldDockSize: 0
-        property list<int> recentDeltas: []
-        property int averageCount: 5
         hoverEnabled: true
         propagateComposedEvents: true
 
@@ -375,59 +371,9 @@ Window {
         }
 
         onPressed: function(mouse) {
-            dock.isDragging = true
-            oldMousePos = mapToGlobal(mouse.x, mouse.y)
-            oldDockSize = dockSize
-            recentDeltas = []
             Panel.requestClosePopup()
-            DS.grabMouse(Panel.rootObject, true)
-        }
-
-        // this used for blocking MouseEvent sent to bottom MouseArea
-        onClicked: {}
-
-        onPositionChanged: function(mouse) {
-            if (!dock.isDragging) return
-            var newPos = mapToGlobal(mouse.x, mouse.y)
-            var xChange = newPos.x - oldMousePos.x
-            var yChange = newPos.y - oldMousePos.y
-
-            if (Panel.position === Dock.Bottom || Panel.position === Dock.Top) {
-                recentDeltas.push(yChange)
-            } else {
-                recentDeltas.push(xChange)
-            }
-
-            if (recentDeltas.length > averageCount) {
-                recentDeltas.shift()
-            }
-            // Taking the average makes the data smooth without jumps
-            var changeAverage = recentDeltas.reduce(function(acc, val) { return acc + val; }, 0) / recentDeltas.length;
-
-            var newDockSize = 0
-            if (Panel.position == Dock.Bottom) {
-                newDockSize = Math.min(Math.max(oldDockSize - changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
-            } else if (Panel.position == Dock.Top) {
-                newDockSize = Math.min(Math.max(oldDockSize + changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
-            } else if (Panel.position == Dock.Left) {
-                newDockSize = Math.min(Math.max(oldDockSize + changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
-            } else {
-                newDockSize = Math.min(Math.max(oldDockSize - changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
-            }
-
-            if (newDockSize !== dockSize) {
-                dockSize = newDockSize
-            }
-
-            pressedAndDragging(true)
-        }
-
-        onReleased: function(mouse) {
-            dock.isDragging = false
-            Applet.dockSize = dockSize
-            itemIconSizeBase = dockItemMaxSize
-            pressedAndDragging(false)
-            DS.grabMouse(Panel.rootObject, false)
+            Panel.startSystemResize()
+            return
         }
 
         function anchorToTop() {
@@ -556,7 +502,6 @@ Window {
             return Panel.devicePixelRatio
         })
 
-        dock.itemIconSizeBase = dock.dockItemMaxSize
         dock.visible = Panel.hideState !== Dock.Hide
         changeDragAreaAnchor()
     }
