@@ -8,6 +8,8 @@
 #include "applet.h"
 #include "dsglobal.h"
 
+#include <QGuiApplication>
+
 class QDBusMessage;
 namespace dock
 {
@@ -34,6 +36,11 @@ public:
     Q_INVOKABLE bool grandSearchVisible() const
     {
         return m_grandSearchVisible;
+    }
+
+    bool load() override
+    {
+        return QGuiApplication::platformName() != QStringLiteral("wayland");
     }
 
 Q_SIGNALS:
