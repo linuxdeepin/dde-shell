@@ -29,6 +29,7 @@ target_link_libraries(dde-shell PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     Dtk${DTK_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::DBus
 )
 
 configure_file(${CMAKE_SOURCE_DIR}/misc/dde-shell-plugin@.service.in

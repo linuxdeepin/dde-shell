@@ -19,6 +19,7 @@ public:
     void disableQmlCache();
     void setFlickableWheelDeceleration(const int &value);
     void dconfigsMigrate();
+    bool registerDBusService(const QString &serviceName);
 
 private:
     bool dconfigMigrate(const QString &newConf, const QString &oldConf);
