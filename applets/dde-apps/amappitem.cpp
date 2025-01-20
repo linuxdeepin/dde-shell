@@ -70,6 +70,12 @@ AMAppItem::AMAppItem(const QDBusObjectPath &path, const ObjectInterfaceMap &sour
 
     auto actions = appInfo.value(u8"Actions").toStringList();
     updateActions(actions, actionName);
+
+    auto desktopFile = appInfo.value(u8"desktopFile").toString();
+    AppItem::setDesktopFile(desktopFile);
+
+    auto isLingLong = appInfo.value(u8"X_linglong").toBool();
+    AppItem::setIsLingLong(isLingLong);
 }
 
 void AMAppItem::launch(const QString &action, const QStringList &fields, const QVariantMap &options)
@@ -131,6 +137,8 @@ void AMAppItem::onPropertyChanged(const QDBusMessage &msg)
     AppItem::setStartupWMclass(Application::startupWMClass());
     AppItem::setAutoStart(Application::autoStart());
     AppItem::setOnDesktop(Application::isOnDesktop());
+    AppItem::setDesktopFile(Application::desktopFile());
+    AppItem::setIsLingLong(Application::x_linglong());
 
     auto actions = Application::actions();
     auto actionName = Application::actionName();
