@@ -171,4 +171,23 @@ void AppItem::setAutoStart(bool start)
     return setData(start, AppItemModel::AutoStartRole);
 }
 
+QString AppItem::desktopFile() const
+{
+    return data(AppItemModel::DesktopFileRole).toString();
+}
+
+void AppItem::setDesktopFile(const QString &desktopFile)
+{
+    return setData(desktopFile, AppItemModel::DesktopFileRole);
+}
+
+bool AppItem::isLingLong() const
+{
+    return data(AppItemModel::IsLingLongRole).toBool();
+}
+
+void AppItem::setIsLingLong(const bool &isLingLong)
+{
+    return setData(isLingLong, AppItemModel::IsLingLongRole);
+}
 }

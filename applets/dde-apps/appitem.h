@@ -59,5 +59,11 @@ public:
 
     virtual bool autoStart() const;
     virtual void setAutoStart(bool autoStart);
+
+    virtual QString desktopFile() const;
+    virtual void setDesktopFile(const QString &desktopFile);
+
+    virtual bool isLingLong() const;
+    virtual void setIsLingLong(const bool &isLingLong);
 };
 }

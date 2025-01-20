@@ -26,6 +26,8 @@ public:
         OnDesktopRole,
         AutoStartRole,
         AppTypeRole,
+        DesktopFileRole,
+        IsLingLongRole
     };
     Q_ENUM(Roles)
 
