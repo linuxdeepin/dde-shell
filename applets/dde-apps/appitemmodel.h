@@ -26,6 +26,10 @@ public:
         OnDesktopRole,
         AutoStartRole,
         AppTypeRole,
+        XLingLongRole,
+        IdRole,
+        XCreatedByRole,
+        ExecsRole,
     };
     Q_ENUM(Roles)
 

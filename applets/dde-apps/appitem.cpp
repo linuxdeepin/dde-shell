@@ -171,4 +171,43 @@ void AppItem::setAutoStart(bool start)
     return setData(start, AppItemModel::AutoStartRole);
 }
 
+bool AppItem::XLingLong() const
+{
+    return data(AppItemModel::XLingLongRole).toBool();
+}
+
+void AppItem::setXLingLong(const bool &isLingLong)
+{
+    return setData(isLingLong, AppItemModel::XLingLongRole);
+}
+
+QString AppItem::id() const
+{
+    return data(AppItemModel::IdRole).toString();
+}
+
+void AppItem::setId(const QString &id)
+{
+    return setData(id, AppItemModel::IdRole);
+}
+
+QString AppItem::XCreatedBy() const
+{
+    return data(AppItemModel::XCreatedByRole).toString();
+}
+
+void AppItem::setXCreatedBy(const QString &XCreatedBy)
+{
+    return setData(XCreatedBy, AppItemModel::XCreatedByRole);
+}
+
+QStringMap AppItem::execs() const
+{
+    return data(AppItemModel::ExecsRole).value<QStringMap>();
+}
+
+void AppItem::setExecs(const QStringMap &execs)
+{
+    return setData(QVariant::fromValue<QStringMap>(execs), AppItemModel::ExecsRole);
+}
 }

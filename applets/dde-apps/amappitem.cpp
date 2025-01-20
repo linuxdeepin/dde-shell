@@ -70,6 +70,18 @@ AMAppItem::AMAppItem(const QDBusObjectPath &path, const ObjectInterfaceMap &sour
 
     auto actions = appInfo.value(u8"Actions").toStringList();
     updateActions(actions, actionName);
+
+    auto isLingLong = appInfo.value(u8"X_linglong").toBool();
+    AppItem::setXLingLong(isLingLong);
+
+    auto id = appInfo.value(u8"ID").toString();
+    AppItem::setId(id);
+
+    auto XCreatedBy = appInfo.value(u8"X_CreatedBy").toString();
+    AppItem::setXCreatedBy(XCreatedBy);
+
+    auto execs = qdbus_cast<QStringMap>(appInfo.value(u8"Execs"));
+    AppItem::setExecs(execs);
 }
 
 void AMAppItem::launch(const QString &action, const QStringList &fields, const QVariantMap &options)
@@ -131,6 +143,10 @@ void AMAppItem::onPropertyChanged(const QDBusMessage &msg)
     AppItem::setStartupWMclass(Application::startupWMClass());
     AppItem::setAutoStart(Application::autoStart());
     AppItem::setOnDesktop(Application::isOnDesktop());
+    AppItem::setXLingLong(Application::x_linglong());
+    AppItem::setId(Application::iD());
+    AppItem::setXCreatedBy(Application::x_CreatedBy());
+    AppItem::setExecs(Application::execs());
 
     auto actions = Application::actions();
     auto actionName = Application::actionName();

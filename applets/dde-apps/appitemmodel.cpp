@@ -26,6 +26,10 @@ QHash<int, QByteArray> AppItemModel::roleNames() const
             {AppItemModel::DockedRole, QByteArrayLiteral("docked")},
             {AppItemModel::OnDesktopRole, QByteArrayLiteral("onDesktop")},
             {AppItemModel::AutoStartRole, QByteArrayLiteral("autoStart")},
-            {AppItemModel::AppTypeRole, QByteArrayLiteral("appType")}};
+            {AppItemModel::AppTypeRole, QByteArrayLiteral("appType")},
+            {AppItemModel::XLingLongRole, QByteArrayLiteral("isLingLong")},
+            {AppItemModel::IdRole, QByteArrayLiteral("id")},
+            {AppItemModel::XCreatedByRole, QByteArrayLiteral("xCreatedBy")},
+            {AppItemModel::ExecsRole, QByteArrayLiteral("execs")}};
 }
 }
