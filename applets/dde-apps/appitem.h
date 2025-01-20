@@ -5,6 +5,7 @@
 #pragma once
 
 #include "appitemmodel.h"
+#include "api/types/am.h"
 #include <QStandardItem>
 
 namespace apps {
@@ -59,5 +60,17 @@ public:
 
     virtual bool autoStart() const;
     virtual void setAutoStart(bool autoStart);
+
+    bool XLingLong() const;
+    void setXLingLong(const bool &isLingLong);
+
+    QString id() const;
+    void setId(const QString &id);
+
+    QString XCreatedBy() const;
+    void setXCreatedBy(const QString &XCreatedBy);
+
+    QStringMap execs() const;
+    void setExecs(const QStringMap &execs);
 };
 }
