@@ -19,7 +19,7 @@ Window {
     id: dock
     property bool useColumnLayout: Applet.position % 2
     // TODO: 临时溢出逻辑，待后面修改
-    property int dockLeftSpaceForCenter: useColumnLayout ? 
+    property int dockLeftSpaceForCenter: useColumnLayout ?
         (Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight) :
         (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth)
     // TODO
@@ -320,6 +320,9 @@ Window {
                 (dock.width - dockCenterPart.implicitWidth) / 2 - (dockLeftPart.implicitWidth + 20) + Math.min((dock.width - dockCenterPart.implicitWidth) / 2 - (dockRightPart.implicitWidth + 20), 0) : 0
             Layout.topMargin: useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
                 (dock.height - dockCenterPart.implicitHeight) / 2 - (dockLeftPart.implicitHeight + 20) + Math.min((dock.height - dockCenterPart.implicitHeight) / 2 - (dockRightPart.implicitHeight + 20), 0) : 0
+
+            Behavior on Layout.leftMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+            Behavior on Layout.topMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
             OverflowContainer {
                 id: centerLoader
