@@ -84,6 +84,11 @@ Q_SIGNALS:
     void dockSizeChanged();
     void requestShutdown(const QString &type);
 
+private Q_SLOTS:
+    void onFontChanged();
+    void onActiveColorChanged();
+    void onThemeChanged();
+
 protected:
     virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg) override;
     virtual void plugin_manager_v1_create_popup_at(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t type, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id) override;
@@ -96,6 +101,8 @@ private:
     void sendEventMsg(Resource *target, const QString &msg);
     QString dockSizeMsg() const;
     QString popupMinHeightMsg() const;
+    using PluginSurfaceCallback = std::function<void(Resource *)>;
+    void foreachPluginSurface(PluginSurfaceCallback callback);
 
 private:
     QList<PluginSurface*> m_pluginSurfaces;
