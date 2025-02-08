@@ -6,6 +6,9 @@
 #include "pluginmanagerintegration_p.h"
 #include "constants.h"
 
+#include <DGuiApplicationHelper>
+#include <DPlatformTheme>
+
 #include <cstdint>
 
 #include <QtWaylandCompositor/QWaylandSurface>
@@ -14,6 +17,8 @@
 
 #include <QJsonObject>
 #include <QJsonParseError>
+
+DGUI_USE_NAMESPACE
 
 PluginScaleManager::PluginScaleManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
@@ -376,6 +381,13 @@ void PluginPopup::plugin_popup_source_size(Resource *resource, int32_t width, in
 PluginManager::PluginManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
 {
+    auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+    QObject::connect(theme, &DPlatformTheme::fontNameChanged, this, &PluginManager::onFontChanged);
+    QObject::connect(theme, &DPlatformTheme::fontPointSizeChanged, this, &PluginManager::onFontChanged);
+    QObject::connect(theme, &DPlatformTheme::activeColorChanged, this, &PluginManager::onActiveColorChanged);
+    QObject::connect(theme, &DPlatformTheme::darkActiveColorChanged, this, &PluginManager::onActiveColorChanged);
+    QObject::connect(theme, &DPlatformTheme::themeNameChanged, this, &PluginManager::onThemeChanged);
+    QObject::connect(theme, &DPlatformTheme::iconThemeNameChanged, this, &PluginManager::onThemeChanged);
 }
 
 void PluginManager::initialize()
@@ -485,6 +497,10 @@ void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QS
 
     send_position_changed(resource->handle, m_dockPosition);
     send_color_theme_changed(resource->handle, m_dockColorTheme);
+    auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+    send_active_color_changed(resource->handle, theme->activeColor().name(), theme->darkActiveColor().name());
+    send_font_changed(resource->handle, theme->fontName(), theme->fontPointSize());
+    send_theme_changed(resource->handle, theme->themeName(), theme->iconThemeName());
 
     auto plugin = new PluginSurface(this, pluginId, itemKey, display_name, plugin_flags, type, size_policy, qwaylandSurface, shellSurfaceResource);
     m_pluginSurfaces << plugin;
@@ -571,6 +587,40 @@ void PluginManager::removePluginSurface(PluginSurface *plugin)
 {
     Q_EMIT pluginSurfaceDestroyed(plugin);
     m_pluginSurfaces.removeAll(plugin);
+}
+
+void PluginManager::onFontChanged()
+{
+    foreachPluginSurface([this](Resource *source) {
+        auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+        send_font_changed(source->handle, theme->fontName(), theme->fontPointSize());
+    });
+}
+
+void PluginManager::onActiveColorChanged()
+{
+    foreachPluginSurface([this](Resource *source) {
+        auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+        send_active_color_changed(source->handle, theme->activeColor().name(), theme->darkActiveColor().name());
+    });
+}
+
+void PluginManager::onThemeChanged()
+{
+    foreachPluginSurface([this](Resource *source) {
+        auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+        send_active_color_changed(source->handle, theme->themeName(), theme->iconThemeName());
+    });
+}
+
+void PluginManager::foreachPluginSurface(PluginSurfaceCallback callback)
+{
+    foreach (PluginSurface *plugin, m_pluginSurfaces) {
+        Resource *target = resourceMap().value(plugin->surface()->waylandClient());
+        if (target) {
+            callback(target);
+        }
+    }
 }
 
 QString PluginManager::dockSizeMsg() const
