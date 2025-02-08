@@ -1,121 +1,119 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ru">
 <context>
     <name>PluginArea</name>
     <message>
         <source>Plugin Area</source>
-        <translation type="unfinished"></translation>
+        <translation>Зона плагинов</translation>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation type="unfinished"></translation>
+        <translation>Выбор значков, отображаемых в док-панели</translation>
     </message>
 </context>
 <context>
     <name>dock</name>
     <message>
         <source>Desktop and taskbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Рабочий стол и панель задач</translation>
     </message>
     <message>
         <source>Set the display and size of icons on the desktop</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройте отображение и размер иконок на рабочем столе.</translation>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"></translation>
+        <translation>Док-панель</translation>
     </message>
     <message>
         <source>Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Режим</translation>
     </message>
     <message>
         <source>Dock size</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер док-панели</translation>
     </message>
     <message>
         <source>Small</source>
-        <translation type="unfinished"></translation>
+        <translation>Маленький</translation>
     </message>
     <message>
         <source>Large</source>
-        <translation type="unfinished"></translation>
+        <translation>Большой</translation>
     </message>
     <message>
         <source>Position on the screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Расположение на экране</translation>
     </message>
     <message>
         <source>Top</source>
-        <translation type="unfinished"></translation>
+        <translation>Сверху</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation type="unfinished"></translation>
+        <translation>Снизу</translation>
     </message>
     <message>
         <source>Left</source>
-        <translation type="unfinished"></translation>
+        <translation>Слева</translation>
     </message>
     <message>
         <source>Right</source>
-        <translation type="unfinished"></translation>
+        <translation>Справа</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation>Состояние</translation>
     </message>
     <message>
         <source>Keep shown</source>
-        <translation type="unfinished"></translation>
+        <translation>Отображать</translation>
     </message>
     <message>
         <source>Keep hidden</source>
-        <translation type="unfinished"></translation>
+        <translation>Не отображать</translation>
     </message>
     <message>
         <source>Smart hide</source>
-        <translation type="unfinished"></translation>
+        <translation>Умное скрытие</translation>
     </message>
     <message>
         <source>Multiple Displays</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Set the position of the taskbar on the screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройка положения панели задач на экране</translation>
     </message>
     <message>
         <source>Only on main</source>
-        <translation type="unfinished"></translation>
+        <translation>Только на основном</translation>
     </message>
     <message>
         <source>On screen where the cursor is</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Plugin Area</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Select which icons appear in the Dock</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Fashion Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Современный Режим</translation>
     </message>
 </context>
 </TS>
