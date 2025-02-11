@@ -8,14 +8,17 @@
 #include "notificationsetting.h"
 #include "notifyentity.h"
 
-#include <QDateTime>
 #include <DDesktopServices>
 #include <DSGApplication>
-#include <QDBusConnection>
 #include <QDBusConnectionInterface>
 
 #include <DConfig>
 
+#include <QAbstractItemModel>
+#include <QDBusInterface>
+#include <QProcess>
+#include <QTimer>
+#include <QLoggingCategory>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -44,7 +47,6 @@ NotificationManager::NotificationManager(QObject *parent)
     : QObject(parent)
     , m_persistence(DataAccessorProxy::instance())
     , m_setting(new NotificationSetting(this))
-    , m_userSessionManager(new UserSessionManager(SessionDBusService, SessionDaemonDBusPath, QDBusConnection::sessionBus(), this))
     , m_pendingTimeout(new QTimer(this))
 {
     m_pendingTimeout->setSingleShot(true);
@@ -74,6 +76,8 @@ NotificationManager::NotificationManager(QObject *parent)
     m_systemApps = config->value("systemApps").toStringList();
     // TODO temporary fix for AppNamesMap
     m_appNamesMap = config->value("AppNamesMap").toMap();
+
+    initScreenLockedState();
 }
 
 NotificationManager::~NotificationManager()
@@ -216,8 +220,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     bool lockScreenShow = true;
     bool dndMode = isDoNotDisturb();
     bool systemNotification = m_systemApps.contains(appId);
-    bool lockScreen = m_userSessionManager->locked();
-    const bool desktopScreen = !lockScreen;
+    const bool desktopScreen = !m_screenLocked;
 
     if (!systemNotification) {
         lockScreenShow = m_setting->appValue(appId, NotificationSetting::ShowOnLockScreen).toBool();
@@ -232,7 +235,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
 
         if (systemNotification) { // 系统通知
             entity.setProcessedType(NotifyEntity::NotProcessed);
-        } else if (lockScreen && !lockScreenShow) { // 锁屏不显示通知
+        } else if (m_screenLocked && !lockScreenShow) { // 锁屏不显示通知
             entity.setProcessedType(NotifyEntity::Processed);
         } else if (desktopScreen && !onDesktopShow) { // 桌面不显示通知
             entity.setProcessedType(NotifyEntity::Processed);
@@ -351,9 +354,8 @@ bool NotificationManager::isDoNotDisturb() const
         return true;
     }
 
-    bool lockScreen = m_userSessionManager->locked();
     // 点击锁屏时 并且 锁屏状态 任何时候都勿扰模式
-    if (m_setting->systemValue(NotificationSetting::LockScreenOpenDNDMode).toBool() && lockScreen)
+    if (m_setting->systemValue(NotificationSetting::LockScreenOpenDNDMode).toBool() && m_screenLocked)
         return true;
 
     QTime currentTime = QTime::fromString(QDateTime::currentDateTime().toString("hh:mm"));
@@ -550,6 +552,26 @@ bool NotificationManager::invokeShellAction(const QString &data)
     return false;
 }
 
+void NotificationManager::initScreenLockedState()
+{
+    const QString interfaceAndServiceName = "org.deepin.dde.LockFront1";
+    const QString path = "/org/deepin/dde/LockFront1";
+
+    QDBusInterface interface(interfaceAndServiceName, path,
+        "org.freedesktop.DBus.Properties", QDBusConnection::sessionBus());
+
+    QDBusReply<QDBusVariant> reply = interface.call("Get", "org.deepin.dde.LockFront1", "Visible");
+    if (reply.isValid()) {
+        m_screenLocked = reply.value().variant().toBool();
+    } else {
+        m_screenLocked = false;
+        qWarning(notifyLog) << "Failed to get the lock visible property:" << reply.error().message();
+    }
+
+    QDBusConnection::sessionBus().connect(interfaceAndServiceName, path, interfaceAndServiceName,
+        "Visible", this, SLOT(onScreenLockedChanged(bool)));
+}
+
 void NotificationManager::onHandingPendingEntities()
 {
     QList<NotifyEntity> timeoutEntities;
@@ -598,6 +620,11 @@ void NotificationManager::removePendingEntity(const NotifyEntity &entity)
         }
         ++iter;
     }
+}
+
+void NotificationManager::onScreenLockedChanged(bool screenLocked)
+{
+    m_screenLocked = screenLocked;
 }
 
 } // notification
