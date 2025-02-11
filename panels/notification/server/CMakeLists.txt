@@ -6,18 +6,6 @@ set(NOTIFICATION_SERVER "notificationserver")
 
 file (GLOB SERVER_SOURCES *.cpp *.h)
 
-set_source_files_properties(
-    ${CMAKE_CURRENT_SOURCE_DIR}/dbus/xml/org.deepin.dde.SessionManager1.xml
-    PROPERTIES
-    CLASSNAME
-        SessionManager1
-)
-
-qt6_add_dbus_interfaces(
-    DBUS_INTERFACES
-    ${CMAKE_CURRENT_SOURCE_DIR}/dbus/xml/org.deepin.dde.SessionManager1.xml
-)
-
 add_library(${NOTIFICATION_SERVER} SHARED
     ${DBUS_INTERFACES}
     ${SERVER_SOURCES}

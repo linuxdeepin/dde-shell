@@ -4,14 +4,10 @@
 
 #pragma once
 
-#include <QObject>
 #include <QDBusContext>
 #include <QDBusVariant>
 
-#include "sessionmanager1interface.h"
-
-using UserSessionManager = org::deepin::dde::SessionManager1;
-
+class QTimer;
 namespace notification {
 
 class NotifyEntity;
@@ -79,17 +75,19 @@ private:
     QString appIdByAppName(const QString &appName) const;
     void doActionInvoked(const NotifyEntity &entity, const QString &actionId);
     bool invokeShellAction(const QString &data);
+    void initScreenLockedState();
 
 private slots:
     void onHandingPendingEntities();
     void removePendingEntity(const NotifyEntity &entity);
+    void onScreenLockedChanged(bool);
 
 private:
     uint m_replacesCount = 0;
+    bool m_screenLocked = false;
 
     DataAccessor *m_persistence = nullptr;
     NotificationSetting *m_setting = nullptr;
-    UserSessionManager *m_userSessionManager = nullptr;
     QTimer *m_pendingTimeout = nullptr;
     qint64 m_lastTimeoutPoint = std::numeric_limits<qint64>::max();
     QMultiHash<qint64, NotifyEntity> m_pendingTimeoutEntities;

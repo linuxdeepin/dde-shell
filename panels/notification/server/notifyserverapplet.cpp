@@ -7,6 +7,9 @@
 #include "dbusadaptor.h"
 #include "pluginfactory.h"
 
+#include <QThread>
+#include <QLoggingCategory>
+
 namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
 }

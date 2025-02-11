@@ -5,7 +5,10 @@
 #include "dbusadaptor.h"
 #include "notificationmanager.h"
 
+#include <QDBusConnection>
+#include <QDBusMessage>
 #include <QLoggingCategory>
+
 namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
 }
