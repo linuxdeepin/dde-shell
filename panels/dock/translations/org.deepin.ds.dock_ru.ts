@@ -4,7 +4,7 @@
     <message>
         <location filename="../package/main.qml" line="162"/>
         <source>Indicator Style</source>
-        <translation type="unfinished"/>
+        <translation>Стиль индикатора</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="164"/>
@@ -19,7 +19,7 @@
     <message>
         <location filename="../package/main.qml" line="175"/>
         <source>Alignment</source>
-        <translation type="unfinished"/>
+        <translation>Выравнивание</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="206"/>
@@ -34,7 +34,7 @@
     <message>
         <location filename="../package/main.qml" line="179"/>
         <source>Align Left</source>
-        <translation type="unfinished"/>
+        <translation>Выровнять по левому краю</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="181"/>
@@ -44,7 +44,7 @@
     <message>
         <location filename="../package/main.qml" line="188"/>
         <source>Align Center</source>
-        <translation type="unfinished"/>
+        <translation>Выровнять по центру</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="196"/>
