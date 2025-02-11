@@ -5,6 +5,7 @@
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Quick)
 
 add_subdirectory(applet-example)
+add_subdirectory(applet-widget-example)
 add_subdirectory(applet-example-data)
 add_subdirectory(containment-example)
 add_subdirectory(panel-example)
