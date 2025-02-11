@@ -591,13 +591,12 @@ void NotificationManager::removePendingEntity(const NotifyEntity &entity)
 {
     for (auto iter = m_pendingTimeoutEntities.begin(); iter != m_pendingTimeoutEntities.end();) {
         const auto item = iter.value();
-        if (item != entity) {
-            iter++;
-            continue;
+        if (item == entity || (entity.isReplace() && item.bubbleId() == entity.bubbleId())) {
+            m_pendingTimeoutEntities.erase(iter);
+            onHandingPendingEntities();
+            break;
         }
-        m_pendingTimeoutEntities.erase(iter);
-        onHandingPendingEntities();
-        break;
+        ++iter;
     }
 }
 
