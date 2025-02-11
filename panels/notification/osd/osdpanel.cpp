@@ -68,8 +68,10 @@ void OsdPanel::ShowOSD(const QString &text)
     qCInfo(osdLog()) << "show text" << text;
     m_osdTimer->setInterval(text == "SwitchWM3D" ? 2000 : 1000);
 
-    setOsdType(text);
-    showOsd();
+    QTimer::singleShot(100, this, [this, text]() {
+        setOsdType(text);
+        showOsd();
+    });
 }
 
 void OsdPanel::hideOsd()
