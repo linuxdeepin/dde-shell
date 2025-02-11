@@ -16,8 +16,8 @@ Item {
     property bool hovered: hoverHandler.hovered
     property bool pressed: tapHandler.pressed
 
-    implicitWidth: shellSurface.width
-    implicitHeight: shellSurface.height
+    implicitWidth: shellSurface ? shellSurface.width : 10
+    implicitHeight: shellSurface ? shellSurface.height : 10
 
     ShellSurfaceItem {
         id: impl
