@@ -411,7 +411,7 @@ bool NotifyModel::greaterNotify(const AppNotifyItem *item1, const AppNotifyItem 
     // `group` is order high in same group.
     if (item1->appName() == item2->appName()) {
         if (item1->type() == item2->type()) {
-            return entity1.cTime() >= entity2.cTime();
+            return item1->entity().cTime() >= item2->entity().cTime();
         }
         return item1->type() == NotifyType::Group;
     }
