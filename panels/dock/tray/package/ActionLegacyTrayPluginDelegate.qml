@@ -40,8 +40,8 @@ AppletItemButton {
     contentItem: Item {
         id: pluginItem
         property var plugin: DockCompositor.findSurface(model.surfaceId)
-        implicitHeight: plugin?.height
-        implicitWidth: plugin?.width
+        implicitHeight: plugin ? plugin.height : 0
+        implicitWidth: plugin ? plugin.width : 0
 
         property var itemGlobalPoint: {
             var a = pluginItem

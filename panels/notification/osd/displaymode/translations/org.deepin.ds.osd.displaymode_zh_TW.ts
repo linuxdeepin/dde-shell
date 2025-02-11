@@ -14,7 +14,7 @@
     <message>
         <location filename="../displaymodeapplet.cpp" line="157"/>
         <source>Only on %1</source>
-        <translation>僅</translation>
+        <translation>僅 %1</translation>
     </message>
 </context>
 </TS>
