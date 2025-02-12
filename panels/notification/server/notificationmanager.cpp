@@ -596,8 +596,8 @@ void NotificationManager::onHandingPendingEntities()
         // find last point to restart pendingTimeout
         m_lastTimeoutPoint = points.first();
         auto newInterval = m_lastTimeoutPoint - current;
-        m_pendingTimeout->setInterval(newInterval);
-        m_pendingTimeout->start();
+        // let timer start in main thread
+        QMetaObject::invokeMethod(m_pendingTimeout, "start", Qt::QueuedConnection, Q_ARG(int, newInterval));
     } else {
         // reset m_lastTimeoutPoint
         m_lastTimeoutPoint = std::numeric_limits<qint64>::max();
