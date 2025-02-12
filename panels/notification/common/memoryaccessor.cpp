@@ -32,6 +32,8 @@ qint64 MemoryAccessor::replaceEntity(qint64 id, const NotifyEntity &entity)
         const auto index = (iter - m_entities.begin());
         Q_ASSERT(index >= 0);
         m_entities[index] = entity;
+    } else {
+        return -1;
     }
 
     return id;
