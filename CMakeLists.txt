@@ -55,6 +55,7 @@ include(KDEGitCommitHooks)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick WaylandClient DBus LinguistTools Sql)
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui)
 find_package(WaylandProtocols REQUIRED)
+find_package(TreelandProtocols REQUIRED)
 find_package(PkgConfig REQUIRED)
 
 add_subdirectory(frame)
