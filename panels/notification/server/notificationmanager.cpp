@@ -252,26 +252,13 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     }
 
     if (entity.processedType() != NotifyEntity::None) {
-        qint64 id = -1;
-        if (entity.isReplace()) {
-            auto lastEntity = m_persistence->fetchLastEntity(entity.bubbleId());
-            if (lastEntity.isValid()) {
-                removePendingEntity(entity);
-                id = m_persistence->replaceEntity(lastEntity.id(), entity);
-            } else {
-                qWarning() << "Not exist notification to replace for the replaceId" << replacesId;
-            }
-        }
-        if (id == -1) {
-            id = m_persistence->addEntity(entity);
-        }
-
-        if (id == -1) {
-            qWarning(notifyLog) << "Failed on saving DB, bubbleId:" << entity.bubbleId() << ", appName" << appName;
+        if (!recordNotification(entity)) {
             return 0;
         }
 
-        entity.setId(id);
+        if (entity.isReplace() && m_persistence->fetchLastEntity(entity.bubbleId()).isValid()) {
+            removePendingEntity(entity);
+        }
 
         emitRecordCountChanged();
 
@@ -372,6 +359,39 @@ bool NotificationManager::isDoNotDisturb() const
     return dndMode && m_setting->systemValue(NotificationSetting::OpenByTimeInterval).toBool();
 }
 
+bool NotificationManager::recordNotification(NotifyEntity &entity)
+{
+    qint64 id = -1;
+    if (entity.isReplace()) {
+        auto lastEntity = m_persistence->fetchLastEntity(entity.bubbleId());
+        if (lastEntity.isValid()) {
+            bool showInNotifyCenter = true;
+            if (entity.hints().contains("x-deepin-ShowInNotifyCenter")) {
+                showInNotifyCenter = entity.hints()["x-deepin-ShowInNotifyCenter"].toBool();
+            }
+            if (showInNotifyCenter) {
+                m_persistence->updateEntityProcessedType(lastEntity.id(), NotifyEntity::Processed);
+            } else {
+                id = m_persistence->replaceEntity(lastEntity.id(), entity);
+            }
+        } else {
+            qWarning() << "Not exist notification to replace for the replaceId" << entity.replacesId();
+        }
+    }
+    if (id == -1) {
+        id = m_persistence->addEntity(entity);
+    }
+
+    if (id == -1) {
+        qWarning(notifyLog) << "Failed on saving DB, bubbleId:" << entity.bubbleId() << ", appName" << entity.appName();
+        return false;
+    }
+
+    entity.setId(id);
+
+    return true;
+}
+
 void NotificationManager::tryPlayNotificationSound(const NotifyEntity &entity, const QString &appId, bool dndMode) const
 {
     const auto hints = entity.hints();
@@ -445,7 +465,10 @@ void NotificationManager::updateEntityProcessed(const NotifyEntity &entity)
 {
     const auto id = entity.id();
     const bool removed = entity.processedType() == NotifyEntity::Removed;
-    const auto showInCenter = m_setting->appValue(entity.appId(), NotificationSetting::ShowInCenter).toBool();
+    bool showInCenter = m_setting->appValue(entity.appId(), NotificationSetting::ShowInCenter).toBool();
+    if (entity.hints().contains("x-deepin-ShowInNotifyCenter")) {
+        showInCenter = entity.hints()["x-deepin-ShowInNotifyCenter"].toBool();
+    }
     // "cancel"表示正在发送蓝牙文件,不需要发送到通知中心
     const auto bluetooth = entity.body().contains("%") && entity.actions().contains("cancel");
     const bool removeEntity = removed || !showInCenter || bluetooth;

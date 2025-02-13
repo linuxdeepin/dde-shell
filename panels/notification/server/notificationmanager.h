@@ -65,6 +65,7 @@ public Q_SLOTS:
 
 private:
     bool isDoNotDisturb() const;
+    bool recordNotification(NotifyEntity &entity);
     void tryPlayNotificationSound(const NotifyEntity &entity, const QString &appId, bool dndMode) const;
     void emitRecordCountChanged();
 
