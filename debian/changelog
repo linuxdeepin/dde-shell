@@ -1,3 +1,10 @@
+dde-shell (1.99.21) UNRELEASED; urgency=medium
+
+  * fix: update replace notification entity expired time(Bug: 296507)
+  * fix: pinned application, notifications display order is incorrect(Bug: 299887)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 14 Feb 2025 10:24:56 +0800
+
 dde-shell (1.99.20) UNRELEASED; urgency=medium
 
   * feat: provide execs and isLingLong properties
