@@ -37,6 +37,10 @@ void DesktopfileAbstractParser::launchWithAction(const QString& action)
 
 }
 
+void DesktopfileAbstractParser::launchWithUrls(const QStringList & urls)
+{
+}
+
 void DesktopfileAbstractParser::requestQuit()
 {
 
