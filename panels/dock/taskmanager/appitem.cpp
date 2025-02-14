@@ -201,6 +201,13 @@ void AppItem::handleClick(const QString& clickItem)
 
 }
 
+void AppItem::handleFileDrop(const QStringList & urls)
+{
+    if (m_desktopfileParser && !m_desktopfileParser.isNull()) {
+        m_desktopfileParser->launchWithUrls(urls);
+    }
+}
+
 QVariant AppItem::data()
 {
     QStringList ret;

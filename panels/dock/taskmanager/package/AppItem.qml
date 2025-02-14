@@ -24,6 +24,7 @@ Item {
     required property int visualIndex
 
     signal clickItem(itemId: string, menuId: string)
+    signal dropFilesOnItem(itemId: string, files: list<string>)
     signal dragFinished()
 
     Drag.active: mouseArea.drag.active
@@ -245,7 +246,7 @@ Item {
                             NumberAnimation { target: rect; property: "width"; from: originSize * (index + 1); to: originSize * (index + 2); duration: 1200 }
                             ColorAnimation { target: rect; property: "color"; from: Qt.rgba(1, 1, 1, 0.4); to: Qt.rgba(1, 1, 1, 0.1); duration: 1200 }
                         }
-                    } 
+                    }
 
                     // TODO Remove it because of consuming performance.
                     // D.BoxShadow {
@@ -381,6 +382,15 @@ Item {
             } else {
                 taskmanager.Applet.hideItemPreview()
             }
+        }
+    }
+
+    DropArea {
+        anchors.fill: parent
+        keys: ["dfm_app_type_for_drag"]
+
+        onDropped: function (drop){
+            root.dropFilesOnItem(root.itemId, drop.urls)
         }
     }
 

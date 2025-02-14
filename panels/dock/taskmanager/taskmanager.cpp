@@ -180,6 +180,14 @@ void TaskManager::clickItem(const QString& itemId, const QString& menuId)
     item->handleClick(menuId);
 }
 
+void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls)
+{
+    auto item = ItemModel::instance()->getItemById(itemId);
+    if(!item) return;
+
+    item->handleFileDrop(urls);
+}
+
 void TaskManager::showItemPreview(const QString &itemId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
     auto item = ItemModel::instance()->getItemById(itemId).get();

@@ -104,6 +104,7 @@ ContainmentItem {
                     ListView.delayRemove: Drag.active
                     Component.onCompleted: {
                         clickItem.connect(taskmanager.Applet.clickItem)
+                        dropFilesOnItem.connect(taskmanager.Applet.dropFilesOnItem)
                     }
                     onDragFinished: function() {
                         launcherDndDropArea.resetDndState()

@@ -39,7 +39,7 @@ DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
 {
     if (!m_amIsAvaliable) m_amIsAvaliable = QDBusConnection::sessionBus().
         interface()->isServiceRegistered(AM_DBUS_PATH);
-    
+
     connect(&desktopobjectManager, &ObjectManager::InterfacesRemoved, this, [this] (const QDBusObjectPath& path, const QStringList& interfaces) {
         if (m_applicationInterface->path() == path.path()) {
             getAppItem()->setDocked(false);
@@ -189,6 +189,11 @@ void DesktopFileAMParser::launch()
 void DesktopFileAMParser::launchWithAction(const QString& action)
 {
     return launchByAMTool(action);
+}
+
+void DesktopFileAMParser::launchWithUrls(const QStringList & urls)
+{
+    m_applicationInterface->Launch(QString(), urls, QVariantMap());
 }
 
 void DesktopFileAMParser::requestQuit()

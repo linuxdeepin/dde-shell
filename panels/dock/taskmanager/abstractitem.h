@@ -56,6 +56,7 @@ public:
     virtual void setDocked(bool docked) =0;
 
     virtual void handleClick(const QString& clickItem) = 0;
+    virtual void handleFileDrop(const QStringList & urls) = 0;
 
     // three type data
     virtual QVariant data() = 0;

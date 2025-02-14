@@ -42,6 +42,7 @@ public:
     void setDocked(bool docked) override;
 
     void handleClick(const QString& clickItem) override;
+    void handleFileDrop(const QStringList & urls) override;
 
     QVariant data() override;
 
