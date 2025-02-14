@@ -22,6 +22,7 @@ public:
 
     virtual void launch() override;
     virtual void launchWithAction(const QString& action) override;
+    virtual void launchWithUrls(const QStringList & urls) override;
     virtual void requestQuit() override;
 
     virtual QString id() override;

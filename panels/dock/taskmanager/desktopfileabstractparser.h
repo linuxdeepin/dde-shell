@@ -39,11 +39,12 @@ public:
     virtual QString genericName();
     virtual QString desktopIcon();
     virtual QString xDeepinVendor();
-    
+
     virtual std::pair<bool, QString> isValied();
 
     virtual void launch();
     virtual void launchWithAction(const QString& action);
+    virtual void launchWithUrls(const QStringList & urls);
     virtual void requestQuit();
     virtual QString type();
 
