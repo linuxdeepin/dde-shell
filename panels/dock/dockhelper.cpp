@@ -77,6 +77,19 @@ bool DockHelper::eventFilter(QObject *watched, QEvent *event)
         return false;
     }
 
+    // if the dock's subwindow is show, the dock is not hidden
+    if (window->transientParent() != NULL && topTransientParent == parent()->rootObject()) {
+        if (event->type() == QEvent::Show) {
+            m_subWindowShows.insert(window, true);
+            if (m_hideTimer->isActive()) {
+                m_hideTimer->stop();
+            }
+        } else if (event->type() == QEvent::Hide) {
+            m_subWindowShows.remove(window);
+            m_hideTimer->start();
+        }
+    }
+
     switch (event->type()) {
     case QEvent::Enter: {
         m_enters.insert(window, true);
@@ -182,6 +195,10 @@ void DockHelper::checkNeedHideOrNot()
     // any enter will not make hide
     for (auto enter : m_enters) {
         needHide &= !enter;
+    }
+
+    for (auto show : m_subWindowShows) {
+        needHide &= !show;
     }
 
     if (needHide)
