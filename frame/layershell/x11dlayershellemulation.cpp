@@ -151,7 +151,7 @@ void LayerShellEmulation::onPositionChanged()
 void LayerShellEmulation::onExclusionZoneChanged()
 {
     // dde-shell issues:379
-    if (m_dlayerShellWindow->exclusionZone() <= 0)
+    if (m_dlayerShellWindow->exclusionZone() < 0)
         return;
     auto scaleFactor = qGuiApp->devicePixelRatio();
     auto *x11Application = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();

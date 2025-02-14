@@ -49,6 +49,7 @@ private:
 private:
     QHash<QScreen *, DockWakeUpArea *> m_areas;
     QHash<QWindow *, bool> m_enters;
+    QHash<QWindow *, bool> m_transientChildShows;
     QTimer *m_hideTimer;
     QTimer *m_showTimer;
 };
