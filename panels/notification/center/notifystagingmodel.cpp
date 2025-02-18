@@ -309,10 +309,6 @@ void NotifyStagingModel::doEntityReceived(qint64 id)
 
 void NotifyStagingModel::onEntityClosed(qint64 id)
 {
-    auto entity = m_accessor->fetchEntity(id);
-    if (!entity.isValid())
-        return;
-    id = entity.bubbleId();
     remove(id);
 }
 
