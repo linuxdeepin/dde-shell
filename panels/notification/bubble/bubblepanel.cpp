@@ -140,8 +140,6 @@ void BubblePanel::closeBubble(qint64 id)
 
     if (id > 0) {
         m_bubbles->removeById(id);
-    } else {
-        qWarning(notifyLog) << "Can't remove bubble:" << id;
     }
 }
 
