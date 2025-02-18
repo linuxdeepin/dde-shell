@@ -471,18 +471,17 @@ void NotificationManager::updateEntityProcessed(const NotifyEntity &entity)
     }
     // "cancel"表示正在发送蓝牙文件,不需要发送到通知中心
     const auto bluetooth = entity.body().contains("%") && entity.actions().contains("cancel");
-    const bool removeEntity = removed || !showInCenter || bluetooth;
-    if (!removeEntity) {
+    if (removed || !showInCenter || bluetooth) {
+        // remove it from memory
+        m_persistence->removeEntity(id);
+    } else {
+        // add to db and remove it form memory
         m_persistence->updateEntityProcessedType(id, entity.processedType());
     }
 
-    // notify state changed, and then remove entity
     Q_EMIT NotificationStateChanged(entity.id(), entity.processedType());
-    if (removeEntity) {
-        m_persistence->removeEntity(id);
-        removePendingEntity(entity);
-    }
 
+    removePendingEntity(entity);
     emitRecordCountChanged();
 }
 

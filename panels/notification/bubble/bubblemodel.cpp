@@ -145,6 +145,17 @@ BubbleItem *BubbleModel::removeById(qint64 id)
     return nullptr;
 }
 
+uint BubbleModel::getBubbleIdByStorageId(qint64 id) const
+{
+    for (const auto &item : m_bubbles) {
+        if (item->id() == id) {
+            return item->bubbleId();
+        }
+    }
+
+    return 0;
+}
+
 BubbleItem *BubbleModel::bubbleItem(int bubbleIndex) const
 {
     if (bubbleIndex < 0 || bubbleIndex >= items().count())

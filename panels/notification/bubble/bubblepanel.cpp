@@ -132,11 +132,17 @@ void BubblePanel::addBubble(qint64 id)
 void BubblePanel::closeBubble(qint64 id)
 {
     const auto entity = m_accessor->fetchEntity(id);
-    if (!entity.isValid())
-        return;
+    if (entity.isValid()) {
+        id = entity.bubbleId();
+    } else {
+        id = m_bubbles->getBubbleIdByStorageId(id);
+    }
 
-    id = entity.bubbleId();
-    m_bubbles->removeById(id);
+    if (id > 0) {
+        m_bubbles->removeById(id);
+    } else {
+        qWarning(notifyLog) << "Can't remove bubble:" << id;
+    }
 }
 
 void BubblePanel::onActionInvoked(qint64 id, uint bubbleId, const QString &actionId)
