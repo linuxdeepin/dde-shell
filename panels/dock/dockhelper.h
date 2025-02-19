@@ -39,7 +39,7 @@ private:
 
     void updateAllDockWakeArea();
 
-private Q_SLOTS:
+public Q_SLOTS:
     void checkNeedHideOrNot();
     void checkNeedShowOrNot();
 

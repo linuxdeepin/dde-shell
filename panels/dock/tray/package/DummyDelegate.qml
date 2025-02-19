@@ -4,6 +4,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import org.deepin.ds.dock 1.0
 import org.deepin.ds.dock.tray 1.0 as DDT
 
 Button {
@@ -25,9 +26,12 @@ Button {
     Drag.onActiveChanged: {
         DDT.TraySortOrderModel.actionsAlwaysVisible = Drag.active
         if (!Drag.active) {
+            Panel.contextDragging = false
             // reset position on drop
             Qt.callLater(() => { x = 0; y = 0; });
+            return
         }
+        Panel.contextDragging = true
     }
     contentItem: Rectangle {
         color: "grey"

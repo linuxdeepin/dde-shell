@@ -38,6 +38,7 @@ DockPanel::DockPanel(QObject *parent)
     , m_loadTrayPlugins(new LoadTrayPlugins(this))
     , m_compositorReady(false)
     , m_launcherShown(false)
+    , m_contextDragging(false)
 {
     connect(this, &DockPanel::compositorReadyChanged, this, [this] {
         if (!m_compositorReady) return;
@@ -408,6 +409,21 @@ bool DockPanel::eventFilter(QObject *watched, QEvent *event)
     }
 
     return false;
+}
+
+bool DockPanel::contextDragging() const
+{
+    return m_contextDragging;
+}
+
+void DockPanel::setContextDragging(bool newContextDragging)
+{
+    if (m_contextDragging == newContextDragging)
+        return;
+    m_contextDragging = newContextDragging;
+    if (!m_contextDragging)
+        m_helper->checkNeedHideOrNot();
+    emit contextDraggingChanged();
 }
 }
 

@@ -194,6 +194,8 @@ void DockHelper::checkNeedHideOrNot()
     }
     }
 
+    needHide &= !parent()->contextDragging();
+
     // any enter will not make hide
     for (auto enter : m_enters) {
         needHide &= !enter;

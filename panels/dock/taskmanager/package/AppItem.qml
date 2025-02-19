@@ -298,8 +298,12 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         drag.target: root
         drag.onActiveChanged: {
-            if (!drag.active)
+            if (!drag.active) {
+                Panel.contextDragging = false
                 root.dragFinished()
+                return
+            }
+            Panel.contextDragging = true
         }
 
         onPressed: function (mouse) {
