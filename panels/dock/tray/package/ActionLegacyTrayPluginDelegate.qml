@@ -169,9 +169,12 @@ AppletItemButton {
     Drag.onActiveChanged: {
         DDT.TraySortOrderModel.actionsAlwaysVisible = Drag.active
         if (!Drag.active) {
+            Panel.contextDragging = false
             // reset position on drop
             Qt.callLater(() => { x = 0; y = 0; });
+            return
         }
+        Panel.contextDragging = true
     }
 
     DragHandler {

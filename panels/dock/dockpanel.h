@@ -37,6 +37,8 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
 
     Q_PROPERTY(bool debugMode READ debugMode FINAL CONSTANT)
 
+    Q_PROPERTY(bool contextDragging READ contextDragging WRITE setContextDragging NOTIFY contextDraggingChanged FINAL)
+
 public:
     explicit DockPanel(QObject *parent = nullptr);
 
@@ -86,6 +88,9 @@ public:
 
     qreal devicePixelRatio() const;
 
+    bool contextDragging() const;
+    void setContextDragging(bool newContextDragging);
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -112,6 +117,8 @@ Q_SIGNALS:
     void requestClosePopup();
     void devicePixelRatioChanged(qreal ratio);
 
+    void contextDraggingChanged();
+
 private:
     ColorTheme m_theme;
     HideState m_hideState;
@@ -120,6 +127,7 @@ private:
     LoadTrayPlugins *m_loadTrayPlugins;
     bool m_compositorReady;
     bool m_launcherShown;
+    bool m_contextDragging;
 };
 
 }

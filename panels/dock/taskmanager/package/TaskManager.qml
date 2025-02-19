@@ -145,6 +145,7 @@ ContainmentItem {
             }
 
             onDropped: function(drop) {
+                Panel.contextDragging = false
                 if (launcherDndDesktopId === "") return
                 let curX = taskmanager.useColumnLayout ? drop.y : drop.x
                 let cellWidth = visualModel.cellWidth
