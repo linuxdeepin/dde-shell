@@ -13,15 +13,31 @@ ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 16
+    property int remainingSpacesForTaskManager: Panel.rootObject.dockLeftSpaceForCenter - Panel.rootObject.dockItemMaxSize * 1.2
+    property int forceRelayoutWorkaround: 0
 
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : appContainer.implicitWidth
-    implicitHeight: useColumnLayout ? appContainer.implicitHeight : Panel.rootObject.dockSize
+    Timer {
+        // FIXME: dockItemMaxSize(visualModel.cellWidth,actually its implicitWidth/Height) change will cause all delegate item's position change, but
+        //        the newly added item will using the old cellWidth to calculate its position, thus it will be placed in the wrong position. Also it
+        //        seems forceLayout() simply doesn't work, so we use a workaround here to force relayout the ListView inside the OverflowContainer.
+        //        See: QTBUG-133953
+        id: relayoutWorkaroundTimer
+        interval: 250 // should longer than OverflowContainer.add duration
+        repeat: false
+        onTriggered: {
+            taskmanager.forceRelayoutWorkaround = visualModel.count % 2 + 1
+            console.log("force relayout", taskmanager.forceRelayoutWorkaround)
+        }
+    }
+
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : (Math.min(remainingSpacesForTaskManager, appContainer.implicitWidth) + forceRelayoutWorkaround)
+    implicitHeight: useColumnLayout ? (Math.min(remainingSpacesForTaskManager, appContainer.implicitHeight) + forceRelayoutWorkaround) : Panel.rootObject.dockSize
 
     OverflowContainer {
         id: appContainer
-        anchors.centerIn: parent
+        anchors.fill: parent
         useColumnLayout: taskmanager.useColumnLayout
-        spacing: Panel.rootObject.itemSpacing
+        spacing: Panel.rootObject.itemSpacing + visualModel.count % 2
         add: Transition {
             NumberAnimation {
                 properties: "scale,opacity"
@@ -50,6 +66,9 @@ ContainmentItem {
             model: taskmanager.Applet.dataModel
             // 1:4 the distance between app : dock height; get width/height≈0.8
             property real cellWidth: Panel.rootObject.dockItemMaxSize * 0.8
+            onCountChanged: function() {
+                relayoutWorkaroundTimer.start()
+            }
             delegate: DropArea {
                 id: delegateRoot
                 required property bool active
@@ -166,7 +185,7 @@ ContainmentItem {
 
     Component.onCompleted: {
         Panel.rootObject.dockItemMaxSize = Qt.binding(function(){
-            return Math.min(Panel.rootObject.dockSize, Panel.rootObject.dockLeftSpaceForCenter * 1.2 / (Panel.rootObject.dockCenterPartCount - 1 + taskmanager.Applet.dataModel.rowCount()) - 2)
+            return Math.min(Panel.rootObject.dockSize, Panel.rootObject.dockLeftSpaceForCenter * 1.2 / (Panel.rootObject.dockCenterPartCount - 1 + visualModel.count) - 2)
         })
     }
 }
