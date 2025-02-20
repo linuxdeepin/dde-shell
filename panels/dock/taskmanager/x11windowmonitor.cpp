@@ -109,6 +109,7 @@ void X11WindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObject* r
 
     if (m_windowPreview.isNull()) {
         m_windowPreview.reset(new X11WindowPreviewContainer(this));
+        m_windowPreview->windowHandle()->setTransientParent(qobject_cast<QWindow *>(relativePositionItem));
     }
 
     m_windowPreview->showPreview(item,qobject_cast<QWindow*>(relativePositionItem), previewXoffset, previewYoffset, direction);
