@@ -107,6 +107,7 @@ Item {
         Loader {
             active: isFallbackIcon && root.dragItem.DQuickDrag.isDragging
             anchors.centerIn: parent
+            anchors.verticalCenterOffset: -root.fallbackIconSize.height / 3 * 2
             sourceComponent: ShellSurfaceItemProxy {
                 shellSurface: root.fallbackDragImage
                 width: root.fallbackIconSize.width
