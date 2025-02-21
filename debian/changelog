@@ -1,3 +1,9 @@
+dde-shell (1.99.23) UNRELEASED; urgency=medium
+
+  * chore: remove dcc-dock-plugin
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 21 Feb 2025 18:17:08 +0800
+
 dde-shell (1.99.22) UNRELEASED; urgency=medium
 
   * fix: record replaced notification to DB (Bug: 296235)
