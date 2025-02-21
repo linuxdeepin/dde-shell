@@ -1,3 +1,20 @@
+dde-shell (1.99.22) UNRELEASED; urgency=medium
+
+  * fix: record replaced notification to DB (Bug: 296235)
+  * fix: Error with SmartHidden and KeepHidden modes of dock (Bug: 302819)
+  * feat: drop to dock task icon to launch with uri (Bug: 275395)
+  * fix: Staging notifications cannot disappear after timeout (Bug: 303331)
+  * fix: Incorrect application layout menu display content (Bug: 289221, 286541, 286553)
+  * fix: Notifications not displayed in the center cannot disappear after timeout (Bug: 303295)
+  * fix: Staging notifications cannot disappear after timeout (Bug: 303331)
+  * fix: Dragging an application will hide the dock (Bug: 289207, 289205)
+  * fix: add offset to quick panel drag item to avoid cursor cover icon (Bug: 293867)
+  * fix: The dock automatically hides
+  * fix: item size not updated when taskbar item count was changed (Bug: 289225)
+  * i18n: Updates for project Deepin Desktop Environment
+ 
+ -- Wang Zichong <wangzichong@deepin.org>  Fri, 21 Feb 2025 13:42:00 +0800
+
 dde-shell (1.99.21) UNRELEASED; urgency=medium
 
   * fix: update replace notification entity expired time(Bug: 296507)
