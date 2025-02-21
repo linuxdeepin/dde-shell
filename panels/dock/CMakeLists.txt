@@ -99,10 +99,6 @@ add_subdirectory(multitaskview)
 
 find_package(DdeControlCenter)
 
-if (DdeControlCenter_FOUND)
-    add_subdirectory(dcc-dock-plugin)
-endif()
-
 add_subdirectory(searchitem)
 #add_subdirectory(appruntimeitem)
 
