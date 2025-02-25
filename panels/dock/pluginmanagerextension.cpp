@@ -609,7 +609,7 @@ void PluginManager::onThemeChanged()
 {
     foreachPluginSurface([this](Resource *source) {
         auto theme = DGuiApplicationHelper::instance()->applicationTheme();
-        send_active_color_changed(source->handle, theme->themeName(), theme->iconThemeName());
+        send_theme_changed(source->handle, theme->themeName(), theme->iconThemeName());
     });
 }
 
