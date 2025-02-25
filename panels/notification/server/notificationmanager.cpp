@@ -22,7 +22,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <applet.h>
+#include <QGuiApplication>
+
 #include <appletbridge.h>
 #include <pluginloader.h>
 
@@ -77,7 +78,9 @@ NotificationManager::NotificationManager(QObject *parent)
     // TODO temporary fix for AppNamesMap
     m_appNamesMap = config->value("AppNamesMap").toMap();
 
-    initScreenLockedState();
+    if (QStringLiteral("wayland") != QGuiApplication::platformName()) {
+        initScreenLockedState();
+    }
 }
 
 NotificationManager::~NotificationManager()
