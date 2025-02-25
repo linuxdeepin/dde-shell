@@ -89,6 +89,7 @@ function(ds_handle_package_translation)
         TS_FILES ${TRANSLATION_FILES}
         SOURCES ${_config_QML_FILES} ${_config_SOURCE_FILES}
         QM_FILES_OUTPUT_VARIABLE TRANSLATED_FILES
+        IMMEDIATE_CALL
     )
 
     # /usr/share/dde-shell/org.deepin.xxx/translations/org.deepin.xxx.qm
