@@ -301,7 +301,6 @@ Window {
                 id: leftLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
-                spacing: 10
                 model: DockPartAppletModel {
                     id: dockLeftPartModel
                     leftDockOrder: 0
