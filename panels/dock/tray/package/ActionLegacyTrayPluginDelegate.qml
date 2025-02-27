@@ -167,7 +167,11 @@ AppletItemButton {
     }
     Drag.supportedActions: Qt.MoveAction
     Drag.onActiveChanged: {
-        DDT.TraySortOrderModel.actionsAlwaysVisible = Drag.active
+        // only drag application-tray plugin can activate application-tray action
+        if (model.surfaceId.startsWith("application-tray")) {
+            DDT.TraySortOrderModel.actionsAlwaysVisible = Drag.active
+        }
+
         if (!Drag.active) {
             Panel.contextDragging = false
             // reset position on drop
