@@ -99,8 +99,8 @@ ContainmentItem {
                 Behavior on scale { NumberAnimation { duration: 200 } }
 
                 // TODO: 临时溢出逻辑，待后面修改
-                implicitWidth: useColumnLayout ? Panel.rootObject.dockItemMaxSize : visualModel.cellWidth
-                implicitHeight: useColumnLayout ? visualModel.cellWidth : Panel.rootObject.dockItemMaxSize
+                implicitWidth: useColumnLayout ? taskmanager.implicitWidth : visualModel.cellWidth
+                implicitHeight: useColumnLayout ? visualModel.cellWidth : taskmanager.implicitHeight
 
                 onEntered: function(drag) {
                     visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)
