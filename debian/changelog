@@ -1,3 +1,9 @@
+dde-shell (1.99.24) UNRELEASED; urgency=medium
+
+  * chore: bump version to 1.99.24
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 28 Feb 2025 10:25:56 +0800
+
 dde-shell (1.99.23) UNRELEASED; urgency=medium
 
   * chore: remove dcc-dock-plugin
