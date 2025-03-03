@@ -12,12 +12,12 @@
     <message>
         <location filename="../NotifyHeader.qml" line="20"/>
         <source>Notification Setting</source>
-        <translation>Mitteilungs-Einstellungen</translation>
+        <translation>Benachrichtigungs-Einstellungen</translation>
     </message>
     <message>
         <location filename="../NotifyHeader.qml" line="56"/>
         <source>Notification Center</source>
-        <translation>Nachrichtenzentrum</translation>
+        <translation>Nachrichtenzentrale</translation>
     </message>
     <message>
         <location filename="../NotifyHeader.qml" line="108"/>
@@ -40,7 +40,7 @@
     <message>
         <location filename="../NotifySetting.qml" line="26"/>
         <source>Notification Setting</source>
-        <translation>Mitteilungs-Einstellungen</translation>
+        <translation>Benachrichtigungs-Einstellungen</translation>
     </message>
 </context>
 <context>
