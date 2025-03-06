@@ -1,3 +1,9 @@
+dde-shell (1.99.25) UNRELEASED; urgency=medium
+
+  * chore: bump version to 1.99.25
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 06 Mar 2025 19:58:56 +0800
+
 dde-shell (1.99.24) UNRELEASED; urgency=medium
 
   * chore: bump version to 1.99.24
