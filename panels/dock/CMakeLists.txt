@@ -156,6 +156,7 @@ target_link_libraries(dock-plugin PUBLIC
 PRIVATE
     PkgConfig::WaylandClient
     Qt${QT_VERSION_MAJOR}::WaylandCompositorPrivate
+    Qt${QT_VERSION_MAJOR}::GuiPrivate
 )
 
 target_include_directories(dock-plugin

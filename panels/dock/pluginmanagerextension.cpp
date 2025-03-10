@@ -18,6 +18,13 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 
+#define protected public
+#include <private/qwaylandcompositor_p.h>
+#undef protected
+#include <qpa/qwindowsysteminterface_p.h>
+#include <private/qwlqtkey_p.h>
+#include <private/qwlqttouch_p.h>
+
 DGUI_USE_NAMESPACE
 
 PluginScaleManager::PluginScaleManager(QWaylandCompositor *compositor)
@@ -394,6 +401,24 @@ void PluginManager::initialize()
 {
     QWaylandCompositorExtensionTemplate::initialize();
     QWaylandCompositor *compositor = static_cast<QWaylandCompositor *>(extensionContainer());
+
+    // ###(zccrs): 在dde-shell中不要使用QWaylandCompositor的event handler，它会对key event进行
+    // 特殊处理，会丢弃掉原生事件的信息，仅根据 native scan key code 通过xkb生成原始key event向
+    // dde-shell 传递，这会导致需要状态切换后进行输入的字符丢失信息，比如外部环境打开NumLock后，小键盘
+    // 的数字输入会被event handler转成原始事件，丢失了NumLock的开关信息。
+    // dde-shell不是一个独立的合成器，所以不需要额外处理key event，需要遵守原始事件中的NumLock状态
+    // 确保输出数字时在dde-shell的wayland客户端中接收到的也是数字。
+    auto eventHandler = QWaylandCompositorPrivate::get(compositor)->eventHandler.get();
+    if (eventHandler == QWindowSystemInterfacePrivate::eventHandler) {
+        QWindowSystemInterfacePrivate::removeWindowSystemEventhandler(eventHandler);
+    }
+
+    // 只创建就行
+    auto qtKey = new QtWayland::QtKeyExtensionGlobal(compositor);
+    qtKey->setParent(compositor);
+    auto qtTouch = new QtWayland::TouchExtensionGlobal(compositor);
+    qtTouch->setParent(compositor);
+
     init(compositor->display(), 1);
 }
 
