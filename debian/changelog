@@ -1,3 +1,9 @@
+dde-shell (1.99.26) UNRELEASED; urgency=medium
+
+  * fix: num-lock can't enable
+
+ -- YeShanShan <yeshanshan@deepin.org>  Wed, 12 Mar 2025 14:50:53 +0800
+
 dde-shell (1.99.25) UNRELEASED; urgency=medium
 
   * chore: bump version to 1.99.25
