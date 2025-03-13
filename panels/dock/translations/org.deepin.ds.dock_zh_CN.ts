@@ -1,6 +1,4 @@
-<?xml version="1.0" ?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_CN">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_CN">
 <context>
     <name>main</name>
     <message>
@@ -36,12 +34,12 @@
     <message>
         <location filename="../package/main.qml" line="176"/>
         <source>Align Left</source>
-        <translation>经典</translation>
+        <translation>靠左</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Align Top</source>
-        <translation>经典</translation>
+        <translation>靠上</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="185"/>
