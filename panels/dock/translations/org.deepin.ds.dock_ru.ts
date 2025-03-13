@@ -29,7 +29,7 @@
     <message>
         <location filename="../package/main.qml" line="172"/>
         <source>Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Режим</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>
@@ -39,7 +39,7 @@
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Align Top</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../package/main.qml" line="185"/>
