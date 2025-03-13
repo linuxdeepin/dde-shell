@@ -1,3 +1,10 @@
+dde-shell (1.99.27) UNRELEASED; urgency=medium
+
+  * fix: task area might have incorrect height after resize in some cases
+    (BUG: 303541, 303155)
+
+ --  Wang Zichong <wangzichong@deepin.org>  Thu, 13 Mar 2025 15:13:00 +0800
+
 dde-shell (1.99.26) UNRELEASED; urgency=medium
 
   * fix: num-lock can't enable
