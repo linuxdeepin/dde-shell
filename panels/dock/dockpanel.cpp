@@ -74,7 +74,7 @@ bool DockPanel::init()
                 if (m_dockScreen != window()->screen() && qApp->screens().contains( m_dockScreen)) {
                     qWarning() << "m_dockScreen" << m_dockScreen << m_dockScreen->name() << "window()->screen()" << window()->screen() << window()->screen()->name();
                     QTimer::singleShot(10, this, [this](){
-                        window()->setScreen(m_dockScreen); 
+                        window()->setScreen(m_dockScreen);
                         onWindowGeometryChanged();
                     });
                 } else {
@@ -335,11 +335,16 @@ void DockPanel::launcherVisibleChanged(bool visible)
 {
     if (visible == m_launcherShown) return;
 
+    const HideState oldHideState = hideState();
     m_launcherShown = visible;
-    Q_EMIT hideStateChanged(hideState());
+    const HideState newHideState = hideState();
+
+    if (newHideState != oldHideState) {
+        Q_EMIT hideStateChanged(newHideState);
+    }
 }
 
-void DockPanel::updateDockScreen() 
+void DockPanel::updateDockScreen()
 {
     auto win = window();
     if (!win)
