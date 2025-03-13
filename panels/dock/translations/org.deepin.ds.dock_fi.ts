@@ -29,7 +29,7 @@
     <message>
         <location filename="../package/main.qml" line="172"/>
         <source>Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Tila</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>
