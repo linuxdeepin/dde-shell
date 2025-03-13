@@ -17,11 +17,6 @@
         <translation>Hatékony mód</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="172"/>
-        <source>Alignment</source>
-        <translation>Igazítás</translation>
-    </message>
-    <message>
         <location filename="../package/main.qml" line="203"/>
         <source>Left</source>
         <translation>Bal</translation>
@@ -30,6 +25,11 @@
         <location filename="../package/main.qml" line="191"/>
         <source>Position</source>
         <translation>Pozíció</translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="172"/>
+        <source>Mode</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>

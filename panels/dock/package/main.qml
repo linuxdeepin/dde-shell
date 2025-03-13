@@ -169,7 +169,7 @@ Window {
                 }
             }
             MutuallyExclusiveMenu {
-                title: qsTr("Alignment")
+                title: qsTr("Mode")
                 EnumPropertyMenuItem {
                     name: {
                         if (Panel.position === Dock.Top || Panel.position === Dock.Bottom) {
