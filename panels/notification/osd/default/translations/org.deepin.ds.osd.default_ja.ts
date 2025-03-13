@@ -4,42 +4,42 @@
     <message>
         <location filename="../package/main.qml" line="54"/>
         <source>WLAN on</source>
-        <translation>無線LAN on</translation>
+        <translation>無線LAN ON</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="55"/>
         <source>WLAN off</source>
-        <translation>無線LAN off</translation>
+        <translation>無線LAN OFF</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="56"/>
         <source>Caps Lock on</source>
-        <translation>Caps Lock on</translation>
+        <translation>Caps Lock ON</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="57"/>
         <source>Caps Lock off</source>
-        <translation>Caps Lock off</translation>
+        <translation>Caps Lock OFF</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="58"/>
         <source>Numeric keypad on</source>
-        <translation>数字キーボード on</translation>
+        <translation>テンキー ON</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="59"/>
         <source>Numeric keypad off</source>
-        <translation>数字キーボード off</translation>
+        <translation>テンキー OFF</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="60"/>
         <source>Touchpad on</source>
-        <translation>タッチパッド on</translation>
+        <translation>タッチパッド ON</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="61"/>
         <source>Touchpad off</source>
-        <translation>タッチパッド off</translation>
+        <translation>タッチパッド OFF</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="62"/>
@@ -54,22 +54,22 @@
     <message>
         <location filename="../package/main.qml" line="64"/>
         <source>Airplane mode on</source>
-        <translation>機内モード on</translation>
+        <translation>機内モード ON</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="65"/>
         <source>Airplane mode off</source>
-        <translation>機内モードoff</translation>
+        <translation>機内モードOFF</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="66"/>
         <source>Mute on</source>
-        <translation>ミュート on</translation>
+        <translation>ミュート ON</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="67"/>
         <source>Mute off</source>
-        <translation>ミュート off</translation>
+        <translation>ミュート OFF</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="68"/>
