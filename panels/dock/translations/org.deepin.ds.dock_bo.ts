@@ -19,11 +19,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="172"/>
-        <source>Alignment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../package/main.qml" line="203"/>
         <source>Left</source>
         <translation type="unfinished"></translation>
@@ -31,6 +26,11 @@
     <message>
         <location filename="../package/main.qml" line="191"/>
         <source>Position</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="172"/>
+        <source>Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

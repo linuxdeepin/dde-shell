@@ -19,11 +19,6 @@
         <translation>高效模式</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="172"/>
-        <source>Alignment</source>
-        <translation>应用布局</translation>
-    </message>
-    <message>
         <location filename="../package/main.qml" line="203"/>
         <source>Left</source>
         <translation>左</translation>
@@ -32,6 +27,11 @@
         <location filename="../package/main.qml" line="191"/>
         <source>Position</source>
         <translation>位置</translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="172"/>
+        <source>Mode</source>
+        <translation>模式</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>

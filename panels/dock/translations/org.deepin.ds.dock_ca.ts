@@ -17,11 +17,6 @@
         <translation>Mode eficient</translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="172"/>
-        <source>Alignment</source>
-        <translation>Alineació</translation>
-    </message>
-    <message>
         <location filename="../package/main.qml" line="203"/>
         <source>Left</source>
         <translation>A l&apos;esquerra</translation>
@@ -30,6 +25,11 @@
         <location filename="../package/main.qml" line="191"/>
         <source>Position</source>
         <translation>Posició</translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="172"/>
+        <source>Mode</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>
