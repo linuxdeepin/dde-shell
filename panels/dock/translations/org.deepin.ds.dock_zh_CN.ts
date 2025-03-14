@@ -1,6 +1,4 @@
-<?xml version="1.0" ?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_CN">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_CN">
 <context>
     <name>main</name>
     <message>
