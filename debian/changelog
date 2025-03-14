@@ -1,3 +1,9 @@
+dde-shell (1.99.28) UNRELEASED; urgency=medium
+
+  * chore: update translation
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 14 Mar 2025 11:07:05 +0800
+
 dde-shell (1.99.27) UNRELEASED; urgency=medium
 
   * fix: task area might have incorrect height after resize in some cases
