@@ -29,6 +29,7 @@ Item {
     signal pluginSurfacesUpdated()
     signal popupCreated(var popup)
     signal requestShutdown(var type)
+    signal popupClosed()
 
     function removeDockPluginSurface(model, object) {
         for (var i = 0; i < model.count; ++i) {
@@ -106,6 +107,11 @@ Item {
 
             onRequestShutdown: (type) => {
                 dockCompositor.requestShutdown(type)
+            }
+
+            onPluginCloseQuickPanelPopup: {
+                console.log("quick panel closed")
+                dockCompositor.popupClosed()
             }
         }
 

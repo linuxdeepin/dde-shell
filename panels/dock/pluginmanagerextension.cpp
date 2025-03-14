@@ -214,6 +214,11 @@ void PluginSurface::plugin_request_shutdown(Resource *resource, const QString &t
     Q_EMIT m_manager->requestShutdown(type);
 }
 
+void PluginSurface::plugin_close_quick_panel(Resource *resource) {
+    qInfo() << "close_quick_panel";
+    Q_EMIT m_manager->pluginCloseQuickPanelPopup();
+}
+
 void PluginSurface::plugin_destroy_resource(Resource *resource)
 {
     Q_UNUSED(resource);
