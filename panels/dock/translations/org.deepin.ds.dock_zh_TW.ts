@@ -34,12 +34,12 @@
     <message>
         <location filename="../package/main.qml" line="176"/>
         <source>Align Left</source>
-        <translation>靠左</translation>
+        <translation>經典</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Align Top</source>
-        <translation>靠上</translation>
+        <translation>經典</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="185"/>
