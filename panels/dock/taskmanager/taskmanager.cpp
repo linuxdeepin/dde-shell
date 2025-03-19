@@ -100,6 +100,7 @@ bool TaskManager::init()
                     for (auto identifiedOrder : identifiedOrders) {
                         auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id, 1, Qt::MatchFixedString | Qt::MatchWrap);
                         if (res.size() > 0 && res.first().isValid()) {
+                            qCDebug(taskManagerLog()) << "Window match id:" << id << "role:" << identifiedOrder << "data:" << res.first().data() << "desktop id:" << res.first().data(roleNames.key("desktopId"));
                             return res.first();
                         }
                     }
@@ -138,14 +139,17 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     QString desktopId;
     if (res.size() > 0) {
         desktopId = res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString();
+        qCDebug(taskManagerLog()) << "identify bt model:" << desktopId;
     }
 
     if (!desktopId.isEmpty()) {
         desktopfile = DESKTOPFILEFACTORY::createById(desktopId, "amAPP");
+        qCDebug(taskManagerLog()) <<  "identify bt AM:" << desktopId;
     }
 
     if (desktopfile.isNull() || !desktopfile->isValied().first) {
         desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+        qCDebug(taskManagerLog()) <<  "identify bt Fallback:" << desktopId;
     }
 
     auto appitem = desktopfile->getAppItem();
