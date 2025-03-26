@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Window 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Window
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
@@ -12,13 +12,15 @@ import org.deepin.dtk 1.0 as D
 Window {
     id: root
     visible: Applet.visible
-    D.DWindow.enabled: true
-    D.DWindow.windowRadius: 18
+    D.DWindow.windowRadius: isSingleView ? 30 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableBlurWindow: true
+    D.DWindow.enabled: true
     color: "transparent"
-    DLayerShellWindow.bottomMargin: 140
+    DLayerShellWindow.bottomMargin: 180
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom
+    palette: D.DTK.palette
+
     screen: Qt.application.screens[0]
     // TODO `Qt.application.screens[0]` maybe invalid, why screen is changed.
     onScreenChanged: {
@@ -29,6 +31,7 @@ Window {
     height: osdView ? osdView.height : 100
 
     property Item osdView
+    property bool isSingleView: false
 
     Repeater {
         model: Applet.appletItems
@@ -36,13 +39,13 @@ Window {
             active: modelData.update(Applet.osdType)
             onActiveChanged: {
                 if (active) {
+                    root.isSingleView = modelData.singleView
                     root.osdView = this
                 }
             }
 
             sourceComponent: Control {
                 contentItem: model.data
-                padding: 10
                 background: D.FloatingPanel {
                     implicitWidth:  100
                     implicitHeight: 40
