@@ -2,18 +2,19 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import QtQuick.Window 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
 
 AppletItem {
     id: control
-    implicitWidth: childrenRect.width
-    implicitHeight: childrenRect.height
+    implicitWidth: 430
+    implicitHeight: listview.height + listview.anchors.topMargin + listview.anchors.bottomMargin
+
+    readonly property bool singleView: false
     property int selectIndex: indexByValue(Applet.effectType)
     property int checkedIndex: indexByValue(Applet.effectType)
 
@@ -42,17 +43,15 @@ AppletItem {
                 return i
             }
         }
-        return -1
+        return 0
     }
 
     function update(osdType)
     {
         if (match(osdType)) {
-            if (selectIndex === effectModel.count - 1) {
-                selectIndex = 0
-            } else {
-                selectIndex++
-            }
+            Qt.callLater(function() {
+                control.selectIndex = (control.selectIndex + 1) % effectModel.count
+            })
             return true
         }
         return false
@@ -65,24 +64,68 @@ AppletItem {
 
     ListView {
         id: listview
-        model: effectModel
+        width: 410
         height: contentHeight
-        width: 500
-        spacing: 5
+        anchors {
+            margins: 10
+            centerIn: parent
+        }
+        model: effectModel
+        spacing: 10
+
         delegate: D.ItemDelegate {
+            id: itemView
+
+            padding: 0
+            spacing: 0
             checkable: true
-            checked: control.selectIndex === index
-            icon.name: model.icon
-            icon.width: 64
-            icon.height: 64
             width: listview.width
-            rightPadding: 10
-            contentFlow: true
-            content: RowLayout {
-                spacing: 10
+
+            required property int index
+            required property string iconName
+            required property string title
+            required property string description
+
+            property D.Palette backgroundColor: D.Palette {
+                normal: Qt.rgba(1, 1, 1, 0.4)
+                normalDark: Qt.rgba(0, 0, 0, 0.4)
+            }
+            property D.Palette checkedBackgroundColor: D.Palette {
+                normal: Qt.rgba(1, 1, 1, 0.6)
+                normalDark: Qt.rgba(0, 0, 0, 0.6)
+            }
+            property D.Palette dropShadowColor: D.Palette {
+                normal: Qt.rgba(0, 0, 0, 0.1)
+                normalDark: Qt.rgba(1, 1, 1, 0.1)
+            }
+            property D.Palette innerShadowColor:  D.Palette {
+                normal: Qt.rgba(1, 1, 1, 0.2)
+                normalDark: Qt.rgba(0, 0, 0, 0.2)
+            }
+
+            contentItem: RowLayout {
+                spacing: 0
+
+                D.DciIcon {
+                    sourceSize {
+                        width: 32
+                        height: 32
+                    }
+                    Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                    Layout.leftMargin: 18
+                    name: itemView.iconName
+                    theme: D.DTK.themeType
+                    palette: D.DTK.makeIconPalette(control.palette)
+                }
+
                 ColumnLayout {
+                    Layout.leftMargin: 18
+                    Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                    Layout.topMargin: 18
+                    Layout.bottomMargin: 18
+                    spacing: 6
                     D.Label {
-                        text: model.title
+                        text: itemView.title
                         font {
                             family: D.DTK.fontManager.t5.family
                             pointSize: D.DTK.fontManager.t5.pointSize
@@ -93,17 +136,59 @@ AppletItem {
                     }
 
                     D.Label {
-                        text: model.description
-                        font: D.DTK.fontManager.t8
+                        text: itemView.description
+                        font: D.DTK.fontManager.t6
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignLeft
+                        Layout.maximumWidth: 298
                         wrapMode: Text.WordWrap
                     }
                 }
+
+                Item {
+                    Layout.fillWidth: true
+                }
+
                 D.DciIcon {
-                    visible: control.checkedIndex === index
-                    sourceSize: Qt.size(24, 24)
+                    sourceSize {
+                        width: 16
+                        height: 16
+                    }
+                    visible: control.checkedIndex === itemView.index
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                    Layout.rightMargin: 10
                     name: "item_checked"
+                    theme: D.DTK.themeType
+                    palette: D.DTK.makeIconPalette(control.palette)
+                }
+            }
+
+            background: Item {
+                Rectangle {
+                    id: backgroundRect
+                    anchors.fill: parent
+                    radius: 6
+                    color: control.selectIndex === itemView.index ? itemView.D.ColorSelector.checkedBackgroundColor
+                                                                  : itemView.D.ColorSelector.backgroundColor
+                }
+                D.BoxShadow {
+                    anchors.fill: parent
+                    shadowOffsetX: 0
+                    shadowOffsetY: 1
+                    shadowColor: itemView.D.ColorSelector.dropShadowColor
+                    shadowBlur: 1
+                    cornerRadius: backgroundRect.radius
+                    spread: 0
+                    hollow: true
+                }
+                D.BoxInsetShadow {
+                    anchors.fill: parent
+                    shadowOffsetX: 0
+                    shadowOffsetY: 1
+                    shadowBlur: 1
+                    spread: 0
+                    cornerRadius: backgroundRect.radius
+                    shadowColor: itemView.D.ColorSelector.innerShadowColor
                 }
             }
         }
@@ -113,19 +198,19 @@ AppletItem {
         id: effectModel
         ListElement {
             value: main.WindowEffectType.Normal
-            icon: "osd_optimal_performance"
+            iconName: "osd_screen_highperformance"
             title: qsTr("Optimal performance")
             description: qsTr("Optimal performance: Close all interface and window effects to ensure efficient system operation")
         }
         ListElement {
             value: main.WindowEffectType.Better
-            icon: "osd_balance_effect"
+            iconName: "osd_screen_balance"
             title: qsTr("Balance")
             description: qsTr("Balance: Limit some window effects to ensure excellent visual experience while maintaining smooth system operation")
         }
         ListElement {
             value: main.WindowEffectType.Best
-            icon: "osd_best_visuals"
+            iconName: "osd_screen_bestvisual"
             title: qsTr("Best Visuals")
             description: qsTr("Best Visual: Enable all interface and window effects to experience the best visual effects")
         }

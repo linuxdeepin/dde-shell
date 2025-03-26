@@ -2,10 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import QtQuick.Window 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
@@ -13,7 +12,9 @@ import org.deepin.dtk 1.0 as D
 AppletItem {
     id: control
     implicitWidth: childrenRect.width
-    implicitHeight: childrenRect.height
+    implicitHeight: 60
+
+    readonly property bool singleView: true
 
     function update(osdType)
     {
@@ -74,27 +75,34 @@ AppletItem {
     }
 
     RowLayout {
-        anchors.leftMargin: 68
-        anchors.rightMargin: 26
+        spacing: 0
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.topMargin: 2
 
         D.DciIcon {
             sourceSize {
                 width: 32
                 height: 32
             }
-            Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: 14
+            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+            Layout.leftMargin: 20
             visible: control.iconName
             name: control.iconName
+            theme: D.DTK.themeType
+            palette: D.DTK.makeIconPalette(control.palette)
+        }
+        Item {
+            Layout.fillWidth: true
         }
 
         Text {
             Layout.fillWidth: true
             Layout.leftMargin: 20
-            Layout.rightMargin: 20
             font: D.DTK.fontManager.t4
-            Layout.alignment: Qt.AlignVCenter
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+            Layout.rightMargin: 20
             visible: control.text
+            color: palette.windowText
             text: control.text
         }
     }
