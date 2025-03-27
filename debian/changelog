@@ -1,3 +1,14 @@
+dde-shell (1.99.29) UNRELEASED; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1064)
+    Thanks to transifex-integration[bot]
+  * feat: Receive close quick panel requests from plugins(Bug: 272277)
+  * feat: adjust OSD ui according to v25
+  * fix: shadow clipped for notification
+  * fix: window preview blurry
+
+ -- YeShanShan <yeshanshan@deepin.org>  Thu, 27 Mar 2025 16:48:29 +0800
+
 dde-shell (1.99.28) UNRELEASED; urgency=medium
 
   * chore: update translation
