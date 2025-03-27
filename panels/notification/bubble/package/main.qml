@@ -31,7 +31,7 @@ Window {
     }
 
     visible: Applet.visible
-    width: 380
+    width: 390
     height: Math.max(10, bubbleView.height + bubbleView.anchors.topMargin + bubbleView.anchors.bottomMargin)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
@@ -57,9 +57,11 @@ Window {
         width: 360
         height: contentHeight
         anchors {
-            centerIn: parent
-            margins: 10
-            topMargin: 20
+            right: parent.right
+            bottom: parent.bottom
+            bottomMargin: 10
+            rightMargin: 10
+            margins: 30
         }
 
         spacing: 10

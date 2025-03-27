@@ -84,8 +84,7 @@ Window {
         anchors {
             top: parent.top
             left: parent.left
-            margins: 10
-            rightMargin: 20
+            margins: 20
             bottom: parent.bottom
         }
 

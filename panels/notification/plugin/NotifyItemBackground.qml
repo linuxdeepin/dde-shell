@@ -59,7 +59,7 @@ Control {
             active: control.dropShadowColor
             sourceComponent: BoxShadow {
                 shadowOffsetX: 0
-                shadowOffsetY: 6
+                shadowOffsetY: 8
                 shadowColor: control.ColorSelector.dropShadowColor
                 shadowBlur: 20
                 cornerRadius: backgroundRect.radius
