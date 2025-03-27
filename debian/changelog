@@ -1,3 +1,9 @@
+dde-shell (1.99.30) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.30
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 27 Mar 2025 16:48:29 +0800
+
 dde-shell (1.99.29) UNRELEASED; urgency=medium
 
   * i18n: Updates for project Deepin Desktop Environment (#1064)
