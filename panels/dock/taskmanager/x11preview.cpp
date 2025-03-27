@@ -262,8 +262,6 @@ public:
         if (WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
             auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
             auto size = calSize(pixmap.size()); 
-            auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            scaledPixmap.setDevicePixelRatio(qApp->devicePixelRatio());
 
             DStyleHelper dstyle(m_listView->style());
             const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
@@ -280,19 +278,18 @@ public:
 
 
             painter->save();
-            painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
             pen.setWidth(1);
             pen.setColor(themeType == DGuiApplicationHelper::DarkType ? QColor(255, 255, 255, 255 * 0.1) : QColor(0, 0, 0, 255 * 0.1));
             painter->setPen(pen);
             QRect imageRect(
-                (option.rect.left() + ((option.rect.width() - scaledPixmap.width()) / 2)),
-                (option.rect.top() + ((option.rect.height() - scaledPixmap.height()) / 2)),
-                scaledPixmap.width(),
-                scaledPixmap.height());
+                (option.rect.left() + ((option.rect.width() - size.width()) / 2)),
+                (option.rect.top() + ((option.rect.height() - size.height()) / 2)),
+                size.width(),
+                size.height());
             QPainterPath clipPath;
             clipPath.addRoundedRect(imageRect, radius, radius);
             painter->setClipPath(clipPath);
-            painter->drawPixmap(imageRect, scaledPixmap);
+            painter->drawPixmap(imageRect, pixmap);
             painter->setClipping(false);
             painter->drawRoundedRect(imageRect, radius, radius);
             if (option.state.testFlag(QStyle::State_MouseOver)) {
