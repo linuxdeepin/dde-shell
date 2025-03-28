@@ -83,6 +83,7 @@ set_target_properties(dde-shell-frame PROPERTIES
 qt_generate_wayland_protocol_client_sources(dde-shell-frame FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/layershell/protocol/wlr-layer-shell-unstable-v1.xml
     ${WaylandProtocols_DATADIR}/stable/xdg-shell/xdg-shell.xml
+    ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-dde-shell-v1.xml
 )
 
 set_target_properties(dde-shell-frame PROPERTIES
