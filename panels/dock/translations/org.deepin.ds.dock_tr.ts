@@ -9,7 +9,7 @@
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Fashion Mode</source>
-        <translation>Moda Modu</translation>
+        <translation>Moda Kipi</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="166"/>
@@ -29,7 +29,7 @@
     <message>
         <location filename="../package/main.qml" line="172"/>
         <source>Mode</source>
-        <translation>Mod</translation>
+        <translation>Kip</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>
