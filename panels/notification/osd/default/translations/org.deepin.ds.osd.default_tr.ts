@@ -4,12 +4,12 @@
     <message>
         <location filename="../package/main.qml" line="54"/>
         <source>WLAN on</source>
-        <translation type="unfinished"/>
+        <translation>Kablosuz Aç</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="55"/>
         <source>WLAN off</source>
-        <translation type="unfinished"/>
+        <translation>Kablosuz kapat</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="56"/>
@@ -89,17 +89,17 @@
     <message>
         <location filename="../package/main.qml" line="71"/>
         <source>Window effect enabled</source>
-        <translation type="unfinished"/>
+        <translation>Pencere etkisi etkinleştirildi</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="72"/>
         <source>Window effect disabled</source>
-        <translation type="unfinished"/>
+        <translation>Pencere etkisi devre dışı bırakıldı</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="73"/>
         <source>Failed to enable window effects</source>
-        <translation type="unfinished"/>
+        <translation>Pencere etkileri etkinleştirilemedi</translation>
     </message>
 </context>
 </TS>
