@@ -265,6 +265,7 @@ public:
 
             DStyleHelper dstyle(m_listView->style());
             const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
+            painter->setRenderHint(QPainter::Antialiasing);
 
             painter->save();
             painter->setPen(Qt::NoPen);
