@@ -11,22 +11,23 @@
 #include <cstdint>
 #include <unistd.h>
 
-#include <QFile>
-#include <QTimer>
-#include <QEvent>
-#include <QWindow>
-#include <QPixmap>
-#include <QLayout>
-#include <QScreen>
-#include <QPainter>
-#include <QByteArray>
-#include <QDBusReply>
-#include <QMouseEvent>
-#include <QDBusInterface>
-#include <QLoggingCategory>
-#include <QDBusUnixFileDescriptor>
-#include <QPainterPath>
 #include <DIconButton>
+#include <QByteArray>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDBusUnixFileDescriptor>
+#include <QEvent>
+#include <QFile>
+#include <QLayout>
+#include <QLoggingCategory>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPixmap>
+#include <QScreen>
+#include <QTimer>
+#include <QWindow>
+#include <QtConcurrent>
 
 #include <DStyle>
 #include <DPlatformHandle>
@@ -161,9 +162,13 @@ private:
     {
         m_previewPixmaps.clear();
         if (!m_item.isNull()) {
-            for (const auto &window : m_item->getAppendWindows()) {
+            const auto previewPixmaps = QtConcurrent::blockingMapped(m_item->getAppendWindows(), [this](const QPointer<AbstractWindow> &window) {
                 auto previewPixmap = fetchWindowPreview(window->id());
-                m_previewPixmaps.insert(window->id(), previewPixmap);
+                return QPair<uint32_t, QPixmap>{window->id(), previewPixmap};
+            });
+
+            for (const auto &item : previewPixmaps) {
+                m_previewPixmaps.insert(item.first, item.second);
             }
         }
     }
