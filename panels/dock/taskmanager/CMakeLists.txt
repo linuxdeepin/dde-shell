@@ -83,6 +83,7 @@ qt_generate_wayland_protocol_client_sources(dock-taskmanager
 target_link_libraries(dock-taskmanager PRIVATE
     dde-shell-frame
     Qt${QT_VERSION_MAJOR}::WaylandClientPrivate
+    Qt${QT_VERSION_MAJOR}::Concurrent
     yaml-cpp
     PkgConfig::WaylandClient
 )
