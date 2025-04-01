@@ -59,7 +59,7 @@ Window {
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
     D.DWindow.borderWidth: 1
-    D.DWindow.enableBlurWindow: true
+    D.DWindow.enableBlurWindow: Qt.platform.pluginName !== "xcb"
     D.DWindow.themeType: Panel.colorTheme
     D.DWindow.borderColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, dock.blendColorAlpha(0.6) + 20 / 255) : Qt.rgba(0, 0, 0, 0.15)
     D.ColorSelector.family: D.Palette.CrystalColor
@@ -78,35 +78,30 @@ Window {
         restoreMode: Binding.RestoreNone
     }
 
-    // only add blendColor effect when DWindow.enableBlurWindow is true,
-    // avoid to updating blur area frequently.--
-    D.StyledBehindWindowBlur {
-        control: parent
-        anchors.fill: parent
-        cornerRadius: 0
-        blendColor: {
-            if (valid) {
-                return DStyle.Style.control.selectColor(undefined,
-                                                    Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, dock.blendColorAlpha(0.6)),
-                                                    Qt.rgba(10 / 255, 10 / 255, 10 /255, dock.blendColorAlpha(85 / 255)))
-            }
-            return DStyle.Style.control.selectColor(undefined,
-                                                DStyle.Style.behindWindowBlur.lightNoBlurColor,
-                                                DStyle.Style.behindWindowBlur.darkNoBlurColor)
-        }
-    }
-
     PropertyAnimation {
         id: hideShowAnimation;
-        target: dock;
-        property: useColumnLayout ? "width" : "height";
-        to: Panel.hideState != Dock.Hide ? Panel.dockSize : 1;
+        // Currently, Wayland (Treeland) doesn't support StyledBehindWindowBlur inside the window, thus we keep using the window size approach on Wayland
+        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
+        target: useTransformBasedAnimation ? dockTransform : dock;
+        property: {
+            if (useTransformBasedAnimation) return dock.useColumnLayout ? "x" : "y";
+            return dock.useColumnLayout ? "width" : "height";
+        }
+        to: {
+            if (useTransformBasedAnimation) return Panel.hideState != Dock.Hide ? 0 : ((Panel.position == Dock.Left || Panel.position == Dock.Top) ? -Panel.dockSize : Panel.dockSize);
+            return Panel.hideState != Dock.Hide ? Panel.dockSize : 1;
+        }
         duration: 500
+        easing.type: Easing.OutCubic
         onStarted: {
             dock.visible = true
         }
         onStopped: {
-            dock.visible = ((useColumnLayout ? dock.width : dock.height) != 1)
+            if (useTransformBasedAnimation) {
+                dock.visible = ((dock.useColumnLayout ? dockTransform.x : dockTransform.y) == 0)
+            } else {
+                dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) != 1)
+            }
         }
     }
 
@@ -238,126 +233,157 @@ Window {
         }
     }
 
-    TapHandler {
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-        gesturePolicy: TapHandler.WithinBounds
-        onTapped: function(eventPoint, button) {
-            let lastActive = MenuHelper.activeMenu
-            MenuHelper.closeCurrent()
-            dockMenuLoader.active = true
-            if (button === Qt.RightButton && lastActive !== dockMenuLoader.item) {
-                // maybe has popup visible, close it.
-                Panel.requestClosePopup()
-                MenuHelper.openMenu(dockMenuLoader.item)
-            }
-            if (button === Qt.LeftButton) {
-                // try to close popup when clicked empty, because dock does not have focus.
-                Panel.requestClosePopup()
-            }
-        }
-    }
-
-    HoverHandler {
-        cursorShape: Qt.ArrowCursor
-    }
-
-    // TODO missing property binding to update ProxyModel's filter and sort opearation.
-    Repeater {
-        model: Applet.appletItems
-        delegate: Item {
-            property var order: model.data.dockOrder
-            property bool itemVisible: model.data.shouldVisible === undefined || model.data.shouldVisible
-
-            onItemVisibleChanged: {
-                updateAppItems()
-            }
-            onOrderChanged: {
-                updateAppItems()
-            }
-        }
-    }
-
-    // TODO: remove GridLayout and use delegatechosser manager all items
-    GridLayout {
-        id: gridLayout
-        anchors.fill: parent
-        columns: 1
-        rows: 1
-        flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
-        property real itemMargin: Math.max((dockItemIconSize / 48 * 10))
-        columnSpacing: dockLeftPartModel.count > 0 ? 10 : itemMargin
-        rowSpacing: columnSpacing
-
-        Item {
-            id: leftMargin
-            implicitWidth: 0
-            implicitHeight: 0
-        }
-
-        Item {
-            id: dockLeftPart
-            visible: dockLeftPartModel.count > 0
-            implicitWidth: leftLoader.implicitWidth
-            implicitHeight: leftLoader.implicitHeight
-            OverflowContainer {
-                id: leftLoader
-                anchors.fill: parent
-                useColumnLayout: dock.useColumnLayout
-                model: DockPartAppletModel {
-                    id: dockLeftPartModel
-                    leftDockOrder: 0
-                    rightDockOrder: 10
-                }
-            }
-        }
-
-        Item {
-            id: dockCenterPart
-            implicitWidth: centerLoader.implicitWidth
-            implicitHeight: centerLoader.implicitHeight
-            onXChanged: dockCenterPartPosChanged()
-            onYChanged: dockCenterPartPosChanged()
-            Layout.leftMargin: !useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
-                (dock.width - dockCenterPart.implicitWidth) / 2 - (dockLeftPart.implicitWidth + 20) + Math.min((dock.width - dockCenterPart.implicitWidth) / 2 - (dockRightPart.implicitWidth + 20), 0) : 0
-            Layout.topMargin: useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
-                (dock.height - dockCenterPart.implicitHeight) / 2 - (dockLeftPart.implicitHeight + 20) + Math.min((dock.height - dockCenterPart.implicitHeight) / 2 - (dockRightPart.implicitHeight + 20), 0) : 0
-
-            Behavior on Layout.leftMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-            Behavior on Layout.topMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-
-            OverflowContainer {
-                id: centerLoader
-                anchors.fill: parent
-                useColumnLayout: dock.useColumnLayout
-                spacing: dock.itemSpacing
-                model: DockPartAppletModel {
-                    id: dockCenterPartModel
-                    leftDockOrder: 10
-                    rightDockOrder: 20
-                }
-            }
-        }
-
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-        }
-    }
-
     Item {
-        id: dockRightPart
-        implicitWidth: rightLoader.implicitWidth
-        implicitHeight: rightLoader.implicitHeight
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        OverflowContainer {
-            id: rightLoader
+        id: dockContainer
+        width: dock.useColumnLayout ? Panel.dockSize : parent.width
+        height: dock.useColumnLayout ? parent.height : Panel.dockSize
+        anchors {
+            left: parent.left
+            top: parent.top
+        }
+        transform: Translate {
+            id: dockTransform
+        }
+
+        // only add blendColor effect when DWindow.enableBlurWindow is true,
+        // avoid to updating blur area frequently.--
+        D.StyledBehindWindowBlur {
+            control: parent
             anchors.fill: parent
-            useColumnLayout: dock.useColumnLayout
-            model: DockPartAppletModel {
-                id: dockRightPartModel
-                leftDockOrder: 20
-                rightDockOrder: 30
+            cornerRadius: 0
+            blendColor: {
+                if (valid) {
+                    return DStyle.Style.control.selectColor(undefined,
+                                                        Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, dock.blendColorAlpha(0.6)),
+                                                        Qt.rgba(10 / 255, 10 / 255, 10 /255, dock.blendColorAlpha(85 / 255)))
+                }
+                return DStyle.Style.control.selectColor(undefined,
+                                                    DStyle.Style.behindWindowBlur.lightNoBlurColor,
+                                                    DStyle.Style.behindWindowBlur.darkNoBlurColor)
+            }
+        }
+
+        TapHandler {
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            gesturePolicy: TapHandler.WithinBounds
+            onTapped: function(eventPoint, button) {
+                let lastActive = MenuHelper.activeMenu
+                MenuHelper.closeCurrent()
+                dockMenuLoader.active = true
+                if (button === Qt.RightButton && lastActive !== dockMenuLoader.item) {
+                    // maybe has popup visible, close it.
+                    Panel.requestClosePopup()
+                    MenuHelper.openMenu(dockMenuLoader.item)
+                }
+                if (button === Qt.LeftButton) {
+                    // try to close popup when clicked empty, because dock does not have focus.
+                    Panel.requestClosePopup()
+                }
+            }
+        }
+
+        HoverHandler {
+            cursorShape: Qt.ArrowCursor
+        }
+
+        // TODO missing property binding to update ProxyModel's filter and sort opearation.
+        Repeater {
+            model: Applet.appletItems
+            delegate: Item {
+                property var order: model.data.dockOrder
+                property bool itemVisible: model.data.shouldVisible === undefined || model.data.shouldVisible
+
+                onItemVisibleChanged: {
+                    updateAppItems()
+                }
+                onOrderChanged: {
+                    updateAppItems()
+                }
+            }
+        }
+
+        // TODO: remove GridLayout and use delegatechosser manager all items
+        GridLayout {
+            id: gridLayout
+            anchors.fill: parent
+            columns: 1
+            rows: 1
+            flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
+            property real itemMargin: Math.max((dockItemIconSize / 48 * 10))
+            columnSpacing: dockLeftPartModel.count > 0 ? 10 : itemMargin
+            rowSpacing: columnSpacing
+
+            Item {
+                id: leftMargin
+                implicitWidth: 0
+                implicitHeight: 0
+            }
+
+            Item {
+                id: dockLeftPart
+                visible: dockLeftPartModel.count > 0
+                implicitWidth: leftLoader.implicitWidth
+                implicitHeight: leftLoader.implicitHeight
+                OverflowContainer {
+                    id: leftLoader
+                    anchors.fill: parent
+                    useColumnLayout: dock.useColumnLayout
+                    model: DockPartAppletModel {
+                        id: dockLeftPartModel
+                        leftDockOrder: 0
+                        rightDockOrder: 10
+                    }
+                }
+            }
+
+            Item {
+                id: dockCenterPart
+                implicitWidth: centerLoader.implicitWidth
+                implicitHeight: centerLoader.implicitHeight
+                onXChanged: dockCenterPartPosChanged()
+                onYChanged: dockCenterPartPosChanged()
+                Layout.leftMargin: !useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
+                    (dock.width - dockCenterPart.implicitWidth) / 2 - (dockLeftPart.implicitWidth + 20) + Math.min((dock.width - dockCenterPart.implicitWidth) / 2 - (dockRightPart.implicitWidth + 20), 0) : 0
+                Layout.topMargin: useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
+                    (dock.height - dockCenterPart.implicitHeight) / 2 - (dockLeftPart.implicitHeight + 20) + Math.min((dock.height - dockCenterPart.implicitHeight) / 2 - (dockRightPart.implicitHeight + 20), 0) : 0
+
+                Behavior on Layout.leftMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                Behavior on Layout.topMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+
+                OverflowContainer {
+                    id: centerLoader
+                    anchors.fill: parent
+                    useColumnLayout: dock.useColumnLayout
+                    spacing: dock.itemSpacing
+                    model: DockPartAppletModel {
+                        id: dockCenterPartModel
+                        leftDockOrder: 10
+                        rightDockOrder: 20
+                    }
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
+        }
+
+        Item {
+            id: dockRightPart
+            implicitWidth: rightLoader.implicitWidth
+            implicitHeight: rightLoader.implicitHeight
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            OverflowContainer {
+                id: rightLoader
+                anchors.fill: parent
+                useColumnLayout: dock.useColumnLayout
+                model: DockPartAppletModel {
+                    id: dockRightPartModel
+                    leftDockOrder: 20
+                    rightDockOrder: 30
+                }
             }
         }
     }
