@@ -57,8 +57,8 @@ AppletItem {
             palette.windowText: undefined
 
             property D.Palette backgroundColor: D.Palette {
-                normal: Qt.rgba(1, 1, 1, 0.4)
-                normalDark: Qt.rgba(0, 0, 0, 0.4)
+                normal: Qt.rgba(1, 1, 1, 0.3)
+                normalDark: Qt.rgba(0, 0, 0, 0.3)
             }
             property D.Palette checkedBackgroundColor: D.Palette {
                 normal: Qt.rgba(1, 1, 1, 0.6)
@@ -66,11 +66,11 @@ AppletItem {
             }
             property D.Palette dropShadowColor: D.Palette {
                 normal: Qt.rgba(0, 0, 0, 0.1)
-                normalDark: Qt.rgba(1, 1, 1, 0.1)
+                normalDark: Qt.rgba(0, 0, 0, 0.7)
             }
-            property D.Palette innerShadowColor:  D.Palette {
+            property D.Palette innerShadowColor: D.Palette {
                 normal: Qt.rgba(1, 1, 1, 0.2)
-                normalDark: Qt.rgba(0, 0, 0, 0.2)
+                normalDark: Qt.rgba(1, 1, 1, 0.03)
             }
 
             property bool isCurrent: Applet.currentPlanItem && Applet.currentPlanItem.key === model.key
@@ -95,7 +95,7 @@ AppletItem {
                     font: D.DTK.fontManager.t5
                     Layout.alignment: Qt.AlignVCenter
                     text: model.text
-                    color: Applet.currentPlanItem && Applet.currentPlanItem.key === model.key ? D.DTK.platformTheme.activeColor : palette.windowText
+                    color: palette.windowText
                 }
 
                 Item {
@@ -125,6 +125,7 @@ AppletItem {
                                               : itemView.D.ColorSelector.backgroundColor
                 }
                 D.BoxShadow {
+                    visible: !itemView.isCurrent
                     anchors.fill: parent
                     shadowOffsetX: 0
                     shadowOffsetY: 1
@@ -135,6 +136,7 @@ AppletItem {
                     hollow: true
                 }
                 D.BoxInsetShadow {
+                    visible: !itemView.isCurrent
                     anchors.fill: parent
                     shadowOffsetX: 0
                     shadowOffsetY: 1

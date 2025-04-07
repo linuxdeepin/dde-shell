@@ -56,6 +56,19 @@ Window {
                     background: D.FloatingPanel {
                         implicitWidth:  100
                         implicitHeight: 40
+                        backgroundColor: D.Palette {
+                            normal: Qt.rgba(247 / 255.0, 247 / 255.0, 247 / 255.0, 0.4)
+                            normalDark: Qt.rgba(0, 0, 0, 0.6)
+                        }
+                        insideBorderColor: D.Palette {
+                            normal: Qt.rgba(1, 0, 0, 0.3)
+                            normalDark: Qt.rgba(1, 1, 1, 0.1)
+                        }
+                        outsideBorderColor: D.Palette {
+                            normal: Qt.rgba(1, 1, 0, 0.1)
+                            normalDark: Qt.rgba(0, 0, 0, 0.7)
+                        }
+                        dropShadowColor: null
                     }
                 }
             }

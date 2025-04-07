@@ -69,11 +69,11 @@ AppletItem {
             }
             property D.Palette dropShadowColor: D.Palette {
                 normal: Qt.rgba(0, 0, 0, 0.1)
-                normalDark: Qt.rgba(1, 1, 1, 0.1)
+                normalDark: Qt.rgba(0, 0, 0, 0.7)
             }
-            property D.Palette innerShadowColor:  D.Palette {
+            property D.Palette innerShadowColor: D.Palette {
                 normal: Qt.rgba(1, 1, 1, 0.2)
-                normalDark: Qt.rgba(0, 0, 0, 0.2)
+                normalDark: Qt.rgba(1, 1, 1, 0.03)
             }
 
             property bool isCurrent: Applet.currentLayout === model.key
