@@ -33,22 +33,30 @@ Window {
     property Item osdView
     property bool isSingleView: false
 
-    Repeater {
-        model: Applet.appletItems
-        delegate: Loader {
-            active: modelData.update(Applet.osdType)
-            onActiveChanged: {
-                if (active) {
-                    root.isSingleView = modelData.singleView
-                    root.osdView = this
-                }
-            }
+    Control {
+        property D.Palette textColor: D.Palette {
+            normal: Qt.rgba(0, 0, 0, 1)
+            normalDark: Qt.rgba(1, 1, 1, 1)
+        }
+        palette.windowText:  D.ColorSelector.textColor
 
-            sourceComponent: Control {
-                contentItem: model.data
-                background: D.FloatingPanel {
-                    implicitWidth:  100
-                    implicitHeight: 40
+        Repeater {
+            model: Applet.appletItems
+            delegate: Loader {
+                active: modelData.update(Applet.osdType)
+                onActiveChanged: {
+                    if (active) {
+                        root.isSingleView = modelData.singleView
+                        root.osdView = this
+                    }
+                }
+
+                sourceComponent: Control {
+                    contentItem: model.data
+                    background: D.FloatingPanel {
+                        implicitWidth:  100
+                        implicitHeight: 40
+                    }
                 }
             }
         }

@@ -138,6 +138,7 @@ AppletItem {
                     D.Label {
                         text: itemView.description
                         font: D.DTK.fontManager.t6
+                        palette.windowText: D.DTK.palette.windowText
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignLeft
                         Layout.maximumWidth: 298
