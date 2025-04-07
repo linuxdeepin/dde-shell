@@ -85,10 +85,11 @@ AppletItem {
             required property string iconName
             required property string title
             required property string description
+            property bool isCurrent: control.selectIndex === itemView.index
 
             property D.Palette backgroundColor: D.Palette {
-                normal: Qt.rgba(1, 1, 1, 0.4)
-                normalDark: Qt.rgba(0, 0, 0, 0.4)
+                normal: Qt.rgba(1, 1, 1, 0.3)
+                normalDark: Qt.rgba(0, 0, 0, 0.3)
             }
             property D.Palette checkedBackgroundColor: D.Palette {
                 normal: Qt.rgba(1, 1, 1, 0.6)
@@ -96,11 +97,11 @@ AppletItem {
             }
             property D.Palette dropShadowColor: D.Palette {
                 normal: Qt.rgba(0, 0, 0, 0.1)
-                normalDark: Qt.rgba(1, 1, 1, 0.1)
+                normalDark: Qt.rgba(0, 0, 0, 0.7)
             }
-            property D.Palette innerShadowColor:  D.Palette {
+            property D.Palette innerShadowColor: D.Palette {
                 normal: Qt.rgba(1, 1, 1, 0.2)
-                normalDark: Qt.rgba(0, 0, 0, 0.2)
+                normalDark: Qt.rgba(1, 1, 1, 0.03)
             }
 
             contentItem: RowLayout {
@@ -155,7 +156,7 @@ AppletItem {
                         width: 16
                         height: 16
                     }
-                    visible: control.checkedIndex === itemView.index
+                    visible: itemView.isCurrent
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                     Layout.rightMargin: 10
                     name: "item_checked"
@@ -169,10 +170,11 @@ AppletItem {
                     id: backgroundRect
                     anchors.fill: parent
                     radius: 6
-                    color: control.selectIndex === itemView.index ? itemView.D.ColorSelector.checkedBackgroundColor
+                    color: itemView.isCurrent ? itemView.D.ColorSelector.checkedBackgroundColor
                                                                   : itemView.D.ColorSelector.backgroundColor
                 }
                 D.BoxShadow {
+                    visible: !itemView.isCurrent
                     anchors.fill: parent
                     shadowOffsetX: 0
                     shadowOffsetY: 1
@@ -183,6 +185,7 @@ AppletItem {
                     hollow: true
                 }
                 D.BoxInsetShadow {
+                    visible: !itemView.isCurrent
                     anchors.fill: parent
                     shadowOffsetX: 0
                     shadowOffsetY: 1
