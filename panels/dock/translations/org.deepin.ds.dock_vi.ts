@@ -1,90 +1,90 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="az">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="vi">
 <context>
     <name>main</name>
     <message>
         <location filename="../package/main.qml" line="159"/>
         <source>Indicator Style</source>
-        <translation>نوع المؤشر</translation>
+        <translation>Kiểu chỉ báo</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Fashion Mode</source>
-        <translation>الMode الموضوي</translation>
+        <translation>Chế độ thời trang</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Efficient Mode</source>
-        <translation>الMode الفعال</translation>
+        <translation>Chế độ hiệu quả</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="203"/>
         <source>Left</source>
-        <translation>يسار</translation>
+        <translation>Trái</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="191"/>
         <source>Position</source>
-        <translation>الposição</translation>
+        <translation>Vị trí</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="172"/>
         <source>Mode</source>
-        <translation>الMode</translation>
+        <translation>Chế độ</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>
         <source>Align Left</source>
-        <translation>محاذاة اليسار</translation>
+        <translation>Định vị trái</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Align Top</source>
-        <translation>محاذاة الأعلى</translation>
+        <translation>Định vị trên</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="185"/>
         <source>Align Center</source>
-        <translation>محاذاة المنتصف</translation>
+        <translation>Định vị giữa</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="193"/>
         <source>Top</source>
-        <translation>أعلى</translation>
+        <translation>Trên</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="198"/>
         <source>Bottom</source>
-        <translation>أسفل</translation>
+        <translation>Dưới</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="208"/>
         <source>Right</source>
-        <translation>يمين</translation>
+        <translation>Phải</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="214"/>
         <source>Status</source>
-        <translation>الحالة</translation>
+        <translation>Trạng thái</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="216"/>
         <source>Keep Shown</source>
-        <translation>احفظ العرض</translation>
+        <translation>Giữ hiển thị</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="221"/>
         <source>Keep Hidden</source>
-        <translation>احفظ الخفاء</translation>
+        <translation>Giữ ẩn</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="226"/>
         <source>Smart Hide</source>
-        <translation>إخفاء ذكي</translation>
+        <translation>Ẩn thông minh</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="233"/>
         <source>Dock Settings</source>
-        <translation>إعدادات الرف</translation>
+        <translation>Cài đặt thanh đock</translation>
     </message>
 </context>
 </TS>

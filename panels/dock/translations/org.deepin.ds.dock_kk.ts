@@ -1,90 +1,90 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="az">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="kk">
 <context>
     <name>main</name>
     <message>
         <location filename="../package/main.qml" line="159"/>
         <source>Indicator Style</source>
-        <translation>نوع المؤشر</translation>
+        <translation>Индикатор стилісі</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Fashion Mode</source>
-        <translation>الMode الموضوي</translation>
+        <translation>Жаңылықтық режим</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Efficient Mode</source>
-        <translation>الMode الفعال</translation>
+        <translation>Негізгі режим</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="203"/>
         <source>Left</source>
-        <translation>يسار</translation>
+        <translation>Сол</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="191"/>
         <source>Position</source>
-        <translation>الposição</translation>
+        <translation>Пozиция</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="172"/>
         <source>Mode</source>
-        <translation>الMode</translation>
+        <translation>Режим</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>
         <source>Align Left</source>
-        <translation>محاذاة اليسار</translation>
+        <translation>Сол жетістіру</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Align Top</source>
-        <translation>محاذاة الأعلى</translation>
+        <translation>Түш жетістіру</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="185"/>
         <source>Align Center</source>
-        <translation>محاذاة المنتصف</translation>
+        <translation>Коңырақ жетістіру</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="193"/>
         <source>Top</source>
-        <translation>أعلى</translation>
+        <translation>Түш</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="198"/>
         <source>Bottom</source>
-        <translation>أسفل</translation>
+        <translation>Төмөн</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="208"/>
         <source>Right</source>
-        <translation>يمين</translation>
+        <translation>Оң</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="214"/>
         <source>Status</source>
-        <translation>الحالة</translation>
+        <translation>Состояние</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="216"/>
         <source>Keep Shown</source>
-        <translation>احفظ العرض</translation>
+        <translation>Көрінісін сактау</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="221"/>
         <source>Keep Hidden</source>
-        <translation>احفظ الخفاء</translation>
+        <translation>Сактау</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="226"/>
         <source>Smart Hide</source>
-        <translation>إخفاء ذكي</translation>
+        <translation>Жетілдірілген атау</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="233"/>
         <source>Dock Settings</source>
-        <translation>إعدادات الرف</translation>
+        <translation>Буғаттау алагыннан алу</translation>
     </message>
 </context>
 </TS>

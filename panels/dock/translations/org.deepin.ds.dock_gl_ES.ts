@@ -1,90 +1,90 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="az">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="gl_ES">
 <context>
     <name>main</name>
     <message>
         <location filename="../package/main.qml" line="159"/>
         <source>Indicator Style</source>
-        <translation>نوع المؤشر</translation>
+        <translation>Estilo do indicador</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Fashion Mode</source>
-        <translation>الMode الموضوي</translation>
+        <translation>Modo de moda</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Efficient Mode</source>
-        <translation>الMode الفعال</translation>
+        <translation>Modo eficiente</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="203"/>
         <source>Left</source>
-        <translation>يسار</translation>
+        <translation>Esquerda</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="191"/>
         <source>Position</source>
-        <translation>الposição</translation>
+        <translation>Posición</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="172"/>
         <source>Mode</source>
-        <translation>الMode</translation>
+        <translation>Modo</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>
         <source>Align Left</source>
-        <translation>محاذاة اليسار</translation>
+        <translation>Alinhar á esquerda</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Align Top</source>
-        <translation>محاذاة الأعلى</translation>
+        <translation>Alinhar no superior</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="185"/>
         <source>Align Center</source>
-        <translation>محاذاة المنتصف</translation>
+        <translation>Alinhar no centro</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="193"/>
         <source>Top</source>
-        <translation>أعلى</translation>
+        <translation>Superior</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="198"/>
         <source>Bottom</source>
-        <translation>أسفل</translation>
+        <translation>Inferior</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="208"/>
         <source>Right</source>
-        <translation>يمين</translation>
+        <translation>Dereita</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="214"/>
         <source>Status</source>
-        <translation>الحالة</translation>
+        <translation>Estado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="216"/>
         <source>Keep Shown</source>
-        <translation>احفظ العرض</translation>
+        <translation>Manter mostrado</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="221"/>
         <source>Keep Hidden</source>
-        <translation>احفظ الخفاء</translation>
+        <translation>Manter oculto</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="226"/>
         <source>Smart Hide</source>
-        <translation>إخفاء ذكي</translation>
+        <translation>Ocultar de xeito inteligente</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="233"/>
         <source>Dock Settings</source>
-        <translation>إعدادات الرف</translation>
+        <translation>Configuración do molle</translation>
     </message>
 </context>
 </TS>

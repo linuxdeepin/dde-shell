@@ -1,90 +1,90 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="az">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ne">
 <context>
     <name>main</name>
     <message>
         <location filename="../package/main.qml" line="159"/>
         <source>Indicator Style</source>
-        <translation>نوع المؤشر</translation>
+        <translation>याहियाँ शैली</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="161"/>
         <source>Fashion Mode</source>
-        <translation>الMode الموضوي</translation>
+        <translation>कलाकार रास्ता</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="166"/>
         <source>Efficient Mode</source>
-        <translation>الMode الفعال</translation>
+        <translation>अनुकूलित रास्ता</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="203"/>
         <source>Left</source>
-        <translation>يسار</translation>
+        <translation>दाहिनो तरिको</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="191"/>
         <source>Position</source>
-        <translation>الposição</translation>
+        <translation>स्थिति</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="172"/>
         <source>Mode</source>
-        <translation>الMode</translation>
+        <translation>रास्ता</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="176"/>
         <source>Align Left</source>
-        <translation>محاذاة اليسار</translation>
+        <translation>दाहिनो तरिको मान्यतालाई</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="178"/>
         <source>Align Top</source>
-        <translation>محاذاة الأعلى</translation>
+        <translation>चारो तरिको मान्यतालाई</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="185"/>
         <source>Align Center</source>
-        <translation>محاذاة المنتصف</translation>
+        <translation>केन्द्र मान्यतालाई</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="193"/>
         <source>Top</source>
-        <translation>أعلى</translation>
+        <translation>चारो तरिको</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="198"/>
         <source>Bottom</source>
-        <translation>أسفل</translation>
+        <translation>नीचे</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="208"/>
         <source>Right</source>
-        <translation>يمين</translation>
+        <translation>दाहिनो</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="214"/>
         <source>Status</source>
-        <translation>الحالة</translation>
+        <translation>स्थिति</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="216"/>
         <source>Keep Shown</source>
-        <translation>احفظ العرض</translation>
+        <translation>बजार्नुहोस्</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="221"/>
         <source>Keep Hidden</source>
-        <translation>احفظ الخفاء</translation>
+        <translation>छुपाउनुहोस्</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="226"/>
         <source>Smart Hide</source>
-        <translation>إخفاء ذكي</translation>
+        <translation>बुद्धिमान छुपाउनुहोस्</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="233"/>
         <source>Dock Settings</source>
-        <translation>إعدادات الرف</translation>
+        <translation>प्लग व्यवस्थापन</translation>
     </message>
 </context>
 </TS>

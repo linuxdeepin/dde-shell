@@ -1,10 +1,10 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="az">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ne">
 <context>
     <name>GroupNotify</name>
     <message>
         <location filename="../GroupNotify.qml" line="50"/>
         <source>Clear All</source>
-        <translation>مسح الكل</translation>
+        <translation>सम्पूर्ण माथि कुनै भन्दा छुट्याउनुहोस्</translation>
     </message>
 </context>
 <context>
@@ -12,17 +12,17 @@
     <message>
         <location filename="../NotifyHeader.qml" line="20"/>
         <source>Notification Setting</source>
-        <translation>إعداد الإشعارات</translation>
+        <translation>नोटिफिकेशन सेटिंग</translation>
     </message>
     <message>
         <location filename="../NotifyHeader.qml" line="56"/>
         <source>Notification Center</source>
-        <translation>مركز الإشعارات</translation>
+        <translation>नोटिफिकेशन केन्द्र</translation>
     </message>
     <message>
         <location filename="../NotifyHeader.qml" line="108"/>
         <source>Clear All</source>
-        <translation>مسح الكل</translation>
+        <translation>सम्पूर्ण माथि कुनै भन्दा छुट्याउनुहोस्</translation>
     </message>
 </context>
 <context>
@@ -30,17 +30,17 @@
     <message>
         <location filename="../NotifySetting.qml" line="18"/>
         <source>Unpin</source>
-        <translation>إلغاء تثبيت</translation>
+        <translation>लगाउनुको सिर्जना छुट्याउनुहोस्</translation>
     </message>
     <message>
         <location filename="../NotifySetting.qml" line="18"/>
         <source>Pin</source>
-        <translation>تثبيت</translation>
+        <translation>लगाउनुको सिर्जना लगाउनुहोस्</translation>
     </message>
     <message>
         <location filename="../NotifySetting.qml" line="26"/>
         <source>Notification Setting</source>
-        <translation>إعداد الإشعارات</translation>
+        <translation>नोटिफिकेशन सेटिंग</translation>
     </message>
 </context>
 <context>
@@ -48,22 +48,22 @@
     <message>
         <location filename="../notifyitem.cpp" line="76"/>
         <source>Just now</source>
-        <translation>الآن</translation>
+        <translation>अब तयार</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="78"/>
         <source>%1 minutes ago</source>
-        <translation>%1 دقيقة مضت</translation>
+        <translation>%1 मिनिटहरू पहिले</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="80"/>
         <source>%1 hours ago</source>
-        <translation>%1 ساعة مضت</translation>
+        <translation>%1 तालहरू पहिले</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="83"/>
         <source>Yesterday </source>
-        <translation>أمس </translation>
+        <translation>हिम्ले </translation>
     </message>
 </context>
 </TS>
