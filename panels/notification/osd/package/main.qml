@@ -15,6 +15,8 @@ Window {
     D.DWindow.windowRadius: isSingleView ? 30 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableBlurWindow: true
     D.DWindow.enabled: true
+    D.DWindow.shadowOffset: Qt.point(0, 8)
+    D.DWindow.shadowColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.2) : Qt.rgba(0, 0, 0, 0.1)
     color: "transparent"
     DLayerShellWindow.bottomMargin: 180
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
