@@ -96,6 +96,8 @@ int main(int argc, char *argv[])
     setenv("DSG_APP_ID", "org.deepin.dde.shell", 0);
     DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
     QApplication a(argc, argv);
+    // Don't apply to plugins
+    qunsetenv("QT_SCALE_FACTOR");
     // dde-shell contains UI controls based on QML and Widget technologies.
     // Due to the inconsistency of the default font rendering methods of different schemes,
     // the font effects are not uniform.
