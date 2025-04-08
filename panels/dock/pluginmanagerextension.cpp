@@ -44,7 +44,7 @@ void PluginScaleManager::setPluginScale(const uint32_t &scale)
     auto outputs = m_compositor->outputs();
     std::for_each(outputs.begin(), outputs.end(), [this](auto *output) {
         // 120 is base of fractional scale.
-        output->setScaleFactor(std::ceil(m_scale / 120));
+        output->setScaleFactor(std::ceil(m_scale / 120.0));
     });
 
     Q_EMIT pluginScaleChanged(m_scale);
@@ -64,7 +64,7 @@ void PluginScaleManager::initialize()
     init(compositor->display(), 1);
     m_compositor = compositor;
     connect(compositor, &QWaylandCompositor::outputAdded, this, [this](auto *output) {
-        output->setScaleFactor(std::ceil(m_scale / 120));
+        output->setScaleFactor(std::ceil(m_scale / 120.0));
     });
 }
 
