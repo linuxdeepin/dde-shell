@@ -4,33 +4,33 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../package/main.qml" line="106"/>
+        <location filename="../package/main.qml" line="206"/>
         <source>Optimal performance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="107"/>
-        <source>Optimal performance: Close all interface and window effects to ensure efficient system operation</source>
+        <location filename="../package/main.qml" line="207"/>
+        <source>Optimal performance: Disable all interface and window effects for efficient system performance.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="112"/>
+        <location filename="../package/main.qml" line="213"/>
+        <source>Balance: Limit some window effects for excellent visuals while maintaining smooth system performance.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="219"/>
+        <source>Best visuals: Enable all interface and window effects for the best visual experience.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../package/main.qml" line="212"/>
         <source>Balance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../package/main.qml" line="113"/>
-        <source>Balance: Limit some window effects to ensure excellent visual experience while maintaining smooth system operation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../package/main.qml" line="118"/>
+        <location filename="../package/main.qml" line="218"/>
         <source>Best Visuals</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../package/main.qml" line="119"/>
-        <source>Best Visual: Enable all interface and window effects to experience the best visual effects</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
