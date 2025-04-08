@@ -204,19 +204,19 @@ AppletItem {
             value: main.WindowEffectType.Normal
             iconName: "osd_screen_highperformance"
             title: qsTr("Optimal performance")
-            description: qsTr("Optimal performance: Close all interface and window effects to ensure efficient system operation")
+            description: qsTr("Optimal performance: Disable all interface and window effects for efficient system performance.")
         }
         ListElement {
             value: main.WindowEffectType.Better
             iconName: "osd_screen_balance"
             title: qsTr("Balance")
-            description: qsTr("Balance: Limit some window effects to ensure excellent visual experience while maintaining smooth system operation")
+            description: qsTr("Balance: Limit some window effects for excellent visuals while maintaining smooth system performance.")
         }
         ListElement {
             value: main.WindowEffectType.Best
             iconName: "osd_screen_bestvisual"
             title: qsTr("Best Visuals")
-            description: qsTr("Best Visual: Enable all interface and window effects to experience the best visual effects")
+            description: qsTr("Best visuals: Enable all interface and window effects for the best visual experience.")
         }
     }
 }
