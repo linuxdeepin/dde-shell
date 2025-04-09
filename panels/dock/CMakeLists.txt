@@ -99,7 +99,6 @@ add_subdirectory(multitaskview)
 
 find_package(DdeControlCenter)
 
-add_subdirectory(searchitem)
 #add_subdirectory(appruntimeitem)
 
 # dock qml element(include Dock.xx defines and DockCompositor)
