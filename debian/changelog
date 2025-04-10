@@ -1,3 +1,10 @@
+dde-shell (1.99.31) UNRELEASED; urgency=medium
+
+  * fix: dock plugin display blurred on 1.25 screen scale ratio
+  * refactor: Remove `searchitem` module from dock
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Thu, 10 Apr 2025 17:36:25 +0800
+
 dde-shell (1.99.30) UNRELEASED; urgency=medium
 
   * bump version to 1.99.30
