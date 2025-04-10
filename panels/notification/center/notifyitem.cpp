@@ -79,7 +79,12 @@ void AppNotifyItem::updateTime()
         } else if (minute > 0 && minute < 60) {
             ret = tr("%1 minutes ago").arg(minute);
         } else {
-            ret = tr("%1 hours ago").arg(minute / 60);
+            const auto hour = minute / 60;
+            if (hour == 1) {
+                ret = tr("1 hour ago");
+            } else {
+                ret = tr("%1 hours ago").arg(hour);
+            }
         }
     } else if (elapsedDay >= 1 && elapsedDay < 2) {
         ret = tr("Yesterday ") + " " + time.toString("hh:mm");
