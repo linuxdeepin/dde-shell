@@ -1,8 +1,10 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ca">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ca">
 <context>
     <name>GroupNotify</name>
     <message>
-        <location filename="../GroupNotify.qml" line="50"/>
+        <location filename="../GroupNotify.qml" line="51"/>
         <source>Clear All</source>
         <translation>Neteja-ho tot</translation>
     </message>
@@ -10,17 +12,16 @@
 <context>
     <name>NotifyHeader</name>
     <message>
-        <location filename="../NotifyHeader.qml" line="20"/>
         <source>Notification Setting</source>
-        <translation>Configuració de les notificacions</translation>
+        <translation type="vanished">Configuració de les notificacions</translation>
     </message>
     <message>
-        <location filename="../NotifyHeader.qml" line="56"/>
+        <location filename="../NotifyHeader.qml" line="42"/>
         <source>Notification Center</source>
         <translation>Centre de notificacions</translation>
     </message>
     <message>
-        <location filename="../NotifyHeader.qml" line="108"/>
+        <location filename="../NotifyHeader.qml" line="90"/>
         <source>Clear All</source>
         <translation>Neteja-ho tot</translation>
     </message>
@@ -46,22 +47,27 @@
 <context>
     <name>notifycenter::AppNotifyItem</name>
     <message>
-        <location filename="../notifyitem.cpp" line="76"/>
+        <location filename="../notifyitem.cpp" line="78"/>
         <source>Just now</source>
         <translation>Ara mateix</translation>
     </message>
     <message>
-        <location filename="../notifyitem.cpp" line="78"/>
+        <location filename="../notifyitem.cpp" line="80"/>
         <source>%1 minutes ago</source>
         <translation>Fa %1 minuts</translation>
     </message>
     <message>
-        <location filename="../notifyitem.cpp" line="80"/>
+        <location filename="../notifyitem.cpp" line="84"/>
+        <source>1 hour ago</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../notifyitem.cpp" line="86"/>
         <source>%1 hours ago</source>
         <translation>Fa %1 hores</translation>
     </message>
     <message>
-        <location filename="../notifyitem.cpp" line="83"/>
+        <location filename="../notifyitem.cpp" line="90"/>
         <source>Yesterday </source>
         <translation>Ahir</translation>
     </message>
