@@ -12,7 +12,7 @@
     <message>
         <location filename="../bubbleitem.cpp" line="363"/>
         <source>1 new message</source>
-        <translation type="unfinished">一条新消息</translation>
+        <translation type="unfinished">1条新消息</translation>
     </message>
 </context>
 <context>
