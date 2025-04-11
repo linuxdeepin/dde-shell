@@ -55,12 +55,15 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     connect(qApp, &QGuiApplication::screenAdded, this, [this] (const QScreen *newScreen) {
         connect(newScreen, &QScreen::geometryChanged, this, &LayerShellEmulation::onPositionChanged);
         connect(newScreen, &QScreen::geometryChanged, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+        m_exclusionZoneChangedTimer.start();
     });
     connect(qApp, &QGuiApplication::primaryScreenChanged, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(m_window, &QWindow::screenChanged, this, [this](QScreen *nowScreen){
         onPositionChanged();
         m_exclusionZoneChangedTimer.start();
     });
+
+    connect(qApp, &QGuiApplication::screenRemoved, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
 
     // connect(m_dlayerShellWindow, &DS_NAMESPACE::DLayerShellWindow::keyboardInteractivityChanged, this, &LayerShellEmulation::onKeyboardInteractivityChanged);
 }
@@ -188,7 +191,7 @@ void LayerShellEmulation::onExclusionZoneChanged()
             if (boundary < screen->geometry().bottom())
                 boundary = screen->geometry().bottom();
         }
-        strut_partial.bottom =  + boundary - rect.bottom() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
+        strut_partial.bottom = boundary - rect.bottom() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
         strut_partial.bottom_start_x = rect.x();
         strut_partial.bottom_end_x = rect.x() + m_window->width();
     }
