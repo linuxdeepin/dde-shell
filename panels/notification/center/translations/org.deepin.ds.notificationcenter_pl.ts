@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="pl">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pl">
 <context>
     <name>GroupNotify</name>
     <message>
@@ -11,10 +9,6 @@
 </context>
 <context>
     <name>NotifyHeader</name>
-    <message>
-        <source>Notification Setting</source>
-        <translation type="vanished">Ustawienia powiadomień</translation>
-    </message>
     <message>
         <location filename="../NotifyHeader.qml" line="42"/>
         <source>Notification Center</source>
@@ -59,7 +53,7 @@
     <message>
         <location filename="../notifyitem.cpp" line="84"/>
         <source>1 hour ago</source>
-        <translation type="unfinished"></translation>
+        <translation>1 godzinę temu</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="86"/>
