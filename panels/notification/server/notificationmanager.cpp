@@ -472,9 +472,7 @@ void NotificationManager::updateEntityProcessed(const NotifyEntity &entity)
     if (entity.hints().contains("x-deepin-ShowInNotifyCenter")) {
         showInCenter = entity.hints()["x-deepin-ShowInNotifyCenter"].toBool();
     }
-    // "cancel"表示正在发送蓝牙文件,不需要发送到通知中心
-    const auto bluetooth = entity.body().contains("%") && entity.actions().contains("cancel");
-    if (removed || !showInCenter || bluetooth) {
+    if (removed || !showInCenter) {
         // remove it from memory
         m_persistence->removeEntity(id);
     } else {

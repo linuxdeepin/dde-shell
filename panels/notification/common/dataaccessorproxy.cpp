@@ -38,7 +38,7 @@ qint64 DataAccessorProxy::addEntity(const NotifyEntity &entity)
     if (entity.processedType() == NotifyEntity::NotProcessed) {
         return m_impl->addEntity(entity);
     } else {
-        if (m_source && m_source->isValid()) {
+        if (m_source && m_source->isValid() && !filterToSource(entity)) {
             return m_source->addEntity(entity);
         }
     }
@@ -63,10 +63,14 @@ void DataAccessorProxy::updateEntityProcessedType(qint64 id, int processedType)
         m_impl->updateEntityProcessedType(id, processedType);
         if (m_source && m_source->isValid()) {
             auto entity = m_impl->fetchEntity(id);
-            const auto sId = m_source->addEntity(entity);
-            if (sId > 0) {
+            if (!filterToSource(entity)) {
+                const auto sId = m_source->addEntity(entity);
+                if (sId > 0) {
+                    m_impl->removeEntity(id);
+                    entity.setId(sId);
+                }
+            } else {
                 m_impl->removeEntity(id);
-                entity.setId(sId);
             }
         }
         return;
@@ -176,5 +180,12 @@ bool DataAccessorProxy::routerToSource(qint64 id, int processedType) const
         return entity.isValid();
     }
     return false;
+}
+
+bool DataAccessorProxy::filterToSource(const NotifyEntity &entity) const
+{
+    // "cancel"表示正在发送蓝牙文件,不需要发送到通知中心
+    const auto bluetooth = entity.body().contains("%") && entity.actions().contains("cancel");
+    return bluetooth;
 }
 }
