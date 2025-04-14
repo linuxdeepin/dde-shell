@@ -48,17 +48,17 @@
     <message>
         <location filename="../notifyitem.cpp" line="80"/>
         <source>%1 minutes ago</source>
-        <translation>%1 minuuttia sitten</translation>
+        <translation>%1 min sitten</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="84"/>
         <source>1 hour ago</source>
-        <translation type="unfinished"/>
+        <translation>1 h sitten</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="86"/>
         <source>%1 hours ago</source>
-        <translation>%1 tuntia sitten</translation>
+        <translation>%1 h sitten</translation>
     </message>
     <message>
         <location filename="../notifyitem.cpp" line="90"/>
