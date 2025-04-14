@@ -40,6 +40,7 @@ public:
 
 private:
     bool routerToSource(qint64 id, int processedType) const;
+    bool filterToSource(const NotifyEntity &entity) const;
 
 private:
     DataAccessor *m_source = nullptr;
