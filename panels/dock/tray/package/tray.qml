@@ -102,7 +102,7 @@ AppletItem {
         isHorizontal: !tray.useColumnLayout
         model: DDT.TraySortOrderModel
         collapsed: DDT.TraySortOrderModel.collapsed
-        trayHeight: isHorizontal ? tray.implicitHeight : tray.implicitWidth
+        trayHeight: Panel.rootObject.dockSize
         surfaceAcceptor: isTrayPluginPopup
         color: "transparent"
         Component.onCompleted: {

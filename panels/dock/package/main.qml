@@ -235,8 +235,8 @@ Window {
 
     Item {
         id: dockContainer
-        width: dock.useColumnLayout ? Panel.dockSize : parent.width
-        height: dock.useColumnLayout ? parent.height : Panel.dockSize
+        width: dock.useColumnLayout ? dock.dockSize : parent.width
+        height: dock.useColumnLayout ? parent.height : dock.dockSize
         anchors {
             left: parent.left
             top: parent.top
