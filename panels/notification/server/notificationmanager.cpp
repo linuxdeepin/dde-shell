@@ -421,8 +421,6 @@ void NotificationManager::tryPlayNotificationSound(const NotifyEntity &entity, c
         } else {
             playSoundTip = true;
         }
-    } else if (systemNotification && dndMode) {
-        playSoundTip = true;
     }
 
     if (playSoundTip) {
