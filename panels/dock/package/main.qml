@@ -347,8 +347,21 @@ Window {
                 Layout.topMargin: useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
                     (dock.height - dockCenterPart.implicitHeight) / 2 - (dockLeftPart.implicitHeight + 20) + Math.min((dock.height - dockCenterPart.implicitHeight) / 2 - (dockRightPart.implicitHeight + 20), 0) : 0
 
-                Behavior on Layout.leftMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                Behavior on Layout.topMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                Behavior on Layout.leftMargin {
+                    enabled: !dock.isDragging
+                    NumberAnimation {
+                        duration: 200
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Behavior on Layout.topMargin {
+                    enabled: !dock.isDragging
+                    NumberAnimation {
+                        duration: 200
+                        easing.type: Easing.OutCubic
+                    }
+                }
 
                 OverflowContainer {
                     id: centerLoader
