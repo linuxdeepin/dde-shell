@@ -47,6 +47,7 @@ private:
     QString id2dbusPath(const QString& id);
     void connectToAmDBusSignal(const QString& propertyName, const char* slot);
     void launchByAMTool(const QString &action = QString());
+    QString getLocaleName(const QString& currentLanguageCode, const QStringMap& names);
 
 private Q_SLOTS:
     void updateActions();

@@ -240,18 +240,32 @@ void DesktopFileAMParser::updateActions()
     auto actionNames = m_applicationInterface->actionName();
 
     for (auto action : actions) {
-        auto localeName = actionNames.value(action).value(currentLanguageCode);
+        auto localeName = getLocaleName(currentLanguageCode, actionNames.value(action));
         auto fallbackDefaultName = actionNames.value(action).value(DEFAULT_KEY);
         m_actions.append({action, localeName.isEmpty() ? fallbackDefaultName : localeName});
     }
+}
+
+QString DesktopFileAMParser::getLocaleName(const QString& currentLanguageCode, const QStringMap& names)
+{
+    auto localeName = names.value(currentLanguageCode);
+    if (currentLanguageCode.contains('_') && !(names.contains(currentLanguageCode)))
+    {
+        auto prefix = currentLanguageCode.split('_')[0];
+        if (names.contains(prefix)) {
+            localeName = names.value(prefix);
+        }
+    }
+    return localeName;
 }
 
 void DesktopFileAMParser::updateLocalName()
 {
     QString currentLanguageCode = QLocale::system().name();
     auto names = m_applicationInterface->name();
-    auto localeName = names.value(currentLanguageCode);
+    auto localeName = getLocaleName(currentLanguageCode, names);
     auto fallbackName = names.value(DEFAULT_KEY);
+
     m_name = localeName.isEmpty() ? fallbackName : localeName;
 }
 
@@ -264,8 +278,9 @@ void DesktopFileAMParser::updateLocalGenericName()
 {
     QString currentLanguageCode = QLocale::system().name();
     auto genericNames = m_applicationInterface->genericName();
-    auto localeGenericName = genericNames.value(currentLanguageCode);
+    auto localeGenericName = getLocaleName(currentLanguageCode, genericNames);
     auto fallBackGenericName = genericNames.value(DEFAULT_KEY);
+
     m_genericName = localeGenericName.isEmpty() ? fallBackGenericName : localeGenericName;
 }
 
