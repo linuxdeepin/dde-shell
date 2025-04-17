@@ -249,7 +249,7 @@ void DesktopFileAMParser::updateActions()
 QString DesktopFileAMParser::getLocaleName(const QString& currentLanguageCode, const QStringMap& names)
 {
     auto localeName = names.value(currentLanguageCode);
-    if( currentLanguageCode.contains('_') && !(names.contains(currentLanguageCode)))
+    if (currentLanguageCode.contains('_') && !(names.contains(currentLanguageCode)))
     {
         auto prefix = currentLanguageCode.split('_')[0];
         if (names.contains(prefix)) {
