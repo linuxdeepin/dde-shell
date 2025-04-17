@@ -23,6 +23,9 @@ public Q_SLOTS: // methods
     void Show();
     void Hide();
 
+Q_SIGNALS:
+    void VisibleChanged(bool visible);
+
 private:
     NotificationCenterProxy *impl() const;
 };
