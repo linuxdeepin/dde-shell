@@ -1,3 +1,17 @@
+dde-shell (1.99.32) UNRELEASED; urgency=medium
+
+  * chore: missing some translations for notification (BUG-289337)
+  * fix: compatibility with Qt 6.9+
+  * fix: elements not aligned correctly when dock resize (BUG-312831)
+  * fix: need update exclusion zone when screen was added or removed
+    (BUG-306339)
+  * fix: bluetooth still entered notificationcenter (BUG-311617)
+  * fix: The icons residing on pannel move from the right side to the left side
+    (BUG-309403)
+  * fix: dnd does not disable to play sound for notification (BUG-310921)
+
+ -- Wang Zichong <wangzichong@deepin.org>  Thu, 17 Apr 2025 17:46:00 +0800
+
 dde-shell (1.99.31) UNRELEASED; urgency=medium
 
   * fix: dock plugin display blurred on 1.25 screen scale ratio
