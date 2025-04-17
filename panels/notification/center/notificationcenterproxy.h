@@ -20,6 +20,9 @@ public slots:
     void Show();
     void Hide();
 
+signals:
+    void VisibleChanged(bool visible);
+
 private:
     NotificationCenterPanel *panel() const;
 };

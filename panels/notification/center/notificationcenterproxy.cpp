@@ -16,6 +16,9 @@ namespace notification {
 NotificationCenterProxy::NotificationCenterProxy(QObject *parent)
     : QObject(parent)
 {
+    connect(panel(), &NotificationCenterPanel::visibleChanged, this, [this]() {
+        Q_EMIT VisibleChanged(panel()->visible());
+    });
 }
 
 NotificationCenterProxy::~NotificationCenterProxy()
