@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
+find_package(Dtk${DTK_VERSION_MAJOR} COMPONENTS Widget REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Widgets Gui WaylandClient)
 find_package(TreelandProtocols REQUIRED)
 pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
@@ -41,6 +42,7 @@ target_link_libraries(dde-shell PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::WaylandClient
     Dtk${DTK_VERSION_MAJOR}::Gui
+    Dtk${DTK_VERSION_MAJOR}::Widget
     Qt${QT_VERSION_MAJOR}::DBus
     PkgConfig::WaylandClient
 )
