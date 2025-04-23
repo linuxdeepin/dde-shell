@@ -7,6 +7,7 @@
 #include <QCommandLineParser>
 #include <QStandardPaths>
 
+#include <DApplication>
 #include <DGuiApplicationHelper>
 #include <DLog>
 #include <QQuickWindow>
@@ -24,6 +25,7 @@
 
 DS_USE_NAMESPACE
 DGUI_USE_NAMESPACE
+DWIDGET_USE_NAMESPACE
 
 DS_BEGIN_NAMESPACE
 Q_DECLARE_LOGGING_CATEGORY(dsLog)
@@ -95,7 +97,7 @@ int main(int argc, char *argv[])
 {
     setenv("DSG_APP_ID", "org.deepin.dde.shell", 0);
     DGuiApplicationHelper::setAttribute(DGuiApplicationHelper::UseInactiveColorGroup, false);
-    QApplication a(argc, argv);
+    DApplication a(argc, argv);
     // Don't apply to plugins
     qunsetenv("QT_SCALE_FACTOR");
     // dde-shell contains UI controls based on QML and Widget technologies.
