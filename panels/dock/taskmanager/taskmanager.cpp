@@ -27,7 +27,7 @@
 #include "x11windowmonitor.h"
 #endif
 
-Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtInfoMsg)
+Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtDebugMsg)
 
 #define Settings TaskManagerSettings::instance()
 
