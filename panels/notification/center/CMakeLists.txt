@@ -20,6 +20,7 @@ qt_add_qml_module(notificationcenterpanel
         AnimationSettingButton.qml
         BoundingRectangle.qml
         DataPanel.qml
+        NotifyHeaderTitleText.qml
     SOURCES
         notificationcenterpanel.h
         notificationcenterpanel.cpp
