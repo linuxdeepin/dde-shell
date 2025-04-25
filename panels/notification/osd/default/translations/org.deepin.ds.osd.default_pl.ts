@@ -34,17 +34,17 @@
     <message>
         <location filename="../package/main.qml" line="60"/>
         <source>Touchpad on</source>
-        <translation>Touchpad włączony</translation>
+        <translation>Panel dotykowy włączony</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="61"/>
         <source>Touchpad off</source>
-        <translation>Touchpad wyłączony</translation>
+        <translation>Panel dotykowy wyłączony</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="62"/>
         <source>Touchpad toggle</source>
-        <translation>Przełącznik Touchpada</translation>
+        <translation>Przełączanie panela dotykowego</translation>
     </message>
     <message>
         <location filename="../package/main.qml" line="63"/>
