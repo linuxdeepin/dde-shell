@@ -15,12 +15,11 @@ NotifyItem {
     signal collapse()
 
     contentItem: RowLayout {
-        Text {
+        NotifyHeaderTitleText {
             text: root.appName
             Layout.alignment: Qt.AlignLeft
             Layout.leftMargin: 18
-            font: DTK.fontManager.t5
-            color: palette.windowText
+            tFont: DTK.fontManager.t5
         }
 
         Item {

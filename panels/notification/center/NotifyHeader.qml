@@ -38,16 +38,11 @@ FocusScope {
 
     RowLayout {
         anchors.fill: parent
-        Text {
+        NotifyHeaderTitleText {
             text: qsTr("Notification Center")
             Layout.alignment: Qt.AlignLeft
             Layout.leftMargin: 18
-            font {
-                pixelSize: DTK.fontManager.t4.pixelSize
-                family: DTK.fontManager.t4.family
-                bold: true
-            }
-            color: palette.windowText
+            tFont: DTK.fontManager.t4
             MouseArea {
                 anchors.fill: parent
                 onDoubleClicked: {
