@@ -108,8 +108,8 @@ private:
 private:
     QList<PluginSurface*> m_pluginSurfaces;
 
-    uint32_t m_dockPosition;
-    uint32_t m_dockColorTheme;
+    uint32_t m_dockPosition = 0;
+    uint32_t m_dockColorTheme = 0;
     QSize m_dockSize;
     int m_popupMinHeight = 0;
 };
