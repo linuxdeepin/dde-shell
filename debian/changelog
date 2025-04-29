@@ -1,4 +1,3 @@
-@@ -1,14 +1,3 @@ 
 dde-shell (1.99.33) unstable; urgency=medium
 
   * [skip CI] Translate org.deepin.ds.osd.default.ts in pl
