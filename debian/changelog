@@ -1,3 +1,14 @@
+dde-shell (2.0.0) unstable; urgency=medium
+
+  * [skip CI] Translate org.deepin.ds.osd.default.ts in pl
+  * [skip CI] Translate org.deepin.ds.notificationcenter.ts in pt_BR
+  * fix: Fixed the issue that qCDebug does not output
+  * fix: initialize dock color theme with default value
+  * fix: adjust ui of title for notification
+  * fix: [Font-size] The Font size can not change by dde-control-center. (#1105)
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Tue, 29 Apr 2025 14:39:30 +0800
+
 dde-shell (1.99.32) UNRELEASED; urgency=medium
 
   * chore: missing some translations for notification (BUG-289337)
