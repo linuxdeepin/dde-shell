@@ -24,6 +24,8 @@ public:
     bool visible() const;
     QString osdType() const;
 
+    Q_INVOKABLE QString lastOsdType() const;
+
 public Q_SLOTS:
     void ShowOSD(const QString &text);
 
@@ -37,11 +39,13 @@ private:
     void showOsd();
     void setVisible(const bool visible);
     void setOsdType(const QString &osdType);
+    void updateLastOsdType(const QString &osdType);
 
 private:
     bool m_visible = false;
     QTimer *m_osdTimer = nullptr;
     QString m_osdType;
+    QString m_lastOsdType;
     int m_interval {2000};
 };
 

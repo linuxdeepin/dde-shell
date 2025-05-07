@@ -20,7 +20,9 @@ AppletItem {
     {
         if (match(osdType)) {
             Applet.sync()
-            Applet.next()
+            if (Panel.lastOsdType() === osdType) {
+                Applet.next()
+            }
             return true
         }
         return false

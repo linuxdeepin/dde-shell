@@ -78,6 +78,7 @@ void OsdPanel::hideOsd()
 {
     m_osdTimer->stop();
     setVisible(false);
+    updateLastOsdType({});
 }
 
 void OsdPanel::showOsd()
@@ -86,6 +87,7 @@ void OsdPanel::showOsd()
 
     m_osdTimer->start();
     setVisible(true);
+    updateLastOsdType(m_osdType);
 }
 
 void OsdPanel::setVisible(const bool visible)
@@ -100,6 +102,18 @@ void OsdPanel::setOsdType(const QString &osdType)
 {
     m_osdType = osdType;
     emit osdTypeChanged(m_osdType);
+}
+
+void OsdPanel::updateLastOsdType(const QString &osdType)
+{
+    if (m_lastOsdType != osdType) {
+        m_lastOsdType = osdType;
+    }
+}
+
+QString OsdPanel::lastOsdType() const
+{
+    return m_lastOsdType;
 }
 
 D_APPLET_CLASS(OsdPanel)
