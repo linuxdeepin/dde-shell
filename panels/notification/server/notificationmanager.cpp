@@ -509,7 +509,14 @@ void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QStr
             QStringList args = i.value().toString().split(",");
             if (!args.isEmpty()) {
                 QString cmd = args.takeFirst(); // 命令
-                QProcess::startDetached(cmd, args); //执行相关命令
+
+                QProcess pro;
+                pro.setProgram(cmd);
+                pro.setArguments(args);
+                QProcessEnvironment proEnv = QProcessEnvironment::systemEnvironment();
+                proEnv.remove("DSG_APP_ID");
+                pro.setProcessEnvironment(proEnv);
+                pro.startDetached();
             }
         } else if (i.key() == "deepin-dde-shell-action-" + actionId) {
             const QString data(i.value().toString());
