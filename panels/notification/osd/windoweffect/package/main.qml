@@ -49,9 +49,11 @@ AppletItem {
     function update(osdType)
     {
         if (match(osdType)) {
-            Qt.callLater(function() {
-                control.selectIndex = (control.selectIndex + 1) % effectModel.count
-            })
+            if (Panel.lastOsdType() === osdType) {
+                Qt.callLater(function() {
+                    control.selectIndex = (control.selectIndex + 1) % effectModel.count
+                })
+            }
             return true
         }
         return false

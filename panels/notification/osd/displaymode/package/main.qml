@@ -26,7 +26,9 @@ AppletItem {
                     Applet.doAction()
                 }
             } else if (osdType === "SwitchMonitors") {
-                Applet.next()
+                if (Panel.lastOsdType() === osdType) {
+                    Applet.next()
+                }
             }
 
             return true
