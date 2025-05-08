@@ -1,3 +1,13 @@
+dde-shell (1.99.34) unstable; urgency=medium
+
+  * refactor: simplify notification action handling
+  * fix: need request back when embed popup hidden
+  * fix: prevent duplicate OSD actions for same type
+  * fix: remove DSG_APP_ID from notification action
+  * chore: release dde-shell 1.99.33
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 08 May 2025 17:41:17 +0800
+
 dde-shell (1.99.33) unstable; urgency=medium
 
   * [skip CI] Translate org.deepin.ds.osd.default.ts in pl
