@@ -24,6 +24,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void actionInvoked(qint64 id, uint bubbleId, const QString &actionKey);
+    void actionInvoked(qint64 id, const QString &actionKey);
     void notificationClosed(qint64 id, uint bubbleId, uint reason);
     QVariant appValue(const QString &appId, int configItem);
     void removeNotification(qint64 id);

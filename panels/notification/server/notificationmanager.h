@@ -26,6 +26,7 @@ public:
     bool registerDbusService();
 
     uint recordCount() const;
+    Q_INVOKABLE void actionInvoked(qint64 id, const QString &actionKey);
     Q_INVOKABLE void actionInvoked(qint64 id, uint bubbleId, const QString &actionKey);
     Q_INVOKABLE void notificationClosed(qint64 id, uint bubbleId, uint reason);
     Q_INVOKABLE void notificationReplaced(qint64 id);
