@@ -87,6 +87,10 @@ Item {
             id: surfaceLayer
             autoClose: true
             Layout.fillWidth: true
+
+            onSurfaceDestroyed: {
+                requestBack()
+            }
         }
 
         Item { Layout.fillHeight: true; Layout.preferredWidth: 1 }
