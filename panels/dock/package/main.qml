@@ -166,18 +166,12 @@ Window {
             MutuallyExclusiveMenu {
                 title: qsTr("Mode")
                 EnumPropertyMenuItem {
-                    name: {
-                        if (Panel.position === Dock.Top || Panel.position === Dock.Bottom) {
-                            return qsTr("Align Left")
-                        } else {
-                            return qsTr("Align Top")
-                        }
-                    }
+                    name: qsTr("Classic Mode")
                     prop: "itemAlignment"
                     value: Dock.LeftAlignment
                 }
                 EnumPropertyMenuItem {
-                    name: qsTr("Align Center")
+                    name: qsTr("Centered Mode")
                     prop: "itemAlignment"
                     value: Dock.CenterAlignment
                 }

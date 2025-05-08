@@ -4,7 +4,6 @@
 <context>
     <name>dock::MultiTaskView</name>
     <message>
-        <location filename="../multitaskview.cpp" line="65"/>
         <source>Multitasking View</source>
         <translation type="unfinished"></translation>
     </message>
@@ -12,7 +11,6 @@
 <context>
     <name>multitaskview</name>
     <message>
-        <location filename="../package/multitaskview.qml" line="23"/>
         <source>Multitasking View</source>
         <translation type="unfinished"></translation>
     </message>
