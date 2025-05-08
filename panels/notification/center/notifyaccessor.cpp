@@ -196,22 +196,10 @@ void NotifyAccessor::invokeAction(const NotifyEntity &entity, const QString &act
 {
     qDebug(notifyLog) << "Invoke action for the notify" << entity.id() << actionId;
 
-    QMap<QString, QVariant> hints = entity.hints();
-    if (hints.isEmpty())
+    if (!m_dataUpdater)
         return;
-    QMap<QString, QVariant>::const_iterator i = hints.constBegin();
-    while (i != hints.constEnd()) {
-        QStringList args = i.value().toString().split(",");
-        if (!args.isEmpty()) {
-            QString cmd = args.first();
-            args.removeFirst();
-            if (i.key() == "x-deepin-action-" + actionId) {
-                qDebug(notifyLog) << "Invoke action" << cmd;
-                QProcess::startDetached(cmd, args);
-            }
-        }
-        ++i;
-    }
+    const auto id = entity.id();
+    QMetaObject::invokeMethod(m_dataUpdater, "actionInvoked", Qt::DirectConnection, Q_ARG(qint64, id), Q_ARG(const QString &, actionId));
 }
 
 void NotifyAccessor::pinApplication(const QString &appId, bool pin)

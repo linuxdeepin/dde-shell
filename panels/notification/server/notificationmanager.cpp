@@ -113,9 +113,9 @@ uint NotificationManager::recordCount() const
     return m_persistence->fetchEntityCount(DataAccessor::AllApp(), NotifyEntity::Processed);
 }
 
-void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
+void NotificationManager::actionInvoked(qint64 id, const QString &actionKey)
 {
-    qInfo(notifyLog) << "Action invoked, bubbleId:" << bubbleId << ", id:" << id << ", actionKey" << actionKey;
+    qInfo(notifyLog) << "Action invoked, id:" << id << ", actionKey" << actionKey;
     auto entity = m_persistence->fetchEntity(id);
     if (entity.isValid()) {
         doActionInvoked(entity, actionKey);
@@ -123,6 +123,12 @@ void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString 
         entity.setProcessedType(NotifyEntity::Removed);
         updateEntityProcessed(entity);
     }
+}
+
+void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
+{
+    qInfo(notifyLog) << "Action invoked, bubbleId:" << bubbleId << ", id:" << id << ", actionKey" << actionKey;
+    actionInvoked(id, actionKey);
 
     Q_EMIT ActionInvoked(bubbleId, actionKey);
     Q_EMIT NotificationClosed(bubbleId, NotifyEntity::Closed);
