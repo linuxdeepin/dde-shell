@@ -1,33 +1,33 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="es">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pt">
 <context>
     <name>main</name>
     <message>
         <source>Indicator Style</source>
-        <translation>Estilo de indicador</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Fashion Mode</source>
-        <translation>Modo elegante</translation>
+        <translation>Modo Elegante</translation>
     </message>
     <message>
         <source>Efficient Mode</source>
-        <translation>Modo eficiente</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation>Modo clásico</translation>
+        <translation>Modo Clássico</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation>Modo centrado</translation>
+        <translation>Modo Centrado</translation>
     </message>
     <message>
         <source>Left</source>
-        <translation>Izquierda</translation>
+        <translation>Esquerda</translation>
     </message>
     <message>
         <source>Position</source>
-        <translation>Posición</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Mode</source>
@@ -35,15 +35,15 @@
     </message>
     <message>
         <source>Top</source>
-        <translation>parte superior</translation>
+        <translation>Topo</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation>parte inferior</translation>
+        <translation>Fundo</translation>
     </message>
     <message>
         <source>Right</source>
-        <translation>Derecha</translation>
+        <translation>Direita</translation>
     </message>
     <message>
         <source>Status</source>
@@ -51,19 +51,19 @@
     </message>
     <message>
         <source>Keep Shown</source>
-        <translation>Mantener visible</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Keep Hidden</source>
-        <translation>Mantener oculto</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Smart Hide</source>
-        <translation>Ocultado inteligente</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Dock Settings</source>
-        <translation>Ajustes del muelle</translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>

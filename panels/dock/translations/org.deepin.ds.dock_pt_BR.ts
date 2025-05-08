@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="pt_BR">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pt_BR">
 <context>
     <name>main</name>
     <message>
@@ -17,11 +15,11 @@
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo clássico</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Modo centralizado</translation>
     </message>
     <message>
         <source>Left</source>

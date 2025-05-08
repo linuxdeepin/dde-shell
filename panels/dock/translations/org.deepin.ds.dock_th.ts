@@ -1,69 +1,69 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="es">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="th">
 <context>
     <name>main</name>
     <message>
         <source>Indicator Style</source>
-        <translation>Estilo de indicador</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Fashion Mode</source>
-        <translation>Modo elegante</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Efficient Mode</source>
-        <translation>Modo eficiente</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation>Modo clásico</translation>
+        <translation>โหมดคลาสสิก</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation>Modo centrado</translation>
+        <translation>โหมดที่อยู่ตรงกลาง</translation>
     </message>
     <message>
         <source>Left</source>
-        <translation>Izquierda</translation>
+        <translation>ด้านซ้าย</translation>
     </message>
     <message>
         <source>Position</source>
-        <translation>Posición</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Mode</source>
-        <translation>Modo</translation>
+        <translation>โหมด</translation>
     </message>
     <message>
         <source>Top</source>
-        <translation>parte superior</translation>
+        <translation>ด้านบน</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation>parte inferior</translation>
+        <translation>ด้านล่าง</translation>
     </message>
     <message>
         <source>Right</source>
-        <translation>Derecha</translation>
+        <translation>ด้านขวา</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation>Estado</translation>
+        <translation>สถานะ</translation>
     </message>
     <message>
         <source>Keep Shown</source>
-        <translation>Mantener visible</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Keep Hidden</source>
-        <translation>Mantener oculto</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Smart Hide</source>
-        <translation>Ocultado inteligente</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Dock Settings</source>
-        <translation>Ajustes del muelle</translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
