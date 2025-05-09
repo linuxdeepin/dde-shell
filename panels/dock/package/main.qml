@@ -116,16 +116,66 @@ Window {
         }
     }
 
+    PropertyAnimation {
+        id: hideDockAnimation;
+        target: dockTransform
+        property: dock.useColumnLayout ? "x" : "y"
+        from: 0
+        to: (Panel.position === Dock.Left || Panel.position === Dock.Top) ? -Panel.dockSize : Panel.dockSize
+        duration: 250
+        easing.type: Easing.OutCubic
+        onStarted: {
+            dock.visible = true
+        }
+        onStopped: {
+            dock.visible = true
+        }
+    }
+    PropertyAnimation {
+        id: showDockAnimation;
+        target: dockTransform;
+        property: dock.useColumnLayout ? "x" : "y";
+        duration: 250
+        easing.type: Easing.OutCubic
+        from: (Panel.position === Dock.Left || Panel.position === Dock.Top) ? -Panel.dockSize : Panel.dockSize
+        to: 0
+        onStarted: {
+            dock.visible = true
+        }
+        onStopped: {
+            dock.visible = true
+        }
+    }
+
     component EnumPropertyMenuItem: LP.MenuItem {
         required property string name
         required property string prop
         required property int value
         text: name
         onTriggered: {
-            Applet[prop] = value
-            checked = Qt.binding(function() {
-                return Applet[prop] === value
-            })
+            if (prop === "position") {
+                // After hide animation completes, change position
+                hideDockAnimation.onStopped.connect(function() {
+                    // Stop any running animations first --fix bug with do not show dock
+                    hideDockAnimation.stop()
+                    showDockAnimation.stop()
+                    // Reset transform before starting new animation--fix bug with change position,will have a blank area
+                    dockTransform.x = 0
+                    dockTransform.y = 0
+
+                    Applet[prop] = value
+                    checked = Qt.binding(function() {
+                        return Applet[prop] === value
+                    })
+                    showDockAnimation.start()
+                })
+                hideDockAnimation.start()
+            } else {
+                Applet[prop] = value
+                checked = Qt.binding(function() {
+                    return Applet[prop] === value
+                })
+            }
         }
         checked: Applet[prop] === value
     }
