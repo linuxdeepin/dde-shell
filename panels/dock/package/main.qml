@@ -116,16 +116,92 @@ Window {
         }
     }
 
+    SequentialAnimation {
+        id: dockAnimation
+        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
+        property bool isShowing: false
+        property var target: useTransformBasedAnimation ? dockTransform : dock
+        property string animProperty: {
+            if (useTransformBasedAnimation) return dock.useColumnLayout ? "x" : "y";
+            return dock.useColumnLayout ? "width" : "height";
+        }
+
+        function startAnimation(showing) {
+            isShowing = showing;
+            start();
+        }
+
+        PropertyAnimation {
+            target: dockAnimation.target
+            property: dockAnimation.animProperty
+            from: {
+                if (dockAnimation.isShowing) {
+                    if (dockAnimation.useTransformBasedAnimation) {
+                        return (Panel.position === Dock.Left || Panel.position === Dock.Top) ? -Panel.dockSize : Panel.dockSize;
+                    }
+                    return 1;
+                }
+                return 0;
+            }
+            to: {
+                if (dockAnimation.isShowing) {
+                    return 0;
+                } else {
+                    if (dockAnimation.useTransformBasedAnimation) {
+                        return (Panel.position === Dock.Left || Panel.position === Dock.Top) ? -Panel.dockSize : Panel.dockSize;
+                    }
+                    return 1;
+                }
+            }
+            duration: 250
+            easing.type: Easing.OutCubic
+        }
+
+        onStarted: {
+            dock.visible = true;
+        }
+
+        onStopped: {
+            if (useTransformBasedAnimation) {
+                dock.visible = true;
+            } else {
+                dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) != 1);
+            }
+        }
+    }
+
     component EnumPropertyMenuItem: LP.MenuItem {
         required property string name
         required property string prop
         required property int value
         text: name
-        onTriggered: {
-            Applet[prop] = value
+
+        property var positionChangeCallback: function() {
+            // Disconnect any existing callback first
+            dockAnimation.onStopped.disconnect(positionChangeCallback);
+            // Stop any running animations first --fix bug with do not show dock
+            dockAnimation.stop();
+            // Reset transform before starting new animation--fix bug with change position,will have a blank area
+            dockTransform.x = 0;
+            dockTransform.y = 0;
+
+            Applet[prop] = value;
             checked = Qt.binding(function() {
-                return Applet[prop] === value
-            })
+                return Applet[prop] === value;
+            });
+            dockAnimation.startAnimation(true);
+        }
+        onTriggered: {
+            if (prop === "position") {
+                // Connect the callback and start the hide animation
+                dockAnimation.onStopped.connect(positionChangeCallback);
+                dockAnimation.startAnimation(false);
+            } else {
+                Applet[prop] = value
+                checked = Qt.binding(function() {
+                    return Applet[prop] === value
+                })
+            }
         }
         checked: Applet[prop] === value
     }
