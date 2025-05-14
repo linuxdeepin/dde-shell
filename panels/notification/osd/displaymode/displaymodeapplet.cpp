@@ -165,13 +165,14 @@ void DisPlayModeApplet::fetchPlanItems()
     m_planItems.clear();
     m_currentPlanItem = nullptr;
 
-    m_planItems << new DPItem(tr("Duplicate"), "osd_display_copy", DPItem::Merge, this);
-    m_planItems << new DPItem(tr("Extend"), "osd_display_expansion", DPItem::Extend, this);
-    if (outputNames.size() == 2) {
+    m_planItems << new DPItem(tr("Duplicate"), "osd_multi_screen_copy", DPItem::Merge, this);
+    m_planItems << new DPItem(tr("Extend"), "osd_multi_screen_extension", DPItem::Extend, this);
+    if (outputNames.size() >= 2) {
         std::sort(outputNames.begin(), outputNames.end(), std::greater<QString>());
         for (int i = 0; i < outputNames.size(); i++) {
             const auto item = outputNames[i];
-            m_planItems << new DPItem(tr("Only on %1").arg(item), item, QString("osd_display_custom%1").arg(i + 1), DPItem::Single, this);
+            const QString iconName = i < 2 ? QString("osd_multi_screen_only%1").arg(i + 1) : "osd_multi_screen_only_more";
+            m_planItems << new DPItem(tr("Only on %1").arg(item), item, iconName, DPItem::Single, this);
         }
     }
 }
