@@ -25,3 +25,21 @@ target_include_directories(rolecombinemodel_tests PRIVATE
 )
 
 add_test(NAME rolecombinemodel COMMAND rolecombinemodel_tests)
+
+add_executable(rolegroupmodel_tests
+    rolegroupmodeltests.cpp
+)
+
+target_link_libraries(rolegroupmodel_tests
+    GTest::GTest
+    GTest::Main
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Test
+    dock-taskmanager
+)
+target_include_directories(rolegroupmodel_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/
+)
+
+add_test(NAME rolegroupmodel COMMAND rolegroupmodel_tests)
+

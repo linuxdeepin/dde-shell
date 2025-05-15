@@ -57,6 +57,8 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     appitem.h
     rolecombinemodel.cpp
     rolecombinemodel.h
+    rolegroupmodel.cpp
+    rolegroupmodel.h
     itemmodel.cpp
     itemmodel.h
     desktopfileabstractparser.cpp
