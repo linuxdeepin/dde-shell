@@ -1,3 +1,10 @@
+dde-shell (1.99.36) unstable; urgency=medium
+
+  * feat: introduce RoleGroupModel
+  * refactor: update display mode icons and logic
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 15 May 2025 21:15:21 +0800
+
 dde-shell (1.99.35) unstable; urgency=medium
 
   * chore: drop no longer existed translation resource 
