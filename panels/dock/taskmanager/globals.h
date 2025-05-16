@@ -9,15 +9,41 @@
 
 namespace dock {
 
+// actions
 static inline const QString DOCK_ACTION_ALLWINDOW = "dock-action-allWindow";
 static inline const QString DOCK_ACTION_FORCEQUIT = "dock-action-forceQuit";
 static inline const QString DOCK_ACTION_CLOSEALL = "dock-action-closeAll";
 static inline const QString DOCK_ACTIN_LAUNCH = "dock-action-launch";
 static inline const QString DOCK_ACTION_DOCK = "dock-action-dock";
 
+// setting keys
 static inline const QString TASKMANAGER_ALLOWFOCEQUIT_KEY = "Allow_Force_Quit";
-static inline const QString TASKMANAGER_WINDOWSPLIT_KEY = "Window_Split";
+static inline const QString TASKMANAGER_WINDOWSPLIT_KEY = "noTaskGrouping";
 static inline const QString TASKMANAGER_DOCKEDITEMS_KEY = "Docked_Items";
+constexpr auto TASKMANAGER_DOCKEDELEMENTS_KEY = "dockedElements";
+
+// model roleNames
+constexpr auto MODEL_WINID = "winId";
+constexpr auto MODEL_PID = "pid";
+constexpr auto MODEL_IDENTIFY = "identity";
+constexpr auto MODEL_WINICON = "icon";
+constexpr auto MODEL_TITLE = "title";
+constexpr auto MODEL_ACTIVE = "active";
+constexpr auto MODEL_ATTENTION = "attention";
+constexpr auto MODEL_SHOULDSKIP = "shouldSkip";
+
+constexpr auto MODEL_DESKTOPID = "desktopId";
+constexpr auto MODEL_ICONNAME = "iconName";
+constexpr auto MODEL_ITEMID = "itemId";
+constexpr auto MODEL_NAME = "name";
+constexpr auto MODEL_STARTUPWMCLASS = "startupWMClass";
+constexpr auto MODEL_ACTIONS = "actions";
+constexpr auto MODEL_MENUS = "menus";
+constexpr auto MODEL_DOCKED = "docked";
+constexpr auto MODEL_WINDOWS = "windows";
+
+// default item icon
+constexpr auto DEFAULT_APP_ICONNAME = "application-default-icon";
 
 // copy from application-manager
 

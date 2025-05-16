@@ -2,17 +2,19 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "abstracttaskmanagerinterface.h"
 #include "appitem.h"
 
 #include "abstractwindow.h"
 #include "abstractwindowmonitor.h"
 #include "desktopfileamparser.h"
 #include "desktopfileparserfactory.h"
+#include "dockcombinemodel.h"
+#include "dockglobalelementmodel.h"
 #include "dsglobal.h"
 #include "globals.h"
 #include "itemmodel.h"
 #include "pluginfactory.h"
-#include "rolecombinemodel.h"
 #include "taskmanager.h"
 #include "taskmanageradaptor.h"
 #include "taskmanagersettings.h"
@@ -38,8 +40,35 @@ Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtDebugMsg)
 
 namespace dock {
 
-TaskManager::TaskManager(QObject* parent)
+class BoolFilterModel : public QSortFilterProxyModel, public AbstractTaskManagerInterface
+{
+    Q_OBJECT
+public:
+    explicit BoolFilterModel(QAbstractItemModel *sourceModel, int role, QObject *parent = nullptr)
+        : QSortFilterProxyModel(parent)
+        , AbstractTaskManagerInterface(this)
+        , m_role(role)
+    {
+        setSourceModel(sourceModel);
+    }
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override
+    {
+        if (sourceRow >= sourceModel()->rowCount())
+            return false;
+
+        QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+        return !sourceModel()->data(index, m_role).toBool();
+    }
+
+private:
+    int m_role;
+};
+
+TaskManager::TaskManager(QObject *parent)
     : DContainment(parent)
+    , AbstractTaskManagerInterface(nullptr)
     , m_windowFullscreen(false)
 {
     qRegisterMetaType<ObjectInterfaceMap>();
@@ -83,31 +112,36 @@ bool TaskManager::init()
     DApplet::init();
 
     DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dde-apps");
+    BoolFilterModel *leftModel = new BoolFilterModel(m_windowMonitor.data(), m_windowMonitor->roleNames().key("shouldSkip"), this);
     if (auto applet = bridge.applet()) {
         auto model = applet->property("appModel").value<QAbstractItemModel *>();
         Q_ASSERT(model);
-        m_activeAppModel =
-            new RoleCombineModel(m_windowMonitor.data(), model, AbstractWindow::identityRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
-                auto roleNames = model->roleNames();
-                QList<QByteArray> identifiedOrders = {"desktopId", "startupWMClass", "name", "iconName"};
+        m_activeAppModel = new DockCombineModel(leftModel, model, TaskManager::IdentityRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+            auto roleNames = model->roleNames();
+            QList<QByteArray> identifiedOrders = {MODEL_DESKTOPID, MODEL_STARTUPWMCLASS, MODEL_NAME, MODEL_ICONNAME};
 
-                auto indentifies = data.toStringList();
-                for (auto id : indentifies) {
-                    if (id.isEmpty()) {
-                        continue;
-                    }
-
-                    for (auto identifiedOrder : identifiedOrders) {
-                        auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id, 1, Qt::MatchFixedString | Qt::MatchWrap);
-                        if (res.size() > 0 && res.first().isValid()) {
-                            qCDebug(taskManagerLog()) << "Window match id:" << id << "role:" << identifiedOrder << "data:" << res.first().data() << "desktop id:" << res.first().data(roleNames.key("desktopId"));
-                            return res.first();
-                        }
-                    }
+            auto identifies = data.toStringList();
+            for (auto id : identifies) {
+                if (id.isEmpty()) {
+                    continue;
                 }
 
-                return QModelIndex();
-            });
+                for (auto identifiedOrder : identifiedOrders) {
+                    auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
+                    if (res.isValid()) {
+                        qCDebug(taskManagerLog) << "matched" << res;
+                        return res;
+                    }
+                }
+            }
+
+            auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), identifies.value(0), 1, Qt::MatchEndsWith);
+            qCDebug(taskManagerLog) << "matched" << res.value(0);
+            return res.value(0);
+        });
+
+        m_dockGlobalElementModel = new DockGlobalElementModel(model, m_activeAppModel, this);
+        m_itemModel = new DockItemModel(m_dockGlobalElementModel, this);
     }
 
     if (m_windowMonitor)
@@ -120,9 +154,50 @@ bool TaskManager::init()
     return true;
 }
 
-ItemModel* TaskManager::dataModel()
+ItemModel *TaskManager::dataModel()
 {
     return ItemModel::instance();
+}
+
+void TaskManager::requestActivate(const QModelIndex &index) const
+{
+    m_itemModel->requestActivate(index);
+}
+
+void TaskManager::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
+{
+    m_itemModel->requestOpenUrls(index, urls);
+}
+
+void TaskManager::requestNewInstance(const QModelIndex &index, const QString &action) const
+{
+    m_itemModel->requestNewInstance(index, action);
+}
+
+void TaskManager::requestClose(const QModelIndex &index, bool force) const
+{
+    m_itemModel->requestClose(index, force);
+}
+
+void TaskManager::requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+{
+    m_itemModel->requestUpdateWindowGeometry(index, geometry, delegate);
+}
+
+void TaskManager::requestPreview(const QModelIndexList &indexes,
+                                 QObject *relativePositionItem,
+                                 int32_t previewXoffset,
+                                 int32_t previewYoffset,
+                                 uint32_t direction) const
+{
+    for (auto index : indexes) {
+        qDebug() << "requestPreview" << index << index.model() << (index.model() == m_itemModel);
+    }
+    m_itemModel->requestPreview(indexes, relativePositionItem, previewXoffset, previewYoffset, direction);
+}
+void TaskManager::requestWindowsView(const QModelIndexList &indexes) const
+{
+    m_itemModel->requestWindowsView(indexes);
 }
 
 void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
@@ -132,7 +207,7 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     // TODO: remove below code and use use model replaced.
     QModelIndexList res;
     if (m_activeAppModel) {
-        res = m_activeAppModel->match(m_activeAppModel->index(0, 0), AbstractWindow::winIdRole, window->id());
+        res = m_activeAppModel->match(m_activeAppModel->index(0, 0), TaskManager::WinIdRole, window->id());
     }
 
     QSharedPointer<DesktopfileAbstractParser> desktopfile = nullptr;
@@ -192,13 +267,17 @@ void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls
     item->handleFileDrop(urls);
 }
 
-void TaskManager::showItemPreview(const QString &itemId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+void TaskManager::showItemPreview(const QString &itemId, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
     auto item = ItemModel::instance()->getItemById(itemId).get();
-    if (!item) return;
+    if (!item) {
+        return;
+    }
 
-    QPointer<AppItem> pItem = reinterpret_cast<AppItem*>(item);
-    if (pItem.isNull()) return;
+    QPointer<AppItem> pItem = reinterpret_cast<AppItem *>(item);
+    if (pItem.isNull()) {
+        return;
+    }
 
     m_windowMonitor->showItemPreview(pItem, relativePositionItem, previewXoffset, previewYoffset, direction);
 }
