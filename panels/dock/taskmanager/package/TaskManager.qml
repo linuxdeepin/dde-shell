@@ -82,11 +82,13 @@ ContainmentItem {
             }
             delegate: Item {
                 id: delegateRoot
+                required property int index
                 required property bool active
                 required property bool attention
                 required property string itemId
                 required property string name
                 required property string iconName
+                required property string icon // winIconName
                 required property string menus
                 required property list<string> windows
                 z: attention ? -1 : 0
@@ -113,6 +115,7 @@ ContainmentItem {
                 implicitHeight: useColumnLayout ? visualModel.cellWidth : taskmanager.implicitHeight
 
                 property int visualIndex: DelegateModel.itemsIndex
+                property var modelIndex: visualModel.modelIndex(index)
 
                 AppItem {
                     id: app
@@ -126,9 +129,9 @@ ContainmentItem {
                     menus: delegateRoot.menus
                     windows: delegateRoot.windows
                     visualIndex: delegateRoot.visualIndex
+                    modelIndex: delegateRoot.modelIndex
                     ListView.delayRemove: Drag.active
                     Component.onCompleted: {
-                        clickItem.connect(taskmanager.Applet.clickItem)
                         dropFilesOnItem.connect(taskmanager.Applet.dropFilesOnItem)
                     }
                     onDragFinished: function() {
