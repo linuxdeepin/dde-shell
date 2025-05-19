@@ -88,7 +88,43 @@ bool TaskManager::load()
     }
 #endif
 
-    connect(m_windowMonitor.get(), &AbstractWindowMonitor::windowAdded, this, &TaskManager::handleWindowAdded);
+    // TODO: remove this after all ItemModel::instance() usage are removed.
+    connect(m_windowMonitor.get(), &AbstractWindowMonitor::windowAdded, this, [this](QPointer<AbstractWindow> window) {
+        if (!window || window->shouldSkip() || window->getAppItem() != nullptr)
+            return;
+
+        // TODO: remove below code and use use model replaced.
+        QModelIndexList res;
+        if (m_activeAppModel) {
+            res = m_activeAppModel->match(m_activeAppModel->index(0, 0), TaskManager::WinIdRole, window->id());
+        }
+
+        QSharedPointer<DesktopfileAbstractParser> desktopfile = nullptr;
+        QString desktopId;
+        if (res.size() > 0) {
+            desktopId = res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString();
+        }
+
+        if (!desktopId.isEmpty()) {
+            desktopfile = DESKTOPFILEFACTORY::createById(desktopId, "amAPP");
+        }
+
+        if (desktopfile.isNull() || !desktopfile->isValied().first) {
+            desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+        }
+
+        auto appitem = desktopfile->getAppItem();
+
+        if (appitem.isNull() || (appitem->hasWindow() && windowSplit())) {
+            auto id = windowSplit() ? QString("%1@%2").arg(desktopfile->id()).arg(window->id()) : desktopfile->id();
+            appitem = new AppItem(id);
+        }
+
+        appitem->appendWindow(window);
+        appitem->setDesktopFileParser(desktopfile);
+
+        ItemModel::instance()->addItem(appitem);
+    });
     return true;
 }
 
@@ -254,6 +290,11 @@ void TaskManager::setAppItemWindowIconGeometry(const QString& appid, QObject* re
     for (auto window : item->getAppendWindows()) {
         window->setWindowIconGeometry(qobject_cast<QWindow*>(relativePositionItem), QRect(QPoint(x1, y1),QPoint(x2, y2)));
     }
+}
+
+void TaskManager::dumpItemInfo(const QModelIndex &index) const
+{
+    dataModel()->dumpItemInfo(index);
 }
 
 bool TaskManager::allowForceQuit()

@@ -4,10 +4,13 @@
 
 import QtQuick 2.15
 import QtQuick.Layouts 2.15
+import QtQuick.Controls 2.15
 
 Item {
     id: root
     required property bool useColumnLayout
+    property bool atViewBeginning: useColumnLayout ? listView.atYBeginning : listView.atXBeginning
+    property bool atViewEnd: useColumnLayout ? listView.atYEnd : listView.atXEnd
     property alias model: listView.model
     property alias delegate: listView.delegate
     property alias spacing: listView.spacing
@@ -16,13 +19,49 @@ Item {
     property alias remove: listView.remove
     property alias move: listView.move
     property alias displaced: listView.displaced
+    property alias interactive: listView.interactive
+    property alias header: listView.header
+    property alias footer: listView.footer
+
+    function forceLayout() {
+        listView.forceLayout()
+    }
+
+    function scrollIncrease() {
+        if (useColumnLayout) {
+            vsb.increase()
+        } else {
+            hsb.increase()
+        }
+    }
+
+    function scrollDecrease() {
+        if (useColumnLayout) {
+            vsb.decrease()
+        } else {
+            hsb.decrease()
+        }
+    }
+
     ListView {
         id: listView
         anchors.fill: parent
-        orientation: useColumnLayout ? ListView.Vertical : ListView.Horizontal
+        orientation: root.useColumnLayout ? ListView.Vertical : ListView.Horizontal
         layoutDirection: Qt.LeftToRight
         verticalLayoutDirection: ListView.TopToBottom
+        boundsBehavior: Flickable.StopAtBounds
         interactive: false
+        cacheBuffer: 100
+        ScrollBar.horizontal: ScrollBar {
+            id: hsb
+            enabled: !root.useColumnLayout
+            policy: ScrollBar.AlwaysOff
+        }
+        ScrollBar.vertical: ScrollBar {
+            id: vsb
+            enabled: root.useColumnLayout
+            policy: ScrollBar.AlwaysOff
+        }
     }
 
     function calculateImplicitWidth(prev, current) {
@@ -52,7 +91,7 @@ Item {
         for (let child of listView.contentItem.visibleChildren) {
             width = calculateImplicitWidth(width, child.implicitWidth)
         }
-        // TODO: abvoe qt6.8 implicitSize to 0 will make size to 0 default.
+        // TODO: above qt6.8 implicitSize to 0 will make size to 0 default.
         // so make minimum implicitSize to 1, find why and remove below
         return Math.max(width, 1)
     }

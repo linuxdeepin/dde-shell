@@ -108,7 +108,7 @@ QVariant AbstractWindowMonitor::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void AbstractWindowMonitor::trackWindow(AbstractWindow* window)
+void AbstractWindowMonitor::trackWindow(AbstractWindow *window)
 {
     beginInsertRows(QModelIndex(), m_trackedWindows.size(), m_trackedWindows.size());
     m_trackedWindows.append(window);
@@ -147,7 +147,7 @@ void AbstractWindowMonitor::trackWindow(AbstractWindow* window)
     });
 }
 
-void AbstractWindowMonitor::destroyWindow(AbstractWindow * window)
+void AbstractWindowMonitor::destroyWindow(AbstractWindow *window)
 {
     auto pos = m_trackedWindows.indexOf(window);
     if (pos == -1)
@@ -157,6 +157,5 @@ void AbstractWindowMonitor::destroyWindow(AbstractWindow * window)
     m_trackedWindows.removeAt(pos);
     endRemoveRows();
 }
-
 
 }

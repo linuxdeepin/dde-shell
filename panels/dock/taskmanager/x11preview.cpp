@@ -271,6 +271,8 @@ public:
         if (WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
             auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
             auto size = calSize(pixmap.size());
+            auto scaledPixmap = pixmap.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            scaledPixmap.setDevicePixelRatio(qApp->devicePixelRatio());
 
             DStyleHelper dstyle(m_listView->style());
             const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);

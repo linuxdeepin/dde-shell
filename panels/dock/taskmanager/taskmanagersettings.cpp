@@ -57,6 +57,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
     m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
     loadDockedItems();
+    qDebug() << m_dockedElements;
 }
 
 bool TaskManagerSettings::isAllowedForceQuit()
