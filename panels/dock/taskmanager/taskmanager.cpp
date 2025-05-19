@@ -13,6 +13,7 @@
 #include "dockglobalelementmodel.h"
 #include "dsglobal.h"
 #include "globals.h"
+#include "hoverpreviewproxymodel.h"
 #include "itemmodel.h"
 #include "pluginfactory.h"
 #include "taskmanager.h"
@@ -72,23 +73,12 @@ TaskManager::TaskManager(QObject *parent)
     , AbstractTaskManagerInterface(nullptr)
     , m_windowFullscreen(false)
 {
-    qRegisterMetaType<ObjectInterfaceMap>();
-    qDBusRegisterMetaType<ObjectInterfaceMap>();
-    qRegisterMetaType<ObjectMap>();
-    qDBusRegisterMetaType<ObjectMap>();
-    qDBusRegisterMetaType<QStringMap>();
-    qRegisterMetaType<QStringMap>();
-    qRegisterMetaType<PropMap>();
-    qDBusRegisterMetaType<PropMap>();
-    qDBusRegisterMetaType<QDBusObjectPath>();
-
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
 }
 
 bool TaskManager::load()
 {
-    loadDockedAppItems();
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
         m_windowMonitor.reset(new TreeLandWindowMonitor());
@@ -144,14 +134,22 @@ bool TaskManager::init()
 
         m_dockGlobalElementModel = new DockGlobalElementModel(model, m_activeAppModel, this);
         m_itemModel = new DockItemModel(m_dockGlobalElementModel, this);
-    }
 
-    if (m_windowMonitor)
-        m_windowMonitor->start();
+        // 初始化预览代理模型，基于合并后的数据
+        m_hoverPreviewModel = new HoverPreviewProxyModel(this);
+        m_hoverPreviewModel->setSourceModel(m_dockGlobalElementModel);
+    }
 
     connect(m_windowMonitor.data(), &AbstractWindowMonitor::windowFullscreenChanged, this, [this] (bool isFullscreen) {
         m_windowFullscreen = isFullscreen;
         emit windowFullscreenChanged(isFullscreen);
+    });
+
+    connect(m_windowMonitor.data(), &AbstractWindowMonitor::previewShouldClear, this, [this]() {
+        // 当预览窗口真正隐藏时，清空过滤条件
+        if (m_hoverPreviewModel) {
+            m_hoverPreviewModel->clearFilter();
+        }
     });
 
     // 设置preview opacity
@@ -161,12 +159,22 @@ bool TaskManager::init()
         modifyOpacityChanged();
         connect(appearanceApplet, SIGNAL(opacityChanged()), this, SLOT(modifyOpacityChanged()));
     }
+    QTimer::singleShot(500, [this]() {
+        if (m_windowMonitor)
+            m_windowMonitor->start();
+    });
+
     return true;
 }
 
-ItemModel *TaskManager::dataModel()
+DockItemModel *TaskManager::dataModel() const
 {
-    return ItemModel::instance();
+    return m_itemModel;
+}
+
+HoverPreviewProxyModel *TaskManager::hoverPreviewModel() const
+{
+    return m_hoverPreviewModel;
 }
 
 void TaskManager::requestActivate(const QModelIndex &index) const
@@ -194,17 +202,26 @@ void TaskManager::requestUpdateWindowGeometry(const QModelIndex &index, const QR
     m_itemModel->requestUpdateWindowGeometry(index, geometry, delegate);
 }
 
-void TaskManager::requestPreview(const QModelIndexList &indexes,
-                                 QObject *relativePositionItem,
-                                 int32_t previewXoffset,
-                                 int32_t previewYoffset,
-                                 uint32_t direction) const
+void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
-    for (auto index : indexes) {
-        qDebug() << "requestPreview" << index << index.model() << (index.model() == m_itemModel);
+    if (!m_hoverPreviewModel) {
+        qWarning() << "TaskManager::requestPreview: m_hoverPreviewModel is null";
+        return;
     }
-    m_itemModel->requestPreview(indexes, relativePositionItem, previewXoffset, previewYoffset, direction);
+
+    // Set the preview filter condition based on the incoming model index
+    m_hoverPreviewModel->setFilterModelIndex(index);
+
+    // Check if there are any windows after filtering
+    if (m_hoverPreviewModel->rowCount() == 0) {
+        qDebug() << "TaskManager::requestPreview: No windows found for index";
+        hideItemPreview();
+        return;
+    }
+
+    m_windowMonitor->requestPreview(m_hoverPreviewModel, qobject_cast<QWindow *>(relativePositionItem), previewXoffset, previewYoffset, direction);
 }
+
 void TaskManager::requestWindowsView(const QModelIndexList &indexes) const
 {
     m_itemModel->requestWindowsView(indexes);
@@ -250,25 +267,6 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     ItemModel::instance()->addItem(appitem);
 }
 
-void TaskManager::clickItem(const QString& itemId, const QString& menuId)
-{
-    auto item = ItemModel::instance()->getItemById(itemId);
-    if(!item) return;
-
-    if (menuId == DOCK_ACTION_ALLWINDOW) {
-        QList<uint32_t> windowIds;
-        auto windows = item->data().toStringList();
-        std::transform(windows.begin(), windows.end(), std::back_inserter(windowIds), [](const QString &windowId) {
-            return windowId.toUInt();
-        });
-
-        m_windowMonitor->presentWindows(windowIds);
-        return;
-    }
-
-    item->handleClick(menuId);
-}
-
 void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls)
 {
     auto indexes = m_itemModel->match(m_itemModel->index(0, 0), TaskManager::ItemIdRole, itemId, 1, Qt::MatchExactly);
@@ -284,23 +282,10 @@ void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls
     m_itemModel->requestOpenUrls(indexes.first(), urlList);
 }
 
-void TaskManager::showItemPreview(const QString &itemId, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
-{
-    auto item = ItemModel::instance()->getItemById(itemId).get();
-    if (!item) {
-        return;
-    }
-
-    QPointer<AppItem> pItem = reinterpret_cast<AppItem *>(item);
-    if (pItem.isNull()) {
-        return;
-    }
-
-    m_windowMonitor->showItemPreview(pItem, relativePositionItem, previewXoffset, previewYoffset, direction);
-}
-
 void TaskManager::hideItemPreview()
 {
+    // 不立即清理预览代理模型的状态，让预览窗口的延迟隐藏机制来处理
+    // 这样用户可以将鼠标移动到预览窗口上
     m_windowMonitor->hideItemPreview();
 }
 
@@ -311,30 +296,6 @@ void TaskManager::setAppItemWindowIconGeometry(const QString& appid, QObject* re
 
     for (auto window : item->getAppendWindows()) {
         window->setWindowIconGeometry(qobject_cast<QWindow*>(relativePositionItem), QRect(QPoint(x1, y1),QPoint(x2, y2)));
-    }
-}
-
-void TaskManager::loadDockedAppItems()
-{
-    // TODO: remove this function once migrated to DockItemModel (when dataModel() returns m_itemModel instead of ItemModel::instance())
-    for (const auto &apps : TaskManagerSettings::instance()->dockedElements()) {
-        // app names in dockedElements are in format of "desktop/<appid>"
-        auto appid = apps.split('/').last();
-        auto desktopfile = DESKTOPFILEFACTORY::createById(appid, "amAPP");
-        auto valid = desktopfile->isValied();
-
-        if (!valid.first) {
-            qInfo(taskManagerLog()) << "failed to load " << appid << " beacause " << valid.second;
-            continue;
-        }
-
-        auto appitem = desktopfile->getAppItem();
-        if (appitem.isNull()) {
-            appitem = new AppItem(appid);
-        }
-
-        appitem->setDesktopFileParser(desktopfile);
-        ItemModel::instance()->addItem(appitem);
     }
 }
 
@@ -353,9 +314,9 @@ bool TaskManager::requestDockByDesktopId(const QString& desktopID)
     if (desktopID.startsWith("internal/")) return false;
     QString appId = desktopIdToAppId(desktopID);
     // 检查应用是否已经在任务栏中，如果是则返回 false
-    if (IsDocked(appId)) 
+    if (IsDocked(appId))
         return false;
-    
+
     return RequestDock(appId);
 }
 
