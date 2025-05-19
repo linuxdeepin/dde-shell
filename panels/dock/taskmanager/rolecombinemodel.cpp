@@ -318,7 +318,6 @@ QHash<int, QByteArray> RoleCombineModel::createRoleNames() const
     std::for_each(minorRoleNames.constBegin(), minorRoleNames.constEnd(), [&lastRole, &roleNames, this](auto &roleName) {
         roleNames.insert(++lastRole, roleName);
     });
-
     return roleNames;
 }
 

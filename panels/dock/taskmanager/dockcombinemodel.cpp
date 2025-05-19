@@ -53,6 +53,7 @@ QVariant DockCombineModel::data(const QModelIndex &index, int role) const
         return res;
     }
     case TaskManager::IconNameRole: {
+        QString winTitle = RoleCombineModel::data(index, m_roleMaps.value(TaskManager::WinIconRole)).toString();
         auto icon = RoleCombineModel::data(index, m_roleMaps.value(TaskManager::IconNameRole)).toString();
         if (icon.isEmpty()) {
             icon = RoleCombineModel::data(index, m_roleMaps.value(TaskManager::WinIconRole)).toString();
