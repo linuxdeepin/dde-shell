@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "appitem.h"
 #include "x11utils.h"
 #include "x11window.h"
 #include "x11preview.h"
@@ -103,21 +102,6 @@ void X11WindowMonitor::presentWindows(QList<uint32_t> windows)
                 .call().waitForFinished();
 }
 
-void X11WindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
-{
-    // custom created preview popup window and show at (relativePositionItem.x + previewXoffset, relativePositionItem.y + previewYoffset) pos
-    // direction is dock current position
-
-    if (m_windowPreview.isNull()) {
-        m_windowPreview.reset(new X11WindowPreviewContainer(this));
-        m_windowPreview->setMaskAlpha(static_cast<int>(m_opacity * 255));
-        m_windowPreview->windowHandle()->setTransientParent(qobject_cast<QWindow *>(relativePositionItem));
-    }
-
-    m_windowPreview->showPreview(item,qobject_cast<QWindow*>(relativePositionItem), previewXoffset, previewYoffset, direction);
-    m_windowPreview->updatePosition();
-}
-
 void X11WindowMonitor::hideItemPreview()
 {
     if (m_windowPreview.isNull()) return;
@@ -149,6 +133,28 @@ void X11WindowMonitor::setPreviewOpacity(double opacity)
     if (!m_windowPreview.isNull()) {
         m_windowPreview->setMaskAlpha(static_cast<int>(m_opacity * 255));
     }
+}
+
+void X11WindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
+                                      QWindow *relativePositionItem,
+                                      int32_t previewXoffset,
+                                      int32_t previewYoffset,
+                                      uint32_t direction)
+{
+    if (m_windowPreview.isNull()) {
+        m_windowPreview.reset(new X11WindowPreviewContainer(this));
+        m_windowPreview->setMaskAlpha(static_cast<int>(m_opacity * 255));
+        m_windowPreview->windowHandle()->setTransientParent(relativePositionItem);
+    }
+
+    m_windowPreview->showPreviewWithModel(sourceModel, relativePositionItem, previewXoffset, previewYoffset, direction);
+    m_windowPreview->updatePosition();
+}
+
+void X11WindowMonitor::clearPreviewState()
+{
+    // 发出信号通知 TaskManager 清空预览过滤状态
+    emit previewShouldClear();
 }
 
 void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)
@@ -203,11 +209,6 @@ void X11WindowMonitor::onWindowPropertyChanged(xcb_window_t window, xcb_atom_t a
         x11Window->updateMotifWmHints();
     } else if (atom == X11->getAtomByName("WM_CLASS")) {
         x11Window->updateIdentify();
-    }
-
-    auto appitem = x11Window->getAppItem();
-    if (x11Window->shouldSkip() && appitem) {
-        appitem->removeWindow(x11Window.data());
     }
 }
 

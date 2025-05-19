@@ -95,8 +95,14 @@ void DockItemModel::setSourceModel(QAbstractItemModel *model)
 
 void DockItemModel::dumpItemInfo(const QModelIndex &index)
 {
-    qDebug() << "Index in DockItemModel:" << index << "DesktopIdRole:" << data(index, TaskManager::DesktopIdRole)
-             << "ItemIdRole:" << data(index, TaskManager::ItemIdRole) << "DockedRole:" << data(index, TaskManager::DockedRole);
+    // clang-format off
+    qDebug() << "Index in DockItemModel:" << index
+             << "DesktopIdRole:" << data(index, TaskManager::DesktopIdRole)
+             << "ItemIdRole:" << data(index, TaskManager::ItemIdRole)
+             << "WinIconRole:" << data(index, TaskManager::WinIconRole)
+             << "IconNameRole:" << data(index, TaskManager::IconNameRole)
+             << "DockedRole:" << data(index, TaskManager::DockedRole);
+    // clang-format on
 }
 
 QHash<int, QByteArray> DockItemModel::roleNames() const
