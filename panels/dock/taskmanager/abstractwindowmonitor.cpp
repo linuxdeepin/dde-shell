@@ -8,8 +8,9 @@
 #include "taskmanager.h"
 
 namespace dock {
-AbstractWindowMonitor::AbstractWindowMonitor(QObject* parent)
+AbstractWindowMonitor::AbstractWindowMonitor(QObject *parent)
     : QAbstractListModel(parent)
+    , AbstractTaskManagerInterface(nullptr)
 {
 }
 
@@ -27,6 +28,57 @@ QHash<int, QByteArray> AbstractWindowMonitor::roleNames() const
 int AbstractWindowMonitor::rowCount(const QModelIndex &parent) const
 {
     return m_trackedWindows.size();
+}
+
+void AbstractWindowMonitor::requestActivate(const QModelIndex &index) const
+{
+    auto window = m_trackedWindows.value(index.row(), nullptr);
+    if (nullptr == window)
+        return;
+
+    if (window->isActive()) {
+        window->minimize();
+    } else {
+        window->activate();
+    }
+}
+
+void AbstractWindowMonitor::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
+{
+}
+
+void AbstractWindowMonitor::requestNewInstance(const QModelIndex &index, const QString &action) const
+{
+}
+
+void AbstractWindowMonitor::requestClose(const QModelIndex &index, bool force) const
+{
+    auto window = m_trackedWindows.value(index.row(), nullptr);
+    if (nullptr == window)
+        return;
+    if (force) {
+        window->killClient();
+    } else {
+        window->close();
+    }
+}
+
+void AbstractWindowMonitor::requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+{
+}
+
+void AbstractWindowMonitor::requestPreview(const QModelIndexList &indexes,
+                                           QObject *relativePositionItem,
+                                           int32_t previewXoffset,
+                                           int32_t previewYoffset,
+                                           uint32_t direction) const
+{
+    qDebug() << indexes;
+}
+
+void AbstractWindowMonitor::requestWindowsView(const QModelIndexList &indexes) const
+{
+    qDebug() << indexes;
 }
 
 QVariant AbstractWindowMonitor::data(const QModelIndex &index, int role) const
@@ -62,33 +114,33 @@ void AbstractWindowMonitor::trackWindow(AbstractWindow* window)
     m_trackedWindows.append(window);
     endInsertRows();
 
-    connect(window, &AbstractWindow::pidChanged, this, [this, window](){
+    connect(window, &AbstractWindow::pidChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::PidRole});
     });
-    connect(window, &AbstractWindow::identityChanged, this, [this, window](){
+    connect(window, &AbstractWindow::identityChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::IdentityRole});
     });
-    connect(window, &AbstractWindow::iconChanged, this, [this, window](){
+    connect(window, &AbstractWindow::iconChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::WinIconRole});
     });
-    connect(window, &AbstractWindow::titleChanged, this, [this, window](){
+    connect(window, &AbstractWindow::titleChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::WinTitleRole});
     });
 
-    connect(window, &AbstractWindow::isActiveChanged, this, [this, window](){
+    connect(window, &AbstractWindow::stateChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
-        Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::ActiveRole});
+        Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::ActiveRole, TaskManager::AttentionRole});
     });
-    connect(window, &AbstractWindow::shouldSkipChanged, this, [this, window](){
+    connect(window, &AbstractWindow::shouldSkipChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::ShouldSkipRole});

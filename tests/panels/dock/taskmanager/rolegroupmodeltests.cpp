@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "rolegroupmodel.h"
+#include <QAbstractItemModelTester>
 #include <QVariant>
 
 #include <gtest/gtest.h>
