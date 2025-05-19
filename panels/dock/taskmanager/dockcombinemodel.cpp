@@ -23,6 +23,7 @@ DockCombineModel::DockCombineModel(QAbstractItemModel *major, QAbstractItemModel
                   {TaskManager::ActionsRole, RoleCombineModel::roleNames().key(MODEL_ACTIONS)},
                   {TaskManager::NameRole, RoleCombineModel::roleNames().key(MODEL_NAME)},
                   {TaskManager::WinIdRole, RoleCombineModel::roleNames().key(MODEL_WINID)},
+                  {TaskManager::WinIconRole, RoleCombineModel::roleNames().key(MODEL_WINICON)},
                   {TaskManager::WinTitleRole, RoleCombineModel::roleNames().key(MODEL_TITLE)}};
 }
 
@@ -36,6 +37,7 @@ QHash<int, QByteArray> DockCombineModel::roleNames() const
             {TaskManager::ActionsRole, MODEL_ACTIONS},
             {TaskManager::NameRole, MODEL_NAME},
             {TaskManager::WinIdRole, MODEL_WINID},
+            {TaskManager::WinIconRole, MODEL_WINICON},
             {TaskManager::WinTitleRole, MODEL_TITLE}};
 }
 
