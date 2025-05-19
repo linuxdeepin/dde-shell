@@ -327,6 +327,7 @@ void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const 
     if (action == DOCK_ACTION_DOCK) {
     } else if (action == DOCK_ACTION_FORCEQUIT) {
     } else if (action == DOCK_ACTION_CLOSEALL) {
+        requestClose(index);
     } else {
         auto data = m_data.value(index.row());
         auto id = std::get<0>(data);

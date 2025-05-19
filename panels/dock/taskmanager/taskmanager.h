@@ -10,7 +10,6 @@
 #include "dockcombinemodel.h"
 #include "dockglobalelementmodel.h"
 #include "dockitemmodel.h"
-#include "itemmodel.h"
 
 #include <QPointer>
 
@@ -63,7 +62,7 @@ public:
 
     explicit TaskManager(QObject* parent = nullptr);
 
-    ItemModel* dataModel();
+    DockItemModel *dataModel() const;
 
     virtual bool init() override;
     virtual bool load() override;
@@ -92,9 +91,7 @@ public:
     Q_INVOKABLE bool IsDocked(QString appID);
     Q_INVOKABLE bool RequestUndock(QString appID);
 
-    Q_INVOKABLE void clickItem(const QString& itemid, const QString& menuId);
-    Q_INVOKABLE void dropFilesOnItem(const QString& itemId, const QStringList& urls);
-    Q_INVOKABLE void showItemPreview(const QString& itemId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    Q_INVOKABLE void dropFilesOnItem(const QString &itemId, const QStringList &urls);
     Q_INVOKABLE void hideItemPreview();
 
     Q_INVOKABLE void setAppItemWindowIconGeometry(const QString& appid, QObject* relativePositionItem, const int& x1, const int& y1, const int& x2, const int& y2);
@@ -110,9 +107,6 @@ Q_SIGNALS:
 private Q_SLOTS:
     void handleWindowAdded(QPointer<AbstractWindow> window);
     void modifyOpacityChanged();
-
-private:
-    void loadDockedAppItems();
 
 private:
     QScopedPointer<AbstractWindowMonitor> m_windowMonitor;
