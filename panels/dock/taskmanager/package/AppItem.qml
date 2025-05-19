@@ -22,8 +22,8 @@ Item {
     required property string menus
     required property list<string> windows
     required property int visualIndex
+    required property var modelIndex
 
-    signal clickItem(itemId: string, menuId: string)
     signal dropFilesOnItem(itemId: string, files: list<string>)
     signal dragFinished()
 
@@ -145,7 +145,7 @@ Item {
                     delegate: LP.MenuItem {
                         text: modelData.name
                         onTriggered: {
-                            root.clickItem(root.itemId, modelData.id)
+                            TaskManager.requestNewInstance(root.modelIndex, modelData.id);
                         }
                     }
                     onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
@@ -286,7 +286,8 @@ Item {
         property int yOffset: 0
         onTriggered: {
             if (root.windows.length != 0 || Qt.platform.pluginName === "wayland") {
-                taskmanager.Applet.showItemPreview(root.itemId, Panel.rootObject, xOffset, yOffset, Panel.position)
+                var indexes = [root.modelIndex];
+                taskmanager.Applet.requestPreview(indexes, Panel.rootObject, xOffset, yOffset, Panel.position);
             }
         }
     }
@@ -316,14 +317,17 @@ Item {
             closeItemPreview()
         }
         onClicked: function (mouse) {
+            let index = root.modelIndex;
             if (mouse.button === Qt.RightButton) {
                 contextMenuLoader.active = true
                 MenuHelper.openMenu(contextMenuLoader.item)
             } else {
                 if (root.windows.length === 0) {
-                    launchAnimation.start()
+                    launchAnimation.start();
+                    TaskManager.requestNewInstance(index, "");
+                    return;
                 }
-                root.clickItem(root.itemId, "")
+                TaskManager.requestActivate(index);
             }
         }
 

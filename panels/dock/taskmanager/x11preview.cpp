@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "appitem.h"
-#include "x11utils.h"
 #include "x11preview.h"
 #include "abstractwindow.h"
+#include "appitem.h"
+#include "taskmanager.h"
+#include "x11utils.h"
 #include "x11windowmonitor.h"
 
 #include <cstdint>
@@ -62,6 +63,74 @@ enum {
     WindowPreviewContentRole,
 };
 
+QPixmap fetchWindowPreview(const uint32_t &winId)
+{
+    // TODO: check kwin is load screenshot plugin
+    if (!WM_HELPER->hasComposite())
+        return QPixmap();
+
+    // pipe read write fd
+    int fd[2];
+
+    if (pipe(fd) < 0) {
+        qDebug() << "failed to create pipe";
+        return QPixmap();
+    }
+
+    QDBusInterface interface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/ScreenShot2"), QStringLiteral("org.kde.KWin.ScreenShot2"));
+    // 第一个参数，winID或者UUID
+    QList<QVariant> args;
+    args << QVariant::fromValue(QString::number(winId));
+    // 第二个参数，需要截图的选项
+    QVariantMap option;
+    option["include-decoration"] = true;
+    option["include-cursor"] = false;
+    option["native-resolution"] = true;
+    args << QVariant::fromValue(option);
+    // 第三个参数，文件描述符
+    args << QVariant::fromValue(QDBusUnixFileDescriptor(fd[1]));
+
+    QDBusReply<QVariantMap> reply = interface.callWithArgumentList(QDBus::Block, QStringLiteral("CaptureWindow"), args);
+
+    // close write
+    ::close(fd[1]);
+
+    if (!reply.isValid()) {
+        ::close(fd[0]);
+        qDebug() << "get current workspace background error: " << reply.error().message();
+        return QPixmap();
+    }
+
+    QVariantMap imageInfo = reply.value();
+    int imageWidth = imageInfo.value("width").toUInt();
+    int imageHeight = imageInfo.value("height").toUInt();
+    int imageStride = imageInfo.value("stride").toUInt();
+    int imageFormat = imageInfo.value("format").toUInt();
+
+    if (imageWidth <= 1 || imageHeight <= 1) {
+        ::close(fd[0]);
+        return QPixmap();
+    }
+
+    QFile file;
+    if (!file.open(fd[0], QIODevice::ReadOnly)) {
+        file.close();
+        ::close(fd[0]);
+        return QPixmap();
+    }
+
+    QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
+    int bitsCountPerPixel = QImage::toPixelFormat(qimageFormat).bitsPerPixel();
+
+    QByteArray fileContent = file.read(imageHeight * imageWidth * bitsCountPerPixel / 8);
+    QImage image(reinterpret_cast<uchar *>(fileContent.data()), imageWidth, imageHeight, imageStride, qimageFormat);
+    // close read
+    ::close(fd[0]);
+    auto pixmap = QPixmap::fromImage(image);
+
+    return pixmap;
+}
+
 class PreviewsListView : public QListView
 {
 public:
@@ -100,36 +169,44 @@ public:
     }
 };
 
-class AppItemWindowModel : public QAbstractListModel
+class DockItemWindowModel : public QAbstractListModel
 {
 public:
-    AppItemWindowModel(QObject* parent = nullptr) : QAbstractListModel(parent) {}
-
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override
+    DockItemWindowModel(QObject *parent = nullptr)
+        : QAbstractListModel(parent)
     {
-        return m_item.isNull() ? 0 : m_item->getAppendWindows().size();
+    }
+
+    inline int rowCount(const QModelIndex &parent = QModelIndex()) const override
+    {
+        return m_dockItemModelIndexes.size();
     }
 
     QVariant data(const QModelIndex& index, int role = WindowIdRole) const override
     {
-        if (!index.isValid() || index.row() >= rowCount() || m_item.isNull())
+        if (!index.isValid() || index.row() >= rowCount())
             return QVariant();
-        
+
         switch (role) {
             case WindowIdRole: {
-                return m_item->getAppendWindows()[index.row()]->id();
+                return m_dockItemModelIndexes.at(index.row()).data(TaskManager::WinIdRole);
             }
             case WindowTitleRole: {
-                return m_item->getAppendWindows()[index.row()]->title();
+                return m_dockItemModelIndexes.at(index.row()).data(TaskManager::WinTitleRole);
             }
             case WindowIconRole: {
-                return m_item->getAppendWindows()[index.row()]->icon();
+                const QModelIndex &modelIndex = m_dockItemModelIndexes.at(index.row());
+                QVariant icon = modelIndex.data(TaskManager::WinIconRole);
+                if (icon.toString().isEmpty()) {
+                    icon = modelIndex.data(TaskManager::IconNameRole);
+                }
+                return icon;
             }
             case WindowPreviewContentRole: {
                 if (index.row() >= m_previewPixmaps.size()) {
-                    return fetchWindowPreview(m_item->getAppendWindows()[index.row()]->id());
+                    return fetchWindowPreview(data(index).toUInt());
                 } else {
-                    return m_previewPixmaps.value(m_item->getAppendWindows()[index.row()]->id());
+                    return m_previewPixmaps.value(data(index).toUInt());
                 }
             }
         }
@@ -137,23 +214,19 @@ public:
         return QVariant();
     }
 
-    void setData(const QPointer<AppItem>& item)
+    void setData(const QModelIndexList &itemIndexes)
     {
-        if (!m_item.isNull()) {
-            m_item->disconnect(this);
-        }
-
         beginResetModel();
-        m_item = item;
+        m_dockItemModelIndexes = itemIndexes;
         resetPreviewPixmap();
         endResetModel();
+    }
 
-        if (!item.isNull()) {
-            connect(item, &AppItem::dataChanged, this, [this](){
-                beginResetModel();
-                resetPreviewPixmap();
-                endResetModel();
-            });
+    void setData(const QPointer<AppItem> &item)
+    {
+        if (item.isNull()) {
+            m_dockItemModelIndexes = {};
+            resetPreviewPixmap();
         }
     }
 
@@ -161,86 +234,17 @@ private:
     void resetPreviewPixmap()
     {
         m_previewPixmaps.clear();
-        if (!m_item.isNull()) {
-            const auto previewPixmaps = QtConcurrent::blockingMapped(m_item->getAppendWindows(), [this](const QPointer<AbstractWindow> &window) {
-                auto previewPixmap = fetchWindowPreview(window->id());
-                return QPair<uint32_t, QPixmap>{window->id(), previewPixmap};
-            });
-
-            for (const auto &item : previewPixmaps) {
-                m_previewPixmaps.insert(item.first, item.second);
+        if (!m_dockItemModelIndexes.isEmpty()) {
+            for (const auto &windowModelIndex : m_dockItemModelIndexes) {
+                uint32_t winId = windowModelIndex.data(TaskManager::WinIdRole).toUInt();
+                auto previewPixmap = fetchWindowPreview(winId);
+                m_previewPixmaps.insert(winId, previewPixmap);
             }
         }
     }
-    QPixmap fetchWindowPreview(const uint32_t& winId) const
-    {
-        // TODO: check kwin is load screenshot plugin
-        if (!WM_HELPER->hasComposite()) return QPixmap();
-
-        // pipe read write fd
-        int fd[2];
-
-        if (pipe(fd) < 0) {
-            qDebug() << "failed to create pipe";
-            return QPixmap();
-        }
-
-        QDBusInterface interface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/ScreenShot2"), QStringLiteral("org.kde.KWin.ScreenShot2"));
-        // 第一个参数，winID或者UUID
-        QList<QVariant> args;
-        args << QVariant::fromValue(QString::number(winId));
-        // 第二个参数，需要截图的选项
-        QVariantMap option;
-        option["include-decoration"] = true;
-        option["include-cursor"] = false;
-        option["native-resolution"] = true;
-        args << QVariant::fromValue(option);
-        // 第三个参数，文件描述符
-        args << QVariant::fromValue(QDBusUnixFileDescriptor(fd[1]));
-
-        QDBusReply<QVariantMap> reply = interface.callWithArgumentList(QDBus::Block, QStringLiteral("CaptureWindow"), args);
-
-        // close write
-        ::close(fd[1]);
-
-        if (!reply.isValid()) {
-            ::close(fd[0]);
-            qDebug() << "get current workspace background error: "<< reply.error().message();
-            return QPixmap();
-        }
-
-        QVariantMap imageInfo = reply.value();
-        int imageWidth = imageInfo.value("width").toUInt();
-        int imageHeight = imageInfo.value("height").toUInt();
-        int imageStride = imageInfo.value("stride").toUInt();
-        int imageFormat = imageInfo.value("format").toUInt();
-
-        if (imageWidth <= 1 || imageHeight <= 1) {
-            ::close(fd[0]);
-            return QPixmap();
-        }
-
-        QFile file;
-        if (!file.open(fd[0], QIODevice::ReadOnly)) {
-            file.close();
-            ::close(fd[0]);
-            return QPixmap();
-        }
-
-        QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
-        int bitsCountPerPixel = QImage::toPixelFormat(qimageFormat).bitsPerPixel();
-
-        QByteArray fileContent = file.read(imageHeight * imageWidth * bitsCountPerPixel / 8);
-        QImage image(reinterpret_cast<uchar *>(fileContent.data()), imageWidth, imageHeight, imageStride, qimageFormat);
-        // close read
-        ::close(fd[0]);
-        auto pixmap = QPixmap::fromImage(image);
-
-        return pixmap;
-    }
 
 private:
-    QPointer<AppItem> m_item;
+    QModelIndexList m_dockItemModelIndexes;
     QHash<uint32_t, QPixmap> m_previewPixmaps;
 };
 
@@ -266,7 +270,7 @@ public:
         QPen pen;
         if (WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
             auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
-            auto size = calSize(pixmap.size()); 
+            auto size = calSize(pixmap.size());
 
             DStyleHelper dstyle(m_listView->style());
             const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
@@ -343,7 +347,7 @@ public:
 
         auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
         int width = qBound(PREVIEW_CONTENT_MIN_WIDTH, calSize(pixmap.size()).width(), PREVIEW_CONTENT_MAX_WIDTH);
-        return QSize(width, PREVIEW_CONTENT_HEIGHT) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2); 
+        return QSize(width, PREVIEW_CONTENT_HEIGHT) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2);
     }
 
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
@@ -394,12 +398,12 @@ private:
 
 };
 
-X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, QWidget *parent)
+X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, QWidget *parent)
     : DBlurEffectWidget(parent)
     , m_direction(0)
     , m_isPreviewEntered(false)
     , m_isDockPreviewCount(0)
-    , m_model(new AppItemWindowModel(this))
+    , m_model(new DockItemWindowModel(this))
     , m_titleWidget(new QWidget())
 {
     m_hideTimer = new QTimer(this);
@@ -431,27 +435,32 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
 
 }
 
-void X11WindowPreviewContainer::showPreview(const QPointer<AppItem> &item, const QPointer<QWindow> &window, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+void X11WindowPreviewContainer::showPreview(const QModelIndexList &indexes,
+                                            const QPointer<QWindow> &window,
+                                            int32_t previewXoffset,
+                                            int32_t previewYoffset,
+                                            uint32_t direction)
 {
     if (!m_previewItem.isNull()) {
         m_previewItem->disconnect(this);
     }
 
-    m_previewItem = item;
     m_baseWindow = window;
     m_previewXoffset = previewXoffset;
     m_previewYoffset = previewYoffset;
     m_direction = direction;
 
     m_isDockPreviewCount += 1;
-    updatePreviewIconFromBase64(item->getCurrentActiveWindowIcon());
-    updatePreviewTitle(item->getCurrentActiveWindowName());
-    m_model->setData(item);
+    const QModelIndex &firstIndex = indexes.first();
+    QString winIcon(firstIndex.data(TaskManager::WinIconRole).toString());
+    if (winIcon.isEmpty()) {
+        winIcon = firstIndex.data(TaskManager::IconNameRole).toString();
+    }
+    updatePreviewIconFromBase64(winIcon);
+    updatePreviewTitle(firstIndex.data(TaskManager::WinTitleRole).toString());
+    m_model->setData(indexes);
 
-    updateSize();
-    connect(m_previewItem, &AppItem::dataChanged, this, [this](){
-        updateSize();
-    });
+    updateSize(indexes.count());
 
     if (isHidden()) {
         show();
@@ -606,7 +615,7 @@ void X11WindowPreviewContainer::initUI()
     titleLayout->addWidget(m_previewIcon);
     titleLayout->setSpacing(0);
     titleLayout->setContentsMargins(QMargins(PREVIEW_HOVER_BORDER, 0, PREVIEW_HOVER_BORDER, 0));
-    titleLayout->addSpacing(6);  
+    titleLayout->addSpacing(6);
     titleLayout->addWidget(m_previewTitle);
     titleLayout->addStretch();
     titleLayout->addWidget(m_closeAllButton, 0, Qt::AlignRight);
@@ -646,9 +655,14 @@ void X11WindowPreviewContainer::initUI()
     handler.setShadowOffset(QPoint(0, 4 * qApp->devicePixelRatio()));
 }
 
-void X11WindowPreviewContainer::updateSize()
+void X11WindowPreviewContainer::updateSize(int windowCount)
 {
-    if (m_previewItem->getAppendWindows().size() == 0) {
+    if (windowCount != -1) {
+        if (windowCount == 0) {
+            DBlurEffectWidget::hide();
+            return;
+        }
+    } else if (m_previewItem && m_previewItem->getAppendWindows().size() == 0) {
         DBlurEffectWidget::hide();
         return;
     }
@@ -726,7 +740,7 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
 
         auto index = m_view->indexAt(mouseEvent->pos());
         if (index.isValid()) {
-            m_previewItem->getAppendWindows()[index.row()]->activate();
+            X11Utils::instance()->setActiveWindow(index.data(TaskManager::WinIdRole).toUInt());
         }
         DBlurEffectWidget::hide();
         break;

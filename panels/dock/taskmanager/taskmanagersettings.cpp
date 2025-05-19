@@ -108,6 +108,10 @@ void TaskManagerSettings::dockedItemsPersisted()
 
 void TaskManagerSettings::loadDockedItems()
 {
+    if (!m_dockedElements.isEmpty()) {
+        return;
+    }
+
     while (!m_dockedItems.isEmpty()) m_dockedItems.removeLast();
 
     auto dcokedDesktopFilesStrList = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDITEMS_KEY).toStringList();

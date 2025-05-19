@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 
+#include <QAbstractItemModelTester>
 #include <QSignalSpy>
 
 #include "rolecombinemodel.h"
@@ -36,11 +37,9 @@ TEST(RoleCombineModel, RowCountTest) {
     modelB.addData(new DataB(0, &modelB));
     modelB.addData(new DataB(1, &modelB));
     modelB.addData(new DataB(2, &modelB));
-    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel* model) -> QModelIndex 
-        {
-            return QModelIndex();
-        }
-    );
+    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        return QModelIndex();
+    });
 
     // modelA is major dataModel
     EXPECT_EQ(model.rowCount(), modelA.rowCount());
@@ -50,16 +49,14 @@ TEST(RoleCombineModel, RowCountTest) {
 TEST(RoleCombineModel, dataTest) {
     TestModelA modelA;
     TestModelB modelB;
-    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel* model) -> QModelIndex 
-        {
-            auto c = model->match(model->index(0, 0), TestModelB::idRole, data);
-            if (c.size() > 0) {
-                return c.first();
-            }
-
-            return QModelIndex();
+    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        auto c = model->match(model->index(0, 0), TestModelB::idRole, data);
+        if (c.size() > 0) {
+            return c.first();
         }
-    );
+
+        return QModelIndex();
+    });
 
     QSignalSpy spyA(&modelA, &QAbstractItemModel::dataChanged);
     QSignalSpy spyB(&modelB, &QAbstractItemModel::dataChanged);
@@ -98,4 +95,21 @@ TEST(RoleCombineModel, dataTest) {
 
     modelB.setData(modelB.index(1), "dataB22");
     EXPECT_EQ(model.index(1, 0).data(names2Role.value(roleNamesB.value(TestModelB::dataRole))), modelB.index(1, 0).data(TestModelB::dataRole));
+}
+
+TEST(RoleCombineModel, ModelTest)
+{
+    TestModelA modelA;
+    TestModelB modelB;
+    modelA.addData(new DataA(0, &modelA));
+    modelA.addData(new DataA(1, &modelA));
+
+    modelB.addData(new DataB(0, &modelB));
+    modelB.addData(new DataB(1, &modelB));
+    modelB.addData(new DataB(2, &modelB));
+    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        return QModelIndex();
+    });
+
+    auto tester = new QAbstractItemModelTester(&model, QAbstractItemModelTester::FailureReportingMode::Fatal);
 }

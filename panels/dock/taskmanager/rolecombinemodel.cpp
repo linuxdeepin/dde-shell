@@ -126,23 +126,27 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
 
     // create minor role map
     auto minorRolenames = m_minor->roleNames();
-    auto thisRoleNames = roleNames();
-    std::for_each(minorRolenames.constBegin(), minorRolenames.constEnd(), [&minorRolenames, &thisRoleNames, this](auto &roleName){
-        m_minorRolesMap.insert(thisRoleNames.key(roleName), minorRolenames.key(roleName));
+    m_roleNames = createRoleNames();
+    std::for_each(minorRolenames.constBegin(), minorRolenames.constEnd(), [&minorRolenames, this](auto &roleName) {
+        m_minorRolesMap.insert(m_roleNames.key(roleName), minorRolenames.key(roleName));
     });
 }
 
-QHash<int, QByteArray> RoleCombineModel::roleNames() const
+QHash<int, QByteArray> RoleCombineModel::createRoleNames() const
 {
     auto roleNames = sourceModel()->roleNames();
     auto keys = sourceModel()->roleNames().keys();
     auto lastRole = *(std::max_element(keys.constBegin(), keys.constEnd()));
     auto minorRoleNames = m_minor->roleNames().values();
-    std::for_each(minorRoleNames.constBegin(), minorRoleNames.constEnd(), [&lastRole, &roleNames, this](auto &roleName){
+    std::for_each(minorRoleNames.constBegin(), minorRoleNames.constEnd(), [&lastRole, &roleNames, this](auto &roleName) {
         roleNames.insert(++lastRole, roleName);
     });
-
     return roleNames;
+}
+
+QHash<int, QByteArray> RoleCombineModel::roleNames() const
+{
+    return m_roleNames;
 }
 
 int RoleCombineModel::rowCount(const QModelIndex &parent) const
