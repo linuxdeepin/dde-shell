@@ -403,13 +403,18 @@ void X11DockHelper::onWindowClientListChanged()
             onWindowAdded(window);
         }
     }
+    bool mightNeedRecheckDockOverlap = false;
     for (auto it = m_windows.cbegin(); it != m_windows.cend();) {
         if (!windows.contains(it.key())) {
             delete it.value();
             it = m_windows.erase(it);
+            mightNeedRecheckDockOverlap = true;
         } else {
             it++;
         }
+    }
+    if (mightNeedRecheckDockOverlap) {
+        Q_EMIT isWindowOverlapChanged(isWindowOverlap());
     }
 }
 
