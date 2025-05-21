@@ -101,8 +101,8 @@ void AbstractWindowMonitor::destroyWindow(AbstractWindow * window)
     if (pos == -1)
         return;
 
-    beginRemoveRows(QModelIndex(), pos, pos + 1);
-    m_trackedWindows.removeOne(window);
+    beginRemoveRows(QModelIndex(), pos, pos);
+    m_trackedWindows.removeAt(pos);
     endRemoveRows();
 }
 
