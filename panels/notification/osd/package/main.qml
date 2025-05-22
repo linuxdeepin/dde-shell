@@ -8,15 +8,18 @@ import QtQuick.Window
 
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
+import org.deepin.dtk.style 1.0 as DS
 
 Window {
     id: root
     visible: Applet.visible
-    D.DWindow.windowRadius: isSingleView ? 30 : D.DTK.platformTheme.windowRadius
+    property var windowRadius: isSingleView ? 30 : D.DTK.platformTheme.windowRadius
+    D.DWindow.windowRadius: root.windowRadius
     D.DWindow.enableBlurWindow: true
     D.DWindow.enabled: true
     D.DWindow.shadowOffset: Qt.point(0, 8)
     D.DWindow.shadowColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.2) : Qt.rgba(0, 0, 0, 0.1)
+    D.DWindow.borderColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.7) : Qt.rgba(0, 0, 0, 0.1)
     color: "transparent"
     DLayerShellWindow.bottomMargin: 180
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
@@ -34,6 +37,32 @@ Window {
 
     property Item osdView
     property bool isSingleView: false
+
+    D.StyledBehindWindowBlur {
+        control: parent
+        anchors.fill: parent
+        blendColor: {
+            if (valid) {
+                return DS.Style.control.selectColor(undefined,
+                                                    Qt.rgba(247 / 255.0, 247 / 255.0, 247 / 255.0, 0.4),
+                                                    Qt.rgba(20 / 255, 20 / 255, 20 / 255, 0.6))
+            }
+            return DS.Style.control.selectColor(undefined,
+                                                DS.Style.behindWindowBlur.lightNoBlurColor,
+                                                DS.Style.behindWindowBlur.darkNoBlurColor)
+        }
+    }
+
+    D.InsideBoxBorder {
+        property D.Palette insideBorderColor: D.Palette {
+            normal: Qt.rgba(1, 1, 1, 0.3)
+            normalDark: Qt.rgba(1, 1, 1, 0.1)
+        }
+        radius: root.windowRadius
+        anchors.fill: parent
+        z: D.DTK.AboveOrder
+        color: D.ColorSelector.insideBorderColor
+    }
 
     Control {
         property D.Palette textColor: D.Palette {
@@ -55,23 +84,6 @@ Window {
 
                 sourceComponent: Control {
                     contentItem: model.data
-                    background: D.FloatingPanel {
-                        implicitWidth:  100
-                        implicitHeight: 40
-                        backgroundColor: D.Palette {
-                            normal: Qt.rgba(247 / 255.0, 247 / 255.0, 247 / 255.0, 0.4)
-                            normalDark: Qt.rgba(0, 0, 0, 0.6)
-                        }
-                        insideBorderColor: D.Palette {
-                            normal: Qt.rgba(1, 0, 0, 0.3)
-                            normalDark: Qt.rgba(1, 1, 1, 0.1)
-                        }
-                        outsideBorderColor: D.Palette {
-                            normal: Qt.rgba(1, 1, 0, 0.1)
-                            normalDark: Qt.rgba(0, 0, 0, 0.7)
-                        }
-                        dropShadowColor: null
-                    }
                 }
             }
         }
