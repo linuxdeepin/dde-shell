@@ -130,7 +130,6 @@ NotifyItem {
             Layout.topMargin: 8
             Layout.leftMargin: 10
             palette: DTK.makeIconPalette(root.palette)
-            mode: root.ColorSelector.controlState
             theme: root.ColorSelector.controlTheme
         }
 
