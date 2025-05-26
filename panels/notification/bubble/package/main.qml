@@ -70,7 +70,7 @@ Window {
         verticalLayoutDirection: ListView.BottomToTop
         add: Transition {
             id: addTrans
-            NumberAnimation { properties: "x"; from: addTrans.ViewTransition.item.width; duration: 600; easing.type: Easing.OutExpo }
+            XAnimator { target: addTrans.ViewTransition.item; from: addTrans.ViewTransition.item.width; duration: 600; easing.type: Easing.OutExpo }
         }
         delegate: Bubble {
             width: 360
