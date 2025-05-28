@@ -14,6 +14,7 @@ Q_LOGGING_CATEGORY(notifyLog, "dde.shell.notification")
 #define ACTION_SEGMENT ("|")
 #define HINT_SEGMENT ("|")
 #define KEY_VALUE_SEGMENT ("!!!")
+#define LIST_VALUE_SEGMENT (":::")
 
 static const uint NoReplaceId = 0;
 
@@ -294,7 +295,13 @@ QString NotifyEntity::convertHintsToString(const QVariantMap &map)
         QString key = it.key();
         text += key;
         text += KEY_VALUE_SEGMENT;
-        QString value = it.value().toString();
+        QString value;
+        if (it.value().typeId() == QMetaType::QStringList) {
+            QStringList tmp = it.value().toStringList();
+            value = tmp.join(LIST_VALUE_SEGMENT);
+        } else {
+            value = it.value().toString();
+        }
         text += value;
         text += HINT_SEGMENT;
     }
@@ -328,7 +335,13 @@ QVariantMap NotifyEntity::parseHint(const QString &hint)
         if (list.size() != 2)
             continue;
         const QString &key = list[0];
-        QVariant value = QVariant::fromValue(list[1]);
+        QVariant value;
+        auto listValue = list[1].split(LIST_VALUE_SEGMENT);
+        if (listValue.size() > 1) {
+            value = QVariant::fromValue(listValue);
+        } else {
+            value = QVariant::fromValue(list[1]);
+        }
 
         map.insert(key, value);
     }

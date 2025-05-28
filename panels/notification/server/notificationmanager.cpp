@@ -512,7 +512,14 @@ void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QStr
     QMap<QString, QVariant>::const_iterator i = hints.constBegin();
     while (i != hints.constEnd()) {
         if (i.key() == "x-deepin-action-" + actionId) {
-            QStringList args = i.value().toString().split(",");
+            QStringList args;
+            if (i.value().typeId() == QMetaType::QStringList) {
+                args = i.value().toStringList();
+            } else {
+                qDebug(notifyLog) << "Deprecate hint format, use string list instead of string."
+                                  << "actionId:" << actionId << ", value:" << i.value();
+                args = i.value().toString().split(",");
+            }
             if (!args.isEmpty()) {
                 QString cmd = args.takeFirst(); // 命令
 
