@@ -1,3 +1,18 @@
+dde-shell (1.99.37) unstable; urgency=medium
+
+  * fix: support string list in notification hints
+  * fix: replace NumberAnimation with XAnimator in notification bubble
+  * style: enhance OSD window visual effects
+  * fix: remove redundant mode property in NotifyItemContent
+  * chore: simplify window effect descriptions
+  * fix: incorrectly removed window in AbstractWindowMonitor
+  * fix: add missing winIconRole to DockCombineModel
+  * fix: smart hide state not updated when window closed
+  * i18n: Updates for project Deepin Desktop Environment (#1127)
+  * refactor: prepare for combined model for taskmanager
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Wed, 28 May 2025 18:30:25 +0800
+
 dde-shell (1.99.36) unstable; urgency=medium
 
   * feat: introduce RoleGroupModel
