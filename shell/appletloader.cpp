@@ -248,17 +248,16 @@ void DAppletLoaderPrivate::loadTranslation(const DPluginMetaData &pluginData)
     const QString baseDir = pluginData.pluginDir();
     const QString pluginId = pluginData.pluginId();
 
-    QString pluginTransFilePath = QString(baseDir + "/translations/" + pluginId + "_%1.qm").arg(QLocale::system().name());
-    if (QFile::exists(pluginTransFilePath)) {
-        auto translator = new QTranslator(qApp);
-        if (translator->load(pluginTransFilePath)) {
-            m_pluginTranslators[pluginId] = translator;
-            qApp->installTranslator(translator);
-            qInfo(dsLoaderLog) << "Loaded translation:" << pluginTransFilePath;
-        } else {
-            qCWarning(dsLoaderLog) << "Failed to load translation:" << pluginTransFilePath;
-            translator->deleteLater();
-        }
+    auto translator = new QTranslator(qApp);
+    const QString pluginTranslationDir(baseDir + "/translations/");
+    if (translator->load(QLocale::system(), pluginId, QLatin1String("_"), pluginTranslationDir)) {
+        m_pluginTranslators[pluginId] = translator;
+        qApp->installTranslator(translator);
+        qInfo(dsLoaderLog) << "Loaded translation:" << translator->filePath();
+    } else {
+        qCWarning(dsLoaderLog) << "Failed to load translation:" << pluginTranslationDir << "plugin id:" << pluginId
+                               << "locale:" << QLocale::system().uiLanguages();
+        translator->deleteLater();
     }
 
     const auto children = DPluginLoader::instance()->childrenPlugin(pluginId);
