@@ -18,6 +18,7 @@ const static QString keyItemAlignment           = "Item_Alignment";
 const static QString keyIndicatorStyle          = "Indicator_Style";
 const static QString keyPluginsVisible           = "Plugins_Visible";
 const static QString keyShowInPrimary           = "Show_In_Primary";
+const static QString keyLocked                  = "Locked";
 
 namespace dock {
 
@@ -131,6 +132,7 @@ DockSettings::DockSettings(QObject* parent)
     , m_dockPosition(dock::Bottom)
     , m_alignment(dock::CenterAlignment)
     , m_style(dock::Fashion)
+    , m_locked(false)
 {
     m_writeTimer->setSingleShot(true);
     m_writeTimer->setInterval(1000);
@@ -147,6 +149,7 @@ void DockSettings::init()
         m_style = string2IndicatorStyle(m_dockConfig->value(keyIndicatorStyle).toString());
         m_pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
         m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
+        m_locked = m_dockConfig->value(keyLocked).toBool();
 
         connect(m_dockConfig.data(), &DConfig::valueChanged, this, [this](const QString& key){
             if (keyDockSize == key) {
@@ -182,6 +185,11 @@ void DockSettings::init()
                 if (showInPrimary == m_showInPrimary) return;
                 m_showInPrimary = showInPrimary;
                 Q_EMIT showInPrimaryChanged(m_showInPrimary);
+            } else if (keyLocked == key) {
+                auto locked = m_dockConfig->value(keyLocked).toBool();
+                if (locked == m_locked) return;
+                m_locked = locked;
+                Q_EMIT lockedChanged(m_locked);
             }
         });
     } else {
@@ -289,6 +297,21 @@ bool DockSettings::showInPrimary() const
     return m_showInPrimary;
 }
 
+bool DockSettings::locked() const
+{
+    return m_locked;
+}
+
+void DockSettings::setLocked(bool newLocked)
+{
+    if (m_locked == newLocked) {
+        return;
+    }
+    m_locked = newLocked;
+    m_dockConfig->setValue(keyLocked, m_locked);
+    Q_EMIT lockedChanged(m_locked);
+}
+
 void DockSettings::addWriteJob(WriteJob job)
 {
     if (m_writeJob.contains(job)) return;
@@ -345,6 +368,5 @@ void DockSettings::checkWriteJob()
 
     m_writeTimer->start();
 }
-
 
 }

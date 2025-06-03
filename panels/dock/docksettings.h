@@ -26,6 +26,7 @@ class DockSettings : public QObject
     Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
     Q_PROPERTY(QVariantMap pluginsVisible READ pluginsVisible WRITE setPluginsVisible NOTIFY pluginsVisibleChanged FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
+    Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
 
 public:
     static DockSettings* instance();
@@ -37,6 +38,7 @@ public:
     IndicatorStyle indicatorStyle();
     QVariantMap pluginsVisible();
     bool showInPrimary() const;
+    bool locked() const;
 
     void setDockSize(const uint& size);
     void setHideMode(const HideMode& mode);
@@ -45,6 +47,7 @@ public:
     void setIndicatorStyle(const IndicatorStyle& style);
     void setPluginsVisible(const QVariantMap & pluginsVisible);
     void setShowInPrimary(bool newShowInPrimary);
+    void setLocked(bool newLocked);
 
 private:
     enum WriteJob {
@@ -70,6 +73,7 @@ Q_SIGNALS:
     void pluginsVisibleChanged(const QVariantMap &pluginsVisible);
 
     void showInPrimaryChanged(bool showInPrimary);
+    void lockedChanged(bool locked);
 
 private:
     QScopedPointer<DConfig> m_dockConfig;
@@ -83,5 +87,6 @@ private:
     IndicatorStyle m_style;
     QVariantMap m_pluginsVisible;
     bool m_showInPrimary;
+    bool m_locked;
 };
 }
