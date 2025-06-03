@@ -281,5 +281,18 @@ void DockDBusProxy::setShowInPrimary(bool newShowInPrimary)
     parent()->setShowInPrimary(newShowInPrimary);
 }
 
+bool DockDBusProxy::locked() const
+{
+    return parent()->locked();
+}
+
+void DockDBusProxy::setLocked(bool newLocked)
+{
+    if (parent()->locked() == newLocked)
+        return;
+
+    parent()->setLocked(newLocked);
+}
+
 }
 

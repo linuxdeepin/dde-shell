@@ -109,6 +109,7 @@ bool DockPanel::init()
     connect(SETTINGS, &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
     connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
+    connect(SETTINGS, &DockSettings::lockedChanged, this, &DockPanel::lockedChanged);
 
     connect(SETTINGS, &DockSettings::dockSizeChanged, this, [this, dockDaemonAdaptor](){
         Q_EMIT dockDaemonAdaptor->WindowSizeEfficientChanged(dockSize());
@@ -120,6 +121,9 @@ bool DockPanel::init()
     });
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, [this, dockDaemonAdaptor](){
         Q_EMIT dockDaemonAdaptor->DisplayModeChanged(itemAlignment());
+    });
+    connect(SETTINGS, &DockSettings::lockedChanged, this, [this, dockDaemonAdaptor](){
+        Q_EMIT dockDaemonAdaptor->LockedChanged(locked());
     });
 
     DPanel::init();
@@ -366,6 +370,16 @@ void DockPanel::setShowInPrimary(bool newShowInPrimary)
         connect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockPanel::updateDockScreen, Qt::UniqueConnection);
     else
         disconnect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockPanel::updateDockScreen);
+}
+
+bool DockPanel::locked() const
+{
+    return SETTINGS->locked();
+}
+
+void DockPanel::setLocked(bool newLocked)
+{
+    SETTINGS->setLocked(newLocked);
 }
 
 D_APPLET_CLASS(DockPanel)

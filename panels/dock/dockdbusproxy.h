@@ -32,6 +32,7 @@ class DockDBusProxy final: public QObject, public QDBusContext
     Q_PROPERTY(uint WindowSizeFashion READ windowSizeFashion WRITE setWindowSizeFashion)
     Q_PROPERTY(int DisplayMode READ displayMode WRITE setDisplayMode FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary FINAL)
+    Q_PROPERTY(bool locked READ locked WRITE setLocked FINAL)
 
 
 public:
@@ -73,6 +74,9 @@ public:
 
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);
+
+    bool locked() const;
+    void setLocked(bool newLocked);
 
 Q_SIGNALS:
     void pluginVisibleChanged(const QString &pluginName, bool visible) const;

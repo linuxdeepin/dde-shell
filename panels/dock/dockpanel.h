@@ -32,6 +32,7 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
     Q_PROPERTY(QString screenName READ screenName NOTIFY screenNameChanged FINAL)
+    Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
 
     Q_PROPERTY(qreal devicePixelRatio READ devicePixelRatio NOTIFY devicePixelRatioChanged FINAL)
 
@@ -81,6 +82,9 @@ public:
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);
 
+    bool locked() const;
+    void setLocked(bool newLocked);
+
     void setHideState(HideState newHideState);
     QScreen* dockScreen();
     void setDockScreen(QScreen *screen);
@@ -116,6 +120,7 @@ Q_SIGNALS:
     void screenNameChanged();
     void requestClosePopup();
     void devicePixelRatioChanged(qreal ratio);
+    void lockedChanged(bool locked);
 
     void contextDraggingChanged();
 

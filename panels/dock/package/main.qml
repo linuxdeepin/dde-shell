@@ -293,7 +293,13 @@ Window {
                     value: Dock.SmartHide
                 }
             }
-
+            LP.MenuItem {
+                text: qsTr("Lock the Dock")
+                checked: Panel.locked
+                onTriggered: {
+                    Panel.locked = !Panel.locked
+                }
+            }
             LP.MenuItem {
                 text: qsTr("Dock Settings")
                 onTriggered: {
@@ -481,6 +487,9 @@ Window {
         propagateComposedEvents: true
 
         cursorShape: {
+            if (Panel.locked) {
+                return Qt.ArrowCursor
+            }
             if (Panel.position == Dock.Top || Panel.position == Dock.Bottom) {
                 return Qt.SizeVerCursor
             }
@@ -488,6 +497,7 @@ Window {
         }
 
         onPressed: function(mouse) {
+            if (Panel.locked) return
             dock.isDragging = true
             oldMousePos = mapToGlobal(mouse.x, mouse.y)
             oldDockSize = dockSize
@@ -500,7 +510,7 @@ Window {
         onClicked: {}
 
         onPositionChanged: function(mouse) {
-            if (!dock.isDragging) return
+            if (Panel.locked || !dock.isDragging) return
             var newPos = mapToGlobal(mouse.x, mouse.y)
             var xChange = newPos.x - oldMousePos.x
             var yChange = newPos.y - oldMousePos.y
@@ -536,6 +546,7 @@ Window {
         }
 
         onReleased: function(mouse) {
+            if (Panel.locked) return
             dock.isDragging = false
             Applet.dockSize = dockSize
             itemIconSizeBase = dockItemMaxSize

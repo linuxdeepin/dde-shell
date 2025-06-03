@@ -24,6 +24,7 @@
         <property access="readwrite" type="i" name="HideMode"/>
         <property access="readwrite" type="i" name="Position"/>
         <property access="read" type="i" name="HideState"/>
+        <property access="readwrite" type="b" name="Locked"/>
         <property access="read" type="(iiii)" name="FrontendWindowRect">
             <annotation name="org.qtproject.QtDBus.QtTypeName" value="QRect"/>
         </property>
@@ -45,6 +46,9 @@
         </signal>
         <signal name="HideModeChanged">
             <arg name="hideMode" type="i" direction="out"/>
+        </signal>
+        <signal name="LockedChanged">
+            <arg name="locked" type="b" direction="out"/>
         </signal>
     </interface>
 </node>
