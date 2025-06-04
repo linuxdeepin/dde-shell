@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_HK">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_HK">
 <context>
     <name>main</name>
     <message>
@@ -64,6 +66,10 @@
     <message>
         <source>Dock Settings</source>
         <translation>任務欄設置</translation>
+    </message>
+    <message>
+        <source>Lock the Dock</source>
+        <translation>禁用自由調節</translation>
     </message>
 </context>
 </TS>
