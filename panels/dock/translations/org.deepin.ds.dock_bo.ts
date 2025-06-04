@@ -67,5 +67,9 @@
         <source>Dock Settings</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Lock the Dock</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>
