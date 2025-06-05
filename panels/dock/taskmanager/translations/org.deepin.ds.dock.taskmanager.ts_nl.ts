@@ -26,23 +26,23 @@
     <name>dock::DockGlobalElementModel</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Openen</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Losmaken</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Vastmaken</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>Afsluiten forceren</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Alles sluiten</translation>
     </message>
 </context>
 </TS>

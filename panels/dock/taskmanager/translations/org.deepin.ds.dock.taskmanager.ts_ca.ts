@@ -26,23 +26,23 @@
     <name>dock::DockGlobalElementModel</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Obre</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Treu de l&apos;acoblador</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Afegeix a l&apos;acoblador</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>Força&apos;n la sortida</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Tanca-ho tot</translation>
     </message>
 </context>
 </TS>

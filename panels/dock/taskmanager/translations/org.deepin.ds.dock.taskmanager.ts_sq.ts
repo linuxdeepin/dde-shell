@@ -26,23 +26,23 @@
     <name>dock::DockGlobalElementModel</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Hape</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Hiqe nga paneli</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Panel</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>Detyro Dalje</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Mbylli Krejt</translation>
     </message>
 </context>
 </TS>
