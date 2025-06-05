@@ -65,5 +65,9 @@
         <source>Dock Settings</source>
         <translation>Configuración do molle</translation>
     </message>
+    <message>
+        <source>Lock the Dock</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 </TS>
