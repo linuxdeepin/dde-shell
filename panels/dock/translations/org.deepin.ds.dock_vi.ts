@@ -65,5 +65,9 @@
         <source>Dock Settings</source>
         <translation>Cài đặt thanh đock</translation>
     </message>
+    <message>
+        <source>Lock the Dock</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 </TS>

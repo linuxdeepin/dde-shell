@@ -1,69 +1,69 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ca">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="sv">
 <context>
     <name>main</name>
     <message>
         <source>Indicator Style</source>
-        <translation>Estil de l&apos;indicador</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Fashion Mode</source>
-        <translation>Mode de moda</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Efficient Mode</source>
-        <translation>Mode eficient</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation>Mode clàssic</translation>
+        <translation>Klassiskt läge</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation>Mode centrat</translation>
+        <translation>Centrerat läge</translation>
     </message>
     <message>
         <source>Left</source>
-        <translation>A l&apos;esquerra</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Position</source>
-        <translation>Posició</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Mode</source>
-        <translation>Mode</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Top</source>
-        <translation>A dalt</translation>
+        <translation>Överst</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation>A baix</translation>
+        <translation>Botten</translation>
     </message>
     <message>
         <source>Right</source>
-        <translation>A la dreta</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Status</source>
-        <translation>Estat</translation>
+        <translation>Status</translation>
     </message>
     <message>
         <source>Keep Shown</source>
-        <translation>Mantén-ho visible</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Keep Hidden</source>
-        <translation>Mantén-ho amagat</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Smart Hide</source>
-        <translation>Ocultació intel·ligent</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Dock Settings</source>
-        <translation>Paràmetres de l&apos;acoblador</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Lock the Dock</source>
