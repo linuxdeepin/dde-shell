@@ -65,5 +65,9 @@
         <source>Dock Settings</source>
         <translation>Peidete seaded</translation>
     </message>
+    <message>
+        <source>Lock the Dock</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 </TS>
