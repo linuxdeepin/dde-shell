@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Desactiva l&apos;afinació lliure</translation>
     </message>
 </context>
 </TS>
