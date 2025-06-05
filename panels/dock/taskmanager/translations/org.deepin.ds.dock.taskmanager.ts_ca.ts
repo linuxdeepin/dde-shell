@@ -22,4 +22,27 @@
         <translation>Tanca-ho tot</translation>
     </message>
 </context>
+<context>
+    <name>dock::DockGlobalElementModel</name>
+    <message>
+        <source>Open</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Undock</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Dock</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Force Quit</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Close All</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
 </TS>
