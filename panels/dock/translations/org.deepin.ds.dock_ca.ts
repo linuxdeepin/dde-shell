@@ -65,5 +65,9 @@
         <source>Dock Settings</source>
         <translation>Paràmetres de l&apos;acoblador</translation>
     </message>
+    <message>
+        <source>Lock the Dock</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 </TS>
