@@ -7,6 +7,9 @@
 #include <QDateTime>
 #include <QLoggingCategory>
 
+#include <unicode/reldatefmt.h> // For RelativeDateTimeFormatter
+#include <unicode/smpdtfmt.h> // For SimpleDateFormat
+
 #include "notifyaccessor.h"
 
 namespace notification {
@@ -62,11 +65,47 @@ QString AppNotifyItem::time() const
     return m_time;
 }
 
+namespace
+{
+QString toQString(const icu::UnicodeString &icuString)
+{
+    // Get a pointer to the internal UTF-16 buffer of the icu::UnicodeString.
+    // The buffer is not necessarily null-terminated, so we also need the length.
+    const UChar *ucharData = icuString.getBuffer();
+    int32_t length = icuString.length();
+
+    // QString has a constructor that takes a const QChar* and a length.
+    // UChar is typically a 16-bit unsigned integer, which is compatible with QChar.
+    // Static_cast is used here for explicit type conversion, though often
+    // UChar and QChar are typedefs to the same underlying type (e.g., unsigned short).
+    return QString(reinterpret_cast<const QChar *>(ucharData), length);
+}
+
+icu::UnicodeString fromQString(const QString &qstr)
+{
+    return icu::UnicodeString(qstr.utf16(), qstr.length());
+}
+} // anonymous namespace
+
 void AppNotifyItem::updateTime()
 {
     QDateTime time = QDateTime::fromMSecsSinceEpoch(m_entity.cTime());
     if (!time.isValid())
         return;
+
+    using namespace icu;
+    static std::unique_ptr<RelativeDateTimeFormatter> formatter;
+    static UErrorCode cachedStatus = U_ZERO_ERROR;
+    if (!formatter) {
+        cachedStatus = U_ZERO_ERROR;
+        formatter = std::make_unique<RelativeDateTimeFormatter>(icu::Locale::getDefault(),
+                                                                nullptr, // Use default NumberFormat
+                                                                UDAT_STYLE_LONG,
+                                                                UDISPCTX_CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE,
+                                                                cachedStatus);
+    }
+    UErrorCode status = U_ZERO_ERROR; // For any per-call ICU operations
+    UnicodeString result;
 
     QString ret;
     QDateTime currentTime = QDateTime::currentDateTime();
@@ -77,21 +116,27 @@ void AppNotifyItem::updateTime()
         if (minute <= 0) {
             ret = tr("Just now");
         } else if (minute > 0 && minute < 60) {
-            ret = tr("%1 minutes ago").arg(minute);
+            formatter->format(minute, UDAT_DIRECTION_LAST, UDAT_RELATIVE_MINUTES, result, status);
+            ret = toQString(result);
         } else {
             const auto hour = minute / 60;
-            if (hour == 1) {
-                ret = tr("1 hour ago");
-            } else {
-                ret = tr("%1 hours ago").arg(hour);
-            }
+            formatter->format(hour, UDAT_DIRECTION_LAST, UDAT_RELATIVE_HOURS, result, status);
+            ret = toQString(result);
         }
     } else if (elapsedDay >= 1 && elapsedDay < 2) {
-        ret = tr("Yesterday ") + " " + time.toString("hh:mm");
+        formatter->format(1, UDAT_DIRECTION_LAST, UDAT_RELATIVE_DAYS, result, status);
+        UnicodeString combinedString;
+        UErrorCode timeStatus = U_ZERO_ERROR;
+        SimpleDateFormat timeFormatter("HH:mm", icu::Locale::getDefault(), timeStatus);
+        UnicodeString timeString;
+        UDate udate = static_cast<UDate>(m_entity.cTime());
+        timeFormatter.format(udate, timeString, timeStatus);
+        formatter->combineDateAndTime(result, timeString, combinedString, status);
+        ret = toQString(combinedString);
     } else if (elapsedDay >= 2 && elapsedDay < 7) {
         ret = time.toString("ddd hh:mm");
     } else {
-        ret = time.toString("yyyy/MM/dd");
+        ret = time.toString(QLocale::system().dateFormat(QLocale::ShortFormat));
     }
 
     m_time = ret;

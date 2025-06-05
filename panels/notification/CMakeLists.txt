@@ -35,6 +35,9 @@ target_link_libraries(ds-notification-shared PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Sql
     Dtk${DTK_VERSION_MAJOR}::Core
+    ICU::uc
+    ICU::i18n
+    ICU::io
 )
 
 install(TARGETS ds-notification-shared DESTINATION "${LIB_INSTALL_DIR}")
