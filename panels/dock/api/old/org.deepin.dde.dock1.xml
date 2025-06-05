@@ -6,7 +6,6 @@
             <annotation name="org.qtproject.QtDBus.QtTypeName" value="QRect"/>
         </property>
         <property access="readwrite" type="b" name="showInPrimary"/>
-        <property access="readwrite" type="b" name="locked"/>
         <method name="callShow"/>
         <method name="ReloadPlugins"/>
         <method name="GetLoadedPlugins">

@@ -32,7 +32,7 @@ class DockDBusProxy final: public QObject, public QDBusContext
     Q_PROPERTY(uint WindowSizeFashion READ windowSizeFashion WRITE setWindowSizeFashion)
     Q_PROPERTY(int DisplayMode READ displayMode WRITE setDisplayMode FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary FINAL)
-    Q_PROPERTY(bool locked READ locked WRITE setLocked FINAL)
+    Q_PROPERTY(bool Locked READ locked WRITE setLocked FINAL)
 
 
 public:
