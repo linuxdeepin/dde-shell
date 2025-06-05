@@ -65,5 +65,9 @@
         <source>Dock Settings</source>
         <translation>任务栏设置</translation>
     </message>
+    <message>
+        <source>Lock the Dock</source>
+        <translation>禁用自由调节</translation>
+    </message>
 </context>
 </TS>
