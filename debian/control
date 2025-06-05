@@ -21,6 +21,7 @@ Build-Depends:
  libdtk6core-dev,
  libdtk6widget-dev,
  libdtkcommon-dev,
+ libicu-dev,
  libxcb-ewmh-dev,
  libxcb-res0-dev,
  libxcb-util-dev,
