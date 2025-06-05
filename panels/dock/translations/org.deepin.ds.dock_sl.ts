@@ -65,5 +65,9 @@
         <source>Dock Settings</source>
         <translation>Nastavitve doloka</translation>
     </message>
+    <message>
+        <source>Lock the Dock</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 </TS>
