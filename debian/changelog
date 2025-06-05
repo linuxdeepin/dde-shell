@@ -1,3 +1,12 @@
+dde-shell (1.99.38) unstable; urgency=medium
+
+  * fix: The tray window panel automatically opens 
+  * fix: just use one Dbus interface.
+  * fix: update tanslation with Lock dock. 
+  * feat: Lock the height of dock. 
+
+-- Wu Jiangyu <wujiangyu@uniontech.com>  Thu, 05 Jun 2025 16:35:14 +0800
+
 dde-shell (1.99.37) unstable; urgency=medium
 
   * fix: support string list in notification hints
