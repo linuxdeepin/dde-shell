@@ -38,6 +38,14 @@ AppletItemButton {
 
         return Qt.point(x + width / 2, y + height / 2)
     }
+    Connections {
+        target: stashedPopup
+        function onPopupVisibleChanged() {
+            if (!stashedPopup.popupVisible && !stashedPopup.stashItemDragging) {
+                dropHoverIndex = -1
+            }
+        }
+    }
 
     onItemGlobalPointChanged: {
         stashedPopup.collapsedBtnCenterPoint = itemGlobalPoint
