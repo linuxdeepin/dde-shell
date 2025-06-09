@@ -34,7 +34,7 @@
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Dock</translation>
     </message>
     <message>
         <source>Force Quit</source>
