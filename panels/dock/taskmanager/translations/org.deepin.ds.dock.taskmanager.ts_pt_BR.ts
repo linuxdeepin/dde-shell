@@ -26,11 +26,11 @@
     <name>dock::DockGlobalElementModel</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Abrir</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Desencaixar</translation>
     </message>
     <message>
         <source>Dock</source>
@@ -38,11 +38,11 @@
     </message>
     <message>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>Forçar saída</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Fechar tudo</translation>
     </message>
 </context>
 </TS>
