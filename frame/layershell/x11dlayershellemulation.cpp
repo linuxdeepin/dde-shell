@@ -172,10 +172,11 @@ void LayerShellEmulation::onExclusionZoneChanged()
     } else if ((anchors == DLayerShellWindow::AnchorRight) || (anchors ^ DLayerShellWindow::AnchorRight) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) {
         int boundary = 0;
         for (auto screen : qApp->screens()) {
-            if (boundary < screen->geometry().right())
-                boundary = screen->geometry().right();
+            int right = screen->geometry().x()/scaleFactor + screen->geometry().width();
+            if (boundary < right)
+                boundary = right;
         }
-        strut_partial.right = boundary - rect.right() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
+        strut_partial.right = (boundary - rect.right() + m_dlayerShellWindow->exclusionZone()) * scaleFactor;
         strut_partial.right_start_y = rect.y();
         strut_partial.right_end_y = rect.y() + m_window->height();
     } else if ((anchors == DLayerShellWindow::AnchorTop) || (anchors ^ DLayerShellWindow::AnchorTop) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) {
@@ -188,10 +189,11 @@ void LayerShellEmulation::onExclusionZoneChanged()
         // but there is no issue.
         int boundary = 0;
         for (auto screen : qApp->screens()) {
-            if (boundary < screen->geometry().bottom())
-                boundary = screen->geometry().bottom();
+            int botton = screen->geometry().y()/scaleFactor + screen->geometry().height();
+            if (boundary < botton)
+                boundary = botton;
         }
-        strut_partial.bottom = boundary - rect.bottom() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
+        strut_partial.bottom = (boundary - rect.bottom() + m_dlayerShellWindow->exclusionZone()) * scaleFactor;
         strut_partial.bottom_start_x = rect.x();
         strut_partial.bottom_end_x = rect.x() + m_window->width();
     }
