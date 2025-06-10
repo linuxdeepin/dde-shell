@@ -26,23 +26,23 @@
     <name>dock::DockGlobalElementModel</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Ouvrir</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Retirer du dock</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Ajouter au dock</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>Forcer à quitter</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Tout fermer</translation>
     </message>
 </context>
 </TS>
