@@ -12,7 +12,7 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 
 AppletItemButton {
     id: root
-    property bool isDropHover: model.visualIndex === dropHoverIndex && dropHoverIndex !== -1
+    property bool isDropHover: model.visualIndex === dropHoverIndex && dropHoverIndex !== -1 && Panel.contextDragging
 
     icon.name: {
         switch (Panel.position) {

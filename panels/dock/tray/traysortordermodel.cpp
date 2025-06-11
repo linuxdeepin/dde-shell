@@ -328,6 +328,9 @@ QStandardItem *TraySortOrderModel::createTrayItem(const QString &name,
 
 void TraySortOrderModel::updateVisualIndexes()
 {
+    m_isUpdating = true;
+    emit isUpdatingChanged(true);
+    
     for (int i = 0; i < rowCount(); i++) {
         item(i)->setData(-1, TraySortOrderModel::VisualIndexRole);
     }
@@ -440,6 +443,9 @@ void TraySortOrderModel::updateVisualIndexes()
 
     // update visible item count property
     setProperty("visualItemCount", currentVisualIndex);
+    
+    m_isUpdating = false;
+    emit isUpdatingChanged(false);
 
     qDebug() << "update" << m_visualItemCount << currentVisualIndex;
 }

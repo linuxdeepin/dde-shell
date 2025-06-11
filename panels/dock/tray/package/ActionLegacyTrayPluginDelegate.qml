@@ -29,7 +29,7 @@ AppletItemButton {
 
     padding: 0
 
-    visible: !Drag.active
+    visible: !Drag.active && itemVisible
     hoverEnabled: inputEventsEnabled
 
     function updatePluginMargins()

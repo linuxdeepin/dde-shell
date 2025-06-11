@@ -25,6 +25,7 @@ class TraySortOrderModel : public QStandardItemModel
     Q_PROPERTY(bool collapsed MEMBER m_collapsed NOTIFY collapsedChanged)
     Q_PROPERTY(bool isCollapsing MEMBER m_isCollapsing NOTIFY isCollapsingChanged)
     Q_PROPERTY(bool actionsAlwaysVisible MEMBER m_actionsAlwaysVisible NOTIFY actionsAlwaysVisibleChanged)
+    Q_PROPERTY(bool isUpdating MEMBER m_isUpdating NOTIFY isUpdatingChanged)
     Q_PROPERTY(QList<QVariantMap> availableSurfaces MEMBER m_availableSurfaces NOTIFY availableSurfacesChanged)
 public:
     // enum SectionTypes {
@@ -67,6 +68,7 @@ signals:
     void collapsedChanged(bool);
     void isCollapsingChanged(bool);
     void actionsAlwaysVisibleChanged(bool);
+    void isUpdatingChanged(bool);
     void visualItemCountChanged(int);
     void availableSurfacesChanged(const QList<QVariantMap> &);
 
@@ -75,6 +77,7 @@ private:
     bool m_collapsed = false;
     bool m_isCollapsing = false;
     bool m_actionsAlwaysVisible = false;
+    bool m_isUpdating = false;
     std::unique_ptr<Dtk::Core::DConfig> m_dconfig;
     // this is for the plugins that currently available.
     QList<QVariantMap> m_availableSurfaces;
