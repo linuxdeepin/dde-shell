@@ -63,7 +63,7 @@
     </message>
     <message>
         <source>Dock Settings</source>
-        <translation>Paneeli asetukset</translation>
+        <translation>Telakan asetukset</translation>
     </message>
     <message>
         <source>Lock the Dock</source>
