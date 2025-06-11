@@ -71,6 +71,7 @@ public:
     bool RequestDock(const QString &desktopFile, int index);
     bool IsDocked(const QString &desktopFile);
     bool RequestUndock(const QString &desktopFile);
+    void ActivateWindow(uint32_t win);
 
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);

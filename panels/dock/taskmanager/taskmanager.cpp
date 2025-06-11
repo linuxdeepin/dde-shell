@@ -27,6 +27,7 @@
 
 #ifdef BUILD_WITH_X11
 #include "x11windowmonitor.h"
+#include "x11utils.h"
 #endif
 
 Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtDebugMsg)
@@ -405,6 +406,16 @@ bool TaskManager::windowSplit()
 bool TaskManager::windowFullscreen()
 {
     return m_windowFullscreen;
+}
+
+void TaskManager::activateWindow(uint32_t windowID)
+{
+#ifdef BUILD_WITH_X11
+    X11Utils::instance()->setActiveWindow(static_cast<xcb_window_t>(windowID));
+#else
+    qWarning() << "activateWindow not supported on this platform";
+    Q_UNUSED(windowID)
+#endif
 }
 
 D_APPLET_CLASS(TaskManager)
