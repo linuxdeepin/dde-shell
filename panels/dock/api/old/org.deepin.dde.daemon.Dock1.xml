@@ -15,6 +15,9 @@
             <arg name="desktopFile" type="s" direction="in"/>
             <arg name="docked" type="b" direction="out"/>
         </method>
+        <method name="ActivateWindow">
+            <arg name="win" type="u" direction="in"/>
+        </method>
         <property access="readwrite" type="u" name="WindowSizeEfficient"/>
         <property access="readwrite" type="u" name="WindowSizeFashion"/>
         <!-- <property access="readwrite" type="u" name="ShowTimeout"/>

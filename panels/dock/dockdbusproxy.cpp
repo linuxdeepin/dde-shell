@@ -195,6 +195,20 @@ bool DockDBusProxy::RequestUndock(const QString &desktopFile)
     return res;
 }
 
+void DockDBusProxy::ActivateWindow(uint32_t win)
+{
+    qDebug() << "ActivateWindow" << win;
+    
+    // 通过 taskmanager 来激活窗口，避免直接依赖 X11Utils
+    DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
+    auto appletItem = bridge.applet();
+    if (appletItem) {
+        QMetaObject::invokeMethod(appletItem, "activateWindow", Qt::QueuedConnection, Q_ARG(uint32_t, win));
+    } else {
+        qWarning() << "Cannot activate window: taskmanager applet not available";
+    }
+}
+
 QStringList DockDBusProxy::GetLoadedPlugins()
 {
     // TODO: implement this function
