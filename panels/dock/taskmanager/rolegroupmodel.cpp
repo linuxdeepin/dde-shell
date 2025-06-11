@@ -109,6 +109,9 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
 
 int RoleGroupModel::rowCount(const QModelIndex &parent) const
 {
+    if (!sourceModel()) {
+        return 0;
+    }
     if (parent.isValid()) {
         auto list = m_rowMap.value(parent.row(), nullptr);
         return nullptr == list ? 0 : list->size();

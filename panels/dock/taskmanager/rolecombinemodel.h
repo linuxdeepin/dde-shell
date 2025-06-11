@@ -34,10 +34,15 @@ public:
     QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
 
 private:
+    QHash<int, QByteArray> createRoleNames() const;
+
+private:
     QAbstractItemModel* m_minor;
 
     // Hash table used to map this QModelIndex row & column 2 origin QModelIndex row & column.
     QMap<QPair<int, int> ,QPair<int, int>> m_indexMap;
     // Hash table map role in this model to role in origin model.
     QHash<int, int> m_minorRolesMap;
+
+    QHash<int, QByteArray> m_roleNames;
 };
