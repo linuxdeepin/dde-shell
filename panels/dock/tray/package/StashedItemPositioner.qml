@@ -4,10 +4,11 @@
 
 import QtQuick
 import QtQuick.Controls
+import org.deepin.ds.dock.tray 1.0 as DDT
 
 Control {
     id: root
-    property bool itemVisible: true
+    property bool itemVisible: !DDT.TraySortOrderModel.isUpdating
 
     spacing: 0
     padding: 0

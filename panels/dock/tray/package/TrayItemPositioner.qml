@@ -9,6 +9,9 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 Control {
     id: root
     property bool itemVisible: {
+        if (DDT.TraySortOrderModel.isUpdating) {
+            return false
+        }
         if (model.sectionType === "collapsable") return !collapsed && model.visibility
         return model.sectionType !== "stashed" && model.visibility
     }
