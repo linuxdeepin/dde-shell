@@ -35,11 +35,11 @@
     </message>
     <message>
         <source>Top</source>
-        <translation>parte superior</translation>
+        <translation>Arriba</translation>
     </message>
     <message>
         <source>Bottom</source>
-        <translation>parte inferior</translation>
+        <translation>Abajo</translation>
     </message>
     <message>
         <source>Right</source>
@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Bloquear muelle</translation>
     </message>
 </context>
 </TS>
