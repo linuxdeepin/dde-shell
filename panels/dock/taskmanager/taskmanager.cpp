@@ -72,23 +72,12 @@ TaskManager::TaskManager(QObject *parent)
     , AbstractTaskManagerInterface(nullptr)
     , m_windowFullscreen(false)
 {
-    qRegisterMetaType<ObjectInterfaceMap>();
-    qDBusRegisterMetaType<ObjectInterfaceMap>();
-    qRegisterMetaType<ObjectMap>();
-    qDBusRegisterMetaType<ObjectMap>();
-    qDBusRegisterMetaType<QStringMap>();
-    qRegisterMetaType<QStringMap>();
-    qRegisterMetaType<PropMap>();
-    qDBusRegisterMetaType<PropMap>();
-    qDBusRegisterMetaType<QDBusObjectPath>();
-
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
 }
 
 bool TaskManager::load()
 {
-    loadDockedAppItems();
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
         m_windowMonitor.reset(new TreeLandWindowMonitor());
@@ -100,7 +89,43 @@ bool TaskManager::load()
     }
 #endif
 
-    connect(m_windowMonitor.get(), &AbstractWindowMonitor::windowAdded, this, &TaskManager::handleWindowAdded);
+    // TODO: remove this after all ItemModel::instance() usage are removed.
+    connect(m_windowMonitor.get(), &AbstractWindowMonitor::windowAdded, this, [this](QPointer<AbstractWindow> window) {
+        if (!window || window->shouldSkip() || window->getAppItem() != nullptr)
+            return;
+
+        // TODO: remove below code and use use model replaced.
+        QModelIndexList res;
+        if (m_activeAppModel) {
+            res = m_activeAppModel->match(m_activeAppModel->index(0, 0), TaskManager::WinIdRole, window->id());
+        }
+
+        QSharedPointer<DesktopfileAbstractParser> desktopfile = nullptr;
+        QString desktopId;
+        if (res.size() > 0) {
+            desktopId = res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString();
+        }
+
+        if (!desktopId.isEmpty()) {
+            desktopfile = DESKTOPFILEFACTORY::createById(desktopId, "amAPP");
+        }
+
+        if (desktopfile.isNull() || !desktopfile->isValied().first) {
+            desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+        }
+
+        auto appitem = desktopfile->getAppItem();
+
+        if (appitem.isNull() || (appitem->hasWindow() && windowSplit())) {
+            auto id = windowSplit() ? QString("%1@%2").arg(desktopfile->id()).arg(window->id()) : desktopfile->id();
+            appitem = new AppItem(id);
+        }
+
+        appitem->appendWindow(window);
+        appitem->setDesktopFileParser(desktopfile);
+
+        ItemModel::instance()->addItem(appitem);
+    });
     return true;
 }
 
@@ -145,19 +170,22 @@ bool TaskManager::init()
         m_itemModel = new DockItemModel(m_dockGlobalElementModel, this);
     }
 
-    if (m_windowMonitor)
-        m_windowMonitor->start();
-
     connect(m_windowMonitor.data(), &AbstractWindowMonitor::windowFullscreenChanged, this, [this] (bool isFullscreen) {
         m_windowFullscreen = isFullscreen;
         emit windowFullscreenChanged(isFullscreen);
     });
+
+    QTimer::singleShot(500, [this]() {
+        if (m_windowMonitor)
+            m_windowMonitor->start();
+    });
+
     return true;
 }
 
-ItemModel *TaskManager::dataModel()
+DockItemModel *TaskManager::dataModel() const
 {
-    return ItemModel::instance();
+    return m_itemModel;
 }
 
 void TaskManager::requestActivate(const QModelIndex &index) const
@@ -241,46 +269,13 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     ItemModel::instance()->addItem(appitem);
 }
 
-void TaskManager::clickItem(const QString& itemId, const QString& menuId)
-{
-    auto item = ItemModel::instance()->getItemById(itemId);
-    if(!item) return;
-
-    if (menuId == DOCK_ACTION_ALLWINDOW) {
-        QList<uint32_t> windowIds;
-        auto windows = item->data().toStringList();
-        std::transform(windows.begin(), windows.end(), std::back_inserter(windowIds), [](const QString &windowId) {
-            return windowId.toUInt();
-        });
-
-        m_windowMonitor->presentWindows(windowIds);
-        return;
-    }
-
-    item->handleClick(menuId);
-}
-
 void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls)
 {
-    auto item = ItemModel::instance()->getItemById(itemId);
-    if(!item) return;
+    qWarning() << "TODO: this is legacy code from rebasing, this need to be implemented elsewhere";
+    // auto item = ItemModel::instance()->getItemById(itemId);
+    // if(!item) return;
 
-    item->handleFileDrop(urls);
-}
-
-void TaskManager::showItemPreview(const QString &itemId, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
-{
-    auto item = ItemModel::instance()->getItemById(itemId).get();
-    if (!item) {
-        return;
-    }
-
-    QPointer<AppItem> pItem = reinterpret_cast<AppItem *>(item);
-    if (pItem.isNull()) {
-        return;
-    }
-
-    m_windowMonitor->showItemPreview(pItem, relativePositionItem, previewXoffset, previewYoffset, direction);
+    // item->handleFileDrop(urls);
 }
 
 void TaskManager::hideItemPreview()
@@ -298,29 +293,9 @@ void TaskManager::setAppItemWindowIconGeometry(const QString& appid, QObject* re
     }
 }
 
-void TaskManager::loadDockedAppItems()
+void TaskManager::dumpItemInfo(const QModelIndex &index) const
 {
-    // TODO: add support for group and dir type
-    for (const auto& appValueRef : TaskManagerSettings::instance()->dockedDesktopFiles()) {
-        auto app = appValueRef.toObject();
-        auto appid = app.value("id").toString();
-        auto type = app.value("type").toString();
-        auto desktopfile = DESKTOPFILEFACTORY::createById(appid, type);
-        auto valid = desktopfile->isValied();
-
-        if (!valid.first) {
-            qInfo(taskManagerLog()) << "failed to load " << appid << " beacause " << valid.second;
-            continue;
-        }
-
-        auto appitem = desktopfile->getAppItem();
-        if (appitem.isNull()) {
-            appitem = new AppItem(appid);
-        }
-
-        appitem->setDesktopFileParser(desktopfile);
-        ItemModel::instance()->addItem(appitem);
-    }
+    dataModel()->dumpItemInfo(index);
 }
 
 bool TaskManager::allowForceQuit()
