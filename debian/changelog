@@ -1,3 +1,13 @@
+dde-shell (1.99.39) unstable; urgency=medium
+
+  * chore: use ICU for relative datetime formatting
+  * fix: layershell calcular in x11 emulation
+  * fix: The tray application flashes an icon when opened
+  * feat: add activeWindow D-Bus interface
+  * chore: tweak role{group,combine}model
+
+-- Wang Zichong <wangzichong@deepin.org>  Thu, 12 Jun 2025 19:12:00 +0800
+
 dde-shell (1.99.38) unstable; urgency=medium
 
   * fix: The tray window panel automatically opens 
