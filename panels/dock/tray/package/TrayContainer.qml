@@ -166,9 +166,23 @@ Item {
             let isBefore = currentPosMapToItem < root.itemVisualSize / 2
             dropHoverIndex = Math.floor(currentItemIndex)
             let isStash = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType") === "stashed"
+            
+            // 检查 ActionShowStashDelegate 是否显示
+            let showStashActionVisible = false
+            for (let i = 0; i < root.model.rowCount(); i++) {
+                let index = root.model.index(i, 0)
+                let itemSurfaceId = root.model.data(index, DDT.TraySortOrderModel.SurfaceIdRole)
+                if (itemSurfaceId === "internal/action-show-stash") {
+                    showStashActionVisible = root.model.data(index, DDT.TraySortOrderModel.VisibilityRole)
+                    break
+                }
+            }
+            
             // TODO: If this method is used in the stash area, it will cause the drag state to be terminated when dragging to the tray area
             if (!isStash) {
-                if (dropHoverIndex !== 0) {
+                // 根据 ActionShowStashDelegate 的显示状态动态改变条件
+                let shouldAllowDrop = showStashActionVisible ? (dropHoverIndex !== 0) : (dropHoverIndex !== -1)
+                if (shouldAllowDrop) {
                     dropTrayTimer.handleDrop = function() {
                         if (isDropped || dragExited) return
                         DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
