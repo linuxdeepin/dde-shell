@@ -38,8 +38,8 @@ Window {
     property real dockItemIconSize: dockItemMaxSize * 9 / 14
 
     // NOTE: -1 means not set its size, follow the platform size
-    width: Panel.position == Dock.Top || Panel.position == Dock.Bottom ? -1 : dockSize
-    height: Panel.position == Dock.Left || Panel.position == Dock.Right ? -1 : dockSize
+    width: Panel.position === Dock.Top || Panel.position === Dock.Bottom ? -1 : dockSize
+    height: Panel.position === Dock.Left || Panel.position === Dock.Right ? -1 : dockSize
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
 
@@ -88,8 +88,8 @@ Window {
             return dock.useColumnLayout ? "width" : "height";
         }
         to: {
-            if (useTransformBasedAnimation) return Panel.hideState != Dock.Hide ? 0 : ((Panel.position == Dock.Left || Panel.position == Dock.Top) ? -Panel.dockSize : Panel.dockSize);
-            return Panel.hideState != Dock.Hide ? Panel.dockSize : 1;
+            if (useTransformBasedAnimation) return Panel.hideState !== Dock.Hide ? 0 : ((Panel.position === Dock.Left || Panel.position === Dock.Top) ? -Panel.dockSize : Panel.dockSize);
+            return Panel.hideState !== Dock.Hide ? Panel.dockSize : 1;
         }
         duration: 500
         easing.type: Easing.OutCubic
@@ -98,9 +98,9 @@ Window {
         }
         onStopped: {
             if (useTransformBasedAnimation) {
-                dock.visible = ((dock.useColumnLayout ? dockTransform.x : dockTransform.y) == 0)
+                dock.visible = ((dock.useColumnLayout ? dockTransform.x : dockTransform.y) === 0)
             } else {
-                dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) != 1)
+                dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) !== 1)
             }
         }
     }
@@ -165,7 +165,7 @@ Window {
             if (useTransformBasedAnimation) {
                 dock.visible = true;
             } else {
-                dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) != 1);
+                dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) !== 1);
             }
         }
     }
@@ -490,7 +490,7 @@ Window {
             if (Panel.locked) {
                 return Qt.ArrowCursor
             }
-            if (Panel.position == Dock.Top || Panel.position == Dock.Bottom) {
+            if (Panel.position === Dock.Top || Panel.position === Dock.Bottom) {
                 return Qt.SizeVerCursor
             }
             return Qt.SizeHorCursor
@@ -528,11 +528,11 @@ Window {
             var changeAverage = recentDeltas.reduce(function(acc, val) { return acc + val; }, 0) / recentDeltas.length;
 
             var newDockSize = 0
-            if (Panel.position == Dock.Bottom) {
+            if (Panel.position === Dock.Bottom) {
                 newDockSize = Math.min(Math.max(oldDockSize - changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
-            } else if (Panel.position == Dock.Top) {
+            } else if (Panel.position === Dock.Top) {
                 newDockSize = Math.min(Math.max(oldDockSize + changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
-            } else if (Panel.position == Dock.Left) {
+            } else if (Panel.position === Dock.Left) {
                 newDockSize = Math.min(Math.max(oldDockSize + changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
             } else {
                 newDockSize = Math.min(Math.max(oldDockSize - changeAverage, Dock.MIN_DOCK_SIZE), Dock.MAX_DOCK_SIZE)
