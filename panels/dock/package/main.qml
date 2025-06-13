@@ -59,6 +59,8 @@ Window {
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
     D.DWindow.borderWidth: 1
+    //D.DWindow.windowEffect: hideShowAnimation.running ? D.PlatformHandle.EffectNoShadow : 0
+    //D.DWindow.borderWidth: hideShowAnimation.running ? 0 : 1
     D.DWindow.enableBlurWindow: Qt.platform.pluginName !== "xcb"
     D.DWindow.themeType: Panel.colorTheme
     D.DWindow.borderColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, dock.blendColorAlpha(0.6) + 20 / 255) : Qt.rgba(0, 0, 0, 0.15)
