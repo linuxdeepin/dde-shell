@@ -3,7 +3,7 @@
     <name>main</name>
     <message>
         <source>Indicator Style</source>
-        <translation type="unfinished"/>
+        <translation>Gösterge Stili</translation>
     </message>
     <message>
         <source>Fashion Mode</source>
@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Özgür Ayarlamayı Devre Dışı Bırak</translation>
     </message>
 </context>
 </TS>
