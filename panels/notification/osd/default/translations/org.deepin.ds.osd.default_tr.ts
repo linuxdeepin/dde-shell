@@ -35,11 +35,11 @@
     </message>
     <message>
         <source>Touchpad toggle</source>
-        <translation type="unfinished"/>
+        <translation>Dokunmatik yüzeyi açma</translation>
     </message>
     <message>
         <source>Fn toggle</source>
-        <translation type="unfinished"/>
+        <translation>Fn açma</translation>
     </message>
     <message>
         <source>Airplane mode on</source>
@@ -51,11 +51,11 @@
     </message>
     <message>
         <source>Mute on</source>
-        <translation type="unfinished"/>
+        <translation>Sessiz açık</translation>
     </message>
     <message>
         <source>Mute off</source>
-        <translation type="unfinished"/>
+        <translation>Sessiz kapalı</translation>
     </message>
     <message>
         <source>Balanced power</source>
