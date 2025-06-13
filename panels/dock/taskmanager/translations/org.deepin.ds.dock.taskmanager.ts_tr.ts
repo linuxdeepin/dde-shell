@@ -26,23 +26,23 @@
     <name>dock::DockGlobalElementModel</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Aç</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Rıhtım&apos;dan çıkar</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Rıhtım&apos;a ekle</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>Zorla Çık</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>Tümünü Kapat</translation>
     </message>
 </context>
 </TS>
