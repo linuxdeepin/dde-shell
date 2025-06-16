@@ -21,15 +21,15 @@
     <name>NotifySetting</name>
     <message>
         <source>Unpin</source>
-        <translation type="unfinished"/>
+        <translation>Sabitlemeyi kaldır</translation>
     </message>
     <message>
         <source>Pin</source>
-        <translation type="unfinished"/>
+        <translation>Sabitle</translation>
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished"/>
+        <translation>Bildirim Ayarı</translation>
     </message>
 </context>
 <context>
@@ -40,15 +40,15 @@
     </message>
     <message>
         <source>%1 minutes ago</source>
-        <translation type="unfinished"/>
+        <translation>%1 dakika önce</translation>
     </message>
     <message>
         <source>1 hour ago</source>
-        <translation type="unfinished"/>
+        <translation>1 saat önce</translation>
     </message>
     <message>
         <source>%1 hours ago</source>
-        <translation type="unfinished"/>
+        <translation>%1 saat önce</translation>
     </message>
     <message>
         <source>Yesterday </source>
