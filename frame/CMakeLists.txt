@@ -87,7 +87,7 @@ qt_generate_wayland_protocol_client_sources(dde-shell-frame FILES
 
 set_target_properties(dde-shell-frame PROPERTIES
     VERSION ${CMAKE_PROJECT_VERSION}
-    SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR}
+    SOVERSION 1
     OUTPUT_NAME dde-shell
     EXPORT_NAME Shell
 )
