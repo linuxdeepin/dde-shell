@@ -152,6 +152,14 @@ bool TaskManager::init()
         m_windowFullscreen = isFullscreen;
         emit windowFullscreenChanged(isFullscreen);
     });
+
+    // 设置preview opacity
+    DS_NAMESPACE::DAppletBridge appearanceBridge("org.deepin.ds.dde-appearance");
+    auto appearanceApplet = appearanceBridge.applet();
+    if (appearanceApplet) {
+        modifyOpacityChanged();
+        connect(appearanceApplet, SIGNAL(opacityChanged()), this, SLOT(modifyOpacityChanged()));
+    }
     return true;
 }
 
@@ -416,6 +424,19 @@ void TaskManager::activateWindow(uint32_t windowID)
     qWarning() << "activateWindow not supported on this platform";
     Q_UNUSED(windowID)
 #endif
+}
+
+void TaskManager::modifyOpacityChanged()
+{
+    DS_NAMESPACE::DAppletBridge appearanceBridge("org.deepin.ds.dde-appearance");
+    auto appearanceApplet = appearanceBridge.applet();
+    if (appearanceApplet) {
+        double opacity = appearanceApplet->property("opacity").toReal();
+        auto x11Monitor = qobject_cast<X11WindowMonitor*>(m_windowMonitor.data());
+        x11Monitor->setPreviewOpacity(opacity);
+    }else{
+        qWarning() << "modifyOpacityChanged: appearanceApplet is null";
+    }
 }
 
 D_APPLET_CLASS(TaskManager)
