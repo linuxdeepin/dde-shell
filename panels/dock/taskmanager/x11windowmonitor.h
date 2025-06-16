@@ -41,6 +41,7 @@ public:
     virtual void hideItemPreview() override;
     void previewWindow(uint32_t winId);
     void cancelPreviewWindow();
+    void setPreviewOpacity(double opacity);
 
 Q_SIGNALS:
     void windowMapped(xcb_window_t window);
@@ -62,5 +63,7 @@ private:
     QScopedPointer<XcbEventFilter> m_xcbEventFilter;
     QScopedPointer<X11WindowPreviewContainer> m_windowPreview;
     QHash<xcb_window_t, QSharedPointer<X11Window>> m_windows;
+    double m_opacity;
+
 };
 }
