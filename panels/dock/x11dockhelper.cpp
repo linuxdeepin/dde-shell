@@ -16,6 +16,8 @@
 #include <QGuiApplication>
 #include <QPointer>
 #include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusReply>
 
 namespace dock {
 Q_LOGGING_CATEGORY(dockX11Log, "dde.shell.dock.x11")
@@ -628,15 +630,12 @@ void X11DockWakeUpArea::updateDockWakeArea(Position pos)
 
 void X11DockHelper::setupKWinDBusConnection()
 {
-    // 连接到 KWin 的 D-Bus 接口监听 showingDesktopChanged 信号
-    QDBusConnection::sessionBus().connect(
-        "org.kde.KWin",                    
-        "/KWin",                           
-        "org.kde.KWin",                    
-        "showingDesktopChanged",           
-        this,                              
-        SLOT(onShowingDesktopChanged(bool)) 
-    );
+    QDBusInterface kwin("org.kde.KWin", "/KWin", "org.kde.KWin", QDBusConnection::sessionBus());
+    if (kwin.isValid()) {
+        m_showingDesktop = kwin.property("showingDesktop").toBool();
+        kwin.connection().connect("org.kde.KWin", "/KWin", "org.kde.KWin", 
+                                 "showingDesktopChanged", this, SLOT(onShowingDesktopChanged(bool)));
+    }
 }
 
 void X11DockHelper::onShowingDesktopChanged(bool showing)
