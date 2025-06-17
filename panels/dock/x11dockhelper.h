@@ -80,8 +80,12 @@ private Q_SLOTS:
 
     void updateDockArea();
 
+    // KWin D-Bus signal handler
+    void onShowingDesktopChanged(bool showing);
+
 private:
     friend class XcbEventFilter;
+    void setupKWinDBusConnection();
 
 private:
     QHash<xcb_window_t, X11DockWakeUpArea *> m_areas;
@@ -89,6 +93,7 @@ private:
     QHash<xcb_window_t, WindowData*> m_windows;
     XcbEventFilter *m_xcbHelper;
     QTimer *m_updateDockAreaTimer;
+    bool m_showingDesktop;
 };
 
 class X11DockWakeUpArea : public QObject, public DockWakeUpArea

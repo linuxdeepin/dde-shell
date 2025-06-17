@@ -15,6 +15,7 @@
 #include <QAbstractNativeEventFilter>
 #include <QGuiApplication>
 #include <QPointer>
+#include <QDBusConnection>
 
 namespace dock {
 Q_LOGGING_CATEGORY(dockX11Log, "dde.shell.dock.x11")
@@ -319,6 +320,7 @@ X11DockHelper::X11DockHelper(DockPanel *panel)
     : DockHelper(panel)
     , m_xcbHelper(new XcbEventFilter(this))
     , m_updateDockAreaTimer(new QTimer(this))
+    , m_showingDesktop(false)
 {
     m_updateDockAreaTimer->setSingleShot(true);
     m_updateDockAreaTimer->setInterval(100);
@@ -333,6 +335,7 @@ X11DockHelper::X11DockHelper(DockPanel *panel)
     connect(panel, &DockPanel::dockScreenChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
 
     qGuiApp->installNativeEventFilter(m_xcbHelper);
+    setupKWinDBusConnection();
     onHideModeChanged(panel->hideMode());
 }
 
@@ -462,6 +465,9 @@ void X11DockHelper::updateWindowHideState(xcb_window_t window)
     bool oldOverlap = data->overlap;
     if (!data->isMinimized) {
         data->overlap = data->rect.intersects(m_dockArea);
+    } else {
+        // 最小化的窗口不会与任务栏重叠
+        data->overlap = false;
     }
 
     if (oldOverlap != data->overlap) {
@@ -522,6 +528,11 @@ bool X11DockHelper::currentActiveWindowFullscreened()
 
 bool X11DockHelper::isWindowOverlap()
 {
+    // 如果当前处于显示桌面状态，则认为没有窗口重叠
+    if (m_showingDesktop) {
+        return false;
+    }
+    
     // any widnow overlap
     bool overlap = false;
     std::for_each(m_windows.begin(), m_windows.end(), [&overlap](const auto &window) {
@@ -614,4 +625,26 @@ void X11DockWakeUpArea::updateDockWakeArea(Position pos)
     xcb_configure_window(m_connection, m_triggerWindow, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, values);
     xcb_flush(m_connection);
 }
+
+void X11DockHelper::setupKWinDBusConnection()
+{
+    // 连接到 KWin 的 D-Bus 接口监听 showingDesktopChanged 信号
+    QDBusConnection::sessionBus().connect(
+        "org.kde.KWin",                    
+        "/KWin",                           
+        "org.kde.KWin",                    
+        "showingDesktopChanged",           
+        this,                              
+        SLOT(onShowingDesktopChanged(bool)) 
+    );
+}
+
+void X11DockHelper::onShowingDesktopChanged(bool showing)
+{
+    // 更新显示桌面状态
+    m_showingDesktop = showing;
+    // 触发窗口重叠状态变化检查
+    Q_EMIT isWindowOverlapChanged(isWindowOverlap());
+}
+
 } // namespace dock
