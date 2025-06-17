@@ -44,7 +44,7 @@
 			"visibility": "private"
 		},
 		"dockedElements": {
-			"value": ["desktop/dde-file-manager", "desktop/deepin-app-storedesktop", "desktop/org.deepin.browser", "desktop/deepin-mail", "desktop/deepin-terminal", "desktop/dde-calendar", "desktop/deepin-music", "desktop/deepin-editor", "desktop/deepin-calculator", "desktop/org.deepin.dde.control-center", "desktop/dde-trash"],
+			"value": ["desktop/dde-file-manager", "desktop/deepin-app-store", "desktop/org.deepin.browser", "desktop/deepin-mail", "desktop/deepin-terminal", "desktop/dde-calendar", "desktop/deepin-music", "desktop/deepin-editor", "desktop/deepin-calculator", "desktop/org.deepin.dde.control-center"],
 			"serial": 0,
 			"flags": [],
 			"name": "dockedElements",
