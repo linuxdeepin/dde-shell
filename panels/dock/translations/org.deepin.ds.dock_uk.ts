@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Вимкнути нетипове налаштовування</translation>
     </message>
 </context>
 </TS>
