@@ -42,4 +42,3 @@ target_include_directories(rolegroupmodel_tests PRIVATE
 )
 
 add_test(NAME rolegroupmodel COMMAND rolegroupmodel_tests)
-

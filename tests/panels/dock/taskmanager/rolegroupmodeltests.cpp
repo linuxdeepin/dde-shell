@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "rolegroupmodel.h"
+#include <QAbstractItemModelTester>
 #include <QVariant>
 
 #include <gtest/gtest.h>
@@ -72,4 +73,36 @@ TEST(RoleGroupModel, RowCountTest)
     EXPECT_EQ(groupModel.rowCount(index1), 2);
     // item5 的内容为data4
     EXPECT_EQ(groupModel.rowCount(index4), 1);
+}
+
+TEST(RoleGroupModel, ModelTest)
+{
+    QStandardItemModel model;
+    QStandardItem *item1 = new QStandardItem;
+    QStandardItem *item2 = new QStandardItem;
+    QStandardItem *item3 = new QStandardItem;
+    QStandardItem *item4 = new QStandardItem;
+    QStandardItem *item5 = new QStandardItem;
+
+    auto role = Qt::UserRole + 1;
+
+    RoleGroupModel groupModel(&model, role);
+    model.setItemRoleNames({{role, "data"}});
+
+    item1->setData(QString("data"), role);
+    model.appendRow(item1);
+
+    item2->setData(QString("data"), role);
+    model.appendRow(item2);
+
+    model.appendRow(item3);
+    model.appendRow(item4);
+    model.appendRow(item5);
+
+    item3->setData(QString("data3"), role);
+    item4->setData(QString("data4"), role);
+    item5->setData(QString("data4"), role);
+    model.removeRows(2, 1);
+
+    auto tester = new QAbstractItemModelTester(&groupModel, QAbstractItemModelTester::FailureReportingMode::Fatal);
 }
