@@ -109,6 +109,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void handleWindowAdded(QPointer<AbstractWindow> window);
+    void modifyOpacityChanged();
 
 private:
     void loadDockedAppItems();

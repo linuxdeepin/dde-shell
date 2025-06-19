@@ -45,6 +45,7 @@ bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *messag
 
 X11WindowMonitor::X11WindowMonitor(QObject* parent)
     : AbstractWindowMonitor(parent)
+    , m_opacity(0.2)
 {
     monitor = this;
     connect(this, &X11WindowMonitor::windowMapped, this, &X11WindowMonitor::onWindowMapped);
@@ -109,6 +110,7 @@ void X11WindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObject* r
 
     if (m_windowPreview.isNull()) {
         m_windowPreview.reset(new X11WindowPreviewContainer(this));
+        m_windowPreview->setMaskAlpha(static_cast<int>(m_opacity * 255));
         m_windowPreview->windowHandle()->setTransientParent(qobject_cast<QWindow *>(relativePositionItem));
     }
 
@@ -139,6 +141,14 @@ void X11WindowMonitor::cancelPreviewWindow()
             .service("com.deepin.wm")
             .method("CancelPreviewWindow")
             .call().waitForFinished();
+}
+
+void X11WindowMonitor::setPreviewOpacity(double opacity)
+{
+    m_opacity = opacity;
+    if (!m_windowPreview.isNull()) {
+        m_windowPreview->setMaskAlpha(static_cast<int>(m_opacity * 255));
+    }
 }
 
 void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)
