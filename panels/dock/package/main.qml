@@ -58,7 +58,10 @@ Window {
 
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
-    D.DWindow.borderWidth: 1
+    //TODO：由于windoweffect处理有BUG，导致动画结束后一致保持无阴影，无borderwidth状态。(所以未取消阴影)
+    //目前在动画结束后还存在阴影残留 
+    //D.DWindow.windowEffect: hideShowAnimation.running ? D.PlatformHandle.EffectNoShadow | D.PlatformHandle.EffectNoBorder : 0
+    D.DWindow.borderWidth:  hideShowAnimation.running ? 0 : 1
     D.DWindow.enableBlurWindow: Qt.platform.pluginName !== "xcb"
     D.DWindow.themeType: Panel.colorTheme
     D.DWindow.borderColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, dock.blendColorAlpha(0.6) + 20 / 255) : Qt.rgba(0, 0, 0, 0.15)
