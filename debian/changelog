@@ -1,3 +1,13 @@
+dde-shell (2.0.0) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1162)
+  * chore: adjust dockedElements DConfig
+  * feat: add smart hide when hide desktop.
+  * i18n: Updates for project Deepin Desktop Environment (#1159)
+  * chore: set libdde-shell.so SOVERSION to 1
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 19 Jun 2025 10:15:26 +0800
+
 dde-shell (1.99.39) unstable; urgency=medium
 
   * chore: use ICU for relative datetime formatting
