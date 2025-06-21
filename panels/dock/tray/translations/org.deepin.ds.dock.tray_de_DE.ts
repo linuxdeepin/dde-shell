@@ -3,14 +3,14 @@
     <name>ActionShowStashDelegate</name>
     <message>
         <source>Application tray</source>
-        <translation>App-Minipaneele</translation>
+        <translation>App-Tafel</translation>
     </message>
 </context>
 <context>
     <name>ActionToggleCollapseDelegate</name>
     <message>
         <source>Collapse tray</source>
-        <translation>Leiste zuklappen</translation>
+        <translation>Leiste auf-/zuklappen</translation>
     </message>
 </context>
 <context>
