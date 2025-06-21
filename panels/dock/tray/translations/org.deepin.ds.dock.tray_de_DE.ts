@@ -3,7 +3,7 @@
     <name>ActionShowStashDelegate</name>
     <message>
         <source>Application tray</source>
-        <translation>App-Tafel</translation>
+        <translation>App-Tableau</translation>
     </message>
 </context>
 <context>
