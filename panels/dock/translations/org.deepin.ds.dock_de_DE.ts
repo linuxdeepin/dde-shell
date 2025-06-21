@@ -15,11 +15,11 @@
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation type="unfinished"/>
+        <translation>Klassischer Modus</translation>
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation type="unfinished"/>
+        <translation>Zentrierter Modus</translation>
     </message>
     <message>
         <source>Left</source>
