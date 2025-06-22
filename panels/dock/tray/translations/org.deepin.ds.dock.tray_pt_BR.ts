@@ -10,7 +10,7 @@
     <name>ActionToggleCollapseDelegate</name>
     <message>
         <source>Collapse tray</source>
-        <translation>Recolhimento da bandeja</translation>
+        <translation>Recolher bandeja</translation>
     </message>
 </context>
 <context>
