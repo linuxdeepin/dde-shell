@@ -1,23 +1,23 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_TW" sourcelanguage="en">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="nl" sourcelanguage="en">
 <context>
     <name>ActionShowStashDelegate</name>
     <message>
         <source>Application tray</source>
-        <translation>應用托盤</translation>
+        <translation>Programmavak</translation>
     </message>
 </context>
 <context>
     <name>ActionToggleCollapseDelegate</name>
     <message>
         <source>Collapse tray</source>
-        <translation>折疊托盤</translation>
+        <translation>Systeemvak inklappen</translation>
     </message>
 </context>
 <context>
     <name>PanelTrayItem</name>
     <message>
         <source>Quick actions</source>
-        <translation>快速設定</translation>
+        <translation>Snelle acties</translation>
     </message>
 </context>
 </TS>

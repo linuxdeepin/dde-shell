@@ -27,7 +27,7 @@
     </message>
     <message>
         <source>Position</source>
-        <translation type="unfinished"/>
+        <translation>位置</translation>
     </message>
     <message>
         <source>Mode</source>
@@ -35,7 +35,7 @@
     </message>
     <message>
         <source>Top</source>
-        <translation>↑</translation>
+        <translation>上</translation>
     </message>
     <message>
         <source>Bottom</source>
@@ -51,19 +51,19 @@
     </message>
     <message>
         <source>Keep Shown</source>
-        <translation type="unfinished"/>
+        <translation>常に表示</translation>
     </message>
     <message>
         <source>Keep Hidden</source>
-        <translation type="unfinished"/>
+        <translation>非表示</translation>
     </message>
     <message>
         <source>Smart Hide</source>
-        <translation type="unfinished"/>
+        <translation>スマートハイド</translation>
     </message>
     <message>
         <source>Dock Settings</source>
-        <translation type="unfinished"/>
+        <translation>ドックの設定</translation>
     </message>
     <message>
         <source>Lock the Dock</source>
