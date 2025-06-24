@@ -8,7 +8,7 @@ filters:
       source_file: panels/dock/taskmanager/translations/org.deepin.ds.dock.taskmanager.ts
       file_format: QT
       source_language: en_US
-      translation_files_expression: panels/dock/taskmanager/translations/org.deepin.ds.dock.taskmanager.ts_<lang>.ts
+      translation_files_expression: panels/dock/taskmanager/translations/org.deepin.ds.dock.taskmanager_<lang>.ts
     - filter_type: file
       source_file: panels/dock/tray/translations/org.deepin.ds.dock.tray.ts
       file_format: QT
