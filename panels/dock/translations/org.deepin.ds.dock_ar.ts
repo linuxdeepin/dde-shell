@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation type="unfinished"/>
+        <translation>قفل ال Dock</translation>
     </message>
 </context>
 </TS>

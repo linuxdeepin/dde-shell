@@ -1,48 +1,48 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_TW">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="de_DE">
 <context>
     <name>dock::AppItem</name>
     <message>
         <source>Open</source>
-        <translation>打開</translation>
+        <translation>Öffnen</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation>移除駐留</translation>
+        <translation>Abdocken</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation>駐留</translation>
+        <translation>Andocken</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation>強制退出</translation>
+        <translation>Auschalten erzwingen</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation>關閉所有</translation>
+        <translation>Alle schließen</translation>
     </message>
 </context>
 <context>
     <name>dock::DockGlobalElementModel</name>
     <message>
         <source>Open</source>
-        <translation>打開</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Undock</source>
-        <translation>移除駐留</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Dock</source>
-        <translation>駐留</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation>強制退出</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Close All</source>
-        <translation>關閉所有</translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
