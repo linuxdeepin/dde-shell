@@ -22,7 +22,7 @@ DWIDGET_USE_NAMESPACE
 
 namespace dock {
 class X11WindowMonitor;
-class AppItemWindowModel;
+class DockItemWindowModel;
 class AppItemWindowDeletegate;
 class PreviewsListView;
 
@@ -66,7 +66,7 @@ class X11WindowPreviewContainer: public DBlurEffectWidget
 
 public:
     explicit X11WindowPreviewContainer(X11WindowMonitor* monitor, QWidget *parent = nullptr);
-    void showPreview(const QPointer<AppItem> &item, const QPointer<QWindow> &window, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    void showPreview(const QModelIndexList &indexes, const QPointer<QWindow> &window, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
     void hidePreView();
 
 protected:
@@ -80,7 +80,7 @@ protected:
 private:
     inline void updatePreviewTitle(const QString& title);
     inline void initUI();
-    inline void updateSize();
+    inline void updateSize(int windowCount = -1);
     void updatePreviewIconFromBase64(const QString &base64Data);
 
 public Q_SLOTS:
@@ -96,7 +96,7 @@ private:
 
     X11WindowMonitor* m_monitor;
 
-    AppItemWindowModel* m_model;
+    DockItemWindowModel *m_model;
     PreviewsListView* m_view;
     QWidget *m_titleWidget;
 

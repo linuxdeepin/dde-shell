@@ -24,17 +24,6 @@ class AbstractWindow : public QObject
     Q_PROPERTY(bool shouldSkip READ shouldSkip NOTIFY shouldSkipChanged FINAL)
 
 public:
-    enum Roles {
-        winIdRole = Qt::UserRole + 1,
-        pidRole,
-        identityRole,
-        winIconRole,
-        winTitleRole,
-        activieRole,
-        shouldSkipRole
-    };
-    Q_ENUM(Roles)
-
     virtual ~AbstractWindow() {};
 
     virtual uint32_t id() = 0;

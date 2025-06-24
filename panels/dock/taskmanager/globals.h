@@ -4,9 +4,8 @@
 
 #pragma once
 
-#include <QString>
 #include <QRegularExpression>
-
+#include <QString>
 namespace dock {
 
 // actions

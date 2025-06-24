@@ -102,20 +102,6 @@ void X11WindowMonitor::presentWindows(QList<uint32_t> windows)
                 .call().waitForFinished();
 }
 
-void X11WindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
-{
-    // custom created preview popup window and show at (relativePositionItem.x + previewXoffset, relativePositionItem.y + previewYoffset) pos
-    // direction is dock current position
-
-    if (m_windowPreview.isNull()) {
-        m_windowPreview.reset(new X11WindowPreviewContainer(this));
-        m_windowPreview->windowHandle()->setTransientParent(qobject_cast<QWindow *>(relativePositionItem));
-    }
-
-    m_windowPreview->showPreview(item,qobject_cast<QWindow*>(relativePositionItem), previewXoffset, previewYoffset, direction);
-    m_windowPreview->updatePosition();
-}
-
 void X11WindowMonitor::hideItemPreview()
 {
     if (m_windowPreview.isNull()) return;
@@ -139,6 +125,22 @@ void X11WindowMonitor::cancelPreviewWindow()
             .service("com.deepin.wm")
             .method("CancelPreviewWindow")
             .call().waitForFinished();
+}
+
+void X11WindowMonitor::requestPreview(const QModelIndexList &indexes,
+                                      QObject *relativePositionItem,
+                                      int32_t previewXoffset,
+                                      int32_t previewYoffset,
+                                      uint32_t direction) const
+{
+    if (m_windowPreview.isNull()) {
+        const_cast<QScopedPointer<X11WindowPreviewContainer> *>(&m_windowPreview)->reset(new X11WindowPreviewContainer(const_cast<X11WindowMonitor *>(this)));
+        // m_windowPreview.reset(new X11WindowPreviewContainer(this));
+    }
+
+    // AppItem tmpAppItem(indexes.first().data(TaskManager::DesktopIdRole));
+    m_windowPreview->showPreview(indexes, qobject_cast<QWindow *>(relativePositionItem), previewXoffset, previewYoffset, direction);
+    m_windowPreview->updatePosition();
 }
 
 void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)
