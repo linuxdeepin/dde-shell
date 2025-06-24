@@ -25,6 +25,7 @@ Window {
     // TODO
     signal dockCenterPartPosChanged()
     signal pressedAndDragging(bool isDragging)
+    signal viewDeactivated()
 
     property int dockCenterPartCount: dockCenterPartModel.count
 
@@ -357,6 +358,7 @@ Window {
                 if (button === Qt.LeftButton) {
                     // try to close popup when clicked empty, because dock does not have focus.
                     Panel.requestClosePopup()
+                    viewDeactivated()
                 }
             }
         }
