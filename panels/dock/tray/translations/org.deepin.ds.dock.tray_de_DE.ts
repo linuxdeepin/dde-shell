@@ -10,7 +10,7 @@
     <name>ActionToggleCollapseDelegate</name>
     <message>
         <source>Collapse tray</source>
-        <translation>Leiste auf-/zuklappen</translation>
+        <translation>Leiste aus-/einfahren</translation>
     </message>
 </context>
 <context>
