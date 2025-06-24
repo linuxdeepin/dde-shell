@@ -1,50 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="uk">
 <context>
     <name>dock::AppItem</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"></translation>
+        <translation>Відкрити</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"></translation>
+        <translation>Відшвартувати</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"></translation>
+        <translation>Пришвартувати</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>Примусово вийти</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation type="unfinished"></translation>
+        <translation>Закрити всі</translation>
     </message>
 </context>
 <context>
     <name>dock::DockGlobalElementModel</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"></translation>
+        <translation>Відкрити</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"></translation>
+        <translation>Від&apos;єднати</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"></translation>
+        <translation>Пришвартувати</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>Примусово вийти</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation type="unfinished"></translation>
+        <translation>Закрити всі</translation>
     </message>
 </context>
 </TS>
