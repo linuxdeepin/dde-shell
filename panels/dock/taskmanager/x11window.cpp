@@ -63,6 +63,14 @@ QString X11Window::icon()
     return m_icon;
 }
 
+void X11Window::resetIcon()
+{
+    if (!m_icon.isEmpty()) {
+        m_icon.clear();
+        Q_EMIT AbstractWindow::iconChanged();
+    }
+}
+
 QString X11Window::title()
 {
     if (m_title.isEmpty()) {
