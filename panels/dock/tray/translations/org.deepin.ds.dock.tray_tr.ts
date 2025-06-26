@@ -1,23 +1,23 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="de_DE" sourcelanguage="en">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="tr" sourcelanguage="en">
 <context>
     <name>ActionShowStashDelegate</name>
     <message>
         <source>Application tray</source>
-        <translation>App-Palette</translation>
+        <translation>Uygulama tepsisi</translation>
     </message>
 </context>
 <context>
     <name>ActionToggleCollapseDelegate</name>
     <message>
         <source>Collapse tray</source>
-        <translation>Leiste aus-/einfahren</translation>
+        <translation>Tepsiye daralt</translation>
     </message>
 </context>
 <context>
     <name>PanelTrayItem</name>
     <message>
         <source>Quick actions</source>
-        <translation>Schnelleinsteller</translation>
+        <translation>Hızlı eylemler</translation>
     </message>
 </context>
 </TS>

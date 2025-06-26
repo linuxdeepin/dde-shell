@@ -44,7 +44,7 @@
     </message>
     <message>
         <source>1 hour ago</source>
-        <translation type="unfinished"/>
+        <translation>vor 1 Stunde</translation>
     </message>
     <message>
         <source>%1 hours ago</source>
