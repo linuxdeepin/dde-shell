@@ -52,6 +52,7 @@ private Q_SLOTS:
     void onWindowMapped(xcb_window_t window);
     void onWindowDestroyed(xcb_window_t window);
     void onWindowPropertyChanged(xcb_window_t window, xcb_atom_t atom);
+    void onIconThemeChanged();
 
 private:
     void monitorX11Event();

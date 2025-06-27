@@ -41,6 +41,8 @@ private:
     friend class X11WindowMonitor;
     X11Window(xcb_window_t winid, QObject *parent = nullptr);
 
+    void resetIcon();
+
 private:
     void updatePid();
     void updateIdentify();
