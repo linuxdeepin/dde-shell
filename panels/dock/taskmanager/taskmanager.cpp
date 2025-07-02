@@ -432,9 +432,10 @@ void TaskManager::modifyOpacityChanged()
     auto appearanceApplet = appearanceBridge.applet();
     if (appearanceApplet) {
         double opacity = appearanceApplet->property("opacity").toReal();
-        auto x11Monitor = qobject_cast<X11WindowMonitor*>(m_windowMonitor.data());
-        x11Monitor->setPreviewOpacity(opacity);
-    }else{
+        if (auto x11Monitor = qobject_cast<X11WindowMonitor*>(m_windowMonitor.data())) {
+            x11Monitor->setPreviewOpacity(opacity);
+        }
+    } else {
         qWarning() << "modifyOpacityChanged: appearanceApplet is null";
     }
 }
