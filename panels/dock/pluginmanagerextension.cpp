@@ -22,8 +22,11 @@
 #include <private/qwaylandcompositor_p.h>
 #undef protected
 #include <qpa/qwindowsysteminterface_p.h>
+
+#ifdef USE_DEEPIN_QT
 #include <private/qwlqtkey_p.h>
 #include <private/qwlqttouch_p.h>
+#endif
 
 DGUI_USE_NAMESPACE
 
@@ -418,11 +421,14 @@ void PluginManager::initialize()
         QWindowSystemInterfacePrivate::removeWindowSystemEventhandler(eventHandler);
     }
 
+    // TODO: Use built-in protocol instead of qt
+#ifdef USE_DEEPIN_QT
     // 只创建就行
     auto qtKey = new QtWayland::QtKeyExtensionGlobal(compositor);
     qtKey->setParent(compositor);
     auto qtTouch = new QtWayland::TouchExtensionGlobal(compositor);
     qtTouch->setParent(compositor);
+#endif
 
     init(compositor->display(), 1);
 }
