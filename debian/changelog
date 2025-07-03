@@ -1,3 +1,27 @@
+dde-shell (2.0.2) unstable; urgency=medium
+
+  * fix: fix safe build.
+  * fix: cannot build on Archlinux
+  * fix: Fixed the blurriness of the preview window to separate the X11
+    and wayland environments.
+  * fix: fix launchpad fullsream, click dock ,it will not close.
+  * fix: init showingDesktop for smart Hide.
+  * feat: add preview follows the system opacity.
+  * fix: modify when keep hiden animation has launched, has shadow and
+    line.
+  * fix: adapt import change of QtQml.Models in Qt 6.9
+  * i18n: Updates for project Deepin Desktop Environment (#1172)
+  * fix(tray): allow plugin icons to be dragged to leftmost position ﻿ -
+    Fix overly strict drag condition in TrayContainer.qml that prevented
+    plugin icons from being dragged to the leftmost position - Replace
+    `dropHoverIndex !== 0` check with precise condition `dropHoverIndex
+    === 0 && !surfaceId.startsWith("application-tray") && isBefore` -
+    Maintain protection for application tray icons while allowing plugin
+    icons to be properly positioned - Fix inconsistent behavior between
+    animation states
+
+ -- WuJiangYu <wujiangyu@uniontech.com>  Thu, 03 Jul 2025 16:32:57 +0800
+
 dde-shell (2.0.1) unstable; urgency=medium
 
   * chore: remove invalid translation resources
