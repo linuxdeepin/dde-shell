@@ -15,6 +15,8 @@
 #include <xcb/xproto.h>
 
 #include <DDBusSender>
+#include <DGuiApplicationHelper>
+#include <DPlatformTheme>
 
 #include <QPointer>
 #include <QWindow>
@@ -51,6 +53,7 @@ X11WindowMonitor::X11WindowMonitor(QObject* parent)
     connect(this, &X11WindowMonitor::windowMapped, this, &X11WindowMonitor::onWindowMapped);
     connect(this, &X11WindowMonitor::windowDestroyed, this, &X11WindowMonitor::onWindowDestroyed);
     connect(this, &X11WindowMonitor::windowPropertyChanged, this, &X11WindowMonitor::onWindowPropertyChanged);
+    connect(DGuiApplicationHelper::instance()->applicationTheme(), &DPlatformTheme::iconThemeNameChanged, this, &X11WindowMonitor::onIconThemeChanged);
 }
 
 void X11WindowMonitor::start()
@@ -208,6 +211,15 @@ void X11WindowMonitor::onWindowPropertyChanged(xcb_window_t window, xcb_atom_t a
     auto appitem = x11Window->getAppItem();
     if (x11Window->shouldSkip() && appitem) {
         appitem->removeWindow(x11Window.data());
+    }
+}
+
+void X11WindowMonitor::onIconThemeChanged()
+{
+    for (const auto &window : m_windows) {
+        if (window) {
+            window->resetIcon();
+        }
     }
 }
 
