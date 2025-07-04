@@ -127,7 +127,6 @@ void DLayerShellWindow::setKeyboardInteractivity(DLayerShellWindow::KeyboardInte
         d->keyboardInteractivity = interactivity;
         Q_EMIT keyboardInteractivityChanged();
     }
-    
 }
 
 DLayerShellWindow::KeyboardInteractivity DLayerShellWindow::keyboardInteractivity() const
@@ -164,7 +163,7 @@ void DLayerShellWindow::setCloseOnDismissed(bool close)
 {
     if (close != d->closeOnDismissed) {
         d->closeOnDismissed = close;
-    }   
+    }
 }
 
 void DLayerShellWindow::setScope(const QString& scope)
@@ -172,7 +171,7 @@ void DLayerShellWindow::setScope(const QString& scope)
     if (scope != d->scope) {
         d->scope = scope;
         Q_EMIT scopeChanged();
-    }   
+    }
 }
 
 QString DLayerShellWindow::scope() const
@@ -215,7 +214,7 @@ DLayerShellWindow::DLayerShellWindow(QWindow* window)
 #ifdef BUILD_WITH_X11
     else if (auto xcbWindow = dynamic_cast<QNativeInterface::Private::QXcbWindow*>(window->handle())) {
         new LayerShellEmulation(window, this);
-        qCWarning(layershellwindow) << "not a wayland window, try to emulate on x11";
+        qCInfo(layershellwindow) << "not a wayland window, try to emulate on x11";
     }
 #endif
     else {
