@@ -162,6 +162,10 @@ void NotifyStagingModel::open()
     if (entities.size() <= 0)
         return;
 
+    std::sort(entities.begin(), entities.end(), [](const NotifyEntity &item1, const NotifyEntity &item2) {
+        return item1.cTime() > item2.cTime();
+    });
+
     beginResetModel();
 
     const auto count = std::min(static_cast<int>(entities.size()), BubbleMaxCount);
