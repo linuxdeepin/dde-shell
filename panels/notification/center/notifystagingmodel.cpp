@@ -144,7 +144,7 @@ void NotifyStagingModel::remove(qint64 id)
 
             qDebug(notifyLog) << "Insert notify" << newEntity.bubbleId();
             beginInsertRows(QModelIndex(), insertedIndex, insertedIndex);
-            auto notify = new BubbleNotifyItem(newEntity);
+            auto notify = new AppNotifyItem(newEntity);
             m_appNotifies.insert(insertedIndex, notify);
             endInsertRows();
         }
@@ -170,7 +170,7 @@ void NotifyStagingModel::open()
 
     const auto count = std::min(static_cast<int>(entities.size()), BubbleMaxCount);
     for (int i = 0; i < count; i++) {
-        auto notify = new BubbleNotifyItem(entities.at(i));
+        auto notify = new AppNotifyItem(entities.at(i));
         m_appNotifies << notify;
     }
     updateOverlapCount(entities.size());
