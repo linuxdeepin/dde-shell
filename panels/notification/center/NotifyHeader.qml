@@ -13,28 +13,6 @@ FocusScope {
     id: root
 
     required property NotifyModel notifyModel
-    signal headerClicked()
-
-    // test
-    onHeaderClicked: function () {
-        dataPanelLoader.active = !dataPanelLoader.active
-        NotifyAccessor.fetchDataInfo()
-        dataPanelLoader.item.show()
-    }
-    Loader {
-        id: dataPanelLoader
-        active: false
-        sourceComponent: Window {
-            id: dataPanel
-            width: 360
-            height: 600
-            x: dataPanel.transientParent.x + root.Window.width + 10
-            y: dataPanel.transientParent.y
-            DataPanel {
-                notifyModel: root.notifyModel
-            }
-        }
-    }
 
     RowLayout {
         anchors.fill: parent
@@ -43,12 +21,6 @@ FocusScope {
             Layout.alignment: Qt.AlignLeft
             Layout.leftMargin: 18
             tFont: DTK.fontManager.t4
-            MouseArea {
-                anchors.fill: parent
-                onDoubleClicked: {
-                    root.headerClicked()
-                }
-            }
         }
 
         Item {

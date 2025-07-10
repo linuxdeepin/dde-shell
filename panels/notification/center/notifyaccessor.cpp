@@ -139,35 +139,21 @@ QStringList NotifyAccessor::fetchApps(int maxCount) const
 void NotifyAccessor::removeEntity(qint64 id)
 {
     qDebug(notifyLog) << "Remove notify" << id;
-    if (m_dataUpdater) {
-        QMetaObject::invokeMethod(m_dataUpdater, "removeNotification", Qt::DirectConnection,
-                                  Q_ARG(qint64, id));
-    } else {
-        m_accessor->removeEntity(id);
-    }
+    QMetaObject::invokeMethod(m_dataUpdater, "removeNotification", Qt::DirectConnection, Q_ARG(qint64, id));
 }
 
 void NotifyAccessor::removeEntityByApp(const QString &appName)
 {
     qDebug(notifyLog) << "Remove notifies for the application" << appName;
 
-    if (m_dataUpdater) {
-        QMetaObject::invokeMethod(m_dataUpdater, "removeNotifications", Qt::DirectConnection,
-                                  Q_ARG(const QString &, appName));
-    } else {
-        m_accessor->removeEntityByApp(appName);
-    }
+    QMetaObject::invokeMethod(m_dataUpdater, "removeNotifications", Qt::DirectConnection, Q_ARG(const QString &, appName));
 }
 
 void NotifyAccessor::clear()
 {
     qDebug(notifyLog) << "Remove all notify";
 
-    if (m_dataUpdater) {
-        QMetaObject::invokeMethod(m_dataUpdater, "removeNotifications", Qt::DirectConnection);
-    } else {
-        m_accessor->clear();
-    }
+    QMetaObject::invokeMethod(m_dataUpdater, "removeNotifications", Qt::DirectConnection);
 }
 
 void NotifyAccessor::closeNotify(const NotifyEntity &entity, NotifyEntity::ClosedReason reason)
@@ -240,34 +226,6 @@ void NotifyAccessor::openNotificationSetting()
     }
 }
 
-void NotifyAccessor::addNotify(const QString &appName, const QString &content)
-{
-    qDebug(notifyLog) << "Add notify" << appName;
-    static int id = 10000;
-    NotifyEntity entity(id++, appName);
-    entity.setBody(content);
-    m_accessor->addEntity(entity);
-
-    if (auto entity = fetchLastEntity(appName); entity.isValid()) {
-        entityReceived(entity.id());
-    }
-}
-
-void NotifyAccessor::fetchDataInfo()
-{
-    QStringList info;
-    auto entityCount = fetchEntityCount(DataAccessor::AllApp());
-    auto apps = fetchApps();
-    info.append(QString("notifyCount: %1, appCount: %2").arg(entityCount).arg(apps.size()));
-    for (auto item : apps) {
-        info.append(QString("%1 -> %2").arg(item).arg(fetchEntityCount(item)));
-    }
-    QString ret = info.join("\n");
-    m_dataInfo = ret;
-    dataInfoChanged();
-    appsChanged();
-}
-
 void NotifyAccessor::onNotificationStateChanged(qint64 id, int processedType)
 {
     if (!enabled())
@@ -283,16 +241,6 @@ void NotifyAccessor::onNotificationStateChanged(qint64 id, int processedType)
 void NotifyAccessor::onReceivedRecord(const QString &id)
 {
     emit entityReceived(id.toLongLong());
-}
-
-QString NotifyAccessor::dataInfo() const
-{
-    return m_dataInfo;
-}
-
-QStringList NotifyAccessor::apps() const
-{
-    return m_apps;
 }
 
 bool NotifyAccessor::debugging() const

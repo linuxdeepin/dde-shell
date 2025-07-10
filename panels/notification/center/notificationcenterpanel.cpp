@@ -88,14 +88,10 @@ bool NotificationCenterPanel::init()
                                  Qt::QueuedConnection);
         notifycenter::NotifyAccessor::instance()->setDataUpdater(server);
         notifycenter::NotifyAccessor::instance()->setEnabled(visible());
-    } else {
-        // old interface by dbus
-        auto connection = QDBusConnection::sessionBus();
-        valid = connection.connect(DDENotifyDBusServer, DDENotifyDBusPath, DDENotifyDBusInterface,
-                                   "RecordAdded", this, SLOT(onReceivedRecord(const QString &)));
     }
     if (!valid) {
         qWarning(notifyLog) << "NotifyConnection is invalid, and can't receive RecordAdded signal.";
+        return false;
     }
 
     return true;

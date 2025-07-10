@@ -173,7 +173,11 @@ bool DBAccessor::open(const QString &dataPath)
 bool DBAccessor::isValid() const
 {
     QMutexLocker locker(&m_mutex);
-    return !m_connection.lastError().isValid();
+    if (m_connection.lastError().isValid()) {
+        qWarning(notifyLog) << "Database error" << m_connection.lastError().text();
+        return false;
+    }
+    return true;
 }
 
 qint64 DBAccessor::addEntity(const NotifyEntity &entity)
