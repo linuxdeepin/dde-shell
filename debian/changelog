@@ -1,3 +1,13 @@
+dde-shell (2.0.3) unstable; urgency=medium
+
+  * refactor: remove debug panel and legacy DBus code
+  * refactor: update notification handling and data access logic
+  * fix: sort notifications by timestamp before display
+  * i18n: Updates for project Deepin Desktop Environment (#1174)
+  * chore: reduce layershell emulate log message's log level
+
+ -- WuJiangYu <wujiangyu@uniontech.com>  Thu, 10 Jul 2025 19:08:51 +0800
+
 dde-shell (2.0.2) unstable; urgency=medium
 
   * fix: fix safe build.
