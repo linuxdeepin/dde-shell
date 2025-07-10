@@ -284,6 +284,16 @@ void BubbleModel::setDelayRemovedBubble(qint64 newDelayRemovedBubble)
     emit delayRemovedBubbleChanged();
 }
 
+void BubbleModel::clearInvalidBubbles()
+{
+    for (int i = m_bubbles.count() - 1; i >= 0; i--) {
+        auto bubble = m_bubbles.at(i);
+        if (!bubble->isValid()) {
+            remove(bubble);
+        }
+    }
+}
+
 int BubbleModel::replaceBubbleIndex(const BubbleItem *bubble) const
 {
     if (bubble->isReplace()) {

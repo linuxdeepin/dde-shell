@@ -53,6 +53,7 @@ NotifyEntity::NotifyEntity(qint64 id, const QString &appName)
 {
     d->id = id;
     d->appName = appName;
+    d->cTime = QDateTime::currentMSecsSinceEpoch();
 }
 
 NotifyEntity::NotifyEntity(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary,
@@ -117,7 +118,7 @@ bool NotifyEntity::operator!=(const NotifyEntity &other) const
 
 bool NotifyEntity::isValid() const
 {
-    return d && d->id > 0;
+    return d && d->id > 0 && d->cTime > 0;
 }
 
 qint64 NotifyEntity::id() const

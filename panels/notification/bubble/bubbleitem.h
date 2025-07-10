@@ -48,6 +48,8 @@ public:
     bool enablePreview() const;
     void setEnablePreview(bool enable);
 
+    bool isValid() const;
+
 signals:
     void levelChanged();
     void timeTipChanged();

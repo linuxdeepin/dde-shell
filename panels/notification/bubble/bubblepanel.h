@@ -57,6 +57,7 @@ private:
     void onBubbleClosed(qint64 id, uint bubbleId, uint reason);
     void setVisible(const bool visible);
     bool enablePreview(const QString &appId) const;
+    void clearInvalidBubbles();
 
     BubbleItem *bubbleItem(int index);
 

@@ -643,6 +643,13 @@ void NotificationManager::onHandingPendingEntities()
     }
 
     for (const auto &item : timeoutEntities) {
+        // Validate entity before processing timeout to prevent race conditions
+        if (!item.isValid()) {
+            qWarning(notifyLog) << "Skipping timeout processing for invalid entity id:" << item.id() << "appName:" << item.appName()
+                                << "cTime:" << item.cTime();
+            continue;
+        }
+
         qDebug(notifyLog) << "Expired for the notification " << item.id() << item.appName();
         notificationClosed(item.id(), item.bubbleId(), NotifyEntity::Expired);
     }

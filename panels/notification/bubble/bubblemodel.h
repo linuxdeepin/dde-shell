@@ -64,6 +64,8 @@ public:
     qint64 delayRemovedBubble() const;
     void setDelayRemovedBubble(qint64 newDelayRemovedBubble);
 
+    void clearInvalidBubbles();
+
 signals:
     void delayRemovedBubbleChanged();
 
