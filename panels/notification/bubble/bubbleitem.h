@@ -18,6 +18,7 @@ public:
 
     explicit BubbleItem(QObject *parent = nullptr);
     explicit BubbleItem(const NotifyEntity &entity, QObject *parent = nullptr);
+    ~BubbleItem();
 
 public:
     void setEntity(const NotifyEntity &entity);
@@ -26,7 +27,7 @@ public:
     qint64 id() const;
     uint bubbleId() const;
     QString appName() const;
-    QString appIcon() const;
+    QString appIcon();
     QString summary() const;
     QString body() const;
     uint replacesId() const;
@@ -65,6 +66,7 @@ private:
     bool m_enablePreview = true;
     QVariantList m_actions;
     QString m_defaultAction;
+    QString m_tempIconPath;
 };
 
 }

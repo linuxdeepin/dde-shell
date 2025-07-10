@@ -7,6 +7,8 @@
 #include <QUrl>
 #include <QTimer>
 #include <QImage>
+#include <QDir>
+#include <QFile>
 #include <QDBusArgument>
 #include <QTemporaryFile>
 #include <QLoggingCategory>
@@ -140,15 +142,21 @@ static QString imagePathOfNotification(const QVariantMap &hints, const QString &
     if (img.isNull()) {
         img = decodeImageFromBase64(imageData);
     }
+
     if (!img.isNull()) {
-        QTemporaryFile file("notification_icon");
-        img.save(file.fileName());
-        return file.fileName();
+        QTemporaryFile file(QDir::temp().filePath("notification_icon_XXXXXX.png"));
+        file.setAutoRemove(false);
+        if (file.open()) {
+            QString filePath = file.fileName();
+            file.close();
+            if (img.save(filePath)) {
+                qDebug(notifyLog) << "Created temporary icon file:" << filePath;
+                return filePath;
+            }
+        }
     }
 
-    DGUI_USE_NAMESPACE;
-    auto icon = DIconTheme::findQIcon(appName, DIconTheme::findQIcon("application-x-desktop"));
-    return icon.name();
+    return {};
 }
 
 
@@ -164,6 +172,14 @@ BubbleItem::BubbleItem(const NotifyEntity &entity, QObject *parent)
     , m_timeTip(tr("just now"))
 {
     setEntity(entity);
+}
+
+BubbleItem::~BubbleItem()
+{
+    // clean up temporary icon file.
+    if (!m_tempIconPath.isEmpty() && QFile::exists(m_tempIconPath)) {
+        QFile::remove(m_tempIconPath);
+    }
 }
 
 void BubbleItem::setEntity(const NotifyEntity &entity)
@@ -192,13 +208,19 @@ QString BubbleItem::appName() const
     return m_entity.appName();
 }
 
-QString BubbleItem::appIcon() const
+QString BubbleItem::appIcon()
 {
     if (!m_entity.appIcon().isEmpty()) {
         return m_entity.appIcon();
     }
 
-    return imagePathOfNotification(m_entity.hints(), m_entity.appIcon(), m_entity.appName());
+    if (!m_tempIconPath.isEmpty() && QFile::exists(m_tempIconPath)) {
+        return m_tempIconPath;
+    }
+
+    m_tempIconPath = imagePathOfNotification(m_entity.hints(), m_entity.appIcon(), m_entity.appName());
+    // if this is empty path, UI can fallback to application-x-desktop icon.
+    return m_tempIconPath;
 }
 
 QString BubbleItem::summary() const
