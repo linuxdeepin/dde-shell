@@ -180,15 +180,9 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
                                  const QString &body, const QStringList &actions, const QVariantMap &hints,
                                  int expireTimeout)
 {
-    qDebug(notifyLog) << "Notify"
-            << ", appName:" << appName
-            << ", summary:" << summary
-            << ", appIcon:" << appIcon
-            << ", body size:" << body.size()
-            << ", actions:" << actions
-            << ", hint: " << hints
-            << ", replaceId:" << replacesId
-            << ", expireTimeout:" << expireTimeout;
+    qInfo(notifyLog) << "Notify"
+                     << ", appName:" << appName << ", summary:" << summary << ", appIcon:" << appIcon << ", body size:" << body.size()
+                     << ", actions:" << actions << ", hint: " << hints << ", replaceId:" << replacesId << ", expireTimeout:" << expireTimeout;
 
     if (calledFromDBus() && m_setting->systemValue(NotificationSetting::CloseNotification).toBool()) {
         qDebug(notifyLog) << "Notify has been disabled by CloseNotification setting.";

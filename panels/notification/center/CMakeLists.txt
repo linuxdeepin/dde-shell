@@ -19,7 +19,6 @@ qt_add_qml_module(notificationcenterpanel
         NotifySettingMenu.qml
         AnimationSettingButton.qml
         BoundingRectangle.qml
-        DataPanel.qml
         NotifyHeaderTitleText.qml
     SOURCES
         notificationcenterpanel.h

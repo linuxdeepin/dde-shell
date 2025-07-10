@@ -25,8 +25,6 @@ class NotifyAccessor : public QObject
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
-    Q_PROPERTY(QString dataInfo READ dataInfo NOTIFY dataInfoChanged FINAL)
-    Q_PROPERTY(QStringList apps READ apps NOTIFY appsChanged FINAL)
     Q_PROPERTY(bool debugging READ debugging NOTIFY debuggingChanged)
 public:
     static NotifyAccessor *instance();
@@ -60,13 +58,6 @@ signals:
     void stagingEntityReceived(qint64 id);
     void stagingEntityClosed(qint64 id);
 
-public slots:
-    void addNotify(const QString &appName, const QString &content);
-    void fetchDataInfo();
-
-signals:
-    void dataInfoChanged();
-    void appsChanged();
     void debuggingChanged();
 
 private slots:
@@ -76,17 +67,13 @@ private slots:
 private:
     explicit NotifyAccessor(QObject *parent = nullptr);
 
-    QString dataInfo() const;
-    QStringList apps() const;
     bool debugging() const;
 
 private:
     DataAccessor *m_accessor = nullptr;
     QObject *m_dataUpdater = nullptr;
     QStringList m_pinnedApps;
-    QStringList m_apps;
     bool m_debugging = false;
-    QString m_dataInfo;
     bool m_enabled = false;
 };
 }
