@@ -116,6 +116,13 @@ void BubblePanel::onBubbleCountChanged()
 void BubblePanel::addBubble(qint64 id)
 {
     const auto entity = m_accessor->fetchEntity(id);
+
+    // Validate entity before creating bubble to prevent invalid notification banners
+    if (!entity.isValid()) {
+        qWarning(notifyLog) << "Failed to add bubble: invalid entity for id" << id << "appName:" << entity.appName() << "cTime:" << entity.cTime();
+        return;
+    }
+
     auto bubble = new BubbleItem(entity);
     const auto enabled = enablePreview(entity.appId());
     bubble->setEnablePreview(enabled);
@@ -135,11 +142,15 @@ void BubblePanel::closeBubble(qint64 id)
     if (entity.isValid()) {
         id = entity.bubbleId();
     } else {
+        qDebug(notifyLog) << "Entity not found or invalid for close bubble, using storage id lookup:" << id;
         id = m_bubbles->getBubbleIdByStorageId(id);
     }
 
     if (id > 0) {
         m_bubbles->removeById(id);
+    } else {
+        qWarning(notifyLog) << "Failed to close bubble: invalid bubble id for entity id:" << id << "appName:" << entity.appName() << "cTime:" << entity.cTime();
+        clearInvalidBubbles();
     }
 }
 
@@ -170,6 +181,11 @@ bool BubblePanel::enablePreview(const QString &appId) const
     QMetaObject::invokeMethod(m_notificationServer, "appValue", Qt::DirectConnection,
                               Q_RETURN_ARG(QVariant, value), Q_ARG(const QString &, appId), Q_ARG(int, EnablePreview));
     return value.toBool();
+}
+
+void BubblePanel::clearInvalidBubbles()
+{
+    m_bubbles->clearInvalidBubbles();
 }
 
 BubbleItem *BubblePanel::bubbleItem(int index)

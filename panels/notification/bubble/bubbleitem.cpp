@@ -317,6 +317,11 @@ void BubbleItem::setEnablePreview(bool enable)
     m_enablePreview = enable;
 }
 
+bool BubbleItem::isValid() const
+{
+    return m_entity.isValid();
+}
+
 QString BubbleItem::displayText() const
 {
     return m_enablePreview ? m_entity.body() : tr("1 new message");
