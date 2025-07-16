@@ -30,7 +30,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                 return std::get<1>(data) == m_appsModel && std::get<2>(data) == i;
             });
             if (it != m_data.end()) {
-                auto pos = it - m_data.end();
+                auto pos = it - m_data.begin();
                 beginRemoveRows(QModelIndex(), pos, pos);
                 m_data.remove(pos);
                 endRemoveRows();
