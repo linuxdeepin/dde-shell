@@ -7,9 +7,11 @@
 #include <QUrl>
 #include <QTimer>
 #include <QImage>
+#include <QBuffer>
 #include <QDBusArgument>
 #include <QTemporaryFile>
 #include <QLoggingCategory>
+#include <QRegularExpression>
 
 #include <DIconTheme>
 
@@ -91,17 +93,14 @@ if (!(condition)) { \
     return image;
 }
 
-static QImage decodeImageFromBase64(const QString &arg)
+static QString decodeImageToBase64(const QImage &image, const char *format = "PNG")
 {
-    if (arg.startsWith("data:image/")) {
-        // iconPath is a string representing an inline image.
-        QStringList strs = arg.split("base64,");
-        if (strs.length() == 2) {
-            QByteArray data = QByteArray::fromBase64(strs.at(1).toLatin1());
-            return QImage::fromData(data);
-        }
-    }
-    return QImage();
+    QByteArray ba;
+    QBuffer buffer(&ba);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, format);
+
+    return QString("data:image/%1;base64,%2").arg(QString::fromLatin1(format).toLower()).arg(QString::fromLatin1(ba.toBase64()));
 }
 
 static QIcon decodeIconFromPath(const QString &arg, const QString &fallback)
@@ -138,17 +137,18 @@ static QString imagePathOfNotification(const QVariantMap &hints, const QString &
         imageData = source.toString();
     }
     if (img.isNull()) {
-        img = decodeImageFromBase64(imageData);
-    }
-    if (!img.isNull()) {
-        QTemporaryFile file("notification_icon");
-        img.save(file.fileName());
-        return file.fileName();
+        // check if imageData is a base64 image data.
+        QRegularExpression dataUriPattern("^data:image/[a-zA-Z0-9+\\-]+;base64,");
+        QRegularExpressionMatch match = dataUriPattern.match(imageData);
+        if (match.hasMatch()) {
+            return imageData;
+        }
+    } else {
+        return decodeImageToBase64(img);
     }
 
-    DGUI_USE_NAMESPACE;
-    auto icon = DIconTheme::findQIcon(appName, DIconTheme::findQIcon("application-x-desktop"));
-    return icon.name();
+    // ui can fallback to application-x-desktop icon.
+    return {};
 }
 
 
