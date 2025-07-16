@@ -1,9 +1,18 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_CN">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_CN">
 <context>
     <name>GroupNotify</name>
     <message>
         <source>Clear All</source>
         <translation>全部清除</translation>
+    </message>
+</context>
+<context>
+    <name>NotifyCenter</name>
+    <message>
+        <source>No recent notifications</source>
+        <translation>没有最近的通知</translation>
     </message>
 </context>
 <context>
@@ -37,22 +46,6 @@
     <message>
         <source>Just now</source>
         <translation>刚刚</translation>
-    </message>
-    <message>
-        <source>%1 minutes ago</source>
-        <translation>%1分钟前</translation>
-    </message>
-    <message>
-        <source>1 hour ago</source>
-        <translation>1小时前</translation>
-    </message>
-    <message>
-        <source>%1 hours ago</source>
-        <translation>%1小时前</translation>
-    </message>
-    <message>
-        <source>Yesterday </source>
-        <translation>昨天 </translation>
     </message>
 </context>
 </TS>

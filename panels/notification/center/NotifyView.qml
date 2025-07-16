@@ -14,6 +14,7 @@ Control {
 
     required property NotifyModel notifyModel
     readonly property real viewHeight: view.contentHeight
+    readonly property int viewCount: view.count
 
     NotifySetting {
         id: notifySetting

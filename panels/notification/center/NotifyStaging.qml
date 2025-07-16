@@ -14,6 +14,7 @@ FocusScope {
     implicitWidth: 360
     implicitHeight: view.height
     property var model: notifyModel
+    readonly property int viewCount: view.count
 
     NotifyStagingModel {
         id: notifyModel

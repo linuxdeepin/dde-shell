@@ -18,6 +18,7 @@ qt_add_qml_module(notificationplugin
         NotifyAction.qml
         SettingActionButton.qml
         OverlapIndicator.qml
+        DropShadowText.qml
     OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/notification/
 )
