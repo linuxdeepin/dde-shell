@@ -1,0 +1,59 @@
+@startuml
+title Qt Wayland Compositor 与 pluginloader 软件的通信流程
+
+actor "用户" as User
+participant "Client 应用 (pluginloader)" as Client
+participant "Compositor 服务端\n(Qt Wayland Compositor)" as Compositor
+
+== 连接建立 ==
+
+User -> Client : 启动应用程序
+Client -> Compositor : 连接到 Wayland 合成器
+Compositor --> Client : 发送 wl_display/wl_registry 等接口信息
+
+== Surface 创建与绑定 ==
+
+Client -> Compositor : create_surface (wl_compositor) (创建一个 Surface)
+Client -> Compositor : get_shell_surface (xdg_surface 等) 
+
+== 渲染流程 ==
+
+Client -> Compositor : attach(buffer) (绑定缓冲区)
+Client -> Compositor : damage(rect) (标记区域需要重绘)
+Client -> Compositor : commit() (提交缓冲区更新)
+
+Compositor -> Compositor : 检查 Surface 状态，合成图层
+Compositor -> Client : frame_done (通知可以渲染下一帧)
+
+== 输入事件示意 ==
+
+User -> Compositor : 鼠标点击/键盘事件
+Compositor -> Client : 发送 pointer/keyboard 输入事件
+
+@enduml
+
+@startuml
+title Qt Wayland Compositor + 插件独立进程架构图
+
+actor 用户
+
+rectangle "Qt Wayland Compositor\n(窗口管理、渲染、输入事件分发)" as Compositor {
+}
+
+rectangle "插件 A 进程\n(独立进程，生成窗口内容)" as PluginA
+rectangle "插件 B 进程\n(独立进程，生成窗口内容)" as PluginB
+
+database "屏幕显示\n(合成所有窗口)" as Screen
+
+' 数据流方向
+用户 --> Compositor : 输入事件
+Compositor --> PluginA : 分发事件
+Compositor --> PluginB : 分发事件
+
+PluginA --> Compositor : 发送窗口数据
+PluginB --> Compositor : 发送窗口数据
+
+Compositor --> Screen : 合成所有窗口并输出到屏幕
+
+@enduml
+

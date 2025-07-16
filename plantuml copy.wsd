@@ -1,0 +1,25 @@
+@startuml
+title Qt Wayland Compositor + 插件独立进程架构图
+
+actor 用户
+
+rectangle "Qt Wayland Compositor进程\n(窗口管理、渲染、输入事件分发)" as Compositor {
+}
+
+rectangle "插件 pluginloaderA 进程\n(独立进程，生成窗口内容)" as PluginA
+rectangle "插件 pluginloaderB 进程\n(独立进程，生成窗口内容)" as PluginB
+
+database "'屏幕'显示\n(合成窗口)" as Screen
+
+' 数据流方向
+用户 --> Compositor : 输入事件
+Compositor --> PluginA : 分发事件
+Compositor --> PluginB : 分发事件
+
+PluginA --> Compositor : 发送窗口数据
+PluginB --> Compositor : 发送窗口数据
+
+Compositor --> Screen : 合成窗口到屏幕
+
+@enduml
+
