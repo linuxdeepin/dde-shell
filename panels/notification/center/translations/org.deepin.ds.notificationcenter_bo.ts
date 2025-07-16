@@ -9,6 +9,13 @@
     </message>
 </context>
 <context>
+    <name>NotifyCenter</name>
+    <message>
+        <source>No recent notifications</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>NotifyHeader</name>
     <message>
         <source>Notification Center</source>
@@ -38,22 +45,6 @@
     <name>notifycenter::AppNotifyItem</name>
     <message>
         <source>Just now</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1 minutes ago</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>1 hour ago</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1 hours ago</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Yesterday </source>
         <translation type="unfinished"></translation>
     </message>
 </context>

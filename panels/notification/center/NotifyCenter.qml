@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import org.deepin.dtk 1.0
+import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 FocusScope {
@@ -15,6 +16,7 @@ FocusScope {
 
     property alias model: notifyModel
     property int maxViewHeight: 400
+    property int stagingViewCount: 0
 
     NotifyModel {
         id: notifyModel
@@ -47,6 +49,17 @@ FocusScope {
             width: parent.width
             height: Math.min(maxViewHeight, viewHeight)
             notifyModel: notifyModel
+        }
+
+        DropShadowText {
+            text: qsTr("No recent notifications")
+            visible: root.stagingViewCount === 0 && view.viewCount === 0
+            anchors {
+                top: header.bottom
+                topMargin: 10
+                horizontalCenter: parent.horizontalCenter
+            }
+            height: 40
         }
     }
 }

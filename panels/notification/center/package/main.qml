@@ -128,6 +128,7 @@ Window {
 
             implicitWidth: 360
             maxViewHeight: root.height
+            stagingViewCount: notifyStaging.viewCount
         }
     }
 }

@@ -1,9 +1,18 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="es">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="es">
 <context>
     <name>GroupNotify</name>
     <message>
         <source>Clear All</source>
         <translation>Limpiar todo</translation>
+    </message>
+</context>
+<context>
+    <name>NotifyCenter</name>
+    <message>
+        <source>No recent notifications</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -37,22 +46,6 @@
     <message>
         <source>Just now</source>
         <translation>Ahora mismo</translation>
-    </message>
-    <message>
-        <source>%1 minutes ago</source>
-        <translation>Hace %1 minutos</translation>
-    </message>
-    <message>
-        <source>1 hour ago</source>
-        <translation>Hace una hora</translation>
-    </message>
-    <message>
-        <source>%1 hours ago</source>
-        <translation>Hace %1 horas</translation>
-    </message>
-    <message>
-        <source>Yesterday </source>
-        <translation>Ayer </translation>
     </message>
 </context>
 </TS>
