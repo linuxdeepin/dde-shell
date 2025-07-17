@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>Dock-u qapla</translation>
+        <translation>Dock-un kilidləməsi</translation>
     </message>
 </context>
 </TS>
