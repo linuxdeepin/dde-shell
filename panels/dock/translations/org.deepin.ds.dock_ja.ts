@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation type="unfinished"/>
+        <translation>ドックを固定</translation>
     </message>
 </context>
 </TS>
