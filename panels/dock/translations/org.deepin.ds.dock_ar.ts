@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>قفل ال Dock</translation>
+        <translation>قفل الشريط</translation>
     </message>
 </context>
 </TS>
