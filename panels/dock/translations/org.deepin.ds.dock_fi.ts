@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Lukitse telakka</translation>
     </message>
 </context>
 </TS>
