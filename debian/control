@@ -73,11 +73,3 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, libdde-shell( =${binary:Version}),
 Multi-Arch: same
 Description: DDE Shell example
  This package contains some plugins based on dde-shell plugin system.
-
-Package: dde-control-center-dock
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Conflicts: dde-dock-dcc-plugin
-Replaces: dde-dock-dcc-plugin
-Multi-Arch: same
-Description: A dock plugin for dde-control-center
