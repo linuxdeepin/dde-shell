@@ -124,7 +124,7 @@ NotifyItem {
         }
 
         DciIcon {
-            name: root.iconName
+            name: root.iconName !== "" ? root.iconName : "application-x-desktop"
             sourceSize: Qt.size(24, 24)
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.topMargin: 8
