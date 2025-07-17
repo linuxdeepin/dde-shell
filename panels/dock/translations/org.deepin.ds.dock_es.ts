@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>Bloquear muelle</translation>
+        <translation>Bloquear el muelle</translation>
     </message>
 </context>
 </TS>
