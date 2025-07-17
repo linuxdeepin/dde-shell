@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>禁用自由調節</translation>
+        <translation>停用自由調節</translation>
     </message>
 </context>
 </TS>
