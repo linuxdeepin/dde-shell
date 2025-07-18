@@ -52,13 +52,15 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
             if (nullptr == list) {
                 beginInsertRows(QModelIndex(), m_rowMap.size(), m_rowMap.size());
                 list = new QList<int>();
+                list->append(i);
                 m_map.insert(data, list);
                 m_rowMap.append(list);
                 endInsertRows();
+            } else {
+                beginInsertRows(index(m_rowMap.indexOf(list), 0), list->size(), list->size());
+                list->append(i);
+                endInsertRows();
             }
-            beginInsertRows(index(m_rowMap.indexOf(list), 0), list->size(), list->size());
-            list->append(i);
-            endInsertRows();
         }
     });
 
@@ -97,8 +99,11 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
             if (list == nullptr)
                 continue;
 
-            auto index = createIndex(list->indexOf(i), 0, m_rowMap.indexOf(list));
-            Q_EMIT dataChanged(index, index, roles);
+            int childRow = list->indexOf(i);
+            if (childRow >= 0) {
+                auto index = createIndex(childRow, 0, m_rowMap.indexOf(list));
+                Q_EMIT dataChanged(index, index, roles);
+            }
         }
     });
 
@@ -109,12 +114,14 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
 
 int RoleGroupModel::rowCount(const QModelIndex &parent) const
 {
-    if (!sourceModel()) {
-        return 0;
-    }
     if (parent.isValid()) {
-        auto list = m_rowMap.value(parent.row(), nullptr);
-        return nullptr == list ? 0 : list->size();
+        int parentRow = parent.row();
+        if (parentRow < 0 || parentRow >= m_rowMap.size()) {
+            return 0;
+        }
+
+        auto list = m_rowMap.value(parentRow, nullptr);
+        return (list != nullptr) ? list->size() : 0;
     }
 
     return m_rowMap.size();
@@ -128,6 +135,31 @@ int RoleGroupModel::columnCount(const QModelIndex &parent) const
     return 0;
 }
 
+bool RoleGroupModel::hasChildren(const QModelIndex &parent) const
+{
+    if (!sourceModel()) {
+        return false;
+    }
+
+    if (!parent.isValid()) {
+        // 根节点：如果有分组则有子节点
+        return m_rowMap.size() > 0;
+    }
+
+    auto parentPos = static_cast<int>(parent.internalId());
+    if (parentPos == -1) {
+        // 这是分组节点：检查是否有子项
+        if (parent.row() < 0 || parent.row() >= m_rowMap.size()) {
+            return false;
+        }
+        auto list = m_rowMap.value(parent.row(), nullptr);
+        return list && list->size() > 0;
+    }
+
+    // 这是子项：没有子节点
+    return false;
+}
+
 QHash<int, QByteArray> RoleGroupModel::roleNames() const
 {
     if (sourceModel()) {
@@ -138,61 +170,104 @@ QHash<int, QByteArray> RoleGroupModel::roleNames() const
 
 QVariant RoleGroupModel::data(const QModelIndex &index, int role) const
 {
-    auto parentPos = static_cast<int>(index.internalId());
-    auto list = m_rowMap.value(index.row(), nullptr);
-    if (parentPos == -1) {
-        if (nullptr == list || list->size() == 0) {
-            return QVariant();
-        }
-        return sourceModel()->index(list->first(), 0).data(role);
-    }
-
-    list = m_rowMap.value(parentPos);
-    if (list == nullptr) {
+    if (!index.isValid()) {
         return QVariant();
     }
 
-    return sourceModel()->index(list->value(index.row()), 0).data(role);
+    auto parentPos = static_cast<int>(index.internalId());
+
+    if (parentPos == -1) {
+        // 这是分组节点（顶级项目）
+        auto list = m_rowMap.value(index.row(), nullptr);
+        if (nullptr == list || list->isEmpty()) {
+            return QVariant();
+        }
+
+        // 对于分组节点，显示分组信息和数量
+        if (role == Qt::DisplayRole) {
+            QString groupValue = sourceModel()->index(list->first(), 0).data(m_roleForDeduplication).toString();
+            return QString("%1 (%2)").arg(groupValue).arg(list->size());
+        } else {
+            // 对于其他角色，返回分组中第一个项目的数据
+            return sourceModel()->index(list->first(), 0).data(role);
+        }
+    } else {
+        // 这是子项目
+        auto list = m_rowMap.value(parentPos);
+        if (list == nullptr || index.row() < 0 || index.row() >= list->size()) {
+            return QVariant();
+        }
+
+        // 直接返回对应源项目的数据
+        return sourceModel()->index(list->value(index.row()), 0).data(role);
+    }
 }
 
 QModelIndex RoleGroupModel::index(int row, int column, const QModelIndex &parent) const
 {
-    auto list = m_map.value(parent.data(m_roleForDeduplication).toString(), nullptr);
-    if (parent.isValid() && nullptr != list) {
-        return createIndex(row, column, m_rowMap.indexOf(list));
-    }
+    if (parent.isValid()) {
+        int parentRow = parent.row();
+        if (parentRow < 0 || parentRow >= m_rowMap.size()) {
+            return QModelIndex();
+        }
 
-    return createIndex(row, column, -1);
+        auto list = m_rowMap.value(parentRow);
+        if (nullptr == list || row < 0 || row >= list->size()) {
+            return QModelIndex();
+        }
+
+        return createIndex(row, column, parentRow);
+    } else {
+        if (row < 0 || row >= m_rowMap.size()) {
+            return QModelIndex();
+        }
+
+        return createIndex(row, column, -1);
+    }
 }
 
 QModelIndex RoleGroupModel::parent(const QModelIndex &child) const
 {
+    if (!child.isValid())
+        return QModelIndex();
+
     auto pos = static_cast<int>(child.internalId());
     if (pos == -1)
         return QModelIndex();
 
-    return createIndex(pos, 0);
+    if (pos < 0 || pos >= m_rowMap.size()) {
+        return QModelIndex();
+    }
+
+    return createIndex(pos, 0, -1);
 }
 
 QModelIndex RoleGroupModel::mapToSource(const QModelIndex &proxyIndex) const
 {
+    if (!proxyIndex.isValid()) {
+        return QModelIndex();
+    }
+
     auto parentIndex = proxyIndex.parent();
     QList<int> *list = nullptr;
 
     if (parentIndex.isValid()) {
-        list = m_rowMap.value(parentIndex.row());
+        int parentRow = parentIndex.row();
+        if (parentRow < 0 || parentRow >= m_rowMap.size()) {
+            return QModelIndex();
+        }
+        list = m_rowMap.value(parentRow);
+        if (!list || proxyIndex.row() >= list->size()) {
+            return QModelIndex();
+        }
+        return sourceModel()->index(list->value(proxyIndex.row()), 0);
     } else {
         list = m_map.value(proxyIndex.data(m_roleForDeduplication).toString());
+        if (!list || list->isEmpty()) {
+            return QModelIndex();
+        }
+        return sourceModel()->index(list->value(0), 0);
     }
-
-    if (nullptr == list)
-        return QModelIndex();
-
-    if (parentIndex.isValid()) {
-        return sourceModel()->index(list->value(proxyIndex.row()), 0);
-    }
-
-    return sourceModel()->index(list->value(0), 0);
 }
 
 QModelIndex RoleGroupModel::mapFromSource(const QModelIndex &sourceIndex) const
@@ -212,7 +287,11 @@ QModelIndex RoleGroupModel::mapFromSource(const QModelIndex &sourceIndex) const
     }
 
     auto pos = list->indexOf(sourceIndex.row());
-    return createIndex(pos, 0, m_rowMap.indexOf(list));
+    if (pos >= 0) {
+        return createIndex(pos, 0, m_rowMap.indexOf(list));
+    }
+
+    return QModelIndex();
 }
 
 void RoleGroupModel::rebuildTreeSource()
