@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>Desativar ajuste</translation>
+        <translation>Bloquear a Dock</translation>
     </message>
 </context>
 </TS>

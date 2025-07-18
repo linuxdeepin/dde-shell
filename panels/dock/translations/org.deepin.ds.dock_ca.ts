@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>Desactiva l&apos;afinació lliure</translation>
+        <translation>Bloca l&apos;acoblador</translation>
     </message>
 </context>
 </TS>

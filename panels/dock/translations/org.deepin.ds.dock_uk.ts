@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>Вимкнути нетипове налаштовування</translation>
+        <translation>Заблокувати панель</translation>
     </message>
 </context>
 </TS>

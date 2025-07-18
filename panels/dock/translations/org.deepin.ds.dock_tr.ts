@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>Özgür Ayarlamayı Devre Dışı Bırak</translation>
+        <translation>Rıhtım&apos;ı Kilitle</translation>
     </message>
 </context>
 </TS>
