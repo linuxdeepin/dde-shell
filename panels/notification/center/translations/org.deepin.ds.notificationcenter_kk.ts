@@ -7,6 +7,13 @@
     </message>
 </context>
 <context>
+    <name>NotifyCenter</name>
+    <message>
+        <source>No recent notifications</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
     <name>NotifyHeader</name>
     <message>
         <source>Notification Center</source>
@@ -37,22 +44,6 @@
     <message>
         <source>Just now</source>
         <translation>Күшті</translation>
-    </message>
-    <message>
-        <source>%1 minutes ago</source>
-        <translation>%1 минутта бұлғанда</translation>
-    </message>
-    <message>
-        <source>1 hour ago</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>%1 hours ago</source>
-        <translation>%1 сағатта бұлғанда</translation>
-    </message>
-    <message>
-        <source>Yesterday </source>
-        <translation>Кешіріп калған күнде </translation>
     </message>
 </context>
 </TS>
