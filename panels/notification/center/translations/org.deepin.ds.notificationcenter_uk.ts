@@ -10,7 +10,7 @@
     <name>NotifyCenter</name>
     <message>
         <source>No recent notifications</source>
-        <translation type="unfinished"/>
+        <translation>Немає нещодавніх сповіщень</translation>
     </message>
 </context>
 <context>
