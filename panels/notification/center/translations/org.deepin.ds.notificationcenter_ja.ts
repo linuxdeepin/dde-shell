@@ -10,7 +10,7 @@
     <name>NotifyCenter</name>
     <message>
         <source>No recent notifications</source>
-        <translation type="unfinished"/>
+        <translation>最近の通知はありません</translation>
     </message>
 </context>
 <context>
