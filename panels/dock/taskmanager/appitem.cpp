@@ -327,7 +327,7 @@ void AppItem::updateCurrentActiveWindow(QPointer<AbstractWindow> window)
     }
 
     m_currentActiveWindow = window;
-    connect(m_currentActiveWindow.get(), &AbstractWindow::iconChanged, this, &AppItem::iconChanged);
+    connect(m_currentActiveWindow.get(), &AbstractWindow::iconChanged, this, &AppItem::iconChanged, Qt::QueuedConnection);
 
     Q_EMIT currentActiveWindowChanged();
 }
