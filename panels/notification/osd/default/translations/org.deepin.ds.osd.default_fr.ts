@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="fr">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="fr">
 <context>
     <name>main</name>
     <message>
@@ -50,14 +52,6 @@
         <translation>Mode avion désactivé</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Sourdine activée</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Sourdine désactivée</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Mode d&apos;énergie équilibré</translation>
     </message>
@@ -80,6 +74,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Impossible d&apos;activer les effets de fenêtres</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

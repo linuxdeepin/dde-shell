@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="fi">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="fi">
 <context>
     <name>main</name>
     <message>
@@ -50,14 +52,6 @@
         <translation>Lentotila pois</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Mykistys päällä</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Mykistys pois</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Tasapainoinen teho</translation>
     </message>
@@ -80,6 +74,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Ikkunatehosteiden käyttöönotto epäonnistui</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

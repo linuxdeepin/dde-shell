@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ru">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ru">
 <context>
     <name>main</name>
     <message>
@@ -50,14 +52,6 @@
         <translation>Авиарежим выкл </translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Звук выкл</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Звук вкл</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Сбалансированный режим</translation>
     </message>
@@ -80,6 +74,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Не удалось включить эффекты окон</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

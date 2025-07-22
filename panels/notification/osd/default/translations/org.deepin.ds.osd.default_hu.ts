@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="hu">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="hu">
 <context>
     <name>main</name>
     <message>
@@ -50,14 +52,6 @@
         <translation>Repülőgép üzemmód kikapcsolva</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Némítás bekapcsolva</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Némítás kikapcsolva</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Kiegyensúlyozott teljesítmény</translation>
     </message>
@@ -80,6 +74,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Az ablakeffektusok engedélyezése sikertelen</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
