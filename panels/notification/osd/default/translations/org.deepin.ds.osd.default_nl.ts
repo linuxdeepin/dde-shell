@@ -50,14 +50,6 @@
         <translation>Vliegtuigstand uit</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Dempen aan</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Dempen uit</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Gebalanceerd energieprofiel</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Vensteranimaties kunnen niet worden ingeschakeld</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
