@@ -6,7 +6,6 @@
 
 #include "abstracttaskmanagerinterface.h"
 #include "abstractwindow.h"
-#include "abstractwindowmonitor.h"
 #include "containment.h"
 #include "dockcombinemodel.h"
 #include "dockglobalelementmodel.h"
@@ -17,7 +16,7 @@
 
 namespace dock {
 class AppItem;
-
+class AbstractWindowMonitor;
 class TaskManager : public DS_NAMESPACE::DContainment, public AbstractTaskManagerInterface
 {
     Q_OBJECT
