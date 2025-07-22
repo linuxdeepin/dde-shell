@@ -50,14 +50,6 @@
         <translation>এয়ারপ্লেন মোড বন্ধ</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>মিউট চালু</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>মিউট বন্ধ</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>পরিষ্কার শক্তি</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>বিংগো ফেরতিই চালু করতে ব্যর্থ হয়েছে</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
