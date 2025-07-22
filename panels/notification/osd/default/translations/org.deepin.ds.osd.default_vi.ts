@@ -50,14 +50,6 @@
         <translation>Chế độ máy bay tắt</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Mute bật</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Mute tắt</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Mức năng lượng cân bằng</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Không thể bật hiệu ứng cửa sổ</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
