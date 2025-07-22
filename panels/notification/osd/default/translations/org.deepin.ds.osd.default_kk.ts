@@ -50,14 +50,6 @@
         <translation>Соңырақ режимі жетісі бекітілген</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Кемет жетісі</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Кемет жетісі бекітілген</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Жалпысыз энергиялық режим</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Квадраттардың ефекті әртүрлі кестесін қатыстыру қателесі</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
