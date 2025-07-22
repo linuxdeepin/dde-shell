@@ -50,14 +50,6 @@
         <translation>Mënyra aeroplan joaktive</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Me heshtim</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Pa heshtim</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Balancim energjie</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>S’u arrit të aktivizohen efekte dritaresh</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
