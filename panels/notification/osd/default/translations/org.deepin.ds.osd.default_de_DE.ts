@@ -50,14 +50,6 @@
         <translation>Flugmodus aus</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Stumm an</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Stumm aus</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Ausgewogener Stromverbrauch</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Fenstereffekt anschalten schlug fehl</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
