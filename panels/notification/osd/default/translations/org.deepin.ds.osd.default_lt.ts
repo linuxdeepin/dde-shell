@@ -50,14 +50,6 @@
         <translation>Lentos režimas išjungtas</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Sisdominti įjungta</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Sisdominti išjungta</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Balansuota energijos tvarka</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Nepavyko įjungti langų efektų</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
