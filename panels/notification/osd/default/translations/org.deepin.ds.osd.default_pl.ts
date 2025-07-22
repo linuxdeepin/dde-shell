@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pl">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="pl">
 <context>
     <name>main</name>
     <message>
@@ -50,14 +52,6 @@
         <translation>Tryb samolotowy wyłączony</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Wyciszenie włączone</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Wyciszenie wyłączone</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Zasilanie zrównoważone</translation>
     </message>
@@ -80,6 +74,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Nie udało się włączyć niektórych efektów okna</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

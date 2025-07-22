@@ -52,14 +52,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation type="unfinished"></translation>
     </message>
@@ -81,6 +73,14 @@
     </message>
     <message>
         <source>Failed to enable window effects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Microphone on</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

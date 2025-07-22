@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_CN">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_CN">
 <context>
     <name>main</name>
     <message>
@@ -50,14 +52,6 @@
         <translation>关闭飞行模式</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>开启静音</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>关闭静音</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>平衡模式</translation>
     </message>
@@ -80,6 +74,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>打开窗口特效失败</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation>麦克风已关</translation>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation>麦克风已开</translation>
     </message>
 </context>
 </TS>
