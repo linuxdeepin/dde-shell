@@ -5,6 +5,7 @@
 #pragma once
 
 #include "abstractwindow.h"
+#include "taskmanager.h"
 
 #include <cstdint>
 
@@ -20,7 +21,7 @@ class AbstractWindowMonitor : public QAbstractListModel
 public:
     QHash<int, QByteArray> roleNames() const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = AbstractWindow::winIdRole) const override;
+    QVariant data(const QModelIndex &index, int role = TaskManager::WinIdRole) const override;
 
     void trackWindow(AbstractWindow* window);
     void destroyWindow(AbstractWindow * window);
