@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ja">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ja">
 <context>
     <name>GroupNotify</name>
     <message>
@@ -12,7 +10,7 @@
     <name>NotifyCenter</name>
     <message>
         <source>No recent notifications</source>
-        <translation type="unfinished"></translation>
+        <translation>最近の通知はありません</translation>
     </message>
 </context>
 <context>

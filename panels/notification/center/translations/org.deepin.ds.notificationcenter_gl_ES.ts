@@ -7,6 +7,13 @@
     </message>
 </context>
 <context>
+    <name>NotifyCenter</name>
+    <message>
+        <source>No recent notifications</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
     <name>NotifyHeader</name>
     <message>
         <source>Notification Center</source>
@@ -37,22 +44,6 @@
     <message>
         <source>Just now</source>
         <translation>Hai uns instantes</translation>
-    </message>
-    <message>
-        <source>%1 minutes ago</source>
-        <translation>%1 minutos ago</translation>
-    </message>
-    <message>
-        <source>1 hour ago</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>%1 hours ago</source>
-        <translation>%1 horas atrás</translation>
-    </message>
-    <message>
-        <source>Yesterday </source>
-        <translation>Orixén</translation>
     </message>
 </context>
 </TS>
