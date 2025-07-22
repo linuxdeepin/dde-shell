@@ -50,14 +50,6 @@
         <translation>Uçak Kipi kapalı</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Sessiz açık</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Sessiz kapalı</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Dengeli Güç</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Pencere etkileri etkinleştirilemedi</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
