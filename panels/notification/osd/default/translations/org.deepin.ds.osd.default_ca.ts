@@ -75,11 +75,11 @@
     </message>
     <message>
         <source>Microphone off</source>
-        <translation type="unfinished"/>
+        <translation>Micròfon tancat</translation>
     </message>
     <message>
         <source>Microphone on</source>
-        <translation type="unfinished"/>
+        <translation>Micròfon obert</translation>
     </message>
 </context>
 </TS>
