@@ -50,14 +50,6 @@
         <translation>מצב מטוס מופסק</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>הופך לSTAן</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>הופך מחוזק</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>הופך לכוח 균ד</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>נכשל להופך לתמונות חלון</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>

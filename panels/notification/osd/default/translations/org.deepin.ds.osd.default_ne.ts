@@ -50,14 +50,6 @@
         <translation>विमान राज्य व्यवस्थापन अकार्य गर्नुहोस्</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>सुन्न चालू गर्नुहोस्</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>सुन्न अकार्य गर्नुहोस्</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>व्यवस्थित शक्ति</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>विंडो प्रभाव सकारात्मक गर्न मित्र छ</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>

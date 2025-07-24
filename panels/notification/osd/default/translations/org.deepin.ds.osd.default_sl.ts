@@ -50,14 +50,6 @@
         <translation>Režim letalnice izključen</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Zapiranje zvoka vključeno</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Zapiranje zvoka izključeno</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Izdelava balansirana</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Napaka pri omogočanju efektov okna</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>

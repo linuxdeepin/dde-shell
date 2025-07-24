@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="pl">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pl">
 <context>
     <name>main</name>
     <message>
@@ -77,11 +75,11 @@
     </message>
     <message>
         <source>Microphone off</source>
-        <translation type="unfinished"></translation>
+        <translation>Mikrofon wyłączony</translation>
     </message>
     <message>
         <source>Microphone on</source>
-        <translation type="unfinished"></translation>
+        <translation>Mikrofon włączony</translation>
     </message>
 </context>
 </TS>

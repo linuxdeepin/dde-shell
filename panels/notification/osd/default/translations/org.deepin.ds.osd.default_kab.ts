@@ -50,14 +50,6 @@
         <translation>Mod tefarawen airplain tefassaden</translation>
     </message>
     <message>
-        <source>Mute on</source>
-        <translation>Mute tefarawen</translation>
-    </message>
-    <message>
-        <source>Mute off</source>
-        <translation>Mute tefassaden</translation>
-    </message>
-    <message>
         <source>Balanced power</source>
         <translation>Tefarawen erghen tafellal</translation>
     </message>
@@ -80,6 +72,14 @@
     <message>
         <source>Failed to enable window effects</source>
         <translation>Chaf tefassaden tefarawen efek tefassaden fenana</translation>
+    </message>
+    <message>
+        <source>Microphone off</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Microphone on</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>

@@ -10,7 +10,7 @@
     <name>ActionToggleCollapseDelegate</name>
     <message>
         <source>Collapse tray</source>
-        <translation>Zwiń</translation>
+        <translation>Zwiń zasobnik</translation>
     </message>
 </context>
 <context>
