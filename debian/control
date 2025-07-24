@@ -36,7 +36,7 @@ Build-Depends:
  qt6-l10n-tools, qt6-svg-dev, dde-tray-loader-dev (> 1.99.14),
  dde-application-manager-api (> 1.2.23)
 Standards-Version: 3.9.8
-Homepage: http://www.deepin.org
+Homepage: https://github.com/linuxdeepin/dde-shell
 
 Package: libdde-shell
 Architecture: any
