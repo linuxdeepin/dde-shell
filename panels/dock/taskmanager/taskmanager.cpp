@@ -344,7 +344,12 @@ QString TaskManager::desktopIdToAppId(const QString& desktopId)
 bool TaskManager::requestDockByDesktopId(const QString& desktopID)
 {
     if (desktopID.startsWith("internal/")) return false;
-    return RequestDock(desktopIdToAppId(desktopID));
+    QString appId = desktopIdToAppId(desktopID);
+    // 检查应用是否已经在任务栏中，如果是则返回 false
+    if (IsDocked(appId)) 
+        return false;
+    
+    return RequestDock(appId);
 }
 
 bool TaskManager::requestUndockByDesktopId(const QString& desktopID)
