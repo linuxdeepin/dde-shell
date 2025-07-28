@@ -14,6 +14,7 @@
 #include <QtWaylandCompositor/QWaylandSurface>
 #include <QtWaylandCompositor/QWaylandResource>
 #include <QtWaylandCompositor/QWaylandCompositor>
+#include <QtWaylandCompositor/QWaylandView>
 
 #include <QJsonObject>
 #include <QJsonParseError>
@@ -431,6 +432,9 @@ void PluginManager::initialize()
 #endif
 
     init(compositor->display(), 1);
+
+    // 设置鼠标焦点监听器
+    setupMouseFocusListener();
 }
 
 void PluginManager::updateDockOverflowState(int state)
@@ -684,4 +688,27 @@ QString PluginManager::popupMinHeightMsg() const
     obj[dock::MSG_DATA] = m_popupMinHeight;
 
     return toJson(obj);
+}
+
+void PluginManager::setupMouseFocusListener()
+{
+    QWaylandCompositor *compositor = static_cast<QWaylandCompositor *>(extensionContainer());
+    if (!compositor)
+        return;
+
+    QWaylandSeat *seat = compositor->defaultSeat();
+    if (!seat)
+        return;
+
+    QObject::connect(seat, &QWaylandSeat::mouseFocusChanged, this,
+        [seat](QWaylandView *newFocus, QWaylandView *oldFocus) {
+            Q_UNUSED(oldFocus);
+            if(!newFocus)
+                return;
+
+            if (auto surface = newFocus->surface()) {
+                qDebug()<<"setKeyboardFocus";
+                seat->setKeyboardFocus(surface);
+            }
+        });
 }
