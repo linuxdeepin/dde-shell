@@ -9,6 +9,8 @@
 #include <QtWaylandCompositor/QWaylandCompositor>
 #include <QtWaylandCompositor/QWaylandSurface>
 #include <QtWaylandCompositor/QWaylandResource>
+#include <QtWaylandCompositor/QWaylandSeat>
+
 #include <cstdint>
 
 #include "qwayland-server-fractional-scale-v1.h"
@@ -75,6 +77,9 @@ public:
     void setDockSize(const QSize &newDockSize);
 
     void removePluginSurface(PluginSurface *plugin);
+
+    //处理鼠标焦点给到相应插件
+    void setupMouseFocusListener();
 
 Q_SIGNALS:
     void pluginPopupCreated(PluginPopup*);
