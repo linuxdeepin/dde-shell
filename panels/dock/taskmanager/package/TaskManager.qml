@@ -149,7 +149,7 @@ ContainmentItem {
                 let desktopId = drag.getDataAsString("text/x-dde-dock-dnd-appid")
                 launcherDndDragSource = drag.getDataAsString("text/x-dde-dock-dnd-source")
                 launcherDndDesktopId = desktopId
-                if (taskmanager.Applet.requestDockByDesktopId(desktopId) === false) {
+                if (launcherDndDragSource !== "taskbar" && taskmanager.Applet.requestDockByDesktopId(desktopId) === false) {
                     resetDndState()
                 }
             }
