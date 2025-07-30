@@ -15,6 +15,11 @@ filters:
       source_language: en_US
       translation_files_expression: panels/dock/tray/translations/org.deepin.ds.dock.tray_<lang>.ts
     - filter_type: file
+      source_file: panels/dock/multitaskview/translations/org.deepin.ds.dock.multitaskview.ts
+      file_format: QT
+      source_language: en_US
+      translation_files_expression: panels/dock/multitaskview/translations/org.deepin.ds.dock.multitaskview_<lang>.ts
+    - filter_type: file
       source_file: panels/notification/bubble/translations/org.deepin.ds.notificationbubble.ts
       file_format: QT
       source_language: en_US
