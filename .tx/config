@@ -1,0 +1,50 @@
+[main]
+host = https://www.transifex.com
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:d7174d6b5ff31870409aec7bc0c26f05]
+file_filter = panels/dock/translations/org.deepin.ds.dock_<lang>.ts
+source_file = panels/dock/translations/org.deepin.ds.dock.ts
+source_lang = en_US
+type = QT
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:58e1e70781dc390d3cd6be0632a841d8]
+file_filter = panels/dock/taskmanager/translations/org.deepin.ds.dock.taskmanager_<lang>.ts
+source_file = panels/dock/taskmanager/translations/org.deepin.ds.dock.taskmanager.ts
+source_lang = en_US
+type = QT
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:fb94788bac9b26ec7737f6d1b5ace4fc]
+file_filter = panels/dock/tray/translations/org.deepin.ds.dock.tray_<lang>.ts
+source_file = panels/dock/tray/translations/org.deepin.ds.dock.tray.ts
+source_lang = en_US
+type = QT
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:46e4fa0e8a44749987eed816ceee3395]
+file_filter = panels/dock/multitaskview/translations/org.deepin.ds.dock.multitaskview_<lang>.ts
+source_file = panels/dock/multitaskview/translations/org.deepin.ds.dock.multitaskview.ts
+source_lang = en_US
+type = QT
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:2613611d0be449d3ec0e158f04862bec]
+file_filter = panels/notification/bubble/translations/org.deepin.ds.notificationbubble_<lang>.ts
+source_file = panels/notification/bubble/translations/org.deepin.ds.notificationbubble.ts
+source_lang = en_US
+type = QT
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:370fb988834b680145c35e741cfc2ef6]
+file_filter = panels/notification/center/translations/org.deepin.ds.notificationcenter_<lang>.ts
+source_file = panels/notification/center/translations/org.deepin.ds.notificationcenter.ts
+source_lang = en_US
+type = QT
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:68df25e3e58bce422c99cddd525bbf36]
+file_filter = panels/notification/osd/default/translations/org.deepin.ds.osd.default_<lang>.ts
+source_file = panels/notification/osd/default/translations/org.deepin.ds.osd.default.ts
+source_lang = en_US
+type = QT
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:e31bc6050698ef334e3f68e2dbc3631c]
+file_filter = panels/notification/osd/displaymode/translations/org.deepin.ds.osd.displaymode_<lang>.ts
+source_file = panels/notification/osd/displaymode/translations/org.deepin.ds.osd.displaymode.ts
+source_lang = en_US
+type = QT
