@@ -1,3 +1,32 @@
+dde-shell (2.0.4) unstable; urgency=medium
+
+  * chore: clang-format code related to refactor branch
+  * i18n: Updates for project Deepin Desktop Environment (#1209)
+  * chore: add .tx/config for tx-cli, switch to REUSE.toml
+  * fix: add translation resources to config for multitasking view
+  * fix: prevent duplicate taskbar entries during drag
+  * i18n: Updates for project Deepin Desktop Environment (#1203)
+  * feat: add keyboard focus management for plugin surfaces
+  * fix: prevent duplicate dock requests
+  * i18n: Updates for project Deepin Desktop Environment (#1200)
+  * fix: update homepage url in debian/control
+  * chore: use roles defined in TaskManager class
+  * fix: incorrect icon and copywriting for Mic ON/OFF OSD
+  * i18n: Updates for project Deepin Desktop Environment (#1195)
+  * fix: update connection for active window icon change
+  * fix: many issues with RoleGroupModel
+  * fix: many issues with RoleCombineModel
+  * feat: add empty state for notification center
+  * i18n: Updates for project Deepin Desktop Environment (#1192)
+  * chore: remove dde-control-center-dock package
+  * fix: handle empty icon name in notification item
+  * fix: Chinese translation should not appear in source translation
+    resource
+  * fix: correct iterator position calculation in DockGlobalElementModel
+  * feat: enhance notification icon handling
+
+ -- Wang Zichong <wangzichong@deepin.org>  Thu, 31 Jul 2025 20:24:00 +0800
+
 dde-shell (2.0.3) unstable; urgency=medium
 
   * feat: enhance notification validation and cleanup
