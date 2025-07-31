@@ -142,7 +142,7 @@ void TreeLandWindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObje
         std::transform(windows.begin(), windows.end(), std::back_inserter(array), [](const QPointer<AbstractWindow>& window){
             return window->id();
         });
-        
+
         QByteArray byteArray;
         int size = array.size() * sizeof(uint32_t);
         byteArray.resize(size);

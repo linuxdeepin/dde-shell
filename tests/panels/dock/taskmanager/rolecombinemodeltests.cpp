@@ -37,11 +37,9 @@ TEST(RoleCombineModel, RowCountTest) {
     modelB.addData(new DataB(0, &modelB));
     modelB.addData(new DataB(1, &modelB));
     modelB.addData(new DataB(2, &modelB));
-    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel* model) -> QModelIndex 
-        {
-            return QModelIndex();
-        }
-    );
+    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        return QModelIndex();
+    });
 
     // modelA is major dataModel
     EXPECT_EQ(model.rowCount(), modelA.rowCount());
@@ -68,16 +66,14 @@ TEST(RoleGroupModel, ModelTest)
 TEST(RoleCombineModel, dataTest) {
     TestModelA modelA;
     TestModelB modelB;
-    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel* model) -> QModelIndex 
-        {
-            auto c = model->match(model->index(0, 0), TestModelB::idRole, data);
-            if (c.size() > 0) {
-                return c.first();
-            }
-
-            return QModelIndex();
+    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        auto c = model->match(model->index(0, 0), TestModelB::idRole, data);
+        if (c.size() > 0) {
+            return c.first();
         }
-    );
+
+        return QModelIndex();
+    });
 
     QSignalSpy spyA(&modelA, &QAbstractItemModel::dataChanged);
     QSignalSpy spyB(&modelB, &QAbstractItemModel::dataChanged);

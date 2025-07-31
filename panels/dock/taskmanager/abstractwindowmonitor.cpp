@@ -62,33 +62,33 @@ void AbstractWindowMonitor::trackWindow(AbstractWindow* window)
     m_trackedWindows.append(window);
     endInsertRows();
 
-    connect(window, &AbstractWindow::pidChanged, this, [this, window](){
+    connect(window, &AbstractWindow::pidChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::PidRole});
     });
-    connect(window, &AbstractWindow::identityChanged, this, [this, window](){
+    connect(window, &AbstractWindow::identityChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::IdentityRole});
     });
-    connect(window, &AbstractWindow::iconChanged, this, [this, window](){
+    connect(window, &AbstractWindow::iconChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::WinIconRole});
     });
-    connect(window, &AbstractWindow::titleChanged, this, [this, window](){
+    connect(window, &AbstractWindow::titleChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::WinTitleRole});
     });
 
-    connect(window, &AbstractWindow::isActiveChanged, this, [this, window](){
+    connect(window, &AbstractWindow::isActiveChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::ActiveRole});
     });
-    connect(window, &AbstractWindow::shouldSkipChanged, this, [this, window](){
+    connect(window, &AbstractWindow::shouldSkipChanged, this, [this, window]() {
         auto pos = m_trackedWindows.indexOf(window);
         auto modelIndex = index(pos);
         Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::ShouldSkipRole});
