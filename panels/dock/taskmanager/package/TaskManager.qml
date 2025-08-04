@@ -33,6 +33,23 @@ ContainmentItem {
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : (Math.min(remainingSpacesForTaskManager, appContainer.implicitWidth) + forceRelayoutWorkaround)
     implicitHeight: useColumnLayout ? (Math.min(remainingSpacesForTaskManager, appContainer.implicitHeight) + forceRelayoutWorkaround) : Panel.rootObject.dockSize
 
+    // Find target index by position using ListView's built-in indexAt method instead of relying on fixed width
+    function findTargetIndexByPosition(dragPosition) {
+        if (!appContainer || !appContainer.model || appContainer.model.count === 0) {
+            return 0
+        }
+        
+        // Use ListView's built-in indexAt method
+        let targetIndex = appContainer.indexAt(dragPosition.x, dragPosition.y)
+        
+        // If no valid index found, return end position
+        if (targetIndex === -1) {
+            return appContainer.model.count
+        }
+        
+        return targetIndex
+    }
+
     OverflowContainer {
         id: appContainer
         anchors.fill: parent
@@ -103,7 +120,8 @@ ContainmentItem {
                 implicitHeight: useColumnLayout ? visualModel.cellWidth : taskmanager.implicitHeight
 
                 onEntered: function(drag) {
-                    visualModel.items.move((drag.source as AppItem).visualIndex, app.visualIndex)
+                    // TODO: this is actually unused, should change the delegateRoot type from DropArea to Item later.
+                    visualModel.items.move(drag.source.DelegateModel.itemsIndex, delegateRoot.DelegateModel.itemsIndex)
                 }
 
                 property int visualIndex: DelegateModel.itemsIndex
@@ -156,21 +174,19 @@ ContainmentItem {
 
             onPositionChanged: function(drag) {
                 if (launcherDndDesktopId === "") return
-                let curX = taskmanager.useColumnLayout ? drag.y : drag.x
-                let cellWidth = visualModel.cellWidth
-                let curCell = curX / cellWidth
+                let dragPosition = Qt.point(drag.x, drag.y)
+                let targetIndex = taskmanager.findTargetIndexByPosition(dragPosition)
                 let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                taskmanager.Applet.dataModel.moveTo(appId, curCell)
+                taskmanager.Applet.dataModel.moveTo(appId, targetIndex)
             }
 
             onDropped: function(drop) {
                 Panel.contextDragging = false
                 if (launcherDndDesktopId === "") return
-                let curX = taskmanager.useColumnLayout ? drop.y : drop.x
-                let cellWidth = visualModel.cellWidth
-                let curCell = curX / cellWidth
+                let dropPosition = Qt.point(drop.x, drop.y)
+                let targetIndex = taskmanager.findTargetIndexByPosition(dropPosition)
                 let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                taskmanager.Applet.dataModel.moveTo(appId, curCell)
+                taskmanager.Applet.dataModel.moveTo(appId, targetIndex)
                 resetDndState()
             }
 
