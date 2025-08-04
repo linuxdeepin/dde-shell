@@ -47,6 +47,10 @@ Item {
         }
     }
 
+    function indexAt(x, y) {
+        return listView.indexAt(x, y)
+    }
+
     implicitWidth: {
         let width = 0
         for (let child of listView.contentItem.visibleChildren) {
