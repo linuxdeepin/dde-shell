@@ -223,17 +223,17 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     QString desktopId;
     if (res.size() > 0) {
         desktopId = res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString();
-        qCDebug(taskManagerLog()) << "identify bt model:" << desktopId;
+        qCDebug(taskManagerLog()) << "identify by model:" << desktopId;
     }
 
     if (!desktopId.isEmpty()) {
         desktopfile = DESKTOPFILEFACTORY::createById(desktopId, "amAPP");
-        qCDebug(taskManagerLog()) <<  "identify bt AM:" << desktopId;
+        qCDebug(taskManagerLog()) << "identify by AM:" << desktopId;
     }
 
     if (desktopfile.isNull() || !desktopfile->isValied().first) {
         desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
-        qCDebug(taskManagerLog()) <<  "identify bt Fallback:" << desktopId;
+        qCDebug(taskManagerLog()) << "identify by Fallback:" << desktopId;
     }
 
     auto appitem = desktopfile->getAppItem();
@@ -308,12 +308,11 @@ void TaskManager::setAppItemWindowIconGeometry(const QString& appid, QObject* re
 
 void TaskManager::loadDockedAppItems()
 {
-    // TODO: add support for group and dir type
-    for (const auto& appValueRef : TaskManagerSettings::instance()->dockedDesktopFiles()) {
-        auto app = appValueRef.toObject();
-        auto appid = app.value("id").toString();
-        auto type = app.value("type").toString();
-        auto desktopfile = DESKTOPFILEFACTORY::createById(appid, type);
+    // TODO: remove this function once migrated to DockItemModel (when dataModel() returns m_itemModel instead of ItemModel::instance())
+    for (const auto &apps : TaskManagerSettings::instance()->dockedElements()) {
+        // app names in dockedElements are in format of "desktop/<appid>"
+        auto appid = apps.split('/').last();
+        auto desktopfile = DESKTOPFILEFACTORY::createById(appid, "amAPP");
         auto valid = desktopfile->isValied();
 
         if (!valid.first) {
@@ -429,6 +428,19 @@ void TaskManager::activateWindow(uint32_t windowID)
     qWarning() << "activateWindow not supported on this platform";
     Q_UNUSED(windowID)
 #endif
+}
+
+void TaskManager::saveDockElementsOrder(const QStringList &appIds)
+{
+    const QStringList &dockedElements = TaskManagerSettings::instance()->dockedElements();
+    QStringList newDockedElements;
+    for (const auto &appId : appIds) {
+        auto desktopElement = QString("desktop/%1").arg(appId);
+        if (dockedElements.contains(desktopElement) && !newDockedElements.contains(desktopElement)) {
+            newDockedElements.append(desktopElement);
+        }
+    }
+    TaskManagerSettings::instance()->setDockedElements(newDockedElements);
 }
 
 void TaskManager::modifyOpacityChanged()

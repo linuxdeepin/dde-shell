@@ -134,10 +134,7 @@ bool DesktopfileAbstractParser::isDocked()
         return false;
     }
 
-    QJsonObject desktopfile;
-    desktopfile["type"] = type();
-    desktopfile["id"] = id();
-    return TaskManagerSettings::instance()->dockedDesktopFiles().contains(desktopfile);
+    return TaskManagerSettings::instance()->isDocked(QStringLiteral("desktop/%1").arg(id()));
 }
 
 void DesktopfileAbstractParser::setDocked(bool docked)
@@ -147,14 +144,12 @@ void DesktopfileAbstractParser::setDocked(bool docked)
         return;
     }
 
-    QJsonObject desktopfile;
-    desktopfile["type"] = type();
-    desktopfile["id"] = id();
+    auto desktopElement = QStringLiteral("desktop/%1").arg(id());
 
     if (docked) {
-        TaskManagerSettings::instance()->appnedDockedDesktopfiles(desktopfile);
+        TaskManagerSettings::instance()->appendDockedElements(desktopElement);
     } else {
-        TaskManagerSettings::instance()->removeDockedDesktopfile(desktopfile);
+        TaskManagerSettings::instance()->removeDockedElements(desktopElement);
     }
 
     Q_EMIT dockedChanged();

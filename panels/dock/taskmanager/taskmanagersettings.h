@@ -29,16 +29,16 @@ public:
     bool isWindowSplit();
     void setWindowSplit(bool split);
 
-    void setDockedDesktopFiles(QJsonArray desktopfiles);
-    void appnedDockedDesktopfiles(QJsonObject desktopfile);
-    void removeDockedDesktopfile(QJsonObject desktopfile);
-    QJsonArray dockedDesktopFiles();
-    QStringList dockedElements();
+    void setDockedElements(const QStringList &elements);
+    void appendDockedElements(const QString &element);
+    void removeDockedElements(const QString &element);
+    QStringList dockedElements() const;
+    bool isDocked(const QString &elementId) const;
 
 private:
     explicit TaskManagerSettings(QObject *parent = nullptr);
-    inline void dockedItemsPersisted();
-    inline void loadDockedItems();
+    inline void migrateFromDockedItems();
+    inline void saveDockedElements();
 
 Q_SIGNALS:
     void allowedForceQuitChanged();
@@ -51,7 +51,6 @@ private:
 
     bool m_allowForceQuit;
     bool m_windowSplit;
-    QJsonArray m_dockedItems;
     QStringList m_dockedElements;
 };
 }
