@@ -31,7 +31,6 @@ public:
     static ItemModel* instance();
     Q_INVOKABLE int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
     Q_INVOKABLE QVariant data(const QModelIndex &index, int role = ItemIdRole) const Q_DECL_OVERRIDE;
-    Q_INVOKABLE void moveTo(const QString &id, int index);
 
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 

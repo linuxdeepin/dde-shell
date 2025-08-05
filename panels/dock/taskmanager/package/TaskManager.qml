@@ -33,21 +33,15 @@ ContainmentItem {
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : (Math.min(remainingSpacesForTaskManager, appContainer.implicitWidth) + forceRelayoutWorkaround)
     implicitHeight: useColumnLayout ? (Math.min(remainingSpacesForTaskManager, appContainer.implicitHeight) + forceRelayoutWorkaround) : Panel.rootObject.dockSize
 
-    // Find target index by position using ListView's built-in indexAt method instead of relying on fixed width
-    function findTargetIndexByPosition(dragPosition) {
-        if (!appContainer || !appContainer.model || appContainer.model.count === 0) {
-            return 0
+    // Helper function to find the current index of an app by its appId in the visualModel
+    function findAppIndex(appId) {
+        for (let i = 0; i < visualModel.items.count; i++) {
+            const item = visualModel.items.get(i);
+            if (item.model.itemId === appId) {
+                return item.itemsIndex
+            }
         }
-        
-        // Use ListView's built-in indexAt method
-        let targetIndex = appContainer.indexAt(dragPosition.x, dragPosition.y)
-        
-        // If no valid index found, return end position
-        if (targetIndex === -1) {
-            return appContainer.model.count
-        }
-        
-        return targetIndex
+        return -1
     }
 
     OverflowContainer {
@@ -174,19 +168,28 @@ ContainmentItem {
 
             onPositionChanged: function(drag) {
                 if (launcherDndDesktopId === "") return
-                let dragPosition = Qt.point(drag.x, drag.y)
-                let targetIndex = taskmanager.findTargetIndexByPosition(dragPosition)
+                let targetIndex = appContainer.indexAt(drag.x, drag.y)
                 let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                taskmanager.Applet.dataModel.moveTo(appId, targetIndex)
+                let currentIndex = taskmanager.findAppIndex(appId)
+                if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
+                    visualModel.items.move(currentIndex, targetIndex)
+                }
             }
 
             onDropped: function(drop) {
                 Panel.contextDragging = false
                 if (launcherDndDesktopId === "") return
-                let dropPosition = Qt.point(drop.x, drop.y)
-                let targetIndex = taskmanager.findTargetIndexByPosition(dropPosition)
+                let targetIndex = appContainer.indexAt(drop.x, drop.y)
                 let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                taskmanager.Applet.dataModel.moveTo(appId, targetIndex)
+                let currentIndex = taskmanager.findAppIndex(appId)
+                if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
+                    visualModel.items.move(currentIndex, targetIndex)
+                }
+                let appIds = []
+                for (let i = 0; i < visualModel.items.count; i++) {
+                    appIds.push(visualModel.items.get(i).model.itemId)
+                }
+                taskmanager.Applet.saveDockElementsOrder(appIds)
                 resetDndState()
             }
 

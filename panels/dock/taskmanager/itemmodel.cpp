@@ -72,29 +72,6 @@ QVariant ItemModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void ItemModel::moveTo(const QString &id, int dIndex)
-{
-    // simply do nothing if dIndex is invalid
-    if (dIndex >= m_items.size() || dIndex < 0) {
-        return;
-    }
-
-    auto sItem = getItemById(id);
-    auto dItem = m_items.at(dIndex);
-
-    int sIndex = m_items.indexOf(sItem);
-    if (sIndex == dIndex) {
-        return;
-    }
-    beginMoveRows(QModelIndex(), sIndex, sIndex, QModelIndex(), dIndex > sIndex ? (dIndex + 1) : dIndex);
-    m_items.move(sIndex, dIndex);
-    endMoveRows();
-
-    if (sItem->isDocked() || dItem->isDocked()) {
-        TaskManagerSettings::instance()->setDockedDesktopFiles(dumpDockedItems());
-    }
-}
-
 QJsonArray ItemModel::dumpDockedItems() const
 {
     QJsonArray result;
