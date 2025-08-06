@@ -247,9 +247,6 @@ QList<NotificationSetting::AppItem> NotificationSetting::appItemsImpl() const
     apps.reserve(m_appAccessor->rowCount());
     for (int i = 0; i < m_appAccessor->rowCount(); i++) {
         const auto index = m_appAccessor->index(i, 0);
-        const auto nodisplay = m_appAccessor->data(index, NoDisplayRole).toBool();
-        if (nodisplay)
-            continue;
 
         const auto desktopId = m_appAccessor->data(index, DesktopIdRole).toString();
         const auto icon = m_appAccessor->data(index, IconNameRole).toString();

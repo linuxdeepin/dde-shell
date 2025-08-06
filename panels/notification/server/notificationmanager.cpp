@@ -207,6 +207,8 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     auto tsAppName = m_setting->appValue(appId, NotificationSetting::AppName).toString();
     if (tsAppName.isEmpty()) {
         tsAppName = appName;
+    } else {
+        qCDebug(notifyLog) << "AppName is translated from AM, which appId is:" << appId;
     }
 
     QString strBody = body;
