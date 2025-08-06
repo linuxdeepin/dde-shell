@@ -80,7 +80,7 @@ ContainmentItem {
             onCountChanged: function() {
                 relayoutWorkaroundTimer.start()
             }
-            delegate: DropArea {
+            delegate: Item {
                 id: delegateRoot
                 required property bool active
                 required property bool attention
@@ -89,7 +89,6 @@ ContainmentItem {
                 required property string iconName
                 required property string menus
                 required property list<string> windows
-                keys: ["text/x-dde-dock-dnd-appid"]
                 z: attention ? -1 : 0
                 property bool visibility: itemId !== taskmanager.Applet.desktopIdToAppId(launcherDndDropArea.launcherDndDesktopId)
 
@@ -112,11 +111,6 @@ ContainmentItem {
                 // TODO: 临时溢出逻辑，待后面修改
                 implicitWidth: useColumnLayout ? taskmanager.implicitWidth : visualModel.cellWidth
                 implicitHeight: useColumnLayout ? visualModel.cellWidth : taskmanager.implicitHeight
-
-                onEntered: function(drag) {
-                    // TODO: this is actually unused, should change the delegateRoot type from DropArea to Item later.
-                    visualModel.items.move(drag.source.DelegateModel.itemsIndex, delegateRoot.DelegateModel.itemsIndex)
-                }
 
                 property int visualIndex: DelegateModel.itemsIndex
 
