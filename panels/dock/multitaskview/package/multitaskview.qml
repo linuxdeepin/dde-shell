@@ -32,33 +32,38 @@ AppletItem {
         scale: Panel.rootObject.dockItemMaxSize * 9 / 14 / Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE
         // 9:14 (iconSize/dockHeight)
         sourceSize: Qt.size(Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE, Dock.MAX_DOCK_TASKMANAGER_ICON_SIZE)
-        Timer {
-            id: toolTipShowTimer
-            interval: 50
-            onTriggered: {
-                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, Applet.rootObject.height / 2)
-                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-                toolTip.open()
-            }
+    }
+
+    Timer {
+        id: toolTipShowTimer
+        interval: 50
+        onTriggered: {
+            var point = toggleworkspace.mapToItem(null, toggleworkspace.width / 2, toggleworkspace.height / 2)
+            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+            toolTip.open()
         }
-        TapHandler {
-            acceptedButtons: Qt.LeftButton
-            onTapped: {
+    }
+
+    MouseArea {
+        id: mouseHandler
+        anchors.fill: parent
+        onClicked: function (mouse) {
+            if (mouse.button === Qt.LeftButton) {
                 Applet.openWorkspace()
                 toolTip.close()
             }
         }
-        HoverHandler {
-            onHoveredChanged: {
-                if (hovered) {
-                    toolTipShowTimer.start()
-                } else {
-                    if (toolTipShowTimer.running) {
-                        toolTipShowTimer.stop()
-                    }
-
-                    toolTip.close()
+    }
+    HoverHandler {
+        onHoveredChanged: {
+            if (hovered) {
+                toolTipShowTimer.start()
+            } else {
+                if (toolTipShowTimer.running) {
+                    toolTipShowTimer.stop()
                 }
+
+                toolTip.close()
             }
         }
     }
