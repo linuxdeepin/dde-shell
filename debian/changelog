@@ -1,3 +1,14 @@
+dde-shell (2.0.5) unstable; urgency=medium
+
+  * fix: click area keep same with app on dock
+  * fix: handle NoDisplay apps in notification settings
+  * chore: change item delegate for taskmanager from DropArea to Item
+  * refactor: migrated docked items config to
+    TASKMANAGER_DOCKEDELEMENTS_KEY
+  * chore: avoid using cell width to calculate target index for taskbar
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 07 Aug 2025 20:00:27 +0800
+
 dde-shell (2.0.4) unstable; urgency=medium
 
   * chore: clang-format code related to refactor branch
