@@ -54,9 +54,11 @@ function(ds_handle_package_translation)
 
     set(TRANSLATION_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_ar.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_az.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_bo.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_ca.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_de.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_es.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_fi.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_fr.ts
@@ -64,10 +66,12 @@ function(ds_handle_package_translation)
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_it.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_ja.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_ko.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_lo.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_nb_NO.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_pl.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_pt_BR.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_ru.ts
+        ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_sq.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_uk.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_zh_CN.ts
         ${CMAKE_CURRENT_SOURCE_DIR}/translations/${_config_PACKAGE}_zh_HK.ts
