@@ -1,3 +1,12 @@
+dde-shell (2.0.6) unstable; urgency=medium
+
+  * i18n: Translate org.deepin.ds.notificationbubble.ts in lo (#1219)
+  * chore: add ar, de, lo, sq to DDEShellPackageMacros.cmake
+  * i18n: Updates for project Deepin Desktop Environment (#1211)
+  * fix: close tooltip before show desktop action
+
+ -- wujiangyu <wujiangyu@uniontech.com>  Tue, 12 Aug 2025 10:39:15 +0800
+
 dde-shell (2.0.5) unstable; urgency=medium
 
   * fix: click area keep same with app on dock
