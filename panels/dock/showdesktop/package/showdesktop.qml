@@ -15,6 +15,7 @@ AppletItem {
     property bool useColumnLayout: Panel.position % 2
     property int dockSize: Panel.rootObject.dockItemMaxSize
     property int dockOrder: 30
+    property bool shouldVisible: Applet.visible
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : showDesktopWidth
     implicitHeight: useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize
 
