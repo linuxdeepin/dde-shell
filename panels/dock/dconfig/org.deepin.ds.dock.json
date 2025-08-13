@@ -81,6 +81,16 @@
                         "description": "lock dock to prevent dragging resize",
                         "permissions": "readwrite",
                         "visibility": "private"
+		},
+		"enableShowDesktop": {
+			"value": true,
+			"serial": 0,
+			"flags": [],
+			"name": "Enable ShowDesktop",
+			"name[zh_CN]": "启用显示桌面区域",
+			"description": "Enable or disable the show desktop area on the right side of the dock",
+			"permissions": "readwrite",
+			"visibility": "private"
 		}
 	}
 }
