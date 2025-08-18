@@ -41,6 +41,7 @@ DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
         interface()->isServiceRegistered(AM_DBUS_PATH);
 
     connect(&desktopobjectManager, &ObjectManager::InterfacesRemoved, this, [this] (const QDBusObjectPath& path, const QStringList& interfaces) {
+        Q_UNUSED(interfaces)
         if (m_applicationInterface->path() == path.path()) {
             getAppItem()->setDocked(false);
             return;
@@ -203,6 +204,8 @@ void DesktopFileAMParser::requestQuit()
 
 void DesktopFileAMParser::connectToAmDBusSignal(const QString& signalName, const char *slot)
 {
+    Q_UNUSED(signalName)
+    Q_UNUSED(slot)
     QDBusConnection::sessionBus().connect(
         m_applicationInterface->service(),
         m_applicationInterface->path(),

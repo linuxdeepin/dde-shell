@@ -34,7 +34,8 @@ DPluginMetaData::DPluginMetaData()
 }
 
 DPluginMetaData::DPluginMetaData(const DPluginMetaData &other)
-    : d(other.d)
+    : QObject()
+    , d(other.d)
 {
 }
 

@@ -7,6 +7,7 @@
 DataA::DataA(int id, TestModelA* parent)
     : m_id(id)
 {
+    Q_UNUSED(parent)
 }
 
 DataA::DataA(int id, const QString &data, TestModelA* model)
@@ -52,6 +53,7 @@ QHash<int, QByteArray> TestModelA::roleNames() const
 
 int TestModelA::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return m_list.size();
 }
 

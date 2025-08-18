@@ -126,7 +126,6 @@ void NotifyStagingModel::remove(qint64 id)
 
             for (int i = 0; i < m_appNotifies.size(); i++) {
                 auto item = m_appNotifies[i];
-                const auto id = item->id();
                 const auto time = item->entity().cTime();
 
                 for (auto entity : newEntities) {
@@ -180,6 +179,7 @@ void NotifyStagingModel::open()
 
 int NotifyStagingModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return m_appNotifies.size();
 }
 

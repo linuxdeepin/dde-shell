@@ -34,11 +34,12 @@ void DesktopfileAbstractParser::launch()
 
 void DesktopfileAbstractParser::launchWithAction(const QString& action)
 {
-
+    Q_UNUSED(action)
 }
 
 void DesktopfileAbstractParser::launchWithUrls(const QStringList & urls)
 {
+    Q_UNUSED(urls)
 }
 
 void DesktopfileAbstractParser::requestQuit()

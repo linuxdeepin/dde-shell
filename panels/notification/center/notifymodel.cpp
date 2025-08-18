@@ -572,7 +572,6 @@ void NotifyModel::removeByApp(const QString &appName)
     beginRemoveRows(QModelIndex(), start, start + notifies.size() - 1);
     for (int i = 0; i < notifies.size(); i++) {
         auto item = notifies[i];
-        const auto id = item->id();
         m_appNotifies.removeOne(item);
         item->deleteLater();
     }
@@ -674,6 +673,7 @@ void NotifyModel::pinApplication(const QString &appName, bool pin)
 
 int NotifyModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return m_appNotifies.size();
 }
 
@@ -827,6 +827,8 @@ void NotifyModel::timerEvent(QTimerEvent *event)
 
 void NotifyModel::sort(int column, Qt::SortOrder order)
 {
+    Q_UNUSED(column)
+    Q_UNUSED(order)
     auto notifies = m_appNotifies;
     // emit layoutAboutToBeChanged(QList<QPersistentModelIndex>(), QAbstractItemModel::VerticalSortHint);
     beginResetModel();

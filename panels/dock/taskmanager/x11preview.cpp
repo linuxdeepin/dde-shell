@@ -107,6 +107,7 @@ public:
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override
     {
+        Q_UNUSED(parent)
         return m_item.isNull() ? 0 : m_item->getAppendWindows().size();
     }
 
@@ -337,6 +338,7 @@ public:
 
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
+        Q_UNUSED(option)
         if (!WM_HELPER->hasComposite() || !WM_HELPER->hasBlurWindow()) {
             return QSize(PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2);
         }
@@ -396,12 +398,13 @@ private:
 
 X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, QWidget *parent)
     : DBlurEffectWidget(parent)
-    , m_direction(0)
     , m_isPreviewEntered(false)
     , m_isDockPreviewCount(0)
     , m_model(new AppItemWindowModel(this))
     , m_titleWidget(new QWidget())
+    , m_direction(0)
 {
+    Q_UNUSED(monitor)
     m_hideTimer = new QTimer(this);
     m_hideTimer->setSingleShot(true);
     m_hideTimer->setInterval(500);
@@ -515,6 +518,7 @@ void X11WindowPreviewContainer::hideEvent(QHideEvent*)
 
 void X11WindowPreviewContainer::resizeEvent(QResizeEvent *event)
 {
+    Q_UNUSED(event)
     updatePosition();
 }
 

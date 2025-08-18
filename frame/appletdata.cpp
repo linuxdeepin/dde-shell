@@ -29,7 +29,8 @@ DAppletData::DAppletData(const QVariantMap &data)
 }
 
 DAppletData::DAppletData(const DAppletData &other)
-    : d(other.d)
+    : QObject()
+    , d(other.d)
 {
 }
 

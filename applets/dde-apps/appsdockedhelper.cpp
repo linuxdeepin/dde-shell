@@ -34,7 +34,7 @@ AppsDockedHelper::AppsDockedHelper(QObject *parent)
             YAML::Node node;
             try {
                 node = YAML::Load("{" + dcokedDesktopFilesStr.toStdString() + "}");
-            } catch (YAML::Exception) {
+            } catch (const YAML::Exception&) {
                 qWarning() << "unable to parse docked desktopfiles";
             }
 
@@ -66,6 +66,8 @@ bool AppsDockedHelper::isDocked(const QString &appItemId) const
 
 void AppsDockedHelper::setDocked(const QString &appId, bool docked)
 {
+    Q_UNUSED(appId)
+    Q_UNUSED(docked)
     // TODO
 }
 }

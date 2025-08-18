@@ -59,6 +59,7 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     });
     connect(qApp, &QGuiApplication::primaryScreenChanged, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(m_window, &QWindow::screenChanged, this, [this](QScreen *nowScreen){
+        Q_UNUSED(nowScreen)
         onPositionChanged();
         m_exclusionZoneChangedTimer.start();
     });

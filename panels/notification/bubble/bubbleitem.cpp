@@ -103,7 +103,7 @@ static QString decodeImageToBase64(const QImage &image, const char *format = "PN
     return QString("data:image/%1;base64,%2").arg(QString::fromLatin1(format).toLower()).arg(QString::fromLatin1(ba.toBase64()));
 }
 
-static QIcon decodeIconFromPath(const QString &arg, const QString &fallback)
+[[maybe_unused]] static QIcon decodeIconFromPath(const QString &arg, const QString &fallback)
 {
     DGUI_USE_NAMESPACE;
     const QUrl url(arg);
@@ -117,6 +117,7 @@ static QIcon decodeIconFromPath(const QString &arg, const QString &fallback)
 
 static QString imagePathOfNotification(const QVariantMap &hints, const QString &appIcon, const QString &appName)
 {
+    Q_UNUSED(appName)
     static const QStringList HintsOrder {
             "desktop-entry",
             "image-data",

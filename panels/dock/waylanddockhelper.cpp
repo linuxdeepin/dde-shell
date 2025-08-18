@@ -18,9 +18,9 @@
 namespace dock {
 WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     : DockHelper(panel)
-    , m_panel(panel)
     , m_isWindowOverlap(false)
     , m_isCurrentActiveWindowFullscreened(false)
+    , m_panel(panel)
 {
     m_wallpaperColorManager.reset(new WallpaperColorManager(this));
     m_ddeShellManager.reset(new TreeLandDDEShellManager());
@@ -250,11 +250,13 @@ void TreeLandDockWakeUpArea::updateDockWakeArea(Position pos)
 
 void TreeLandDockWakeUpArea::enterEvent(QEnterEvent *event)
 {
+    Q_UNUSED(event)
     m_helper->enterScreen(QWidget::screen());
 }
 
 void TreeLandDockWakeUpArea::leaveEvent(QEvent *event)
 {
+    Q_UNUSED(event)
     m_helper->leaveScreen();
 }
 

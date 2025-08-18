@@ -212,7 +212,7 @@ DLayerShellWindow::DLayerShellWindow(QWindow* window)
         waylandWindow->setShellIntegration(shellIntegration);
     }
 #ifdef BUILD_WITH_X11
-    else if (auto xcbWindow = dynamic_cast<QNativeInterface::Private::QXcbWindow*>(window->handle())) {
+    else if (dynamic_cast<QNativeInterface::Private::QXcbWindow*>(window->handle())) {
         new LayerShellEmulation(window, this);
         qCInfo(layershellwindow) << "not a wayland window, try to emulate on x11";
     }

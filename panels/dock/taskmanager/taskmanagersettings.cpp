@@ -105,7 +105,7 @@ void TaskManagerSettings::migrateFromDockedItems()
         YAML::Node node;
         try {
             node = YAML::Load("{" + dcokedDesktopFilesStr.toStdString() + "}");
-        } catch (YAML::Exception) {
+        } catch (const YAML::Exception&) {
             qWarning() << "unable to parse docked desktopfiles";
         }
 

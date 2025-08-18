@@ -55,12 +55,14 @@ bool DockPanel::load()
 bool DockPanel::init()
 {
     DockAdaptor* adaptor = new DockAdaptor(this);
+    Q_UNUSED(adaptor)
     QDBusConnection::sessionBus().registerService("org.deepin.ds.Dock");
     QDBusConnection::sessionBus().registerObject("/org/deepin/ds/Dock", "org.deepin.ds.Dock", this);
 
     // for old api compatible
     DockDBusProxy* proxy = new DockDBusProxy(this);
     DockFrontAdaptor* dockFrontAdaptor = new DockFrontAdaptor(proxy);
+    Q_UNUSED(dockFrontAdaptor)
     QDBusConnection::sessionBus().registerService("org.deepin.dde.Dock1");
     QDBusConnection::sessionBus().registerObject("/org/deepin/dde/Dock1", "org.deepin.dde.Dock1", proxy);
 

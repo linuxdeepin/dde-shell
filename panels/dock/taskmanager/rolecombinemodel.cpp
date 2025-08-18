@@ -24,6 +24,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     }
 
     connect(sourceModel(), &QAbstractItemModel::rowsInserted, this, [this, majorRoles, func](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         // 对于QAbstractListModel，parent通常是无效的，我们直接使用QModelIndex()
         beginInsertRows(QModelIndex(), first, last);
 
@@ -58,6 +59,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     });
 
     connect(sourceModel(), &QAbstractItemModel::columnsInserted, this, [this, majorRoles, func](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         beginInsertColumns(QModelIndex(), first, last);
 
         // 先调整现有映射中后续列的索引
@@ -91,6 +93,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     });
 
     connect(sourceModel(), &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         beginRemoveRows(QModelIndex(), first, last);
 
         // 删除被移除行的映射
@@ -123,6 +126,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     });
 
     connect(sourceModel(), &QAbstractItemModel::columnsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         beginRemoveColumns(QModelIndex(), first, last);
 
         // 删除被移除列的映射
@@ -157,6 +161,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     // connect changedSignal
     connect(major, &QAbstractItemModel::dataChanged, this,
         [this, majorRoles, func](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles){
+            Q_UNUSED(roles)
             for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
                 for (int j = topLeft.column(); j <= bottomRight.column(); j++) {
                     QModelIndex majorIndex = sourceModel()->index(i, j);
@@ -175,6 +180,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     // appended roles from minor datachanged
     connect(m_minor, &QAbstractItemModel::dataChanged, this,
         [this, majorRoles, func](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles){
+            Q_UNUSED(roles)
             for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
                 for (int j =  topLeft.column(); j <= bottomRight.column(); j++) {
                     auto majorPos = m_indexMap.key(qMakePair(i, j), qMakePair(-1, -1));
@@ -197,13 +203,13 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
 
     // 添加对minor模型删除操作的处理
     connect(m_minor, &QAbstractItemModel::rowsRemoved, this, [this, majorRoles, func](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         // 当minor模型删除行时，需要更新映射并可能触发数据变化信号
         QList<QModelIndex> affectedMajorIndexes;
 
         // 找到受影响的major索引
         for (auto it = m_indexMap.begin(); it != m_indexMap.end();) {
             int minorRow = it.value().first;
-            int minorCol = it.value().second;
 
             if (minorRow >= first && minorRow <= last) {
                 // 这个映射指向的minor行被删除了，需要重新建立映射
@@ -242,9 +248,9 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     });
 
     connect(m_minor, &QAbstractItemModel::columnsRemoved, this, [this, majorRoles, func](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         // 当minor模型删除列时，需要更新映射
         for (auto it = m_indexMap.begin(); it != m_indexMap.end(); ++it) {
-            int minorRow = it.value().first;
             int minorCol = it.value().second;
 
             if (minorCol > last) {
@@ -257,6 +263,9 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
 
     connect(m_minor, &QAbstractItemModel::rowsInserted, this,
         [this, majorRoles, func](const QModelIndex &parent, int first, int last){
+            Q_UNUSED(parent)
+            Q_UNUSED(first)
+            Q_UNUSED(last)
         auto rowCount = sourceModel()->rowCount();
         auto columnCount = sourceModel()->columnCount();
         for (int i = 0; i < rowCount; i++) {
@@ -373,6 +382,7 @@ QModelIndex RoleCombineModel::index(int row, int column, const QModelIndex &pare
 
 QModelIndex RoleCombineModel::parent(const QModelIndex &child) const
 {
+    Q_UNUSED(child)
     return QModelIndex();
 }
 

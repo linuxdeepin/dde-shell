@@ -33,9 +33,9 @@ void ForeignToplevelManager::treeland_foreign_toplevel_manager_v1_toplevel(struc
 
 TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v1 *context)
     : QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>(1)
-    , m_hideTimer(new QTimer(this))
     , m_isPreviewEntered(false)
     , m_isDockMouseAreaEnter(false)
+    , m_hideTimer(new QTimer(this))
 {
     init(context);
 
@@ -113,7 +113,7 @@ QPointer<AbstractWindow> TreeLandWindowMonitor::getWindowByWindowId(ulong window
 
 void TreeLandWindowMonitor::presentWindows(QList<uint32_t> windows)
 {
-
+    Q_UNUSED(windows)
 }
 
 void TreeLandWindowMonitor::showItemPreview(const QPointer<AppItem> &item, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)

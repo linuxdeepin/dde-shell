@@ -68,6 +68,8 @@ TraySortOrderModel::~TraySortOrderModel()
 
 bool TraySortOrderModel::dropToStashTray(const QString &draggedSurfaceId, int dropVisualIndex, bool isBefore)
 {
+    Q_UNUSED(dropVisualIndex)
+    Q_UNUSED(isBefore)
     // Check if the dragged tray surfaceId exists. Reject if not the case
     QList<QStandardItem *> draggedItems = findItems(draggedSurfaceId);
     if (draggedItems.isEmpty()) return false;

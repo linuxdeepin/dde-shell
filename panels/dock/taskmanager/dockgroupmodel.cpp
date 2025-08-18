@@ -15,17 +15,22 @@ DockGroupModel::DockGroupModel(QAbstractItemModel *sourceModel, int role, QObjec
     , m_roleForDeduplication(role)
 {
     connect(this, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(first)
+        Q_UNUSED(last)
         if (!parent.isValid())
             return;
         Q_EMIT dataChanged(index(parent.row(), 0), index(parent.row(), 0), {TaskManager::WindowsRole});
     });
     connect(this, &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(first)
+        Q_UNUSED(last)
         if (!parent.isValid())
             return;
         Q_EMIT dataChanged(index(parent.row(), 0), index(parent.row(), 0), {TaskManager::WindowsRole});
     });
 
     connect(this, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
+        Q_UNUSED(bottomRight)
         if (!topLeft.parent().isValid())
             return;
         auto parentRow = topLeft.parent().row();
@@ -86,7 +91,6 @@ QVariantList DockGroupModel::all(const QModelIndex &index, int role) const
     QVariantList res;
     auto rowCount = RoleGroupModel::rowCount(index);
     for (int i = 0; i < rowCount; i++) {
-        auto cIndex = RoleGroupModel::index(i, 0, index);
         auto window = RoleGroupModel::data(index, role);
         if (window.isValid())
             res.append(window);
@@ -115,6 +119,8 @@ void DockGroupModel::requestActivate(const QModelIndex &index) const
 
 void DockGroupModel::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
 {
+    Q_UNUSED(index)
+    Q_UNUSED(urls)
 }
 
 void DockGroupModel::requestClose(const QModelIndex &index, bool force) const
@@ -132,6 +138,9 @@ void DockGroupModel::requestClose(const QModelIndex &index, bool force) const
 
 void DockGroupModel::requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
 {
+    Q_UNUSED(index)
+    Q_UNUSED(geometry)
+    Q_UNUSED(delegate)
 }
 
 void DockGroupModel::requestPreview(const QModelIndexList &indexes,
