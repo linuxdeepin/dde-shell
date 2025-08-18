@@ -32,11 +32,6 @@ static const QString DDENotifyDBusServer = "org.deepin.dde.Notification1";
 static const QString DDENotifyDBusInterface = "org.deepin.dde.Notification1";
 static const QString DDENotifyDBusPath = "/org/deepin/dde/Notification1";
 
-static QDBusInterface notifyCenterInterface()
-{
-    return QDBusInterface(DDENotifyDBusServer, DDENotifyDBusPath, DDENotifyDBusInterface);
-}
-
 NotificationCenterPanel::NotificationCenterPanel(QObject *parent)
     : DPanel(parent)
     , m_proxy(new NotificationCenterProxy(this))

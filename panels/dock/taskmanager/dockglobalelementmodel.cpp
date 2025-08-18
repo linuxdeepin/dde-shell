@@ -25,6 +25,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
 {
     connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedElementsChanged, this, &DockGlobalElementModel::loadDockedElements);
     connect(m_appsModel, &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         for (int i = first; i <= last; ++i) {
             auto it = std::find_if(m_data.begin(), m_data.end(), [this, &i](auto data) {
                 return std::get<1>(data) == m_appsModel && std::get<2>(data) == i;
@@ -44,6 +45,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
     });
 
     connect(m_activeAppModel, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         for (int i = first; i <= last; ++i) {
             auto index = m_activeAppModel->index(i, 0);
             auto desktopId = index.data(TaskManager::DesktopIdRole).toString();
@@ -72,6 +74,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
     });
 
     connect(m_activeAppModel, &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         for (int i = first; i <= last; ++i) {
             auto it = std::find_if(m_data.begin(), m_data.end(), [this, i](auto data) {
                 return std::get<1>(data) == m_activeAppModel && std::get<2>(data) == i;
@@ -160,16 +163,19 @@ QHash<int, QByteArray> DockGlobalElementModel::roleNames() const
 
 QModelIndex DockGlobalElementModel::index(int row, int column, const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return createIndex(row, column);
 }
 
 QModelIndex DockGlobalElementModel::parent(const QModelIndex &child) const
 {
+    Q_UNUSED(child)
     return QModelIndex();
 }
 
 int DockGlobalElementModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return 1;
 }
 
@@ -312,6 +318,8 @@ void DockGlobalElementModel::requestActivate(const QModelIndex &index) const
 
 void DockGlobalElementModel::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
 {
+    Q_UNUSED(index)
+    Q_UNUSED(urls)
 }
 
 void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const QString &action) const
@@ -346,6 +354,9 @@ void DockGlobalElementModel::requestClose(const QModelIndex &index, bool force) 
 }
 void DockGlobalElementModel::requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
 {
+    Q_UNUSED(index)
+    Q_UNUSED(geometry)
+    Q_UNUSED(delegate)
 }
 
 void DockGlobalElementModel::requestPreview(const QModelIndexList &indexes,
@@ -369,5 +380,6 @@ void DockGlobalElementModel::requestPreview(const QModelIndexList &indexes,
 
 void DockGlobalElementModel::requestWindowsView(const QModelIndexList &indexes) const
 {
+    Q_UNUSED(indexes)
 }
 }

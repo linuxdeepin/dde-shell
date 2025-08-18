@@ -81,10 +81,11 @@ QString toQString(const icu::UnicodeString &icuString)
     return QString(reinterpret_cast<const QChar *>(ucharData), length);
 }
 
-icu::UnicodeString fromQString(const QString &qstr)
+[[maybe_unused]] icu::UnicodeString fromQString(const QString &qstr)
 {
     return icu::UnicodeString(qstr.utf16(), qstr.length());
 }
+
 } // anonymous namespace
 
 void AppNotifyItem::updateTime()

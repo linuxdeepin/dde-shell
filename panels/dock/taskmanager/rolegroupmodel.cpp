@@ -39,6 +39,7 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
         return;
 
     connect(sourceModel(), &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         adjustMap(first, (last - first) + 1);
 
         for (int i = first; i <= last; i++) {
@@ -65,6 +66,7 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
     });
 
     connect(sourceModel(), &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
         for (int i = 0; i < m_rowMap.count(); ++i) {
             auto sourceRows = m_rowMap.value(i);
             for (int j = 0; j < sourceRows->size(); ++j) {

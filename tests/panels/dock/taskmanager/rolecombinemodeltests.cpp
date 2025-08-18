@@ -17,7 +17,11 @@
 TEST(RoleCombineModel, RoleNamesTest) {
     TestModelA modelA;
     TestModelB modelB;
-    RoleCombineModel model(&modelA, &modelB, 1, [](QVariant data, QAbstractItemModel* model) -> QModelIndex{ return QModelIndex();});
+    RoleCombineModel model(&modelA, &modelB, 1, [](QVariant data, QAbstractItemModel* model) -> QModelIndex{ 
+        Q_UNUSED(data)
+        Q_UNUSED(model)
+        return QModelIndex();
+    });
     QHash<int, QByteArray> res(modelA.roleNames());
     auto keys = modelA.roleNames().keys();
     auto maxKey = *(std::max_element(keys.begin(), keys.end())) + 1;
@@ -38,6 +42,8 @@ TEST(RoleCombineModel, RowCountTest) {
     modelB.addData(new DataB(1, &modelB));
     modelB.addData(new DataB(2, &modelB));
     RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        Q_UNUSED(data)
+        Q_UNUSED(model)
         return QModelIndex();
     });
 
@@ -57,10 +63,12 @@ TEST(RoleGroupModel, ModelTest)
     modelB.addData(new DataB(1, &modelB));
     modelB.addData(new DataB(2, &modelB));
     RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        Q_UNUSED(data)
+        Q_UNUSED(model)
         return QModelIndex();
     });
 
-    auto tester = new QAbstractItemModelTester(&model, QAbstractItemModelTester::FailureReportingMode::Fatal);
+    [[maybe_unused]] auto tester = new QAbstractItemModelTester(&model, QAbstractItemModelTester::FailureReportingMode::Fatal);
 }
 
 TEST(RoleCombineModel, dataTest) {
@@ -183,6 +191,8 @@ TEST(RoleCombineModel, InvalidParentHandlingBug)
     TestModelB modelB;
 
     RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        Q_UNUSED(data)
+        Q_UNUSED(model)
         return QModelIndex();
     });
 

@@ -51,6 +51,7 @@ public:
 NotifyAccessor::NotifyAccessor(QObject *parent)
     : m_pinnedApps(InvalidPinnedApps)
 {
+    Q_UNUSED(parent)
     if (!qEnvironmentVariableIsEmpty("DS_NOTIFICATION_DEBUG")) {
         const int value = qEnvironmentVariableIntValue("DS_NOTIFICATION_DEBUG");
         m_debugging = value;

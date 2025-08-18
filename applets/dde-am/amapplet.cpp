@@ -57,6 +57,7 @@ static QString unescapeAppIdFromObjectPath(const QString &path)
 
 void AMApplet::onInterfacesRemoved(const QDBusObjectPath &objPath, const QStringList &interfaces)
 {
+    Q_UNUSED(interfaces)
     const QString &path(objPath.path());
     qDebug() << "InterfacesRemoved by AM, path:" << path;
 

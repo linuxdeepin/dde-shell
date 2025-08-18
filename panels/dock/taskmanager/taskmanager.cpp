@@ -107,6 +107,7 @@ bool TaskManager::load()
 bool TaskManager::init()
 {
     auto adaptor = new TaskManagerAdaptor(this);
+    Q_UNUSED(adaptor)
     QDBusConnection::sessionBus().registerService("org.deepin.ds.Dock.TaskManager");
     QDBusConnection::sessionBus().registerObject("/org/deepin/ds/Dock/TaskManager", "org.deepin.ds.Dock.TaskManager", this);
 

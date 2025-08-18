@@ -104,21 +104,25 @@ QHash<int, QByteArray> DockItemModel::roleNames() const
 
 QModelIndex DockItemModel::index(int row, int column, const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return createIndex(row, column);
 }
 
 QModelIndex DockItemModel::parent(const QModelIndex &child) const
 {
+    Q_UNUSED(child)
     return QModelIndex();
 }
 
 int DockItemModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return 1;
 }
 
 int DockItemModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     auto sourceModel = this->sourceModel();
     return sourceModel == nullptr ? 0 : sourceModel->rowCount();
 }

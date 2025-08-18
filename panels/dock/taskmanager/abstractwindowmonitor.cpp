@@ -26,6 +26,7 @@ QHash<int, QByteArray> AbstractWindowMonitor::roleNames() const
 
 int AbstractWindowMonitor::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent)
     return m_trackedWindows.size();
 }
 

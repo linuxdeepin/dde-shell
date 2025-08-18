@@ -381,7 +381,7 @@ void X11DockHelper::onHideModeChanged(HideMode mode)
             updating = true;
             int currentWorkspace = m_xcbHelper->getCurrentWorkspace();
             for (auto &&data : m_windows) {
-                if (data->overlap && (data->workspace == currentWorkspace || data->workspace == allWorkspace)) {
+                if (data->overlap && (static_cast<int>(data->workspace) == currentWorkspace || data->workspace == static_cast<uint32_t>(allWorkspace))) {
                     Q_EMIT isWindowOverlapChanged(isWindowOverlap());
                     updating = false;
                     return;
@@ -486,13 +486,13 @@ void X11DockHelper::updateDockArea()
         rect.setHeight(size);
         break;
     case Bottom:
-        if (rect.height() != size) {
+        if (rect.height() != static_cast<int>(size)) {
             rect.setTop(rect.top() + rect.height() - size);
             rect.setHeight(size);
         }
         break;
     case Right:
-        if (rect.width() != size) {
+        if (rect.width() != static_cast<int>(size)) {
             rect.setLeft(rect.left() + rect.width() - size);
             rect.setWidth(size);
         }

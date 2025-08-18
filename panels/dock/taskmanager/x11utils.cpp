@@ -112,6 +112,7 @@ QString X11Utils::getNameByAtom(const xcb_atom_t &atom)
 }
 QList<xcb_window_t> X11Utils::getWindowClientList(const xcb_window_t &window)
 {
+    Q_UNUSED(window)
     QList<xcb_window_t> ret;
     xcb_get_property_cookie_t cookie = xcb_ewmh_get_client_list(&m_ewmh, 0);
     xcb_ewmh_get_windows_reply_t reply;
@@ -183,7 +184,7 @@ QString X11Utils::getWindowIcon(const xcb_window_t &window)
         });
     
         xcb_ewmh_wm_icon_iterator_t iter = xcb_ewmh_get_wm_icon_iterator(replyPtr.get());
-        xcb_ewmh_wm_icon_iterator_t wmIconIt{0, 0, nullptr};
+        xcb_ewmh_wm_icon_iterator_t wmIconIt{0, 0, nullptr, 0, 0};
         for (; iter.rem; xcb_ewmh_get_wm_icon_next(&iter)) {
             const uint32_t size = iter.width * iter.height;
             if (size > 0 && size > wmIconIt.width * wmIconIt.height) {

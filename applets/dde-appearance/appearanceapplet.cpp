@@ -21,6 +21,7 @@ AppearanceApplet::AppearanceApplet(QObject *parent)
     watcher->addWatchedService("org.deepin.dde.Appearance1");
     watcher->setConnection(QDBusConnection::sessionBus());
     connect(watcher, &QDBusServiceWatcher::serviceRegistered, this, [this] (const QString & service) {
+        Q_UNUSED(service)
         initDBusProxy();
     });
 }

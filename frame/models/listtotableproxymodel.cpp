@@ -25,8 +25,8 @@ ListToTableProxyModel::ListToTableProxyModel(QObject *parent)
     });
 
     connect(this, &ListToTableProxyModel::dataChanged, this,
-            [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                   const QList<int> &roles = QList<int>()){
+            [this](const QModelIndex &, const QModelIndex &,
+                   const QList<int> &){
         // TODO: lazy solution, we should use dataChanged() to notify extra column changed;
         beginResetModel();
         endResetModel();
@@ -35,6 +35,7 @@ ListToTableProxyModel::ListToTableProxyModel(QObject *parent)
 
 QVariant ListToTableProxyModel::extraColumnData(const QModelIndex &parent, int row, int extraColumn, int role) const
 {
+    Q_UNUSED(role)
     QVariant result(data(index(row, m_sourceColumn, parent), m_roles[extraColumn]));
     if (!result.isValid()) return QStringLiteral("<invalid>");
     return result.userType() == QMetaType::QVariantList ? result.toStringList().join(',') : result;

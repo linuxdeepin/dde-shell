@@ -39,6 +39,7 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
     });
 
     connect(m_manager, &ObjectManager::InterfacesRemoved, this, [this](const QDBusObjectPath &objPath, const QStringList &interfaces) {
+        Q_UNUSED(interfaces)
         auto desktopId = DUtil::unescapeFromObjectPath(objPath.path().split('/').last());
         auto res = match(index(0, 0), AppItemModel::DesktopIdRole, desktopId);
         if (res.isEmpty()) {

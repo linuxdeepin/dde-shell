@@ -163,7 +163,7 @@ void AppItem::active() const
 bool AppItem::isAttention() const
 {
     bool res = false;
-    for (const auto window : m_windows) {
+    for (const auto &window : m_windows) {
         if (window->isAttention()) {
             res = true;
             break;

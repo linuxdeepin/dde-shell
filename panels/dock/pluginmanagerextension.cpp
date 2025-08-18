@@ -202,12 +202,14 @@ void PluginSurface::updatePluginGeometry(const QRect &geometry)
 
 void PluginSurface::plugin_mouse_event(QtWaylandServer::plugin::Resource *resource, int32_t type)
 {
+    Q_UNUSED(resource)
     qInfo() << "server plugin surface receive mouse event:" << type;
     Q_EMIT recvMouseEvent((QEvent::Type)type);
 }
 
 void PluginSurface::plugin_dcc_icon(Resource *resource, const QString &icon)
 {
+    Q_UNUSED(resource)
     qInfo() << "dcc_icon:" << icon;
     m_dccIcon = icon;
 }
@@ -219,6 +221,7 @@ void PluginSurface::plugin_request_shutdown(Resource *resource, const QString &t
 }
 
 void PluginSurface::plugin_close_quick_panel(Resource *resource) {
+    Q_UNUSED(resource)
     qInfo() << "close_quick_panel";
     Q_EMIT m_manager->pluginCloseQuickPanelPopup();
 }
@@ -280,12 +283,14 @@ PluginPopup::PluginPopup(PluginManager *manager,
                          const QWaylandResource &resource)
     : m_manager(manager)
     , m_surface(surface)
-    , m_pluginId(pluginId)
     , m_itemKey(itemKey)
+    , m_pluginId(pluginId)
     , m_popupType(popupType)
     , m_height(1)
     , m_width(1)
 {
+    Q_UNUSED(x)
+    Q_UNUSED(y)
     init(resource.resource());
     setExtensionContainer(surface);
     QWaylandCompositorExtension::initialize();
@@ -360,6 +365,7 @@ int32_t PluginPopup::popupType() const
 
 void PluginPopup::plugin_popup_set_position(Resource *resource, int32_t x, int32_t y)
 {
+    Q_UNUSED(resource)
     setX(x);
     setY(y);
 }
@@ -500,6 +506,7 @@ void PluginManager::setEmbedPanelMinHeight(int height)
 
 void PluginManager::plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg)
 {
+    Q_UNUSED(resource)
     qInfo() << "server pluginManager receive client:" << plugin_id << item_key << " msg:" << msg;
     PluginSurface *dstPlugin = nullptr;
     for (PluginSurface *plugin : m_pluginSurfaces) {

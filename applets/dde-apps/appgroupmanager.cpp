@@ -15,8 +15,8 @@ namespace apps {
 AppGroupManager::AppGroupManager(AMAppItemModel * referenceModel, QObject *parent)
     : QStandardItemModel(parent)
     , m_referenceModel(referenceModel)
-    , m_config(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dde-apps", "", this))
     , m_dumpTimer(new QTimer(this))
+    , m_config(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dde-apps", "", this))
 {
     m_dumpTimer->setSingleShot(true);
     m_dumpTimer->setInterval(1000);
@@ -295,7 +295,6 @@ void AppGroupManager::launchpadArrangementConfigMigration()
         itemArrangementSettings.beginGroup(groupName);
         QString folderName = itemArrangementSettings.value("name", QString()).toString();
         int pageCount = itemArrangementSettings.value("pageCount", 0).toInt();
-        bool isTopLevel = groupName == "toplevel";
 
         QVariantMap valueMap;
         valueMap.insert("name", folderName);
@@ -344,7 +343,7 @@ void AppGroupManager::loadAppGroupInfo()
         if (groupId.isEmpty()) {
             groupId = assignGroupId();
         }
-        auto p = appendGroup(groupId, name, items);
+        appendGroup(groupId, name, items);
     }
 
     // always ensure top-level group exists

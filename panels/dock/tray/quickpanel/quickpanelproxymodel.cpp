@@ -19,7 +19,7 @@ enum {
     QuickSurfaceItemKey,
     TraySurface,
     TraySurfaceItemKey
-} ProxyRole;
+};
 }
 QuickPanelProxyModel::QuickPanelProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)

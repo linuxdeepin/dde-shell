@@ -130,7 +130,7 @@ QString DDENotificationDbusAdaptor::GetAppSetting(const QString &appName)
 
 void DDENotificationDbusAdaptor::SetAppSetting(const QString &settings)
 {
-
+    Q_UNUSED(settings)
 }
 
 void DDENotificationDbusAdaptor::SetSystemInfo(uint configItem, const QDBusVariant &value)
