@@ -33,6 +33,17 @@
 			"permissions": "readwrite",
 			"visibility": "private"
 		},
+		"cgroupsBasedGrouping": {
+			"value": true,
+			"serial": 0,
+			"flags": [],
+			"name": "cgroupsBasedGrouping",
+			"name[zh_CN]": "基于 cgroups 的任务图标分组",
+			"description": "Enable cgroups-based task grouping",
+			"description[zh_CN]": "启用基于 cgroups 的任务图标分组",
+			"permissions": "readonly",
+			"visibility": "private"
+		},
 		"Docked_Items": {
 			"value": ["id: dde-file-manager,type: amAPP", "id: org.deepin.browser,type: amAPP", "id: deepin-app-store,type: amAPP", "id: org.deepin.dde.control-center, type: amAPP", "id: deepin-music,type: amAPP", "id: deepin-editor,type: amAPP", "id: deepin-mail,type: amAPP","id: deepin-terminal,type: amAPP","id: dde-calendar,type: amAPP", "id: deepin-calculator,type: amAPP"],
 			"serial": 0,

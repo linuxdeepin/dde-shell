@@ -51,6 +51,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
 
     m_allowForceQuit = enableStr2Bool(m_taskManagerDconfig->value(TASKMANAGER_ALLOWFOCEQUIT_KEY).toString());
     m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
+    m_cgroupsBasedGrouping = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_KEY, true).toBool();
     m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
     migrateFromDockedItems();
 }
@@ -75,6 +76,11 @@ void TaskManagerSettings::setWindowSplit(bool split)
 {
     m_windowSplit = split;
     m_taskManagerDconfig->setValue(TASKMANAGER_WINDOWSPLIT_KEY, m_windowSplit);
+}
+
+bool TaskManagerSettings::cgroupsBasedGrouping() const
+{
+    return m_cgroupsBasedGrouping;
 }
 
 QStringList TaskManagerSettings::dockedElements() const
