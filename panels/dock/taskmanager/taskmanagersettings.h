@@ -29,6 +29,8 @@ public:
     bool isWindowSplit();
     void setWindowSplit(bool split);
 
+    bool cgroupsBasedGrouping() const;
+
     void setDockedElements(const QStringList &elements);
     void appendDockedElements(const QString &element);
     void removeDockedElements(const QString &element);
@@ -51,6 +53,7 @@ private:
 
     bool m_allowForceQuit;
     bool m_windowSplit;
+    bool m_cgroupsBasedGrouping;
     QStringList m_dockedElements;
 };
 }

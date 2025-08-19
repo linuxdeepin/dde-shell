@@ -232,7 +232,7 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
         qCDebug(taskManagerLog()) << "identify by AM:" << desktopId;
     }
 
-    if (desktopfile.isNull() || !desktopfile->isValied().first) {
+    if (Settings->cgroupsBasedGrouping() && (desktopfile.isNull() || !desktopfile->isValied().first)) {
         desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
         qCDebug(taskManagerLog()) << "identify by Fallback:" << desktopId;
     }

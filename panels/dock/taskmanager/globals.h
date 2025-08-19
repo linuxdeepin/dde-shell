@@ -19,6 +19,7 @@ static inline const QString DOCK_ACTION_DOCK = "dock-action-dock";
 // setting keys
 static inline const QString TASKMANAGER_ALLOWFOCEQUIT_KEY = "Allow_Force_Quit";
 static inline const QString TASKMANAGER_WINDOWSPLIT_KEY = "noTaskGrouping";
+static inline const QString TASKMANAGER_CGROUPS_BASED_GROUPING_KEY = "cgroupsBasedGrouping";
 static inline const QString TASKMANAGER_DOCKEDITEMS_KEY = "Docked_Items";
 constexpr auto TASKMANAGER_DOCKEDELEMENTS_KEY = "dockedElements";
 
