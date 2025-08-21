@@ -63,6 +63,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, libdde-shell( =${binary:Version}),
   qml6-module-qtquick-layouts, qml6-module-qtquick-window,
   qml6-module-qt-labs-platform, qml6-module-qt-labs-qmlmodels,
   dde-tray-loader (> 1.99.8)
+Breaks: dde-clipboard (<< 1:6.0.14),
 Multi-Arch: same
 Description: An wrapper for developed based on dde-shell plugin system
 
