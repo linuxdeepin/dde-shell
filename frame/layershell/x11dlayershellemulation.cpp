@@ -165,38 +165,105 @@ void LayerShellEmulation::onExclusionZoneChanged()
     xcb_ewmh_wm_strut_partial_t strut_partial;
     memset(&strut_partial, 0, sizeof(xcb_ewmh_wm_strut_partial_t));
     auto anchors = m_dlayerShellWindow->anchors();
-    QRect rect = m_window->screen()->geometry();
-    if ((anchors == DLayerShellWindow::AnchorLeft) || (anchors ^ DLayerShellWindow::AnchorLeft) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) {
-        strut_partial.left = rect.x() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
-        strut_partial.left_start_y = rect.y();
-        strut_partial.left_end_y = rect.y() + m_window->height();
+    QScreen *currentScreen = m_window->screen();
+    if ((anchors == DLayerShellWindow::AnchorLeft) || (anchors ^ DLayerShellWindow::AnchorLeft) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) {        
+        // 计算独占区域：屏幕X坐标 + 任务栏物理宽度
+        // 注意：QScreen::geometry().x() 已经是设备无关像素，不需要缩放
+        // 只有exclusionZone需要转换为物理像素
+        strut_partial.left = static_cast<uint32_t>(currentScreen->geometry().x() + m_dlayerShellWindow->exclusionZone() * scaleFactor);
+        strut_partial.left_start_y = static_cast<uint32_t>(m_window->geometry().y());
+        strut_partial.left_end_y = static_cast<uint32_t>(m_window->geometry().y() + m_window->geometry().height() * scaleFactor);
+
+        qCDebug(layershell) << "AnchorLeft: screen.x=" << currentScreen->geometry().x() << "exclusionZone=" << m_dlayerShellWindow->exclusionZone()
+                            << "result=" << strut_partial.left;
     } else if ((anchors == DLayerShellWindow::AnchorRight) || (anchors ^ DLayerShellWindow::AnchorRight) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) {
-        int boundary = 0;
+        // 找到桌面的最右边界（物理像素）
+        // 注意：QScreen::geometry()返回混合坐标系统 - X/Y是物理像素，宽度/高度是逻辑像素
+        int desktopRightBoundaryPhysical = 0;
         for (auto screen : qApp->screens()) {
-            int right = screen->geometry().x()/scaleFactor + screen->geometry().width();
-            if (boundary < right)
-                boundary = right;
+            // 屏幕物理右边界 = X坐标(物理) + 宽度(逻辑) * 缩放系数
+            int screenRightPhysical = screen->geometry().x() + static_cast<int>(screen->geometry().width() * scaleFactor);
+            if (desktopRightBoundaryPhysical < screenRightPhysical)
+                desktopRightBoundaryPhysical = screenRightPhysical;
         }
-        strut_partial.right = (boundary - rect.right() + m_dlayerShellWindow->exclusionZone()) * scaleFactor;
-        strut_partial.right_start_y = rect.y();
-        strut_partial.right_end_y = rect.y() + m_window->height();
-    } else if ((anchors == DLayerShellWindow::AnchorTop) || (anchors ^ DLayerShellWindow::AnchorTop) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) {
-        strut_partial.top = rect.y() + (m_dlayerShellWindow->exclusionZone()) * scaleFactor;
-        strut_partial.top_start_x = rect.x();
-        strut_partial.top_end_x = rect.x() + m_window->width();
+
+        // 计算当前屏幕物理右边界
+        int currentScreenRightPhysical = currentScreen->geometry().x() + static_cast<int>(currentScreen->geometry().width() * scaleFactor);
+
+        // 计算到桌面右边界的物理距离
+        int distanceToDesktopRightPhysical = desktopRightBoundaryPhysical - currentScreenRightPhysical;
+
+        // 独占区域 = 到桌面右边界的物理距离 + 任务栏物理宽度
+        strut_partial.right = static_cast<uint32_t>(distanceToDesktopRightPhysical + m_dlayerShellWindow->exclusionZone() * scaleFactor);
+
+        qCDebug(layershell) << "AnchorRight: desktopRightBoundary=" << desktopRightBoundaryPhysical << "currentScreenRight=" << currentScreenRightPhysical
+                            << "distance=" << distanceToDesktopRightPhysical << "result=" << strut_partial.right;
+
+        strut_partial.right_start_y = static_cast<uint32_t>(m_window->geometry().y());
+        strut_partial.right_end_y = static_cast<uint32_t>(m_window->geometry().y() + m_window->geometry().height() * scaleFactor);
+    } else if ((anchors == DLayerShellWindow::AnchorTop) || (anchors ^ DLayerShellWindow::AnchorTop) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) {        
+        // 计算独占区域：屏幕Y坐标 + 任务栏物理高度
+        // 注意：QScreen::geometry().y() 已经是设备无关像素，不需要缩放
+        // 只有exclusionZone需要转换为物理像素
+        strut_partial.top = static_cast<uint32_t>(currentScreen->geometry().y() + m_dlayerShellWindow->exclusionZone() * scaleFactor);
+        strut_partial.top_start_x = static_cast<uint32_t>(m_window->geometry().x());
+        strut_partial.top_end_x = static_cast<uint32_t>(m_window->geometry().x() + m_window->geometry().width() * scaleFactor);
+
+        qCDebug(layershell) << "AnchorTop: screen.y=" << currentScreen->geometry().y() << "exclusionZone=" << m_dlayerShellWindow->exclusionZone()
+                            << "result=" << strut_partial.top;
     } else if ((anchors == DLayerShellWindow::AnchorBottom) || (anchors ^ DLayerShellWindow::AnchorBottom) == (DLayerShellWindow::AnchorLeft | DLayerShellWindow::AnchorRight)) {
-        // Note: In the X environment, 
-        // the upper screen's exclusive zone spans across the entire lower screen when there are multiple screens, 
-        // but there is no issue.
-        int boundary = 0;
+        // 计算当前屏幕的物理底边界（修正混合坐标系统）
+        int currentScreenBottomPhysical = currentScreen->geometry().y() + static_cast<int>(currentScreen->geometry().height() * scaleFactor);
+
+        // 查找紧邻下方的屏幕，支持垂直布局
+        // 算法：找到在当前屏幕下方且与当前屏幕水平重叠的屏幕
+        int belowScreensHeight = 0;
+        QRect currentRect = currentScreen->geometry();
         for (auto screen : qApp->screens()) {
-            int botton = screen->geometry().y()/scaleFactor + screen->geometry().height();
-            if (boundary < botton)
-                boundary = botton;
+            if (screen == currentScreen)
+                continue;
+            QRect screenRect = screen->geometry();
+
+            // 检查屏幕是否在当前屏幕下方（使用物理坐标）
+            if (screenRect.y() >= currentScreenBottomPhysical) {
+                // 检查是否有水平重叠（支持垂直布局）
+                // 使用物理坐标计算重叠
+                int screenLeftPhysical = screenRect.x();
+                int screenRightPhysical = screenRect.x() + static_cast<int>(screenRect.width() * scaleFactor);
+                int currentLeftPhysical = currentRect.x();
+                int currentRightPhysical = currentRect.x() + static_cast<int>(currentRect.width() * scaleFactor);
+                bool hasHorizontalOverlap = (screenLeftPhysical < currentRightPhysical && screenRightPhysical > currentLeftPhysical);
+                if (hasHorizontalOverlap) {
+                    // 累加下方屏幕的高度（逻辑像素）
+                    belowScreensHeight += screenRect.height();
+                    qCDebug(layershell) << "Found below screen:" << screenRect.height() << "px";
+                }
+            }
         }
-        strut_partial.bottom = (boundary - rect.bottom() + m_dlayerShellWindow->exclusionZone()) * scaleFactor;
-        strut_partial.bottom_start_x = rect.x();
-        strut_partial.bottom_end_x = rect.x() + m_window->width();
+
+        // 如果没有找到下方屏幕，使用修正的回退算法（支持水平布局）
+        if (belowScreensHeight == 0) {
+            // 找到桌面最底边的物理边界
+            int desktopBottomBoundaryPhysical = 0;
+            for (auto screen : qApp->screens()) {
+                int screenBottomPhysical = screen->geometry().y() + static_cast<int>(screen->geometry().height() * scaleFactor);
+                if (desktopBottomBoundaryPhysical < screenBottomPhysical)
+                    desktopBottomBoundaryPhysical = screenBottomPhysical;
+            }
+
+            // 计算物理距离，然后转换为逻辑像素用于后续计算
+            int distancePhysical = desktopBottomBoundaryPhysical - currentScreenBottomPhysical;
+            belowScreensHeight = static_cast<int>(distancePhysical / scaleFactor);
+        }
+
+        // 独占区域 = 下方区域物理高度 + 任务栏物理高度
+        strut_partial.bottom = static_cast<uint32_t>(belowScreensHeight * scaleFactor + m_dlayerShellWindow->exclusionZone() * scaleFactor);
+
+        qCDebug(layershell) << "AnchorBottom: belowScreensHeight=" << belowScreensHeight << "exclusionZone=" << m_dlayerShellWindow->exclusionZone()
+                            << "result=" << strut_partial.bottom;
+
+        strut_partial.bottom_start_x = static_cast<uint32_t>(m_window->geometry().x());
+        strut_partial.bottom_end_x = static_cast<uint32_t>(m_window->geometry().x() + m_window->geometry().width() * scaleFactor);
     }
 
     qCDebug(layershell) << "update exclusion zone, winId:" << m_window->winId()
