@@ -59,9 +59,11 @@ Window {
 
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
-    //TODO：由于windoweffect处理有BUG，导致动画结束后一致保持无阴影，无borderwidth状态。(所以未取消阴影)
-    //目前在动画结束后还存在阴影残留 
+    //TODO：由于windoweffect处理有BUG，导致动画结束后一致保持无阴影，无borderwidth状态。 无法恢复到最初的阴影和边框
     //D.DWindow.windowEffect: hideShowAnimation.running ? D.PlatformHandle.EffectNoShadow | D.PlatformHandle.EffectNoBorder : 0
+    
+    //目前直接处理shadowColor(透明和默认值的切换)和borderWidth(0和1的切换)，来控制阴影和边框
+    D.DWindow.shadowColor: hideShowAnimation.running ? Qt.rgba(0,0,0,0) : Qt.rgba(0,0,0,255 * 0.6)
     D.DWindow.borderWidth:  hideShowAnimation.running ? 0 : 1
     D.DWindow.enableBlurWindow: Qt.platform.pluginName !== "xcb"
     D.DWindow.themeType: Panel.colorTheme
