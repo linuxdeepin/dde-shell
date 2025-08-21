@@ -1,3 +1,8 @@
+---
+# SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+#
+# SPDX-License-Identifier: CC-BY-4.0
+---
 # DDE-Shell 独占区域计算规则
 
 ## 概述
