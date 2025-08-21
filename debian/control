@@ -3,7 +3,7 @@ Section: DDE
 Priority: optional
 Maintainer: Deepin Packages Builder <packages@deepin.com>
 Build-Depends:
- debhelper-compat ( =12),
+ debhelper-compat (= 13),
  cmake,
  systemd,
  qt6-base-dev,
@@ -35,7 +35,7 @@ Build-Depends:
  libyaml-cpp-dev,
  qt6-l10n-tools, qt6-svg-dev, dde-tray-loader-dev (>= 1.99.14),
  dde-application-manager-api (>= 1.2.23)
-Standards-Version: 3.9.8
+Standards-Version: 4.6.2
 Homepage: https://github.com/linuxdeepin/dde-shell
 
 Package: libdde-shell
