@@ -110,16 +110,16 @@ dde-shell (1.99.39) unstable; urgency=medium
   * feat: add activeWindow D-Bus interface
   * chore: tweak role{group,combine}model
 
--- Wang Zichong <wangzichong@deepin.org>  Thu, 12 Jun 2025 19:12:00 +0800
+ -- Wang Zichong <wangzichong@deepin.org>  Thu, 12 Jun 2025 19:12:00 +0800
 
 dde-shell (1.99.38) unstable; urgency=medium
 
-  * fix: The tray window panel automatically opens 
+  * fix: The tray window panel automatically opens
   * fix: just use one Dbus interface.
-  * fix: update tanslation with Lock dock. 
-  * feat: Lock the height of dock. 
+  * fix: update tanslation with Lock dock.
+  * feat: Lock the height of dock.
 
--- Wu Jiangyu <wujiangyu@uniontech.com>  Thu, 05 Jun 2025 16:35:14 +0800
+ -- Wu Jiangyu <wujiangyu@uniontech.com>  Thu, 05 Jun 2025 16:35:14 +0800
 
 dde-shell (1.99.37) unstable; urgency=medium
 
@@ -145,12 +145,12 @@ dde-shell (1.99.36) unstable; urgency=medium
 
 dde-shell (1.99.35) unstable; urgency=medium
 
-  * chore: drop no longer existed translation resource 
-  * chore: update copywriting of dock modes 
-  * feat: Add animation for position switching to dock	
+  * chore: drop no longer existed translation resource
+  * chore: update copywriting of dock modes
+  * feat: Add animation for position switching to dock
   * Update translations from Transifex
 
--- Wu Jiangyu <wujiangyu@uniontech.com>  Tue, 13 May 2025 17:20:000 +0800
+ -- Wu Jiangyu <wujiangyu@uniontech.com>  Tue, 13 May 2025 17:20:00 +0800
 
 dde-shell (1.99.34) unstable; urgency=medium
 
@@ -262,7 +262,7 @@ dde-shell (1.99.22) UNRELEASED; urgency=medium
   * fix: The dock automatically hides
   * fix: item size not updated when taskbar item count was changed (Bug: 289225)
   * i18n: Updates for project Deepin Desktop Environment
- 
+
  -- Wang Zichong <wangzichong@deepin.org>  Fri, 21 Feb 2025 13:42:00 +0800
 
 dde-shell (1.99.21) UNRELEASED; urgency=medium
@@ -600,7 +600,7 @@ dde-shell (0.0.21) unstable; urgency=medium
 
   * fix: app tray icon size not same as plugin
 
- -- tsic404 <tsic@tsic-v23>  Tue, 14 May 2024 14:44:31 +0800
+ -- tsic404 <liuheng@deepin.org>  Tue, 14 May 2024 14:44:31 +0800
 
 dde-shell (0.0.20) unstable; urgency=medium
 
@@ -946,7 +946,7 @@ dde-shell (0.0.2) unstable; urgency=medium
   * fix: missing systemd package
   * fix: missing labs package
   * feat: Add new UI about notification
- 
+
  -- YeShanShan <yeshanshan@deepin.org>  Fri, 15 Dec 2023 09:20:22 +0800
 
 dde-shell (0.0.1) unstable; urgency=medium
