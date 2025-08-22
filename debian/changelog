@@ -1,3 +1,15 @@
+dde-shell (2.0.7) unstable; urgency=medium
+
+  * Fix: missing license header in new developer document
+  * Fix: fix dock window shadow animation issue
+  * Chore: Re-implement the calculation method of exclusion zone (#1227)
+  * Chore: optimize packaging (#1225)
+  * Feat: add configurable show desktop feature
+  * Feat: new dconfig option to allow disable cgroups-based app grouping
+  * Fix: update building warning.
+
+ -- zyz <zhaoyingzhen@uniontech.com>  Fri, 22 Aug 2025 09:32:54 +0800
+
 dde-shell (2.0.6) unstable; urgency=medium
 
   * i18n: Translate org.deepin.ds.notificationbubble.ts in lo (#1219)
