@@ -102,6 +102,7 @@ private:
     QString registerSurfaceId(const QVariantMap &surfaceData);
     void loadDataFromDConfig();
     void saveDataToDConfig();
+    void handlePluginVisibleChanged(const QString &surfaceId, bool visible);
 
 private slots:
     void onAvailableSurfacesChanged();
