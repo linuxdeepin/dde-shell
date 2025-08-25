@@ -20,7 +20,6 @@ public:
     Q_INVOKABLE virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
 
     void requestActivate(const QModelIndex &index) const override;
-    void requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const override;
     void requestClose(const QModelIndex &index, bool force = false) const override;
     void requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
     void requestPreview(const QModelIndexList &indexes,

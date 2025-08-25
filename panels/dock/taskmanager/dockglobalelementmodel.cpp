@@ -3,11 +3,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "dockglobalelementmodel.h"
+#include "applicationinterface.h"
 #include "globals.h"
 #include "taskmanager.h"
 #include "taskmanagersettings.h"
 
 #include <QAbstractListModel>
+#include <QDBusConnection>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcess>
@@ -234,6 +236,11 @@ void DockGlobalElementModel::loadDockedElements()
     }
 
     m_dockedElements = newDocked;
+
+    if (!m_data.isEmpty()) {
+        // MenusRole should also be handled here due to it contains the copywriting of docked or undocked
+        Q_EMIT dataChanged(index(0, 0), index(m_data.size() - 1, 0), {TaskManager::DockedRole, TaskManager::MenusRole});
+    }
 }
 
 QString DockGlobalElementModel::getMenus(const QModelIndex &index) const
@@ -318,15 +325,33 @@ void DockGlobalElementModel::requestActivate(const QModelIndex &index) const
 
 void DockGlobalElementModel::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
 {
-    Q_UNUSED(index)
-    Q_UNUSED(urls)
+    auto data = m_data.value(index.row());
+    auto id = std::get<0>(data);
+
+    QStringList urlStrings;
+    for (const QUrl &url : urls) {
+        urlStrings.append(url.toLocalFile());
+    }
+
+    QString dbusPath = QStringLiteral("/org/desktopspec/ApplicationManager1/") + escapeToObjectPath(id);
+    using Application = org::desktopspec::ApplicationManager1::Application;
+    Application appInterface(QStringLiteral("org.desktopspec.ApplicationManager1"), dbusPath, QDBusConnection::sessionBus());
+
+    if (appInterface.isValid()) {
+        appInterface.Launch(QString(), urlStrings, QVariantMap());
+    }
 }
 
 void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const QString &action) const
 {
     if (action == DOCK_ACTION_DOCK) {
+        auto data = m_data.value(index.row());
+        auto id = std::get<0>(data);
+        TaskManagerSettings::instance()->toggleDockedElement(QStringLiteral("desktop/%1").arg(id));
     } else if (action == DOCK_ACTION_FORCEQUIT) {
+        requestClose(index, true);
     } else if (action == DOCK_ACTION_CLOSEALL) {
+        requestClose(index);
     } else {
         auto data = m_data.value(index.row());
         auto id = std::get<0>(data);

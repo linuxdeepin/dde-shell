@@ -271,10 +271,17 @@ void TaskManager::clickItem(const QString& itemId, const QString& menuId)
 
 void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls)
 {
-    auto item = ItemModel::instance()->getItemById(itemId);
-    if(!item) return;
+    auto indexes = m_itemModel->match(m_itemModel->index(0, 0), TaskManager::ItemIdRole, itemId, 1, Qt::MatchExactly);
+    if (indexes.isEmpty()) {
+        return;
+    }
 
-    item->handleFileDrop(urls);
+    QList<QUrl> urlList;
+    for (const QString &url : urls) {
+        urlList.append(QUrl::fromLocalFile(url));
+    }
+
+    m_itemModel->requestOpenUrls(indexes.first(), urlList);
 }
 
 void TaskManager::showItemPreview(const QString &itemId, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
