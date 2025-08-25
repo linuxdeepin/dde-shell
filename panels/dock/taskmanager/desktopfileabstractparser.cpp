@@ -148,9 +148,9 @@ void DesktopfileAbstractParser::setDocked(bool docked)
     auto desktopElement = QStringLiteral("desktop/%1").arg(id());
 
     if (docked) {
-        TaskManagerSettings::instance()->appendDockedElements(desktopElement);
+        TaskManagerSettings::instance()->appendDockedElement(desktopElement);
     } else {
-        TaskManagerSettings::instance()->removeDockedElements(desktopElement);
+        TaskManagerSettings::instance()->removeDockedElement(desktopElement);
     }
 
     Q_EMIT dockedChanged();

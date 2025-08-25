@@ -234,6 +234,11 @@ void DockGlobalElementModel::loadDockedElements()
     }
 
     m_dockedElements = newDocked;
+
+    if (!m_data.isEmpty()) {
+        // MenusRole should also be handled here due to it contains the copywriting of docked or undocked
+        Q_EMIT dataChanged(index(0, 0), index(m_data.size() - 1, 0), {TaskManager::DockedRole, TaskManager::MenusRole});
+    }
 }
 
 QString DockGlobalElementModel::getMenus(const QModelIndex &index) const
@@ -325,8 +330,13 @@ void DockGlobalElementModel::requestOpenUrls(const QModelIndex &index, const QLi
 void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const QString &action) const
 {
     if (action == DOCK_ACTION_DOCK) {
+        auto data = m_data.value(index.row());
+        auto id = std::get<0>(data);
+        TaskManagerSettings::instance()->toggleDockedElement(QStringLiteral("desktop/%1").arg(id));
     } else if (action == DOCK_ACTION_FORCEQUIT) {
+        requestClose(index, true);
     } else if (action == DOCK_ACTION_CLOSEALL) {
+        requestClose(index);
     } else {
         auto data = m_data.value(index.row());
         auto id = std::get<0>(data);

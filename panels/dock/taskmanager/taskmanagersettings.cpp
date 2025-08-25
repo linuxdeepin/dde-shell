@@ -148,14 +148,23 @@ void TaskManagerSettings::setDockedElements(const QStringList &elements)
     saveDockedElements();
 }
 
-void TaskManagerSettings::appendDockedElements(const QString &element)
+void TaskManagerSettings::toggleDockedElement(const QString &element)
+{
+    if (isDocked(element)) {
+        removeDockedElement(element);
+    } else {
+        appendDockedElement(element);
+    }
+}
+
+void TaskManagerSettings::appendDockedElement(const QString &element)
 {
     m_dockedElements.append(element);
     Q_EMIT dockedElementsChanged();
     saveDockedElements();
 }
 
-void TaskManagerSettings::removeDockedElements(const QString &element)
+void TaskManagerSettings::removeDockedElement(const QString &element)
 {
     m_dockedElements.removeAll(element);
     Q_EMIT dockedElementsChanged();
