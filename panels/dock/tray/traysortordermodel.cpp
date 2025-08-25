@@ -6,6 +6,9 @@
 #include "constants.h"
 
 #include <QDebug>
+#include <QDBusMessage>
+#include <QDBusConnection>
+
 #include <DConfig>
 
 namespace docktray {
@@ -116,6 +119,7 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
     auto deferUpdateVisualIndex = qScopeGuard([this](){updateVisualIndexes();});
     if (m_hiddenIds.contains(draggedSurfaceId)) {
         m_hiddenIds.removeOne(draggedSurfaceId);
+        handlePluginVisibleChanged(draggedSurfaceId, true);
     }
 
     if (dropOnSurfaceId == QLatin1String("internal/action-show-stash")) {
@@ -205,6 +209,7 @@ void TraySortOrderModel::setSurfaceVisible(const QString &surfaceId, bool visibl
             m_hiddenIds.append(surfaceId);
         }
     }
+    handlePluginVisibleChanged(surfaceId, visible);
     updateVisualIndexes();
 }
 
@@ -277,6 +282,7 @@ QString TraySortOrderModel::findSection(const QString &surfaceId, const QString 
     ) {
         if (!m_hiddenIds.contains(surfaceId)) {
             m_hiddenIds.append(surfaceId);
+            handlePluginVisibleChanged(surfaceId, false);
         }
     }
 
@@ -514,6 +520,35 @@ void TraySortOrderModel::onAvailableSurfacesChanged()
     updateVisualIndexes();
     // and also save the current sort order
     saveDataToDConfig();
+}
+
+void TraySortOrderModel::handlePluginVisibleChanged(const QString &surfaceId, bool visible)
+{
+    QStringList parts = surfaceId.split("::");
+    if (parts.size() != 2 || parts.at(1).isEmpty()) {
+        qWarning() << "Invalid surfaceId format:" << surfaceId;
+        return;
+    }
+
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+        "org.deepin.dde.Dock1",
+        "/org/deepin/dde/Dock1",
+        "org.deepin.dde.Dock1",
+        "setItemOnDock"
+    );
+    
+    const QString DockQuickPlugins = "Dock_Quick_Plugins";
+    msg << DockQuickPlugins
+        << parts.last()
+        << visible;
+    
+    QDBusMessage reply = QDBusConnection::sessionBus().call(msg);
+    
+    if (reply.type() == QDBusMessage::ErrorMessage) {
+        qWarning() << "DBus call failed:" << reply.errorMessage();
+    } else {
+        qDebug() << "setItemOnDock call success";
+    }
 }
 
 }
