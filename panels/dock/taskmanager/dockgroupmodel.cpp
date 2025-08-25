@@ -117,12 +117,6 @@ void DockGroupModel::requestActivate(const QModelIndex &index) const
     interface->requestActivate(sourceIndex);
 }
 
-void DockGroupModel::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
-{
-    Q_UNUSED(index)
-    Q_UNUSED(urls)
-}
-
 void DockGroupModel::requestClose(const QModelIndex &index, bool force) const
 {
     auto interface = dynamic_cast<AbstractTaskManagerInterface *>(sourceModel());

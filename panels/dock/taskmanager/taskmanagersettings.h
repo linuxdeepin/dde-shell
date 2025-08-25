@@ -32,8 +32,9 @@ public:
     bool cgroupsBasedGrouping() const;
 
     void setDockedElements(const QStringList &elements);
-    void appendDockedElements(const QString &element);
-    void removeDockedElements(const QString &element);
+    void toggleDockedElement(const QString &element);
+    void appendDockedElement(const QString &element);
+    void removeDockedElement(const QString &element);
     QStringList dockedElements() const;
     bool isDocked(const QString &elementId) const;
 
