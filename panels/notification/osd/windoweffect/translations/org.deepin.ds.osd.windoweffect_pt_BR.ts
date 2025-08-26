@@ -19,7 +19,7 @@
     </message>
     <message>
         <source>Limit some window effects for excellent visuals while maintaining smooth system performance</source>
-        <translation type="unfinished"/>
+        <translation>Limita alguns efeitos de janelas para visuais excelentes mantendo desempenho suave do sistema</translation>
     </message>
     <message>
         <source>Enable all interface and window effects for the best visual experience</source>
