@@ -3,83 +3,83 @@
     <name>main</name>
     <message>
         <source>WLAN on</source>
-        <translation>واي فاي eingeschaltet</translation>
+        <translation>تشغيل الواي فاي</translation>
     </message>
     <message>
         <source>WLAN off</source>
-        <translation>واي فاي ausgeschaltet</translation>
+        <translation>إيقاف الواي فاي</translation>
     </message>
     <message>
         <source>Caps Lock on</source>
-        <translation>Caps Lock an</translation>
+        <translation>أحرف كبيرة</translation>
     </message>
     <message>
         <source>Caps Lock off</source>
-        <translation>Caps Lock aus</translation>
+        <translation>أحرف صغيرة</translation>
     </message>
     <message>
         <source>Numeric keypad on</source>
-        <translation>numerische Tastatur an</translation>
+        <translation>تشغيل لوحة الأرقام</translation>
     </message>
     <message>
         <source>Numeric keypad off</source>
-        <translation>numerische Tastatur aus</translation>
+        <translation>إيقاف لوحة الأرقام</translation>
     </message>
     <message>
         <source>Touchpad on</source>
-        <translation>Touchpad an</translation>
+        <translation>تشغيل لوحة اللمس</translation>
     </message>
     <message>
         <source>Touchpad off</source>
-        <translation>Touchpad aus</translation>
+        <translation>إيقاف لوحة اللمس</translation>
     </message>
     <message>
         <source>Touchpad toggle</source>
-        <translation>Touchpad umschalten</translation>
+        <translation>تبديل لوحة اللمس</translation>
     </message>
     <message>
         <source>Fn toggle</source>
-        <translation>Fn umschalten</translation>
+        <translation>تبديل Fn</translation>
     </message>
     <message>
         <source>Airplane mode on</source>
-        <translation>Flugzeugmodus an</translation>
+        <translation>تشغيل وضع الطيران</translation>
     </message>
     <message>
         <source>Airplane mode off</source>
-        <translation>Flugzeugmodus aus</translation>
+        <translation>إيقاف وضع الطيران</translation>
     </message>
     <message>
         <source>Balanced power</source>
-        <translation>ausgewogene Leistung</translation>
+        <translation>طاقة متوازنة</translation>
     </message>
     <message>
         <source>Power saver</source>
-        <translation>Energiesparmodus</translation>
+        <translation>وضع توفير الطاقة</translation>
     </message>
     <message>
         <source>High performance</source>
-        <translation>Hochleistungsmodus</translation>
+        <translation>وضع الأداء العالي</translation>
     </message>
     <message>
         <source>Window effect enabled</source>
-        <translation>Fenster-Effekt aktiviert</translation>
+        <translation>تم تفعيل تأثيرات النوافذ</translation>
     </message>
     <message>
         <source>Window effect disabled</source>
-        <translation>Fenster-Effekt deaktiviert</translation>
+        <translation>تم تعطيل تأثيرات النوافذ</translation>
     </message>
     <message>
         <source>Failed to enable window effects</source>
-        <translation>Konnte Fenster-Effekte nicht aktivieren</translation>
+        <translation>فشل في تفعيل تأثيرات النوافذ</translation>
     </message>
     <message>
         <source>Microphone off</source>
-        <translation type="unfinished"/>
+        <translation>إيقاف الميكروفون</translation>
     </message>
     <message>
         <source>Microphone on</source>
-        <translation type="unfinished"/>
+        <translation>تشغيل الميكروفون</translation>
     </message>
 </context>
 </TS>
