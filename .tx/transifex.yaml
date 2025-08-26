@@ -5,6 +5,11 @@ filters:
       source_language: en_US
       translation_files_expression: panels/dock/translations/org.deepin.ds.dock_<lang>.ts
     - filter_type: file
+      source_file: panels/dock/showdesktop/translations/org.deepin.ds.dock.showdesktop.ts
+      file_format: QT
+      source_language: en_US
+      translation_files_expression: panels/dock/showdesktop/translations/org.deepin.ds.dock.showdesktop_<lang>.ts
+    - filter_type: file
       source_file: panels/dock/taskmanager/translations/org.deepin.ds.dock.taskmanager.ts
       file_format: QT
       source_language: en_US
@@ -39,5 +44,10 @@ filters:
       file_format: QT
       source_language: en_US
       translation_files_expression: panels/notification/osd/displaymode/translations/org.deepin.ds.osd.displaymode_<lang>.ts
+    - filter_type: file
+      source_file: panels/notification/osd/windoweffect/translations/org.deepin.ds.osd.windoweffect.ts
+      file_format: QT
+      source_language: en_US
+      translation_files_expression: panels/notification/osd/windoweffect/translations/org.deepin.ds.osd.windoweffect_<lang>.ts
 settings:
     pr_branch_name: transifex_update_<br_unique_id>
