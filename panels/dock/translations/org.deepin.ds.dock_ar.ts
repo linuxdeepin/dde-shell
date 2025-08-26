@@ -15,7 +15,7 @@
     </message>
     <message>
         <source>Classic Mode</source>
-        <translation>ال新模式</translation>
+        <translation>الوضع الكلاسيكي</translation>
     </message>
     <message>
         <source>Centered Mode</source>
@@ -31,11 +31,11 @@
     </message>
     <message>
         <source>Mode</source>
-        <translation>وضع</translation>
+        <translation>الوضع</translation>
     </message>
     <message>
         <source>Top</source>
-        <translation>قمة</translation>
+        <translation>أعلى</translation>
     </message>
     <message>
         <source>Bottom</source>
@@ -63,11 +63,11 @@
     </message>
     <message>
         <source>Dock Settings</source>
-        <translation>إعدادات الدوكات</translation>
+        <translation>إعدادات شريط المهام</translation>
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>قفل الشريط</translation>
+        <translation>تأمين شريط المهام</translation>
     </message>
 </context>
 </TS>
