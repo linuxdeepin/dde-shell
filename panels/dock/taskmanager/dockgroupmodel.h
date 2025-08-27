@@ -22,11 +22,6 @@ public:
     void requestActivate(const QModelIndex &index) const override;
     void requestClose(const QModelIndex &index, bool force = false) const override;
     void requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
-    void requestPreview(const QModelIndexList &indexes,
-                        QObject *relativePositionItem,
-                        int32_t previewXoffset,
-                        int32_t previewYoffset,
-                        uint32_t direction) const override;
     void requestWindowsView(const QModelIndexList &indexes) const override;
 
 private:

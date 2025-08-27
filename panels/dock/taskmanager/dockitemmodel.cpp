@@ -19,11 +19,13 @@ DockItemModel::DockItemModel(QAbstractItemModel *globalModel, QObject *parent)
     , m_isUpdating(false)
 {
     auto updateSourceModel = [this]() {
-        if (TaskManagerSettings::instance()->isWindowSplit() == m_split)
+        bool isWindowSplit = TaskManagerSettings::instance()->isWindowSplit();
+        if (isWindowSplit == m_split)
             return;
 
-        m_split = TaskManagerSettings::instance()->isWindowSplit();
-        if (m_split) {
+        m_split = isWindowSplit;
+
+        if (isWindowSplit) {
             setSourceModel(m_globalModel);
             m_groupModel.reset(nullptr);
         } else {
