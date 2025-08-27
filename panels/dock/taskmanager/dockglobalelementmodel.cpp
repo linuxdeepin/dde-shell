@@ -41,7 +41,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
         }
         std::for_each(m_data.begin(), m_data.end(), [this, first, last](auto &data) {
             if (std::get<1>(data) == m_appsModel && std::get<2>(data) >= first) {
-                data = std::make_tuple(std::get<0>(data), std::get<1>(data), std::get<2>(data) - -((last - first) + 1));
+                data = std::make_tuple(std::get<0>(data), std::get<1>(data), std::get<2>(data) - ((last - first) + 1));
             }
         });
     });
@@ -293,7 +293,9 @@ QVariant DockGlobalElementModel::data(const QModelIndex &index, int role) const
         if (model == m_activeAppModel) {
             return QStringList{model->index(row, 0).data(TaskManager::WinIdRole).toString()};
         }
-        return QVariant();
+        // For m_appsModel data, when it's GroupModel we can directly get all window IDs for this desktop ID
+        QModelIndex groupIndex = model->index(row, 0);
+        return groupIndex.data(TaskManager::WindowsRole).toStringList();
     }
     case TaskManager::MenusRole: {
         return getMenus(index);
@@ -382,25 +384,6 @@ void DockGlobalElementModel::requestUpdateWindowGeometry(const QModelIndex &inde
     Q_UNUSED(index)
     Q_UNUSED(geometry)
     Q_UNUSED(delegate)
-}
-
-void DockGlobalElementModel::requestPreview(const QModelIndexList &indexes,
-                                            QObject *relativePositionItem,
-                                            int32_t previewXoffset,
-                                            int32_t previewYoffset,
-                                            uint32_t direction) const
-{
-    QModelIndexList sourceIndexes;
-    for (auto index : indexes) {
-        auto data = m_data.value(index.row());
-        auto id = std::get<0>(data);
-        auto sourceModel = std::get<1>(data);
-        auto sourceRow = std::get<2>(data);
-        if (sourceModel == m_activeAppModel) {
-            sourceIndexes.append(sourceModel->index(sourceRow, 0));
-        }
-    }
-    m_activeAppModel->requestPreview(sourceIndexes, relativePositionItem, previewXoffset, previewYoffset, direction);
 }
 
 void DockGlobalElementModel::requestWindowsView(const QModelIndexList &indexes) const

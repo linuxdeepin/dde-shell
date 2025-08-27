@@ -194,17 +194,11 @@ void TaskManager::requestUpdateWindowGeometry(const QModelIndex &index, const QR
     m_itemModel->requestUpdateWindowGeometry(index, geometry, delegate);
 }
 
-void TaskManager::requestPreview(const QModelIndexList &indexes,
-                                 QObject *relativePositionItem,
-                                 int32_t previewXoffset,
-                                 int32_t previewYoffset,
-                                 uint32_t direction) const
+void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
-    for (auto index : indexes) {
-        qDebug() << "requestPreview" << index << index.model() << (index.model() == m_itemModel);
-    }
-    m_itemModel->requestPreview(indexes, relativePositionItem, previewXoffset, previewYoffset, direction);
+    // TODO: implement this
 }
+
 void TaskManager::requestWindowsView(const QModelIndexList &indexes) const
 {
     m_itemModel->requestWindowsView(indexes);
@@ -353,9 +347,9 @@ bool TaskManager::requestDockByDesktopId(const QString& desktopID)
     if (desktopID.startsWith("internal/")) return false;
     QString appId = desktopIdToAppId(desktopID);
     // 检查应用是否已经在任务栏中，如果是则返回 false
-    if (IsDocked(appId)) 
+    if (IsDocked(appId))
         return false;
-    
+
     return RequestDock(appId);
 }
 

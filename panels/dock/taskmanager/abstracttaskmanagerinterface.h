@@ -66,12 +66,6 @@ public:
     {
         callInterfaceMethod(index, &AbstractTaskManagerInterface::requestUpdateWindowGeometry, geometry, delegate);
     }
-
-    virtual void
-    requestPreview(const QModelIndexList &indexes, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) const
-    {
-        callInterfaceMethod(indexes, &AbstractTaskManagerInterface::requestPreview, relativePositionItem, previewXoffset, previewYoffset, direction);
-    }
     virtual void requestWindowsView(const QModelIndexList &indexes) const
     {
         callInterfaceMethod(indexes, &AbstractTaskManagerInterface::requestWindowsView);

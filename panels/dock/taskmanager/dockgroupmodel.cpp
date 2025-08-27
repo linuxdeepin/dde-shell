@@ -137,23 +137,6 @@ void DockGroupModel::requestUpdateWindowGeometry(const QModelIndex &index, const
     Q_UNUSED(delegate)
 }
 
-void DockGroupModel::requestPreview(const QModelIndexList &indexes,
-                                    QObject *relativePositionItem,
-                                    int32_t previewXoffset,
-                                    int32_t previewYoffset,
-                                    uint32_t direction) const
-{
-    QModelIndexList proxyIndexes;
-    for (auto index : indexes) {
-        for (int i = 0; i < RoleGroupModel::rowCount(index); ++i) {
-            auto proxyIndex = createIndex(i, 0, index.row());
-            proxyIndexes.append(proxyIndex);
-        }
-    }
-
-    callInterfaceMethod(proxyIndexes, &AbstractTaskManagerInterface::requestPreview, relativePositionItem, previewXoffset, previewYoffset, direction);
-}
-
 void DockGroupModel::requestWindowsView(const QModelIndexList &indexes) const
 {
     QModelIndexList sourceIndexes;
