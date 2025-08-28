@@ -1,3 +1,16 @@
+dde-shell (2.0.8) unstable; urgency=medium
+
+  * fix: OSD cannot displayed on top of the lock window (#1234)
+  * chore: remove requestPreview from abstracttaskmanagerinterface.h
+  * i18n: Updates for project Deepin Desktop Environment (#1232)
+  * fix: pluginVisibleChanged signal needs to be sent when dragging the
+    plugin docked to tray
+  * chore: add showdesktop and windoweffect to transifex.yaml
+  * i18n: Updates for project Deepin Desktop Environment (#1231)
+  * chore: implement dock item menus for DockGlobalElementModel
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 28 Aug 2025 14:33:05 +0200
+
 dde-shell (2.0.7) unstable; urgency=medium
 
   * Fix: missing license header in new developer document
