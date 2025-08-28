@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "abstracttaskmanagerinterface.h"
 #include "abstractwindow.h"
 #include "taskmanager.h"
 
@@ -14,7 +15,7 @@
 
 namespace dock {
 class AppItem;
-class AbstractWindowMonitor : public QAbstractListModel
+class AbstractWindowMonitor : public QAbstractListModel, public AbstractTaskManagerInterface
 {
     Q_OBJECT
 
@@ -34,9 +35,19 @@ public:
     // TODO: remove this when Modelized finizhed.
     virtual QPointer<AbstractWindow> getWindowByWindowId(ulong windowId) = 0;
 
+    void requestActivate(const QModelIndex &index) const override;
+    void requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const override;
+    void requestNewInstance(const QModelIndex &index, const QString &action) const override;
+    void requestClose(const QModelIndex &index, bool force = false) const override;
+    void requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
+
+    virtual void
+    requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) = 0;
+
+    void requestWindowsView(const QModelIndexList &indexes) const override;
+
     virtual void presentWindows(QList<uint32_t> windowsId) = 0;
 
-    virtual void showItemPreview(const QPointer<AppItem>& item, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) = 0;
     virtual void hideItemPreview() = 0;
 
 Q_SIGNALS:
@@ -44,6 +55,7 @@ Q_SIGNALS:
     // true -> At least one window is at fullscreen state. false -> none of the windows is at fullscreen state.
     void windowFullscreenChanged(bool);
     void WindowMonitorShutdown();
+    void previewShouldClear();
 
 private:
     QList<AbstractWindow*> m_trackedWindows;
