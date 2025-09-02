@@ -22,6 +22,9 @@ Window {
     property int dockLeftSpaceForCenter: useColumnLayout ?
         (Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight) :
         (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth)
+    property int dockRemainingSpaceForCenter: useColumnLayout ?
+        (Screen.height / 1.8 - dockRightPart.implicitHeight)  :
+        (Screen.width / 1.8 - dockRightPart.implicitWidth) 
     // TODO
     signal dockCenterPartPosChanged()
     signal pressedAndDragging(bool isDragging)
@@ -419,10 +422,20 @@ Window {
                 }
             }
 
-            Item {
+            Item {  
                 id: dockCenterPart
-                implicitWidth: centerLoader.implicitWidth
-                implicitHeight: centerLoader.implicitHeight
+                property var taskmanagerRootObject: {
+                    let applet = DS.applet("org.deepin.ds.dock.taskmanager")
+                    return applet ? applet.rootObject : null
+                }
+                
+                readonly property real taskmanagerImplicitWidth: taskmanagerRootObject ? taskmanagerRootObject.implicitWidth : 0
+                readonly property real taskmanagerImplicitHeight: taskmanagerRootObject ? taskmanagerRootObject.implicitHeight : 0
+                readonly property real taskmanagerAppContainerWidth: taskmanagerRootObject ? taskmanagerRootObject.appContainerWidth : 0
+                readonly property real taskmanagerAppContainerHeight: taskmanagerRootObject ? taskmanagerRootObject.appContainerHeight : 0
+                
+                implicitWidth: centerLoader.implicitWidth - taskmanagerImplicitWidth + taskmanagerAppContainerWidth
+                implicitHeight: centerLoader.implicitHeight - taskmanagerImplicitHeight + taskmanagerAppContainerHeight
                 onXChanged: dockCenterPartPosChanged()
                 onYChanged: dockCenterPartPosChanged()
                 Layout.leftMargin: !useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
