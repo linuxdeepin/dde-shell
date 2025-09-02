@@ -13,8 +13,12 @@ ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 16
-    property int remainingSpacesForTaskManager: Panel.rootObject.dockLeftSpaceForCenter - Panel.rootObject.dockItemMaxSize * 1.2
+    property int remainingSpacesForTaskManager: Panel.itemAlignment === Dock.LeftAlignment ? Panel.rootObject.dockLeftSpaceForCenter : Panel.rootObject.dockRemainingSpaceForCenter
     property int forceRelayoutWorkaround: 0
+
+    // 用于居中计算的实际应用区域尺寸
+    property int appContainerWidth: useColumnLayout ? Panel.rootObject.dockSize : (appContainer.implicitWidth + forceRelayoutWorkaround)
+    property int appContainerHeight: useColumnLayout ? (appContainer.implicitHeight + forceRelayoutWorkaround) : Panel.rootObject.dockSize
 
     Timer {
         // FIXME: dockItemMaxSize(visualModel.cellWidth,actually its implicitWidth/Height) change will cause all delegate item's position change, but
@@ -30,8 +34,8 @@ ContainmentItem {
         }
     }
 
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : (Math.min(remainingSpacesForTaskManager, appContainer.implicitWidth) + forceRelayoutWorkaround)
-    implicitHeight: useColumnLayout ? (Math.min(remainingSpacesForTaskManager, appContainer.implicitHeight) + forceRelayoutWorkaround) : Panel.rootObject.dockSize
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : (Math.max(remainingSpacesForTaskManager, appContainer.implicitWidth) + forceRelayoutWorkaround)
+    implicitHeight: useColumnLayout ? (Math.max(remainingSpacesForTaskManager, appContainer.implicitHeight) + forceRelayoutWorkaround) : Panel.rootObject.dockSize
 
     // Helper function to find the current index of an app by its appId in the visualModel
     function findAppIndex(appId) {
