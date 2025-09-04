@@ -97,6 +97,9 @@ public:
     Q_INVOKABLE void activateWindow(uint32_t windowID);
     Q_INVOKABLE void saveDockElementsOrder(const QStringList &appIds);
 
+private:
+    void moveFilesToTrash(const QStringList& urls);
+
 Q_SIGNALS:
     void dataModelChanged();
     void windowSplitChanged();
