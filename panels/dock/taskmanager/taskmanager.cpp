@@ -23,6 +23,8 @@
 
 #include <QGuiApplication>
 #include <QStringLiteral>
+#include <QUrl>
+#include <DTrashManager>
 
 #include <appletbridge.h>
 
@@ -269,6 +271,13 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
 
 void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls)
 {
+    if (itemId == "dde-trash") {
+        qCDebug(taskManagerLog) << "dropFilesOnItem: dde-trash - moving files to trash:" << urls;
+        // 将文件移动到回收站
+        moveFilesToTrash(urls);
+        return;
+    }
+
     auto indexes = m_itemModel->match(m_itemModel->index(0, 0), TaskManager::ItemIdRole, itemId, 1, Qt::MatchExactly);
     if (indexes.isEmpty()) {
         return;
@@ -280,6 +289,20 @@ void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls
     }
 
     m_itemModel->requestOpenUrls(indexes.first(), urlList);
+}
+
+void TaskManager::moveFilesToTrash(const QStringList& urls)
+{
+    // 将文件路径转换为本地路径并移动到回收站
+    for (const QString& urlString : urls) {
+        QUrl url(urlString);
+        QString filePath = url.toLocalFile();
+        if (DTrashManager::instance()->moveToTrash(filePath)) {
+            qCDebug(taskManagerLog) << "Successfully moved to trash:" << filePath;
+        } else {
+            qCWarning(taskManagerLog) << "Failed to move to trash:" << filePath;
+        }
+    }
 }
 
 void TaskManager::hideItemPreview()
