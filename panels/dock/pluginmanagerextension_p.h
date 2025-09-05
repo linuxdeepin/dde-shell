@@ -133,6 +133,8 @@ class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public
     Q_PROPERTY(bool isItemActive WRITE setItemActive READ isItemActive NOTIFY itemActiveChanged)
     Q_PROPERTY(QString dccIcon READ dccIcon CONSTANT)
     Q_PROPERTY(int margins READ margins WRITE setMargins NOTIFY marginsChanged FINAL)
+    QML_ELEMENT
+    QML_UNCREATABLE("PluginSurface is not creatable in QML.")
 
 public:
     PluginSurface(const PluginSurface &) = delete;
@@ -217,6 +219,8 @@ class PluginPopup : public QWaylandShellSurfaceTemplate<PluginPopup>, public QtW
     Q_PROPERTY(int32_t popupType READ popupType)
     Q_PROPERTY(int height READ height NOTIFY heightChanged)
     Q_PROPERTY(int width READ width NOTIFY widthChanged)
+    QML_ELEMENT
+    QML_UNCREATABLE("PluginPopup is not creatable in QML.")
 
 public:
     PluginPopup(PluginManager* shell, const QString &pluginId, const QString &itemKey, int x, int y, int popupType,
