@@ -19,6 +19,7 @@
 #include <QDBusUnixFileDescriptor>
 #include <QEvent>
 #include <QFile>
+#include <QHash>
 #include <QLayout>
 #include <QLoggingCategory>
 #include <QMouseEvent>
@@ -56,13 +57,18 @@ Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPrevie
 DGUI_USE_NAMESPACE
 
 namespace dock {
-// 角色枚举已移除，现在直接使用 TaskManager 中定义的角色
+
+static QHash<uint32_t, QPixmap> s_windowPreviewCache;
 
 QPixmap fetchWindowPreview(const uint32_t &winId)
 {
     // TODO: check kwin is load screenshot plugin
     if (!WM_HELPER->hasComposite())
         return QPixmap();
+
+    if (s_windowPreviewCache.contains(winId)) {
+        return s_windowPreviewCache.value(winId);
+    }
 
     // pipe read write fd
     int fd[2];
@@ -122,6 +128,10 @@ QPixmap fetchWindowPreview(const uint32_t &winId)
     // close read
     ::close(fd[0]);
     auto pixmap = QPixmap::fromImage(image);
+
+    if (!pixmap.isNull()) {
+        s_windowPreviewCache.insert(winId, pixmap);
+    }
 
     return pixmap;
 }
@@ -187,7 +197,6 @@ public:
 
         QPen pen;
         if (WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
-            // 直接获取预览图像，使用 fetchWindowPreview
             uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
             auto pixmap = fetchWindowPreview(winId);
             auto size = calSize(pixmap.size());
@@ -297,6 +306,8 @@ public:
 
         connect(closeButton, &DToolButton::clicked, this, [this, index]() {
             uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+
+            s_windowPreviewCache.remove(winId);
             X11Utils::instance()->closeWindow(winId);
 
             // 给一点时间让窗口关闭事件传播
@@ -362,6 +373,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
         }
 
         for (auto windowId : windowIds) {
+            s_windowPreviewCache.remove(windowId);
             X11Utils::instance()->closeWindow(windowId);
         }
 
@@ -412,6 +424,8 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
         // 建立模型变化监听（只在模型真正变化时建立）
         if (sourceModel) {
             connect(sourceModel, &QAbstractItemModel::rowsRemoved, this, [this]() {
+                // 当窗口被移除时，清理相关缓存
+                s_windowPreviewCache.clear();
                 // 延迟调用，确保视图完全更新后再计算大小
                 QTimer::singleShot(0, this, [this]() {
                     if (m_sourceModel) {
@@ -479,6 +493,7 @@ void X11WindowPreviewContainer::callHide()
     if (m_isDockPreviewCount > 0) return;
 
     hide();
+    s_windowPreviewCache.clear();
 }
 
 void X11WindowPreviewContainer::hidePreView()
