@@ -91,8 +91,10 @@ QVariantList DockGroupModel::all(const QModelIndex &index, int role) const
     QVariantList res;
     auto rowCount = RoleGroupModel::rowCount(index);
     for (int i = 0; i < rowCount; i++) {
-        auto window = RoleGroupModel::data(index, role);
-        if (window.isValid())
+        auto childIndex = RoleGroupModel::index(i, 0, index);
+        auto window = RoleGroupModel::data(childIndex, role);
+        // Check if the data is valid and not empty
+        if (window.isValid() && !window.toString().isEmpty())
             res.append(window);
     }
 
@@ -135,23 +137,6 @@ void DockGroupModel::requestUpdateWindowGeometry(const QModelIndex &index, const
     Q_UNUSED(index)
     Q_UNUSED(geometry)
     Q_UNUSED(delegate)
-}
-
-void DockGroupModel::requestPreview(const QModelIndexList &indexes,
-                                    QObject *relativePositionItem,
-                                    int32_t previewXoffset,
-                                    int32_t previewYoffset,
-                                    uint32_t direction) const
-{
-    QModelIndexList proxyIndexes;
-    for (auto index : indexes) {
-        for (int i = 0; i < RoleGroupModel::rowCount(index); ++i) {
-            auto proxyIndex = createIndex(i, 0, index.row());
-            proxyIndexes.append(proxyIndex);
-        }
-    }
-
-    callInterfaceMethod(proxyIndexes, &AbstractTaskManagerInterface::requestPreview, relativePositionItem, previewXoffset, previewYoffset, direction);
 }
 
 void DockGroupModel::requestWindowsView(const QModelIndexList &indexes) const

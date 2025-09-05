@@ -13,6 +13,14 @@ import org.deepin.dtk.style 1.0 as DS
 Window {
     id: root
     visible: Applet.visible
+    flags: Qt.BypassWindowManagerHint | Qt.WindowTransparentForInput | Qt.WindowDoesNotAcceptFocus
+
+    onVisibleChanged: {
+        if (visible) {
+            root.raise()
+        }
+    }
+
     property var windowRadius: isSingleView ? 30 : D.DTK.platformTheme.windowRadius
     D.DWindow.windowRadius: root.windowRadius
     D.DWindow.enableBlurWindow: true

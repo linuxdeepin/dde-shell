@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "appitem.h"
-#include "x11utils.h"
 #include "x11preview.h"
-#include "abstractwindow.h"
+
+#include "appitem.h"
+#include "taskmanager.h"
+#include "x11utils.h"
 #include "x11windowmonitor.h"
 
 #include <cstdint>
@@ -55,12 +56,75 @@ Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPrevie
 DGUI_USE_NAMESPACE
 
 namespace dock {
-enum {
-    WindowIdRole = Qt::UserRole + 1,
-    WindowTitleRole,
-    WindowIconRole,
-    WindowPreviewContentRole,
-};
+// 角色枚举已移除，现在直接使用 TaskManager 中定义的角色
+
+QPixmap fetchWindowPreview(const uint32_t &winId)
+{
+    // TODO: check kwin is load screenshot plugin
+    if (!WM_HELPER->hasComposite())
+        return QPixmap();
+
+    // pipe read write fd
+    int fd[2];
+
+    if (pipe(fd) < 0) {
+        qDebug() << "failed to create pipe";
+        return QPixmap();
+    }
+
+    QDBusInterface interface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/ScreenShot2"), QStringLiteral("org.kde.KWin.ScreenShot2"));
+    // 第一个参数，winID或者UUID
+    QList<QVariant> args;
+    args << QVariant::fromValue(QString::number(winId));
+    // 第二个参数，需要截图的选项
+    QVariantMap option;
+    option["include-decoration"] = true;
+    option["include-cursor"] = false;
+    option["native-resolution"] = true;
+    args << QVariant::fromValue(option);
+    // 第三个参数，文件描述符
+    args << QVariant::fromValue(QDBusUnixFileDescriptor(fd[1]));
+
+    QDBusReply<QVariantMap> reply = interface.callWithArgumentList(QDBus::Block, QStringLiteral("CaptureWindow"), args);
+
+    // close write
+    ::close(fd[1]);
+
+    if (!reply.isValid()) {
+        ::close(fd[0]);
+        qDebug() << "get current workspace background error: " << reply.error().message();
+        return QPixmap();
+    }
+
+    QVariantMap imageInfo = reply.value();
+    int imageWidth = imageInfo.value("width").toUInt();
+    int imageHeight = imageInfo.value("height").toUInt();
+    int imageStride = imageInfo.value("stride").toUInt();
+    int imageFormat = imageInfo.value("format").toUInt();
+
+    if (imageWidth <= 1 || imageHeight <= 1) {
+        ::close(fd[0]);
+        return QPixmap();
+    }
+
+    QFile file;
+    if (!file.open(fd[0], QIODevice::ReadOnly)) {
+        file.close();
+        ::close(fd[0]);
+        return QPixmap();
+    }
+
+    QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
+    int bitsCountPerPixel = QImage::toPixelFormat(qimageFormat).bitsPerPixel();
+
+    QByteArray fileContent = file.read(imageHeight * imageWidth * bitsCountPerPixel / 8);
+    QImage image(reinterpret_cast<uchar *>(fileContent.data()), imageWidth, imageHeight, imageStride, qimageFormat);
+    // close read
+    ::close(fd[0]);
+    auto pixmap = QPixmap::fromImage(image);
+
+    return pixmap;
+}
 
 class PreviewsListView : public QListView
 {
@@ -100,150 +164,7 @@ public:
     }
 };
 
-class AppItemWindowModel : public QAbstractListModel
-{
-public:
-    AppItemWindowModel(QObject* parent = nullptr) : QAbstractListModel(parent) {}
-
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override
-    {
-        Q_UNUSED(parent)
-        return m_item.isNull() ? 0 : m_item->getAppendWindows().size();
-    }
-
-    QVariant data(const QModelIndex& index, int role = WindowIdRole) const override
-    {
-        if (!index.isValid() || index.row() >= rowCount() || m_item.isNull())
-            return QVariant();
-        
-        switch (role) {
-            case WindowIdRole: {
-                return m_item->getAppendWindows()[index.row()]->id();
-            }
-            case WindowTitleRole: {
-                return m_item->getAppendWindows()[index.row()]->title();
-            }
-            case WindowIconRole: {
-                return m_item->getAppendWindows()[index.row()]->icon();
-            }
-            case WindowPreviewContentRole: {
-                if (index.row() >= m_previewPixmaps.size()) {
-                    return fetchWindowPreview(m_item->getAppendWindows()[index.row()]->id());
-                } else {
-                    return m_previewPixmaps.value(m_item->getAppendWindows()[index.row()]->id());
-                }
-            }
-        }
-
-        return QVariant();
-    }
-
-    void setData(const QPointer<AppItem>& item)
-    {
-        if (!m_item.isNull()) {
-            m_item->disconnect(this);
-        }
-
-        beginResetModel();
-        m_item = item;
-        resetPreviewPixmap();
-        endResetModel();
-
-        if (!item.isNull()) {
-            connect(item, &AppItem::dataChanged, this, [this](){
-                beginResetModel();
-                resetPreviewPixmap();
-                endResetModel();
-            });
-        }
-    }
-
-private:
-    void resetPreviewPixmap()
-    {
-        m_previewPixmaps.clear();
-        if (!m_item.isNull()) {
-            const auto previewPixmaps = QtConcurrent::blockingMapped(m_item->getAppendWindows(), [this](const QPointer<AbstractWindow> &window) {
-                auto previewPixmap = fetchWindowPreview(window->id());
-                return QPair<uint32_t, QPixmap>{window->id(), previewPixmap};
-            });
-
-            for (const auto &item : previewPixmaps) {
-                m_previewPixmaps.insert(item.first, item.second);
-            }
-        }
-    }
-    QPixmap fetchWindowPreview(const uint32_t& winId) const
-    {
-        // TODO: check kwin is load screenshot plugin
-        if (!WM_HELPER->hasComposite()) return QPixmap();
-
-        // pipe read write fd
-        int fd[2];
-
-        if (pipe(fd) < 0) {
-            qDebug() << "failed to create pipe";
-            return QPixmap();
-        }
-
-        QDBusInterface interface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/ScreenShot2"), QStringLiteral("org.kde.KWin.ScreenShot2"));
-        // 第一个参数，winID或者UUID
-        QList<QVariant> args;
-        args << QVariant::fromValue(QString::number(winId));
-        // 第二个参数，需要截图的选项
-        QVariantMap option;
-        option["include-decoration"] = true;
-        option["include-cursor"] = false;
-        option["native-resolution"] = true;
-        args << QVariant::fromValue(option);
-        // 第三个参数，文件描述符
-        args << QVariant::fromValue(QDBusUnixFileDescriptor(fd[1]));
-
-        QDBusReply<QVariantMap> reply = interface.callWithArgumentList(QDBus::Block, QStringLiteral("CaptureWindow"), args);
-
-        // close write
-        ::close(fd[1]);
-
-        if (!reply.isValid()) {
-            ::close(fd[0]);
-            qDebug() << "get current workspace background error: "<< reply.error().message();
-            return QPixmap();
-        }
-
-        QVariantMap imageInfo = reply.value();
-        int imageWidth = imageInfo.value("width").toUInt();
-        int imageHeight = imageInfo.value("height").toUInt();
-        int imageStride = imageInfo.value("stride").toUInt();
-        int imageFormat = imageInfo.value("format").toUInt();
-
-        if (imageWidth <= 1 || imageHeight <= 1) {
-            ::close(fd[0]);
-            return QPixmap();
-        }
-
-        QFile file;
-        if (!file.open(fd[0], QIODevice::ReadOnly)) {
-            file.close();
-            ::close(fd[0]);
-            return QPixmap();
-        }
-
-        QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
-        int bitsCountPerPixel = QImage::toPixelFormat(qimageFormat).bitsPerPixel();
-
-        QByteArray fileContent = file.read(imageHeight * imageWidth * bitsCountPerPixel / 8);
-        QImage image(reinterpret_cast<uchar *>(fileContent.data()), imageWidth, imageHeight, imageStride, qimageFormat);
-        // close read
-        ::close(fd[0]);
-        auto pixmap = QPixmap::fromImage(image);
-
-        return pixmap;
-    }
-
-private:
-    QPointer<AppItem> m_item;
-    QHash<uint32_t, QPixmap> m_previewPixmaps;
-};
+// DockItemWindowModel 已移除，现在直接使用 HoverPreviewProxyModel
 
 class AppItemWindowDeletegate : public QAbstractItemDelegate
 {
@@ -266,8 +187,10 @@ public:
 
         QPen pen;
         if (WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
-            auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
-            auto size = calSize(pixmap.size()); 
+            // 直接获取预览图像，使用 fetchWindowPreview
+            uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+            auto pixmap = fetchWindowPreview(winId);
+            auto size = calSize(pixmap.size());
 
             DStyleHelper dstyle(m_listView->style());
             const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
@@ -314,7 +237,8 @@ public:
                                     PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2,
                                     PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2)
                                 .marginsAdded(QMargins(-PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER));
-            auto text = QFontMetrics(m_parent->font()).elidedText(index.data(WindowTitleRole).toString(), Qt::TextElideMode::ElideRight, rect.width() - PREVIEW_TITLE_HEIGHT);
+            auto text = QFontMetrics(m_parent->font())
+                            .elidedText(index.data(TaskManager::WinTitleRole).toString(), Qt::TextElideMode::ElideRight, rect.width() - PREVIEW_TITLE_HEIGHT);
             painter->drawText(rect, text);
 
             if (option.state.testFlag(QStyle::State_MouseOver)) {
@@ -343,9 +267,10 @@ public:
             return QSize(PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2);
         }
 
-        auto pixmap = index.data(WindowPreviewContentRole).value<QPixmap>();
+        uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+        auto pixmap = fetchWindowPreview(winId);
         int width = qBound(PREVIEW_CONTENT_MIN_WIDTH, calSize(pixmap.size()).width(), PREVIEW_CONTENT_MAX_WIDTH);
-        return QSize(width, PREVIEW_CONTENT_HEIGHT) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2); 
+        return QSize(width, PREVIEW_CONTENT_HEIGHT) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2);
     }
 
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
@@ -370,11 +295,17 @@ public:
         closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + 4, -5));
         closeButton->setVisible(true);
 
-        connect(closeButton, &DToolButton::clicked, this, [this, index](){
-            X11Utils::instance()->closeWindow(index.data(WindowIdRole).toInt());
-            if (m_listView->model()->rowCount() == 1) {
-                m_parent->hide();
-            }
+        connect(closeButton, &DToolButton::clicked, this, [this, index]() {
+            uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+            X11Utils::instance()->closeWindow(winId);
+
+            // 给一点时间让窗口关闭事件传播
+            QTimer::singleShot(100, this, [this]() {
+                if (m_listView->model()->rowCount() == 0) {
+                    m_parent->hide();
+                }
+                // 大小更新现在由模型变化信号自动处理
+            });
         });
 
         return closeButton;
@@ -396,15 +327,15 @@ private:
 
 };
 
-X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, QWidget *parent)
+X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, QWidget *parent)
     : DBlurEffectWidget(parent)
     , m_isPreviewEntered(false)
     , m_isDockPreviewCount(0)
-    , m_model(new AppItemWindowModel(this))
+    , m_monitor(monitor)
+    , m_sourceModel(nullptr)
     , m_titleWidget(new QWidget())
     , m_direction(0)
 {
-    Q_UNUSED(monitor)
     m_hideTimer = new QTimer(this);
     m_hideTimer->setSingleShot(true);
     m_hideTimer->setInterval(500);
@@ -415,46 +346,115 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor* monitor, 
 
     connect(m_hideTimer, &QTimer::timeout, this, &X11WindowPreviewContainer::callHide);
 
-    connect(m_closeAllButton, &DIconButton::clicked, this, [this](){
-        if (m_previewItem.isNull()) return;
-        for (auto window : m_previewItem->getAppendWindows()) {
-            window->close();
+    connect(m_closeAllButton, &DIconButton::clicked, this, [this]() {
+        qCDebug(x11WindowPreview) << "closeAllButton clicked";
+        if (!m_sourceModel) {
+            return;
         }
+
+        QList<uint32_t> windowIds;
+        for (int i = 0; i < m_sourceModel->rowCount(); i++) {
+            QModelIndex index = m_sourceModel->index(i, 0);
+            uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+            if (winId != 0) {
+                windowIds.append(winId);
+            }
+        }
+
+        for (auto windowId : windowIds) {
+            X11Utils::instance()->closeWindow(windowId);
+        }
+
+        hide();
     });
 
-    connect(m_view, &QListView::entered, this, [this](const QModelIndex &enter){
+    connect(m_view, &QListView::entered, this, [this](const QModelIndex &enter) {
         m_closeAllButton->setVisible(false);
         if (WM_HELPER->hasComposite()) {
-            m_monitor->previewWindow(enter.data(WindowIdRole).toInt());
+            m_monitor->previewWindow(enter.data(TaskManager::WinIdRole).toInt());
         }
 
-        updatePreviewIconFromBase64(enter.data(WindowIconRole).toString());
-        updatePreviewTitle(enter.data(WindowTitleRole).toString());
+        // 获取图标，优先使用窗口图标，如果为空则使用应用图标
+        QVariant iconData = enter.data(TaskManager::WinIconRole);
+        if (iconData.toString().isEmpty()) {
+            iconData = enter.data(TaskManager::IconNameRole);
+        }
+        updatePreviewIconFromBase64(iconData.toString());
+        updatePreviewTitle(enter.data(TaskManager::WinTitleRole).toString());
     });
-
 }
 
-void X11WindowPreviewContainer::showPreview(const QPointer<AppItem> &item, const QPointer<QWindow> &window, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceModel,
+                                                     const QPointer<QWindow> &window,
+                                                     int32_t previewXoffset,
+                                                     int32_t previewYoffset,
+                                                     uint32_t direction)
 {
-    if (!m_previewItem.isNull()) {
-        m_previewItem->disconnect(this);
-    }
-
-    m_previewItem = item;
     m_baseWindow = window;
     m_previewXoffset = previewXoffset;
     m_previewYoffset = previewYoffset;
     m_direction = direction;
 
     m_isDockPreviewCount += 1;
-    updatePreviewIconFromBase64(item->getCurrentActiveWindowIcon());
-    updatePreviewTitle(item->getCurrentActiveWindowName());
-    m_model->setData(item);
 
-    updateSize();
-    connect(m_previewItem, &AppItem::dataChanged, this, [this](){
-        updateSize();
-    });
+    // 只在第一次设置模型或模型真的发生变化时才重新设置
+    if (m_sourceModel != sourceModel) {
+        // 断开之前模型的连接
+        if (m_sourceModel) {
+            disconnect(m_sourceModel, nullptr, this, nullptr);
+        }
+
+        m_sourceModel = sourceModel;
+
+        // 设置新模型给 view
+        m_view->setModel(sourceModel);
+
+        // 建立模型变化监听（只在模型真正变化时建立）
+        if (sourceModel) {
+            connect(sourceModel, &QAbstractItemModel::rowsRemoved, this, [this]() {
+                // 延迟调用，确保视图完全更新后再计算大小
+                QTimer::singleShot(0, this, [this]() {
+                    if (m_sourceModel) {
+                        if (m_sourceModel->rowCount() > 0) {
+                            // 强制视图立即更新几何信息
+                            m_view->updateGeometry();
+                            m_view->adjustSize();
+                            updateSize(m_sourceModel->rowCount());
+                        } else {
+                            // 如果没有窗口了，隐藏预览容器
+                            hide();
+                        }
+                    }
+                });
+            });
+
+            connect(sourceModel, &QAbstractItemModel::rowsInserted, this, [this]() {
+                // 延迟调用，确保视图完全更新后再计算大小
+                QTimer::singleShot(0, this, [this]() {
+                    if (m_sourceModel) {
+                        // 强制视图立即更新几何信息
+                        m_view->updateGeometry();
+                        m_view->adjustSize();
+                        updateSize(m_sourceModel->rowCount());
+                    }
+                });
+            });
+        }
+    }
+
+    if (sourceModel && sourceModel->rowCount() > 0) {
+        const QModelIndex &firstIndex = sourceModel->index(0, 0);
+        // 获取图标，优先使用窗口图标，如果为空则使用应用图标
+        QVariant iconData = firstIndex.data(TaskManager::WinIconRole);
+        if (iconData.toString().isEmpty()) {
+            iconData = firstIndex.data(TaskManager::IconNameRole);
+        }
+        updatePreviewIconFromBase64(iconData.toString());
+        updatePreviewTitle(firstIndex.data(TaskManager::WinTitleRole).toString());
+        updateSize(sourceModel->rowCount());
+    } else {
+        updateSize(0);
+    }
 
     if (isHidden()) {
         show();
@@ -511,9 +511,12 @@ void X11WindowPreviewContainer::showEvent(QShowEvent *event)
 
 void X11WindowPreviewContainer::hideEvent(QHideEvent*)
 {
-    m_previewItem->disconnect(this);
-    m_previewItem = QPointer<AppItem>(nullptr);
-    m_model->setData(nullptr);
+    // 只通知监视器清空预览状态，让 TaskManager 统一管理模型清理
+    // 不要在这里断开模型连接，因为 clearPreviewState 信号会触发 TaskManager 的 clearFilter
+    // QPointer 会自动处理对象销毁的情况
+    if (m_monitor) {
+        m_monitor->clearPreviewState();
+    }
 }
 
 void X11WindowPreviewContainer::resizeEvent(QResizeEvent *event)
@@ -610,12 +613,12 @@ void X11WindowPreviewContainer::initUI()
     titleLayout->addWidget(m_previewIcon);
     titleLayout->setSpacing(0);
     titleLayout->setContentsMargins(QMargins(PREVIEW_HOVER_BORDER, 0, PREVIEW_HOVER_BORDER, 0));
-    titleLayout->addSpacing(6);  
+    titleLayout->addSpacing(6);
     titleLayout->addWidget(m_previewTitle);
     titleLayout->addStretch();
     titleLayout->addWidget(m_closeAllButton, 0, Qt::AlignRight);
 
-    m_view->setModel(m_model);
+    // 模型将在 showPreviewWithModel 中设置
     m_view->setItemDelegate(new AppItemWindowDeletegate(m_view, this));
     m_view->setMouseTracking(true);
     m_view->viewport()->installEventFilter(this);
@@ -650,11 +653,13 @@ void X11WindowPreviewContainer::initUI()
     handler.setShadowOffset(QPoint(0, 4 * qApp->devicePixelRatio()));
 }
 
-void X11WindowPreviewContainer::updateSize()
+void X11WindowPreviewContainer::updateSize(int windowCount)
 {
-    if (m_previewItem->getAppendWindows().size() == 0) {
-        DBlurEffectWidget::hide();
-        return;
+    if (windowCount != -1) {
+        if (windowCount == 0) {
+            DBlurEffectWidget::hide();
+            return;
+        }
     }
 
     m_view->adjustSize();
@@ -715,9 +720,9 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
         }
 
         m_closeAllButton->setVisible(true);
-        if (m_previewItem.isNull()) return false;
-        updatePreviewIconFromBase64(m_previewItem->getCurrentActiveWindowIcon());
-        updatePreviewTitle(m_previewItem->getCurrentActiveWindowName());
+        if (!m_sourceModel || m_sourceModel->rowCount() == 0)
+            return false;
+        updatePreviewTitle(m_previewTitleStr);
         break;
     }
     case QEvent::QEvent::MouseButtonRelease: {
@@ -730,7 +735,7 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
 
         auto index = m_view->indexAt(mouseEvent->pos());
         if (index.isValid()) {
-            m_previewItem->getAppendWindows()[index.row()]->activate();
+            X11Utils::instance()->setActiveWindow(index.data(TaskManager::WinIdRole).toUInt());
         }
         DBlurEffectWidget::hide();
         break;
@@ -752,10 +757,6 @@ void X11WindowPreviewContainer::updatePreviewIconFromBase64(const QString &base6
     if (!pix.isNull()) {
         m_previewIcon->setPixmap(pix);
         return;
-    }
-
-    if (m_previewItem) {
-        m_previewIcon->setPixmap(QIcon::fromTheme(m_previewItem->icon()).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT));
     }
 }
 }

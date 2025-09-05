@@ -5,10 +5,9 @@
 #pragma once
 
 #include "abstractwindow.h"
-#include "appitem.h"
-#include "x11window.h"
-#include "x11preview.h"
 #include "abstractwindowmonitor.h"
+#include "x11preview.h"
+#include "x11window.h"
 
 #include <cstdint>
 #include <xcb/xcb.h>
@@ -37,11 +36,14 @@ public:
 
     virtual QPointer<AbstractWindow> getWindowByWindowId(ulong windowId) override;
     virtual void presentWindows(QList<uint32_t> windows) override;
-    virtual void showItemPreview(const QPointer<AppItem> &item, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
     virtual void hideItemPreview() override;
     void previewWindow(uint32_t winId);
     void cancelPreviewWindow();
     void setPreviewOpacity(double opacity);
+    void clearPreviewState();
+
+    void
+    requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
 
 Q_SIGNALS:
     void windowMapped(xcb_window_t window);

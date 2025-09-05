@@ -4,25 +4,24 @@
 
 #pragma once
 
-#include "appitem.h"
-#include "dsglobal.h"
-
 #include <cstdint>
 
-#include <DLabel>
-#include <QWidget>
-#include <QListView>
-#include <DToolButton>
-#include <QVBoxLayout>
 #include <DBlurEffectWidget>
 #include <DGuiApplicationHelper>
 #include <DIconButton>
+#include <DLabel>
+#include <DToolButton>
+#include <QListView>
+#include <QPointer>
+#include <QVBoxLayout>
+#include <QWidget>
+#include <QWindow>
 
 DWIDGET_USE_NAMESPACE
 
 namespace dock {
 class X11WindowMonitor;
-class AppItemWindowModel;
+class DockItemWindowModel;
 class AppItemWindowDeletegate;
 class PreviewsListView;
 
@@ -66,7 +65,10 @@ class X11WindowPreviewContainer: public DBlurEffectWidget
 
 public:
     explicit X11WindowPreviewContainer(X11WindowMonitor* monitor, QWidget *parent = nullptr);
-    void showPreview(const QPointer<AppItem> &item, const QPointer<QWindow> &window, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+
+    void
+    showPreviewWithModel(QAbstractItemModel *sourceModel, const QPointer<QWindow> &window, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+
     void hidePreView();
 
 protected:
@@ -80,7 +82,7 @@ protected:
 private:
     inline void updatePreviewTitle(const QString& title);
     inline void initUI();
-    inline void updateSize();
+    inline void updateSize(int windowCount = -1);
     void updatePreviewIconFromBase64(const QString &base64Data);
 
 public Q_SLOTS:
@@ -94,9 +96,8 @@ private:
     bool m_isPreviewEntered;
     int32_t m_isDockPreviewCount;
 
-    X11WindowMonitor* m_monitor;
-
-    AppItemWindowModel* m_model;
+    QPointer<X11WindowMonitor> m_monitor;
+    QAbstractItemModel *m_sourceModel;
     PreviewsListView* m_view;
     QWidget *m_titleWidget;
 
@@ -111,7 +112,6 @@ private:
     uint32_t m_direction;
 
     QPointer<QWindow> m_baseWindow;
-    QPointer<AppItem> m_previewItem;
 
     QString m_previewTitleStr;
 };

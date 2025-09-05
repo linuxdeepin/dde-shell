@@ -10,7 +10,7 @@
 #include "dockcombinemodel.h"
 #include "dockglobalelementmodel.h"
 #include "dockitemmodel.h"
-#include "itemmodel.h"
+#include "hoverpreviewproxymodel.h"
 
 #include <QPointer>
 
@@ -63,7 +63,8 @@ public:
 
     explicit TaskManager(QObject* parent = nullptr);
 
-    ItemModel* dataModel();
+    DockItemModel *dataModel() const;
+    HoverPreviewProxyModel *hoverPreviewModel() const;
 
     virtual bool init() override;
     virtual bool load() override;
@@ -78,11 +79,8 @@ public:
     Q_INVOKABLE void requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const override;
     Q_INVOKABLE void requestClose(const QModelIndex &index, bool force = false) const override;
     Q_INVOKABLE void requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
-    Q_INVOKABLE void requestPreview(const QModelIndexList &indexes,
-                                    QObject *relativePositionItem,
-                                    int32_t previewXoffset,
-                                    int32_t previewYoffset,
-                                    uint32_t direction) const override;
+    Q_INVOKABLE void
+    requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
     Q_INVOKABLE void requestWindowsView(const QModelIndexList &indexes) const override;
 
     Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId);
@@ -92,14 +90,15 @@ public:
     Q_INVOKABLE bool IsDocked(QString appID);
     Q_INVOKABLE bool RequestUndock(QString appID);
 
-    Q_INVOKABLE void clickItem(const QString& itemid, const QString& menuId);
-    Q_INVOKABLE void dropFilesOnItem(const QString& itemId, const QStringList& urls);
-    Q_INVOKABLE void showItemPreview(const QString& itemId, QObject* relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    Q_INVOKABLE void dropFilesOnItem(const QString &itemId, const QStringList &urls);
     Q_INVOKABLE void hideItemPreview();
 
     Q_INVOKABLE void setAppItemWindowIconGeometry(const QString& appid, QObject* relativePositionItem, const int& x1, const int& y1, const int& x2, const int& y2);
     Q_INVOKABLE void activateWindow(uint32_t windowID);
     Q_INVOKABLE void saveDockElementsOrder(const QStringList &appIds);
+
+private:
+    void moveFilesToTrash(const QStringList& urls);
 
 Q_SIGNALS:
     void dataModelChanged();
@@ -112,14 +111,12 @@ private Q_SLOTS:
     void modifyOpacityChanged();
 
 private:
-    void loadDockedAppItems();
-
-private:
     QScopedPointer<AbstractWindowMonitor> m_windowMonitor;
     bool m_windowFullscreen;
     DockCombineModel *m_activeAppModel = nullptr;
     DockGlobalElementModel *m_dockGlobalElementModel = nullptr;
     DockItemModel *m_itemModel = nullptr;
+    HoverPreviewProxyModel *m_hoverPreviewModel = nullptr;
 };
 
 }

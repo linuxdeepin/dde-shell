@@ -39,11 +39,13 @@ public:
             QObject::connect(s_engine, &QQmlEngine::quit, qApp, &QCoreApplication::quit);
             auto paths = s_engine->importPathList();
             // high priority for builtin plugin.
-            paths.prepend(DDE_SHELL_QML_INSTALL_DIR);
+            if (!paths.contains(DDE_SHELL_QML_INSTALL_DIR))
+                paths.prepend(DDE_SHELL_QML_INSTALL_DIR);
             const QString rootDir = QCoreApplication::applicationDirPath();
             QDir pluginDir(rootDir);
             if (pluginDir.cd("../plugins")) {
-                paths.prepend(pluginDir.absolutePath());
+                if (!paths.contains(pluginDir.absolutePath()))
+                    paths.prepend(pluginDir.absolutePath());
             }
             s_engine->setImportPathList(paths);
             qCDebug(dsLog()) << "Engine importPaths" << s_engine->importPathList();
