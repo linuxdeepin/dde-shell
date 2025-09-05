@@ -13,7 +13,7 @@ macro(ds_build_package)
         SOURCES ${package_files}
     )
     set(package_dirs ${PROJECT_BINARY_DIR}/packages/${_config_PACKAGE}/)
-    add_custom_command(TARGET ${_config_PACKAGE}_package
+    add_custom_command(TARGET ${_config_PACKAGE}_package POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${package_root_dir} ${package_dirs}
     )
 

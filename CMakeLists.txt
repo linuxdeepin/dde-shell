@@ -58,6 +58,8 @@ find_package(ICU 74.2 REQUIRED COMPONENTS uc i18n io)
 find_package(WaylandProtocols REQUIRED)
 find_package(PkgConfig REQUIRED)
 
+qt_policy(SET QTP0001 NEW)
+
 try_compile(COMPILE_RESULT
     ${CMAKE_CURRENT_BINARY_DIR}/try_compile_build
     SOURCES ${CMAKE_SOURCE_DIR}/tests/check/qt_wayland_keyextension.cpp

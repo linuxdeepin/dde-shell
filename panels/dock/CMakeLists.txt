@@ -97,8 +97,6 @@ add_subdirectory(taskmanager)
 add_subdirectory(tray)
 add_subdirectory(multitaskview)
 
-find_package(DdeControlCenter)
-
 #add_subdirectory(appruntimeitem)
 
 # dock qml element(include Dock.xx defines and DockCompositor)
@@ -127,7 +125,6 @@ set_source_files_properties(DockPalette.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
 )
 
-qt_policy(SET QTP0001 OLD)
 qt_add_qml_module(dock-plugin
     PLUGIN_TARGET dock-plugin
     URI "org.deepin.ds.dock"
