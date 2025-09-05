@@ -8,7 +8,6 @@ find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Gu
 find_package(Dtk6 REQUIRED COMPONENTS Core Gui)
 find_package(DdeTrayLoader REQUIRED)
 
-qt_policy(SET QTP0001 OLD)
 qt_add_qml_module(dock-tray
     PLUGIN_TARGET dock-tray
     URI "org.deepin.ds.dock.tray"
