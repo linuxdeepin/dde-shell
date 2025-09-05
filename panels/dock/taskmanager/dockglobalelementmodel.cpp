@@ -245,7 +245,7 @@ void DockGlobalElementModel::loadDockedElements()
 
 QString DockGlobalElementModel::getMenus(const QModelIndex &index) const
 {
-    auto data = m_data.value(index.row());
+    auto data = m_data.at(index.row());
     auto id = std::get<0>(data);
     auto model = std::get<1>(data);
     auto row = std::get<2>(data);
@@ -278,10 +278,10 @@ int DockGlobalElementModel::rowCount(const QModelIndex &parent) const
 
 QVariant DockGlobalElementModel::data(const QModelIndex &index, int role) const
 {
-    if (index.row() > m_data.size())
+    if (index.row() >= m_data.size())
         return {};
 
-    auto data = m_data.value(index.row());
+    auto data = m_data.at(index.row());
     auto id = std::get<0>(data);
     auto model = std::get<1>(data);
     auto row = std::get<2>(data);
