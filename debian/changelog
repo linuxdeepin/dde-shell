@@ -1,3 +1,18 @@
+dde-shell (2.0.9) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1244)
+  * fix: add back cache for window preview to avoid lag
+  * chore: eliminate CMake configuration warnings
+  * fix: add QML annotations to eliminate compilation warnings
+  * fix: crash when click close on preview window in some cases
+  * fix: improve task manager layout calculation
+  * fix: prevent duplicate QML import paths
+  * feat: add trash file drop support
+  * refactor: migrate taskmanager model to the new DockItemModel
+  * i18n: Updates for project Deepin Desktop Environment (#1236)
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 11 Sep 2025 21:00:13 +0800
+
 dde-shell (2.0.8) unstable; urgency=medium
 
   * fix: OSD cannot displayed on top of the lock window (#1234)
