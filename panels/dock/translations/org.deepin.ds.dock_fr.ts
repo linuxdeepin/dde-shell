@@ -59,7 +59,7 @@
     </message>
     <message>
         <source>Smart Hide</source>
-        <translation>Masquage intelligemment</translation>
+        <translation>Masquage intelligent</translation>
     </message>
     <message>
         <source>Dock Settings</source>
@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>قفل شريط المكتب</translation>
+        <translation>Verrouiller le Dock</translation>
     </message>
 </context>
 </TS>
