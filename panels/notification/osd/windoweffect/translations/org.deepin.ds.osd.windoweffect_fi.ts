@@ -19,11 +19,11 @@
     </message>
     <message>
         <source>Limit some window effects for excellent visuals while maintaining smooth system performance</source>
-        <translation type="unfinished"/>
+        <translation>Rajoita joitakin visuaalisia tehosteita, säilyttäen samalla sujuvan suorituskyvyn</translation>
     </message>
     <message>
         <source>Enable all interface and window effects for the best visual experience</source>
-        <translation type="unfinished"/>
+        <translation>Tehoa riittää. Kaikki tehosteet käyttöön parhaalla visuaalisella käyttökokemuksella.</translation>
     </message>
 </context>
 </TS>
