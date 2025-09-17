@@ -3,7 +3,7 @@
     <name>GroupNotify</name>
     <message>
         <source>Clear All</source>
-        <translation>全部清除</translation>
+        <translation>清除全部</translation>
     </message>
 </context>
 <context>
@@ -21,7 +21,7 @@
     </message>
     <message>
         <source>Clear All</source>
-        <translation>全部清除</translation>
+        <translation>清除全部</translation>
     </message>
 </context>
 <context>
