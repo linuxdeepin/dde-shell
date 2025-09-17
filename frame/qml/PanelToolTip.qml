@@ -92,7 +92,11 @@ Item {
         visible: readyBinding
         anchors.centerIn: parent
         parent: toolTipWindow ? toolTipWindow.contentItem : undefined
-        font: DTK.fontManager.t6
+        font {
+            family: DTK.fontManager.t6.family
+            pixelSize: DTK.fontManager.t6.pixelSize
+            capitalization: Font.Capitalize
+        }
         contentItem: Text {
             topPadding: 4
             bottomPadding: 4
