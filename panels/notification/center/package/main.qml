@@ -81,6 +81,8 @@ Window {
     Item {
         id: view
         width: parent.width
+        // clear focus when NotificationCenter is closed.
+        focus: root.visible
         anchors {
             top: parent.top
             left: parent.left

@@ -120,7 +120,6 @@ DelegateChooser {
         OverlapNotify {
             id: overlapNotify
             objectName: "overlap-" + model.appName
-            focus: true
             width: 360
             activeFocusOnTab: true
 
