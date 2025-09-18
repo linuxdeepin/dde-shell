@@ -23,7 +23,7 @@ DelegateChooser {
         GroupNotify {
             id: groupNotify
             objectName: "group-" + model.appName
-            width: 360
+            width: NotifyStyle.contentItem.width
             appName: model.appName
             activeFocusOnTab: true
 
@@ -61,7 +61,7 @@ DelegateChooser {
         NormalNotify {
             id: normalNotify
             objectName: "normal-" + model.appName
-            width: 360
+            width: NotifyStyle.contentItem.width
             activeFocusOnTab: true
 
             appName: model.appName
@@ -120,7 +120,7 @@ DelegateChooser {
         OverlapNotify {
             id: overlapNotify
             objectName: "overlap-" + model.appName
-            width: 360
+            width: NotifyStyle.contentItem.width
             activeFocusOnTab: true
 
             count: model.overlapCount

@@ -7,6 +7,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import org.deepin.dtk 1.0
 import org.deepin.ds 1.0
+import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 Window {
@@ -33,7 +34,8 @@ Window {
     visible: Panel.visible
     flags: Qt.Tool
 
-    width: 360 + view.anchors.leftMargin + view.anchors.rightMargin
+    property int contentPadding: 20
+    width: NotifyStyle.contentItem.width + contentPadding * 2
     // height: 800
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorRight | DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom
@@ -80,13 +82,13 @@ Window {
 
     Item {
         id: view
-        width: parent.width
         // clear focus when NotificationCenter is closed.
         focus: root.visible
         anchors {
             top: parent.top
             left: parent.left
-            margins: 20
+            leftMargin: contentPadding
+            right: parent.right
             bottom: parent.bottom
         }
 
@@ -95,8 +97,9 @@ Window {
             anchors {
                 top: parent.top
                 left: parent.left
+                right: parent.right
+                rightMargin: contentPadding
             }
-            implicitWidth: 360
             Connections {
                 target: Panel
                 function onVisibleChanged() {
@@ -114,6 +117,7 @@ Window {
             anchors {
                 top: notifyStaging.bottom
                 left: parent.left
+                right: parent.right
                 bottom: parent.bottom
             }
 
@@ -128,7 +132,6 @@ Window {
                 }
             }
 
-            implicitWidth: 360
             maxViewHeight: root.height
             stagingViewCount: notifyStaging.viewCount
         }

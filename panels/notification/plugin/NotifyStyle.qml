@@ -12,5 +12,7 @@ QtObject {
         property int topMargin: 4
         property int bottomMargin: 8
         property int miniHeight: 40
+        property int width: 360
     }
+    property int scrollBarPadding: 2
 }
