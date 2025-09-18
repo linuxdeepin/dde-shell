@@ -42,8 +42,7 @@ NotifyItem {
     }
 
     // placeHolder to receive MouseEvent
-    Control {
-        id: closePlaceHolder
+    FocusScope {
         focus: true
         anchors {
             top: parent.top
@@ -53,14 +52,15 @@ NotifyItem {
         }
         width: 20
         height: 20
-        contentItem: Loader {
-            active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered || closePlaceHolder.activeFocus || activeFocus)
+
+        Loader {
+            active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || activeFocus)
             sourceComponent: SettingActionButton {
                 id: closeBtn
                 objectName: "closeNotify-" + root.appName
                 icon.name: "clean-alone"
                 padding: 2
-                forcusBorderVisible: visualFocus || closePlaceHolder.visualFocus
+                forcusBorderVisible: visualFocus
                 onClicked: function () {
                     root.remove()
                 }
