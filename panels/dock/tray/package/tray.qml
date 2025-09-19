@@ -81,7 +81,7 @@ AppletItem {
     Connections {
         target: DDT.TraySortOrderModel
         function onActionsAlwaysVisibleChanged(val) {
-            if (!val) {
+            if (!val && !Panel.contextDragging) {
                 closeStashPopupTimer.start()
             }
         }
@@ -93,7 +93,9 @@ AppletItem {
         interval: 10
         repeat: false
         onTriggered: {
-            stashedPopup.close()
+            if (!Panel.contextDragging) {
+                stashedPopup.close()
+            }
         }
     }
 
