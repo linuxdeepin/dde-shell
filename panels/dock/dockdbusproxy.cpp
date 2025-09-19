@@ -222,7 +222,7 @@ DockItemInfos DockDBusProxy::plugins()
         QMetaObject::invokeMethod(m_trayApplet, "dockItemInfos", Qt::DirectConnection, qReturnArg(iteminfos));
     }
 
-    if (m_multitaskviewApplet && DWindowManagerHelper::instance()->hasComposite()) {
+    if (m_multitaskviewApplet && DWindowManagerHelper::instance()->hasBlurWindow()) {
         DockItemInfo info;
         if (QMetaObject::invokeMethod(m_multitaskviewApplet, "dockItemInfo", Qt::DirectConnection, qReturnArg(info))) {
             iteminfos.append(info);
