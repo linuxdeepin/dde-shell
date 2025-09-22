@@ -12,7 +12,10 @@
 #include <QDBusConnection>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLoggingCategory>
 #include <QProcess>
+
+Q_LOGGING_CATEGORY(dockGlobalElementModelLog, "dde.shell.dock.taskmanager.dockglobalelementmodel")
 
 #include <algorithm>
 #include <tuple>
@@ -181,6 +184,12 @@ int DockGlobalElementModel::columnCount(const QModelIndex &parent) const
     return 1;
 }
 
+void DockGlobalElementModel::initDockedElements(bool unused)
+{
+    Q_UNUSED(unused);
+    loadDockedElements();
+}
+
 void DockGlobalElementModel::loadDockedElements()
 {
     QList<std::tuple<QString, QString>> newDocked;
@@ -236,6 +245,8 @@ void DockGlobalElementModel::loadDockedElements()
     }
 
     m_dockedElements = newDocked;
+
+    qCDebug(dockGlobalElementModelLog) << "loaded docked elements count:" << m_dockedElements.count() << "appsModel row count:" << m_appsModel->rowCount();
 
     if (!m_data.isEmpty()) {
         // MenusRole should also be handled here due to it contains the copywriting of docked or undocked

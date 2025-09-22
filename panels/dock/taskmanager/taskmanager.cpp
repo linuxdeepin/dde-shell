@@ -140,6 +140,8 @@ bool TaskManager::init()
         // 初始化预览代理模型，基于合并后的数据
         m_hoverPreviewModel = new HoverPreviewProxyModel(this);
         m_hoverPreviewModel->setSourceModel(m_dockGlobalElementModel);
+
+        connect(applet, SIGNAL(appModelReadyChanged(bool)), m_dockGlobalElementModel, SLOT(initDockedElements(bool)));
     }
 
     connect(m_windowMonitor.data(), &AbstractWindowMonitor::windowFullscreenChanged, this, [this] (bool isFullscreen) {
