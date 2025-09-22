@@ -106,11 +106,19 @@ void AMAppItem::setOnDesktop(bool on)
     AppItem::setOnDesktop(on);
 }
 
-QString AMAppItem::getLocaleOrDefaultValue(const QStringMap &value, const QString &targetKey, const QString &fallbackKey)
+QString AMAppItem::getLocaleOrDefaultValue(const QStringMap &value, const QString &localeCode, const QString &fallbackKey)
 {
-    auto targetValue = value.value(targetKey);
-    auto fallbackValue = value.value(fallbackKey);
-    return !targetValue.isEmpty() ? targetValue : fallbackValue;
+    if (value.contains(localeCode)) {
+        return value.value(localeCode);
+    } else {
+        QString fallbackValue = value.value(fallbackKey);
+        if (localeCode.contains('_')) {
+            QString prefix = localeCode.split('_')[0];
+            return value.value(prefix, fallbackValue);
+        } else {
+            return fallbackValue;
+        }
+    }
 }
 
 void AMAppItem::onPropertyChanged(const QDBusMessage &msg)
@@ -133,7 +141,7 @@ void AMAppItem::onPropertyChanged(const QDBusMessage &msg)
         AppItem::setAppName(name);
     }
 
-    auto iconName = getLocaleOrDefaultValue(Application::icons(), DESKTOP_ENTRY_ICON_KEY, "");
+    auto iconName = Application::icons().value(DESKTOP_ENTRY_ICON_KEY);
     AppItem::setAppIconName(iconName);
 
     AppItem::setNoDisPlay(Application::noDisplay());
@@ -160,7 +168,7 @@ void AMAppItem::updateActions(const QStringList &actions, const PropMap &actionN
         auto localeNames = actionName.value(action);
         QJsonObject actionObject;
         actionObject.insert(QStringLiteral("id"), action);
-        actionObject.insert(QStringLiteral("name"), getLocaleOrDefaultValue(localeNames, action, DEFAULT_KEY));
+        actionObject.insert(QStringLiteral("name"), getLocaleOrDefaultValue(localeNames, locale, DEFAULT_KEY));
         actionsArray.append(actionObject);
     }
     if (actions.size() > 0) {

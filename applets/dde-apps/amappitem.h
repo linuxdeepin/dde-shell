@@ -22,7 +22,7 @@ public:
     void setOnDesktop(bool on) override;
 
 private:
-    QString getLocaleOrDefaultValue(const QStringMap &value, const QString &targetKey, const QString &fallbackKey);
+    QString getLocaleOrDefaultValue(const QStringMap &value, const QString &localeCode, const QString &fallbackKey);
     void updateActions(const QStringList &actions, const PropMap &actionName);
 
 private Q_SLOTS:
