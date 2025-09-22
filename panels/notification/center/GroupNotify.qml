@@ -11,45 +11,52 @@ import org.deepin.ds.notificationcenter
 
 NotifyItem {
     id: root
+    implicitWidth: impl.implicitWidth
+    implicitHeight: impl.implicitHeight
 
     signal collapse()
 
-    contentItem: RowLayout {
-        NotifyHeaderTitleText {
-            text: root.appName
-            Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: 18
-            tFont: DTK.fontManager.t5
-        }
+    Control {
+        id: impl
+        anchors.fill: parent
 
-        Item {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 1
-        }
+        contentItem: RowLayout {
+            NotifyHeaderTitleText {
+                text: root.appName
+                Layout.alignment: Qt.AlignLeft
+                Layout.leftMargin: 18
+                tFont: DTK.fontManager.t5
+            }
 
-        SettingActionButton {
-            Layout.alignment: Qt.AlignRight
-            icon.name: "fold"
-            onClicked: {
-                console.log("collapse")
-                root.collapse()
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
             }
-        }
-        SettingActionButton {
-            Layout.alignment: Qt.AlignRight
-            icon.name: "more"
-            onClicked: function () {
-                console.log("group setting", appName)
-                let pos = mapToItem(root, Qt.point(width / 2, height))
-                root.setting(pos)
+
+            SettingActionButton {
+                Layout.alignment: Qt.AlignRight
+                icon.name: "fold"
+                onClicked: {
+                    console.log("collapse")
+                    root.collapse()
+                }
             }
-        }
-        AnimationSettingButton {
-            Layout.alignment: Qt.AlignRight
-            icon.name: "clean-group"
-            text: qsTr("Clear All")
-            onClicked: function () {
-                root.remove()
+            SettingActionButton {
+                Layout.alignment: Qt.AlignRight
+                icon.name: "more"
+                onClicked: function () {
+                    console.log("group setting", root.appName)
+                    let pos = mapToItem(root, Qt.point(width / 2, height))
+                    root.setting(pos)
+                }
+            }
+            AnimationSettingButton {
+                Layout.alignment: Qt.AlignRight
+                icon.name: "clean-group"
+                text: qsTr("Clear All")
+                onClicked: function () {
+                    root.remove()
+                }
             }
         }
     }

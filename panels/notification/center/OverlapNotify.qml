@@ -11,6 +11,8 @@ import org.deepin.ds.notificationcenter
 
 NotifyItem {
     id: root
+    implicitWidth: impl.implicitWidth
+    implicitHeight: impl.implicitHeight
 
     property int count: 1
     readonly property int overlapItemRadius: 12
@@ -40,62 +42,67 @@ NotifyItem {
         }
     }
 
-    contentItem: Item {
-        width: parent.width
-        implicitHeight: notifyContent.height + indicator.height
-        NotifyItemContent {
-            id: notifyContent
+    Control {
+        id: impl
+        anchors.fill: parent
+
+        contentItem: Item {
             width: parent.width
-            appName: root.appName
-            iconName: root.iconName
-            content: root.content
-            title: root.title
-            date: root.date
-            actions: root.actions
-            defaultAction: root.defaultAction
-            closeVisible: root.hovered || root.activeFocus
-            strongInteractive: root.strongInteractive
-            contentIcon: root.contentIcon
-            contentRowCount: root.contentRowCount
-            enableDismissed: root.enableDismissed
+            implicitHeight: notifyContent.height + indicator.height
+            NotifyItemContent {
+                id: notifyContent
+                width: parent.width
+                appName: root.appName
+                iconName: root.iconName
+                content: root.content
+                title: root.title
+                date: root.date
+                actions: root.actions
+                defaultAction: root.defaultAction
+                closeVisible: impl.hovered || root.activeFocus
+                strongInteractive: root.strongInteractive
+                contentIcon: root.contentIcon
+                contentRowCount: root.contentRowCount
+                enableDismissed: root.enableDismissed
 
-            onRemove: function () {
-                root.removedCallback = function () {
-                    root.remove()
+                onRemove: function () {
+                    root.removedCallback = function () {
+                        root.remove()
+                    }
+                    root.state = "removing"
                 }
-                root.state = "removing"
-            }
-            onDismiss: function () {
-                root.removedCallback = function () {
-                    root.dismiss()
+                onDismiss: function () {
+                    root.removedCallback = function () {
+                        root.dismiss()
+                    }
+                    root.state = "removing"
                 }
-                root.state = "removing"
+                onActionInvoked: function (actionId) {
+                    root.actionInvoked(actionId)
+                }
             }
-            onActionInvoked: function (actionId) {
-                root.actionInvoked(actionId)
+
+            OverlapIndicator {
+                id: indicator
+                anchors {
+                    bottom: parent.bottom
+                    left: parent.left
+                    leftMargin: overlapItemRadius
+                    right: parent.right
+                    rightMargin: overlapItemRadius
+                }
+                z: -1
+                count: root.count
             }
         }
 
-        OverlapIndicator {
-            id: indicator
-            anchors {
-                bottom: parent.bottom
-                left: parent.left
-                leftMargin: overlapItemRadius
-                right: parent.right
-                rightMargin: overlapItemRadius
-            }
-            z: -1
-            count: root.count
+        // expand
+        TapHandler {
+            enabled: !root.enableDismissed
+            acceptedButtons: Qt.LeftButton
+            onTapped: root.expand()
         }
+        Keys.onEnterPressed: root.expand()
+        Keys.onReturnPressed: root.expand()
     }
-
-    // expand
-    TapHandler {
-        enabled: !root.enableDismissed
-        acceptedButtons: Qt.LeftButton
-        onTapped: root.expand()
-    }
-    Keys.onEnterPressed: root.expand()
-    Keys.onReturnPressed: root.expand()
 }
