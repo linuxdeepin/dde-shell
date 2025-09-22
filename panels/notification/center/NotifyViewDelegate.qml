@@ -140,7 +140,7 @@ DelegateChooser {
                 active: overlapNotify.activeFocus && NotifyAccessor.debugging
 
                 sourceComponent: FocusBoxBorder {
-                    radius: overlapNotify.radius
+                    radius: overlapNotify.overlapItemRadius
                     color: overlapNotify.palette.highlight
                 }
             }

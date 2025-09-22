@@ -11,6 +11,8 @@ import org.deepin.ds.notificationcenter
 
 NotifyItem {
     id: root
+    implicitWidth: impl.implicitWidth
+    implicitHeight: impl.implicitHeight
 
     property var removedCallback
 
@@ -35,34 +37,39 @@ NotifyItem {
         }
     }
 
-    contentItem: NotifyItemContent {
-        width: parent.width
-        appName: root.appName
-        iconName: root.iconName
-        content: root.content
-        title: root.title
-        date: root.date
-        actions: root.actions
-        defaultAction: root.defaultAction
-        closeVisible: root.hovered || root.activeFocus
-        strongInteractive: root.strongInteractive
-        contentIcon: root.contentIcon
-        contentRowCount: root.contentRowCount
+    Control {
+        id: impl
+        anchors.fill: parent
 
-        onRemove: function () {
-            root.removedCallback = function () {
-                root.remove()
+        contentItem: NotifyItemContent {
+            width: parent.width
+            appName: root.appName
+            iconName: root.iconName
+            content: root.content
+            title: root.title
+            date: root.date
+            actions: root.actions
+            defaultAction: root.defaultAction
+            closeVisible: impl.hovered || root.activeFocus
+            strongInteractive: root.strongInteractive
+            contentIcon: root.contentIcon
+            contentRowCount: root.contentRowCount
+
+            onRemove: function () {
+                root.removedCallback = function () {
+                    root.remove()
+                }
+                root.state = "removing"
             }
-            root.state = "removing"
-        }
-        onDismiss: function () {
-            root.removedCallback = function () {
-                root.dismiss()
+            onDismiss: function () {
+                root.removedCallback = function () {
+                    root.dismiss()
+                }
+                root.state = "removing"
             }
-            root.state = "removing"
-        }
-        onActionInvoked: function (actionId) {
-            root.actionInvoked(actionId)
+            onActionInvoked: function (actionId) {
+                root.actionInvoked(actionId)
+            }
         }
     }
 }
