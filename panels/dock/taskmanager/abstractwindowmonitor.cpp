@@ -22,6 +22,7 @@ QHash<int, QByteArray> AbstractWindowMonitor::roleNames() const
             {TaskManager::WinIconRole, MODEL_WINICON},
             {TaskManager::WinTitleRole, MODEL_TITLE},
             {TaskManager::ActiveRole, MODEL_ACTIVE},
+            {TaskManager::AttentionRole, MODEL_ATTENTION},
             {TaskManager::ShouldSkipRole, MODEL_SHOULDSKIP}};
 }
 
@@ -95,6 +96,8 @@ QVariant AbstractWindowMonitor::data(const QModelIndex &index, int role) const
         return window->isActive();
     case TaskManager::ShouldSkipRole:
         return window->shouldSkip();
+    case TaskManager::AttentionRole:
+        return window->isAttention();
     }
 
     return QVariant();
