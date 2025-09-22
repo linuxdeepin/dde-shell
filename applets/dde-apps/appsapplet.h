@@ -18,6 +18,7 @@ class AppsApplet : public DApplet
 {
     Q_OBJECT
     Q_PROPERTY(QAbstractItemModel *appModel READ appModel CONSTANT FINAL)
+    Q_PROPERTY(bool appModelReady READ appModelReady NOTIFY appModelReadyChanged FINAL)
     Q_PROPERTY(QAbstractItemModel *appGroupModel READ groupModel CONSTANT FINAL)
 
 public:
@@ -29,7 +30,13 @@ public:
     QAbstractItemModel *appModel() const;
     QAbstractItemModel *groupModel() const;
 
+    bool appModelReady() const;
+
+signals:
+    void appModelReadyChanged(bool ready);
+
 private:
+    bool m_appModelReady;
     AMAppItemModel *m_appModel;
     QAbstractItemModel *m_groupModel;
 };

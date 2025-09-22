@@ -18,6 +18,7 @@ namespace apps
 AMAppItemModel::AMAppItemModel(QObject *parent)
     : AppItemModel(parent)
     , m_manager(new ObjectManager("org.desktopspec.ApplicationManager1", "/org/desktopspec/ApplicationManager1", QDBusConnection::sessionBus()))
+    , m_ready(false)
 {
     qRegisterMetaType<ObjectInterfaceMap>();
     qDBusRegisterMetaType<ObjectInterfaceMap>();
@@ -60,7 +61,15 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
                 appendRow(c);
             }
         }
+
+        setProperty("ready", true);
+        qCDebug(appsLog) << "AMAppItemModel is now ready with apps counts:" << rowCount();
     });
+}
+
+bool AMAppItemModel::ready() const
+{
+    return m_ready;
 }
 
 AMAppItem * AMAppItemModel::appItem(const QString &id)

@@ -36,6 +36,9 @@ public:
 
     void requestWindowsView(const QModelIndexList &indexes) const override;
 
+public slots:
+    void initDockedElements(bool unused);
+
 private:
     void loadDockedElements();
     QString getMenus(const QModelIndex &index) const;

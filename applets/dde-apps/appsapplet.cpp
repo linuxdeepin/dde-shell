@@ -17,6 +17,7 @@ AppsApplet::AppsApplet(QObject *parent)
     , m_appModel(new AMAppItemModel(this))
     , m_groupModel(new AppGroupManager(m_appModel, this))
 {
+    connect(m_appModel, &AMAppItemModel::readyChanged, this, &AppsApplet::appModelReadyChanged);
 }
 
 AppsApplet::~AppsApplet()
@@ -37,6 +38,11 @@ QAbstractItemModel *AppsApplet::groupModel() const
 QAbstractItemModel *AppsApplet::appModel() const
 {
     return m_appModel;
+}
+
+bool AppsApplet::appModelReady() const
+{
+    return m_appModel->ready();
 }
 
 D_APPLET_CLASS(AppsApplet)

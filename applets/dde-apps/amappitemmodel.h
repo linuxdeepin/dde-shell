@@ -13,13 +13,19 @@ class AMAppItem;
 class AMAppItemModel : public AppItemModel
 {
     Q_OBJECT
-
+    Q_PROPERTY(bool ready MEMBER m_ready READ ready NOTIFY readyChanged)
 public:
     explicit AMAppItemModel(QObject *parent = nullptr);
 
     AMAppItem * appItem(const QString &id);
 
+    bool ready() const;
+
+signals:
+    void readyChanged(bool);
+
 private:
+    bool m_ready;
     ObjectManager *m_manager;
 };
 }
