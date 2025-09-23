@@ -13,7 +13,7 @@ NotifyItem {
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
-    property bool closeVisible: activeFocus
+    property bool closeVisible: activeFocus || impl.hovered
     property int miniContentHeight: NotifyStyle.contentItem.miniHeight
     property bool enableDismissed: true
 
@@ -47,8 +47,8 @@ NotifyItem {
         }
 
         // placeHolder to receive MouseEvent
-        FocusScope {
-            focus: true
+        Control {
+            id: closePlaceHolder
             anchors {
                 top: parent.top
                 topMargin: -height / 2
@@ -60,7 +60,7 @@ NotifyItem {
 
             Loader {
                 focus: true
-                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || activeFocus)
+                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered || activeFocus)
                 sourceComponent: SettingActionButton {
                     id: closeBtn
                     objectName: "closeNotify-" + root.appName
