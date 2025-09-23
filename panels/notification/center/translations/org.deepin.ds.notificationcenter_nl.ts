@@ -7,11 +7,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>Invouwen</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"/>
+        <translation>Meer</translation>
     </message>
 </context>
 <context>
@@ -33,11 +33,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>Invouwen</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"/>
+        <translation>Meer</translation>
     </message>
 </context>
 <context>
