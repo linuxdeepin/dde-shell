@@ -5,6 +5,14 @@
         <source>Clear All</source>
         <translation>सम्पूर्ण माथि कुनै भन्दा छुट्याउनुहोस्</translation>
     </message>
+    <message>
+        <source>Fold</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>More</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 <context>
     <name>NotifyCenter</name>
@@ -22,6 +30,14 @@
     <message>
         <source>Clear All</source>
         <translation>सम्पूर्ण माथि कुनै भन्दा छुट्याउनुहोस्</translation>
+    </message>
+    <message>
+        <source>Fold</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>More</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
