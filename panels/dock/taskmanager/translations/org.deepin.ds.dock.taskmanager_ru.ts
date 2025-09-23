@@ -30,11 +30,11 @@
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Открепить</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>Закрепить</translation>
     </message>
     <message>
         <source>Force Quit</source>
