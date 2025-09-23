@@ -25,7 +25,7 @@ AppletItemButton {
 
     padding: itemPadding
 
-    D.ColorSelector.hovered: (isDropHover && DDT.TraySortOrderModel.actionsAlwaysVisible) || hoverHandler.hovered || stashedPopup.popupVisible
+    D.ColorSelector.hovered: (isDropHover && DDT.TraySortOrderModel.actionsAlwaysVisible) || hovered || stashedPopup.popupVisible
 
     property var itemGlobalPoint: {
         var a = root
@@ -95,11 +95,11 @@ AppletItemButton {
 
     onClicked: {
         if (stashedPopup.popupVisible) {
-            stashedPopup.close();
+            stashedPopup.close()
         } else {
-            stashedPopup.open();
+            stashedPopup.open()
         }
-        toolTip.close();
+        toolTip.close()
     }
 
     PanelToolTip {
@@ -117,18 +117,21 @@ AppletItemButton {
             toolTip.open()
         }
     }
-    HoverHandler {
-        id: hoverHandler
-        onHoveredChanged: {
-            if (hovered) {
-                toolTipShowTimer.start()
-            } else {
-                if (toolTipShowTimer.running) {
-                    toolTipShowTimer.stop()
-                }
+    
+    onHoveredChanged: {
+        if (stashedPopup.popupVisible) {
+            return
+        }
 
-                toolTip.close()
+        if (hovered) {
+            toolTipShowTimer.start()
+        } else {
+            if (toolTipShowTimer.running) {
+                toolTipShowTimer.stop()
             }
+
+            toolTip.close()
         }
     }
+
 }

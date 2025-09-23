@@ -64,19 +64,17 @@ AppletItemButton {
             toolTip.open()
         }
     }
-    HoverHandler {
-        id: hoverHandler
-        enabled: root.inputEventsEnabled
-        onHoveredChanged: {
-            if (hovered) {
-                toolTipShowTimer.start()
-            } else {
-                if (toolTipShowTimer.running) {
-                    toolTipShowTimer.stop()
-                }
 
-                toolTip.close()
+
+    onHoveredChanged: {
+        if (hovered) {
+            toolTipShowTimer.start()
+        } else {
+            if (toolTipShowTimer.running) {
+                toolTipShowTimer.stop()
             }
+
+            toolTip.close()
         }
     }
 }
