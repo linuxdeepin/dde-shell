@@ -1,16 +1,26 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="hu">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="hu">
 <context>
     <name>GroupNotify</name>
     <message>
         <source>Clear All</source>
         <translation>Összes törlése</translation>
     </message>
+    <message>
+        <source>Fold</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>NotifyCenter</name>
     <message>
         <source>No recent notifications</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -22,6 +32,14 @@
     <message>
         <source>Clear All</source>
         <translation>Összes törlése</translation>
+    </message>
+    <message>
+        <source>Fold</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

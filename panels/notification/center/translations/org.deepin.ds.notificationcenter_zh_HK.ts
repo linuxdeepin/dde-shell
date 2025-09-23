@@ -1,9 +1,19 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_HK">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_HK">
 <context>
     <name>GroupNotify</name>
     <message>
         <source>Clear All</source>
         <translation>全部清除</translation>
+    </message>
+    <message>
+        <source>Fold</source>
+        <translation>折疊</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>更多</translation>
     </message>
 </context>
 <context>
@@ -22,6 +32,14 @@
     <message>
         <source>Clear All</source>
         <translation>全部清除</translation>
+    </message>
+    <message>
+        <source>Fold</source>
+        <translation>折疊</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>更多</translation>
     </message>
 </context>
 <context>
