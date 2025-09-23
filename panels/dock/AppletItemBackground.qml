@@ -8,11 +8,13 @@ import QtQuick.Controls
 import org.deepin.ds.dock 1.0
 import org.deepin.dtk
 
-Item {
+MouseArea {
     id: control
     property bool isActive
     property real radius: 4
 
+    // can accept mouse event,prevent further event delivery
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
     implicitWidth: 24
     implicitHeight: 24
     property Palette backgroundColor: Palette {
