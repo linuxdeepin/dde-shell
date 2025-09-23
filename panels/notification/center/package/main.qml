@@ -86,6 +86,7 @@ Window {
         focus: root.visible
         anchors {
             top: parent.top
+            topMargin: contentPadding
             left: parent.left
             leftMargin: contentPadding
             right: parent.right
