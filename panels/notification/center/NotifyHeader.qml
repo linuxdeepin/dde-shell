@@ -28,23 +28,25 @@ FocusScope {
             Layout.preferredHeight: 1
         }
 
-        SettingActionButton {
+        AnimationSettingButton {
             objectName: "collapse"
             focus: true
             visible: !notifyModel.collapse
             Layout.alignment: Qt.AlignRight
             icon.name: "fold"
+            text: qsTr("Fold")
             onClicked: function () {
                 console.log("Collapse all notify")
                 notifyModel.collapseAllApp()
             }
         }
 
-        SettingActionButton {
+        AnimationSettingButton {
             objectName: "more"
             focus: true
             Layout.alignment: Qt.AlignRight
             icon.name: "more"
+            text: qsTr("More")
             onClicked: function () {
                 console.log("Notify setting")
                 NotifyAccessor.openNotificationSetting()

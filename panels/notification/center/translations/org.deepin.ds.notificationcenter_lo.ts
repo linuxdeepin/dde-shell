@@ -1,9 +1,19 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="lo">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="lo">
 <context>
     <name>GroupNotify</name>
     <message>
         <source>Clear All</source>
         <translation>ລົບເຄີຍທັງໝົດ</translation>
+    </message>
+    <message>
+        <source>Fold</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -22,6 +32,14 @@
     <message>
         <source>Clear All</source>
         <translation>ລົບເຄີຍທັງໝົດ</translation>
+    </message>
+    <message>
+        <source>Fold</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

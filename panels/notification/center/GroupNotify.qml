@@ -33,17 +33,19 @@ NotifyItem {
                 Layout.preferredHeight: 1
             }
 
-            SettingActionButton {
+            AnimationSettingButton {
                 Layout.alignment: Qt.AlignRight
                 icon.name: "fold"
+                text: qsTr("Fold")
                 onClicked: {
                     console.log("collapse")
                     root.collapse()
                 }
             }
-            SettingActionButton {
+            AnimationSettingButton {
                 Layout.alignment: Qt.AlignRight
                 icon.name: "more"
+                text: qsTr("More")
                 onClicked: function () {
                     console.log("group setting", root.appName)
                     let pos = mapToItem(root, Qt.point(width / 2, height))
