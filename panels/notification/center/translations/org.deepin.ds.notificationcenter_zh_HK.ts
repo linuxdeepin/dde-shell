@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_HK">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_HK">
 <context>
     <name>GroupNotify</name>
     <message>
@@ -9,11 +7,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation>折疊</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
-        <translation>更多</translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -35,11 +33,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation>折疊</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
-        <translation>更多</translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
