@@ -1,3 +1,18 @@
+dde-shell (2.0.11) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1257)
+  * fix: sometimes dock might be empty after boot and login
+  * fix: improve notification close button hover detection
+  * fix: desktop menu actions shows English instead of locale language
+  * fix: fix notification center tab key focus issue
+  * fix: missing attention role for taskmanager's base model
+  * chore: Use the hasBlurWindow interface
+  * fix: The tray popup was was hidden when an item is dragged in or out
+  * fix: When clicked the application tray button, the hover background
+    is not displayed
+
+ -- Wang Zichong <wangzichong@deepin.org>  Tue, 23 Sep 2025 13:09:55 +0800
+
 dde-shell (2.0.10) unstable; urgency=medium
 
   * fix: adjust notification center scrollbar position
