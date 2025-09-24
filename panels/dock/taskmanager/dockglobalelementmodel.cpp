@@ -262,7 +262,15 @@ QString DockGlobalElementModel::getMenus(const QModelIndex &index) const
     auto row = std::get<2>(data);
 
     QJsonArray menusArray;
-    menusArray.append(QJsonObject{{"id", ""}, {"name", model == m_activeAppModel ? index.data(TaskManager::WinTitleRole).toString() : tr("Open")}});
+    QString appNameInMenu = tr("Open");
+    if (model == m_activeAppModel) {
+        appNameInMenu = index.data(TaskManager::NameRole).toString();
+        // In case a window does not belongs to a known application, use the window title instead
+        if (appNameInMenu.isEmpty()) {
+            appNameInMenu = index.data(TaskManager::WinTitleRole).toString();
+        }
+    }
+    menusArray.append(QJsonObject{{"id", ""}, {"name", appNameInMenu}});
 
     auto actions = model->index(row, 0).data(TaskManager::ActionsRole).toByteArray();
     for (auto action : QJsonDocument::fromJson(actions).array()) {
