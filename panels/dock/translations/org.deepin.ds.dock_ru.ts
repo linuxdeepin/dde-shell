@@ -51,19 +51,19 @@
     </message>
     <message>
         <source>Keep Shown</source>
-        <translation>Отображать Всегда</translation>
+        <translation>Отобразить</translation>
     </message>
     <message>
         <source>Keep Hidden</source>
-        <translation>Держать Скрытым</translation>
+        <translation>Скрыть</translation>
     </message>
     <message>
         <source>Smart Hide</source>
-        <translation>Умное Скрытие</translation>
+        <translation>Умное скрытие</translation>
     </message>
     <message>
         <source>Dock Settings</source>
-        <translation>Настройки Dock</translation>
+        <translation>Настройки дока</translation>
     </message>
     <message>
         <source>Lock the Dock</source>
