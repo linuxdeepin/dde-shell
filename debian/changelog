@@ -1,3 +1,14 @@
+dde-shell (2.0.11.1) unstable; urgency=medium
+
+  * fix: ensure preview icon will use icon from theme as fallback
+  * fix: taskmanager context menu should use app name instead of window
+    title
+  * i18n: Updates for project Deepin Desktop Environment (#1266)
+  * fix: adjust notification center window positioning
+  * feat: add button text labels for accessibility
+
+ -- Wang Zichong <wangzichong@deepin.org>  Wed, 24 Sep 2025 15:28:00 +0800
+
 dde-shell (2.0.11) unstable; urgency=medium
 
   * i18n: Updates for project Deepin Desktop Environment (#1257)
