@@ -643,7 +643,8 @@ void NotifyModel::invokeAction(qint64 id, const QString &actionId)
     if (!entity.isValid())
         return;
 
-    m_accessor->invokeAction(entity, actionId);
+    // The storage notification needs to emit signal.
+    m_accessor->invokeNotify(entity, actionId);
 
     remove(id);
 }
