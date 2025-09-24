@@ -391,7 +391,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
         if (iconData.toString().isEmpty()) {
             iconData = enter.data(TaskManager::IconNameRole);
         }
-        updatePreviewIconFromBase64(iconData.toString());
+        updatePreviewIconFromString(iconData.toString());
         updatePreviewTitle(enter.data(TaskManager::WinTitleRole).toString());
     });
 }
@@ -463,7 +463,7 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
         if (iconData.toString().isEmpty()) {
             iconData = firstIndex.data(TaskManager::IconNameRole);
         }
-        updatePreviewIconFromBase64(iconData.toString());
+        updatePreviewIconFromString(iconData.toString());
         updatePreviewTitle(firstIndex.data(TaskManager::WinTitleRole).toString());
         updateSize(sourceModel->rowCount());
     } else {
@@ -761,17 +761,24 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
     return false;
 }
 
-void X11WindowPreviewContainer::updatePreviewIconFromBase64(const QString &base64Data)
+void X11WindowPreviewContainer::updatePreviewIconFromString(const QString &stringData)
 {
-    const QStringList strs = base64Data.split("base64,");
     QPixmap pix;
+    const QStringList strs = stringData.split("base64,");
     if (strs.size() == 2) {
+        // is base64 image data
         pix.loadFromData(QByteArray::fromBase64(strs.at(1).toLatin1()));
+    } else {
+        // is (likely) icon name from theme
+        pix = QIcon::fromTheme(stringData).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
     }
 
-    if (!pix.isNull()) {
-        m_previewIcon->setPixmap(pix);
-        return;
+    if (pix.isNull()) {
+        qCInfo(x11WindowPreview) << "Cannot load icon from string data:" << stringData;
+        pix = QPixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+        pix.fill(Qt::transparent);
     }
+
+    m_previewIcon->setPixmap(pix);
 }
 }
