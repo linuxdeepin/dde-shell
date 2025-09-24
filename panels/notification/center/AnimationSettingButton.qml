@@ -12,7 +12,7 @@ SettingActionButton {
     id: root
 
     property int duration: 200
-    property bool textVisible: root.hovered && text !== ""
+    property bool textVisible: (root.hovered || root.activeFocus) && text !== ""
     property bool enableAnimation: false
 
     Component.onCompleted: {
