@@ -1,9 +1,11 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_HK">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_HK">
 <context>
     <name>GroupNotify</name>
     <message>
         <source>Clear All</source>
-        <translation>全部清除</translation>
+        <translation>清除全部</translation>
     </message>
     <message>
         <source>Fold</source>
@@ -53,6 +55,13 @@
     <message>
         <source>Notification Setting</source>
         <translation>通知設置</translation>
+    </message>
+</context>
+<context>
+    <name>OverlapNotify</name>
+    <message>
+        <source>Clean All</source>
+        <translation>清除全部</translation>
     </message>
 </context>
 <context>

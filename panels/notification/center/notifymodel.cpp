@@ -546,38 +546,41 @@ void NotifyModel::removeByApp(const QString &appName)
     int row = -1;
     for (int i = 0; i < m_appNotifies.size(); i++) {
         auto item = m_appNotifies[i];
-        if (item->appName() == appName && item->type() == NotifyType::Group) {
+        if (item->appName() == appName && (item->type() == NotifyType::Group || item->type() == NotifyType::Overlap)) {
             row = i;
             break;
         }
     }
-
-    if (row >= 0) {
-        auto notify = m_appNotifies[row];
-        beginRemoveRows(QModelIndex(), row, row);
-        m_appNotifies.removeOne(notify);
-        endRemoveRows();
-        notify->deleteLater();
+    if (row < 0) {
+        qWarning(notifyLog) << "No notify for the app" << appName;
+        return;
     }
-
-    QList<AppNotifyItem *> notifies;
-    for (int i = row; i < m_appNotifies.size(); i++) {
-        auto item = m_appNotifies[i];
-        if (item->appName() == appName && item->type() == NotifyType::Normal) {
-            notifies.append(item);
-        }
-    }
-
-    const auto start = row;
-    beginRemoveRows(QModelIndex(), start, start + notifies.size() - 1);
-    for (int i = 0; i < notifies.size(); i++) {
-        auto item = notifies[i];
-        m_appNotifies.removeOne(item);
-        item->deleteLater();
-    }
+    auto notify = m_appNotifies[row];
+    beginRemoveRows(QModelIndex(), row, row);
+    m_appNotifies.removeOne(notify);
     endRemoveRows();
 
+    if(notify->type() == NotifyType::Group) {
+        QList<AppNotifyItem *> notifies;
+        for (int i = row; i < m_appNotifies.size(); i++) {
+            auto item = m_appNotifies[i];
+            if (item->appName() == appName && item->type() == NotifyType::Normal) {
+                notifies.append(item);
+            }
+        }
+
+        const auto start = row;
+        beginRemoveRows(QModelIndex(), start, start + notifies.size() - 1);
+        for (int i = 0; i < notifies.size(); i++) {
+            auto item = notifies[i];
+            m_appNotifies.removeOne(item);
+            item->deleteLater();
+        }
+        endRemoveRows();
+
+    }
     m_accessor->removeEntityByApp(appName);
+    notify->deleteLater();
 }
 
 void NotifyModel::clear()

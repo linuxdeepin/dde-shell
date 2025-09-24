@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ca">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ca">
 <context>
     <name>GroupNotify</name>
     <message>
@@ -53,6 +55,13 @@
     <message>
         <source>Notification Setting</source>
         <translation>Configuració de les notificacions</translation>
+    </message>
+</context>
+<context>
+    <name>OverlapNotify</name>
+    <message>
+        <source>Clean All</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

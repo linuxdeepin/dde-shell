@@ -64,12 +64,15 @@ NotifyItem {
                 contentIcon: root.contentIcon
                 contentRowCount: root.contentRowCount
                 enableDismissed: root.enableDismissed
-
-                onRemove: function () {
-                    root.removedCallback = function () {
-                        root.remove()
+                clearButton: AnimationSettingButton {
+                    icon.name: "clean-alone"
+                    text: qsTr("Clean All")
+                    onClicked: function () {
+                        root.removedCallback = function() {
+                            root.remove()
+                        }
+                        root.state = "removing"
                     }
-                    root.state = "removing"
                 }
                 onDismiss: function () {
                     root.removedCallback = function () {
