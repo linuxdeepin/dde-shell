@@ -649,6 +649,10 @@ Window {
             if (popup && popup.visible)
                 popup.close()
         }
+        function onDockScreenChanged() {
+            // Close all popups when dock moves to another screen
+            Panel.requestClosePopup()
+        }
 
         target: Panel
     }
