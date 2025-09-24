@@ -58,6 +58,13 @@
     </message>
 </context>
 <context>
+    <name>OverlapNotify</name>
+    <message>
+        <source>Clean All</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>notifycenter::AppNotifyItem</name>
     <message>
         <source>Just now</source>

@@ -166,8 +166,8 @@ DelegateChooser {
                              })
             }
             onRemove: function () {
-                console.log("remove overlap", model.id)
-                notifyModel.remove(model.id)
+                console.log("remove overlap", model.appName)
+                notifyModel.removeByApp(model.appName)
             }
             onActionInvoked: function (actionId) {
                 console.log("action overlap", model.id, actionId)

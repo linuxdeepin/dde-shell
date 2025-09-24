@@ -16,6 +16,7 @@ NotifyItem {
     property bool closeVisible: activeFocus || impl.hovered
     property int miniContentHeight: NotifyStyle.contentItem.miniHeight
     property bool enableDismissed: true
+    property alias clearButton: clearLoader.sourceComponent
 
     Control {
         id: impl
@@ -59,7 +60,9 @@ NotifyItem {
             height: 20
 
             Loader {
+                id: clearLoader
                 focus: true
+                anchors.right: parent.right
                 active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered || activeFocus)
                 sourceComponent: SettingActionButton {
                     id: closeBtn
