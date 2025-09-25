@@ -7,11 +7,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>Taita</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"/>
+        <translation>Lisää</translation>
     </message>
 </context>
 <context>
@@ -33,11 +33,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>Taita</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"/>
+        <translation>Lisää</translation>
     </message>
 </context>
 <context>
@@ -59,7 +59,7 @@
     <name>OverlapNotify</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"/>
+        <translation>Puhdista kaikki</translation>
     </message>
 </context>
 <context>
