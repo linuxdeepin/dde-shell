@@ -428,6 +428,7 @@ void TraySortOrderModel::updateVisualIndexes()
     // "internal/action-toggle-quick-settings"
     results = findItems("internal/action-toggle-quick-settings");
     Q_ASSERT(!results.isEmpty());
+    results[0]->setData(SECTION_FIXED, TraySortOrderModel::SectionTypeRole);
     results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
     currentVisualIndex++;
 
@@ -549,6 +550,20 @@ void TraySortOrderModel::handlePluginVisibleChanged(const QString &surfaceId, bo
     } else {
         qDebug() << "setItemOnDock call success";
     }
+}
+
+QModelIndex TraySortOrderModel::getModelIndexByVisualIndex(int visualIndex) const
+{
+    for (int i = 0; i < rowCount(); i++) {
+        QModelIndex index = this->index(i, 0);
+        int itemVisualIndex = data(index, VisualIndexRole).toInt();
+        bool visibility = data(index, VisibilityRole).toBool();
+        
+        if (visibility && itemVisualIndex == visualIndex) {
+            return index;
+        }
+    }
+    return QModelIndex();
 }
 
 }
