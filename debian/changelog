@@ -1,3 +1,20 @@
+dde-shell (2.0.12) unstable; urgency=medium
+
+  * fix: prevent dragging items to fixed plugin section
+  * feat: add clean all button for overlap notifications
+  * fix: improve text visibility logic in AnimationSettingButton
+  * fix: Popup windows was not closed  when dock screen changed (#1274)
+  * fix: Application tray button can accept right mouse button to open
+    popup window
+  * fix: ensure preview icon will use icon from theme as fallback
+  * fix: taskmanager context menu should use app name instead of window
+    title
+  * i18n: Updates for project Deepin Desktop Environment (#1266)
+  * fix: adjust notification center window positioning
+  * feat: add button text labels for accessibility
+
+ -- wujiangyu <wujiangyu@uniontech.com>  Thu, 25 Sep 2025 17:40:29 +0800
+
 dde-shell (2.0.11) unstable; urgency=medium
 
   * i18n: Updates for project Deepin Desktop Environment (#1257)
