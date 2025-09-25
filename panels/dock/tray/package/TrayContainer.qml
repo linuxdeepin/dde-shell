@@ -145,6 +145,7 @@ Item {
         property bool dragExited: false
         property string source: ""
         property string surfaceId: ""
+
         onEntered: function (dragEvent) {
             dragExited = false
             isDropped = false
@@ -161,11 +162,19 @@ Item {
         onPositionChanged: function (dragEvent) {
             let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
             let pos = root.isHorizontal ? drag.x : drag.y
-            let currentItemIndex = pos / (root.itemVisualSize + root.itemSpacing)
-            let currentPosMapToItem = pos % (root.itemVisualSize + root.itemSpacing)
-            let isBefore = currentPosMapToItem < root.itemVisualSize / 2
-            dropHoverIndex = Math.floor(currentItemIndex)
+            let dropIdx = DDT.TrayItemPositionManager.itemIndexByPoint(Qt.point(drag.x, drag.y))
+            let currentItemIndex = dropIdx.index
+            let isBefore = dropIdx.isBefore            
             let isStash = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType") === "stashed"
+            dropHoverIndex = dropIdx.index
+            
+            // 检查当前悬停位置是否是禁止拖拽的插件
+            let modelIndex = DDT.TraySortOrderModel.getModelIndexByVisualIndex(currentItemIndex)
+            let sectionType =root.model.data(modelIndex, DDT.TraySortOrderModel.SectionTypeRole)
+            if (sectionType === "fixed") {
+                dragEvent.accepted = false
+                return
+            }
             
             // 检查 ActionShowStashDelegate 是否显示
             let showStashActionVisible = false

@@ -63,6 +63,7 @@ public:
     Q_INVOKABLE bool dropToDockTray(const QString & draggedSurfaceId, int dropVisualIndex, bool isBefore);
     Q_INVOKABLE void setSurfaceVisible(const QString & surfaceId, bool visible);
     Q_INVOKABLE bool isDisplayedSurface(const QString &surfaceId) const;
+    Q_INVOKABLE QModelIndex getModelIndexByVisualIndex(int visualIndex) const;
 
 signals:
     void collapsedChanged(bool);
