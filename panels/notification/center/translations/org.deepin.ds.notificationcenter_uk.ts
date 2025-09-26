@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="uk">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="uk">
 <context>
     <name>GroupNotify</name>
     <message>
@@ -9,11 +7,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation>Згорнути</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation>Більше</translation>
     </message>
 </context>
 <context>
@@ -35,11 +33,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation>Згорнути</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation>Більше</translation>
     </message>
 </context>
 <context>
@@ -61,7 +59,7 @@
     <name>OverlapNotify</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"></translation>
+        <translation>Вилучити все</translation>
     </message>
 </context>
 <context>
