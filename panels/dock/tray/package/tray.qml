@@ -57,6 +57,8 @@ AppletItem {
                 color: "transparent"
                 model: DDT.SortFilterProxyModel {
                     sourceModel: DDT.TraySortOrderModel
+                    sortRoleName: "visualIndex"
+                    sortOrder: Qt.AscendingOrder
                     filterRowCallback: (sourceRow, sourceParent) => {
                         let index = sourceModel.index(sourceRow, 0, sourceParent)
                         return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) === "stashed" &&
