@@ -30,7 +30,7 @@
     </message>
     <message>
         <source>Undock</source>
-        <translation>Desencaixar</translation>
+        <translation>Remover do dock</translation>
     </message>
     <message>
         <source>Dock</source>
