@@ -62,6 +62,7 @@ AppletItem {
                         return sourceModel.data(index, DDT.TraySortOrderModel.SectionTypeRole) === "stashed" &&
                                sourceModel.data(index, DDT.TraySortOrderModel.VisibilityRole) === true
                     }
+                    sortRole: DDT.TraySortOrderModel.VisualIndexRole
                 }
                 anchors.centerIn: parent
                 onRowCountChanged: {
