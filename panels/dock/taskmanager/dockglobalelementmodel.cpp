@@ -398,11 +398,18 @@ void DockGlobalElementModel::requestClose(const QModelIndex &index, bool force) 
 
     qWarning() << "unable to close app not running";
 }
-void DockGlobalElementModel::requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+
+void DockGlobalElementModel::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
 {
-    Q_UNUSED(index)
-    Q_UNUSED(geometry)
-    Q_UNUSED(delegate)
+    auto data = m_data.value(index.row());
+    auto id = std::get<0>(data);
+    auto sourceModel = std::get<1>(data);
+    auto sourceRow = std::get<2>(data);
+
+    if (sourceModel == m_activeAppModel) {
+        auto sourceIndex = sourceModel->index(sourceRow, 0);
+        m_activeAppModel->requestUpdateWindowIconGeometry(sourceIndex, geometry, delegate);
+    }
 }
 
 void DockGlobalElementModel::requestWindowsView(const QModelIndexList &indexes) const

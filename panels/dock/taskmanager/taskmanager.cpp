@@ -201,9 +201,9 @@ void TaskManager::requestClose(const QModelIndex &index, bool force) const
     m_itemModel->requestClose(index, force);
 }
 
-void TaskManager::requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+void TaskManager::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
 {
-    m_itemModel->requestUpdateWindowGeometry(index, geometry, delegate);
+    m_itemModel->requestUpdateWindowIconGeometry(index, geometry, delegate);
 }
 
 void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
@@ -310,16 +310,6 @@ void TaskManager::moveFilesToTrash(const QStringList& urls)
 void TaskManager::hideItemPreview()
 {
     m_windowMonitor->hideItemPreview();
-}
-
-void TaskManager::setAppItemWindowIconGeometry(const QString& appid, QObject* relativePositionItem, const int& x1, const int& y1, const int& x2, const int& y2)
-{
-    QPointer<AppItem> item = static_cast<AppItem*>(ItemModel::instance()->getItemById(appid).get());
-    if (item.isNull()) return;
-
-    for (auto window : item->getAppendWindows()) {
-        window->setWindowIconGeometry(qobject_cast<QWindow*>(relativePositionItem), QRect(QPoint(x1, y1),QPoint(x2, y2)));
-    }
 }
 
 bool TaskManager::allowForceQuit()

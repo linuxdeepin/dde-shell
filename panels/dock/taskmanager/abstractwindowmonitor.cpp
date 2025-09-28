@@ -65,7 +65,7 @@ void AbstractWindowMonitor::requestClose(const QModelIndex &index, bool force) c
     }
 }
 
-void AbstractWindowMonitor::requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+void AbstractWindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
 {
 }
 

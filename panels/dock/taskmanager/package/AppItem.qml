@@ -272,8 +272,8 @@ Item {
         repeat: false
         onTriggered: {
             var pos = icon.mapToItem(null, 0, 0)
-            taskmanager.Applet.setAppItemWindowIconGeometry(root.itemId, Panel.rootObject, pos.x, pos.y,
-                pos.x + icon.width, pos.y + icon.height)
+            taskmanager.Applet.requestUpdateWindowIconGeometry(root.modelIndex, Qt.rect(pos.x, pos.y,
+                icon.width, icon.height), Panel.rootObject)
         }
     }
 

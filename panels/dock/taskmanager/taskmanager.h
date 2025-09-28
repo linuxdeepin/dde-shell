@@ -78,7 +78,7 @@ public:
 
     Q_INVOKABLE void requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const override;
     Q_INVOKABLE void requestClose(const QModelIndex &index, bool force = false) const override;
-    Q_INVOKABLE void requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
+    Q_INVOKABLE void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
     Q_INVOKABLE void
     requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
     Q_INVOKABLE void requestWindowsView(const QModelIndexList &indexes) const override;
@@ -93,7 +93,6 @@ public:
     Q_INVOKABLE void dropFilesOnItem(const QString &itemId, const QStringList &urls);
     Q_INVOKABLE void hideItemPreview();
 
-    Q_INVOKABLE void setAppItemWindowIconGeometry(const QString& appid, QObject* relativePositionItem, const int& x1, const int& y1, const int& x2, const int& y2);
     Q_INVOKABLE void activateWindow(uint32_t windowID);
     Q_INVOKABLE void saveDockElementsOrder(const QStringList &appIds);
 

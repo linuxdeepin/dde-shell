@@ -132,11 +132,17 @@ void DockGroupModel::requestClose(const QModelIndex &index, bool force) const
     }
 }
 
-void DockGroupModel::requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+void DockGroupModel::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
 {
-    Q_UNUSED(index)
-    Q_UNUSED(geometry)
-    Q_UNUSED(delegate)
+    auto interface = dynamic_cast<AbstractTaskManagerInterface *>(sourceModel());
+    if (nullptr == interface)
+        return;
+
+    auto indexRowCount = RoleGroupModel::rowCount(index);
+    for (int i = 0; i < indexRowCount; i++) {
+        auto cIndex = RoleGroupModel::index(i, 0, index);
+        callInterfaceMethod(cIndex, &AbstractTaskManagerInterface::requestUpdateWindowIconGeometry, geometry, delegate);
+    }
 }
 
 void DockGroupModel::requestWindowsView(const QModelIndexList &indexes) const

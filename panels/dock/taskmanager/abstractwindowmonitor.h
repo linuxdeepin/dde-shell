@@ -39,7 +39,7 @@ public:
     void requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const override;
     void requestNewInstance(const QModelIndex &index, const QString &action) const override;
     void requestClose(const QModelIndex &index, bool force = false) const override;
-    void requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
+    void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
 
     virtual void
     requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) = 0;
