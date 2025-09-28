@@ -15,7 +15,7 @@
     </message>
     <message>
         <source>Force Quit</source>
-        <translation>Forçar encerramento</translation>
+        <translation>Forçar encerrar</translation>
     </message>
     <message>
         <source>Close All</source>
@@ -38,7 +38,7 @@
     </message>
     <message>
         <source>Force Quit</source>
-        <translation>Forçar saída</translation>
+        <translation>Forçar encerrar</translation>
     </message>
     <message>
         <source>Close All</source>
