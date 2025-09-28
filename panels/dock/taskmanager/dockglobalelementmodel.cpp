@@ -340,7 +340,10 @@ void DockGlobalElementModel::requestActivate(const QModelIndex &index) const
         auto sourceIndex = sourceModel->index(sourceRow, 0);
         m_activeAppModel->requestActivate(sourceIndex);
     } else {
-        this->requestNewInstance(index, "");
+        if (auto interface = dynamic_cast<AbstractTaskManagerInterface*>(sourceModel)) {
+            auto sourceIndex = sourceModel->index(sourceRow, 0);
+            interface->requestNewInstance(sourceIndex, "");
+        }
     }
 }
 
@@ -363,26 +366,6 @@ void DockGlobalElementModel::requestOpenUrls(const QModelIndex &index, const QLi
     }
 }
 
-void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const QString &action) const
-{
-    if (action == DOCK_ACTION_DOCK) {
-        auto data = m_data.value(index.row());
-        auto id = std::get<0>(data);
-        TaskManagerSettings::instance()->toggleDockedElement(QStringLiteral("desktop/%1").arg(id));
-    } else if (action == DOCK_ACTION_FORCEQUIT) {
-        requestClose(index, true);
-    } else if (action == DOCK_ACTION_CLOSEALL) {
-        requestClose(index);
-    } else {
-        auto data = m_data.value(index.row());
-        auto id = std::get<0>(data);
-        QProcess process;
-        process.setProcessChannelMode(QProcess::MergedChannels);
-        process.start("dde-am", {"--by-user", id, action});
-        process.waitForFinished();
-        return;
-    }
-}
 void DockGlobalElementModel::requestClose(const QModelIndex &index, bool force) const
 {
     auto data = m_data.value(index.row());
