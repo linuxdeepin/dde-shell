@@ -32,7 +32,7 @@ public:
 
     void requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const override;
     void requestClose(const QModelIndex &index, bool force = false) const override;
-    void requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
+    void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
 
     void requestWindowsView(const QModelIndexList &indexes) const override;
 

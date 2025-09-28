@@ -62,9 +62,9 @@ public:
     {
         callInterfaceMethod(index, &AbstractTaskManagerInterface::requestClose, force);
     }
-    virtual void requestUpdateWindowGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const
+    virtual void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const
     {
-        callInterfaceMethod(index, &AbstractTaskManagerInterface::requestUpdateWindowGeometry, geometry, delegate);
+        callInterfaceMethod(index, &AbstractTaskManagerInterface::requestUpdateWindowIconGeometry, geometry, delegate);
     }
     virtual void requestWindowsView(const QModelIndexList &indexes) const
     {

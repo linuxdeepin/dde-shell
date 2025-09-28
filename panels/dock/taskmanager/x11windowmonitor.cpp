@@ -151,6 +151,13 @@ void X11WindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
     m_windowPreview->updatePosition();
 }
 
+void X11WindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+{
+    xcb_window_t winId = index.data(TaskManager::WinIdRole).toUInt();
+    auto pos = qobject_cast<QWindow *>(delegate)->position() + geometry.topLeft();
+    X11->setWindowIconGemeotry(winId, QRect(pos.x(), pos.y(), geometry.width(), geometry.height()));
+}
+
 void X11WindowMonitor::clearPreviewState()
 {
     // 发出信号通知 TaskManager 清空预览过滤状态
