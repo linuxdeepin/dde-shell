@@ -11,7 +11,7 @@
     </message>
     <message>
         <source>Dock</source>
-        <translation>Dock</translation>
+        <translation>Fixar no dock</translation>
     </message>
     <message>
         <source>Force Quit</source>
@@ -34,7 +34,7 @@
     </message>
     <message>
         <source>Dock</source>
-        <translation>Dock</translation>
+        <translation>Fixar no dock</translation>
     </message>
     <message>
         <source>Force Quit</source>
