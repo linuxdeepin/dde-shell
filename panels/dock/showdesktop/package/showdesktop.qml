@@ -32,8 +32,10 @@ AppletItem {
 
         Rectangle {
             property D.Palette lineColor: DockPalette.showDesktopLineColor
-            implicitWidth: useColumnLayout ? showdesktop.implicitWidth : 1
-            implicitHeight: useColumnLayout ? 1 : showdesktop.implicitHeight
+            // Use device pixel ratio to ensure the line is always 1 physical pixel regardless of system scaling
+            property real devicePixelRatio: Screen.devicePixelRatio
+            implicitWidth: useColumnLayout ? showdesktop.implicitWidth : (1 / devicePixelRatio)
+            implicitHeight: useColumnLayout ? (1 / devicePixelRatio) : showdesktop.implicitHeight
 
             color: D.ColorSelector.lineColor
         }
