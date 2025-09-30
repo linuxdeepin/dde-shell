@@ -59,7 +59,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"/>
+        <translation>Neteja-ho tot</translation>
     </message>
 </context>
 <context>
