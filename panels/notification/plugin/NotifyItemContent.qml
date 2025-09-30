@@ -172,7 +172,7 @@ NotifyItem {
 
                     Loader {
                         id: time
-                        active: !root.closeVisible
+                        active: !root.closeVisible && !closePlaceHolder.hovered
                         visible: active
                         Layout.alignment: Qt.AlignRight
                         sourceComponent: Text {
