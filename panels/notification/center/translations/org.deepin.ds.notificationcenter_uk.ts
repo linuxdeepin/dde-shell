@@ -56,10 +56,10 @@
     </message>
 </context>
 <context>
-    <name>OverlapNotify</name>
+    <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation>Вилучити все</translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
