@@ -56,7 +56,7 @@
     </message>
 </context>
 <context>
-    <name>OverlapNotify</name>
+    <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
         <translation>清除全部</translation>
