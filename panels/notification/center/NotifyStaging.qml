@@ -48,6 +48,16 @@ FocusScope {
             contentIcon: model.contentIcon
             contentRowCount: model.contentRowCount
 
+            clearButton: SettingActionButton {
+                icon.name: "clean-alone"
+                onClicked: function () {
+                    overlapNotify.removedCallback = function() {
+                        overlapNotify.remove()
+                    }
+                    overlapNotify.state = "removing"
+                }
+            }
+
             onRemove: function () {
                 console.log("remove overlap", model.id)
                 notifyModel.closeNotify(model.id, NotifyItem.Closed)

@@ -18,6 +18,16 @@ NotifyItem {
     readonly property int overlapItemRadius: 12
     property bool enableDismissed: true
     property var removedCallback
+    property Component clearButton: AnimationSettingButton {
+        icon.name: "clean-alone"
+        text: qsTr("Clean All")
+        onClicked: function () {
+            root.removedCallback = function() {
+                root.remove()
+            }
+            root.state = "removing"
+        }
+    }
 
     signal expand()
 
@@ -64,16 +74,7 @@ NotifyItem {
                 contentIcon: root.contentIcon
                 contentRowCount: root.contentRowCount
                 enableDismissed: root.enableDismissed
-                clearButton: AnimationSettingButton {
-                    icon.name: "clean-alone"
-                    text: qsTr("Clean All")
-                    onClicked: function () {
-                        root.removedCallback = function() {
-                            root.remove()
-                        }
-                        root.state = "removing"
-                    }
-                }
+                clearButton: root.clearButton
                 onDismiss: function () {
                     root.removedCallback = function () {
                         root.dismiss()
