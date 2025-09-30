@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ca">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ca">
 <context>
     <name>GroupNotify</name>
     <message>
@@ -56,10 +58,10 @@
     </message>
 </context>
 <context>
-    <name>OverlapNotify</name>
+    <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation>Neteja-ho tot</translation>
+        <translation type="unfinished">Neteja-ho tot</translation>
     </message>
 </context>
 <context>
