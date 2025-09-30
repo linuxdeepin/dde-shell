@@ -9,7 +9,7 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation>折疊</translation>
+        <translation>收起</translation>
     </message>
     <message>
         <source>More</source>
