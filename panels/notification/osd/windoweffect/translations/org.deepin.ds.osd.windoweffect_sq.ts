@@ -3,27 +3,27 @@
     <name>main</name>
     <message>
         <source>Optimal performance</source>
-        <translation>Performancë optimale</translation>
+        <translation>Funksionim optimal</translation>
     </message>
     <message>
         <source>Balance</source>
-        <translation>Ekuilibër</translation>
+        <translation>Baraspeshim</translation>
     </message>
     <message>
         <source>Best Visuals</source>
-        <translation>Pamje më të mira</translation>
+        <translation>Më të Mirët e Elementëve Pamorë</translation>
     </message>
     <message>
         <source>Disable all interface and window effects for efficient system performance</source>
-        <translation>Çaktivizo të gjitha efektet e ndërfaqes dhe dritares për performancë efikase të sistemit</translation>
+        <translation>Çaktivizo krejt efektet e ndërfaqes dhe dritareve, për funksionim efikas të sistemit.</translation>
     </message>
     <message>
         <source>Limit some window effects for excellent visuals while maintaining smooth system performance</source>
-        <translation>Kufizo disa efekte dritareje për pamje të shkëlqyera duke ruajtur performancën e qetë të sistemit</translation>
+        <translation>Kufizo disa efekte dritaresh, për anë pamore të shkëlqyera, teksa mirëmbahet funksionim i rrjedhshëm i sistemit.</translation>
     </message>
     <message>
         <source>Enable all interface and window effects for the best visual experience</source>
-        <translation>Aktivizo të gjitha efektet e ndërfaqes dhe dritares për përvojën më të mirë vizuale</translation>
+        <translation>Aktivizo krejt efektet e ndërfaqes dhe dritareve, për më të mirat e anëve pamore.</translation>
     </message>
 </context>
 </TS>
