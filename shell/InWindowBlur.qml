@@ -29,15 +29,11 @@ Item {
             }
             color: Window.window && Window.window.color.a < 1 ? D.ColorSelector.overlay : "transparent"
 
-            MultiEffect {
+            FastBlur {
                 id: blur
                 anchors.fill: parent
                 source: blitter.content
-                autoPaddingEnabled: false
-                blurEnabled: true
-                blur: 1.0
-                blurMax: 64
-                saturation: 0.4
+                radius: 64
             }
         }
     }
