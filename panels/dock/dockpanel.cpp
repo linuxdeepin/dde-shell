@@ -75,10 +75,10 @@ bool DockPanel::init()
             if (m_dockScreen) {
                 if (m_dockScreen != window()->screen() && qApp->screens().contains( m_dockScreen)) {
                     qWarning() << "m_dockScreen" << m_dockScreen << m_dockScreen->name() << "window()->screen()" << window()->screen() << window()->screen()->name();
-                    QTimer::singleShot(10, this, [this](){
+                    QMetaObject::invokeMethod(this, [this](){
                         window()->setScreen(m_dockScreen);
                         onWindowGeometryChanged();
-                    });
+                    }, Qt::QueuedConnection);
                 } else {
                     onWindowGeometryChanged();
                 }
