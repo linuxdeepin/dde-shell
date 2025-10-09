@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <DObject>
+#include <QJSValue>
 
 QT_BEGIN_NAMESPACE
 class QWindow;
@@ -32,6 +33,7 @@ public:
     Q_INVOKABLE static void closeChildrenWindows(QWindow *target);
     Q_INVOKABLE bool grabKeyboard(QWindow *target, bool grab = true);
     Q_INVOKABLE bool grabMouse(QWindow *target, bool grab = true);
+    Q_INVOKABLE void singleShot(int msec, QJSValue callback);
 
     DApplet *rootApplet() const;
 

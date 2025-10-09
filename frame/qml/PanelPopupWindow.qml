@@ -77,17 +77,16 @@ PopupWindow {
     D.DWindow.shadowOffset: Qt.point(0, 25)
     D.DWindow.shadowColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.5) : Qt.rgba(0, 0, 0, 0.2)
     D.ColorSelector.family: D.Palette.CrystalColor
-
     color: "transparent"
-    onVisibleChanged: function (arg) {
-        if (!arg) {
-            currentItem = null
-            root.width = 10
-            root.height = 10
-        }
-        if (!arg)
-            DS.closeChildrenWindows(root)
-    }
+
+    onVisibleChanged: DS.singleShot(200, (function () {
+        if(root.visible)
+            return
+        currentItem = null
+        root.width = 10
+        root.height = 10
+        DS.closeChildrenWindows(root)
+    }))
 
     Connections {
         target: root.transientParent
