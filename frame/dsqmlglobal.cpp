@@ -13,6 +13,8 @@
 #include <QQueue>
 #include <QWindow>
 #include <QGuiApplication>
+#include <QTimer>
+#include <QQmlEngine>
 
 #ifdef BUILD_WITH_X11
 #include "private/utility_x11_p.h"
@@ -83,6 +85,23 @@ bool DQmlGlobal::grabMouse(QWindow *target, bool grab)
 DApplet *DQmlGlobal::rootApplet() const
 {
     return DPluginLoader::instance()->rootApplet();
+}
+
+void DQmlGlobal::singleShot(int msec, QJSValue callback)
+{
+    if (!callback.isCallable()) {
+        qCWarning(dsLog) << "singleShot: callback is not callable";
+        return;
+    }
+
+    QTimer::singleShot(msec, this, [callback]() {
+        if (callback.isCallable()) {
+            QJSValue result = callback.call();
+            if (result.isError()) {
+                qCWarning(dsLog) << "singleShot callback error:" << result.toString();
+            }
+        }
+    });
 }
 
 DQmlGlobal *DQmlGlobal::instance()
