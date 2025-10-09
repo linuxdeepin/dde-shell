@@ -95,6 +95,7 @@ public:
 
     Q_INVOKABLE void activateWindow(uint32_t windowID);
     Q_INVOKABLE void saveDockElementsOrder(const QStringList &appIds);
+    Q_INVOKABLE QString getTrashTipText();
 
 private:
     void moveFilesToTrash(const QStringList& urls);
