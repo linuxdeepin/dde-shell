@@ -1,4 +1,13 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="lo">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="lo">
+<context>
+    <name>AppItem</name>
+    <message>
+        <source>Move to Trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 <context>
     <name>dock::AppItem</name>
     <message>
@@ -43,6 +52,13 @@
     <message>
         <source>Close All</source>
         <translation>ປິດທັງໝົດ</translation>
+    </message>
+</context>
+<context>
+    <name>dock::TaskManager</name>
+    <message>
+        <source>%1 files</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
