@@ -13,13 +13,6 @@ RoleGroupModel::RoleGroupModel(QAbstractItemModel *sourceModel, int role, QObjec
     RoleGroupModel::setSourceModel(sourceModel);
 }
 
-RoleGroupModel::~RoleGroupModel()
-{
-    qDeleteAll(m_rowMap);
-    m_rowMap.clear();
-    m_map.clear();
-}
-
 void RoleGroupModel::setDeduplicationRole(const int &role)
 {
     if (role != m_roleForDeduplication) {
@@ -56,39 +49,38 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
                 continue;
             }
 
-            auto list = m_map.value(data, nullptr);
-            if (nullptr == list) {
+            if (!m_map.contains(data)) {
                 beginInsertRows(QModelIndex(), m_rowMap.size(), m_rowMap.size());
-                list = new QList<int>();
-                list->append(i);
-                m_map.insert(data, list);
-                m_rowMap.append(list);
-                endInsertRows();
-            } else {
-                beginInsertRows(index(m_rowMap.indexOf(list), 0), list->size(), list->size());
-                list->append(i);
+                m_rowMap.append(data);
+                m_map.insert(data, QList<int>());
                 endInsertRows();
             }
+
+            QList<int> &list = m_map[data];
+            int groupRow = m_rowMap.indexOf(data);
+
+            beginInsertRows(index(groupRow, 0), list.size(), list.size());
+            list.append(i);
+            endInsertRows();
         }
     });
 
     connect(sourceModel(), &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
         Q_UNUSED(parent)
-        for (int i = 0; i < m_rowMap.count(); ++i) {
-            auto sourceRows = m_rowMap.value(i);
-            for (int j = 0; j < sourceRows->size(); ++j) {
-                if (first <= sourceRows->value(j) && last >= sourceRows->value(j)) {
-                    beginRemoveRows(index(m_rowMap.indexOf(sourceRows), 0), j, j);
-                    sourceRows->removeAt(j);
+        for (int i = m_rowMap.count() - 1; i >= 0; --i) {
+            auto groupKey = m_rowMap.value(i);
+            QList<int> &sourceRows = m_map[groupKey];
+            for (int j = sourceRows.size() - 1; j >= 0; --j) {
+                if (first <= sourceRows.value(j) && last >= sourceRows.value(j)) {
+                    beginRemoveRows(index(i, 0), j, j);
+                    sourceRows.removeAt(j);
                     endRemoveRows();
-                    --j;
                 }
             }
-            if (sourceRows->size() == 0) {
-                beginRemoveRows(QModelIndex(), m_rowMap.indexOf(sourceRows), m_rowMap.indexOf(sourceRows));
-                m_map.remove(m_map.key(sourceRows));
-                m_rowMap.removeOne(sourceRows);
-                delete sourceRows;
+            if (sourceRows.isEmpty()) {
+                beginRemoveRows(QModelIndex(), i, i);
+                m_map.remove(groupKey);
+                m_rowMap.removeAt(i);
                 endRemoveRows();
             }
         }
@@ -104,14 +96,15 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
 
         for (int i = topLeft.row(); i <= bottomRight.row(); ++i) {
             auto data = sourceModel()->index(i, 0).data(m_roleForDeduplication).toString();
-            auto list = m_map.value(data, nullptr);
-            if (list == nullptr)
+            if (!m_map.contains(data))
                 continue;
 
-            int childRow = list->indexOf(i);
+            const QList<int> &list = m_map.value(data);
+            int childRow = list.indexOf(i);
             if (childRow >= 0) {
-                auto index = createIndex(childRow, 0, m_rowMap.indexOf(list));
-                Q_EMIT dataChanged(index, index, roles);
+                int groupRow = m_rowMap.indexOf(data);
+                auto proxyIndex = createIndex(childRow, 0, groupRow);
+                Q_EMIT dataChanged(proxyIndex, proxyIndex, roles);
             }
         }
     });
@@ -129,8 +122,8 @@ int RoleGroupModel::rowCount(const QModelIndex &parent) const
             return 0;
         }
 
-        auto list = m_rowMap.value(parentRow, nullptr);
-        return (list != nullptr) ? list->size() : 0;
+        const QString groupKey = m_rowMap.value(parentRow);
+        return m_map.value(groupKey).size();
     }
 
     return m_rowMap.size();
@@ -161,8 +154,8 @@ bool RoleGroupModel::hasChildren(const QModelIndex &parent) const
         if (parent.row() < 0 || parent.row() >= m_rowMap.size()) {
             return false;
         }
-        auto list = m_rowMap.value(parent.row(), nullptr);
-        return list && list->size() > 0;
+        const QString groupKey = m_rowMap.value(parent.row());
+        return m_map.contains(groupKey) && !m_map.value(groupKey).isEmpty();
     }
 
     // 这是子项：没有子节点
@@ -187,28 +180,30 @@ QVariant RoleGroupModel::data(const QModelIndex &index, int role) const
 
     if (parentPos == -1) {
         // 这是分组节点（顶级项目）
-        auto list = m_rowMap.value(index.row(), nullptr);
-        if (nullptr == list || list->isEmpty()) {
+        const QString groupKey = m_rowMap.value(index.row());
+        const QList<int> &list = m_map.value(groupKey);
+        if (list.isEmpty()) {
             return QVariant();
         }
 
         // 对于分组节点，显示分组信息和数量
         if (role == Qt::DisplayRole) {
-            QString groupValue = sourceModel()->index(list->first(), 0).data(m_roleForDeduplication).toString();
-            return QString("%1 (%2)").arg(groupValue).arg(list->size());
+            QString groupValue = sourceModel()->index(list.first(), 0).data(m_roleForDeduplication).toString();
+            return QString("%1 (%2)").arg(groupValue).arg(list.size());
         } else {
             // 对于其他角色，返回分组中第一个项目的数据
-            return sourceModel()->index(list->first(), 0).data(role);
+            return sourceModel()->index(list.first(), 0).data(role);
         }
     } else {
         // 这是子项目
-        auto list = m_rowMap.value(parentPos);
-        if (list == nullptr || index.row() < 0 || index.row() >= list->size()) {
+        const QString groupKey = m_rowMap.value(parentPos);
+        const QList<int> &list = m_map.value(groupKey);
+        if (index.row() < 0 || index.row() >= list.size()) {
             return QVariant();
         }
 
         // 直接返回对应源项目的数据
-        return sourceModel()->index(list->value(index.row()), 0).data(role);
+        return sourceModel()->index(list.value(index.row()), 0).data(role);
     }
 }
 
@@ -220,8 +215,9 @@ QModelIndex RoleGroupModel::index(int row, int column, const QModelIndex &parent
             return QModelIndex();
         }
 
-        auto list = m_rowMap.value(parentRow);
-        if (nullptr == list || row < 0 || row >= list->size()) {
+        const QString groupKey = m_rowMap.value(parentRow);
+        const QList<int> &list = m_map.value(groupKey);
+        if (row < 0 || row >= list.size()) {
             return QModelIndex();
         }
 
@@ -258,24 +254,25 @@ QModelIndex RoleGroupModel::mapToSource(const QModelIndex &proxyIndex) const
     }
 
     auto parentIndex = proxyIndex.parent();
-    QList<int> *list = nullptr;
 
     if (parentIndex.isValid()) {
         int parentRow = parentIndex.row();
         if (parentRow < 0 || parentRow >= m_rowMap.size()) {
             return QModelIndex();
         }
-        list = m_rowMap.value(parentRow);
-        if (!list || proxyIndex.row() >= list->size()) {
+        const QString groupKey = m_rowMap.value(parentRow);
+        const QList<int> &list = m_map.value(groupKey);
+        if (proxyIndex.row() >= list.size()) {
             return QModelIndex();
         }
-        return sourceModel()->index(list->value(proxyIndex.row()), 0);
+        return sourceModel()->index(list.value(proxyIndex.row()), 0);
     } else {
-        list = m_map.value(proxyIndex.data(m_roleForDeduplication).toString());
-        if (!list || list->isEmpty()) {
+        const QString groupKey = m_rowMap.value(proxyIndex.row());
+        const QList<int> &list = m_map.value(groupKey);
+        if (list.isEmpty()) {
             return QModelIndex();
         }
-        return sourceModel()->index(list->value(0), 0);
+        return sourceModel()->index(list.value(0), 0);
     }
 }
 
@@ -286,18 +283,20 @@ QModelIndex RoleGroupModel::mapFromSource(const QModelIndex &sourceIndex) const
         return QModelIndex();
     }
 
-    auto list = m_map.value(data, nullptr);
-    if (nullptr == list || 0 == list->size()) {
-        return {};
+    if (!m_map.contains(data)) {
+        return QModelIndex();
     }
 
-    if (sourceIndex.row() == list->first()) {
-        return createIndex(m_rowMap.indexOf(list), 0, -1);
+    const QList<int> &list = m_map.value(data);
+    int groupRow = m_rowMap.indexOf(data);
+
+    if (sourceIndex.row() == list.first()) {
+        return createIndex(groupRow, 0, -1);
     }
 
-    auto pos = list->indexOf(sourceIndex.row());
+    auto pos = list.indexOf(sourceIndex.row());
     if (pos >= 0) {
-        return createIndex(pos, 0, m_rowMap.indexOf(list));
+        return createIndex(pos, 0, groupRow);
     }
 
     return QModelIndex();
@@ -306,7 +305,6 @@ QModelIndex RoleGroupModel::mapFromSource(const QModelIndex &sourceIndex) const
 void RoleGroupModel::rebuildTreeSource()
 {
     beginResetModel();
-    qDeleteAll(m_rowMap);
     m_map.clear();
     m_rowMap.clear();
 
@@ -322,25 +320,23 @@ void RoleGroupModel::rebuildTreeSource()
             continue;
         }
 
-        auto list = m_map.value(data, nullptr);
-        if (nullptr == list) {
-            list = new QList<int>();
-            m_map.insert(data, list);
-            m_rowMap.append(list);
+        if (!m_map.contains(data)) {
+            m_rowMap.append(data);
+            m_map.insert(data, QList<int>());
         }
-        list->append(i);
+        m_map[data].append(i);
     }
     endResetModel();
 }
 
-void RoleGroupModel::adjustMap(int base, int offset)
+void RoleGroup_model::adjustMap(int base, int offset)
 {
     for (int i = 0; i < m_rowMap.count(); ++i) {
-        auto sourceRows = m_rowMap.value(i);
-        for (int j = 0; j < sourceRows->size(); ++j) {
-            if (sourceRows->value(j) < base)
+        QList<int> &sourceRows = m_map[m_rowMap.value(i)];
+        for (int j = 0; j < sourceRows.size(); ++j) {
+            if (sourceRows.value(j) < base)
                 continue;
-            (*sourceRows)[j] += offset;
+            sourceRows[j] += offset;
         }
     }
 }

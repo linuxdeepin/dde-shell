@@ -12,7 +12,6 @@ class RoleGroupModel : public QAbstractProxyModel
 
 public:
     explicit RoleGroupModel(QAbstractItemModel *sourceModel, int role, QObject *parent = nullptr);
-    ~RoleGroupModel();
     void setSourceModel(QAbstractItemModel *sourceModel) override;
 
     void setDeduplicationRole(const int &role);
@@ -42,8 +41,8 @@ private:
     int m_roleForDeduplication;
 
     // for order
-    QList<QList<int> *> m_rowMap;
+    QList<QString> m_rowMap;
 
     // data 2 source row
-    QHash<QString, QList<int> *> m_map;
+    QHash<QString, QList<int>> m_map;
 };

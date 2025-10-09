@@ -9,10 +9,14 @@ import org.deepin.dtk 1.0 as D
 Item {
     id :control
     property bool offscreen: false
-    property alias radius: blur.blurMax
+    property alias radius: blur.radius
     property alias content: content
     default property alias data: blitter.data
     readonly property bool valid: blitter.blitterEnabled
+
+    // Note: The original MultiEffect was replaced with FastBlur to improve
+    // performance and reduce memory consumption. The 'saturation' property
+    // was removed as part of this optimization.
 
     D.BackdropBlitter {
         id: blitter
