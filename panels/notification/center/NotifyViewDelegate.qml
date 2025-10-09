@@ -134,6 +134,13 @@ DelegateChooser {
             contentIcon: model.contentIcon
             contentRowCount: model.contentRowCount
             enableDismissed: false
+            notifyContent.clearButton: AnimationSettingButton {
+                icon.name: "clean-alone"
+                text: qsTr("Clean All")
+                onClicked: function () {
+                    notifyContent.remove()
+                }
+            }
 
             Loader {
                 anchors.fill: parent

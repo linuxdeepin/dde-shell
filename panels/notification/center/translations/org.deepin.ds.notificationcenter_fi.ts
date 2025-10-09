@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="fi">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="fi">
 <context>
     <name>GroupNotify</name>
     <message>
@@ -59,7 +61,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation>Puhdista kaikki</translation>
+        <translation type="unfinished">Puhdista kaikki</translation>
     </message>
 </context>
 <context>

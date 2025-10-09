@@ -58,7 +58,7 @@
     </message>
 </context>
 <context>
-    <name>OverlapNotify</name>
+    <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
         <translation type="unfinished"></translation>
