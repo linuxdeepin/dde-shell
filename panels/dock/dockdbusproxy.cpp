@@ -48,7 +48,7 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
     };
 
     // TODO: DQmlGlobal maybe missing a  signal which named `appletListChanged`?
-    QTimer *timer = new QTimer;
+    QTimer *timer = new QTimer(this);
     timer->setInterval(1000);
     connect(timer, &QTimer::timeout, this, [ = ] {
         if (getOtherApplet()) {

@@ -13,6 +13,13 @@ RoleGroupModel::RoleGroupModel(QAbstractItemModel *sourceModel, int role, QObjec
     RoleGroupModel::setSourceModel(sourceModel);
 }
 
+RoleGroupModel::~RoleGroupModel()
+{
+    qDeleteAll(m_rowMap);
+    m_rowMap.clear();
+    m_map.clear();
+}
+
 void RoleGroupModel::setDeduplicationRole(const int &role)
 {
     if (role != m_roleForDeduplication) {

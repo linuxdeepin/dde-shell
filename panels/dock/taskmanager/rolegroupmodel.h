@@ -12,6 +12,7 @@ class RoleGroupModel : public QAbstractProxyModel
 
 public:
     explicit RoleGroupModel(QAbstractItemModel *sourceModel, int role, QObject *parent = nullptr);
+    ~RoleGroupModel();
     void setSourceModel(QAbstractItemModel *sourceModel) override;
 
     void setDeduplicationRole(const int &role);
