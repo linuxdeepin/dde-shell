@@ -9,6 +9,13 @@
     </message>
 </context>
 <context>
+    <name>AppItem</name>
+    <message>
+        <source>Move to Trash</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
     <name>dock::AppItem</name>
     <message>
         <source>Open</source>

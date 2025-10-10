@@ -3,14 +3,14 @@
     <name>dock::MultiTaskView</name>
     <message>
         <source>Multitasking View</source>
-        <translation>Pamje multidetyror</translation>
+        <translation>Pamje Multitasking</translation>
     </message>
 </context>
 <context>
     <name>multitaskview</name>
     <message>
         <source>Multitasking View</source>
-        <translation>Pamje multidetyror</translation>
+        <translation>Pamje Multitasking</translation>
     </message>
 </context>
 </TS>

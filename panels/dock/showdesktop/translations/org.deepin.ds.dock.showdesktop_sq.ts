@@ -3,7 +3,7 @@
     <name>showdesktop</name>
     <message>
         <source>show desktop</source>
-        <translation>trego desktop</translation>
+        <translation>shfaq desktopin</translation>
     </message>
 </context>
 </TS>

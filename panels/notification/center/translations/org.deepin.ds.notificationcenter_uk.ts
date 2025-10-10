@@ -61,7 +61,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished">Вилучити все</translation>
+        <translation>Вилучити усе</translation>
     </message>
 </context>
 <context>

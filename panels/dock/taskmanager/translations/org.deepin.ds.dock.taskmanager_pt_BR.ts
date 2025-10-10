@@ -9,6 +9,13 @@
     </message>
 </context>
 <context>
+    <name>AppItem</name>
+    <message>
+        <source>Move to Trash</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
     <name>dock::AppItem</name>
     <message>
         <source>Open</source>
@@ -20,11 +27,11 @@
     </message>
     <message>
         <source>Dock</source>
-        <translation>Dock</translation>
+        <translation>Fixar no dock</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation>Forçar encerramento</translation>
+        <translation>Forçar encerrar</translation>
     </message>
     <message>
         <source>Close All</source>
@@ -39,15 +46,15 @@
     </message>
     <message>
         <source>Undock</source>
-        <translation>Desencaixar</translation>
+        <translation>Remover do dock</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation>Dock</translation>
+        <translation>Fixar no dock</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation>Forçar saída</translation>
+        <translation>Forçar encerrar</translation>
     </message>
     <message>
         <source>Close All</source>

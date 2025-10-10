@@ -47,7 +47,7 @@
     </message>
     <message>
         <source>Status</source>
-        <translation>Exibição</translation>
+        <translation>Visibilidade</translation>
     </message>
     <message>
         <source>Keep Shown</source>
@@ -67,7 +67,7 @@
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation>Bloquear a Dock</translation>
+        <translation>Bloquear dock</translation>
     </message>
 </context>
 </TS>
