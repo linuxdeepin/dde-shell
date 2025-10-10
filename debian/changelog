@@ -1,3 +1,22 @@
+dde-shell (2.0.13) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1283)
+  * feat: add delayed window state reset with singleShot
+  * fix: show tray action icons during drag operations
+  * feat: enhance trash functionality with file count and drag hints
+  * fix: prevent time text flickering on hover
+  * fix: Ensure the show desktop line is always 1 physical pixel
+    regardless of system scaling
+  * feat: add clean all button to notification center
+  * feat: implement close all windows functionality
+  * chore: update window icon geometry via new taskmanager interface
+  * feat: add sorting to tray items
+  * fix: The newly dragged in stash container item is not displayed at
+    the back (#1280)
+  * i18n: Updates for project Deepin Desktop Environment (#1276)
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Fri, 10 Oct 2025 17:32:04 +0800
+
 dde-shell (2.0.12) unstable; urgency=medium
 
   * fix: prevent dragging items to fixed plugin section
