@@ -1,5 +1,12 @@
 <?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="de_DE">
 <context>
+    <name>AppItem</name>
+    <message>
+        <source>Move to Trash</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
     <name>dock::AppItem</name>
     <message>
         <source>Open</source>
@@ -43,6 +50,13 @@
     <message>
         <source>Close All</source>
         <translation>Alles schließen</translation>
+    </message>
+</context>
+<context>
+    <name>dock::TaskManager</name>
+    <message>
+        <source>%1 files</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 </TS>
