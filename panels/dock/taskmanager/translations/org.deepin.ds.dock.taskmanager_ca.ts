@@ -1,18 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ca">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ca">
 <context>
     <name>AppItem</name>
     <message>
         <source>Move to Trash</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>AppItem</name>
-    <message>
-        <source>Move to Trash</source>
-        <translation type="unfinished"/>
+        <translation>Mou a la paperera</translation>
     </message>
 </context>
 <context>
@@ -65,7 +56,7 @@
     <name>dock::TaskManager</name>
     <message>
         <source>%1 files</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 fitxers</translation>
     </message>
 </context>
 </TS>
