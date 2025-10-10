@@ -3,7 +3,7 @@
     <name>AppItem</name>
     <message>
         <source>Move to Trash</source>
-        <translation type="unfinished"/>
+        <translation>Verplaatsen naar prullenbak</translation>
     </message>
 </context>
 <context>
@@ -56,7 +56,7 @@
     <name>dock::TaskManager</name>
     <message>
         <source>%1 files</source>
-        <translation type="unfinished"/>
+        <translation>%1 bestanden</translation>
     </message>
 </context>
 </TS>
