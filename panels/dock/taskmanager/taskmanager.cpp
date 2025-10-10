@@ -24,6 +24,8 @@
 #include <QGuiApplication>
 #include <QStringLiteral>
 #include <QUrl>
+#include <QDir>
+#include <QStandardPaths>
 #include <DTrashManager>
 
 #include <appletbridge.h>
@@ -423,6 +425,20 @@ void TaskManager::saveDockElementsOrder(const QStringList &appIds)
         }
     }
     TaskManagerSettings::instance()->setDockedElements(newDockedElements);
+}
+
+QString TaskManager::getTrashTipText()
+{
+    int fileCount = 0;
+    QString trashPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/Trash/files";
+    QDir trashDir(trashPath);
+    
+    if (trashDir.exists()) {
+        QStringList entries = trashDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+        fileCount = entries.size();
+    }
+
+    return tr("%1 files").arg(fileCount);
 }
 
 void TaskManager::modifyOpacityChanged()

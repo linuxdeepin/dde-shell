@@ -1,4 +1,13 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="fi">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="fi">
+<context>
+    <name>AppItem</name>
+    <message>
+        <source>Move to Trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 <context>
     <name>AppItem</name>
     <message>
@@ -56,7 +65,7 @@
     <name>dock::TaskManager</name>
     <message>
         <source>%1 files</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

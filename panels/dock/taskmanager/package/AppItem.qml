@@ -369,9 +369,17 @@ Item {
 
         PanelToolTip {
             id: toolTip
-            text: root.name
+            text: root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
             toolTipX: DockPanelPositioner.x
             toolTipY: DockPanelPositioner.y
+        }
+
+        PanelToolTip {
+            id: dragToolTip
+            text: qsTr("Move to Trash")
+            toolTipX: DockPanelPositioner.x
+            toolTipY: DockPanelPositioner.y
+            visible: false
         }
 
         Timer {
@@ -396,6 +404,20 @@ Item {
     DropArea {
         anchors.fill: parent
         keys: ["dfm_app_type_for_drag"]
+
+        onEntered: function (drag) {
+            if (root.itemId === "dde-trash") {
+                var point = root.mapToItem(null, root.width / 2, root.height / 2)
+                dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
+                dragToolTip.open()
+            }
+        }
+
+        onExited: function (drag) {
+            if (root.itemId === "dde-trash") {
+                dragToolTip.close()
+            }
+        }
 
         onDropped: function (drop){
             root.dropFilesOnItem(root.itemId, drop.urls)

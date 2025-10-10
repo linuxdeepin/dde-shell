@@ -152,6 +152,8 @@ Item {
             surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
             source = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-source")
             console.log(surfaceId, source)
+            // Make action icons (collapse/show stash) visible while dragging over tray
+            DDT.TraySortOrderModel.actionsAlwaysVisible = true
             if (source !== "" && DDT.TraySortOrderModel.isDisplayedSurface(surfaceId)) {
                 dragEvent.accepted = false
             } else {
@@ -219,6 +221,10 @@ Item {
             if (source !== "" && !isDropped) {
                 dropTrayTimer.stop()
                 DDT.TraySortOrderModel.setSurfaceVisible(surfaceId, false)
+            }
+            // Hide action icons when drag leaves tray without dropping
+            if (!isDropped) {
+                DDT.TraySortOrderModel.actionsAlwaysVisible = false
             }
         }
 

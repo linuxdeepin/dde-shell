@@ -1,4 +1,13 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_HK">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_HK">
+<context>
+    <name>AppItem</name>
+    <message>
+        <source>Move to Trash</source>
+        <translation>移動到回收站</translation>
+    </message>
+</context>
 <context>
     <name>AppItem</name>
     <message>
