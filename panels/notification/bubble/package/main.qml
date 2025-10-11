@@ -25,7 +25,7 @@ Window {
         if (dockScreen !== screen || dockIsHide)
             return 0
 
-        let dockSize = dockApplet.dockSize
+        let dockSize = dockApplet.rootObject.dockSize
         let dockPosition = dockApplet.position
         return dockPosition === position ? dockSize : 0
     }
