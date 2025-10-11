@@ -211,7 +211,7 @@ NotifyItem {
                         maximumLineCount: root.contentRowCount
                         font: DTK.fontManager.t8
                         color: palette.windowText
-                        wrapMode: Text.WordWrap
+                        wrapMode: Text.Wrap
                         elide: Text.ElideRight
                         linkColor: palette.highlight
                         onLinkActivated: function (link) {
