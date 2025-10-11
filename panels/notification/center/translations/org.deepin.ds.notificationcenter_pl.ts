@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="pl">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pl">
 <context>
     <name>GroupNotify</name>
     <message>
         <source>Clear All</source>
-        <translation>Wyczyść wszystko</translation>
+        <translation>Wyczyść wszystkie</translation>
     </message>
     <message>
         <source>Fold</source>
@@ -31,7 +29,7 @@
     </message>
     <message>
         <source>Clear All</source>
-        <translation>Wyczyść wszystko</translation>
+        <translation>Wyczyść wszystkie</translation>
     </message>
     <message>
         <source>Fold</source>
@@ -61,7 +59,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished">Wyczyść wszystkie</translation>
+        <translation>Wyczyść wszystkie</translation>
     </message>
 </context>
 <context>
