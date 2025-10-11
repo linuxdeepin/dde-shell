@@ -78,7 +78,7 @@
             "visibility": "private"
         },
         "selfMaintenanceTrayPlugins": {
-            "value": ["libapplication-tray.so", "libbrightness.so", "libdatetime.so", "libdnd-mode.so", "libeye-comfort-mode.so", "libmedia.so", "libnotification.so", "libonboard.so", "libshutdown.so", "libairplane-mode.so", "libbluetooth.so", "libdock-tray-network-plugin.so", "libdock-wirelesscasting-plugin.so", "libkeyboard-layout.so", "libpower.so", "libsound.so"],
+            "value": ["libapplication-tray.so", "libbrightness.so", "libdatetime.so", "libdnd-mode.so", "libeye-comfort-mode.so", "libmedia.so", "libnotification.so", "libonboard.so", "libshutdown.so", "libairplane-mode.so", "libbluetooth.so", "libdock-network-plugin.so", "libdock-wirelesscasting-plugin.so", "libkeyboard-layout.so", "libpower.so", "libsound.so"],
             "serial": 0,
             "flags": [],
             "name": "self maintenance plugins",
