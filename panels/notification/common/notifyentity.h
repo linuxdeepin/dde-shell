@@ -30,6 +30,7 @@ public:
         Dismissed = 2,
         Closed = 3,
         Unknown = 4,
+        Timeout = 5,
     };
 
     NotifyEntity();

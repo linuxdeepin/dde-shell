@@ -144,6 +144,17 @@
       "description[zh_CN]": "应用名称映射",
       "permissions": "readwrite",
       "visibility": "private"
+    },
+    "notificationCleanupDays": {
+      "value": 7,
+      "serial": 0,
+      "flags": [],
+      "name": "notification cleanup days",
+      "name[zh_CN]": "通知清理天数",
+      "description": "Number of days after which notifications will be automatically cleaned up",
+      "description[zh_CN]": "通知自动清理的天数，超过此天数的通知将被自动删除",
+      "permissions": "readwrite",
+      "visibility": "public"
     }
   }
 }

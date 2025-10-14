@@ -116,6 +116,11 @@ NotifyEntity DataAccessorProxy::fetchLastEntity(uint notifyId)
     return m_source->fetchLastEntity(notifyId);
 }
 
+QList<NotifyEntity> DataAccessorProxy::fetchExpiredEntities(qint64 expiredTime)
+{
+    return m_source->fetchExpiredEntities(expiredTime);
+}
+
 QList<NotifyEntity> DataAccessorProxy::fetchEntities(const QString &appName, int processedType, int maxCount)
 {
     if (processedType == NotifyEntity::NotProcessed) {
