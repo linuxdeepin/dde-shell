@@ -83,6 +83,7 @@ private slots:
     void onHandingPendingEntities();
     void removePendingEntity(const NotifyEntity &entity);
     void onScreenLockedChanged(bool);
+    void onCleanupExpiredNotifications();
 
 private:
     uint m_replacesCount = 0;
@@ -91,10 +92,12 @@ private:
     DataAccessor *m_persistence = nullptr;
     NotificationSetting *m_setting = nullptr;
     QTimer *m_pendingTimeout = nullptr;
+    QTimer *m_cleanupTimer = nullptr;
     qint64 m_lastTimeoutPoint = std::numeric_limits<qint64>::max();
     QMultiHash<qint64, NotifyEntity> m_pendingTimeoutEntities;
     QStringList m_systemApps;
     QMap<QString, QVariant> m_appNamesMap;
+    int m_cleanupDays = 7;
 };
 
 } // notification
