@@ -204,7 +204,7 @@ NotifyItem {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     Text {
                         id: bodyText
-                        Layout.alignment: Qt.AlignLeft
+                        Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                         Layout.fillWidth: true
                         visible: text !== ""
                         text: root.content
