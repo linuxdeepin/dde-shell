@@ -225,6 +225,7 @@ void TreeLandWindowMonitor::handleForeignToplevelHandleRemoved()
     auto window = m_windows.value(id, nullptr);
 
     if (window) {
+        destroyWindow(window.get());
         m_windows.remove(id);
     }
 }
