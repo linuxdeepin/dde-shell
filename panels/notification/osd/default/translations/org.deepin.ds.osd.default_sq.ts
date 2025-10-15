@@ -59,7 +59,7 @@
     </message>
     <message>
         <source>High performance</source>
-        <translation>Këshilla higëzuar</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Window effect enabled</source>
@@ -75,11 +75,11 @@
     </message>
     <message>
         <source>Microphone off</source>
-        <translation type="unfinished"/>
+        <translation>Mikrofoni fikur</translation>
     </message>
     <message>
         <source>Microphone on</source>
-        <translation type="unfinished"/>
+        <translation>Mikrofoni hapur</translation>
     </message>
 </context>
 </TS>
