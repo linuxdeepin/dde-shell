@@ -75,6 +75,7 @@ public:
 
     void
     requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
+    void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
 
 private Q_SLOTS:
     friend class ForeignToplevelManager;

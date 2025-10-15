@@ -176,6 +176,15 @@ void TreeLandWindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
     }
 }
 
+void TreeLandWindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+{
+    uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+    auto window = m_windows.value(winId, nullptr);
+    if (window) {
+        window->setWindowIconGeometry(qobject_cast<QWindow *>(delegate), geometry);
+    }
+}
+
 void TreeLandWindowMonitor::handleForeignToplevelHandleAdded()
 {
     auto handle = qobject_cast<ForeignToplevelHandle*>(sender());
