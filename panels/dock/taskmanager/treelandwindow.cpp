@@ -100,8 +100,10 @@ void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_state(wl_array *
 
 void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_done()
 {
-    m_isReady = true;
-    Q_EMIT handlerIsReady();
+    if (!m_isReady) {
+        m_isReady = true;
+        Q_EMIT handlerIsReady();
+    }
 }
 void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_closed()
 {
