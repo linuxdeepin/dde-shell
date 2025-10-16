@@ -49,9 +49,14 @@ NotificationManager::NotificationManager(QObject *parent)
     , m_persistence(DataAccessorProxy::instance())
     , m_setting(new NotificationSetting(this))
     , m_pendingTimeout(new QTimer(this))
+    , m_cleanupTimer(new QTimer(this))
 {
     m_pendingTimeout->setSingleShot(true);
     connect(m_pendingTimeout, &QTimer::timeout, this, &NotificationManager::onHandingPendingEntities);
+    
+    m_cleanupTimer->setInterval(1000); 
+    connect(m_cleanupTimer, &QTimer::timeout, this, &NotificationManager::onCleanupExpiredNotifications);
+    m_cleanupTimer->start();
 
     DataAccessorProxy::instance()->setSource(DBAccessor::instance());
 
@@ -77,7 +82,9 @@ NotificationManager::NotificationManager(QObject *parent)
     m_systemApps = config->value("systemApps").toStringList();
     // TODO temporary fix for AppNamesMap
     m_appNamesMap = config->value("AppNamesMap").toMap();
-
+    if(!config->value("notificationCleanupDays").isNull()) {
+        m_cleanupDays = config->value("notificationCleanupDays").toInt();
+    } 
     if (QStringLiteral("wayland") != QGuiApplication::platformName()) {
         initScreenLockedState();
     }
@@ -457,6 +464,8 @@ void NotificationManager::updateEntityProcessed(qint64 id, uint reason)
     if (entity.isValid()) {
         if ((reason == NotifyEntity::Closed || reason == NotifyEntity::Dismissed) && entity.processedType() == NotifyEntity::NotProcessed) {
             entity.setProcessedType(NotifyEntity::Removed);
+        } else if (reason == NotifyEntity::Timeout) {
+            entity.setProcessedType(NotifyEntity::Removed);
         } else {
             entity.setProcessedType(NotifyEntity::Processed);
         }
@@ -673,6 +682,16 @@ void NotificationManager::removePendingEntity(const NotifyEntity &entity)
 void NotificationManager::onScreenLockedChanged(bool screenLocked)
 {
     m_screenLocked = screenLocked;
+}
+
+void NotificationManager::onCleanupExpiredNotifications()
+{    
+    const qint64 cutoffTime = QDateTime::currentDateTime().addDays(-m_cleanupDays).toMSecsSinceEpoch();
+    auto expiredEntities = m_persistence->fetchExpiredEntities(cutoffTime);
+    
+    for (const auto &entity : expiredEntities) {
+        notificationClosed(entity.id(), entity.bubbleId(), NotifyEntity::Timeout);
+    }
 }
 
 } // notification
