@@ -28,6 +28,7 @@ public:
 private:
     bool any(const QModelIndex &index, int role) const;
     QVariantList all(const QModelIndex &index, int role) const;
+    void resetActiveWindow(int parentRow);
 
 private:
     int m_roleForDeduplication;
