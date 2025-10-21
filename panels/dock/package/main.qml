@@ -114,6 +114,40 @@ Window {
         }
     }
 
+    Connections {
+        target: dockTransform
+        enabled: Qt.platform.pluginName === "xcb" && hideShowAnimation.running
+        
+        function onXChanged() {
+            if (dock.useColumnLayout) {
+                Panel.notifyDockPositionChanged(dockTransform.x, 0)
+            }
+        }
+        
+        function onYChanged() {
+            if (!dock.useColumnLayout) {
+                Panel.notifyDockPositionChanged(0, dockTransform.y)
+            }
+        }
+    }
+
+    Connections {
+        target: dock
+        enabled: Qt.platform.pluginName !== "xcb" && hideShowAnimation.running
+        
+        function onWidthChanged() {
+            if (dock.useColumnLayout) {
+                Panel.notifyDockPositionChanged()
+            }
+        }
+        
+        function onHeightChanged() {
+            if (!dock.useColumnLayout) {
+                Panel.notifyDockPositionChanged()
+            }
+        }
+    }
+
     Timer {
         id: hideTimer
         interval: 500

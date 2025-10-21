@@ -182,6 +182,11 @@ QRect DockPanel::geometry()
 
 QRect DockPanel::frontendWindowRect()
 {
+    return frontendWindowRect(0, 0);
+}
+
+QRect DockPanel::frontendWindowRect(int transformOffsetX, int transformOffsetY)
+{
     if(!window()) return QRect();
 
     auto ratio = window()->devicePixelRatio();
@@ -192,17 +197,19 @@ QRect DockPanel::frontendWindowRect()
     switch (position()) {
         case Top:
             xOffset = (screenGeometry.width() - geometry.width()) / 2;
+            yOffset = transformOffsetY;
             break;
         case Bottom:
             xOffset = (screenGeometry.width() - geometry.width()) / 2;
-            yOffset = screenGeometry.height() - geometry.height();
+            yOffset = screenGeometry.height() - geometry.height() + transformOffsetY;
             break;
         case Right:
-            xOffset = screenGeometry.width() - geometry.width();
+            xOffset = screenGeometry.width() - geometry.width() + transformOffsetX;
             yOffset = (screenGeometry.height() - geometry.height()) / 2;
             break;
         case Left:
-            yOffset = screenGeometry.height() - geometry.height();
+            xOffset = transformOffsetX;
+            yOffset = (screenGeometry.height() - geometry.height()) / 2;
             break;
     }
 
@@ -335,6 +342,11 @@ void DockPanel::openDockSettings() const
         .method(QStringLiteral("ShowPage"))
         .arg(QStringLiteral("personalization/dock"))
         .call();
+}
+
+void DockPanel::notifyDockPositionChanged(int offsetX, int offsetY)
+{
+    Q_EMIT frontendWindowRectChanged(frontendWindowRect(offsetX, offsetY));
 }
 
 void DockPanel::launcherVisibleChanged(bool visible)
