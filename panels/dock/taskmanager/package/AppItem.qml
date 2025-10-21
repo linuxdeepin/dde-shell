@@ -369,7 +369,6 @@ Item {
 
         PanelToolTip {
             id: toolTip
-            text: root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
             toolTipX: DockPanelPositioner.x
             toolTipY: DockPanelPositioner.y
         }
@@ -388,6 +387,7 @@ Item {
             onTriggered: {
                 var point = root.mapToItem(null, root.width / 2, root.height / 2)
                 toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+                toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
                 toolTip.open()
             }
         }
