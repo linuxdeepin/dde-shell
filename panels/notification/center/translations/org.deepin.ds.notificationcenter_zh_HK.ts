@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_HK">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_HK">
 <context>
     <name>GroupNotify</name>
     <message>
@@ -9,7 +7,7 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation>折疊</translation>
+        <translation>收起</translation>
     </message>
     <message>
         <source>More</source>
@@ -61,7 +59,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished">清除全部</translation>
+        <translation>清除全部</translation>
     </message>
 </context>
 <context>
