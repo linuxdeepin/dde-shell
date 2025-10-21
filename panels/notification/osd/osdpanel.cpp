@@ -47,7 +47,7 @@ bool OsdPanel::init()
     m_osdTimer = new QTimer(this);
     m_osdTimer->setInterval(m_interval);
     m_osdTimer->setSingleShot(true);
-    QObject::connect(m_osdTimer, &QTimer::timeout, this, &OsdPanel::hideOsd);
+    QObject::connect(m_osdTimer, &QTimer::timeout, this, &OsdPanel::doneSetting);
     return DPanel::init();
 }
 
@@ -71,6 +71,20 @@ void OsdPanel::ShowOSD(const QString &text)
     QTimer::singleShot(100, this, [this, text]() {
         setOsdType(text);
         showOsd();
+    });
+}
+
+void OsdPanel::doneSetting()
+{
+    if (qApp->queryKeyboardModifiers().testFlag(Qt::MetaModifier)) {
+        m_osdTimer->start();
+        return;
+    }
+
+    int delay = m_osdTimer->interval() - m_osdTimer->remainingTime();
+    if (delay < 0) delay = 0;
+    QTimer::singleShot(delay,this, [this](){
+        hideOsd();
     });
 }
 
