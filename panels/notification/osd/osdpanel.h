@@ -35,6 +35,8 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void hideOsd();
+    void doneSetting();
+
 private:
     void showOsd();
     void setVisible(const bool visible);
