@@ -51,6 +51,7 @@ public:
 
     QRect geometry();
     QRect frontendWindowRect();
+    QRect frontendWindowRect(int transformOffsetX, int transformOffsetY);
 
     HideState hideState();
 
@@ -78,6 +79,8 @@ public:
     bool debugMode() const;
 
     Q_INVOKABLE void openDockSettings() const;
+
+    Q_INVOKABLE void notifyDockPositionChanged(int offsetX, int offsetY);
 
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);
