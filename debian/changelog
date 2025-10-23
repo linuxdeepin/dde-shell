@@ -1,3 +1,15 @@
+dde-shell (2.0.15) unstable; urgency=medium
+
+  * fix: add missing definitions for dockpanel
+  * feat: add notification auto cleanup and timeout handling
+  * fix: Signals during the process of adding dock animations
+  * fix: move tooltip text assignment to show handler
+  * fix: improve OSD panel timeout behavior with modifier key
+  * i18n: Updates for project Deepin Desktop Environment (#1304)
+  * fix: sometimes clicking dock icon won't activate window as intended
+
+ -- wujiangyu <wujiangyu@uniontech.com>  Thu, 23 Oct 2025 15:59:54 +0800
+
 dde-shell (2.0.14) unstable; urgency=medium
 
   * i18n: Updates for project Deepin Desktop Environment (#1294)
