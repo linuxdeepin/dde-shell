@@ -97,9 +97,6 @@ public:
     Q_INVOKABLE void saveDockElementsOrder(const QStringList &appIds);
     Q_INVOKABLE QString getTrashTipText();
 
-private:
-    void moveFilesToTrash(const QStringList& urls);
-
 Q_SIGNALS:
     void dataModelChanged();
     void windowSplitChanged();
