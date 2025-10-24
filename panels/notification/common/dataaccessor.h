@@ -34,8 +34,11 @@ public:
     virtual NotifyEntity fetchEntity(qint64 id) { Q_UNUSED(id); return {}; }
     virtual int fetchEntityCount(const QString &appName, int processedType) const { Q_UNUSED(appName); Q_UNUSED(processedType); return 0; }
     virtual NotifyEntity fetchLastEntity(const QString &appName, int processedType) { Q_UNUSED(appName); Q_UNUSED(processedType); return {}; }
-    virtual NotifyEntity fetchLastEntity(uint notifyId) { Q_UNUSED(notifyId); return {}; }
-    virtual QList<NotifyEntity> fetchExpiredEntities(qint64 expiredTime) { Q_UNUSED(expiredTime); return {}; }
+    virtual NotifyEntity fetchLastEntity(uint notifyId)
+    {
+        Q_UNUSED(notifyId);
+        return {};
+    }
     virtual QList<NotifyEntity> fetchEntities(const QString &appName, int processedType, int maxCount)
     {
         Q_UNUSED(appName)
@@ -47,6 +50,10 @@ public:
 
     virtual void removeEntity(qint64 id) { Q_UNUSED(id); }
     virtual void removeEntityByApp(const QString &appName) { Q_UNUSED(appName); }
+    virtual void removeEntitiesByExpiredTime(qint64 expiredTime)
+    {
+        Q_UNUSED(expiredTime);
+    }
     virtual void clear() {}
     inline static QString AllApp()
     {

@@ -37,11 +37,11 @@ public:
     NotifyEntity fetchLastEntity(const QString &appName, int processedType) override;
     QList<NotifyEntity> fetchEntities(const QString &appName, int processedType, int maxCount) override;
     NotifyEntity fetchLastEntity(uint notifyId) override;
-    QList<NotifyEntity> fetchExpiredEntities(qint64 expiredTime) override;
     QList<QString> fetchApps(int maxCount) const override;
 
     void removeEntity(qint64 id) override;
     void removeEntityByApp(const QString &appName) override;
+    void removeEntitiesByExpiredTime(qint64 expiredTime) override;
     void clear() override;
 
 private:

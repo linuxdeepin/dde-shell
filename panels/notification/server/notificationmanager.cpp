@@ -49,14 +49,9 @@ NotificationManager::NotificationManager(QObject *parent)
     , m_persistence(DataAccessorProxy::instance())
     , m_setting(new NotificationSetting(this))
     , m_pendingTimeout(new QTimer(this))
-    , m_cleanupTimer(new QTimer(this))
 {
     m_pendingTimeout->setSingleShot(true);
     connect(m_pendingTimeout, &QTimer::timeout, this, &NotificationManager::onHandingPendingEntities);
-    
-    m_cleanupTimer->setInterval(1000); 
-    connect(m_cleanupTimer, &QTimer::timeout, this, &NotificationManager::onCleanupExpiredNotifications);
-    m_cleanupTimer->start();
 
     DataAccessorProxy::instance()->setSource(DBAccessor::instance());
 
@@ -171,6 +166,15 @@ void NotificationManager::removeNotifications(const QString &appName)
 void NotificationManager::removeNotifications()
 {
     m_persistence->clear();
+
+    emitRecordCountChanged();
+}
+
+void NotificationManager::removeExpiredNotifications()
+{
+    qDebug(notifyLog) << "Remove expired notifications.";
+    const qint64 cutoffTime = QDateTime::currentDateTime().addDays(-m_cleanupDays).toMSecsSinceEpoch();
+    m_persistence->removeEntitiesByExpiredTime(cutoffTime);
 
     emitRecordCountChanged();
 }
@@ -682,16 +686,6 @@ void NotificationManager::removePendingEntity(const NotifyEntity &entity)
 void NotificationManager::onScreenLockedChanged(bool screenLocked)
 {
     m_screenLocked = screenLocked;
-}
-
-void NotificationManager::onCleanupExpiredNotifications()
-{    
-    const qint64 cutoffTime = QDateTime::currentDateTime().addDays(-m_cleanupDays).toMSecsSinceEpoch();
-    auto expiredEntities = m_persistence->fetchExpiredEntities(cutoffTime);
-    
-    for (const auto &entity : expiredEntities) {
-        notificationClosed(entity.id(), entity.bubbleId(), NotifyEntity::Timeout);
-    }
 }
 
 } // notification
