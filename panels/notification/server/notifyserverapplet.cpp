@@ -56,6 +56,8 @@ bool NotifyServerApplet::init()
 
     connect(m_manager, &NotificationManager::NotificationStateChanged, this, &NotifyServerApplet::notificationStateChanged);
 
+    removeExpiredNotifications();
+
     m_worker = new QThread();
     m_manager->moveToThread(m_worker);
     m_worker->start();
@@ -95,6 +97,11 @@ void NotifyServerApplet::removeNotifications(const QString &appName)
 void NotifyServerApplet::removeNotifications()
 {
     m_manager->removeNotifications();
+}
+
+void NotifyServerApplet::removeExpiredNotifications()
+{
+    m_manager->removeExpiredNotifications();
 }
 
 D_APPLET_CLASS(NotifyServerApplet)

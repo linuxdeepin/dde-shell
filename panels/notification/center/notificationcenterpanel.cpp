@@ -102,6 +102,13 @@ void NotificationCenterPanel::setVisible(bool newVisible)
     if (m_visible == newVisible)
         return;
     m_visible = newVisible;
+    if (m_visible) {
+        qDebug(notifyLog) << "Try to remove expired notifications.";
+        DAppletBridge bridge("org.deepin.ds.notificationserver");
+        if (auto applet = bridge.applet()) {
+            QMetaObject::invokeMethod(applet, "removeExpiredNotifications", Qt::DirectConnection);
+        }
+    }
     notifycenter::NotifyAccessor::instance()->setEnabled(m_visible);
     setBubblePanelEnabled(!m_visible);
     emit visibleChanged();

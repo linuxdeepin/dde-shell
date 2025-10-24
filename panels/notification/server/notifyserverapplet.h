@@ -30,6 +30,7 @@ public Q_SLOTS:
     void removeNotification(qint64 id);
     void removeNotifications(const QString &appName);
     void removeNotifications();
+    void removeExpiredNotifications();
 
 private:
     NotificationManager *m_manager = nullptr;
