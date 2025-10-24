@@ -103,24 +103,6 @@ NotifyEntity MemoryAccessor::fetchLastEntity(uint notifyId)
     return {};
 }
 
-QList<NotifyEntity> MemoryAccessor::fetchExpiredEntities(qint64 expiredTime)
-{
-    QMutexLocker locker(&m_mutex);
-    QList<NotifyEntity> expiredEntities;
-    
-    for (const auto &entity : m_entities) {
-        if (entity.cTime() < expiredTime) {
-            expiredEntities.append(entity);
-        }
-    }
-    
-    std::sort(expiredEntities.begin(), expiredEntities.end(), [](const NotifyEntity &a, const NotifyEntity &b) {
-        return a.cTime() < b.cTime();
-    });
-    
-    return expiredEntities;
-}
-
 QList<NotifyEntity> MemoryAccessor::fetchEntities(const QString &appName, int processedType, int maxCount)
 {
     QMutexLocker locker(&m_mutex);
@@ -162,6 +144,14 @@ void MemoryAccessor::removeEntityByApp(const QString &appName)
     QMutexLocker locker(&m_mutex);
     m_entities.removeIf([appName](const NotifyEntity &entity) {
         return entity.appName() == appName;
+    });
+}
+
+void MemoryAccessor::removeEntitiesByExpiredTime(qint64 expiredTime)
+{
+    QMutexLocker locker(&m_mutex);
+    m_entities.removeIf([expiredTime](const NotifyEntity &entity) {
+        return entity.cTime() < expiredTime;
     });
 }
 

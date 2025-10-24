@@ -443,32 +443,6 @@ NotifyEntity DBAccessor::fetchLastEntity(uint notifyId)
     return {};
 }
 
-QList<NotifyEntity> DBAccessor::fetchExpiredEntities(qint64 expiredTime)
-{
-    BENCHMARK();
-
-    QMutexLocker locker(&m_mutex);
-    QSqlQuery query(m_connection);
-    
-    QString cmd = QString("SELECT %1 FROM notifications2 WHERE CTime < :expiredTime ORDER BY CTime ASC").arg(EntityFields.join(","));
-    query.prepare(cmd);
-    query.bindValue(":expiredTime", expiredTime);
-
-    if (!query.exec()) {
-        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
-        return {};
-    }
-
-    QList<NotifyEntity> expiredEntities;
-    while (query.next()) {
-        auto entity = parseEntity(query);
-        if (entity.isValid()) {
-            expiredEntities.append(entity);
-        }
-    }
-    return expiredEntities;
-}
-
 QList<QString> DBAccessor::fetchApps(int maxCount) const
 {
     BENCHMARK();
@@ -529,6 +503,25 @@ void DBAccessor::removeEntityByApp(const QString &appName)
     QString cmd("DELETE FROM notifications2 WHERE AppName = :appName");
     query.prepare(cmd);
     query.bindValue(":appName", appName);
+
+    if (!query.exec()) {
+        qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
+        return;
+    }
+
+    qDebug(notifyDBLog) << "Delete notify count" << query.numRowsAffected();
+}
+
+void DBAccessor::removeEntitiesByExpiredTime(qint64 expiredTime)
+{
+    BENCHMARK();
+
+    QMutexLocker locker(&m_mutex);
+    QSqlQuery query(m_connection);
+
+    QString cmd("DELETE FROM notifications2 WHERE CTime < :expiredTime");
+    query.prepare(cmd);
+    query.bindValue(":expiredTime", expiredTime);
 
     if (!query.exec()) {
         qWarning(notifyDBLog) << "Query execution error:" << query.lastError().text();
