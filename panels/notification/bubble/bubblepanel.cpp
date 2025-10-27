@@ -138,18 +138,10 @@ void BubblePanel::addBubble(qint64 id)
 
 void BubblePanel::closeBubble(qint64 id)
 {
-    const auto entity = m_accessor->fetchEntity(id);
-    if (entity.isValid()) {
-        id = entity.bubbleId();
-    } else {
-        qDebug(notifyLog) << "Entity not found or invalid for close bubble, using storage id lookup:" << id;
-        id = m_bubbles->getBubbleIdByStorageId(id);
-    }
-
     if (id > 0) {
         m_bubbles->removeById(id);
     } else {
-        qWarning(notifyLog) << "Failed to close bubble: invalid bubble id for entity id:" << id << "appName:" << entity.appName() << "cTime:" << entity.cTime();
+        qWarning(notifyLog) << "Failed to close bubble: invalid bubble id for entity id:" << id;
         clearInvalidBubbles();
     }
 }
