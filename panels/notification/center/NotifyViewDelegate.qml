@@ -102,11 +102,15 @@ DelegateChooser {
             }
             onRemove: function () {
                 console.log("remove normal", model.id)
+                let removeIndex = index
                 notifyModel.remove(model.id)
+                root.view.nextIndex = Math.min(removeIndex, root.view.count - 1)
             }
             onDismiss: function () {
                 console.log("dismiss normal", model.id)
+                let dismissIndex = index
                 notifyModel.remove(model.id)
+                root.view.nextIndex = Math.min(dismissIndex, root.view.count - 1)
             }
             onActionInvoked: function (actionId) {
                 console.log("action normal", model.id, actionId)
@@ -163,7 +167,9 @@ DelegateChooser {
             onExpand: function ()
             {
                 console.log("expand")
-                notifyModel.expandApp(model.index)
+                let expandIndex = model.index
+                notifyModel.expandApp(expandIndex)
+                root.view.nextIndex = expandIndex + 1
             }
             onSetting: function (pos) {
                 let tmp = mapToItem(root.view, pos)

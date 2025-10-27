@@ -27,6 +27,13 @@ Control {
         snapMode: ListView.SnapToItem
         // activeFocusOnTab: true
         ScrollBar.vertical: ScrollBar { }
+        property int nextIndex: -1
+        
+        onNextIndexChanged: {
+            if (nextIndex >= 0 && count > 0) {
+                currentIndex = nextIndex
+            }
+        }
 
         model: root.notifyModel
         delegate: NotifyViewDelegate {
