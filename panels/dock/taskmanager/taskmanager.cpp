@@ -27,6 +27,7 @@
 #include <QStandardPaths>
 
 #include <appletbridge.h>
+#include <DSGApplication>
 
 #ifdef BUILD_WITH_X11
 #include "x11windowmonitor.h"
@@ -43,6 +44,25 @@ Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtDebugMsg)
                         >
 
 namespace dock {
+
+// 通过AM(Application Manager)匹配应用程序的辅助函数
+static QString getDesktopIdByPid(const QStringList &identifies)
+{
+    if (identifies.isEmpty())
+        return {};
+
+    pid_t windowPid = identifies.last().toInt();
+    if (windowPid <= 0)
+        return {};
+
+    auto appId = DSGApplication::getId(windowPid);
+    if (appId.isEmpty()) {
+        qCDebug(taskManagerLog) << "appId is empty, AM failed to identify window with pid:" << windowPid;
+        return {};
+    }
+        
+    return QString::fromUtf8(appId);
+}
 
 class BoolFilterModel : public QSortFilterProxyModel, public AbstractTaskManagerInterface
 {
@@ -126,6 +146,16 @@ bool TaskManager::init()
                         qCDebug(taskManagerLog) << "matched" << res;
                         return res;
                     }
+                }
+            }
+            
+            // 尝试通过AM(Application Manager)匹配应用程序
+            auto desktopId = getDesktopIdByPid(identifies);
+            if (!desktopId.isEmpty()) {
+                auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), desktopId, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
+                if (res.isValid()) {
+                    qCDebug(taskManagerLog) << "matched by AM desktop ID:" << desktopId << res;
+                    return res;
                 }
             }
 

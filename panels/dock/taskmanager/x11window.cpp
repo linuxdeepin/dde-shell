@@ -49,11 +49,6 @@ QStringList X11Window::identity()
 {
     if (m_identity.isEmpty()) {
         m_identity = X11->getWindowWMClass(m_windowID);
-        if (auto appItem = getAppItem()) {
-            m_identity.append(appItem->desktopfileID());
-        } else {
-            qCWarning(x11windowLog) << "identify not found appitem." << id();
-        }
         m_identity.append(QString::number(pid()));
     }
 
