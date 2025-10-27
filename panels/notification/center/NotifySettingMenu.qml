@@ -11,6 +11,7 @@ Menu {
     id: root
 
     closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
+    modal: true
 
     function toggle()
     {
