@@ -175,9 +175,8 @@ void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)
 
     uint32_t value_list[] = { XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_VISIBILITY_CHANGE};
     xcb_change_window_attributes(X11->getXcbConnection(), xcb_window, XCB_CW_EVENT_MASK, value_list);
-    Q_EMIT AbstractWindowMonitor::windowAdded(static_cast<QPointer<AbstractWindow>>(window.get()));
     trackWindow(window.get());
-
+    Q_EMIT AbstractWindowMonitor::windowAdded(static_cast<QPointer<AbstractWindow>>(window.get()));
 }
 
 void X11WindowMonitor::onWindowDestroyed(xcb_window_t xcb_window)
