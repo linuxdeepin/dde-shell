@@ -539,6 +539,7 @@ Window {
         property int averageCount: 5
         hoverEnabled: true
         propagateComposedEvents: true
+        enabled: !Panel.locked
 
         cursorShape: {
             if (Panel.locked) {
