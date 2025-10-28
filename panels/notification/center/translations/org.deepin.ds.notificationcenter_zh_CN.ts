@@ -33,7 +33,7 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation>折叠</translation>
+        <translation>收起</translation>
     </message>
     <message>
         <source>More</source>
