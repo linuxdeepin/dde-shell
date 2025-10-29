@@ -72,6 +72,8 @@ AppletItem {
         ListElement { type: "SwitchWM3D"; iconName: "osd_wm_3d"; text: qsTr("Window effect enabled")}
         ListElement { type: "SwitchWM2D"; iconName: "osd_wm_2d"; text: qsTr("Window effect disabled")}
         ListElement { type: "SwitchWMError"; iconName: "osd_wm_failed"; text: qsTr("Failed to enable window effects")}
+        ListElement { type: "CameraOn"; iconName: "osd_camera_on"; text: qsTr("Camera on")}
+        ListElement { type: "CameraOff"; iconName: "osd_camera_off"; text: qsTr("Camera off")}
     }
 
     RowLayout {
