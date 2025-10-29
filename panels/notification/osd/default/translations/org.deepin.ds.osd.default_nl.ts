@@ -81,5 +81,13 @@
         <source>Microphone on</source>
         <translation>Microfoon aan</translation>
     </message>
+    <message>
+        <source>Camera on</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Camera off</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 </TS>
