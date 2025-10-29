@@ -5,7 +5,7 @@
 
 audio=("AudioUp" "AudioDown" "AudioMute" "AudioUpAsh" "AudioDownAsh" "AudioMuteAsh")
 brightness=("BrightnessUp" "BrightnessDown" "BrightnessUpAsh" "BrightnessDownAsh")
-default=("WLANOn" "WLANOff" "CapsLockOn" "CapsLockOff" "NumLockOn" "NumLockOff" "TouchpadOn" "TouchpadOff" "TouchpadToggle" "FnToggle" "AirplaneModeOn" "AirplaneModeOff" "AudioMicMuteOn" "AudioMicMuteOff" "balance" "powersave" "performance" "SwitchWM3D" "SwitchWM2D" "SwitchWMError")
+default=("WLANOn" "WLANOff" "CapsLockOn" "CapsLockOff" "NumLockOn" "NumLockOff" "TouchpadOn" "TouchpadOff" "TouchpadToggle" "FnToggle" "AirplaneModeOn" "AirplaneModeOff" "AudioMicMuteOn" "AudioMicMuteOff" "balance" "powersave" "performance" "SwitchWM3D" "SwitchWM2D" "SwitchWMError" "CameraOn" "CameraOff")
 display=("SwitchMonitors")
 kblayout=("SwitchLayout")
 windoweffect=("SwitchWM")
