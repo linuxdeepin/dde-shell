@@ -137,6 +137,7 @@ Item {
         Loader {
             id: contextMenuLoader
             active: false
+            property bool trashEmpty: true
             sourceComponent: LP.Menu {
                 id: contextMenu
                 Instantiator {
@@ -144,6 +145,9 @@ Item {
                     model: JSON.parse(menus)
                     delegate: LP.MenuItem {
                         text: modelData.name
+                        enabled: (root.itemId === "dde-trash" && modelData.id === "clean-trash")
+                                ? !contextMenuLoader.trashEmpty
+                                : true
                         onTriggered: {
                             TaskManager.requestNewInstance(root.modelIndex, modelData.id);
                         }
@@ -319,6 +323,7 @@ Item {
         onClicked: function (mouse) {
             let index = root.modelIndex;
             if (mouse.button === Qt.RightButton) {
+                contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
                 contextMenuLoader.active = true
                 MenuHelper.openMenu(contextMenuLoader.item)
             } else {

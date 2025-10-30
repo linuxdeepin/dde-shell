@@ -25,6 +25,7 @@
 #include <QStringLiteral>
 #include <QUrl>
 #include <QStandardPaths>
+#include <QProcess>
 
 #include <appletbridge.h>
 #include <DSGApplication>
@@ -436,16 +437,30 @@ void TaskManager::saveDockElementsOrder(const QStringList &appIds)
 
 QString TaskManager::getTrashTipText()
 {
-    int fileCount = 0;
-    QString trashPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/Trash/files";
-    QDir trashDir(trashPath);
-    
-    if (trashDir.exists()) {
-        QStringList entries = trashDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-        fileCount = entries.size();
-    }
+    const auto count = queryTrashCount();
+    return tr("%1 files").arg(count);
+}
 
-    return tr("%1 files").arg(fileCount);
+bool TaskManager::isTrashEmpty() const
+{
+    return queryTrashCount() == 0;
+}
+
+int TaskManager::queryTrashCount() const
+{
+    int count = 0;
+
+    QProcess gio;
+    gio.start("gio", QStringList() << "trash" << "--list");
+    if (gio.waitForFinished(1000) && gio.exitStatus() == QProcess::NormalExit && gio.exitCode() == 0) {
+        const QByteArray &out = gio.readAllStandardOutput();
+        const QList<QByteArray> lines = out.split('\n');
+        for (const QByteArray &l : lines) {
+            if (!l.trimmed().isEmpty()) count++;
+        }
+        return count;
+    }
+    return count;
 }
 
 void TaskManager::modifyOpacityChanged()
