@@ -97,6 +97,7 @@ public:
     Q_INVOKABLE void saveDockElementsOrder(const QStringList &appIds);
     Q_INVOKABLE QString getTrashTipText();
 
+    Q_INVOKABLE bool isTrashEmpty() const;
 Q_SIGNALS:
     void dataModelChanged();
     void windowSplitChanged();
@@ -114,6 +115,7 @@ private:
     DockGlobalElementModel *m_dockGlobalElementModel = nullptr;
     DockItemModel *m_itemModel = nullptr;
     HoverPreviewProxyModel *m_hoverPreviewModel = nullptr;
+    int queryTrashCount() const;
 };
 
 }
