@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_CN">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_CN">
 <context>
     <name>main</name>
     <message>
@@ -85,11 +83,11 @@
     </message>
     <message>
         <source>Camera on</source>
-        <translation type="unfinished"></translation>
+        <translation>摄像头已开启</translation>
     </message>
     <message>
         <source>Camera off</source>
-        <translation type="unfinished"></translation>
+        <translation>摄像头已关闭</translation>
     </message>
 </context>
 </TS>

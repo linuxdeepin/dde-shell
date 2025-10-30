@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="sq">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="sq">
 <context>
     <name>main</name>
     <message>
@@ -61,7 +59,7 @@
     </message>
     <message>
         <source>High performance</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Window effect enabled</source>
@@ -85,11 +83,11 @@
     </message>
     <message>
         <source>Camera on</source>
-        <translation type="unfinished"></translation>
+        <translation>Kamera hapur</translation>
     </message>
     <message>
         <source>Camera off</source>
-        <translation type="unfinished"></translation>
+        <translation>Kamera mbyllur</translation>
     </message>
 </context>
 </TS>
