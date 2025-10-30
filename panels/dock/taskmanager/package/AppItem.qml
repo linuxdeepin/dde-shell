@@ -306,6 +306,15 @@ Item {
             if (!drag.active) {
                 Panel.contextDragging = false
                 root.dragFinished()
+                // 确保拖拽结束时关闭回收站提示
+                if (root.itemId === "dde-trash") {
+                    console.warn("MouseArea drag.onActiveChanged: drag finished, closing dragToolTip for trash")
+                    isDragOver = false
+                    shouldShowTooltip = false
+                    tooltipVisible = false
+                    tooltipDelayTimer.stop()
+                    dragToolTip.close()
+                }
                 return
             }
             Panel.contextDragging = true
@@ -409,23 +418,102 @@ Item {
     DropArea {
         anchors.fill: parent
         keys: ["dfm_app_type_for_drag"]
+        
+        property bool isDragOver: false
+        property var lastDragPosition: Qt.point(0, 0)
+        property int dragStableThreshold: 5 // 像素阈值，小于这个距离的移动不重新计算位置
+        property bool shouldShowTooltip: false
+        property int lastEnterTime: 0
+        property int lastExitTime: 0
+        property int debounceThreshold: 50 // 50ms防抖阈值，更严格的防抖
+        property bool tooltipVisible: false
 
         onEntered: function (drag) {
+            var currentTime = Date.now()
+            console.warn("AppItem DropArea onEntered:", root.itemId, "drag entered at time", currentTime, "last exit:", lastExitTime, "diff:", currentTime - lastExitTime)
+            
+            // 如果距离上次退出时间太短，忽略这次进入事件
+            if (currentTime - lastExitTime < debounceThreshold) {
+                console.warn("AppItem DropArea onEntered: ignoring rapid enter event, too soon after exit")
+                return
+            }
+            
             if (root.itemId === "dde-trash") {
-                var point = root.mapToItem(null, root.width / 2, root.height / 2)
-                dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
-                dragToolTip.open()
+                isDragOver = true
+                lastDragPosition = Qt.point(drag.x, drag.y)
+                lastEnterTime = currentTime
+                shouldShowTooltip = true
+                // 如果提示已经显示，不再重新显示
+                if (!tooltipVisible) {
+                    // 使用定时器延迟显示，避免快速切换
+                    tooltipDelayTimer.start()
+                }
             }
         }
 
         onExited: function (drag) {
+            var currentTime = Date.now()
+            console.warn("AppItem DropArea onExited:", root.itemId, "drag exited at time", currentTime, "last enter:", lastEnterTime, "diff:", currentTime - lastEnterTime)
+            
+            // 如果距离上次进入时间太短，忽略这次退出事件
+            if (currentTime - lastEnterTime < debounceThreshold) {
+                console.warn("AppItem DropArea onExited: ignoring rapid exit event, too soon after enter")
+                return
+            }
+            
             if (root.itemId === "dde-trash") {
+                isDragOver = false
+                lastExitTime = currentTime
+                shouldShowTooltip = false
+                tooltipVisible = false
+                tooltipDelayTimer.stop()
+                console.warn("AppItem DropArea onExited: closing dragToolTip for trash")
                 dragToolTip.close()
+            }
+        }
+        
+        onPositionChanged: function (drag) {
+            if (root.itemId === "dde-trash" && isDragOver && drag) {
+                var currentPos = Qt.point(drag.x, drag.y)
+                var distance = Math.sqrt(Math.pow(currentPos.x - lastDragPosition.x, 2) + Math.pow(currentPos.y - lastDragPosition.y, 2))
+                
+                console.warn("AppItem DropArea onPositionChanged: drag moved", distance, "pixels, threshold:", dragStableThreshold)
+                
+                // 只有当移动距离超过阈值时才更新提示位置
+                if (distance > dragStableThreshold) {
+                    lastDragPosition = currentPos
+                    var point = root.mapToItem(null, root.width / 2, root.height / 2)
+                    console.warn("AppItem DropArea onPositionChanged: updating dragToolTip position to", point.x, point.y)
+                    dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
+                }
             }
         }
 
         onDropped: function (drop){
+            console.warn("AppItem DropArea onDropped: files dropped on", root.itemId)
+            if (root.itemId === "dde-trash") {
+                isDragOver = false
+                shouldShowTooltip = false
+                tooltipVisible = false
+                tooltipDelayTimer.stop()
+                dragToolTip.close()
+                console.warn("AppItem DropArea onDropped: closing dragToolTip for trash after drop")
+            }
             root.dropFilesOnItem(root.itemId, drop.urls)
+        }
+
+        Timer {
+            id: tooltipDelayTimer
+            interval: 50 // 50ms延迟，更快的响应
+            onTriggered: {
+                if (shouldShowTooltip && isDragOver) {
+                    var point = root.mapToItem(null, root.width / 2, root.height / 2)
+                    console.warn("AppItem DropArea tooltipDelayTimer: opening dragToolTip for trash at point", point.x, point.y)
+                    dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
+                    dragToolTip.open()
+                    tooltipVisible = true
+                }
+            }
         }
     }
 
