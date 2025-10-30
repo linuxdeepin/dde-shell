@@ -103,6 +103,43 @@ void DockPositioner::setY(int y)
 
 void DockPositioner::update()
 {
+    // 如果位置没有实质性变化，不重新计算
+    const auto newBounding = m_bounding;
+    const auto dockWindowRect = dockGeometry();
+    
+    int xPosition = 0;
+    int yPosition = 0;
+    switch (dockPosition()) {
+    case dock::Top: {
+        xPosition = newBounding.x();
+        yPosition = newBounding.y();
+        break;
+    }
+    case dock::Right: {
+        xPosition = newBounding.x() - newBounding.width();
+        yPosition = newBounding.y();
+        break;
+    }
+    case dock::Bottom: {
+        xPosition = newBounding.x();
+        yPosition = newBounding.y() - newBounding.height();
+        break;
+    }
+    case dock::Left: {
+        xPosition = newBounding.x();
+        yPosition = newBounding.y();
+        break;
+    }
+    default:
+        break;
+    }
+    
+    // 如果新计算的位置与当前位置相同，不触发更新
+    if (m_x == xPosition && m_y == yPosition) {
+        qWarning() << "DockPositioner::update: position unchanged, skipping update";
+        return;
+    }
+    
     m_positionTimer->start();
 }
 
@@ -201,6 +238,10 @@ void DockPanelPositioner::updatePosition()
     int yPosition = 0;
     int horizontalOffset = m_horizontalOffset == -1 ? m_bounding.width() / 2 : m_horizontalOffset;
     int vertialOffset = m_vertialOffset == -1 ? m_bounding.height() / 2 : m_vertialOffset;
+    
+    qWarning() << "DockPanelPositioner::updatePosition called for" << parent()->objectName()
+               << "bounding:" << m_bounding << "dockPosition:" << dockPosition();
+    
     switch (dockPosition()) {
     case dock::Top: {
         xPosition = m_bounding.x() - horizontalOffset;
@@ -226,6 +267,8 @@ void DockPanelPositioner::updatePosition()
         break;
     }
 
+    qWarning() << "DockPanelPositioner::updatePosition result - x:" << xPosition << "y:" << yPosition;
+    
     setX(xPosition);
     setY(yPosition);
 }

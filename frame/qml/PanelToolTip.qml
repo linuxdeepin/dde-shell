@@ -46,6 +46,7 @@ Item {
 
     function open()
     {
+        console.warn("PanelToolTip::open called for text:", text)
         if (!toolTipWindow)
             return
 
@@ -73,6 +74,7 @@ Item {
     
     function close()
     {
+        console.warn("PanelToolTip::close called for text:", text)
         if (!toolTipWindow)
             return
 
