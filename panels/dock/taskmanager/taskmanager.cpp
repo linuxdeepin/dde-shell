@@ -149,14 +149,16 @@ bool TaskManager::init()
                     }
                 }
             }
-            
+
             // 尝试通过AM(Application Manager)匹配应用程序
-            auto desktopId = getDesktopIdByPid(identifies);
-            if (!desktopId.isEmpty()) {
-                auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), desktopId, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
-                if (res.isValid()) {
-                    qCDebug(taskManagerLog) << "matched by AM desktop ID:" << desktopId << res;
-                    return res;
+            if (Settings->cgroupsBasedGrouping()) {
+                auto desktopId = getDesktopIdByPid(identifies);
+                if (!desktopId.isEmpty() && !Settings->cgroupsBasedGroupingSkipIds().contains(desktopId)) {
+                    auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), desktopId, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
+                    if (res.isValid()) {
+                        qCDebug(taskManagerLog) << "matched by AM desktop ID:" << desktopId << res;
+                        return res;
+                    }
                 }
             }
 

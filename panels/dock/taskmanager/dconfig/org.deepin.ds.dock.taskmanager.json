@@ -37,11 +37,22 @@
 			"value": true,
 			"serial": 0,
 			"flags": [],
-			"name": "cgroupsBasedGrouping",
+			"name": "CGroups-based Grouping",
 			"name[zh_CN]": "基于 cgroups 的任务图标分组",
 			"description": "Enable cgroups-based task grouping",
 			"description[zh_CN]": "启用基于 cgroups 的任务图标分组",
 			"permissions": "readonly",
+			"visibility": "private"
+		},
+		"cgroupsBasedGroupingSkipAppIds": {
+			"value": ["deepin-terminal"],
+			"serial": 0,
+			"flags": [],
+			"name": "CGroups-Based Grouping Skipped App IDs",
+			"name[zh_CN]": "基于 cgroups 的任务图标分组所应跳过的应用列表",
+			"description": "List of app id that cgroups-based grouping should skip checking",
+			"description[zh_CN]": "一个表示基于 CGroups 的应用分组所应当跳过的 App ID 列表",
+			"permissions": "readwrite",
 			"visibility": "private"
 		},
 		"Docked_Items": {

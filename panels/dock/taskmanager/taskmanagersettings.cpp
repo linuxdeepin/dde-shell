@@ -53,6 +53,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
     m_cgroupsBasedGrouping = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_KEY, true).toBool();
     m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
+    m_cgroupsBasedGroupingSkipAppIds = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_APPIDS, {"deepin-terminal"}).toStringList();
     migrateFromDockedItems();
 }
 
@@ -81,6 +82,11 @@ void TaskManagerSettings::setWindowSplit(bool split)
 bool TaskManagerSettings::cgroupsBasedGrouping() const
 {
     return m_cgroupsBasedGrouping;
+}
+
+QStringList TaskManagerSettings::cgroupsBasedGroupingSkipIds() const
+{
+    return m_cgroupsBasedGroupingSkipAppIds;
 }
 
 QStringList TaskManagerSettings::dockedElements() const
