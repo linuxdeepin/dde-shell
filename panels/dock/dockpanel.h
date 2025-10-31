@@ -109,7 +109,7 @@ private Q_SLOTS:
 Q_SIGNALS:
     void geometryChanged(QRect geometry);
     void frontendWindowRectChanged(QRect frontendWindowRect);
-    void hideStateChanged(HideState state); // not emitted
+    void hideStateChanged(HideState state);
     void colorThemeChanged(ColorTheme theme);
     void compositorReadyChanged();
 
