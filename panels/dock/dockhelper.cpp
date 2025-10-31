@@ -67,6 +67,11 @@ bool DockHelper::eventFilter(QObject *watched, QEvent *event)
         return false;
     }
 
+    // skip tooltip windows
+    if (window->flags().testFlags(Qt::ToolTip)) {
+        return false;
+    }
+
     auto topTransientParent = window;
     while (topTransientParent->transientParent()) {
         topTransientParent = topTransientParent->transientParent();
