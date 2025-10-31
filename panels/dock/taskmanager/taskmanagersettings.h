@@ -30,6 +30,7 @@ public:
     void setWindowSplit(bool split);
 
     bool cgroupsBasedGrouping() const;
+    QStringList cgroupsBasedGroupingSkipIds() const;
 
     void setDockedElements(const QStringList &elements);
     void toggleDockedElement(const QString &element);
@@ -56,5 +57,6 @@ private:
     bool m_windowSplit;
     bool m_cgroupsBasedGrouping;
     QStringList m_dockedElements;
+    QStringList m_cgroupsBasedGroupingSkipAppIds;
 };
 }
