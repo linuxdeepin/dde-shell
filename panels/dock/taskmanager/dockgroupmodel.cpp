@@ -18,48 +18,63 @@ DockGroupModel::DockGroupModel(QAbstractItemModel *sourceModel, int role, QObjec
     , AbstractTaskManagerInterface(this)
     , m_roleForDeduplication(role)
 {
-    connect(this, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int first, int last) {
-        Q_UNUSED(first)
-        Q_UNUSED(last)
-        if (!parent.isValid())
-            return;
-        Q_EMIT dataChanged(index(parent.row(), 0), index(parent.row(), 0), {TaskManager::WindowsRole});
-    });
-    connect(this, &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
-        if (!parent.isValid())
-            return;
+    connect(
+        this,
+        &QAbstractItemModel::rowsInserted,
+        this,
+        [this](const QModelIndex &parent, int first, int last) {
+            Q_UNUSED(first)
+            Q_UNUSED(last)
+            if (!parent.isValid())
+                return;
+            Q_EMIT dataChanged(index(parent.row(), 0), index(parent.row(), 0), {TaskManager::WindowsRole});
+        },
+        Qt::QueuedConnection);
+    connect(
+        this,
+        &QAbstractItemModel::rowsRemoved,
+        this,
+        [this](const QModelIndex &parent, int first, int last) {
+            if (!parent.isValid())
+                return;
 
-        // Update m_currentActiveWindow when windows are removed
-        int parentRow = parent.row();
-        if (m_currentActiveWindow.contains(parentRow)) {
-            int currentActive = m_currentActiveWindow.value(parentRow);
-            int windowCount = RoleGroupModel::rowCount(parent);
+            // Update m_currentActiveWindow when windows are removed
+            int parentRow = parent.row();
+            if (m_currentActiveWindow.contains(parentRow)) {
+                int currentActive = m_currentActiveWindow.value(parentRow);
+                int windowCount = RoleGroupModel::rowCount(parent);
 
-            // Check if the current active window was removed
-            if (currentActive >= first && currentActive <= last) {
-                // Current active window was removed, reset to first window
-                resetActiveWindow(parentRow);
-            } else if (currentActive > last) {
-                // Current active window is after the removed range, shift it back
-                int removedCount = last - first + 1;
-                m_currentActiveWindow[parentRow] = currentActive - removedCount;
+                // Check if the current active window was removed
+                if (currentActive >= first && currentActive <= last) {
+                    // Current active window was removed, reset to first window
+                    resetActiveWindow(parentRow);
+                } else if (currentActive > last) {
+                    // Current active window is after the removed range, shift it back
+                    int removedCount = last - first + 1;
+                    m_currentActiveWindow[parentRow] = currentActive - removedCount;
+                }
+                // If currentActive < first, no change needed
             }
-            // If currentActive < first, no change needed
-        }
 
-        Q_EMIT dataChanged(index(parent.row(), 0), index(parent.row(), 0), {TaskManager::WindowsRole});
-    });
+            Q_EMIT dataChanged(index(parent.row(), 0), index(parent.row(), 0), {TaskManager::WindowsRole});
+        },
+        Qt::QueuedConnection);
 
-    connect(this, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
-        Q_UNUSED(bottomRight)
-        if (!topLeft.parent().isValid())
-            return;
-        auto parentRow = topLeft.parent().row();
-        Q_EMIT dataChanged(index(parentRow, 0), index(parentRow, 0), roles);
+    connect(
+        this,
+        &QAbstractItemModel::dataChanged,
+        this,
+        [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
+            Q_UNUSED(bottomRight)
+            if (!topLeft.parent().isValid())
+                return;
+            auto parentRow = topLeft.parent().row();
+            Q_EMIT dataChanged(index(parentRow, 0), index(parentRow, 0), roles);
 
-        if (roles.contains(TaskManager::ActiveRole))
-            m_currentActiveWindow.insert(parentRow, topLeft.row());
-    });
+            if (roles.contains(TaskManager::ActiveRole))
+                m_currentActiveWindow.insert(parentRow, topLeft.row());
+        },
+        Qt::QueuedConnection);
 }
 
 QVariant DockGroupModel::data(const QModelIndex &index, int role) const
