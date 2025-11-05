@@ -66,7 +66,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
 
             } else {
                 beginInsertRows(QModelIndex(), m_data.size(), m_data.size());
-                m_data.append(std::make_tuple(desktopId, m_activeAppModel, first));
+                m_data.append(std::make_tuple(desktopId, m_activeAppModel, i));
                 endInsertRows();
             }
         }
