@@ -1,3 +1,15 @@
+dde-shell (2.0.17) unstable; urgency=medium
+
+  * fix: use correct index when adding dock elements
+  * i18n: Translate org.deepin.ds.osd.default.ts in fi (#1327)
+  * fix: incorrect window state for JLCPCB
+  * chore: ensure ctest can detect gtest unit tests
+  * feat: ability to fine-tune cgroups-based appid detection
+  * fix: skip tooltip windows in dock event filter
+  * i18n: Updates for project Deepin Desktop Environment (#1322)
+
+ -- caixiangrong <caixiangrong@uniontech.com>  Thu, 06 Nov 2025 16:14:02 +0800
+
 dde-shell (2.0.16) unstable; urgency=medium
 
   * feat: implement trash empty state detection
