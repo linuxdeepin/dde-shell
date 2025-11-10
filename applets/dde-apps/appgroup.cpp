@@ -10,7 +10,7 @@
 #include <QLoggingCategory>
 #include <algorithm>
 
-Q_LOGGING_CATEGORY(appGroupLog, "org.deepin.ds.dde-apps.appgroup")
+Q_LOGGING_CATEGORY(appGroupLog, "org.deepin.dde.shell.dde-apps.appgroup")
 
 namespace apps {
 AppGroup::AppGroup(const QString &groupId, const QString &name, const QList<QStringList> &appIDs)

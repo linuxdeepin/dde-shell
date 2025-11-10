@@ -9,7 +9,7 @@
 #include <QTimer>
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(dockSettingsLog, "dde.shell.dock.docksettings")
+Q_LOGGING_CATEGORY(dockSettingsLog, "org.deepin.dde.shell.dock.docksettings")
 
 const static QString keyPosition                = "Position";
 const static QString keyHideMode                = "Hide_Mode";

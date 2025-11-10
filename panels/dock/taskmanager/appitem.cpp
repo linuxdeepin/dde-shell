@@ -16,7 +16,7 @@
 #include <QStringLiteral>
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(appitemLog, "dde.shell.dock.taskmanger.appitem")
+Q_LOGGING_CATEGORY(appitemLog, "org.deepin.dde.shell.dock.taskmanger.appitem")
 
 namespace dock {
 AppItem::AppItem(QString id, QObject *parent)

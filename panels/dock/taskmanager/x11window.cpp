@@ -15,7 +15,7 @@
 
 #define X11 X11Utils::instance()
 
-Q_LOGGING_CATEGORY(x11windowLog, "dde.shell.dock.taskmanager.x11window")
+Q_LOGGING_CATEGORY(x11windowLog, "org.deepin.dde.shell.dock.taskmanager.x11window")
 
 namespace dock {
 X11Window::X11Window(xcb_window_t winid, QObject *parent)

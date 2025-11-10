@@ -19,7 +19,7 @@
 
 DS_BEGIN_NAMESPACE
 
-Q_LOGGING_CATEGORY(layershell, "dde.shell.layershell")
+Q_LOGGING_CATEGORY(layershell, "org.deepin.dde.shell.layershell")
 
 LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     : QObject(parent)

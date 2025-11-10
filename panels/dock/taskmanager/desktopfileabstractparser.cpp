@@ -12,8 +12,7 @@
 
 #include <fstream>
 
-Q_LOGGING_CATEGORY(abstractdesktopfileLog, "dde.shell.dock.abstractdesktopfile")
-
+Q_LOGGING_CATEGORY(abstractdesktopfileLog, "org.deepin.dde.shell.dock.abstractdesktopfile")
 
 namespace dock {
 

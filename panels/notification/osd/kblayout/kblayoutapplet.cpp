@@ -15,7 +15,7 @@
 
 namespace osd {
 
-Q_LOGGING_CATEGORY(osdKBLog, "dde.shell.osd.kblayout")
+Q_LOGGING_CATEGORY(osdKBLog, "org.deepin.dde.shell.osd.kblayout")
 
 static DDBusSender keyboardInter()
 {

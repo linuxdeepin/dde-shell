@@ -20,7 +20,7 @@
 #include <QDBusReply>
 
 namespace dock {
-Q_LOGGING_CATEGORY(dockX11Log, "dde.shell.dock.x11")
+Q_LOGGING_CATEGORY(dockX11Log, "org.deepin.dde.shell.dock.x11")
 
 const uint16_t monitorSize = 15;
 const uint32_t allWorkspace = 0xffffffff;

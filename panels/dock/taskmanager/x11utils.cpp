@@ -19,7 +19,7 @@
 #include <QGuiApplication>
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(x11UtilsLog, "dde.shell.dock.taskmanager.x11utils")
+Q_LOGGING_CATEGORY(x11UtilsLog, "org.deepin.dde.shell.dock.taskmanager.x11utils")
 
 namespace dock {
 

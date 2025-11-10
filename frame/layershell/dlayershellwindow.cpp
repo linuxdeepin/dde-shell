@@ -16,7 +16,7 @@
 #include "x11dlayershellemulation.h"
 #endif
 
-Q_LOGGING_CATEGORY(layershellwindow, "dde.shell.layershell.window")
+Q_LOGGING_CATEGORY(layershellwindow, "org.deepin.dde.shell.layershell.window")
 
 DS_BEGIN_NAMESPACE
 

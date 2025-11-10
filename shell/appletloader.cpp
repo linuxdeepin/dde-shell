@@ -23,7 +23,7 @@ DS_BEGIN_NAMESPACE
 DCORE_USE_NAMESPACE;
 DGUI_USE_NAMESPACE
 
-Q_LOGGING_CATEGORY(dsLoaderLog, "dde.shell.loader")
+Q_LOGGING_CATEGORY(dsLoaderLog, "org.deepin.dde.shell.loader")
 
 namespace {
     class Benchmark

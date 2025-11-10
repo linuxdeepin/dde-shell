@@ -51,7 +51,7 @@ bool OsdPanel::init()
     return DPanel::init();
 }
 
-Q_LOGGING_CATEGORY(osdLog, "dde.shell.osd")
+Q_LOGGING_CATEGORY(osdLog, "org.deepin.dde.shell.osd")
 
 QString OsdPanel::osdType() const
 {

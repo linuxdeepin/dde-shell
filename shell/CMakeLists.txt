@@ -54,6 +54,12 @@ configure_file(${CMAKE_SOURCE_DIR}/misc/dde-shell@.service.in
     ${CMAKE_CURRENT_BINARY_DIR}/dde-shell@.service
     @ONLY)
 
+# debug config file
+install(FILES ${CMAKE_SOURCE_DIR}/misc/deepin-debug-config/org.deepin.dde.shell.json
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/deepin-debug-config/deepin-debug-config.d)
+install(FILES ${CMAKE_SOURCE_DIR}/misc/deepin-log-config/org.deepin.dde.shell.json
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/deepin-log-viewer/deepin-log.conf.d)
+
 install(TARGETS dde-shell DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dde-shell@.service DESTINATION ${SYSTEMD_USER_UNIT_DIR})

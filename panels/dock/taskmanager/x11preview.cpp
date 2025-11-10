@@ -37,7 +37,7 @@
 #include <DWindowManagerHelper>
 #include <DGuiApplicationHelper>
 
-Q_LOGGING_CATEGORY(x11WindowPreview, "dde.shell.dock.taskmanager.x11WindowPreview")
+Q_LOGGING_CATEGORY(x11WindowPreview, "org.deepin.dde.shell.dock.taskmanager.x11WindowPreview")
 
 #define PREVIEW_TITLE_HEIGHT 24
 #define PREVIEW_TITLE_BOTTOMMARGIN 8

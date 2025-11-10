@@ -22,7 +22,7 @@
 
 #define X11 X11Utils::instance()
 
-Q_LOGGING_CATEGORY(x11Log, "dde.shell.dock.taskmanager.x11windowmonitor")
+Q_LOGGING_CATEGORY(x11Log, "org.deepin.dde.shell.dock.taskmanager.x11windowmonitor")
 
 namespace dock {
 static QPointer<X11WindowMonitor> monitor;

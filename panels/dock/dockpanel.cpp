@@ -26,7 +26,7 @@
 
 #define SETTINGS DockSettings::instance()
 
-Q_LOGGING_CATEGORY(dockLog, "dde.shell.dock")
+Q_LOGGING_CATEGORY(dockLog, "org.deepin.dde.shell.dock")
 
 namespace dock {
 
