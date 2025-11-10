@@ -14,29 +14,6 @@ NotifyItem {
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
 
-    property var removedCallback
-
-    states: [
-        State {
-            name: "removing"
-            PropertyChanges { target: root; x: root.width; opacity: 0}
-        }
-    ]
-
-    transitions: Transition {
-        to: "removing"
-        ParallelAnimation {
-            NumberAnimation { properties: "x"; duration: 300; easing.type: Easing.Linear }
-            NumberAnimation { properties: "opacity"; duration: 300; easing.type: Easing.Linear }
-        }
-        onRunningChanged: {
-            if (!running && root.removedCallback) {
-                root.removedCallback()
-                root.removedCallback = undefined
-            }
-        }
-    }
-
     Control {
         id: impl
         anchors.fill: parent
@@ -54,18 +31,13 @@ NotifyItem {
             strongInteractive: root.strongInteractive
             contentIcon: root.contentIcon
             contentRowCount: root.contentRowCount
+            indexInGroup: root.indexInGroup
 
             onRemove: function () {
-                root.removedCallback = function () {
-                    root.remove()
-                }
-                root.state = "removing"
+                root.remove()
             }
             onDismiss: function () {
-                root.removedCallback = function () {
-                    root.dismiss()
-                }
-                root.state = "removing"
+                root.dismiss()
             }
             onActionInvoked: function (actionId) {
                 root.actionInvoked(actionId)

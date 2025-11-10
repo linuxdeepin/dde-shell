@@ -37,7 +37,8 @@ public:
         NotifyStrongInteractive,
         NotifyContentIcon,
         NotifyOverlapCount,
-        NotifyContentRowCount
+        NotifyContentRowCount,
+        NotifyIndexInGroup
     };
     NotifyModel(QObject *parent = nullptr);
 

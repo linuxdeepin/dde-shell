@@ -14,6 +14,7 @@ Item {
     property int radius: 12
     property int overlapHeight: 8
     property bool revert: false
+    property bool enableAnimation: false
 
     implicitHeight: layout.height
     implicitWidth: 360
@@ -39,6 +40,34 @@ Item {
                         top: revert ? undefined : parent.top
                         topMargin: revert ? undefined : -(height - overlapHeight)
                         bottomMargin: revert ? -(height - overlapHeight) : undefined
+                    }
+                    opacity: 0
+
+                    Component.onCompleted: {
+                        if (root.enableAnimation) {
+                            fadeInAnimation.start()
+                        } else {
+                            opacity = 1
+                        }
+                    }
+
+                    SequentialAnimation {
+                        id: fadeInAnimation
+
+                        PauseAnimation {
+                            duration: realIndex * 100
+                        }
+
+                        ParallelAnimation {
+                            NumberAnimation {
+                                target: background
+                                property: "opacity"
+                                from: 0
+                                to: 1
+                                duration: 300
+                                easing.type: Easing.OutQuad
+                            }
+                        }
                     }
                 }
             }

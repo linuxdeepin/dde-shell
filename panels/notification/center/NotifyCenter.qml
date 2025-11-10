@@ -15,6 +15,7 @@ FocusScope {
     palette: DTK.palette
 
     property alias model: notifyModel
+    property alias viewPanelShown: view.viewPanelShown
     property int maxViewHeight: 400
     property int stagingViewCount: 0
 
