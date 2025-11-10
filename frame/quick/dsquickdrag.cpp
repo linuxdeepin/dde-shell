@@ -18,7 +18,7 @@
 
 DS_BEGIN_NAMESPACE
 
-Q_LOGGING_CATEGORY(dsDragLog, "dde.shell.drag")
+Q_LOGGING_CATEGORY(dsDragLog, "org.deepin.dde.shell.drag")
 
 class DragWindowEventFilter : public QObject {
 public:

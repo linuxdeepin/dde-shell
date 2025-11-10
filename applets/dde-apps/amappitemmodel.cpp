@@ -11,7 +11,7 @@
 #include <DUtil>
 #include <QtConcurrent>
 
-Q_LOGGING_CATEGORY(appsLog, "dde.shell.dde-apps.amappitemmodel")
+Q_LOGGING_CATEGORY(appsLog, "org.deepin.dde.shell.dde-apps.amappitemmodel")
 
 namespace apps
 {

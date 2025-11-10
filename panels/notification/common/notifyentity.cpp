@@ -9,7 +9,7 @@
 #include <QLoggingCategory>
 
 namespace notification {
-Q_LOGGING_CATEGORY(notifyLog, "dde.shell.notification")
+Q_LOGGING_CATEGORY(notifyLog, "org.deepin.dde.shell.notification")
 
 #define ACTION_SEGMENT ("|")
 #define HINT_SEGMENT ("|")

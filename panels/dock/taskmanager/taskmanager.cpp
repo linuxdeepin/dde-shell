@@ -35,7 +35,7 @@
 #include "x11utils.h"
 #endif
 
-Q_LOGGING_CATEGORY(taskManagerLog, "dde.shell.dock.taskmanager", QtDebugMsg)
+Q_LOGGING_CATEGORY(taskManagerLog, "org.deepin.dde.shell.dock.taskmanager", QtDebugMsg)
 
 #define Settings TaskManagerSettings::instance()
 

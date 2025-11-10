@@ -13,7 +13,7 @@
 #include <private/qwaylandwindow_p.h>
 #include <private/qwaylandnativeinterface_p.h>
 
-Q_LOGGING_CATEGORY(waylandwindowLog, "dde.shell.dock.taskmanager.treelandwindow")
+Q_LOGGING_CATEGORY(waylandwindowLog, "org.deepin.dde.shell.dock.taskmanager.treelandwindow")
 
 namespace dock {
 ForeignToplevelHandle::ForeignToplevelHandle(struct ::treeland_foreign_toplevel_handle_v1 *object)

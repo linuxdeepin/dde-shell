@@ -20,7 +20,7 @@ namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
 }
 namespace notification {
-Q_LOGGING_CATEGORY(notifyDBLog, "dde.shell.notification.db", QtMsgType::QtWarningMsg)
+Q_LOGGING_CATEGORY(notifyDBLog, "org.deepin.dde.shell.notification.db", QtMsgType::QtWarningMsg)
 
 static const QString TableName = "notifications";
 static const QString TableName_v2 = "notifications2";

@@ -15,7 +15,7 @@
 #include <QtWaylandClient/private/qwaylandsurface_p.h>
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
 
-Q_LOGGING_CATEGORY(layershellsurface, "dde.shell.layershell.surface")
+Q_LOGGING_CATEGORY(layershellsurface, "org.deepin.dde.shell.layershell.surface")
 
 DS_BEGIN_NAMESPACE
 

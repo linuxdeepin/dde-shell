@@ -9,7 +9,7 @@
 #include "pluginfactory.h"
 
 DS_BEGIN_NAMESPACE
-Q_LOGGING_CATEGORY(notifyLog, "dde.shell.notification")
+Q_LOGGING_CATEGORY(notifyLog, "org.deepin.dde.shell.notification")
 
 NotificationContainment::NotificationContainment(QObject *parent)
     : DContainment(parent)

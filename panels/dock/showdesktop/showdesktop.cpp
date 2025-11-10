@@ -16,7 +16,7 @@
 
 DCORE_USE_NAMESPACE
 
-Q_LOGGING_CATEGORY(showDesktop, "dde.shell.dock.showdesktop")
+Q_LOGGING_CATEGORY(showDesktop, "org.deepin.dde.shell.dock.showdesktop")
 
 namespace dock {
 

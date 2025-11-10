@@ -14,7 +14,7 @@
 
 DS_BEGIN_NAMESPACE
 
-Q_LOGGING_CATEGORY(dsLog, "dde.shell")
+Q_LOGGING_CATEGORY(dsLog, "org.deepin.dde.shell")
 
 class DPluginMetaDataPrivate : public QSharedData
 {

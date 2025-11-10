@@ -15,7 +15,7 @@
 #include <QLoggingCategory>
 #include <QProcess>
 
-Q_LOGGING_CATEGORY(dockGlobalElementModelLog, "dde.shell.dock.taskmanager.dockglobalelementmodel")
+Q_LOGGING_CATEGORY(dockGlobalElementModelLog, "org.deepin.dde.shell.dock.taskmanager.dockglobalelementmodel")
 
 #include <algorithm>
 #include <tuple>

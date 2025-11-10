@@ -15,7 +15,7 @@
 #include <QDBusConnection>
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(amdesktopfileLog, "dde.shell.dock.amdesktopfile")
+Q_LOGGING_CATEGORY(amdesktopfileLog, "org.deepin.dde.shell.dock.amdesktopfile")
 
 // AM static string
 static const QString AM_DBUS_PATH = "org.desktopspec.ApplicationManager1";

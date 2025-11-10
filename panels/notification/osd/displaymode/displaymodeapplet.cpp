@@ -14,7 +14,7 @@
 #include <DConfig>
 #include <DDBusSender>
 
-Q_LOGGING_CATEGORY(osdDPLog, "dde.shell.osd.display")
+Q_LOGGING_CATEGORY(osdDPLog, "org.deepin.dde.shell.osd.display")
 
 namespace osd {
 

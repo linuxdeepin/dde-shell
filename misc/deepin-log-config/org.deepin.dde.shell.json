@@ -1,0 +1,152 @@
+{
+    "name": "dde-shell",
+    "group": "dde",
+    "submodules": [
+        {
+            "name": "shell.dde-apps.amappitemmodel",
+            "filter": "org.deepin.dde.shell.dde-apps.amappitemmodel",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dde-apps.appgroup",
+            "filter": "org.deepin.dde.shell.dde-apps.appgroup",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell",
+            "filter": "org.deepin.dde.shell",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.layershell.window",
+            "filter": "org.deepin.dde.shell.layershell.window",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.layershell.surface",
+            "filter": "org.deepin.dde.shell.layershell.surface",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.layershell",
+            "filter": "org.deepin.dde.shell.layershell",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.drag",
+            "filter": "org.deepin.dde.shell.drag",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock",
+            "filter": "org.deepin.dde.shell.dock",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.docksettings",
+            "filter": "org.deepin.dde.shell.dock.docksettings",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.x11",
+            "filter": "org.deepin.dde.shell.dock.x11",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.showdesktop",
+            "filter": "org.deepin.dde.shell.dock.showdesktop",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.abstractdesktopfile",
+            "filter": "org.deepin.dde.shell.dock.abstractdesktopfile",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.amdesktopfile",
+            "filter": "org.deepin.dde.shell.dock.amdesktopfile",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.taskmanager.dockglobalelementmodel",
+            "filter": "org.deepin.dde.shell.dock.taskmanager.dockglobalelementmodel",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.taskmanager",
+            "filter": "org.deepin.dde.shell.dock.taskmanager",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.taskmanager.treelandwindow",
+            "filter": "org.deepin.dde.shell.dock.taskmanager.treelandwindow",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.taskmanager.x11WindowPreview",
+            "filter": "org.deepin.dde.shell.dock.taskmanager.x11WindowPreview",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.taskmanager.x11utils",
+            "filter": "org.deepin.dde.shell.dock.taskmanager.x11utils",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.taskmanager.x11window",
+            "filter": "org.deepin.dde.shell.dock.taskmanager.x11window",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.dock.taskmanager.x11windowmonitor",
+            "filter": "org.deepin.dde.shell.dock.taskmanager.x11windowmonitor",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.notification",
+            "filter": "org.deepin.dde.shell.notification",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.osd",
+            "filter": "org.deepin.dde.shell.osd",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.osd.kblayout",
+            "filter": "org.deepin.dde.shell.osd.kblayout",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        },
+        {
+            "name": "shell.loader",
+            "filter": "org.deepin.dde.shell.loader",
+            "exec": "/usr/bin/dde-shell",
+            "logType": "journal"
+        }
+    ],
+    "visible": 1,
+    "version": "V1.0"
+}
