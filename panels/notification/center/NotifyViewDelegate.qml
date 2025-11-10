@@ -26,6 +26,7 @@ DelegateChooser {
             width: NotifyStyle.contentItem.width
             appName: model.appName
             activeFocusOnTab: true
+            z: index
 
             Loader {
                 anchors.fill: parent
@@ -63,6 +64,7 @@ DelegateChooser {
             objectName: "normal-" + model.appName
             width: NotifyStyle.contentItem.width
             activeFocusOnTab: true
+            z: index
 
             appName: model.appName
             iconName: model.iconName
@@ -74,6 +76,7 @@ DelegateChooser {
             contentIcon: model.contentIcon
             contentRowCount: model.contentRowCount
             defaultAction: model.defaultAction
+            indexInGroup: model.indexInGroup
 
             Loader {
                 anchors.fill: parent
@@ -126,6 +129,7 @@ DelegateChooser {
             objectName: "overlap-" + model.appName
             width: NotifyStyle.contentItem.width
             activeFocusOnTab: true
+            z: index
 
             count: model.overlapCount
             appName: model.appName

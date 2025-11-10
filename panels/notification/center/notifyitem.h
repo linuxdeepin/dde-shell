@@ -41,6 +41,9 @@ public:
     void updateActions();
     void updateStrongInteractive();
 
+    int indexInGroup() const { return m_indexInGroup; }
+    void setIndexInGroup(int index) { m_indexInGroup = index; }
+
     void refresh();
 
     bool pinned() const;
@@ -54,6 +57,7 @@ protected:
     NotifyEntity m_entity;
     bool m_pinned = false;
     bool m_strongInteractive = false;
+    int m_indexInGroup = -1;
 };
 
 class BubbleNotifyItem : public AppNotifyItem

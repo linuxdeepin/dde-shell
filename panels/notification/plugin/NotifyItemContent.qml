@@ -133,6 +133,7 @@ NotifyItem {
             }
 
             DciIcon {
+                id: appIcon
                 name: root.iconName !== "" ? root.iconName : "application-x-desktop"
                 sourceSize: Qt.size(24, 24)
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
@@ -143,6 +144,7 @@ NotifyItem {
             }
 
             ColumnLayout {
+                id: contentLayout
                 spacing: 0
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 Layout.rightMargin: 10
@@ -200,12 +202,18 @@ NotifyItem {
                 }
 
                 RowLayout {
+                    id: bodyRow
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     Text {
                         id: bodyText
                         Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                        Layout.fillWidth: true
+                        // text 宽度若让Layout通过implicitWidth计算会导致ListView的add动画出现位置错误，故这里手动计算Text的宽度
+                        Layout.preferredWidth: NotifyStyle.contentItem.width - appIcon.width
+                            - appIcon.Layout.leftMargin - appIcon.Layout.rightMargin
+                            - contentLayout.Layout.rightMargin - contentLayout.Layout.leftMargin 
+                            - (contentIconLoader.active ? (contentIconLoader.width + 1) : 0)
+                            - bodyRow.spacing * bodyRow.children.length - 1
                         visible: text !== ""
                         text: root.content
                         maximumLineCount: root.contentRowCount
@@ -228,6 +236,7 @@ NotifyItem {
                     }
 
                     Loader {
+                        id: contentIconLoader
                         Layout.maximumWidth: 106
                         Layout.maximumHeight: 106
                         Layout.minimumWidth: 16

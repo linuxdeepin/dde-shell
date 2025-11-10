@@ -106,8 +106,12 @@ Window {
                 function onVisibleChanged() {
                     if (Panel.visible) {
                         notifyStaging.model.open()
+                        DS.singleShot(100, function() {
+                            notifyCenter.viewPanelShown = true
+                        })
                     } else {
                         notifyStaging.model.close()
+                        notifyCenter.viewPanelShown = false
                     }
                 }
             }
@@ -127,8 +131,12 @@ Window {
                 function onVisibleChanged() {
                     if (Panel.visible) {
                         notifyCenter.model.open()
+                        DS.singleShot(100, function() {
+                            notifyCenter.viewPanelShown = true
+                        })
                     } else {
                         notifyCenter.model.close()
+                        notifyCenter.viewPanelShown = false
                     }
                 }
             }

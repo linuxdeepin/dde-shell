@@ -32,6 +32,7 @@ FocusScope {
     property bool strongInteractive: false
     property string contentIcon: "deepin-editor"
     property int contentRowCount: 6
+    property int indexInGroup: -1
 
     signal remove()
     signal dismiss()

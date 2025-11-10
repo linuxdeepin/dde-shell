@@ -65,17 +65,12 @@ NotifyItem {
                 contentIcon: root.contentIcon
                 contentRowCount: root.contentRowCount
                 enableDismissed: root.enableDismissed
+                indexInGroup: root.indexInGroup
                 onRemove: function () {
-                    root.removedCallback = function () {
-                        root.remove()
-                    }
-                    root.state = "removing"
+                    root.remove()
                 }
                 onDismiss: function () {
-                    root.removedCallback = function () {
-                        root.dismiss()
-                    }
-                    root.state = "removing"
+                    root.dismiss()
                 }
                 onActionInvoked: function (actionId) {
                     root.actionInvoked(actionId)
@@ -84,6 +79,7 @@ NotifyItem {
 
             OverlapIndicator {
                 id: indicator
+                enableAnimation: root.ListView.view.panelShown
                 anchors {
                     bottom: parent.bottom
                     left: parent.left
