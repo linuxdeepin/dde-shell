@@ -32,7 +32,7 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
 
     connect(m_manager, &ObjectManager::InterfacesAdded, this, [this](const QDBusObjectPath &objPath, ObjectInterfaceMap interfacesAndProperties) {
         auto desktopId = DUtil::unescapeFromObjectPath(objPath.path().split('/').last());
-        if (!match(index(0, 0), AppItemModel::DesktopIdRole, desktopId).isEmpty()) {
+        if (!match(index(0, 0), AppItemModel::DesktopIdRole, desktopId, 1, Qt::MatchExactly).isEmpty()) {
             qCWarning(appsLog()) << "desktopId: " << desktopId << " already contains";
             return;
         }
@@ -42,7 +42,7 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
     connect(m_manager, &ObjectManager::InterfacesRemoved, this, [this](const QDBusObjectPath &objPath, const QStringList &interfaces) {
         Q_UNUSED(interfaces)
         auto desktopId = DUtil::unescapeFromObjectPath(objPath.path().split('/').last());
-        auto res = match(index(0, 0), AppItemModel::DesktopIdRole, desktopId);
+        auto res = match(index(0, 0), AppItemModel::DesktopIdRole, desktopId, 1, Qt::MatchExactly);
         if (res.isEmpty()) {
             qCWarning(appsLog()) << "failed find desktopId: " << desktopId;
             return;
