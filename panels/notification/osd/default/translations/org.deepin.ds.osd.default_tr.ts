@@ -75,19 +75,19 @@
     </message>
     <message>
         <source>Microphone off</source>
-        <translation type="unfinished"/>
+        <translation>Mikrofon kapalı</translation>
     </message>
     <message>
         <source>Microphone on</source>
-        <translation type="unfinished"/>
+        <translation>Mikrofon açık</translation>
     </message>
     <message>
         <source>Camera on</source>
-        <translation type="unfinished"/>
+        <translation>Kamera açık</translation>
     </message>
     <message>
         <source>Camera off</source>
-        <translation type="unfinished"/>
+        <translation>Kamera kapalı</translation>
     </message>
 </context>
 </TS>
