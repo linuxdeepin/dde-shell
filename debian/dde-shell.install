@@ -30,3 +30,5 @@ usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.taskmanager.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.tray.json
 usr/share/dsg/configs/org.deepin.ds.dock/
+usr/share/deepin-debug-config/deepin-debug-config.d/*.json
+usr/share/deepin-log-viewer/deepin-log.conf.d/*.json
