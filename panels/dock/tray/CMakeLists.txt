@@ -56,5 +56,9 @@ target_link_libraries(trayitem PRIVATE
     dde-shell-frame
 )
 
+install(TARGETS dock-tray DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/tray/")
+install(DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/tray/ DESTINATION ${QML_INSTALL_DIR}/org/deepin/ds/dock/tray/
+    FILES_MATCHING PATTERN "qmldir" PATTERN "*.qmltypes"  PATTERN "*.qml" PATTERN "*.js"
+)
 ds_install_package(PACKAGE org.deepin.ds.dock.tray TARGET trayitem)
 ds_handle_package_translation(PACKAGE org.deepin.ds.dock.tray)
