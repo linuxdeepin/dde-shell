@@ -21,6 +21,7 @@ NotifyItem {
     Control {
         id: impl
         anchors.fill: parent
+        implicitHeight: contentColumn.implicitHeight
 
         Item {
             anchors.fill: parent
@@ -125,6 +126,7 @@ NotifyItem {
         }
 
         contentItem: RowLayout {
+            id: contentRow
             spacing: 0
             Binding {
                 target: root
@@ -143,6 +145,7 @@ NotifyItem {
             }
 
             ColumnLayout {
+                id: contentColumn
                 spacing: 0
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 Layout.rightMargin: 10
@@ -150,9 +153,20 @@ NotifyItem {
                 Layout.topMargin: NotifyStyle.contentItem.topMargin
                 Layout.bottomMargin: NotifyStyle.contentItem.bottomMargin
                 Layout.fillWidth: true
-                Layout.fillHeight: true
                 Layout.minimumHeight: NotifyStyle.contentItem.miniHeight
                 Layout.maximumHeight: 240
+                implicitHeight: {
+                    var height = 0
+                    height += firstLine.Layout.preferredHeight
+                    if (root.title !== "") {
+                        height += title.implicitHeight
+                    }
+                    var bodyHeight = bodyText.implicitHeight
+                    if (bodyText.visible && bodyHeight > 0) {
+                        height += bodyHeight
+                    }
+                    return height
+                }
                 RowLayout {
                     id: firstLine
                     spacing: 0
@@ -184,6 +198,7 @@ NotifyItem {
                 }
 
                 Text {
+                    id: title
                     text: root.title
                     visible: text !== ""
                     maximumLineCount: 1
@@ -200,6 +215,7 @@ NotifyItem {
                 }
 
                 RowLayout {
+                    id: bodyRow
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     Text {
