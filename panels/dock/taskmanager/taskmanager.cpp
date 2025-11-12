@@ -75,6 +75,7 @@ public:
         , m_role(role)
     {
         setSourceModel(sourceModel);
+        setDynamicSortFilter(false);
     }
 
 protected:
