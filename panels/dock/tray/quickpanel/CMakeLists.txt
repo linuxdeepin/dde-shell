@@ -25,3 +25,8 @@ qt_add_qml_module(tray-quickpanel
 target_link_libraries(tray-quickpanel PRIVATE
     Dtk${DTK_VERSION_MAJOR}::Core
 )
+
+install(TARGETS tray-quickpanel DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/tray/quickpanel/")
+install(DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/tray/quickpanel/ DESTINATION ${QML_INSTALL_DIR}/org/deepin/ds/dock/tray/quickpanel/
+    FILES_MATCHING PATTERN "qmldir" PATTERN "*.qmltypes"  PATTERN "*.qml" PATTERN "*.js"
+)

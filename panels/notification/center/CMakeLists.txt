@@ -59,7 +59,9 @@ target_link_libraries(notificationcenterpanel
 )
 
 install(TARGETS notificationcenterpanelplugin DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/notificationcenter/")
-install(DIRECTORY "${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/notificationcenter/" DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/notificationcenter/")
+install(DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/notificationcenter/ DESTINATION ${QML_INSTALL_DIR}/org/deepin/ds/notificationcenter/
+    FILES_MATCHING PATTERN "qmldir" PATTERN "*.qmltypes"  PATTERN "*.qml" PATTERN "*.js"
+)
 
 ds_install_package(PACKAGE org.deepin.ds.notificationcenter TARGET notificationcenterpanel)
 ds_handle_package_translation(PACKAGE org.deepin.ds.notificationcenter)

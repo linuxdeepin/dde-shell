@@ -24,4 +24,6 @@ qt_add_qml_module(notificationplugin
 )
 
 install(TARGETS notificationplugin DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/notification/")
-install(DIRECTORY "${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/notification/" DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/notification/")
+install(DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/notification/ DESTINATION ${QML_INSTALL_DIR}/org/deepin/ds/notification/
+    FILES_MATCHING PATTERN "qmldir" PATTERN "*.qmltypes"  PATTERN "*.qml" PATTERN "*.js"
+)
