@@ -1,3 +1,19 @@
+dde-shell (2.0.18) unstable; urgency=medium
+
+  * fix: fix collapsed tray item visual index
+  * fix: scale task manager preview icons for high DPI displays
+  * chore: make hover preview proxy model simpler
+  * i18n: Updates for project Deepin Desktop Environment (#1341)
+  * fix: disable dynamic sort filter in task manager proxy model
+  * feat: add plugin update to tray whitelist
+  * fix: WinSCP dock icon stayed when window closed
+  * fix: add exact match flag to prevent duplicate app entries
+  * i18n: Translate org.deepin.ds.osd.default.ts in pl (#1335)
+  * fix: update dde-shell.install for debug log configs
+  * chore: adapt debugging settings function
+
+ -- xionglinlin <xionglinlin@uniontech.com>  Thu, 13 Nov 2025 19:48:04 +0800
+
 dde-shell (2.0.17) unstable; urgency=medium
 
   * fix: use correct index when adding dock elements
