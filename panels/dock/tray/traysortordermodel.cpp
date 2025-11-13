@@ -396,7 +396,8 @@ void TraySortOrderModel::updateVisualIndexes()
             if (!m_collapsed) {
                 results[0]->setData(currentVisualIndex++, TraySortOrderModel::VisualIndexRole);
             } else {
-                results[0]->setData(currentVisualIndex-1, TraySortOrderModel::VisualIndexRole);
+                // When collapsed, collapsable items should be hidden (visualIndex = -1)
+                results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
             }
         }
     }
