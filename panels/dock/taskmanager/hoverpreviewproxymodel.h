@@ -24,20 +24,16 @@ class HoverPreviewProxyModel : public QSortFilterProxyModel
 public:
     explicit HoverPreviewProxyModel(QObject *parent = nullptr);
 
+    enum FilterMode {
+        FilterByAppId,
+        FilterByWinId,
+    };
+
     /**
      * @brief 设置要预览的模型索引，在 noTaskGrouping 模式下精确匹配该窗口
      * @param index 要预览的模型索引，无效索引则清除过滤条件
      */
-    void setFilterModelIndex(const QModelIndex &index);
-
-    /**
-     * @brief 获取当前过滤的模型索引
-     * @return 当前过滤的模型索引
-     */
-    QModelIndex filterModelIndex() const
-    {
-        return m_filterIndex;
-    }
+    void setFilter(QString filter, enum FilterMode mode);
 
     /**
      * @brief 清除过滤条件，重置模型状态
@@ -48,8 +44,8 @@ protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
 private:
-    QModelIndex m_filterIndex; // 当前过滤的模型索引
-    TaskManagerSettings *m_settings; // 任务管理器设置，用于获取 noTaskGrouping 状态
+    FilterMode m_filterMode;
+    QString m_filter;
 };
 
 }

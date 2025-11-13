@@ -248,7 +248,13 @@ void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePosi
     }
 
     // Set the preview filter condition based on the incoming model index
-    m_hoverPreviewModel->setFilterModelIndex(index);
+    if (windowSplit()) {
+        QString winId = index.data(TaskManager::WinIdRole).toString();
+        m_hoverPreviewModel->setFilter(winId, HoverPreviewProxyModel::FilterByWinId);
+    } else {
+        QString appId = index.data(TaskManager::DesktopIdRole).toString();
+        m_hoverPreviewModel->setFilter(appId, HoverPreviewProxyModel::FilterByAppId);
+    }
 
     // Check if there are any windows after filtering
     if (m_hoverPreviewModel->rowCount() == 0) {
