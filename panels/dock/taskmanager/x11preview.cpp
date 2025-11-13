@@ -770,7 +770,8 @@ void X11WindowPreviewContainer::updatePreviewIconFromString(const QString &strin
         pix.loadFromData(QByteArray::fromBase64(strs.at(1).toLatin1()));
     } else {
         // is (likely) icon name from theme
-        pix = QIcon::fromTheme(stringData).pixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+        const int scaledSize = PREVIEW_TITLE_HEIGHT * qApp->devicePixelRatio();
+        pix = QIcon::fromTheme(stringData).pixmap(scaledSize, scaledSize);
     }
 
     if (pix.isNull()) {
