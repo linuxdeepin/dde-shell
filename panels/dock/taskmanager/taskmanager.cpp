@@ -217,27 +217,27 @@ HoverPreviewProxyModel *TaskManager::hoverPreviewModel() const
 
 void TaskManager::requestActivate(const QModelIndex &index) const
 {
-    m_itemModel->requestActivate(index);
+    dataModel()->requestActivate(index);
 }
 
 void TaskManager::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
 {
-    m_itemModel->requestOpenUrls(index, urls);
+    dataModel()->requestOpenUrls(index, urls);
 }
 
 void TaskManager::requestNewInstance(const QModelIndex &index, const QString &action) const
 {
-    m_itemModel->requestNewInstance(index, action);
+    dataModel()->requestNewInstance(index, action);
 }
 
 void TaskManager::requestClose(const QModelIndex &index, bool force) const
 {
-    m_itemModel->requestClose(index, force);
+    dataModel()->requestClose(index, force);
 }
 
 void TaskManager::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
 {
-    m_itemModel->requestUpdateWindowIconGeometry(index, geometry, delegate);
+    dataModel()->requestUpdateWindowIconGeometry(index, geometry, delegate);
 }
 
 void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
@@ -268,7 +268,7 @@ void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePosi
 
 void TaskManager::requestWindowsView(const QModelIndexList &indexes) const
 {
-    m_itemModel->requestWindowsView(indexes);
+    dataModel()->requestWindowsView(indexes);
 }
 
 void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
@@ -323,7 +323,7 @@ void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls
         urlList.append(QUrl::fromLocalFile(url));
     }
 
-    m_itemModel->requestOpenUrls(indexes.first(), urlList);
+    dataModel()->requestOpenUrls(indexes.first(), urlList);
 }
 
 void TaskManager::hideItemPreview()

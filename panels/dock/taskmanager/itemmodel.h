@@ -14,16 +14,8 @@ class ItemModel : public QAbstractListModel
     Q_OBJECT
 public:
     enum Roles {
-        ItemIdRole = Qt::UserRole + 1,
-        NameRole,
-        IconNameRole,
-        ActiveRole,
-        AttentionRole,
-        MenusRole,
-        DockedRole,
+        ItemIdRole = Qt::UserRole + 64,
         // data type
-        WindowsRole,
-        DesktopFilesIconsRole,
         DockedDirRole,
     };
     Q_ENUM(Roles)
@@ -37,6 +29,13 @@ public:
     QPointer<AbstractItem> getItemById(const QString& id) const;
     void addItem(QPointer<AbstractItem> item);
     QJsonArray dumpDockedItems() const;
+
+    void requestActivate(const QModelIndex &index) const;
+    void requestNewInstance(const QModelIndex &index, const QString &action) const;
+    void requestClose(const QModelIndex &index, bool force = false) const;
+    void requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const;
+    void requestWindowsView(const QModelIndexList &indexes) const;
+    void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const;
 
 private Q_SLOTS:
     void onItemDestroyed();
