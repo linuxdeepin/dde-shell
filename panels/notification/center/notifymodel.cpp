@@ -81,6 +81,9 @@ void NotifyModel::expandApp(int row)
         }
         endInsertRows();
     }
+
+    // Rebuild all delegates to ensure Tab focus order matches visual order
+    rebuildDelegates();
 }
 
 void NotifyModel::collapseApp(int row)
@@ -129,6 +132,9 @@ void NotifyModel::collapseApp(int row)
         m_appNotifies.insert(row, overlap);
         endInsertRows();
     }
+
+    // Rebuild all delegates to ensure Tab focus order matches visual order
+    rebuildDelegates();
 }
 
 void NotifyModel::close()
@@ -359,6 +365,14 @@ int NotifyModel::lastNotifyIndex(const AppNotifyItem *item) const
 void NotifyModel::sortNotifies()
 {
     sort(0, Qt::DescendingOrder);
+}
+
+void NotifyModel::rebuildDelegates()
+{
+    // Force a model reset so that QML ListView delegates are destroyed and recreated
+    // in the current order, which helps synchronize Tab focus order with visual order.
+    beginResetModel();
+    endResetModel();
 }
 
 void NotifyModel::trayUpdateGroupLastEntity(const NotifyEntity &entity)
