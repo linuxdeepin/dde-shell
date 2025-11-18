@@ -65,8 +65,9 @@ Window {
     //TODO：由于windoweffect处理有BUG，导致动画结束后一致保持无阴影，无borderwidth状态。 无法恢复到最初的阴影和边框
     //D.DWindow.windowEffect: hideShowAnimation.running ? D.PlatformHandle.EffectNoShadow | D.PlatformHandle.EffectNoBorder : 0
     
-    //目前直接处理shadowColor(透明和默认值的切换)和borderWidth(0和1的切换)，来控制阴影和边框
-    D.DWindow.shadowColor: hideShowAnimation.running ? Qt.rgba(0,0,0,0) : Qt.rgba(0,0,0,255 * 0.6)
+    // 目前直接处理shadowColor(透明和默认值的切换)和borderWidth(0和1的切换)，来控制阴影和边框
+    // 默认阴影透明度是 60%，见： https://github.com/linuxdeepin/qt5platform-plugins/blob/master/xcb/dframewindow.h#L122
+    D.DWindow.shadowColor: hideShowAnimation.running ? Qt.rgba(0, 0, 0, 0) : Qt.rgba(0, 0, 0, 0.6)
     D.DWindow.borderWidth:  hideShowAnimation.running ? 0 : 1
     D.DWindow.enableBlurWindow: Qt.platform.pluginName !== "xcb"
     D.DWindow.themeType: Panel.colorTheme
