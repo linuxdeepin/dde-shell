@@ -138,13 +138,13 @@ Window {
         
         function onWidthChanged() {
             if (dock.useColumnLayout) {
-                Panel.notifyDockPositionChanged()
+                Panel.notifyDockPositionChanged(dock.width, 0)
             }
         }
         
         function onHeightChanged() {
             if (!dock.useColumnLayout) {
-                Panel.notifyDockPositionChanged()
+                Panel.notifyDockPositionChanged(0, dock.height)
             }
         }
     }

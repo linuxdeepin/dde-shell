@@ -159,7 +159,7 @@ AppletItemButton {
 
     Drag.dragType: Drag.Automatic
     DQuickDrag.overlay: overlayWindow
-    DQuickDrag.active: Drag.active
+    DQuickDrag.active: Drag.active && Qt.platform.pluginName === "xcb"
     DQuickDrag.hotSpotScale: Qt.size(0.5, 1)
     Drag.mimeData: {
         "text/x-dde-shell-tray-dnd-surfaceId": model.surfaceId,
@@ -172,6 +172,12 @@ AppletItemButton {
             DDT.TraySortOrderModel.actionsAlwaysVisible = Drag.active
         }
 
+        if (Qt.platform.pluginName !== "xcb") {
+            root.grabToImage(function(result) {
+                root.Drag.imageSource = result.url;
+            })
+        }
+
         if (!Drag.active) {
             Panel.contextDragging = false
             // reset position on drop
@@ -179,6 +185,14 @@ AppletItemButton {
             return
         }
         Panel.contextDragging = true
+    }
+
+    onWidthChanged: {
+        if (Qt.platform.pluginName !== "xcb") {
+            root.grabToImage(function(result) {
+                root.Drag.imageSource = result.url;
+            })
+        }
     }
 
     DragHandler {
