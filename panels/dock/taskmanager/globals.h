@@ -13,6 +13,7 @@ namespace dock {
 static inline const QString DOCK_ACTION_ALLWINDOW = "dock-action-allWindow";
 static inline const QString DOCK_ACTION_FORCEQUIT = "dock-action-forceQuit";
 static inline const QString DOCK_ACTION_CLOSEALL = "dock-action-closeAll";
+static inline const QString DOCK_ACTION_CLOSEWINDOW = "dock-action-closeWindow";
 static inline const QString DOCK_ACTIN_LAUNCH = "dock-action-launch";
 static inline const QString DOCK_ACTION_DOCK = "dock-action-dock";
 
