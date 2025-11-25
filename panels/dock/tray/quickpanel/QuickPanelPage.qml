@@ -64,6 +64,9 @@ Item {
             StackView.onActivating: function () {
                 panelView.contentHeight = Qt.binding(function() { return contentHeight})
             }
+            StackView.onActivated: function () {
+                takeFocus()
+            }
         }
     }
 }

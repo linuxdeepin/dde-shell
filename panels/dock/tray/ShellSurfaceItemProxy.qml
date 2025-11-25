@@ -20,6 +20,10 @@ Item {
     implicitWidth: shellSurface ? shellSurface.width : 10
     implicitHeight: shellSurface ? shellSurface.height : 10
 
+    function takeFocus() {
+        impl.takeFocus()
+    }
+
     ShellSurfaceItem {
         id: impl
         width: parent.width
