@@ -28,6 +28,7 @@ public:
     inline int mapToSourceModelRole(QAbstractItemModel *model, int role) const;
 
     void requestActivate(const QModelIndex &index) const override;
+    void requestNewInstance(const QModelIndex &index, const QString &action) const override;
 
     void requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const override;
     void requestClose(const QModelIndex &index, bool force = false) const override;
