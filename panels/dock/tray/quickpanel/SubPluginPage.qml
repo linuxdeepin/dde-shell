@@ -22,6 +22,10 @@ Item {
     property int subPluginMinHeight
     property int headerMargin: 10
 
+    function takeFocus() {
+        surfaceLayer.takeFocus()
+    }
+
     Component.onCompleted: {
         var surfaceMinHeight = subPluginMinHeight - titleLayer.height - headerMargin
         shellSurface.setEmbedPanelMinHeight(surfaceMinHeight)
