@@ -48,7 +48,7 @@ QVariant DockCombineModel::data(const QModelIndex &index, int role) const
         auto res = RoleCombineModel::data(index, m_roleMaps.value(TaskManager::DesktopIdRole)).toString();
         if (res.isEmpty()) {
             auto data = RoleCombineModel::data(index, m_roleMaps.value(TaskManager::IdentityRole)).toStringList();
-            res = data.value(0, "");
+            res = data.join("-");
         }
         return res;
     }
