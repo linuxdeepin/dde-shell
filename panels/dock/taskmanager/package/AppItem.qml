@@ -391,8 +391,8 @@ Item {
             interval: 50
             onTriggered: {
                 var point = root.mapToItem(null, root.width / 2, root.height / 2)
-                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
                 toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
+                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
                 toolTip.open()
             }
         }
