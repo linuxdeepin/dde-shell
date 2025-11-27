@@ -40,6 +40,7 @@ public:
     enum Roles {
         SurfaceIdRole = Qt::UserRole, // actually "pluginId::itemKey" or an internal one.
         VisibilityRole,
+        DockVisibleRole,
         SectionTypeRole,
         VisualIndexRole,
         DelegateTypeRole,
@@ -63,6 +64,8 @@ public:
     Q_INVOKABLE bool dropToDockTray(const QString & draggedSurfaceId, int dropVisualIndex, bool isBefore);
     Q_INVOKABLE void setSurfaceVisible(const QString & surfaceId, bool visible);
     Q_INVOKABLE bool isDisplayedSurface(const QString &surfaceId) const;
+    Q_INVOKABLE void setDockVisible(const QString & surfaceId, bool visible);
+    Q_INVOKABLE bool isDockVisible(const QString &surfaceId) const;
     Q_INVOKABLE QModelIndex getModelIndexByVisualIndex(int visualIndex) const;
 
 signals:
@@ -89,6 +92,8 @@ private:
     QStringList m_fixedIds;
     // surface IDs that should be invisible/hidden from the tray area.
     QStringList m_hiddenIds;
+    // surface IDs that should be hidden from dock tray but keep VisibilityRole true.
+    QStringList m_dockHiddenIds;
 
     QStandardItem * findItemByVisualIndex(int visualIndex, VisualSections visualSection) const;
     QStringList * getSection(const QString & sectionType);
