@@ -67,6 +67,17 @@
             "permissions": "readwrite",
             "visibility": "private"
         },
+        "dockHiddenSurfaceIds": {
+            "value": [],
+            "serial": 0,
+            "flags": [],
+            "name": "Dock Hidden Surface IDs",
+            "name[zh_CN]": "在 Dock 中隐藏的标识 ID 列表",
+            "description": "Tray plugin surface IDs that should be hidden from dock tray but keep visible in other areas (e.g., control center)",
+            "description[zh_CN]": "在 Dock 托盘中隐藏但在其他区域（如控制中心）仍保持可见的标识 ID 列表",
+            "permissions": "readwrite",
+            "visibility": "private"
+        },
         "isCollapsed": {
             "value": false,
             "serial": 0,
