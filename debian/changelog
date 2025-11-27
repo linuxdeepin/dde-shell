@@ -1,3 +1,20 @@
+dde-shell (2.0.20) unstable; urgency=medium
+
+  * feat: add dock-specific tray item visibility control
+  * fix: tooltip not centered when first hover
+  * feat: group application windows together in task manager
+  * fix: 主要是处理打包单元测试报错问题。
+  * fix: reduce app item border width
+  * feat: implement window split mode with dynamic title display
+  * fix: Fix the focus issue on secondary pages in Quick Settings
+  * fix: avoid use DQuickDrag under wayland session
+  * i18n: remove de_DE translation resources
+  * fix: shadow too hard caused by incorrect Qt.rgba usage
+  * fix: optimize plugin installation to avoid redundant files
+  * feat: add reproducible build parameters
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Thu, 27 Nov 2025 17:33:36 +0800
+
 dde-shell (2.0.19) unstable; urgency=medium
 
   * feat: enhance notification animations and visual effects
