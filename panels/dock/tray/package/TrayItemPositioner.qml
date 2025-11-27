@@ -12,8 +12,8 @@ Control {
         if (DDT.TraySortOrderModel.isUpdating) {
             return false
         }
-        if (model.sectionType === "collapsable") return !collapsed && model.visibility
-        return model.sectionType !== "stashed" && model.visibility
+        if (model.sectionType === "collapsable") return !collapsed && model.visibility && model.dockVisible
+        return model.sectionType !== "stashed" && model.visibility && model.dockVisible
     }
     property size visualSize: Qt.size(0, 0)
 
