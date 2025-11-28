@@ -83,11 +83,11 @@
     </message>
     <message>
         <source>Camera on</source>
-        <translation type="unfinished"/>
+        <translation>Caméra activée</translation>
     </message>
     <message>
         <source>Camera off</source>
-        <translation type="unfinished"/>
+        <translation>Caméra désactivée</translation>
     </message>
 </context>
 </TS>
