@@ -1,3 +1,9 @@
+dde-shell (2.0.21) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1359)
+
+ -- fuleyi <fuleyi@uniontech.com>  Thu, 04 Dec 2025 19:12:53 +0800
+
 dde-shell (2.0.20) unstable; urgency=medium
 
   * feat: add dock-specific tray item visibility control
