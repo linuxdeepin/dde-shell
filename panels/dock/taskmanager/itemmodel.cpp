@@ -4,6 +4,9 @@
 
 #include "itemmodel.h"
 #include "abstractitem.h"
+#include "appitem.h"
+#include "globals.h"
+#include "taskmanager.h"
 #include "taskmanagersettings.h"
 
 #include <algorithm>
@@ -32,17 +35,19 @@ ItemModel::ItemModel(QObject* parent)
 
 QHash<int, QByteArray> ItemModel::roleNames() const
 {
-    return {{ItemModel::ItemIdRole, "itemId"},
-        {ItemModel::NameRole, "name"},
-        {ItemModel::IconNameRole, "iconName"},
-        {ItemModel::ActiveRole, "active"},
-        {ItemModel::AttentionRole, "attention"},
-        {ItemModel::MenusRole, "menus"},
-        {ItemModel::DockedRole, "docked"},
-        {ItemModel::WindowsRole, "windows"},
-        {ItemModel::DesktopFilesIconsRole, "desktopfileIcons"},
+    // clang-format off
+    return {{ItemModel::ItemIdRole, MODEL_ITEMID},
+        {TaskManager::NameRole, MODEL_NAME},
+        {TaskManager::IconNameRole, MODEL_ICONNAME},
+        {TaskManager::ActiveRole, MODEL_ACTIVE},
+        {TaskManager::AttentionRole, MODEL_ATTENTION},
+        {TaskManager::MenusRole, MODEL_MENUS},
+        {TaskManager::DockedRole, MODEL_DOCKED},
+        {TaskManager::WindowsRole, MODEL_WINDOWS},
+        {TaskManager::WinIconRole, MODEL_WINICON},
         {ItemModel::DockedDirRole, "dockedDir"}
     };
+    // clang-format on
 }
 
 int ItemModel::rowCount(const QModelIndex &parent) const
@@ -57,18 +62,20 @@ QVariant ItemModel::data(const QModelIndex &index, int role) const
     }
 
     auto item = m_items[index.row()];
+    // clang-format off
     switch (role) {
         case ItemModel::ItemIdRole: return item->id();
-        case ItemModel::NameRole: return item->name();
-        case ItemModel::IconNameRole: return item->icon();
-        case ItemModel::ActiveRole: return item->isActive();
-        case ItemModel::AttentionRole: return item->isAttention();
-        case ItemModel::MenusRole: return item->menus();
-        case ItemModel::DockedRole: return item->isDocked();
-        case ItemModel::WindowsRole: return item->data().toStringList();
-        case ItemModel::DesktopFilesIconsRole: return item->data().toStringList();
+        case TaskManager::NameRole: return item->name();
+        case TaskManager::IconNameRole: return item->icon();
+        case TaskManager::ActiveRole: return item->isActive();
+        case TaskManager::AttentionRole: return item->isAttention();
+        case TaskManager::MenusRole: return item->menus();
+        case TaskManager::DockedRole: return item->isDocked();
+        case TaskManager::WindowsRole: return item->data().toStringList();
+        case TaskManager::WinIconRole: return item->data().toStringList();
         case ItemModel::DockedDirRole: return item->data().toString();
     }
+    // clang-format on
     return QVariant();
 }
 
@@ -87,6 +94,78 @@ QJsonArray ItemModel::dumpDockedItems() const
     }
 
     return result;
+}
+
+void ItemModel::requestActivate(const QModelIndex &index) const
+{
+    QString itemId = data(index).toString();
+
+    auto item = ItemModel::instance()->getItemById(itemId);
+    if (!item) {
+        return;
+    }
+
+    item->handleClick(QString());
+}
+
+void ItemModel::requestNewInstance(const QModelIndex &index, const QString &action) const
+{
+    QString itemId = data(index).toString();
+
+    auto item = ItemModel::instance()->getItemById(itemId);
+    if (!item) {
+        return;
+    }
+
+    item->handleClick(DOCK_ACTIN_LAUNCH);
+}
+
+void ItemModel::requestClose(const QModelIndex &index, bool force) const
+{
+    QString itemId = data(index).toString();
+
+    auto item = ItemModel::instance()->getItemById(itemId);
+    if (!item) {
+        return;
+    }
+
+    item->handleClick(force ? DOCK_ACTION_FORCEQUIT : DOCK_ACTION_CLOSEALL);
+}
+
+void ItemModel::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
+{
+    QString itemId = data(index).toString();
+
+    auto item = ItemModel::instance()->getItemById(itemId);
+    if (!item) {
+        return;
+    }
+
+    // convert urls to string list
+    QStringList urlsStr;
+    for (auto url : std::as_const(urls)) {
+        urlsStr.append(url.toString());
+    }
+
+    item->handleFileDrop(urlsStr);
+}
+
+void ItemModel::requestWindowsView(const QModelIndexList &indexes) const
+{
+    // nothing here, dummy entry.
+}
+
+void ItemModel::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+{
+    QString itemId = data(index).toString();
+
+    QPointer<AppItem> item = static_cast<AppItem *>(ItemModel::instance()->getItemById(itemId).get());
+    if (item.isNull())
+        return;
+
+    for (auto window : item->getAppendWindows()) {
+        window->setWindowIconGeometry(qobject_cast<QWindow *>(delegate), geometry);
+    }
 }
 
 QPointer<AbstractItem> ItemModel::getItemById(const QString& id) const
