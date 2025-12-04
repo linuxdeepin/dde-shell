@@ -96,6 +96,7 @@ private:
     void trayUpdateGroupLastEntity(const QString &appName);
     void updateCollapseStatus();
     void updateContentRowCount(int rowCount);
+    void rebuildDelegates();
 
 private:
     QList<AppNotifyItem *> m_appNotifies;
