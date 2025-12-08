@@ -223,7 +223,8 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     }
 
     QString strBody = body;
-    strBody.replace(QLatin1String("\\\\"), QLatin1String("\\"), Qt::CaseInsensitive);
+    // Unescape backslashes and quotes from %q formatted strings (e.g., \\ -> \, \" -> ", \' -> ')
+    strBody.replace(QRegularExpression("\\\\(\\\\|['\"])"), "\\1");
 
     QString strIcon = appIcon;
     if (strIcon.isEmpty())
