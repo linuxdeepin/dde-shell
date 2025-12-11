@@ -1,3 +1,9 @@
+dde-shell (2.0.22) unstable; urgency=medium
+
+  * fix: unescape quotes in Bluetooth device notification
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 11 Dec 2025 20:32:24 +0800
+
 dde-shell (2.0.21) unstable; urgency=medium
 
   * i18n: Updates for project Deepin Desktop Environment (#1359)
