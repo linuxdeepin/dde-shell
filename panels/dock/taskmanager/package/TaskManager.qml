@@ -14,32 +14,17 @@ ContainmentItem {
     property bool useColumnLayout: Panel.position % 2
     property int dockOrder: 16
     property int remainingSpacesForTaskManager: Panel.itemAlignment === Dock.LeftAlignment ? Panel.rootObject.dockLeftSpaceForCenter : Panel.rootObject.dockRemainingSpaceForCenter
-    property int forceRelayoutWorkaround: 0
     
     property int remainingSpacesForSplitWindow: Panel.rootObject.dockLeftSpaceForCenter - (Panel.rootObject.dockCenterPartCount - 1) * Panel.rootObject.dockItemMaxSize * 9 / 14
     // 用于居中计算的实际应用区域尺寸
-    property int appContainerWidth: useColumnLayout ? Panel.rootObject.dockSize : (appContainer.implicitWidth + forceRelayoutWorkaround)
-    property int appContainerHeight: useColumnLayout ? (appContainer.implicitHeight + forceRelayoutWorkaround) : Panel.rootObject.dockSize
+    property int appContainerWidth: useColumnLayout ? Panel.rootObject.dockSize : appContainer.implicitWidth
+    property int appContainerHeight: useColumnLayout ? appContainer.implicitHeight : Panel.rootObject.dockSize
     
     // 动态字符限制数组，存储每个应用的最大显示字符数
     property var dynamicCharLimits: []
 
-    Timer {
-        // FIXME: dockItemMaxSize(visualModel.cellWidth,actually its implicitWidth/Height) change will cause all delegate item's position change, but
-        //        the newly added item will using the old cellWidth to calculate its position, thus it will be placed in the wrong position. Also it
-        //        seems forceLayout() simply doesn't work, so we use a workaround here to force relayout the ListView inside the OverflowContainer.
-        //        See: QTBUG-133953
-        id: relayoutWorkaroundTimer
-        interval: 250 // should longer than OverflowContainer.add duration
-        repeat: false
-        onTriggered: {
-            taskmanager.forceRelayoutWorkaround = visualModel.count % 2 + 1
-            console.log("force relayout", taskmanager.forceRelayoutWorkaround)
-        }
-    }
-
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : (Math.max(remainingSpacesForTaskManager, appContainer.implicitWidth) + forceRelayoutWorkaround)
-    implicitHeight: useColumnLayout ? (Math.max(remainingSpacesForTaskManager, appContainer.implicitHeight) + forceRelayoutWorkaround) : Panel.rootObject.dockSize
+    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : Math.max(remainingSpacesForTaskManager, appContainer.implicitWidth)
+    implicitHeight: useColumnLayout ? Math.max(remainingSpacesForTaskManager, appContainer.implicitHeight) : Panel.rootObject.dockSize
 
     // Helper function to find the current index of an app by its appId in the visualModel
     function findAppIndex(appId) {
@@ -238,14 +223,6 @@ ContainmentItem {
         anchors.fill: parent
         useColumnLayout: taskmanager.useColumnLayout
         spacing: Panel.rootObject.itemSpacing + visualModel.count % 2
-        add: Transition {
-            NumberAnimation {
-                properties: "scale,opacity"
-                from: 0
-                to: 1
-                duration: 200
-            }
-        }
         remove: Transition {
             NumberAnimation {
                 properties: "scale,opacity"
@@ -277,7 +254,6 @@ ContainmentItem {
             // 1:4 the distance between app : dock height; get width/height≈0.8
             property real cellWidth: Panel.rootObject.dockItemMaxSize * 0.8
             onCountChanged: function() {
-                relayoutWorkaroundTimer.start()
                 DS.singleShot(300, updateDynamicCharLimits)
             }
             delegate: Item {
@@ -310,6 +286,14 @@ ContainmentItem {
                     }
                     // 非 windowSplit 模式，隐藏整个应用
                     return false
+                }
+
+                ListView.onAdd: NumberAnimation {
+                    target: delegateRoot
+                    properties: "scale,opacity"
+                    from: 0
+                    to: 1
+                    duration: 200
                 }
 
                 states: [
@@ -472,7 +456,6 @@ ContainmentItem {
         repeat: false
         onTriggered: {
             updateDynamicCharLimits()
-            taskmanager.forceRelayoutWorkaround = (visualModel.count + 1) % 2 + 1
         }
     }
 
