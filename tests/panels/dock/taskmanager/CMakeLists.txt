@@ -8,6 +8,8 @@ find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Co
 include(GoogleTest)
 
 add_executable(rolecombinemodel_tests
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/rolecombinemodel.h
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/rolecombinemodel.cpp
     combinemodela.cpp
     combinemodela.h
     combinemodelb.cpp
@@ -19,8 +21,8 @@ target_link_libraries(rolecombinemodel_tests
     GTest::GTest
     GTest::Main
     Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Test
-    dock-taskmanager
 )
 target_include_directories(rolecombinemodel_tests PRIVATE
     ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/
@@ -29,6 +31,8 @@ target_include_directories(rolecombinemodel_tests PRIVATE
 gtest_discover_tests(rolecombinemodel_tests)
 
 add_executable(rolegroupmodel_tests
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/rolegroupmodel.h
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/rolegroupmodel.cpp
     rolegroupmodeltests.cpp
 )
 
@@ -36,8 +40,9 @@ target_link_libraries(rolegroupmodel_tests
     GTest::GTest
     GTest::Main
     Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Test
-    dock-taskmanager
+    # dock-taskmanager
 )
 target_include_directories(rolegroupmodel_tests PRIVATE
     ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/
