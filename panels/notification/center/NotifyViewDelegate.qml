@@ -18,6 +18,34 @@ DelegateChooser {
 
     role: "type"
 
+    // Shared navigation helper: focus next item or cycle to header
+    function navigateToNextItem(currentIndex) {
+        if (currentIndex < view.count - 1) {
+            view.currentIndex = currentIndex + 1
+            view.positionViewAtIndex(currentIndex + 1, ListView.Contain)
+            Qt.callLater(function() {
+                let nextItem = view.itemAtIndex(currentIndex + 1)
+                if (nextItem && nextItem.enabled) nextItem.forceActiveFocus()
+            })
+        } else {
+            view.gotoHeaderFirst()
+        }
+    }
+
+    // Shared navigation helper: focus previous item or cycle to header
+    function navigateToPrevItem(currentIndex) {
+        if (currentIndex > 0) {
+            view.currentIndex = currentIndex - 1
+            view.positionViewAtIndex(currentIndex - 1, ListView.Contain)
+            Qt.callLater(function() {
+                let prevItem = view.itemAtIndex(currentIndex - 1)
+                if (prevItem && prevItem.enabled) prevItem.forceActiveFocus()
+            })
+        } else {
+            view.gotoHeaderLast()
+        }
+    }
+
     DelegateChoice {
         roleValue: "group"
         GroupNotify {
@@ -25,8 +53,20 @@ DelegateChooser {
             objectName: "group-" + model.appName
             width: NotifyStyle.contentItem.width
             appName: model.appName
-            activeFocusOnTab: true
+            activeFocusOnTab: false
             z: index
+
+            Keys.onTabPressed: function(event) {
+                groupNotify.focusFirstButton()
+                event.accepted = true
+            }
+            Keys.onBacktabPressed: function(event) {
+                root.navigateToPrevItem(index)
+                event.accepted = true
+            }
+
+            onGotoNextItem: root.navigateToNextItem(index)
+            onGotoPrevItem: groupNotify.focusFirstButton()
 
             Loader {
                 anchors.fill: parent
@@ -63,8 +103,26 @@ DelegateChooser {
             id: normalNotify
             objectName: "normal-" + model.appName
             width: NotifyStyle.contentItem.width
-            activeFocusOnTab: true
+            activeFocusOnTab: false
             z: index
+
+            Keys.onTabPressed: function(event) {
+                if (normalNotify.focusFirstButton()) {
+                    event.accepted = true
+                    return
+                }
+                Qt.callLater(function() {
+                    if (normalNotify.focusFirstButton()) return
+                    root.navigateToNextItem(index)
+                })
+                event.accepted = true
+            }
+            Keys.onBacktabPressed: function(event) {
+                root.navigateToPrevItem(index)
+                event.accepted = true
+            }
+            onGotoNextItem: root.navigateToNextItem(index)
+            onGotoPrevItem: normalNotify.forceActiveFocus()
 
             appName: model.appName
             iconName: model.iconName
@@ -128,8 +186,26 @@ DelegateChooser {
             id: overlapNotify
             objectName: "overlap-" + model.appName
             width: NotifyStyle.contentItem.width
-            activeFocusOnTab: true
+            activeFocusOnTab: false
             z: index
+
+            Keys.onTabPressed: function(event) {
+                if (overlapNotify.focusFirstButton()) {
+                    event.accepted = true
+                    return
+                }
+                Qt.callLater(function() {
+                    if (overlapNotify.focusFirstButton()) return
+                    root.navigateToNextItem(index)
+                })
+                event.accepted = true
+            }
+            Keys.onBacktabPressed: function(event) {
+                root.navigateToPrevItem(index)
+                event.accepted = true
+            }
+            onGotoNextItem: root.navigateToNextItem(index)
+            onGotoPrevItem: overlapNotify.forceActiveFocus()
 
             count: model.overlapCount
             appName: model.appName
@@ -145,6 +221,16 @@ DelegateChooser {
             notifyContent.clearButton: AnimationSettingButton {
                 icon.name: "clean-alone"
                 text: qsTr("Clean All")
+                activeFocusOnTab: false
+                focusBorderVisible: activeFocus
+                Keys.onTabPressed: function(event) {
+                    overlapNotify.gotoNextItem()
+                    event.accepted = true
+                }
+                Keys.onBacktabPressed: function(event) {
+                    overlapNotify.gotoPrevItem()
+                    event.accepted = true
+                }
                 onClicked: function () {
                     notifyContent.remove()
                 }

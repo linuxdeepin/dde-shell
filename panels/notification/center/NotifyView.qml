@@ -13,25 +13,60 @@ Control {
     id: root
     focus: true
 
+    // Maximum retry attempts for focus operations when delegate creation is pending
+    readonly property int maxFocusRetries: 5
+
     required property NotifyModel notifyModel
     property alias viewPanelShown: view.panelShown
     readonly property real viewHeight: view.contentHeight
     readonly property int viewCount: view.count
+
+    signal gotoHeaderFirst()  // Signal to cycle Tab back to header first button
+    signal gotoHeaderLast()   // Signal to cycle Shift+Tab back to header last button
 
     NotifySetting {
         id: notifySetting
         notifyModel: root.notifyModel
     }
 
+    // Focus notify item at specified index with retry logic for delegate creation
+    function focusItemAtIndex(idx) {
+        if (idx < 0 || idx >= view.count) return false
+        view.currentIndex = idx
+        view.positionViewAtIndex(idx, ListView.Contain)
+        function tryFocus(retries) {
+            let item = view.itemAtIndex(idx)
+            if (item && item.enabled) {
+                item.forceActiveFocus()
+            } else if (retries > 0) {
+                Qt.callLater(function() { tryFocus(retries - 1) })
+            }
+        }
+        Qt.callLater(function() { tryFocus(root.maxFocusRetries) })
+        return true
+    }
+
+    // Focus the last notify item for Shift+Tab cycling from header
+    function focusLastItem() {
+        if (view.count > 0) {
+            focusItemAtIndex(view.count - 1)
+        }
+    }
+
     contentItem: ListView {
         id: view
         spacing: 10
         snapMode: ListView.SnapToItem
-        // activeFocusOnTab: true
+        keyNavigationEnabled: false
+        activeFocusOnTab: false
         ScrollBar.vertical: ScrollBar { }
         property int nextIndex: -1
         property bool panelShown: false
-        
+
+        // Forward signals from delegate to root for Tab cycling
+        function gotoHeaderFirst() { root.gotoHeaderFirst() }
+        function gotoHeaderLast() { root.gotoHeaderLast() }
+
         onNextIndexChanged: {
             if (nextIndex >= 0 && count > 0) {
                 currentIndex = nextIndex

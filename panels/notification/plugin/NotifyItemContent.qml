@@ -13,10 +13,49 @@ NotifyItem {
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
-    property bool closeVisible: activeFocus || impl.hovered
+    // Maximum retry attempts for focus operations when loader content is pending
+    readonly property int maxFocusRetries: 5
+    property bool closeVisible: activeFocus || impl.hovered || (clearLoader.item && clearLoader.item.activeFocus)
     property int miniContentHeight: NotifyStyle.contentItem.miniHeight
     property bool enableDismissed: true
     property alias clearButton: clearLoader.sourceComponent
+
+    signal gotoNextItem()  // Signal to navigate to next notify item
+    signal gotoPrevItem()  // Signal to navigate to previous notify item
+
+    // Focus first interactive button (action buttons first, then X button)
+    function focusFirstButton() {
+        if (actionLoader.item && actionLoader.item.enabled) {
+            actionLoader.item.focusFirstButton()
+            return true
+        }
+        if (clearLoader.item && clearLoader.item.enabled) {
+            clearLoader.item.forceActiveFocus()
+            return true
+        }
+        // Retry if clearLoader not yet created
+        function tryFocusClear(retries) {
+            if (clearLoader.item && clearLoader.item.enabled) {
+                clearLoader.item.forceActiveFocus()
+            } else if (retries > 0) {
+                Qt.callLater(function() { tryFocusClear(retries - 1) })
+            }
+        }
+        Qt.callLater(function() { tryFocusClear(root.maxFocusRetries) })
+        return true
+    }
+
+    // Focus last interactive button (X button first, then action buttons)
+    function focusLastButton() {
+        if (clearLoader.item && clearLoader.item.enabled) {
+            clearLoader.item.forceActiveFocus()
+            return true
+        } else if (actionLoader.item && actionLoader.item.enabled) {
+            actionLoader.item.focusLastButton()
+            return true
+        }
+        return false
+    }
 
     Control {
         id: impl
@@ -61,15 +100,28 @@ NotifyItem {
 
             Loader {
                 id: clearLoader
-                focus: true
                 anchors.right: parent.right
-                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered || activeFocus)
+                // Show when mouse hovers or notification item has focus
+                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered)
                 sourceComponent: SettingActionButton {
                     id: closeBtn
                     objectName: "closeNotify-" + root.appName
                     icon.name: "clean-alone"
                     padding: 2
-                    forcusBorderVisible: visualFocus
+                    activeFocusOnTab: false
+                    focusBorderVisible: activeFocus
+                    Keys.onTabPressed: function(event) {
+                        root.gotoNextItem()
+                        event.accepted = true
+                    }
+                    Keys.onBacktabPressed: function(event) {
+                        if (actionLoader.item) {
+                            actionLoader.item.focusLastButton()
+                        } else {
+                            root.gotoPrevItem()
+                        }
+                        event.accepted = true
+                    }
                     onClicked: function () {
                         root.remove()
                     }
@@ -254,6 +306,7 @@ NotifyItem {
                 }
 
                 Loader {
+                    id: actionLoader
                     active: root.actions.length > 0
                     visible: active
                     Layout.alignment: Qt.AlignRight | Qt.AlignBottom
@@ -262,6 +315,15 @@ NotifyItem {
                         onActionInvoked: function (actionId) {
                             root.actionInvoked(actionId)
                         }
+                        onGotoNextButton: {
+                            // Navigate to clear button or next notification item
+                            if (clearLoader.item) {
+                                clearLoader.item.forceActiveFocus()
+                            } else {
+                                root.gotoNextItem()
+                            }
+                        }
+                        onGotoPrevItem: root.gotoPrevItem()
                     }
                 }
             }

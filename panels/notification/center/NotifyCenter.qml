@@ -36,6 +36,13 @@ FocusScope {
             width: NotifyStyle.contentItem.width
             notifyModel: notifyModel
             z: 1
+            onGotoFirstNotify: {
+                if (view.viewCount === 0 || !view.focusItemAtIndex(0)) header.focusFirstButton()
+            }
+            onGotoLastNotify: {
+                if (view.viewCount === 0) header.focusLastButton()
+                else view.focusLastItem()
+            }
         }
 
         NotifyView {
@@ -51,6 +58,8 @@ FocusScope {
 
             height: Math.min(maxViewHeight, viewHeight)
             notifyModel: notifyModel
+            onGotoHeaderFirst: header.focusFirstButton()
+            onGotoHeaderLast: header.focusLastButton()
         }
 
         DropShadowText {
