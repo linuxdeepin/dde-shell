@@ -14,11 +14,19 @@ NotifyItem {
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
 
+    signal gotoNextItem()
+    signal gotoPrevItem()
+
+    function focusFirstButton() {
+        return notifyContent.focusFirstButton()
+    }
+
     Control {
         id: impl
         anchors.fill: parent
 
         contentItem: NotifyItemContent {
+            id: notifyContent
             width: parent.width
             appName: root.appName
             iconName: root.iconName
@@ -42,6 +50,8 @@ NotifyItem {
             onActionInvoked: function (actionId) {
                 root.actionInvoked(actionId)
             }
+            onGotoNextItem: root.gotoNextItem()
+            onGotoPrevItem: root.gotoPrevItem()
         }
     }
 }

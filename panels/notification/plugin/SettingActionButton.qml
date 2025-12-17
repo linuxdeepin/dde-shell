@@ -11,7 +11,7 @@ ActionButton {
     id: root
 
     property int radius: 15
-    property bool forcusBorderVisible: root.visualFocus
+    property bool focusBorderVisible: root.visualFocus
 
     icon.width: 16
     icon.height: 16
@@ -20,7 +20,7 @@ ActionButton {
 
     Loader {
         anchors.fill: parent
-        active: root.forcusBorderVisible
+        active: root.focusBorderVisible
 
         sourceComponent: FocusBoxBorder {
             radius: root.radius

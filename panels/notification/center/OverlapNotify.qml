@@ -21,6 +21,12 @@ NotifyItem {
     property alias notifyContent: notifyContent
 
     signal expand()
+    signal gotoNextItem()
+    signal gotoPrevItem()
+
+    function focusFirstButton() {
+        return notifyContent.focusFirstButton()
+    }
 
     states: [
         State {
@@ -75,6 +81,8 @@ NotifyItem {
                 onActionInvoked: function (actionId) {
                     root.actionInvoked(actionId)
                 }
+                onGotoNextItem: root.gotoNextItem()
+                onGotoPrevItem: root.gotoPrevItem()
             }
 
             OverlapIndicator {
