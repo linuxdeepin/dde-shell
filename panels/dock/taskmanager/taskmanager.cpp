@@ -388,11 +388,7 @@ bool TaskManager::IsDocked(QString appID)
         return false;
     }
 
-    QPointer<AppItem> appitem = desktopfileParser->getAppItem();
-    if (appitem.isNull()) {
-        return false;
-    }
-    return appitem->isDocked();
+    return desktopfileParser->isDocked();
 }
 
 bool TaskManager::RequestUndock(QString appID)
