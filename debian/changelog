@@ -1,3 +1,14 @@
+dde-shell (2.0.23) unstable; urgency=medium
+
+  * fix: Fix error in obtaining resident app status
+  * fix: resolve Tab key focus navigation issues in notification center
+  * chore: backup plan to temporary switch back to legacy ItemModel
+  * fix: update test CMakeLists for role models
+  * Revert "fix: 主要是处理打包单元测试报错问题。"
+  * fix: icons stuck together caused by listview add animation
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 18 Dec 2025 19:49:23 +0800
+
 dde-shell (2.0.22) unstable; urgency=medium
 
   * fix: unescape quotes in Bluetooth device notification
