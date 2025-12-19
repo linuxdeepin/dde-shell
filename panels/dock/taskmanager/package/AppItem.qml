@@ -161,25 +161,25 @@ Item {
                 case Dock.Top: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
                     windowIndicator.anchors.top = parent.top
-                    windowIndicator.anchors.topMargin = Qt.binding(() => {return (root.height - iconSize) / 2 / 3})
+                    windowIndicator.anchors.topMargin = Qt.binding(() => {return Math.max((root.height - iconSize) / 2 - 8, (root.height - iconSize) / 2 / 3)})
                     return
                 }
                 case Dock.Bottom: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
                     windowIndicator.anchors.bottom = parent.bottom
-                    windowIndicator.anchors.bottomMargin = Qt.binding(() => {return (root.height - iconSize) / 2 / 3})
+                    windowIndicator.anchors.bottomMargin = Qt.binding(() => {return Math.max((root.height - iconSize) / 2 - 8, (root.height - iconSize) / 2 / 3)})
                     return
                 }
                 case Dock.Left: {
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
                     windowIndicator.anchors.left = parent.left
-                    windowIndicator.anchors.leftMargin = Qt.binding(() => {return (root.width - iconSize) / 2 / 3})
+                    windowIndicator.anchors.leftMargin = Qt.binding(() => {return Math.max((root.width - iconSize) / 2 - 8, (root.width - iconSize) / 2 / 3)})
                     return
                 }
                 case Dock.Right:{
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
                     windowIndicator.anchors.right = parent.right
-                    windowIndicator.anchors.rightMargin = Qt.binding(() => {return (root.width - iconSize) / 2 / 3})
+                    windowIndicator.anchors.rightMargin = Qt.binding(() => {return Math.max((root.width - iconSize) / 2 - 8, (root.width - iconSize) / 2 / 3)})
                     return
                 }
                 }
