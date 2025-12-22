@@ -23,6 +23,9 @@ Item {
     required property list<string> windows
     required property int visualIndex
     required property var modelIndex
+    required property string title
+
+    property real blendOpacity: 1.0
 
     signal dropFilesOnItem(itemId: string, files: list<string>)
     signal dragFinished()
@@ -32,11 +35,13 @@ Item {
     Drag.hotSpot.x: icon.width / 2
     Drag.hotSpot.y: icon.height / 2
     Drag.dragType: Drag.Automatic
-    Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar" }
-
+    Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
+    
     property bool useColumnLayout: Panel.position % 2
     property int statusIndicatorSize: useColumnLayout ? root.width * 0.72 : root.height * 0.72
     property int iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
+    property bool enableTitle: false
+    property bool titleActive: enableTitle && titleLoader.active
 
     property var iconGlobalPoint: {
         var a = icon
@@ -50,25 +55,84 @@ Item {
         return Qt.point(x, y)
     }
 
-    Item {
+    implicitWidth: appItem.implicitWidth
+
+    AppItemPalette {
+        id: itemPalette
+        displayMode: root.displayMode
+        colorTheme: root.colorTheme
+        active: root.active
+        backgroundColor: D.DTK.palette.highlight
+    }
+
+    Control {
         anchors.fill: parent
         id: appItem
+        implicitWidth: root.titleActive ? (iconContainer.width + 4 + titleLoader.width) : iconContainer.width
         visible: !root.Drag.active // When in dragging, hide app item
-        AppItemPalette {
-            id: itemPalette
-            displayMode: root.displayMode
-            colorTheme: root.colorTheme
-            active: root.active
-            backgroundColor: D.DTK.palette.highlight
-        }
 
-        StatusIndicator {
-            id: statusIndicator
-            palette: itemPalette
-            width: root.statusIndicatorSize
-            height: root.statusIndicatorSize
-            anchors.centerIn: icon
-            visible: root.displayMode === Dock.Efficient && root.windows.length > 0
+        Item {
+            id: iconContainer
+            anchors.verticalCenter: root.useColumnLayout ? undefined : parent.verticalCenter
+            anchors.horizontalCenter: root.useColumnLayout ? parent.horizontalCenter : undefined
+            width: root.titleActive ? root.iconSize : Panel.rootObject.dockItemMaxSize * 0.8
+            height: parent.height
+            StatusIndicator {
+                id: statusIndicator
+                palette: itemPalette
+                width: root.statusIndicatorSize
+                height: root.statusIndicatorSize
+                anchors.centerIn: iconContainer
+                visible: root.displayMode === Dock.Efficient && root.windows.length > 0
+            }
+
+            Connections {
+                function onPositionChanged() {
+                    windowIndicator.updateIndicatorAnchors()
+                    updateWindowIconGeometryTimer.start()
+                }
+                target: Panel
+            }
+
+            D.DciIcon {
+                id: icon
+                name: root.iconName
+                height: iconSize
+                width: iconSize
+                sourceSize: Qt.size(iconSize, iconSize)
+                anchors.centerIn: parent
+                retainWhileLoading: true
+
+                LaunchAnimation {
+                    id: launchAnimation
+                    launchSpace: {
+                        switch (Panel.position) {
+                        case Dock.Top:
+                        case Dock.Bottom:
+                            return (root.height - icon.height) / 2
+                        case Dock.Left:
+                        case Dock.Right:
+                            return (root.width - icon.width) / 2
+                        }
+                    }
+
+                    direction: {
+                        switch (Panel.position) {
+                        case Dock.Top:
+                            return LaunchAnimation.Direction.Down
+                        case Dock.Bottom:
+                            return LaunchAnimation.Direction.Up
+                        case Dock.Left:
+                            return LaunchAnimation.Direction.Right
+                        case Dock.Right:
+                            return LaunchAnimation.Direction.Left
+                        }
+                    }
+                    target: icon
+                    loops: 1
+                    running: false
+                }
+            }
         }
 
         WindowIndicator {
@@ -95,13 +159,13 @@ Item {
 
                 switch(Panel.position) {
                 case Dock.Top: {
-                    windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
+                    windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
                     windowIndicator.anchors.top = parent.top
                     windowIndicator.anchors.topMargin = Qt.binding(() => {return (root.height - iconSize) / 2 / 3})
                     return
                 }
                 case Dock.Bottom: {
-                    windowIndicator.anchors.horizontalCenter = parent.horizontalCenter
+                    windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
                     windowIndicator.anchors.bottom = parent.bottom
                     windowIndicator.anchors.bottomMargin = Qt.binding(() => {return (root.height - iconSize) / 2 / 3})
                     return
@@ -126,90 +190,19 @@ Item {
             }
         }
 
-        Connections {
-            function onPositionChanged() {
-                windowIndicator.updateIndicatorAnchors()
-                updateWindowIconGeometryTimer.start()
-            }
-            target: Panel
-        }
-
-        Loader {
-            id: contextMenuLoader
-            active: false
-            property bool trashEmpty: true
-            sourceComponent: LP.Menu {
-                id: contextMenu
-                Instantiator {
-                    id: menuItemInstantiator
-                    model: JSON.parse(menus)
-                    delegate: LP.MenuItem {
-                        text: modelData.name
-                        enabled: (root.itemId === "dde-trash" && modelData.id === "clean-trash")
-                                ? !contextMenuLoader.trashEmpty
-                                : true
-                        onTriggered: {
-                            TaskManager.requestNewInstance(root.modelIndex, modelData.id);
-                        }
-                    }
-                    onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
-                    onObjectRemoved: (index, object) => contextMenu.removeItem(object)
-                }
-            }
-        }
-
-        D.DciIcon {
-            id: icon
-            name: root.iconName
-            height: iconSize
-            width: iconSize
-            sourceSize: Qt.size(iconSize, iconSize)
-            anchors.centerIn: parent
-            retainWhileLoading: true
-            scale: Panel.rootObject.isDragging ? 1.0 : 1.0
-
-            LaunchAnimation {
-                id: launchAnimation
-                launchSpace: {
-                    switch (Panel.position) {
-                    case Dock.Top:
-                    case Dock.Bottom:
-                    return (root.height - icon.height) / 2
-                    case Dock.Left:
-                    case Dock.Right:
-                        return (root.width - icon.width) / 2
-                    }
-                }
-
-                direction: {
-                    switch (Panel.position) {
-                    case Dock.Top:
-                        return LaunchAnimation.Direction.Down
-                    case Dock.Bottom:
-                        return LaunchAnimation.Direction.Up
-                    case Dock.Left:
-                        return LaunchAnimation.Direction.Right
-                    case Dock.Right:
-                        return LaunchAnimation.Direction.Left
-                    }
-                }
-                target: icon
-                loops: 1
-                running: false
-            }
+        AppItemTitle {
+            id: titleLoader
+            anchors.left: iconContainer.right
+            anchors.leftMargin: 4
+            anchors.verticalCenter: parent.verticalCenter
+            enabled: root.enableTitle && root.windows.length > 0
+            text: root.title
         }
 
         // TODO: value can set during debugPanel
         Loader {
-            id: aniamtionRoot
-            function blendColorAlpha(fallback) {
-                var appearance = DS.applet("org.deepin.ds.dde-appearance")
-                if (!appearance || appearance.opacity < 0)
-                    return fallback
-                return appearance.opacity
-            }
-            property real blendOpacity: blendColorAlpha(D.DTK.themeType === D.ApplicationHelper.DarkType ? 0.25 : 1.0)
-            anchors.fill: icon
+            id: animationRoot
+            anchors.fill: parent
             z: -1
             active: root.attention && !Panel.rootObject.isDragging
             sourceComponent: Repeater {
@@ -225,7 +218,7 @@ Item {
                     color: Qt.rgba(1, 1, 1, 0.1)
 
                     anchors.centerIn: parent
-                    opacity: Math.min(3 - width / originSize, aniamtionRoot.blendOpacity)
+                    opacity: Math.min(3 - width / originSize, root.blendOpacity)
 
                     SequentialAnimation {
                         running: true
@@ -267,6 +260,40 @@ Item {
                 }
             }
         }
+
+        HoverHandler {
+            onHoveredChanged: function () {
+                if (hovered) {
+                    root.onEntered()
+                } else {
+                    root.onExited()
+                }
+            }
+        }
+    }
+
+    Loader {
+        id: contextMenuLoader
+        active: false
+        property bool trashEmpty: true
+        sourceComponent: LP.Menu {
+            id: contextMenu
+            Instantiator {
+                id: menuItemInstantiator
+                model: JSON.parse(menus)
+                delegate: LP.MenuItem {
+                    text: modelData.name
+                    enabled: (root.itemId === "dde-trash" && modelData.id === "clean-trash")
+                            ? !contextMenuLoader.trashEmpty
+                            : true
+                    onTriggered: {
+                        TaskManager.requestNewInstance(root.modelIndex, modelData.id);
+                    }
+                }
+                onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
+                onObjectRemoved: (index, object) => contextMenu.removeItem(object)
+            }
+        }
     }
 
     Timer {
@@ -296,10 +323,55 @@ Item {
         }
     }
 
+
+    function onEntered() {
+        if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
+            toolTipShowTimer.start()
+            return
+        }
+
+        var itemPos = root.mapToItem(null, 0, 0)
+        let xOffset, yOffset, interval = 10
+        if (Panel.position % 2 === 0) {
+            xOffset = itemPos.x + (root.width / 2)
+            yOffset = (Panel.position == 2 ? -interval : interval + Panel.dockSize)
+        } else {
+            xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
+            yOffset = itemPos.y + (root.height / 2)
+        }
+        previewTimer.xOffset = xOffset
+        previewTimer.yOffset = yOffset
+        previewTimer.start()
+    }
+
+    function onExited() {
+        if (toolTipShowTimer.running) {
+            toolTipShowTimer.stop()
+        }
+
+        if (previewTimer.running) {
+            previewTimer.stop()
+        }
+
+        if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
+            toolTip.close()
+            return
+        }
+        closeItemPreview()
+    }
+
+    function closeItemPreview() {
+        if (previewTimer.running) {
+            previewTimer.stop()
+        } else {
+            taskmanager.Applet.hideItemPreview()
+        }
+    }
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        hoverEnabled: true
+        hoverEnabled: false
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         drag.target: root
         drag.onActiveChanged: {
@@ -313,7 +385,7 @@ Item {
 
         onPressed: function (mouse) {
             if (mouse.button === Qt.LeftButton) {
-                icon.grabToImage(function(result) {
+                appItem.grabToImage(function(result) {
                     root.Drag.imageSource = result.url;
                 })
             }
@@ -334,42 +406,6 @@ Item {
                 }
                 TaskManager.requestActivate(index);
             }
-        }
-
-        onEntered: {
-            if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
-                toolTipShowTimer.start()
-                return
-            }
-
-            var itemPos = root.mapToItem(null, 0, 0)
-            let xOffset, yOffset, interval = 10
-            if (Panel.position % 2 === 0) {
-                xOffset = itemPos.x + (root.width / 2)
-                yOffset = (Panel.position == 2 ? -interval : interval + Panel.dockSize)
-            } else {
-                xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
-                yOffset = itemPos.y + (root.height / 2)
-            }
-            previewTimer.xOffset = xOffset
-            previewTimer.yOffset = yOffset
-            previewTimer.start()
-        }
-
-        onExited: {
-            if (toolTipShowTimer.running) {
-                toolTipShowTimer.stop()
-            }
-
-            if (previewTimer.running) {
-                previewTimer.stop()
-            }
-
-            if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
-                toolTip.close()
-                return
-            }
-            closeItemPreview()
         }
 
         PanelToolTip {
@@ -394,14 +430,6 @@ Item {
                 toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
                 toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
                 toolTip.open()
-            }
-        }
-
-        function closeItemPreview() {
-            if (previewTimer.running) {
-                previewTimer.stop()
-            } else {
-                taskmanager.Applet.hideItemPreview()
             }
         }
     }
