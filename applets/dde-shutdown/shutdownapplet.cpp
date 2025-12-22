@@ -82,9 +82,26 @@ void ShutdownApplet::x11LockScreen()
     QString originMap;
 
     // Step 1: get current keyboard options
-    process.start("bash", {"-c", "/usr/bin/setxkbmap -query | grep option | awk -F ' ' '{print $2}'"});
+    process.start("/usr/bin/setxkbmap", QStringList() << "-query");
     process.waitForFinished();
-    originMap = QString::fromUtf8(process.readAllStandardOutput()).trimmed();
+    QString output = QString::fromUtf8(process.readAllStandardOutput());
+    QStringList lines = output.split('\n');
+    for (const QString &line : lines) {
+        // 查找包含 "option" 的行（原 grep option 命令）
+        if (line.contains("option")) {
+            // 模拟 awk -F ' ' '{print $2}'
+            // 按空格分割，跳过空字符串
+            QStringList parts = line.split(' ', Qt::SkipEmptyParts);
+            if (parts.size() >= 2) {
+                originMap = parts[1];
+                // 如果第二个字段以冒号结尾，可能需要进一步处理
+                if (originMap.endsWith(':')) {
+                    originMap = originMap.left(originMap.length() - 1);
+                }
+            }
+            break;
+        }
+    }
 
     // Step 2: set keyboard options to un grab
     process.start("/usr/bin/setxkbmap", {"-option", "grab:break_actions"});
