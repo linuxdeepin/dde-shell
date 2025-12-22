@@ -404,8 +404,7 @@ void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const 
 {
     auto data = m_data.value(index.row());
     auto id = std::get<0>(data);
-    auto sourceModel = std::get<1>(data);
-    auto sourceRow = std::get<2>(data);
+    qDebug(dockGlobalElementModelLog) << "Requesting new instance for index:" << index << "with action:" << action << "id:" << id;
 
     // Handle special actions first (for both active and docked apps)
     if (action == DOCK_ACTION_DOCK) {
@@ -417,29 +416,11 @@ void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const 
     } else if (action == DOCK_ACTION_CLOSEWINDOW || action == DOCK_ACTION_CLOSEALL) {
         requestClose(index, false);
         return;
-    }
-
-    //应用自身处理的action
-    if (!action.isEmpty()) {
+    } else {
         QProcess process;
         process.setProcessChannelMode(QProcess::MergedChannels);
         process.start("dde-am", {"--by-user", id, action});
         process.waitForFinished();
-        return;
-    }
-
-    // Handle launch/activate (empty action)
-    if (sourceModel == m_activeAppModel) {
-        auto sourceIndex = sourceModel->index(sourceRow, 0);
-        m_activeAppModel->requestNewInstance(sourceIndex, action);
-    } else {
-        QString dbusPath = QStringLiteral("/org/desktopspec/ApplicationManager1/") + escapeToObjectPath(id);
-        using Application = org::desktopspec::ApplicationManager1::Application;
-        Application appInterface(QStringLiteral("org.desktopspec.ApplicationManager1"), dbusPath, QDBusConnection::sessionBus());
-
-        if (appInterface.isValid()) {
-            appInterface.Launch(QString(), QStringList(), QVariantMap());
-        }
     }
 }
 
