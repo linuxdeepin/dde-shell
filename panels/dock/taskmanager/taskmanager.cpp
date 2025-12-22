@@ -19,13 +19,15 @@
 #include "taskmanager.h"
 #include "taskmanageradaptor.h"
 #include "taskmanagersettings.h"
+#include "textcalculator.h"
 #include "treelandwindowmonitor.h"
 
 #include <QGuiApplication>
+#include <QProcess>
+#include <QStandardPaths>
 #include <QStringLiteral>
 #include <QUrl>
-#include <QStandardPaths>
-#include <QProcess>
+#include <QtQml/QtQml>
 
 #include <appletbridge.h>
 #include <DSGApplication>
@@ -97,6 +99,9 @@ TaskManager::TaskManager(QObject *parent)
     , AbstractTaskManagerInterface(nullptr)
     , m_windowFullscreen(false)
 {
+    qmlRegisterType<TextCalculator>("org.deepin.ds.dock.taskmanager", 1, 0, "TextCalculator");
+    qmlRegisterUncreatableType<TextCalculatorAttached>("org.deepin.ds.dock.taskmanager", 1, 0, "TextCalculatorAttached", "TextCalculator Attached");
+
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
 }

@@ -25,6 +25,7 @@ Window {
     property int dockRemainingSpaceForCenter: useColumnLayout ?
         (Screen.height / 1.8 - dockRightPart.implicitHeight)  :
         (Screen.width / 1.8 - dockRightPart.implicitWidth) 
+    property int dockPartSpacing: gridLayout.columnSpacing
     // TODO
     signal dockCenterPartPosChanged()
     signal pressedAndDragging(bool isDragging)

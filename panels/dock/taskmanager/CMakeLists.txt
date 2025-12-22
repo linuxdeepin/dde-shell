@@ -84,6 +84,8 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     treelandwindowmonitor.h
     taskmanagersettings.cpp
     taskmanagersettings.h
+    textcalculator.h
+    textcalculator.cpp
 )
 
 qt_generate_wayland_protocol_client_sources(dock-taskmanager
