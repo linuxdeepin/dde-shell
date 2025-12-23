@@ -51,6 +51,10 @@
         <source>Close All</source>
         <translation>Tanca-ho tot</translation>
     </message>
+    <message>
+        <source>Close this window</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 <context>
     <name>dock::TaskManager</name>

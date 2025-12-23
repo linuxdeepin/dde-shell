@@ -1,13 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_CN">
-<context>
-    <name>AppItem</name>
-    <message>
-        <source>Move to Trash</source>
-        <translation>移动到回收站</translation>
-    </message>
-</context>
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_CN">
 <context>
     <name>AppItem</name>
     <message>
@@ -59,6 +50,10 @@
     <message>
         <source>Close All</source>
         <translation>关闭所有</translation>
+    </message>
+    <message>
+        <source>Close this window</source>
+        <translation>关闭当前窗口</translation>
     </message>
 </context>
 <context>
