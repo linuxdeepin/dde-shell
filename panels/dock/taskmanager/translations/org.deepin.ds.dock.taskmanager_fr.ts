@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="fr">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="fr">
 <context>
     <name>AppItem</name>
     <message>
@@ -50,6 +52,10 @@
     <message>
         <source>Close All</source>
         <translation>Tout fermer</translation>
+    </message>
+    <message>
+        <source>Close this window</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

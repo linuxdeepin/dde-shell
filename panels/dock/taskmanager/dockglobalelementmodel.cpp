@@ -334,7 +334,7 @@ QString DockGlobalElementModel::getMenus(const QModelIndex &index) const
             menusArray.append(QJsonObject{{"id", DOCK_ACTION_FORCEQUIT}, {"name", tr("Force Quit")}});
         }
         if (TaskManagerSettings::instance()->isWindowSplit()) {
-            menusArray.append(QJsonObject{{"id", DOCK_ACTION_CLOSEWINDOW}, {"name", tr("Close")}});
+            menusArray.append(QJsonObject{{"id", DOCK_ACTION_CLOSEWINDOW}, {"name", tr("Close this window")}});
         } else {
             menusArray.append(QJsonObject{{"id", DOCK_ACTION_CLOSEALL}, {"name", tr("Close All")}});
         }

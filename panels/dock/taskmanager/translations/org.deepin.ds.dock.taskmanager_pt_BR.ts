@@ -9,13 +9,6 @@
     </message>
 </context>
 <context>
-    <name>AppItem</name>
-    <message>
-        <source>Move to Trash</source>
-        <translation type="unfinished"/>
-    </message>
-</context>
-<context>
     <name>dock::AppItem</name>
     <message>
         <source>Open</source>
@@ -59,6 +52,10 @@
     <message>
         <source>Close All</source>
         <translation>Fechar tudo</translation>
+    </message>
+    <message>
+        <source>Close this window</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
