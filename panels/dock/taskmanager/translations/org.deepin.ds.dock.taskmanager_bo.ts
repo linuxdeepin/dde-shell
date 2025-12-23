@@ -53,6 +53,10 @@
         <source>Close All</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Close this window</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>dock::TaskManager</name>
