@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_TW">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh_TW">
 <context>
     <name>AppItem</name>
     <message>
@@ -55,7 +53,7 @@
     </message>
     <message>
         <source>Close this window</source>
-        <translation type="unfinished"></translation>
+        <translation>關閉當前視窗</translation>
     </message>
 </context>
 <context>
