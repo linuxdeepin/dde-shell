@@ -117,6 +117,7 @@ private:
     uint32_t m_dockColorTheme = 0;
     QSize m_dockSize;
     int m_popupMinHeight = 0;
+    QMetaObject::Connection m_cursorSurfaceConn = {};
 };
 
 class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public QtWaylandServer::plugin

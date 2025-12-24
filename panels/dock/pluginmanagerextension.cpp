@@ -15,12 +15,17 @@
 #include <QtWaylandCompositor/QWaylandResource>
 #include <QtWaylandCompositor/QWaylandCompositor>
 #include <QtWaylandCompositor/QWaylandView>
+#include <QtWaylandCompositor/QWaylandBufferRef>
 
 #include <QJsonObject>
 #include <QJsonParseError>
+#include <QGuiApplication>
+#include <QCursor>
+#include <QPixmap>
 
 #define protected public
 #include <private/qwaylandcompositor_p.h>
+#include <private/qwaylandsurface_p.h>
 #undef protected
 #include <qpa/qwindowsysteminterface_p.h>
 
@@ -709,13 +714,50 @@ void PluginManager::setupMouseFocusListener()
 
     QObject::connect(seat, &QWaylandSeat::mouseFocusChanged, this,
         [seat](QWaylandView *newFocus, QWaylandView *oldFocus) {
-            Q_UNUSED(oldFocus);
-            if(!newFocus)
-                return;
-
-            if (auto surface = newFocus->surface()) {
-                qDebug()<<"setKeyboardFocus";
-                seat->setKeyboardFocus(surface);
+            // Restore default cursor when mouse leaves all plugin areas
+            if (!newFocus && oldFocus) {
+                qApp->restoreOverrideCursor();
             }
+
+            if (newFocus) {
+                if (auto surface = newFocus->surface()) {
+                    seat->setKeyboardFocus(surface);
+                }
+            }
+        });
+
+    // Handle client cursor requests and apply cursor changes to the host window
+    QObject::connect(seat, &QWaylandSeat::cursorSurfaceRequested, this,
+        [this](QWaylandSurface *surface, int hotspotX, int hotspotY) {
+            // Disconnect previous connection
+            if (m_cursorSurfaceConn) {
+                QObject::disconnect(m_cursorSurfaceConn);
+                m_cursorSurfaceConn = {};
+            }
+
+            if (!surface) {
+                qApp->restoreOverrideCursor();
+                return;
+            }
+
+            auto updateCursor = [surface, hotspotX, hotspotY]() {
+                QWaylandSurfacePrivate *surf = QWaylandSurfacePrivate::get(surface);
+                QWaylandBufferRef buf = surf->bufferRef;
+                if (!buf.hasBuffer()) {
+                    return;
+                }
+                QImage image = buf.image();
+                if (!image.isNull() && image.width() > 0 && image.height() > 0) {
+                    QPixmap pixmap = QPixmap::fromImage(image);
+                    QCursor cursor(QPixmap::fromImage(image), hotspotX, hotspotY);
+                    if (qApp->overrideCursor()) {
+                        qApp->changeOverrideCursor(cursor);
+                    } else {
+                        qApp->setOverrideCursor(cursor);
+                    }
+                }
+            };
+            // Listen to surface redraw signal to grab cursor after buffer is updated
+            m_cursorSurfaceConn = QObject::connect(surface, &QWaylandSurface::redraw, updateCursor);
         });
 }
