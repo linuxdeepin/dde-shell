@@ -1,3 +1,29 @@
+dde-shell (2.0.24) unstable; urgency=medium
+
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in tr
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in ru
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in uk
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in zh_CN
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in pt_BR
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in nl
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in zh_TW
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in sq
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in zh_HK
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in pl
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in ja
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in fi
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in lo
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in fr
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in es
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in ca
+  * feat: improve translation files and task manager menu text
+  * refactor: unify app split/merge display and optimize text
+    calculation
+  * fix: correct instance request handling in dock model
+  * fix: remove bash -c for security hardening
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 25 Dec 2025 19:32:57 +0800
+
 dde-shell (2.0.23) unstable; urgency=medium
 
   * fix: Fix error in obtaining resident app status
