@@ -53,7 +53,7 @@
     </message>
     <message>
         <source>Close this window</source>
-        <translation type="unfinished"/>
+        <translation>Mbylle këtë dritare</translation>
     </message>
 </context>
 <context>
