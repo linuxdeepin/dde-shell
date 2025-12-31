@@ -15,7 +15,8 @@ NotifyItem {
     implicitHeight: impl.implicitHeight
     // Maximum retry attempts for focus operations when loader content is pending
     readonly property int maxFocusRetries: 5
-    property bool closeVisible: activeFocus || impl.hovered || (clearLoader.item && clearLoader.item.activeFocus)
+    property bool parentHovered: false  // External hover state from parent component
+    property bool closeVisible: activeFocus || impl.hovered || parentHovered || (clearLoader.item && clearLoader.item.activeFocus)
     property int miniContentHeight: NotifyStyle.contentItem.miniHeight
     property bool enableDismissed: true
     property alias clearButton: clearLoader.sourceComponent
@@ -102,7 +103,8 @@ NotifyItem {
                 id: clearLoader
                 anchors.right: parent.right
                 // Show when mouse hovers or notification item has focus
-                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered)
+                // Keep active when button itself has focus to prevent unloading during Tab navigation
+                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered || (clearLoader.item && clearLoader.item.activeFocus))
                 sourceComponent: SettingActionButton {
                     id: closeBtn
                     objectName: "closeNotify-" + root.appName

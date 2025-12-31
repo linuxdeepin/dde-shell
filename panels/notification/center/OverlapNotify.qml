@@ -66,7 +66,8 @@ NotifyItem {
                 date: root.date
                 actions: root.actions
                 defaultAction: root.defaultAction
-                closeVisible: impl.hovered || root.activeFocus
+                // Don't override closeVisible - use parentHovered to pass external hover/focus state
+                parentHovered: impl.hovered || root.activeFocus
                 strongInteractive: root.strongInteractive
                 contentIcon: root.contentIcon
                 contentRowCount: root.contentRowCount
