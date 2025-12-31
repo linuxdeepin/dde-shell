@@ -1,3 +1,10 @@
+dde-shell (2.0.25) unstable; urgency=medium
+
+  * fix: keep dock indicator distance constant when icons scale down
+  * i18n: Updates for project Deepin Desktop Environment (#1378)
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 31 Dec 2025 13:59:01 +0800
+
 dde-shell (2.0.24) unstable; urgency=medium
 
   * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in tr
