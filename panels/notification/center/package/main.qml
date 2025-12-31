@@ -101,6 +101,9 @@ Window {
                 right: parent.right
                 rightMargin: contentPadding
             }
+            // Tab navigation: staging -> header
+            onGotoHeaderFirst: notifyCenter.focusHeaderFirst()
+            onGotoHeaderLast: notifyCenter.focusHeaderLast()
             Connections {
                 target: Panel
                 function onVisibleChanged() {
@@ -124,6 +127,24 @@ Window {
                 left: parent.left
                 right: parent.right
                 bottom: parent.bottom
+            }
+            // Shift+Tab navigation: header -> staging (or view last item if no staging)
+            onGotoStagingLast: {
+                if (notifyStaging.viewCount > 0) {
+                    notifyStaging.focusLastButton()
+                } else if (notifyCenter.viewCount > 0) {
+                    notifyCenter.focusViewLastItem()
+                } else {
+                    notifyCenter.focusHeaderLast()
+                }
+            }
+            // Tab cycle: view last item -> staging first item
+            onGotoStagingFirst: {
+                if (notifyStaging.viewCount > 0) {
+                    notifyStaging.focusFirstItem()
+                } else {
+                    notifyCenter.focusHeaderFirst()
+                }
             }
 
             Connections {
