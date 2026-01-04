@@ -54,6 +54,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     m_cgroupsBasedGrouping = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_KEY, true).toBool();
     m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
     m_cgroupsBasedGroupingSkipAppIds = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_APPIDS, {"deepin-terminal"}).toStringList();
+    m_cgroupsBasedGroupingSkipCategories = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_CATEGORIES, {"TerminalEmulator"}).toStringList();
     migrateFromDockedItems();
 }
 
@@ -87,6 +88,11 @@ bool TaskManagerSettings::cgroupsBasedGrouping() const
 QStringList TaskManagerSettings::cgroupsBasedGroupingSkipIds() const
 {
     return m_cgroupsBasedGroupingSkipAppIds;
+}
+
+QStringList TaskManagerSettings::cgroupsBasedGroupingSkipCategories() const
+{
+    return m_cgroupsBasedGroupingSkipCategories;
 }
 
 QStringList TaskManagerSettings::dockedElements() const

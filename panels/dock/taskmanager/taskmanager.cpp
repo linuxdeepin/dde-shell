@@ -31,6 +31,7 @@
 
 #include <appletbridge.h>
 #include <DSGApplication>
+#include "applicationinterface.h"
 
 #ifdef BUILD_WITH_X11
 #include "x11windowmonitor.h"
@@ -63,8 +64,47 @@ static QString getDesktopIdByPid(const QStringList &identifies)
         qCDebug(taskManagerLog) << "appId is empty, AM failed to identify window with pid:" << windowPid;
         return {};
     }
-        
+
     return QString::fromUtf8(appId);
+}
+
+// 检查应用的 Categories 是否在跳过列表中
+static bool shouldSkipCgroupsByCategories(const QString &desktopId)
+{
+    auto skipCategories = Settings->cgroupsBasedGroupingSkipCategories();
+    if (skipCategories.isEmpty() || desktopId.isEmpty()) {
+        return false;
+    }
+
+    // 构造 DBus 路径
+    QString dbusPath = QStringLiteral("/org/desktopspec/ApplicationManager1/") + escapeToObjectPath(desktopId);
+
+    // 创建 Application 接口
+    Application appInterface(QStringLiteral("org.desktopspec.ApplicationManager1"),
+                            dbusPath,
+                            QDBusConnection::sessionBus());
+
+    if (!appInterface.isValid()) {
+        qCDebug(taskManagerLog) << "Failed to create Application interface for:" << desktopId;
+        return false;
+    }
+
+    // 获取应用的 Categories
+    QStringList categories = appInterface.categories();
+    if (categories.isEmpty()) {
+        return false;
+    }
+
+    // 检查是否有任何 category 在跳过列表中
+    for (const QString &category : categories) {
+        if (skipCategories.contains(category)) {
+            qCDebug(taskManagerLog) << "Skipping cgroups grouping for" << desktopId
+                                   << "due to category:" << category;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 class BoolFilterModel : public QSortFilterProxyModel, public AbstractTaskManagerInterface
@@ -159,7 +199,9 @@ bool TaskManager::init()
             // 尝试通过AM(Application Manager)匹配应用程序
             if (Settings->cgroupsBasedGrouping()) {
                 auto desktopId = getDesktopIdByPid(identifies);
-                if (!desktopId.isEmpty() && !Settings->cgroupsBasedGroupingSkipIds().contains(desktopId)) {
+                if (!desktopId.isEmpty() &&
+                    !Settings->cgroupsBasedGroupingSkipIds().contains(desktopId) &&
+                    !shouldSkipCgroupsByCategories(desktopId)) {
                     auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), desktopId, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
                     if (res.isValid()) {
                         qCDebug(taskManagerLog) << "matched by AM desktop ID:" << desktopId << res;
