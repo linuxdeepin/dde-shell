@@ -406,7 +406,8 @@ bool TaskManager::RequestUndock(QString appID)
     }
     QPointer<AppItem> appitem = desktopfileParser->getAppItem();
     if (appitem.isNull()) {
-        return false;
+        desktopfileParser->setDocked(false);
+        return true;
     }
     appitem->setDocked(false);
     return true;
