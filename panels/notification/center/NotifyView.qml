@@ -61,11 +61,40 @@ Control {
         activeFocusOnTab: false
         ScrollBar.vertical: ScrollBar { }
         property int nextIndex: -1
+        property int pendingFocusIndex: -1  // Index to focus after expand operation
         property bool panelShown: false
 
         // Forward signals from delegate to root for Tab cycling
         function gotoHeaderFirst() { root.gotoHeaderFirst() }
         function gotoHeaderLast() { root.gotoHeaderLast() }
+
+        // Request focus on item after expand with retry
+        function requestFocusOnExpand(idx) {
+            pendingFocusIndex = idx
+            currentIndex = idx
+            positionViewAtIndex(idx, ListView.Contain)
+            expandFocusTimer.retries = 15
+            expandFocusTimer.start()
+        }
+
+        Timer {
+            id: expandFocusTimer
+            property int retries: 15
+            interval: 50
+            repeat: true
+            onTriggered: {
+                let item = view.itemAtIndex(view.pendingFocusIndex)
+                if (item && item.enabled) {
+                    item.forceActiveFocus()
+                    view.pendingFocusIndex = -1
+                    stop()
+                } else if (retries <= 0) {
+                    view.pendingFocusIndex = -1
+                    stop()
+                }
+                retries--
+            }
+        }
 
         onNextIndexChanged: {
             if (nextIndex >= 0 && count > 0) {
