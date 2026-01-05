@@ -80,7 +80,9 @@ DelegateChooser {
 
             onCollapse: function () {
                 console.log("collapse group", model.appName)
+                let collapseIndex = index
                 notifyModel.collapseApp(index)
+                root.view.requestFocusOnExpand(collapseIndex)
             }
 
             onSetting: function (pos) {
@@ -259,7 +261,7 @@ DelegateChooser {
                 console.log("expand")
                 let expandIndex = model.index
                 notifyModel.expandApp(expandIndex)
-                root.view.nextIndex = expandIndex + 1
+                root.view.requestFocusOnExpand(expandIndex + 1)
             }
             onSetting: function (pos) {
                 let tmp = mapToItem(root.view, pos)
