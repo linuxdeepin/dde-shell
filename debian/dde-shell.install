@@ -24,6 +24,7 @@ usr/share/dde-shell/org.deepin.ds.notification*/
 usr/share/dde-shell/org.deepin.ds.notificationcenter*/
 usr/share/dde-shell/org.deepin.ds.osd*/
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.dde.shell.json
+usr/share/dsg/configs/overrides/org.deepin.dde.shell/*
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.dde.shell.notification.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dde-apps.json
 usr/share/dsg/configs/org.deepin.dde.shell/org.deepin.ds.dock.json
