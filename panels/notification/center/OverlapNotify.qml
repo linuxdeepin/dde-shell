@@ -105,7 +105,10 @@ NotifyItem {
         TapHandler {
             enabled: !root.enableDismissed
             acceptedButtons: Qt.LeftButton
-            onTapped: root.expand()
+            onTapped: {
+                root.forceActiveFocus()
+                root.expand()
+            }
         }
         Keys.onEnterPressed: root.expand()
         Keys.onReturnPressed: root.expand()
