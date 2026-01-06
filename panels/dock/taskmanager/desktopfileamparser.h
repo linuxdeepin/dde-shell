@@ -32,6 +32,7 @@ public:
     virtual QList<QPair<QString, QString>> actions() override;
     virtual QString genericName() override;
     virtual QString type() override;
+    virtual QStringList categories() override;
 
     virtual std::pair<bool, QString> isValied() override;
 

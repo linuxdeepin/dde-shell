@@ -31,7 +31,6 @@
 
 #include <appletbridge.h>
 #include <DSGApplication>
-#include "applicationinterface.h"
 
 #ifdef BUILD_WITH_X11
 #include "x11windowmonitor.h"
@@ -76,21 +75,14 @@ static bool shouldSkipCgroupsByCategories(const QString &desktopId)
         return false;
     }
 
-    // 构造 DBus 路径
-    QString dbusPath = QStringLiteral("/org/desktopspec/ApplicationManager1/") + escapeToObjectPath(desktopId);
-
-    // 创建 Application 接口
-    Application appInterface(QStringLiteral("org.desktopspec.ApplicationManager1"),
-                            dbusPath,
-                            QDBusConnection::sessionBus());
-
-    if (!appInterface.isValid()) {
-        qCDebug(taskManagerLog) << "Failed to create Application interface for:" << desktopId;
+    // 创建一个临时的 parser 来获取 categories
+    auto parser = DESKTOPFILEFACTORY::createById(desktopId, "amAPP");
+    if (!parser || parser.isNull()) {
         return false;
     }
 
     // 获取应用的 Categories
-    QStringList categories = appInterface.categories();
+    QStringList categories = parser->categories();
     if (categories.isEmpty()) {
         return false;
     }
