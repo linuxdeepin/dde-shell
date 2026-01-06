@@ -1,3 +1,10 @@
+dde-shell (2.0.19.1) unstable; urgency=medium
+
+  * fix: add command whitelist validation for notification actions
+  * fix: add DTK preference override configuration
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Tue, 06 Jan 2026 10:18:57 +0800
+
 dde-shell (2.0.19) unstable; urgency=medium
 
   * feat: enhance notification animations and visual effects
