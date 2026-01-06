@@ -55,6 +55,7 @@ Control {
 
     contentItem: ListView {
         id: view
+        clip: true
         spacing: 10
         snapMode: ListView.SnapToItem
         keyNavigationEnabled: false
