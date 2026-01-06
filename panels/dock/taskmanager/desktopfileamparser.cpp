@@ -122,17 +122,6 @@ QString DesktopFileAMParser::genericName()
     return m_genericName;
 }
 
-QStringList DesktopFileAMParser::categories()
-{
-    if (!m_amIsAvaliable) return DesktopfileAbstractParser::categories();
-
-    if (m_applicationInterface) {
-        return m_applicationInterface->categories();
-    }
-
-    return QStringList();
-}
-
 std::pair<bool, QString> DesktopFileAMParser::isValied()
 {
     // TODO:    1. am service may be unavailable and get dbus timeout

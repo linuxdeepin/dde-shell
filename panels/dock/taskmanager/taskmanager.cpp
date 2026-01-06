@@ -68,21 +68,23 @@ static QString getDesktopIdByPid(const QStringList &identifies)
 }
 
 // 检查应用的 Categories 是否在跳过列表中
-static bool shouldSkipCgroupsByCategories(const QString &desktopId)
+static bool shouldSkipCgroupsByCategories(const QString &desktopId, QAbstractItemModel *activeAppModel, const QHash<int, QByteArray> &roleNames)
 {
     auto skipCategories = Settings->cgroupsBasedGroupingSkipCategories();
     if (skipCategories.isEmpty() || desktopId.isEmpty()) {
         return false;
     }
 
-    // 创建一个临时的 parser 来获取 categories
-    auto parser = DESKTOPFILEFACTORY::createById(desktopId, "amAPP");
-    if (!parser || parser.isNull()) {
-        return false;
+    QStringList categories;
+
+    // 从 dde-apps 的 AppItem 读取 categories
+    if (activeAppModel) {
+        auto existingItem = activeAppModel->match(activeAppModel->index(0, 0), roleNames.key("desktopId"), desktopId, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
+        if (existingItem.isValid()) {
+            categories = activeAppModel->data(existingItem, roleNames.key("categories")).toStringList();
+        }
     }
 
-    // 获取应用的 Categories
-    QStringList categories = parser->categories();
     if (categories.isEmpty()) {
         return false;
     }
@@ -193,7 +195,7 @@ bool TaskManager::init()
                 auto desktopId = getDesktopIdByPid(identifies);
                 if (!desktopId.isEmpty() &&
                     !Settings->cgroupsBasedGroupingSkipIds().contains(desktopId) &&
-                    !shouldSkipCgroupsByCategories(desktopId)) {
+                    !shouldSkipCgroupsByCategories(desktopId, model, roleNames)) {
                     auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), desktopId, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
                     if (res.isValid()) {
                         qCDebug(taskManagerLog) << "matched by AM desktop ID:" << desktopId << res;

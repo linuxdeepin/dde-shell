@@ -77,11 +77,6 @@ QString DesktopfileAbstractParser::genericName()
     return "";
 }
 
-QStringList DesktopfileAbstractParser::categories()
-{
-    return QStringList();
-}
-
 QString DesktopfileAbstractParser::identifyWindow(QPointer<AbstractWindow> window)
 {
     QString res = QStringLiteral("asbtractAPP:://");

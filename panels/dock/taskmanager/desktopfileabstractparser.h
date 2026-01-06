@@ -39,7 +39,6 @@ public:
     virtual QString genericName();
     virtual QString desktopIcon();
     virtual QString xDeepinVendor();
-    virtual QStringList categories();
 
     virtual std::pair<bool, QString> isValied();
 

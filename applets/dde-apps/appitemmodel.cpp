@@ -20,6 +20,7 @@ QHash<int, QByteArray> AppItemModel::roleNames() const
             {AppItemModel::NoDisplayRole, QByteArrayLiteral("noDisplay")},
             {AppItemModel::ActionsRole, QByteArrayLiteral("actions")},
             {AppItemModel::DDECategoryRole, QByteArrayLiteral("ddeCategory")},
+            {AppItemModel::CategoriesRole, QByteArrayLiteral("categories")},
             {AppItemModel::InstalledTimeRole, QByteArrayLiteral("installedTime")},
             {AppItemModel::LastLaunchedTimeRole, QByteArrayLiteral("lastLaunchedTime")},
             {AppItemModel::LaunchedTimesRole, QByteArrayLiteral("launchedTimes")},
