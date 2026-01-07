@@ -1,3 +1,18 @@
+dde-shell (2.0.25) unstable; urgency=medium
+
+  * fix: clip ListView content to prevent overflow in NotifyView
+  * fix: ensure focus before expand in OverlapNotify
+  * fix: improve focus handling after expand/collapse in NotifyView
+  * fix: add command whitelist validation for notification actions
+  * fix: Fix taskbar failing to cancel app pinning
+  * fix: add DTK preference override configuration
+  * fix: enable Tab focus for staging area buttons in notification
+    center
+  * fix: keep dock indicator distance constant when icons scale down
+  * i18n: Updates for project Deepin Desktop Environment (#1378)
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 07 Jan 2026 10:16:39 +0800
+
 dde-shell (2.0.24) unstable; urgency=medium
 
   * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in tr
