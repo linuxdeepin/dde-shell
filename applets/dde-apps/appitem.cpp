@@ -99,6 +99,16 @@ void AppItem::setDDECategories(const AppItemModel::DDECategories &categories)
     return setData(categories, AppItemModel::DDECategoryRole);
 }
 
+QStringList AppItem::categories() const
+{
+    return data(AppItemModel::CategoriesRole).toStringList();
+}
+
+void AppItem::setCategories(const QStringList &categories)
+{
+    return setData(categories, AppItemModel::CategoriesRole);
+}
+
 QString AppItem::actions() const
 {
     return data(AppItemModel::ActionsRole).toString();

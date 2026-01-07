@@ -51,6 +51,7 @@ public:
         NoDisplayRole,
         ActionsRole,
         DDECategoryRole,
+        CategoriesRole,
         InstalledTimeRole,
         LastLaunchedTimeRole,
         LaunchedTimesRole,
