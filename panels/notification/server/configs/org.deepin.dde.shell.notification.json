@@ -157,7 +157,7 @@
       "visibility": "public"
     },
     "safeCommands": {
-      "value": ["xdg-open","dbus-send","qdbus","deepin-defender","dde-control-center","downloader","dde-file-manager","dde-dconfig","/usr/lib/deepin-daemon/dde-bluetooth-dialog","/usr/bin/dde-hints-dialog","/usr/bin/deepin-devicemanager"],
+      "value": ["xdg-open","dbus-send","qdbus","busctl","gdbus","deepin-defender","dde-control-center","downloader","dde-file-manager","dde-dconfig","/usr/lib/deepin-daemon/dde-bluetooth-dialog","/usr/bin/dde-hints-dialog","/usr/bin/deepin-devicemanager"],
       "serial": 0,
       "flags": [],
       "name": "safe commands",
