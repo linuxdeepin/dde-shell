@@ -63,8 +63,52 @@ static QString getDesktopIdByPid(const QStringList &identifies)
         qCDebug(taskManagerLog) << "appId is empty, AM failed to identify window with pid:" << windowPid;
         return {};
     }
-        
+
     return QString::fromUtf8(appId);
+}
+
+// 尝试通过 AM(Application Manager) 匹配应用程序
+static QModelIndex tryMatchByApplicationManager(const QStringList &identifies,
+                                                  QAbstractItemModel *model,
+                                                  const QHash<int, QByteArray> &roleNames)
+{
+    Q_ASSERT(model);
+
+    if (!Settings->cgroupsBasedGrouping()) {
+        return QModelIndex();
+    }
+
+    auto desktopId = getDesktopIdByPid(identifies);
+    if (desktopId.isEmpty() || Settings->cgroupsBasedGroupingSkipIds().contains(desktopId)) {
+        return QModelIndex();
+    }
+
+    // 先在 model 中查找 desktopId 对应的 item
+    auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID),
+                           desktopId, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
+
+    if (!res.isValid()) {
+        return QModelIndex();
+    }
+
+    // 检查应用的 Categories 是否在跳过列表中
+    auto skipCategories = Settings->cgroupsBasedGroupingSkipCategories();
+    if (!skipCategories.isEmpty()) {
+        QStringList categories = res.data(TaskManager::CategoriesRole).toStringList();
+        if (!categories.isEmpty()) {
+            // 检查是否有任何 skipCategory 在应用的 categories 中
+            for (const QString &skipCategory : skipCategories) {
+                if (categories.contains(skipCategory)) {
+                    qCDebug(taskManagerLog) << "Skipping cgroups grouping for" << desktopId
+                                           << "due to category:" << skipCategory;
+                    return QModelIndex();
+                }
+            }
+        }
+    }
+
+    qCDebug(taskManagerLog) << "matched by AM desktop ID:" << desktopId << res;
+    return res;
 }
 
 class BoolFilterModel : public QSortFilterProxyModel, public AbstractTaskManagerInterface
@@ -157,15 +201,9 @@ bool TaskManager::init()
             }
 
             // 尝试通过AM(Application Manager)匹配应用程序
-            if (Settings->cgroupsBasedGrouping()) {
-                auto desktopId = getDesktopIdByPid(identifies);
-                if (!desktopId.isEmpty() && !Settings->cgroupsBasedGroupingSkipIds().contains(desktopId)) {
-                    auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), desktopId, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
-                    if (res.isValid()) {
-                        qCDebug(taskManagerLog) << "matched by AM desktop ID:" << desktopId << res;
-                        return res;
-                    }
-                }
+            auto amMatchResult = tryMatchByApplicationManager(identifies, model, roleNames);
+            if (amMatchResult.isValid()) {
+                return amMatchResult;
             }
 
             auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), identifies.value(0), 1, Qt::MatchEndsWith);

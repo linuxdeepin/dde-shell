@@ -49,6 +49,7 @@ AMAppItem::AMAppItem(const QDBusObjectPath &path, const ObjectInterfaceMap &sour
 
     auto categories = appInfo.value(u8"Categories").toStringList();
     AppItem::setDDECategories(AppItemModel::DDECategories(CategoryUtils::parseBestMatchedCategory(categories)));
+    AppItem::setCategories(categories);
 
     auto lastLaunchedTime = appInfo.value(u8"LastLaunchedTime").toULongLong();
     AppItem::setLastLaunchedTime(lastLaunchedTime);
