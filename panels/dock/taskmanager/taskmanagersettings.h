@@ -31,6 +31,7 @@ public:
 
     bool cgroupsBasedGrouping() const;
     QStringList cgroupsBasedGroupingSkipIds() const;
+    QStringList cgroupsBasedGroupingSkipCategories() const;
 
     void setDockedElements(const QStringList &elements);
     void toggleDockedElement(const QString &element);
@@ -58,5 +59,6 @@ private:
     bool m_cgroupsBasedGrouping;
     QStringList m_dockedElements;
     QStringList m_cgroupsBasedGroupingSkipAppIds;
+    QStringList m_cgroupsBasedGroupingSkipCategories;
 };
 }

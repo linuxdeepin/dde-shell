@@ -39,6 +39,9 @@ public:
     AppItemModel::DDECategories ddeCategories() const;
     void setDDECategories(const AppItemModel::DDECategories &categories);
 
+    QStringList categories() const;
+    void setCategories(const QStringList &categories);
+
     QString actions() const;
     void setActions(const QString &actions);
 
