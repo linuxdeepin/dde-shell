@@ -1,3 +1,10 @@
+dde-shell (2.0.26) unstable; urgency=medium
+
+  * fix: update safeCommands whitelist for notification service
+  * i18n: Updates for project Deepin Desktop Environment (#1381)
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Wed, 14 Jan 2026 14:50:15 +0800
+
 dde-shell (2.0.25) unstable; urgency=medium
 
   * fix: clip ListView content to prevent overflow in NotifyView
