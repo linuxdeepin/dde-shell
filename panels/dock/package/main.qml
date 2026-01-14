@@ -24,7 +24,7 @@ Window {
         (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth)
     property int dockRemainingSpaceForCenter: useColumnLayout ?
         (Screen.height / 1.8 - dockRightPart.implicitHeight)  :
-        (Screen.width / 1.8 - dockRightPart.implicitWidth) 
+        (Screen.width / 1.8 - dockRightPart.implicitWidth)
     property int dockPartSpacing: gridLayout.columnSpacing
     // TODO
     signal dockCenterPartPosChanged()
@@ -41,6 +41,9 @@ Window {
     property bool isDragging: false
 
     property real dockItemIconSize: dockItemMaxSize * 9 / 14
+
+    // LauncherController wrapper for optional launchpad support
+    property var launcherControllerWrapper: null
 
     // NOTE: -1 means not set its size, follow the platform size
     width: Panel.position === Dock.Top || Panel.position === Dock.Bottom ? -1 : dockSize
@@ -65,7 +68,7 @@ Window {
     D.DWindow.windowRadius: 0
     //TODO：由于windoweffect处理有BUG，导致动画结束后一致保持无阴影，无borderwidth状态。 无法恢复到最初的阴影和边框
     //D.DWindow.windowEffect: hideShowAnimation.running ? D.PlatformHandle.EffectNoShadow | D.PlatformHandle.EffectNoBorder : 0
-    
+
     // 目前直接处理shadowColor(透明和默认值的切换)和borderWidth(0和1的切换)，来控制阴影和边框
     // 默认阴影透明度是 60%，见： https://github.com/linuxdeepin/qt5platform-plugins/blob/master/xcb/dframewindow.h#L122
     D.DWindow.shadowColor: hideShowAnimation.running ? Qt.rgba(0, 0, 0, 0) : Qt.rgba(0, 0, 0, 0.6)
@@ -119,13 +122,13 @@ Window {
     Connections {
         target: dockTransform
         enabled: Qt.platform.pluginName === "xcb" && hideShowAnimation.running
-        
+
         function onXChanged() {
             if (dock.useColumnLayout) {
                 Panel.notifyDockPositionChanged(dockTransform.x, 0)
             }
         }
-        
+
         function onYChanged() {
             if (!dock.useColumnLayout) {
                 Panel.notifyDockPositionChanged(0, dockTransform.y)
@@ -136,13 +139,13 @@ Window {
     Connections {
         target: dock
         enabled: Qt.platform.pluginName !== "xcb" && hideShowAnimation.running
-        
+
         function onWidthChanged() {
             if (dock.useColumnLayout) {
                 Panel.notifyDockPositionChanged(dock.width, 0)
             }
         }
-        
+
         function onHeightChanged() {
             if (!dock.useColumnLayout) {
                 Panel.notifyDockPositionChanged(0, dock.height)
@@ -458,18 +461,18 @@ Window {
                 }
             }
 
-            Item {  
+            Item {
                 id: dockCenterPart
                 property var taskmanagerRootObject: {
                     let applet = DS.applet("org.deepin.ds.dock.taskmanager")
                     return applet ? applet.rootObject : null
                 }
-                
+
                 readonly property real taskmanagerImplicitWidth: taskmanagerRootObject ? taskmanagerRootObject.implicitWidth : 0
                 readonly property real taskmanagerImplicitHeight: taskmanagerRootObject ? taskmanagerRootObject.implicitHeight : 0
                 readonly property real taskmanagerAppContainerWidth: taskmanagerRootObject ? taskmanagerRootObject.appContainerWidth : 0
                 readonly property real taskmanagerAppContainerHeight: taskmanagerRootObject ? taskmanagerRootObject.appContainerHeight : 0
-                
+
                 implicitWidth: centerLoader.implicitWidth - taskmanagerImplicitWidth + taskmanagerAppContainerWidth
                 implicitHeight: centerLoader.implicitHeight - taskmanagerImplicitHeight + taskmanagerAppContainerHeight
                 onXChanged: dockCenterPartPosChanged()
@@ -685,6 +688,10 @@ Window {
             DS.closeChildrenWindows(popup)
             if (popup && popup.visible)
                 popup.close()
+            // Close dde-launchpad if available
+            if (launcherControllerWrapper) {
+                launcherControllerWrapper.hide()
+            }
         }
         function onDockScreenChanged() {
             // Close all popups when dock moves to another screen
@@ -744,5 +751,14 @@ Window {
         dock.itemIconSizeBase = dock.dockItemMaxSize
         dock.visible = Panel.hideState !== Dock.Hide
         changeDragAreaAnchor()
+
+        // Try to create LauncherController wrapper for optional launchpad support
+        try {
+            launcherControllerWrapper = Qt.createQmlObject(
+                'import QtQuick 2.15; import org.deepin.launchpad 1.0; QtObject { function hide() { LauncherController.visible = false } }',
+                dock, "LauncherControllerWrapper")
+        } catch (e) {
+            // Launchpad module not available, launcherControllerWrapper remains null
+        }
     }
 }

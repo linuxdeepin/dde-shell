@@ -8,12 +8,30 @@ import Qt.labs.platform
 
 Item {
     property Menu activeMenu: null
+    property var aboutToHideConnections: ({})  // Store connections by menu object
+
     function openMenu(menu: Menu) {
         if (activeMenu) {
             activeMenu.close()
         }
+
+        // Disconnect previous connection for this menu if exists
+        if (aboutToHideConnections[menu]) {
+            try {
+                menu.aboutToHide.disconnect(aboutToHideConnections[menu])
+            } catch (e) {
+                // Silently ignore disconnect errors
+            }
+        }
         menu.open()
-        menu.aboutToHide.connect(() => { activeMenu = null })
+
+        // Create and store the handler for this specific menu
+        let handler = function() {
+            activeMenu = null
+        }
+        aboutToHideConnections[menu] = handler
+        menu.aboutToHide.connect(handler)
+
         activeMenu = menu
     }
     function closeMenu(menu: Menu) {
