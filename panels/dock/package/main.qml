@@ -394,6 +394,7 @@ Window {
                 if (button === Qt.RightButton && lastActive !== dockMenuLoader.item) {
                     // maybe has popup visible, close it.
                     Panel.requestClosePopup()
+                    viewDeactivated()
                     MenuHelper.openMenu(dockMenuLoader.item)
                 }
                 if (button === Qt.LeftButton) {
