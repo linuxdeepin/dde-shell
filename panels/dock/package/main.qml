@@ -67,8 +67,11 @@ Window {
     //D.DWindow.windowEffect: hideShowAnimation.running ? D.PlatformHandle.EffectNoShadow | D.PlatformHandle.EffectNoBorder : 0
     
     // 目前直接处理shadowColor(透明和默认值的切换)和borderWidth(0和1的切换)，来控制阴影和边框
-    // 默认阴影透明度是 60%，见： https://github.com/linuxdeepin/qt5platform-plugins/blob/master/xcb/dframewindow.h#L122
-    D.DWindow.shadowColor: hideShowAnimation.running ? Qt.rgba(0, 0, 0, 0) : Qt.rgba(0, 0, 0, 0.6)
+    // 参数默认值见： https://github.com/linuxdeepin/qt5platform-plugins/blob/master/xcb/dframewindow.h#L122
+    // 需要注意，shadowRadius不能直接套用于“扩散”参数，拿到不透明度100%的设计图确定radius更合适一些。
+    D.DWindow.shadowColor: hideShowAnimation.running ? Qt.rgba(0, 0, 0, 0) : Qt.rgba(0, 0, 0, 0.1)
+    D.DWindow.shadowOffset: Qt.point(0, 0)
+    D.DWindow.shadowRadius: 40
     D.DWindow.borderWidth:  hideShowAnimation.running ? 0 : 1
     D.DWindow.enableBlurWindow: Qt.platform.pluginName !== "xcb"
     D.DWindow.themeType: Panel.colorTheme
