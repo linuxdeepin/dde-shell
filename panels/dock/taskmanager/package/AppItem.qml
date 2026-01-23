@@ -57,6 +57,17 @@ Item {
 
     implicitWidth: appItem.implicitWidth
 
+    // Monitor Panel position changes to update icon geometry
+    Connections {
+        target: Panel.rootObject
+        function onXChanged() {
+            updateWindowIconGeometryTimer.start()
+        }
+        function onYChanged() {
+            updateWindowIconGeometryTimer.start()
+        }
+    }
+
     AppItemPalette {
         id: itemPalette
         displayMode: root.displayMode
