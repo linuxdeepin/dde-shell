@@ -1,3 +1,12 @@
+dde-shell (2.0.27) unstable; urgency=medium
+
+  * fix: adjust dock shadow parameters
+  * fix: FTBFS when building with newer treeland-protocols
+  * fix: close launchpad when right-clicking taskbar to open menu
+  * feat: add category-based skip list for cgroups grouping
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 23 Jan 2026 09:36:09 +0800
+
 dde-shell (2.0.26) unstable; urgency=medium
 
   * fix: update safeCommands whitelist for notification service
