@@ -484,7 +484,7 @@ Window {
                     (dock.height - dockCenterPart.implicitHeight) / 2 - (dockLeftPart.implicitHeight + 20) + Math.min((dock.height - dockCenterPart.implicitHeight) / 2 - (dockRightPart.implicitHeight + 20), 0) : 0
 
                 Behavior on Layout.leftMargin {
-                    enabled: !dock.isDragging
+                    enabled: !dock.isDragging && !Applet.isResizing
                     NumberAnimation {
                         duration: 200
                         easing.type: Easing.OutCubic
@@ -492,7 +492,7 @@ Window {
                 }
 
                 Behavior on Layout.topMargin {
-                    enabled: !dock.isDragging
+                    enabled: !dock.isDragging && !Applet.isResizing
                     NumberAnimation {
                         duration: 200
                         easing.type: Easing.OutCubic
