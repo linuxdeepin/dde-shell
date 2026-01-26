@@ -33,6 +33,7 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
     Q_PROPERTY(QString screenName READ screenName NOTIFY screenNameChanged FINAL)
     Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
+    Q_PROPERTY(bool isResizing READ isResizing WRITE setIsResizing NOTIFY isResizingChanged FINAL)
 
     Q_PROPERTY(qreal devicePixelRatio READ devicePixelRatio NOTIFY devicePixelRatioChanged FINAL)
 
@@ -98,6 +99,9 @@ public:
     bool contextDragging() const;
     void setContextDragging(bool newContextDragging);
 
+    bool isResizing() const;
+    void setIsResizing(bool resizing);
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -126,6 +130,7 @@ Q_SIGNALS:
     void lockedChanged(bool locked);
 
     void contextDraggingChanged();
+    void isResizingChanged(bool isResizing);
 
 private:
     ColorTheme m_theme;
@@ -136,6 +141,7 @@ private:
     bool m_compositorReady;
     bool m_launcherShown;
     bool m_contextDragging;
+    bool m_isResizing;
 };
 
 }

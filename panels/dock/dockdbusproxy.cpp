@@ -279,7 +279,9 @@ QString DockDBusProxy::getPluginKey(const QString &pluginName)
 void DockDBusProxy::resizeDock(int offset, bool dragging)
 {
     Q_UNUSED(dragging)
+    parent()->setIsResizing(true);
     parent()->setDockSize(offset);
+    parent()->setIsResizing(false);
 }
 
 bool DockDBusProxy::showInPrimary() const

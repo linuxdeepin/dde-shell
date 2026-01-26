@@ -39,6 +39,7 @@ DockPanel::DockPanel(QObject *parent)
     , m_compositorReady(false)
     , m_launcherShown(false)
     , m_contextDragging(false)
+    , m_isResizing(false)
 {
     connect(this, &DockPanel::compositorReadyChanged, this, [this] {
         if (!m_compositorReady) return;
@@ -457,6 +458,20 @@ void DockPanel::setContextDragging(bool newContextDragging)
     if (!m_contextDragging)
         m_helper->checkNeedHideOrNot();
     emit contextDraggingChanged();
+}
+
+bool DockPanel::isResizing() const
+{
+    return m_isResizing;
+
+}
+
+void DockPanel::setIsResizing(bool resizing)
+{
+    if (m_isResizing == resizing)
+        return;
+    m_isResizing = resizing;
+    emit isResizingChanged(m_isResizing);
 }
 }
 
