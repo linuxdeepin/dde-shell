@@ -93,8 +93,8 @@ Item {
         anchors.centerIn: parent
         parent: toolTipWindow ? toolTipWindow.contentItem : undefined
         font {
-            family: DTK.fontManager.t6.family
-            pixelSize: DTK.fontManager.t6.pixelSize
+            family: DTK.fontManager.t8.family
+            pixelSize: DTK.fontManager.t8.pixelSize
             capitalization: Font.Capitalize
         }
         contentItem: Text {
