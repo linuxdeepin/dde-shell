@@ -155,17 +155,6 @@
       "description[zh_CN]": "通知自动清理的天数，超过此天数的通知将被自动删除",
       "permissions": "readwrite",
       "visibility": "public"
-    },
-    "safeCommands": {
-      "value": ["xdg-open","dbus-send","qdbus","deepin-defender","dde-control-center","downloader","dde-file-manager","dde-dconfig","/usr/lib/deepin-daemon/dde-bluetooth-dialog","/usr/bin/dde-hints-dialog","/usr/bin/deepin-devicemanager"],
-      "serial": 0,
-      "flags": [],
-      "name": "safe commands",
-      "name[zh_CN]": "安全指令",
-      "description": "safe commands",
-      "description[zh_CN]": "通知扩展的x-deepin-action-携带的指令白名单",
-      "permissions": "readonly",
-      "visibility": "private"
     }
   }
 }
