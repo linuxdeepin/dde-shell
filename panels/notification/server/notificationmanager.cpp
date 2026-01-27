@@ -533,9 +533,15 @@ void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QStr
             if (!args.isEmpty()) {
                 QString cmd = args.takeFirst(); // 命令
 
+                QStringList amArgs;
+                amArgs << "-c" << cmd;
+                if (!args.isEmpty()) {
+                    amArgs << "--" << args;
+                }
+
                 QProcess pro;
-                pro.setProgram(cmd);
-                pro.setArguments(args);
+                pro.setProgram("dde-am");
+                pro.setArguments(amArgs);
                 QProcessEnvironment proEnv = QProcessEnvironment::systemEnvironment();
                 proEnv.remove("DSG_APP_ID");
                 pro.setProcessEnvironment(proEnv);
