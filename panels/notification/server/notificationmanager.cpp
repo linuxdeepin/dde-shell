@@ -533,14 +533,6 @@ void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QStr
             if (!args.isEmpty()) {
                 QString cmd = args.takeFirst(); // 命令
 
-                QScopedPointer<DConfig> config(DConfig::create("org.deepin.dde.shell", "org.deepin.dde.shell.notification"));
-                QStringList safeCommands = config->value("safeCommands").toStringList();
-
-                if (!safeCommands.contains(cmd)) {
-                    qWarning(notifyLog) << "The command is not allowed to be executed:" << cmd << safeCommands;
-                    return;
-                }
-
                 QProcess pro;
                 pro.setProgram(cmd);
                 pro.setArguments(args);
