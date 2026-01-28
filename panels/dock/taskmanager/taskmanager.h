@@ -51,7 +51,6 @@ public:
         NoDisplayRole,
         ActionsRole,
         DDECategoryRole,
-        CategoriesRole,
         InstalledTimeRole,
         LastLaunchedTimeRole,
         LaunchedTimesRole,
@@ -59,6 +58,11 @@ public:
         OnDesktopRole,
         AutoStartRole,
         AppTypeRole,
+        XLingLongRole,
+        IdRole,
+        XCreatedByRole,
+        ExecsRole,
+        CategoriesRole,
     };
     Q_ENUM(Roles)
 
