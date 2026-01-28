@@ -19,7 +19,6 @@ public:
         NoDisplayRole,
         ActionsRole,
         DDECategoryRole,
-        CategoriesRole,
         InstalledTimeRole,
         LastLaunchedTimeRole,
         LaunchedTimesRole,
@@ -31,6 +30,7 @@ public:
         IdRole,
         XCreatedByRole,
         ExecsRole,
+        CategoriesRole,
     };
     Q_ENUM(Roles)
 
