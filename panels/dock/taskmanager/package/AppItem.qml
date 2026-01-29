@@ -37,7 +37,7 @@ Item {
     Drag.dragType: Drag.Automatic
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
     
-    property bool useColumnLayout: Panel.position % 2
+    property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int statusIndicatorSize: useColumnLayout ? root.width * 0.72 : root.height * 0.72
     property int iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
     property bool enableTitle: false

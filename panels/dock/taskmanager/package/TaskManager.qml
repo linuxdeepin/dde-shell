@@ -12,7 +12,7 @@ import org.deepin.dtk 1.0 as D
 
 ContainmentItem {
     id: taskmanager
-    property bool useColumnLayout: Panel.position % 2
+    property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int dockOrder: 16
     property real remainingSpacesForTaskManager: Panel.itemAlignment === Dock.LeftAlignment ? Panel.rootObject.dockLeftSpaceForCenter : Panel.rootObject.dockRemainingSpaceForCenter
 

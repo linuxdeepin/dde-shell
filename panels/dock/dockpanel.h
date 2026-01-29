@@ -119,6 +119,7 @@ Q_SIGNALS:
 
     void dockSizeChanged(uint size);
     void hideModeChanged(HideMode mode);
+    void beforePositionChanged(Position beforePosition);
     void positionChanged(Position position);
     void itemAlignmentChanged(ItemAlignment alignment);
     void indicatorStyleChanged(IndicatorStyle style);
