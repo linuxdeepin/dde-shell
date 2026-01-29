@@ -262,6 +262,12 @@ Position DockPanel::position()
 
 void DockPanel::setPosition(const Position& position)
 {
+    if (position == SETTINGS->position()) return;
+
+    // Emit signal with old position before updating
+    Q_EMIT beforePositionChanged(SETTINGS->position());
+
+    // Directly commit the position change
     SETTINGS->setPosition(position);
 }
 
