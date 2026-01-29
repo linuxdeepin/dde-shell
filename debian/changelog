@@ -1,3 +1,20 @@
+dde-shell (2.0.28) unstable; urgency=medium
+
+  * fix: refactor dock position management and decouple from animation
+    flow
+  * fix: correct icon display order from right to left
+  * feat: reorder task manager role enum for compatibility
+  * fix: move CategoriesRole to end of enum for compatibility
+  * fix: lower default font size for tray action
+  * fix: Use dde-am to execute command in notifications
+  * Revert "fix: add command whitelist validation for notification
+    actions"
+  * Revert "fix: update safeCommands whitelist for notification service"
+  * fix: disable dock animations during resize operations
+  * fix: update window icon geometry when panel position changes
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 29 Jan 2026 20:22:15 +0800
+
 dde-shell (2.0.27) unstable; urgency=medium
 
   * fix: adjust dock shadow parameters
