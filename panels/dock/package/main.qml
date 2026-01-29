@@ -168,6 +168,8 @@ Window {
         id: dockAnimation
         property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
         property bool isShowing: false
+        property bool isPositionChanging: false
+        property int positionForAnimation: Panel.position
         property var target: useTransformBasedAnimation ? dockTransform : dock
         property string animProperty: {
             if (useTransformBasedAnimation) return dock.useColumnLayout ? "x" : "y";
@@ -185,7 +187,7 @@ Window {
             from: {
                 if (dockAnimation.isShowing) {
                     if (dockAnimation.useTransformBasedAnimation) {
-                        return (Panel.position === Dock.Left || Panel.position === Dock.Top) ? -Panel.dockSize : Panel.dockSize;
+                        return (dockAnimation.positionForAnimation === Dock.Left || dockAnimation.positionForAnimation === Dock.Top) ? -Panel.dockSize : Panel.dockSize;
                     }
                     return 1;
                 }
@@ -196,7 +198,7 @@ Window {
                     return 0;
                 } else {
                     if (dockAnimation.useTransformBasedAnimation) {
-                        return (Panel.position === Dock.Left || Panel.position === Dock.Top) ? -Panel.dockSize : Panel.dockSize;
+                        return (dockAnimation.positionForAnimation === Dock.Left || dockAnimation.positionForAnimation === Dock.Top) ? -Panel.dockSize : Panel.dockSize;
                     }
                     return 1;
                 }
@@ -215,6 +217,40 @@ Window {
             } else {
                 dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) !== 1);
             }
+
+            // If this was a hide animation during position change, prepare for show animation
+            if (isPositionChanging && !isShowing) {
+                isPositionChanging = false;
+
+                // Update position for animation to new position for show animation
+                positionForAnimation = Panel.position;
+
+                // Set transform to hidden position before showing
+                if (useTransformBasedAnimation) {
+                    var hideOffset = (Panel.position === Dock.Left || Panel.position === Dock.Top) ? -Panel.dockSize : Panel.dockSize;
+                    if (dock.useColumnLayout) {
+                        dockTransform.x = hideOffset;
+                        dockTransform.y = 0;
+                    } else {
+                        dockTransform.x = 0;
+                        dockTransform.y = hideOffset;
+                    }
+                } else {
+                    dockTransform.x = 0;
+                    dockTransform.y = 0;
+                }
+
+                startAnimation(true);
+            } else if (isShowing) {
+                // After show animation completes, check if we need to auto-hide
+                // For KeepHidden and SmartHide modes, trigger hide check immediately
+                if (Panel.hideMode === Dock.KeepHidden || Panel.hideMode === Dock.SmartHide) {
+                    hideTimer.running = true;
+                } else if (Panel.hideState === Dock.Hide) {
+                    // For other cases, if hideState is already Hide, trigger hide animation
+                    hideTimer.running = true;
+                }
+            }
         }
     }
 
@@ -224,31 +260,9 @@ Window {
         required property int value
         text: name
 
-        property var positionChangeCallback: function() {
-            // Disconnect any existing callback first
-            dockAnimation.onStopped.disconnect(positionChangeCallback);
-            // Stop any running animations first --fix bug with do not show dock
-            dockAnimation.stop();
-            // Reset transform before starting new animation--fix bug with change position,will have a blank area
-            dockTransform.x = 0;
-            dockTransform.y = 0;
-
-            Applet[prop] = value;
-            checked = Qt.binding(function() {
-                return Applet[prop] === value;
-            });
-            dockAnimation.startAnimation(true);
-        }
         onTriggered: {
-            if (prop === "position") {
-                // Connect the callback and start the hide animation
-                dockAnimation.onStopped.connect(positionChangeCallback);
-                dockAnimation.startAnimation(false);
-            } else {
+            if (Applet[prop] !== value) {
                 Applet[prop] = value
-                checked = Qt.binding(function() {
-                    return Applet[prop] === value
-                })
             }
         }
         checked: Applet[prop] === value
@@ -669,9 +683,54 @@ Window {
     }
 
     Connections {
+        function onBeforePositionChanged(beforePosition) {
+            // Stop any running animations first
+            dockAnimation.stop();
+            hideShowAnimation.stop();
+
+            // Set the position for animation to old position for hide animation
+            dockAnimation.positionForAnimation = beforePosition;
+
+            // Mark that we're changing position
+            dockAnimation.isPositionChanging = true;
+
+            // Check if dock is currently hidden
+            if (Panel.hideState === Dock.Hide && !dock.visible) {
+                // Dock is already hidden, no need for hide animation
+                // Wait for onPositionChanged to get the new position, then show
+                dockAnimation.isPositionChanging = false;
+            } else {
+                // Start hide animation at old position
+                // When animation completes, onStopped will handle show animation
+                dockAnimation.startAnimation(false);
+            }
+        }
+
         function onPositionChanged() {
             changeDragAreaAnchor()
             Panel.requestClosePopup()
+
+            // If dock was hidden when position change started, show it now at new position
+            if (!dockAnimation.isPositionChanging && !dock.visible) {
+                dockAnimation.positionForAnimation = Panel.position;
+
+                // Set transform to hidden position before showing
+                if (dockAnimation.useTransformBasedAnimation) {
+                    var hideOffset = (Panel.position === Dock.Left || Panel.position === Dock.Top) ? -Panel.dockSize : Panel.dockSize;
+                    if (dock.useColumnLayout) {
+                        dockTransform.x = hideOffset;
+                        dockTransform.y = 0;
+                    } else {
+                        dockTransform.x = 0;
+                        dockTransform.y = hideOffset;
+                    }
+                } else {
+                    dockTransform.x = 0;
+                    dockTransform.y = 0;
+                }
+
+                dockAnimation.startAnimation(true);
+            }
         }
         function onDockSizeChanged() {
             dock.dockSize = Panel.dockSize
@@ -681,7 +740,10 @@ Window {
             if (Panel.hideState === Dock.Hide) {
                 hideTimer.running = true
             } else {
-                hideShowAnimation.restart()
+                // Only restart animation if not already running or if visible state doesn't match
+                if (!hideShowAnimation.running || !dock.visible) {
+                    hideShowAnimation.restart()
+                }
             }
         }
         function onRequestClosePopup() {

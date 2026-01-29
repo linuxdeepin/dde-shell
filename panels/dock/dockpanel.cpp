@@ -40,6 +40,7 @@ DockPanel::DockPanel(QObject *parent)
     , m_launcherShown(false)
     , m_contextDragging(false)
     , m_isResizing(false)
+    , m_beforePosition(Bottom)
 {
     connect(this, &DockPanel::compositorReadyChanged, this, [this] {
         if (!m_compositorReady) return;
@@ -262,6 +263,13 @@ Position DockPanel::position()
 
 void DockPanel::setPosition(const Position& position)
 {
+    if (position == SETTINGS->position()) return;
+
+    // Store the old position for animation reference
+    m_beforePosition = SETTINGS->position();
+    Q_EMIT beforePositionChanged(m_beforePosition);
+
+    // Directly commit the position change
     SETTINGS->setPosition(position);
 }
 
@@ -472,6 +480,11 @@ void DockPanel::setIsResizing(bool resizing)
         return;
     m_isResizing = resizing;
     emit isResizingChanged(m_isResizing);
+}
+
+Position DockPanel::beforePosition() const
+{
+    return m_beforePosition;
 }
 }
 

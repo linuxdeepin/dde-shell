@@ -34,6 +34,7 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(QString screenName READ screenName NOTIFY screenNameChanged FINAL)
     Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
     Q_PROPERTY(bool isResizing READ isResizing WRITE setIsResizing NOTIFY isResizingChanged FINAL)
+    Q_PROPERTY(Position beforePosition READ beforePosition NOTIFY beforePositionChanged FINAL)
 
     Q_PROPERTY(qreal devicePixelRatio READ devicePixelRatio NOTIFY devicePixelRatioChanged FINAL)
 
@@ -102,6 +103,8 @@ public:
     bool isResizing() const;
     void setIsResizing(bool resizing);
 
+    Position beforePosition() const;
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -119,6 +122,7 @@ Q_SIGNALS:
 
     void dockSizeChanged(uint size);
     void hideModeChanged(HideMode mode);
+    void beforePositionChanged(Position beforePosition);
     void positionChanged(Position position);
     void itemAlignmentChanged(ItemAlignment alignment);
     void indicatorStyleChanged(IndicatorStyle style);
@@ -142,6 +146,7 @@ private:
     bool m_launcherShown;
     bool m_contextDragging;
     bool m_isResizing;
+    Position m_beforePosition;
 };
 
 }
