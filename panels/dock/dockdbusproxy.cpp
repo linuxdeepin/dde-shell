@@ -54,6 +54,7 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
         if (getOtherApplet()) {
             timer->stop();
             timer->deleteLater();
+            connect(m_trayApplet, SIGNAL(pluginsChanged()), this, SIGNAL(pluginsChanged()));
         }
     });
     timer->start();

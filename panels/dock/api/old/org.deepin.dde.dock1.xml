@@ -41,5 +41,6 @@
             <arg type="s"/>
             <arg type="b"/>
         </signal>
+        <signal name="pluginsChanged"/>
     </interface>
 </node>

@@ -160,6 +160,7 @@ AppletItem {
             }
             DDT.TraySortOrderModel.availableSurfaces = surfacesData
             console.log("onPluginSurfacesUpdated", surfacesData.length)
+            Applet.emitPluginsChanged()
         }
 
         function onRequestShutdown(type) {
