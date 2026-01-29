@@ -32,11 +32,14 @@ public:
 
     Q_INVOKABLE DockItemInfos dockItemInfos();
     Q_INVOKABLE void setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible);
+    Q_INVOKABLE void emitPluginsChanged();
 
 Q_SIGNALS:
     void trayPluginModelChanged();
     void quickPluginModelChanged();
     void fixedPluginModelChanged();
+
+    void pluginsChanged();
 
 private:
     bool loopDockItemInfosModel(QAbstractItemModel *model, const std::function<bool (const DockItemInfo &)> &cb);

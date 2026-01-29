@@ -81,6 +81,7 @@ public:
 
 Q_SIGNALS:
     void pluginVisibleChanged(const QString &pluginName, bool visible) const;
+    void pluginsChanged();
 
 private:
     DockPanel* parent() const;

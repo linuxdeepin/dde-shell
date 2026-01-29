@@ -135,6 +135,11 @@ void TrayItem::setItemOnDock(const QString &settingKey, const QString &itemKey, 
               TraySettings::instance()->removeTrayItemOnDock(pluginId + "::" + itemKey);
 }
 
+void TrayItem::emitPluginsChanged()
+{
+    Q_EMIT pluginsChanged();
+}
+
 D_APPLET_CLASS(TrayItem)
 }
 
