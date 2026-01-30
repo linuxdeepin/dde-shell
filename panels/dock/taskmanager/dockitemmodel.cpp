@@ -15,6 +15,7 @@ DockItemModel::DockItemModel(QAbstractItemModel *globalModel, QObject *parent)
     : QAbstractProxyModel(parent)
     , AbstractTaskManagerInterface(this)
     , m_globalModel(globalModel)
+    , m_groupModel(nullptr)
     , m_split(!TaskManagerSettings::instance()->isWindowSplit())
     , m_isUpdating(false)
 {
@@ -27,10 +28,9 @@ DockItemModel::DockItemModel(QAbstractItemModel *globalModel, QObject *parent)
 
         if (isWindowSplit) {
             setSourceModel(m_globalModel);
-            m_groupModel.reset(nullptr);
         } else {
-            m_groupModel.reset(new DockGroupModel(m_globalModel, TaskManager::DesktopIdRole));
-            setSourceModel(m_groupModel.get());
+            m_groupModel = new DockGroupModel(m_globalModel, TaskManager::DesktopIdRole, this);
+            setSourceModel(m_groupModel);
         }
     };
 
@@ -107,6 +107,8 @@ void DockItemModel::dumpItemInfo(const QModelIndex &index)
 
 QHash<int, QByteArray> DockItemModel::roleNames() const
 {
+    if (!m_globalModel)
+        return {};
     return m_globalModel->roleNames();
 }
 

@@ -7,6 +7,7 @@
 #include "abstracttaskmanagerinterface.h"
 
 #include <QAbstractProxyModel>
+#include <QPointer>
 
 namespace dock
 {
@@ -29,8 +30,8 @@ public:
     void dumpItemInfo(const QModelIndex &index);
 
 private:
-    QAbstractItemModel *m_globalModel;
-    QScopedPointer<QAbstractItemModel> m_groupModel;
+    QPointer<QAbstractItemModel> m_globalModel;
+    QAbstractItemModel *m_groupModel = nullptr;
     bool m_split;
     bool m_isUpdating;
 };
