@@ -378,7 +378,7 @@ bool NotificationManager::isDoNotDisturb() const
 
 bool NotificationManager::recordNotification(NotifyEntity &entity)
 {
-    qint64 id = -1;
+    qint64 id = NotifyEntity::InvalidId;
     if (entity.isReplace()) {
         auto lastEntity = m_persistence->fetchLastEntity(entity.bubbleId());
         if (lastEntity.isValid()) {
@@ -393,13 +393,14 @@ bool NotificationManager::recordNotification(NotifyEntity &entity)
             }
         } else {
             qWarning() << "Not exist notification to replace for the replaceId" << entity.replacesId();
+            return false;
         }
     }
-    if (id == -1) {
+    if (id == NotifyEntity::InvalidId) {
         id = m_persistence->addEntity(entity);
     }
 
-    if (id == -1) {
+    if (id == NotifyEntity::InvalidId) {
         qWarning(notifyLog) << "Failed on saving DB, bubbleId:" << entity.bubbleId() << ", appName" << entity.appName();
         return false;
     }

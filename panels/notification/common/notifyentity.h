@@ -33,6 +33,8 @@ public:
         Timeout = 5,
     };
 
+    static constexpr qint64 InvalidId = 0;
+
     NotifyEntity();
     explicit NotifyEntity(qint64 id, const QString &appName);
     explicit NotifyEntity(const QString &appName, uint replacesId, const QString &appIcon, const QString &summary,

@@ -169,7 +169,7 @@ QVariant BubbleModel::data(const QModelIndex &index, int role) const
     case BubbleModel::AppName:
         return m_bubbles[row]->appName();
     case BubbleModel::Id:
-        return m_bubbles[row]->bubbleId();
+        return m_bubbles[row]->id();
     case BubbleModel::Body:
         return m_bubbles[row]->body();
     case BubbleModel::Summary:

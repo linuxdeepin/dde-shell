@@ -112,8 +112,7 @@ NotifyEntity DataAccessorProxy::fetchLastEntity(uint notifyId)
     auto entity = m_impl->fetchLastEntity(notifyId);
     if (entity.isValid())
         return entity;
-
-    return m_source->fetchLastEntity(notifyId);
+    return {};
 }
 
 QList<NotifyEntity> DataAccessorProxy::fetchEntities(const QString &appName, int processedType, int maxCount)
