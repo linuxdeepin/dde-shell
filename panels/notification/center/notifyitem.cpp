@@ -186,6 +186,8 @@ void AppNotifyItem::updateActions()
         return;
     }
 
+    auto hints = m_entity.hints();
+    auto processed = m_entity.processed();
     QVariantList array;
     for (int i = 0; i < actions.size(); i += 2) {
         const auto id = actions[i];
@@ -193,6 +195,10 @@ void AppNotifyItem::updateActions()
         QVariantMap item;
         item["id"] = id;
         item["text"] = text;
+
+        // we only allow to invoke the action if we have the extension hint and it's not in the notify center.
+        item["enabled"] = hints.contains("x-deepin-action-" + id) || !processed;
+
         array.append(item);
     }
 

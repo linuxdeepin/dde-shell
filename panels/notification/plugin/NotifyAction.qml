@@ -120,6 +120,7 @@ Control {
         id: actionButton
         required property var actionData
         text: actionData ? actionData.text : ""
+        enabled: actionData ? actionData.enabled : false
         topPadding: undefined
         bottomPadding: undefined
         leftPadding: undefined
