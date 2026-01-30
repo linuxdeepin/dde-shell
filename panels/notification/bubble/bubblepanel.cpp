@@ -138,7 +138,7 @@ void BubblePanel::addBubble(qint64 id)
 
 void BubblePanel::closeBubble(qint64 id)
 {
-    if (id > 0) {
+    if (id != NotifyEntity::InvalidId) {
         m_bubbles->removeById(id);
     } else {
         qWarning(notifyLog) << "Failed to close bubble: invalid bubble id for entity id:" << id;

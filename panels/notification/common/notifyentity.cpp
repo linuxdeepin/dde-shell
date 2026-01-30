@@ -37,7 +37,7 @@ public:
     uint replacesId = NoReplaceId;
     int expireTimeout = 0;
 
-    qint64 id = -1;
+    qint64 id = NotifyEntity::InvalidId;
     qint64 cTime = 0;
     int processedType = NotifyEntity::NotProcessed;
 };
@@ -118,7 +118,7 @@ bool NotifyEntity::operator!=(const NotifyEntity &other) const
 
 bool NotifyEntity::isValid() const
 {
-    return d && d->id > 0 && d->cTime > 0;
+    return d && d->id != NotifyEntity::InvalidId && d->cTime > 0;
 }
 
 qint64 NotifyEntity::id() const

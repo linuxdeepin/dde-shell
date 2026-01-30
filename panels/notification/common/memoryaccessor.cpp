@@ -15,9 +15,10 @@ MemoryAccessor::~MemoryAccessor()
 
 qint64 MemoryAccessor::addEntity(const NotifyEntity &entity)
 {
+    static qint64 g_Id = NotifyEntity::InvalidId; // use negative id for in-memory entities
     QMutexLocker locker(&m_mutex);
     m_entities << entity;
-    return entity.bubbleId();
+    return --g_Id;
 }
 
 qint64 MemoryAccessor::replaceEntity(qint64 id, const NotifyEntity &entity)
