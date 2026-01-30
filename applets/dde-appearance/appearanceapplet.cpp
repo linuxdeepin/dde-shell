@@ -61,6 +61,7 @@ void AppearanceApplet::initDBusProxy()
 
     m_interface->setSync(false);
     QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::OpacityChanged, this, &AppearanceApplet::opacityChanged);
+    Q_EMIT opacityChanged();
 }
 
 D_APPLET_CLASS(AppearanceApplet)
