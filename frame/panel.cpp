@@ -22,6 +22,12 @@ DPanel::DPanel(QObject *parent)
     QObject::connect(this, &DPanel::rootObjectChanged, this, [this]() {
 
         D_D(DPanel);
+        if (auto window = qobject_cast<QWindow *>(d->m_rootObject)) {
+            // set a default title if not set
+            if (window->title().isEmpty()) {
+                window->setTitle(pluginId());
+            }
+        }
         d->ensurePopupWindow();
         d->ensureToolTipWindow();
         d->ensureMenuWindow();
