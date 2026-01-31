@@ -150,6 +150,14 @@ void DockHelper::enterScreen(QScreen *screen)
         return;
     }
 
+    // Do not switch screen if any popup/transient child window is showing
+    for (auto show : m_transientChildShows) {
+        if (show) {
+            parent()->setHideState(Show);
+            return;
+        }
+    }
+
     QTimer::singleShot(200, [this, screen]() {
         parent()->setDockScreen(screen);
         parent()->setHideState(Show);
