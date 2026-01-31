@@ -160,7 +160,7 @@ Window {
         running: false
         repeat: false
         onTriggered: {
-            if (!dock.isDragging)
+            if (!dock.isDragging && !MenuHelper.activeMenu)
                 hideShowAnimation.start()
         }
     }
@@ -416,6 +416,7 @@ Window {
                     // maybe has popup visible, close it.
                     Panel.requestClosePopup()
                     viewDeactivated()
+                    hideTimer.stop()
                     MenuHelper.openMenu(dockMenuLoader.item)
                 }
                 if (button === Qt.LeftButton) {
@@ -750,6 +751,19 @@ Window {
         }
 
         target: Panel
+    }
+
+    Connections {
+        function onMenuClosed() {
+            // 当右键菜单关闭时，根据当前隐藏模式重新启动隐藏计时器
+            if (Panel.hideMode === Dock.KeepHidden
+                || Panel.hideMode === Dock.SmartHide
+                || Panel.hideState === Dock.Hide) {
+                hideTimer.running = true
+            }
+        }
+
+        target: MenuHelper
     }
 
     function position2Anchors(position) {
