@@ -14,7 +14,10 @@ Control {
     property string itemKey
     property alias shellSurface: surfaceLayer.shellSurface
     property alias traySurface: dragLayer.fallbackDragImage
-    property bool canDrag: true
+    // 根据插件的 pluginFlags 判断是否可拖动
+    // Attribute_CanDrag = 0x200，如果 flags 中包含此标志则可拖动
+    readonly property bool canDragByFlags: shellSurface ? (shellSurface.pluginFlags & 0x200) !== 0 : true
+    property bool canDrag: canDragByFlags
     property int radius: 8
     property bool isActive
     function updateSurface()
@@ -39,7 +42,8 @@ Control {
             if (type === 2) {
                 canDrag = false
             } else if (type === 3) {
-                canDrag = true
+                // 鼠标释放时恢复到基于 Attribute_CanDrag 的判断结果
+                canDrag = canDragByFlags
             }
         }
     }
