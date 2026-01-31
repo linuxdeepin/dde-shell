@@ -8,12 +8,20 @@ import Qt.labs.platform
 
 Item {
     property Menu activeMenu: null
+    
+    signal menuClosed()
+    Connections {
+        target: activeMenu
+        function onAboutToHide() {
+            activeMenu = null
+            menuClosed()
+        }
+    }
     function openMenu(menu: Menu) {
         if (activeMenu) {
             activeMenu.close()
         }
         menu.open()
-        menu.aboutToHide.connect(() => { activeMenu = null })
         activeMenu = menu
     }
     function closeMenu(menu: Menu) {
