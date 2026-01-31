@@ -70,7 +70,26 @@ Window {
         verticalLayoutDirection: ListView.BottomToTop
         add: Transition {
             id: addTrans
-            XAnimator { target: addTrans.ViewTransition.item; from: addTrans.ViewTransition.item.width; duration: 600; easing.type: Easing.OutExpo }
+            // Before starting the new animation, forcibly complete the previous notification bubble's animation
+            ScriptAction {
+                script: {
+                    // Only handle the previous notification bubble (at index count - 1); no need to iterate through all of them
+                    if (bubbleView.count > 1) {
+                        let prevItem = bubbleView.itemAtIndex(bubbleView.count - 2)
+                        if (prevItem) {
+                            // Directly set x to 0 to forcibly complete the animation
+                            prevItem.x = 0
+                        }
+                    }
+                }
+            }
+            XAnimator { 
+                target: addTrans.ViewTransition.item
+                from: addTrans.ViewTransition.item.width
+                to: 0
+                duration: 600
+                easing.type: Easing.OutExpo
+            }
         }
         delegate: Bubble {
             width: 360
