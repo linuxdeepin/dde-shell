@@ -6,16 +6,17 @@
 #include "dlayershellwindow.h"
 #include "x11dlayershellemulation.h"
 
-#include <QScreen>
-#include <QMargins>
 #include <QGuiApplication>
 #include <QLoggingCategory>
+#include <QMargins>
+#include <QScreen>
 
 #include <qpa/qplatformwindow.h>
 #include <qpa/qplatformwindow_p.h>
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_ewmh.h>
+#include <xcb/xcb_icccm.h>
 
 DS_BEGIN_NAMESPACE
 
@@ -65,6 +66,9 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     });
 
     connect(qApp, &QGuiApplication::screenRemoved, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+
+    onScopeChanged();
+    connect(m_dlayerShellWindow, &DLayerShellWindow::scopeChanged, this, &LayerShellEmulation::onScopeChanged);
 
     // connect(m_dlayerShellWindow, &DS_NAMESPACE::DLayerShellWindow::keyboardInteractivityChanged, this, &LayerShellEmulation::onKeyboardInteractivityChanged);
 }
@@ -270,6 +274,35 @@ void LayerShellEmulation::onExclusionZoneChanged()
                         << ", (left, right, top, bottom)"
                         << strut_partial.left << strut_partial.right << strut_partial.top << strut_partial.bottom;
     xcb_ewmh_set_wm_strut_partial(&ewmh_connection, m_window->winId(), strut_partial);
+}
+
+void LayerShellEmulation::onScopeChanged()
+{
+    auto *x11Application = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
+    if (!x11Application || !m_window->winId()) {
+        return;
+    }
+
+    QString instanceName = m_dlayerShellWindow->scope();
+    if (instanceName.isEmpty()) {
+        // Don't set WM_CLASS for default scope, let X11 use its default behavior
+        return;
+    }
+
+    // Set WM_CLASS property
+    // Format: instance_name\0class_name\0
+    // - instance_name: scope value (e.g., "dock", "notification")
+    // - class_name: application binary name (e.g., "dde-shell")
+    QString className = QCoreApplication::applicationName();
+    QByteArray wmClassData;
+    wmClassData.append(instanceName.toUtf8());
+    wmClassData.append('\0');
+    wmClassData.append(className.toUtf8());
+    wmClassData.append('\0');
+
+    xcb_icccm_set_wm_class(x11Application->connection(), m_window->winId(), wmClassData.length(), wmClassData.constData());
+
+    qCDebug(layershell) << "Set WM_CLASS for window" << m_window->winId() << " wm_class:" << wmClassData;
 }
 
 // void X11Emulation::onKeyboardInteractivityChanged()
