@@ -30,7 +30,7 @@ public:
     }
 
     QWindow* parentWindow;
-    QString scope = QStringLiteral("window");
+    QString scope;
     DLayerShellWindow::Anchors anchors = {DLayerShellWindow::AnchorNone};
     int32_t exclusionZone = 0;
     DLayerShellWindow::KeyboardInteractivity keyboardInteractivity = DLayerShellWindow::KeyboardInteractivityNone;

@@ -27,6 +27,7 @@ private slots:
     // margins or anchor changed
     void onPositionChanged();
     void onExclusionZoneChanged();
+    void onScopeChanged();
     // void onKeyboardInteractivityChanged();
 
 private:
