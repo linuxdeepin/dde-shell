@@ -25,6 +25,8 @@ DockCombineModel::DockCombineModel(QAbstractItemModel *major, QAbstractItemModel
                   {TaskManager::WinIdRole, RoleCombineModel::roleNames().key(MODEL_WINID)},
                   {TaskManager::WinIconRole, RoleCombineModel::roleNames().key(MODEL_WINICON)},
                   {TaskManager::WinTitleRole, RoleCombineModel::roleNames().key(MODEL_TITLE)}};
+    
+    connect(sourceModel(), &QAbstractItemModel::dataChanged, this, &DockCombineModel::onSourceDataChanged);
 }
 
 QHash<int, QByteArray> DockCombineModel::roleNames() const
@@ -71,5 +73,14 @@ QVariant DockCombineModel::data(const QModelIndex &index, int role) const
     }
 
     return QVariant();
+}
+
+void DockCombineModel::onSourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles)
+{
+    // 部分窗口没有desktop, 应用图标使用的是窗口图标，当窗口图标变化的时候也需要发送应用图标变化的通知，以便前端更新
+    if ((roles.isEmpty() || roles.contains(TaskManager::WinIconRole)) &&
+        !roles.contains(TaskManager::IconNameRole)) {
+        Q_EMIT dataChanged(topLeft, bottomRight, { TaskManager::IconNameRole });
+    }
 }
 }
