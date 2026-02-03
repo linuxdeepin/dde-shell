@@ -12,7 +12,6 @@ import org.deepin.ds.notificationcenter
 
 Window {
     id: root
-
     function windowMargin(position) {
         let dockApplet = DS.applet("org.deepin.ds.dock")
         if (!dockApplet)
@@ -20,14 +19,43 @@ Window {
 
         let dockScreen = dockApplet.screenName
         let screen = root.screen.name
-        let dockHideState = dockApplet.hideState
-        let dockIsHide = dockHideState === 2
-        if (dockScreen !== screen || dockIsHide)
+        if (dockScreen !== screen)
             return 0
 
-        let dockSize = dockApplet.dockSize
         let dockPosition = dockApplet.position
-        return dockPosition === position ? dockSize : 0
+        if (dockPosition !== position)
+            return 0
+            
+        let frontendRect = dockApplet.frontendWindowRect
+        let dpr = root.screen.devicePixelRatio
+        let dockGeometry = Qt.rect(
+            frontendRect.x / dpr,
+            frontendRect.y / dpr,
+            frontendRect.width / dpr,
+            frontendRect.height / dpr
+        )
+
+        let screenGeometry = Qt.rect(
+            root.screen.virtualX,
+            root.screen.virtualY,
+            root.screen.width,
+            root.screen.height
+        )
+
+        switch (position) {
+            case 0: { // DOCK_TOP
+                let visibleHeight = Math.max(0, dockGeometry.y + dockGeometry.height - screenGeometry.y)
+                return Math.min(visibleHeight, dockGeometry.height)
+            }
+            case 1: { // DOCK_RIGHT
+                let visibleWidth = Math.max(0, screenGeometry.x + screenGeometry.width - dockGeometry.x)
+                return Math.min(visibleWidth, dockGeometry.width)
+            }
+            case 2: { // DOCK_BOTTOM
+                return dockApplet.dockSize
+            }
+            return 0
+        }
     }
 
     // visible: true
