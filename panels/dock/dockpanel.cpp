@@ -183,12 +183,12 @@ QRect DockPanel::geometry()
 
 QRect DockPanel::frontendWindowRect()
 {
-    return frontendWindowRect(0, 0);
+    return m_frontendWindowRect;
 }
 
-QRect DockPanel::frontendWindowRect(int transformOffsetX, int transformOffsetY)
+void DockPanel::setFrontendWindowRect(int transformOffsetX, int transformOffsetY)
 {
-    if(!window()) return QRect();
+    if(!window()) return;
 
     auto ratio = window()->devicePixelRatio();
     auto screenGeometry = window()->screen()->geometry();
@@ -214,7 +214,7 @@ QRect DockPanel::frontendWindowRect(int transformOffsetX, int transformOffsetY)
             break;
     }
 
-    return QRect(screenGeometry.x() + xOffset * ratio, screenGeometry.y() + yOffset * ratio, geometry.width() * ratio, geometry.height() * ratio);
+    m_frontendWindowRect = QRect(screenGeometry.x() + xOffset * ratio, screenGeometry.y() + yOffset * ratio, geometry.width() * ratio, geometry.height() * ratio);
 }
 
 ColorTheme DockPanel::colorTheme()
@@ -293,7 +293,8 @@ void DockPanel::setIndicatorStyle(const IndicatorStyle& style)
 
 void DockPanel::onWindowGeometryChanged()
 {
-    Q_EMIT frontendWindowRectChanged(frontendWindowRect());
+    setFrontendWindowRect(0, 0);
+    Q_EMIT frontendWindowRectChanged(m_frontendWindowRect);
     Q_EMIT geometryChanged(geometry());
 }
 
@@ -353,7 +354,8 @@ void DockPanel::openDockSettings() const
 
 void DockPanel::notifyDockPositionChanged(int offsetX, int offsetY)
 {
-    Q_EMIT frontendWindowRectChanged(frontendWindowRect(offsetX, offsetY));
+    setFrontendWindowRect(offsetX, offsetY);
+    Q_EMIT frontendWindowRectChanged(m_frontendWindowRect);
 }
 
 void DockPanel::launcherVisibleChanged(bool visible)

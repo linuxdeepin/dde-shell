@@ -52,7 +52,7 @@ public:
 
     QRect geometry();
     QRect frontendWindowRect();
-    QRect frontendWindowRect(int transformOffsetX, int transformOffsetY);
+    void setFrontendWindowRect(int transformOffsetX, int transformOffsetY);
 
     HideState hideState();
 
@@ -143,6 +143,7 @@ private:
     bool m_launcherShown;
     bool m_contextDragging;
     bool m_isResizing;
+    QRect m_frontendWindowRect;
 };
 
 }
