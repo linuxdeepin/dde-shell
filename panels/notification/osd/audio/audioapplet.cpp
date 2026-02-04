@@ -75,7 +75,7 @@ QString AudioApplet::fetchIconName() const
 
     const double volume = m_volumeValue;
 
-    QString level = "0";
+    QString level = "mute";
     if (volume > 0 && volume <= 0.33)
         level = "33";
     else if (volume > 0.33 && volume <= 0.66)
