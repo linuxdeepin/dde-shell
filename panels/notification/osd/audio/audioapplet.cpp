@@ -84,6 +84,8 @@ QString AudioApplet::fetchIconName() const
         level = "100";
     else if (volume > 1)
         level = "more";
+    else
+        return "osd_volume_mute";
 
     return QString("osd_volume_%1").arg(level);
 }
