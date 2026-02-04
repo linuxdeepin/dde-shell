@@ -31,6 +31,7 @@ AppletItemButton {
 
     visible: !Drag.active && itemVisible
     hoverEnabled: inputEventsEnabled
+    enabled: !DDT.TraySortOrderModel.isCollapsing
 
     function updatePluginMargins()
     {
