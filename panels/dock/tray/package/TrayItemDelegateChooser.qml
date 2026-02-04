@@ -36,7 +36,7 @@ LQM.DelegateChooser {
             contentItem: ActionLegacyTrayPluginDelegate {
                 id: traySurfaceDelegate
                 objectName: "tray"
-                inputEventsEnabled: !disableInputEvents && (model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.collapsed)
+                inputEventsEnabled: !disableInputEvents && (model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.isCollapsing)
                 itemVisible: traySurfacePositioner.itemVisible
                 dragable: model.sectionType !== "fixed"
                 isActive: surfacePopup.isOpened
