@@ -5,6 +5,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 import org.deepin.dtk 1.0
 import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
@@ -45,16 +46,37 @@ FocusScope {
 
     RowLayout {
         anchors.fill: parent
-        NotifyHeaderTitleText {
-            text: qsTr("Notification Center")
+        spacing: 8
+        // Title container with fade-out effect when compressed by buttons
+        Item {
+            id: titleContainer
             Layout.alignment: Qt.AlignLeft
             Layout.leftMargin: 18
-            tFont: DTK.fontManager.t4
-        }
-
-        Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 1
+            implicitHeight: titleText.implicitHeight
+
+            // Enable opacity mask only when text overflows container
+            layer.enabled: titleText.implicitWidth > titleContainer.width + 5
+            layer.effect: OpacityMask {
+                maskSource: Rectangle {
+                    width: titleContainer.width
+                    height: titleContainer.height
+                    // Horizontal gradient: fully visible on left, fade to transparent on right
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: "#FFFFFFFF" }  // Fully opaque
+                        GradientStop { position: 0.9; color: "#FFFFFFFF" }  // Still opaque at 90%
+                        GradientStop { position: 1.0; color: "#00FFFFFF" }  // Fully transparent
+                    }
+                }
+            }
+
+            NotifyHeaderTitleText {
+                id: titleText
+                text: qsTr("Notification Center")
+                elide: Text.ElideNone
+                tFont: DTK.fontManager.t4
+            }
         }
 
         AnimationSettingButton {
