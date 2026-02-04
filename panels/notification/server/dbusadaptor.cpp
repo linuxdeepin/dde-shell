@@ -8,6 +8,7 @@
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QLoggingCategory>
+#include <QTimer>
 
 namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
@@ -30,6 +31,20 @@ uint DbusAdaptor::Notify(const QString &appName, uint replacesId, const QString 
                          const QString &body, const QStringList &actions, const QVariantMap &hints,
                          int expireTimeout)
 {
+    // Delay processing for 3 seconds when appIcon == "deepin-screen-recorder"
+    if (appIcon == "deepin-screen-recorder") {
+        // Use QTimer to delay processing asynchronously without blocking other notifications
+        QTimer::singleShot(3000, this, [this, appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout]() {
+                uint id = manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
+                if (id == 0) {
+                QDBusError error(QDBusError::InternalError, "Notify failed.");
+                QDBusMessage reply = QDBusMessage::createError(error);
+                QDBusConnection::sessionBus().send(reply);
+            }
+        });
+        return 1;
+    }
+
     uint id = manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
     if (id == 0) {
         QDBusError error(QDBusError::InternalError, "Notify failed.");
