@@ -470,6 +470,10 @@ Item {
 
     onWindowsChanged: {
         updateWindowIconGeometryTimer.start()
+        // Close tooltip when window appears
+        if (windows.length > 0 && toolTip.toolTipVisible) {
+            toolTip.close()
+        }
     }
 
     onIconGlobalPointChanged: {
