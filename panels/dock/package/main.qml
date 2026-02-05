@@ -265,9 +265,10 @@ Window {
         text: name
 
         onTriggered: {
-            if (Applet[prop] !== value) {
-                Applet[prop] = value
-            }
+            Applet[prop] = value
+            checked = Qt.binding(function() {
+                return Applet[prop] === value
+            })
         }
         checked: Applet[prop] === value
     }
