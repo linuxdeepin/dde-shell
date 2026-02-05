@@ -1,3 +1,30 @@
+dde-shell (2.0.29) unstable; urgency=medium
+
+  * feat: add hover background and adjust spacing for dock app items
+  * fix(notification): Button text is truncated when hovering over
+    "Clear all" in English environment with 20 font size
+  * fix: restore checkbox binding after menu item triggered
+  * fix: close tooltip when window appears in AppItem
+  * i18n: Translate org.deepin.ds.dock.taskmanager.ts in fr (#1404)
+  * fix: disable tray items during collapse animation
+  * fix: return mute icon for silent audio
+  * fix: improve notification center window positioning
+  * fix: emit IconNameRole change when WinIconRole changes
+  * fix: prevent dock screen switch if any popup is showing
+  * feat: add X11 WM_CLASS support for layer shell windows
+  * fix: Optimize the entrance animation logic for notification bubbles
+  * fix: set default window title for panel windows
+  * fix: fix tray plugin drag behavior based on plugin flags
+  * fix: fix dock hide timer behavior with context menu
+  * feat(notification): Adjust the activation logic for the notification
+    button
+  * fix: emit opacityChanged signal on DBus proxy initialization
+  * fix: correct notification ID handling and validation
+  * fix: fix crash caused by DockGroupModel destruction issue
+  * feat: add tray plugins changed signal
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 05 Feb 2026 19:23:23 +0800
+
 dde-shell (2.0.28) unstable; urgency=medium
 
   * fix: refactor dock position management and decouple from animation
