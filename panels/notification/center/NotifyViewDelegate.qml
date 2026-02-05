@@ -25,7 +25,10 @@ DelegateChooser {
             view.positionViewAtIndex(currentIndex + 1, ListView.Contain)
             Qt.callLater(function() {
                 let nextItem = view.itemAtIndex(currentIndex + 1)
-                if (nextItem && nextItem.enabled) nextItem.forceActiveFocus()
+                if (nextItem && nextItem.enabled) {
+                    // Focus on the item itself first, not directly to buttons
+                    nextItem.forceActiveFocus()
+                }
             })
         } else {
             view.gotoHeaderFirst()
@@ -39,7 +42,10 @@ DelegateChooser {
             view.positionViewAtIndex(currentIndex - 1, ListView.Contain)
             Qt.callLater(function() {
                 let prevItem = view.itemAtIndex(currentIndex - 1)
-                if (prevItem && prevItem.enabled) prevItem.forceActiveFocus()
+                if (prevItem && prevItem.enabled) {
+                    // Focus on the item itself first, not directly to buttons
+                    prevItem.forceActiveFocus()
+                }
             })
         } else {
             view.gotoHeaderLast()
@@ -56,27 +62,8 @@ DelegateChooser {
             activeFocusOnTab: false
             z: index
 
-            Keys.onTabPressed: function(event) {
-                groupNotify.focusFirstButton()
-                event.accepted = true
-            }
-            Keys.onBacktabPressed: function(event) {
-                root.navigateToPrevItem(index)
-                event.accepted = true
-            }
-
             onGotoNextItem: root.navigateToNextItem(index)
-            onGotoPrevItem: groupNotify.focusFirstButton()
-
-            Loader {
-                anchors.fill: parent
-                active: groupNotify.activeFocus && NotifyAccessor.debugging
-
-                sourceComponent: FocusBoxBorder {
-                    radius: groupNotify.radius
-                    color: groupNotify.palette.highlight
-                }
-            }
+            onGotoPrevItem: root.navigateToPrevItem(index)
 
             onCollapse: function () {
                 console.log("collapse group", model.appName)
@@ -108,23 +95,8 @@ DelegateChooser {
             activeFocusOnTab: false
             z: index
 
-            Keys.onTabPressed: function(event) {
-                if (normalNotify.focusFirstButton()) {
-                    event.accepted = true
-                    return
-                }
-                Qt.callLater(function() {
-                    if (normalNotify.focusFirstButton()) return
-                    root.navigateToNextItem(index)
-                })
-                event.accepted = true
-            }
-            Keys.onBacktabPressed: function(event) {
-                root.navigateToPrevItem(index)
-                event.accepted = true
-            }
             onGotoNextItem: root.navigateToNextItem(index)
-            onGotoPrevItem: normalNotify.forceActiveFocus()
+            onGotoPrevItem: root.navigateToPrevItem(index)
 
             appName: model.appName
             iconName: model.iconName
@@ -137,16 +109,6 @@ DelegateChooser {
             contentRowCount: model.contentRowCount
             defaultAction: model.defaultAction
             indexInGroup: model.indexInGroup
-
-            Loader {
-                anchors.fill: parent
-                active: normalNotify.activeFocus && NotifyAccessor.debugging
-
-                sourceComponent: FocusBoxBorder {
-                    radius: normalNotify.radius
-                    color: normalNotify.palette.highlight
-                }
-            }
 
             TapHandler {
                 acceptedButtons: Qt.RightButton
@@ -191,23 +153,8 @@ DelegateChooser {
             activeFocusOnTab: false
             z: index
 
-            Keys.onTabPressed: function(event) {
-                if (overlapNotify.focusFirstButton()) {
-                    event.accepted = true
-                    return
-                }
-                Qt.callLater(function() {
-                    if (overlapNotify.focusFirstButton()) return
-                    root.navigateToNextItem(index)
-                })
-                event.accepted = true
-            }
-            Keys.onBacktabPressed: function(event) {
-                root.navigateToPrevItem(index)
-                event.accepted = true
-            }
             onGotoNextItem: root.navigateToNextItem(index)
-            onGotoPrevItem: overlapNotify.forceActiveFocus()
+            onGotoPrevItem: root.navigateToPrevItem(index)
 
             count: model.overlapCount
             appName: model.appName
@@ -221,15 +168,23 @@ DelegateChooser {
             contentRowCount: model.contentRowCount
             enableDismissed: false
             notifyContent.clearButton: AnimationSettingButton {
+                id: clearBtn
                 icon.name: "clean-alone"
                 text: qsTr("Clean All")
                 activeFocusOnTab: false
                 focusBorderVisible: activeFocus
                 Keys.onTabPressed: function(event) {
+                    // Try to focus first action button
+                    if (overlapNotify.focusFirstButton()) {
+                        event.accepted = true
+                        return
+                    }
+                    // No enabled action buttons, go to next item
                     overlapNotify.gotoNextItem()
                     event.accepted = true
                 }
                 Keys.onBacktabPressed: function(event) {
+                    // Shift+Tab: go back to previous item (clear button is first in tab order)
                     overlapNotify.gotoPrevItem()
                     event.accepted = true
                 }
@@ -238,14 +193,9 @@ DelegateChooser {
                 }
             }
 
-            Loader {
-                anchors.fill: parent
-                active: overlapNotify.activeFocus && NotifyAccessor.debugging
-
-                sourceComponent: FocusBoxBorder {
-                    radius: overlapNotify.overlapItemRadius
-                    color: overlapNotify.palette.highlight
-                }
+            Component.onCompleted: {
+                // Pass clear button reference to OverlapNotify
+                overlapNotify.clearButton = clearBtn
             }
 
             TapHandler {

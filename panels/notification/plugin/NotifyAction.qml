@@ -13,26 +13,57 @@ Control {
     id: root
 
     property var actions: []
+    readonly property bool hasEnabledAction: {
+        if (actions.length === 0) return false
+        for (let i = 0; i < actions.length; i++) {
+            if (actions[i] && actions[i].enabled) return true
+        }
+        return false
+    }
     signal actionInvoked(var actionId)
     signal gotoNextButton()  // Signal to Tab to next button (X button or next notify)
     signal gotoPrevItem()    // Signal to Shift+Tab to previous notify item
 
     // Focus the first action button for Tab navigation
+    // Returns true if an enabled button was found and focused
     function focusFirstButton() {
-        if (actions.length > 0) {
+        if (actions.length > 0 && actions[0] && actions[0].enabled) {
             firstActionBtn.forceActiveFocus()
+            return true
         }
+        // If first action is disabled, try to find the first enabled action
+        for (let i = 1; i < actions.length; i++) {
+            if (actions[i] && actions[i].enabled) {
+                if (i === 1 && secondActionLoader.item) {
+                    secondActionLoader.item.forceActiveFocus()
+                    return true
+                } else if (i > 1 && moreActionsLoader.item) {
+                    moreActionsLoader.item.forceActiveFocus()
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     // Focus the last action button for Shift+Tab navigation
     function focusLastButton() {
-        if (actions.length === 2 && secondActionLoader.item) {
-            secondActionLoader.item.forceActiveFocus()
-        } else if (actions.length > 2 && moreActionsLoader.item) {
-            moreActionsLoader.item.forceActiveFocus()
-        } else if (actions.length > 0) {
-            firstActionBtn.forceActiveFocus()
+        // Find the last enabled action button
+        for (let i = actions.length - 1; i >= 0; i--) {
+            if (actions[i] && actions[i].enabled) {
+                if (i === 1 && secondActionLoader.item) {
+                    secondActionLoader.item.forceActiveFocus()
+                    return true
+                } else if (i > 1 && moreActionsLoader.item) {
+                    moreActionsLoader.item.forceActiveFocus()
+                    return true
+                } else if (i === 0) {
+                    firstActionBtn.forceActiveFocus()
+                    return true
+                }
+            }
         }
+        return false
     }
 
     contentItem: RowLayout {
@@ -52,12 +83,23 @@ Control {
                 event.accepted = true
             }
             Keys.onTabPressed: function(event) {
+                // Try to go to next action button or next notification item
                 if (actions.length === 1) {
+                    // Only one action button, go to next item
                     root.gotoNextButton()
-                } else if (actions.length === 2 && secondActionLoader.item) {
-                    secondActionLoader.item.forceActiveFocus()
-                } else if (actions.length > 2 && moreActionsLoader.item) {
-                    moreActionsLoader.item.forceActiveFocus()
+                } else if (actions.length === 2) {
+                    // Try to focus second action button
+                    if (secondActionLoader.item && secondActionLoader.item.enabled) {
+                        secondActionLoader.item.forceActiveFocus()
+                    } else {
+                        // Second button is disabled, go to next item
+                        root.gotoNextButton()
+                    }
+                } else if (actions.length > 2) {
+                    // Try to focus more actions combo
+                    if (moreActionsLoader.item) {
+                        moreActionsLoader.item.forceActiveFocus()
+                    }
                 }
                 event.accepted = true
             }
@@ -75,10 +117,17 @@ Control {
                 actionData: actions.length > 1 ? actions[1] : null
                 activeFocusOnTab: false
                 Keys.onBacktabPressed: function(event) {
-                    firstActionBtn.forceActiveFocus()
+                    // Go back to first action button
+                    if (firstActionBtn.enabled) {
+                        firstActionBtn.forceActiveFocus()
+                    } else {
+                        // First button is disabled, go to previous item
+                        root.gotoPrevItem()
+                    }
                     event.accepted = true
                 }
                 Keys.onTabPressed: function(event) {
+                    // Last action button, go to next item
                     root.gotoNextButton()
                     event.accepted = true
                 }
@@ -99,10 +148,17 @@ Control {
                 model: expandActions
                 activeFocusOnTab: false
                 Keys.onBacktabPressed: function(event) {
-                    firstActionBtn.forceActiveFocus()
+                    // Go back to first action button
+                    if (firstActionBtn.enabled) {
+                        firstActionBtn.forceActiveFocus()
+                    } else {
+                        // First button is disabled, go to previous item
+                        root.gotoPrevItem()
+                    }
                     event.accepted = true
                 }
                 Keys.onTabPressed: function(event) {
+                    // Last action button, go to next item
                     root.gotoNextButton()
                     event.accepted = true
                 }

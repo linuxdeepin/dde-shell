@@ -24,35 +24,43 @@ NotifyItem {
     signal gotoNextItem()  // Signal to navigate to next notify item
     signal gotoPrevItem()  // Signal to navigate to previous notify item
 
-    // Focus first interactive button (action buttons first, then X button)
+    // Focus first interactive button (close button first, then action buttons)
+    // Returns true if a button was successfully focused, false if no enabled button found
     function focusFirstButton() {
-        if (actionLoader.item && actionLoader.item.enabled) {
-            actionLoader.item.focusFirstButton()
-            return true
-        }
+        // Check close button first
         if (clearLoader.item && clearLoader.item.enabled) {
             clearLoader.item.forceActiveFocus()
             return true
         }
-        // Retry if clearLoader not yet created
-        function tryFocusClear(retries) {
-            if (clearLoader.item && clearLoader.item.enabled) {
-                clearLoader.item.forceActiveFocus()
-            } else if (retries > 0) {
-                Qt.callLater(function() { tryFocusClear(retries - 1) })
-            }
+        // Check action buttons (from left to right)
+        if (actionLoader.item && actionLoader.item.enabled && actionLoader.item.hasEnabledAction) {
+            let focused = actionLoader.item.focusFirstButton()
+            if (focused) return true
         }
-        Qt.callLater(function() { tryFocusClear(root.maxFocusRetries) })
-        return true
+        // No enabled button found - return false so caller can skip to next item
+        return false
     }
 
-    // Focus last interactive button (X button first, then action buttons)
+    // Focus action buttons only (skip close button)
+    // Used by OverlapNotify to avoid infinite loop
+    function focusFirstActionOnly() {
+        if (actionLoader.item && actionLoader.item.enabled && actionLoader.item.hasEnabledAction) {
+            let focused = actionLoader.item.focusFirstButton()
+            if (focused) return true
+        }
+        return false
+    }
+
+    // Focus last interactive button (action buttons first, then close button)
     function focusLastButton() {
+        // Check action buttons first (find last enabled action button)
+        if (actionLoader.item && actionLoader.item.enabled && actionLoader.item.hasEnabledAction) {
+            let focused = actionLoader.item.focusLastButton()
+            if (focused) return true
+        }
+        // Check close button
         if (clearLoader.item && clearLoader.item.enabled) {
             clearLoader.item.forceActiveFocus()
-            return true
-        } else if (actionLoader.item && actionLoader.item.enabled) {
-            actionLoader.item.focusLastButton()
             return true
         }
         return false
@@ -113,15 +121,20 @@ NotifyItem {
                     activeFocusOnTab: false
                     focusBorderVisible: activeFocus
                     Keys.onTabPressed: function(event) {
+                        // Try to focus first action button
+                        if (actionLoader.item && actionLoader.item.enabled && actionLoader.item.hasEnabledAction) {
+                            if (actionLoader.item.focusFirstButton()) {
+                                event.accepted = true
+                                return
+                            }
+                        }
+                        // No enabled action buttons, go to next item
                         root.gotoNextItem()
                         event.accepted = true
                     }
                     Keys.onBacktabPressed: function(event) {
-                        if (actionLoader.item) {
-                            actionLoader.item.focusLastButton()
-                        } else {
-                            root.gotoPrevItem()
-                        }
+                        // Shift+Tab: go back to previous item (close button is first in tab order)
+                        root.gotoPrevItem()
                         event.accepted = true
                     }
                     onClicked: function () {
@@ -318,12 +331,8 @@ NotifyItem {
                             root.actionInvoked(actionId)
                         }
                         onGotoNextButton: {
-                            // Navigate to clear button or next notification item
-                            if (clearLoader.item) {
-                                clearLoader.item.forceActiveFocus()
-                            } else {
-                                root.gotoNextItem()
-                            }
+                            // From action buttons, go directly to next notification item
+                            root.gotoNextItem()
                         }
                         onGotoPrevItem: root.gotoPrevItem()
                     }

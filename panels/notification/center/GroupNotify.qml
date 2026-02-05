@@ -24,9 +24,30 @@ NotifyItem {
         return true
     }
 
+    // Focus the last button for Shift+Tab navigation into group
+    function focusLastButton() {
+        groupClearBtn.forceActiveFocus()
+        return true
+    }
+
     Control {
         id: impl
         anchors.fill: parent
+        focus: true
+
+        Keys.onTabPressed: function(event) {
+            if (root.focusFirstButton()) {
+                event.accepted = true
+            } else {
+                root.gotoNextItem()
+                event.accepted = true
+            }
+        }
+
+        Keys.onBacktabPressed: function(event) {
+            root.gotoPrevItem()
+            event.accepted = true
+        }
 
         contentItem: RowLayout {
             NotifyHeaderTitleText {

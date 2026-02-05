@@ -13,6 +13,7 @@ NotifyItem {
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
+    property bool shouldShowClose: false  // True when item gets focus from keyboard navigation
 
     signal gotoNextItem()
     signal gotoPrevItem()
@@ -21,9 +22,31 @@ NotifyItem {
         return notifyContent.focusFirstButton()
     }
 
+    function focusLastButton() {
+        return notifyContent.focusLastButton()
+    }
+
     Control {
         id: impl
         anchors.fill: parent
+        focus: true
+
+        Keys.onTabPressed: function(event) {
+            // Mark that this item got focus from Tab navigation
+            root.shouldShowClose = true
+            if (notifyContent.focusFirstButton()) {
+                event.accepted = true
+            } else {
+                root.gotoNextItem()
+                event.accepted = true
+            }
+        }
+
+        Keys.onBacktabPressed: function(event) {
+            root.shouldShowClose = true
+            root.gotoPrevItem()
+            event.accepted = true
+        }
 
         contentItem: NotifyItemContent {
             id: notifyContent
@@ -35,7 +58,8 @@ NotifyItem {
             date: root.date
             actions: root.actions
             defaultAction: root.defaultAction
-            parentHovered: impl.hovered || root.activeFocus
+            // Show close button when: mouse hovers, or item has focus from keyboard navigation
+            parentHovered: impl.hovered || (root.activeFocus && root.shouldShowClose)
             strongInteractive: root.strongInteractive
             contentIcon: root.contentIcon
             contentRowCount: root.contentRowCount

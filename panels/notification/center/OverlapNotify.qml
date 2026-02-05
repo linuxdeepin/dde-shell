@@ -17,6 +17,7 @@ NotifyItem {
     property int count: 1
     readonly property int overlapItemRadius: 12
     property bool enableDismissed: true
+    property bool shouldShowClose: false  // True when item gets focus from keyboard navigation
     property var removedCallback
     property alias notifyContent: notifyContent
 
@@ -24,8 +25,29 @@ NotifyItem {
     signal gotoNextItem()
     signal gotoPrevItem()
 
+    property var clearButton: null  // Reference to the externally defined clear button
+
     function focusFirstButton() {
-        return notifyContent.focusFirstButton()
+        // Focus clear button first, then action buttons
+        if (clearButton && clearButton.enabled && clearButton.visible) {
+            clearButton.forceActiveFocus()
+            return true
+        }
+        // Try action buttons (skip clear button to avoid loop)
+        return notifyContent.focusFirstActionOnly()
+    }
+
+    function focusLastButton() {
+        // Focus last action button, then clear button
+        if (notifyContent.focusLastButton()) {
+            return true
+        }
+        // Try clear button
+        if (clearButton && clearButton.enabled && clearButton.visible) {
+            clearButton.forceActiveFocus()
+            return true
+        }
+        return false
     }
 
     states: [
@@ -52,6 +74,23 @@ NotifyItem {
     Control {
         id: impl
         anchors.fill: parent
+        focus: true
+
+        Keys.onTabPressed: function(event) {
+            root.shouldShowClose = true
+            if (notifyContent.focusFirstButton()) {
+                event.accepted = true
+            } else {
+                root.gotoNextItem()
+                event.accepted = true
+            }
+        }
+
+        Keys.onBacktabPressed: function(event) {
+            root.shouldShowClose = true
+            root.gotoPrevItem()
+            event.accepted = true
+        }
 
         contentItem: Item {
             width: parent.width
@@ -66,13 +105,13 @@ NotifyItem {
                 date: root.date
                 actions: root.actions
                 defaultAction: root.defaultAction
-                // Don't override closeVisible - use parentHovered to pass external hover/focus state
-                parentHovered: impl.hovered || root.activeFocus
+                // Show close button when: mouse hovers, or item has focus from keyboard navigation
+                parentHovered: impl.hovered || (root.activeFocus && root.shouldShowClose)
                 strongInteractive: root.strongInteractive
                 contentIcon: root.contentIcon
                 contentRowCount: root.contentRowCount
-                enableDismissed: root.enableDismissed
                 indexInGroup: root.indexInGroup
+                enableDismissed: root.enableDismissed
                 onRemove: function () {
                     root.remove()
                 }
