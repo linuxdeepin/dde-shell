@@ -16,6 +16,10 @@ ContainmentItem {
     property int dockOrder: 16
     property real remainingSpacesForTaskManager: Panel.itemAlignment === Dock.LeftAlignment ? Panel.rootObject.dockLeftSpaceForCenter : Panel.rootObject.dockRemainingSpaceForCenter
 
+    readonly property int appItemIconSize: Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14)
+    readonly property int appItemCellWidth: Math.round(Panel.rootObject.dockItemMaxSize * 0.8)
+    readonly property int appItemSpacing: Math.max(0, Math.max(10, Math.round(appItemIconSize / 3)) - Math.max(0, appItemCellWidth - appItemIconSize))
+    readonly property int appTitleSpacing: Math.max(10, appItemIconSize / 3)
     property real remainingSpacesForSplitWindow: Panel.rootObject.dockLeftSpaceForCenter - (
         (Panel.rootObject.dockCenterPartCount - 1) * (visualModel.cellWidth + appContainer.spacing) + (Panel.rootObject.dockCenterPartCount) * Panel.rootObject.dockPartSpacing)
     // 用于居中计算的实际应用区域尺寸
@@ -73,7 +77,7 @@ ContainmentItem {
         id: appContainer
         anchors.fill: parent
         useColumnLayout: taskmanager.useColumnLayout
-        spacing: Panel.rootObject.itemSpacing + visualModel.count % 2
+        spacing: taskmanager.appItemSpacing
         remove: Transition {
             NumberAnimation {
                 properties: "scale,opacity"
@@ -173,6 +177,7 @@ ContainmentItem {
                     blendOpacity: taskmanager.blendOpacity
                     title: delegateRoot.title
                     enableTitle: textCalculator.enabled
+                    appTitleSpacing: taskmanager.appTitleSpacing
                     ListView.delayRemove: Drag.active
                     Component.onCompleted: {
                         dropFilesOnItem.connect(taskmanager.Applet.dropFilesOnItem)

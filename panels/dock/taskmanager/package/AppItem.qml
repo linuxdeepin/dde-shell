@@ -42,7 +42,7 @@ Item {
     property int iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
     property bool enableTitle: false
     property bool titleActive: enableTitle && titleLoader.active
-
+    property int appTitleSpacing: 0
     property var iconGlobalPoint: {
         var a = icon
         var x = 0, y = 0
@@ -79,7 +79,7 @@ Item {
     Control {
         anchors.fill: parent
         id: appItem
-        implicitWidth: root.titleActive ? (iconContainer.width + 4 + titleLoader.width) : iconContainer.width
+        implicitWidth: root.titleActive ? (iconContainer.width + titleLoader.width + root.appTitleSpacing) : iconContainer.width
         visible: !root.Drag.active // When in dragging, hide app item
 
         Item {
@@ -273,6 +273,7 @@ Item {
         }
 
         HoverHandler {
+            id: hoverHandler
             onHoveredChanged: function () {
                 if (hovered) {
                     root.onEntered()
