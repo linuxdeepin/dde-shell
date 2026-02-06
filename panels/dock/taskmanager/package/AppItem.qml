@@ -79,15 +79,61 @@ Item {
     Control {
         anchors.fill: parent
         id: appItem
-        implicitWidth: root.titleActive ? (iconContainer.width + titleLoader.width + root.appTitleSpacing) : iconContainer.width
+        implicitWidth: root.titleActive ? (iconContainer.width + 4 + titleLoader.width + root.appTitleSpacing) : iconContainer.width + root.appTitleSpacing
         visible: !root.Drag.active // When in dragging, hide app item
+        background: AppletItemBackground {
+            id: hoverBackground
 
+            readonly property int verticalSpacing: Math.round(root.iconSize / 8) + 1
+            readonly property int horizontalSpacing: Math.round(root.iconSize / 8)
+            readonly property int nonSplitHeight: root.iconSize + verticalSpacing * 2
+            readonly property int hoverPadding: Math.round((Panel.rootObject.dockItemMaxSize * 0.8 - root.iconSize) / 2)
+            readonly property int splitWidth: Math.round(icon.width + titleLoader.width + hoverPadding * 2)
+            readonly property int nonSplitWidth: Math.round(root.iconSize + horizontalSpacing * 2)
+
+            enabled: false
+
+            width: root.titleActive ? splitWidth : nonSplitWidth
+            height: nonSplitHeight
+            radius: height / 5
+            anchors.centerIn: parent
+            isActive: root.active
+            opacity: (hoverHandler.hovered || (root.active && root.windows.length > 0)) ? 1.0 : 0.0
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
+        }
         Item {
             id: iconContainer
-            anchors.verticalCenter: root.useColumnLayout ? undefined : parent.verticalCenter
-            anchors.horizontalCenter: root.useColumnLayout ? parent.horizontalCenter : undefined
-            width: root.titleActive ? root.iconSize : Panel.rootObject.dockItemMaxSize * 0.8
+            width: root.iconSize 
             height: parent.height
+            anchors.verticalCenter: parent.verticalCenter
+            states: [
+                State {
+                    name: "titleActive"
+                    when: root.titleActive
+
+                    AnchorChanges {
+                        target: iconContainer
+                        anchors.left: parent.left
+                        anchors.horizontalCenter: undefined
+                    }
+                    PropertyChanges {
+                        target: iconContainer
+                        anchors.leftMargin: hoverBackground.horizontalSpacing
+                    }
+                },
+                State {
+                    name: "nonTitleActive"
+                    when: !root.titleActive
+
+                    AnchorChanges {
+                        target: iconContainer
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.left: undefined
+                    }
+                }
+            ]
             StatusIndicator {
                 id: statusIndicator
                 palette: itemPalette
@@ -171,26 +217,26 @@ Item {
                 switch(Panel.position) {
                 case Dock.Top: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.top = parent.top
-                    windowIndicator.anchors.topMargin = Qt.binding(() => {return Math.max((root.height - iconSize) / 2 - 8, (root.height - iconSize) / 2 / 3)})
+                    windowIndicator.anchors.top = hoverBackground.top
+                    windowIndicator.anchors.topMargin = 1
                     return
                 }
                 case Dock.Bottom: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.bottom = parent.bottom
-                    windowIndicator.anchors.bottomMargin = Qt.binding(() => {return Math.max((root.height - iconSize) / 2 - 8, (root.height - iconSize) / 2 / 3)})
+                    windowIndicator.anchors.bottom = hoverBackground.bottom
+                    windowIndicator.anchors.bottomMargin = 1
                     return
                 }
                 case Dock.Left: {
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
-                    windowIndicator.anchors.left = parent.left
-                    windowIndicator.anchors.leftMargin = Qt.binding(() => {return Math.max((root.width - iconSize) / 2 - 8, (root.width - iconSize) / 2 / 3)})
+                    windowIndicator.anchors.left = hoverBackground.left
+                    windowIndicator.anchors.leftMargin = 1
                     return
                 }
                 case Dock.Right:{
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
-                    windowIndicator.anchors.right = parent.right
-                    windowIndicator.anchors.rightMargin = Qt.binding(() => {return Math.max((root.width - iconSize) / 2 - 8, (root.width - iconSize) / 2 / 3)})
+                    windowIndicator.anchors.right = hoverBackground.right
+                    windowIndicator.anchors.rightMargin = 1
                     return
                 }
                 }
