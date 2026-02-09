@@ -127,6 +127,7 @@ Q_SIGNALS:
     void dockScreenChanged(QScreen *screen);
     void screenNameChanged();
     void requestClosePopup();
+    void leftEdgeClicked(const QString &minOrder);
     void devicePixelRatioChanged(qreal ratio);
     void lockedChanged(bool locked);
 
