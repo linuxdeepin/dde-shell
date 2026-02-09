@@ -95,15 +95,7 @@ AppletItem {
             }
             property D.Palette checkedBackgroundColor: D.Palette {
                 normal: Qt.rgba(1, 1, 1, 0.6)
-                normalDark: Qt.rgba(0, 0, 0, 0.6)
-            }
-            property D.Palette dropShadowColor: D.Palette {
-                normal: Qt.rgba(0, 0, 0, 0.1)
-                normalDark: Qt.rgba(0, 0, 0, 0.7)
-            }
-            property D.Palette innerShadowColor: D.Palette {
-                normal: Qt.rgba(1, 1, 1, 0.2)
-                normalDark: Qt.rgba(1, 1, 1, 0.03)
+                normalDark: Qt.rgba(0, 0, 0, 0.5)
             }
 
             contentItem: RowLayout {
@@ -175,26 +167,33 @@ AppletItem {
                     color: itemView.isCurrent ? itemView.D.ColorSelector.checkedBackgroundColor
                                                                   : itemView.D.ColorSelector.backgroundColor
                 }
-                D.BoxShadow {
-                    visible: !itemView.isCurrent
+                D.InsideBoxBorder {
+                    property D.Palette insideBorderColor: D.Palette {
+                        normal: Qt.rgba(1, 1, 1, 0.1)
+                        normalDark: Qt.rgba(1, 1, 1, 0.05)
+                    }
+                    property D.Palette checkedInsideBorderColor: D.Palette {
+                        normal: Qt.rgba(1, 1, 1, 0.15)
+                        normalDark: Qt.rgba(1, 1, 1, 0.08)
+                    }
+                    radius: backgroundRect.radius
                     anchors.fill: parent
-                    shadowOffsetX: 0
-                    shadowOffsetY: 1
-                    shadowColor: itemView.D.ColorSelector.dropShadowColor
-                    shadowBlur: 1
-                    cornerRadius: backgroundRect.radius
-                    spread: 0
-                    hollow: true
+                    color: itemView.isCurrent ? D.ColorSelector.checkedInsideBorderColor
+                                              : D.ColorSelector.insideBorderColor
                 }
-                D.BoxInsetShadow {
-                    visible: !itemView.isCurrent
+                D.OutsideBoxBorder {
+                    property D.Palette outsideBorderColor: D.Palette {
+                        normal: Qt.rgba(0, 0, 0, 0.05)
+                        normalDark: Qt.rgba(0, 0, 0, 0.4)
+                    }
+                    property D.Palette checkedOutsideBorderColor: D.Palette {
+                        normal: Qt.rgba(0, 0, 0, 0.1)
+                        normalDark: Qt.rgba(0, 0, 0, 0.45)
+                    }
+                    radius: backgroundRect.radius
                     anchors.fill: parent
-                    shadowOffsetX: 0
-                    shadowOffsetY: 1
-                    shadowBlur: 1
-                    spread: 0
-                    cornerRadius: backgroundRect.radius
-                    shadowColor: itemView.D.ColorSelector.innerShadowColor
+                    color: itemView.isCurrent ? D.ColorSelector.checkedOutsideBorderColor
+                                              : D.ColorSelector.outsideBorderColor
                 }
             }
         }
