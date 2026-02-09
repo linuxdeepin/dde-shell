@@ -15,4 +15,5 @@ QtObject {
         property int width: 360
     }
     property int scrollBarPadding: 2
+    property int leftMargin: 20
 }

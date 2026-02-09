@@ -50,6 +50,7 @@ FocusScope {
             anchors {
                 top: parent.top
                 left: parent.left
+                leftMargin: NotifyStyle.leftMargin
             }
             height: 40
             width: NotifyStyle.contentItem.width
@@ -77,7 +78,6 @@ FocusScope {
                 top: header.bottom
                 right: parent.right
                 rightMargin: NotifyStyle.scrollBarPadding
-                topMargin: 10
                 bottom: parent.bottom
             }
 
