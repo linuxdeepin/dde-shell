@@ -447,7 +447,25 @@ Window {
                 }
             }
         }
-
+        //此处为边距区域的点击实践特殊处理。
+        MouseArea {                                                                                                                                     
+            id: leftMarginArea                                                                                                                          
+            width: useColumnLayout ? parent.width : gridLayout.columnSpacing                                                                            
+            height: useColumnLayout ? gridLayout.rowSpacing : parent.height                                                                             
+            anchors.left: parent.left
+            anchors.top: parent.top
+            onClicked: {
+                let minOrder = Number.MAX_VALUE
+                
+                for (let i = 0; i < Applet.appletItems.rowCount(); i++) {
+                    let itemData = Applet.appletItems.data(Applet.appletItems.index(i, 0), Qt.UserRole + 1)
+                    if (itemData && itemData.dockOrder < minOrder) {
+                        minOrder = itemData.dockOrder
+                    }
+                }
+                Panel.leftEdgeClicked(minOrder)
+            }                                                                       
+        } 
         // TODO: remove GridLayout and use delegatechosser manager all items
         GridLayout {
             id: gridLayout
