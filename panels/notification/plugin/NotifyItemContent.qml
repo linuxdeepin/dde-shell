@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -232,6 +232,7 @@ NotifyItem {
                         text: root.appName
                         font: DTK.fontManager.t10
                         color: palette.windowText
+                        renderType: Text.QtRendering
                     }
 
                     Item {
@@ -248,6 +249,7 @@ NotifyItem {
                             text: root.date
                             font: DTK.fontManager.t10
                             color: palette.windowText
+                            renderType: Text.QtRendering
                         }
                     }
                 }
@@ -262,6 +264,7 @@ NotifyItem {
                         bold: true
                     }
                     color: palette.windowText
+                    renderType: Text.QtRendering
                     wrapMode: Text.NoWrap
                     elide: Text.ElideMiddle
                     Layout.fillWidth: true
@@ -278,7 +281,7 @@ NotifyItem {
                         // text 宽度若让Layout通过implicitWidth计算会导致ListView的add动画出现位置错误，故这里手动计算Text的宽度
                         Layout.preferredWidth: NotifyStyle.contentItem.width - appIcon.width
                             - appIcon.Layout.leftMargin - appIcon.Layout.rightMargin
-                            - contentLayout.Layout.rightMargin - contentLayout.Layout.leftMargin 
+                            - contentLayout.Layout.rightMargin - contentLayout.Layout.leftMargin
                             - (contentIconLoader.active ? (contentIconLoader.width + 1) : 0)
                             - bodyRow.spacing * bodyRow.children.length - 1
                         visible: text !== ""
@@ -286,6 +289,7 @@ NotifyItem {
                         maximumLineCount: root.contentRowCount
                         font: DTK.fontManager.t8
                         color: palette.windowText
+                        renderType: Text.QtRendering
                         wrapMode: Text.Wrap
                         elide: Text.ElideRight
                         linkColor: palette.highlight
