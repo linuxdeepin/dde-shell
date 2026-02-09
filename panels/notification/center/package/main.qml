@@ -63,7 +63,7 @@ Window {
     flags: Qt.Tool
 
     property int contentPadding: 20
-    width: NotifyStyle.contentItem.width + contentPadding * 2
+    width: NotifyStyle.contentItem.width + NotifyStyle.leftMargin +contentPadding * 2
     // height: 800
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorRight | DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom
