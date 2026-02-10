@@ -328,8 +328,7 @@ void TraySortOrderModel::registerToSection(const QString & surfaceId, const QStr
     }
 
     if (!section->contains(surfaceId)) {
-        // the icon should be show from right to left
-        section->append(surfaceId);
+        section->prepend(surfaceId);
     }
 }
 
