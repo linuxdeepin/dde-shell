@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,6 +17,7 @@ class TextCalculatorAttached : public QObject
     QML_ELEMENT
     Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
     Q_PROPERTY(QString elidedText READ elidedText NOTIFY elidedTextChanged)
+    Q_PROPERTY(qreal ellipsisWidth READ ellipsisWidth NOTIFY ellipsisWidthChanged)
     Q_PROPERTY(TextCalculator *calculator READ calculator NOTIFY calculatorChanged)
 
 public:
@@ -34,11 +35,17 @@ public:
 
     QString elidedText() const;
 
+    qreal ellipsisWidth() const
+    {
+        return m_ellipsisWidth;
+    }
+
     void ensureInitialize();
 
 Q_SIGNALS:
     void textChanged();
     void elidedTextChanged();
+    void ellipsisWidthChanged();
     void calculatorChanged();
 
 private Q_SLOTS:
@@ -47,6 +54,7 @@ private Q_SLOTS:
 private:
     QString m_text;
     QString m_elidedText;
+    qreal m_ellipsisWidth = 0.0;
     TextCalculator *m_calculator;
     bool m_initialized = false;
 };
