@@ -129,6 +129,8 @@ void NotifyModel::collapseApp(int row)
         m_appNotifies.insert(row, overlap);
         endInsertRows();
     }
+
+    emit layoutChanged();
 }
 
 void NotifyModel::close()
