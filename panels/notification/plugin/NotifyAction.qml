@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -141,12 +141,53 @@ Control {
             Layout.maximumWidth: 200
             Layout.alignment: Qt.AlignHCenter
             sourceComponent: ComboBox {
+                id: comboBox
+                flat: false
+                rightPadding: 8
+                leftPadding: 2
+                topPadding: 0
+                bottomPadding: 0
                 property var expandActions: actions.slice(1)
+                property real maxItemWidth: 0
                 textRole: "text"
                 implicitHeight: 30
-                implicitWidth: 160
                 model: expandActions
                 activeFocusOnTab: false
+                popup.width: maxItemWidth + comboBox.padding + 28                
+                TextMetrics {
+                    id: textMetrics
+                    font: comboBox.font
+                    text: comboBox.displayText
+                }
+                
+                TextMetrics {
+                    id: itemTextMetrics
+                    font: comboBox.font
+                }
+                
+                popup.onAboutToShow: {
+                    let maxWidth = 0
+                    for (let i = 0; i < comboBox.model.length; i++) {
+                        if (comboBox.model[i] && comboBox.model[i].text) {
+                            itemTextMetrics.text = comboBox.model[i].text
+                            if (itemTextMetrics.width > maxWidth) {
+                                maxWidth = itemTextMetrics.width
+                            }
+                        }
+                    }
+                    maxItemWidth = maxWidth
+                }
+                
+                implicitWidth: textMetrics.width + comboBox.padding + 30
+                background: NotifyItemBackground {
+                    leftInset: 2
+                    implicitHeight: 30
+                    implicitWidth: comboBox.width
+                    radius: 6
+                    outsideBorderColor: null
+                    insideBorderColor: null
+                    anchors.fill: parent
+                }
                 Keys.onBacktabPressed: function(event) {
                     // Go back to first action button
                     if (firstActionBtn.enabled) {
@@ -162,11 +203,25 @@ Control {
                     root.gotoNextButton()
                     event.accepted = true
                 }
-                delegate: NotifyActionButton {
+                delegate: MenuItem {
                     required property int index
-                    width: parent.width
-                    actionData: expandActions[index]
-                    activeFocusOnTab: false
+                    text: model[index] ? model[index].text : ""
+
+                    contentItem: Text {                        
+                        text: model[index] ? model[index].text : ""
+                        font: DTK.fontManager.t6
+                        color: parent.hovered ? parent.palette.highlightedText : parent.palette.text
+                    }
+                    onTriggered: {
+                        if (model[index]) {
+                            actionInvoked(model[index].id)
+                            comboBox.popup.close()
+                        }
+                    }
+                    background: Rectangle {
+                        radius: 6
+                        color: parent.hovered ? parent.palette.highlight : "transparent"
+                    }
                 }
             }
         }
