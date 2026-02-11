@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -31,7 +31,6 @@ AppletItemButton {
 
     visible: !Drag.active && itemVisible
     hoverEnabled: inputEventsEnabled
-    enabled: !DDT.TraySortOrderModel.isCollapsing
 
     function updatePluginMargins()
     {
