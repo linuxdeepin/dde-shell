@@ -16,6 +16,7 @@ Item {
     property bool inputEventsEnabled: true
     property bool hovered: hoverHandler.hovered
     property bool pressed: tapHandler.pressed
+    property int cursorShape: Qt.ArrowCursor
 
     implicitWidth: shellSurface ? shellSurface.width : 10
     implicitHeight: shellSurface ? shellSurface.height : 10
@@ -42,6 +43,7 @@ Item {
 
         HoverHandler {
             id: hoverHandler
+            cursorShape: root.cursorShape
         }
         TapHandler {
             id: tapHandler
@@ -110,6 +112,18 @@ Item {
                     return root.shellSurface
                 })
             })
+        }
+
+        function onCursorShapeRequested(cursorShape)
+        {
+            console.log("onCursorShapeRequested:", cursorShape)
+            // Qt::CursorShape range is 0-21, plus 24 (BitmapCursor) and 25 (CustomCursor).
+            // We set a default if the value is out of logical bounds.
+            if (cursorShape < 0 || cursorShape > 25) {
+                root.cursorShape = Qt.ArrowCursor
+            } else {
+                root.cursorShape = cursorShape
+            }
         }
     }
 }
