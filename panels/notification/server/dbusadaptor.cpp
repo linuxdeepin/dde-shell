@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -32,10 +32,7 @@ uint DbusAdaptor::Notify(const QString &appName, uint replacesId, const QString 
 {
     uint id = manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
     if (id == 0) {
-        QDBusError error(QDBusError::InternalError, "Notify failed.");
-        QDBusMessage reply = QDBusMessage::createError(error);
-
-        QDBusConnection::sessionBus().send(reply);
+        qWarning(notifyLog) << "Notify failed for app:" << appName;
     }
 
     return id;
@@ -76,10 +73,7 @@ uint DDENotificationDbusAdaptor::Notify(const QString &appName, uint replacesId,
 {
     uint id = manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
     if (id == 0) {
-        QDBusError error(QDBusError::InternalError, "Notify failed.");
-        QDBusMessage reply = QDBusMessage::createError(error);
-
-        QDBusConnection::sessionBus().send(reply);
+        qWarning(notifyLog) << "Notify failed for app:" << appName;
     }
 
     return id;
