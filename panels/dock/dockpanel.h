@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -9,6 +9,7 @@
 #include "constants.h"
 
 #include <QDBusContext>
+#include <QPointer>
 
 namespace dock {
 class DockHelper;
@@ -138,7 +139,7 @@ private:
     ColorTheme m_theme;
     HideState m_hideState;
     DockHelper* m_helper;
-    QScreen *m_dockScreen;
+    QPointer<QScreen> m_dockScreen;
     LoadTrayPlugins *m_loadTrayPlugins;
     bool m_compositorReady;
     bool m_launcherShown;
