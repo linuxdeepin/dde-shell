@@ -4,6 +4,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import Qt5Compat.GraphicalEffects
 
 import org.deepin.ds.dock.taskmanager 1.0
 import org.deepin.dtk 1.0 as D
@@ -30,7 +31,20 @@ Item {
             color: D.DTK.themeType === D.ApplicationHelper.DarkType ? "#FFFFFF" : "#000000"            
             font: root.TextCalculator.calculator.font
             verticalAlignment: Text.AlignVCenter
-
+                    
+            layer.enabled: root.TextCalculator.isTruncated
+            layer.effect: OpacityMask {
+                maskSource: Rectangle {
+                    id: maskRect
+                    width: root.TextCalculator.ellipsisWidth
+                    height: titleText.height
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 1; color: "#00FFFFFF" }
+                        GradientStop { position: 0.6; color: "#FFFFFFFF" }
+                    }
+                }
+            }
             opacity: visible ? 1.0 : 0.0
             
             Behavior on opacity {

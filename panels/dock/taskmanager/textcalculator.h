@@ -17,6 +17,8 @@ class TextCalculatorAttached : public QObject
     QML_ELEMENT
     Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
     Q_PROPERTY(QString elidedText READ elidedText NOTIFY elidedTextChanged)
+    Q_PROPERTY(qreal ellipsisWidth READ ellipsisWidth NOTIFY ellipsisWidthChanged)
+    Q_PROPERTY(bool isTruncated READ isTruncated NOTIFY isTruncatedChanged)
     Q_PROPERTY(TextCalculator *calculator READ calculator NOTIFY calculatorChanged)
 
 public:
@@ -34,11 +36,23 @@ public:
 
     QString elidedText() const;
 
+    qreal ellipsisWidth() const
+    {
+        return m_ellipsisWidth;
+    }
+
+    bool isTruncated() const
+    {
+        return m_isTruncated;
+    }
+
     void ensureInitialize();
 
 Q_SIGNALS:
     void textChanged();
     void elidedTextChanged();
+    void ellipsisWidthChanged();
+    void isTruncatedChanged();
     void calculatorChanged();
 
 private Q_SLOTS:
@@ -47,6 +61,8 @@ private Q_SLOTS:
 private:
     QString m_text;
     QString m_elidedText;
+    qreal m_ellipsisWidth = 0.0;
+    bool m_isTruncated = false;
     TextCalculator *m_calculator;
     bool m_initialized = false;
 };

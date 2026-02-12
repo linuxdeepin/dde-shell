@@ -258,8 +258,8 @@ void TextCalculator::calculateOptimalTextWidth()
     qreal newTotalWidth = 0.0;
     int charCount = 7; // Maximum character count limit
 
-    // Iterate from 7 characters to 1 character, finding the optimal solution
-    for (; charCount >= 1; --charCount) {
+    // Iterate from 7 characters to 2 characters, finding the optimal solution
+    for (; charCount >= 2; --charCount) {
         // 1. Calculate baseline width (based on character count)
         qreal baselineWidth = calculateBaselineWidth(charCount);
 
@@ -401,7 +401,11 @@ void TextCalculatorAttached::updateElidedText()
     if (!m_calculator) {
         qCDebug(textCalculatorLog) << "No calculator available for elided text update";
         m_elidedText.clear();
+        m_ellipsisWidth = 0.0;
+        m_isTruncated = false;
         emit elidedTextChanged();
+        emit ellipsisWidthChanged();
+        emit isTruncatedChanged();
         return;
     }
 
@@ -411,7 +415,17 @@ void TextCalculatorAttached::updateElidedText()
     QString newElidedText = fontMetrics.elidedText(m_text, Qt::ElideRight, maxWidth);
     if (!isValidElidedText(newElidedText)) {
         newElidedText = {};
+    } else {
+        m_isTruncated = (m_text != newElidedText);
+        emit isTruncatedChanged();
+        newElidedText.replace(QString::fromUtf8("…"), "");
     }
+    
+    if (m_isTruncated) {
+        m_ellipsisWidth = fontMetrics.horizontalAdvance(QString::fromUtf8("…"));
+        emit ellipsisWidthChanged();
+    }
+        
     if (m_elidedText != newElidedText) {
         m_elidedText = newElidedText;
         emit elidedTextChanged();
