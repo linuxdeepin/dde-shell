@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -229,7 +229,17 @@ DPluginLoader::DPluginLoader()
 
 DPluginLoader::~DPluginLoader()
 {
-    destroy();
+    // 防止在 Qt 全局资源清理后析构导致崩溃
+    // 当作为 Q_APPLICATION_STATIC 静态对象时，析构可能发生在 Qt 全局资源清理之后
+    // 此时子 Applet 的析构可能访问已清理的 Qt 全局资源（如 QThreadStorage）
+    if (qApp && !QCoreApplication::closingDown()) {
+        // 正常情况：在 aboutToQuit 中调用的 destroy()，Qt 资源有效
+        destroy();
+    } else {
+        // 异常情况：静态析构阶段，Qt 全局资源可能已清理
+        // 不调用 destroy()，避免触发子对象析构
+        // 内存泄漏无关紧要，程序即将退出，操作系统会回收所有资源
+    }
 }
 
 DPluginLoader *DPluginLoader::instance()
