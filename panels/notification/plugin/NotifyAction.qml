@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -141,12 +141,35 @@ Control {
             Layout.maximumWidth: 200
             Layout.alignment: Qt.AlignHCenter
             sourceComponent: ComboBox {
+                id: comboBox
+                padding: 0
+                rightPadding: 4
                 property var expandActions: actions.slice(1)
                 textRole: "text"
                 implicitHeight: 30
-                implicitWidth: 160
                 model: expandActions
                 activeFocusOnTab: false
+                
+                TextMetrics {
+                    id: textMetrics
+                    font: comboBox.font
+                    text: comboBox.displayText
+                }
+                
+                implicitWidth: Math.min(200, textMetrics.width + comboBox.padding + comboBox.rightPadding + 28)
+                
+                indicator: DciIcon {
+                    x: comboBox.width - width - comboBox.rightPadding
+                    y: comboBox.topPadding + (comboBox.availableHeight - height) / 2
+                    sourceSize.width: DS.Style.comboBox.iconSize
+                    sourceSize.height: DS.Style.comboBox.iconSize
+                    palette: DTK.makeIconPalette(comboBox.palette)
+                    name: "arrow_ordinary_down"
+                    mode: comboBox.D.ColorSelector.controlState
+                    theme: comboBox.D.ColorSelector.controlTheme
+                    fallbackToQIcon: false
+                }
+                
                 Keys.onBacktabPressed: function(event) {
                     // Go back to first action button
                     if (firstActionBtn.enabled) {
@@ -164,6 +187,7 @@ Control {
                 }
                 delegate: NotifyActionButton {
                     required property int index
+                    padding: 0
                     width: parent.width
                     actionData: expandActions[index]
                     activeFocusOnTab: false
