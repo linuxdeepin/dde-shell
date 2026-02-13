@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -386,10 +386,10 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
             m_monitor->previewWindow(enter.data(TaskManager::WinIdRole).toInt());
         }
 
-        // 获取图标，优先使用窗口图标，如果为空则使用应用图标
-        QVariant iconData = enter.data(TaskManager::WinIconRole);
+        // 获取图标，优先使用主题图标（会跟随主题变化），如果为空则使用窗口图标
+        QVariant iconData = enter.data(TaskManager::IconNameRole);
         if (iconData.toString().isEmpty()) {
-            iconData = enter.data(TaskManager::IconNameRole);
+            iconData = enter.data(TaskManager::WinIconRole);
         }
         updatePreviewIconFromString(iconData.toString());
         updatePreviewTitle(enter.data(TaskManager::WinTitleRole).toString());
@@ -458,10 +458,10 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
 
     if (sourceModel && sourceModel->rowCount() > 0) {
         const QModelIndex &firstIndex = sourceModel->index(0, 0);
-        // 获取图标，优先使用窗口图标，如果为空则使用应用图标
-        QVariant iconData = firstIndex.data(TaskManager::WinIconRole);
+        // 获取图标，优先使用主题图标（会跟随主题变化），如果为空则使用窗口图标
+        QVariant iconData = firstIndex.data(TaskManager::IconNameRole);
         if (iconData.toString().isEmpty()) {
-            iconData = firstIndex.data(TaskManager::IconNameRole);
+            iconData = firstIndex.data(TaskManager::WinIconRole);
         }
         updatePreviewIconFromString(iconData.toString());
         updatePreviewTitle(firstIndex.data(TaskManager::WinTitleRole).toString());
