@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -34,8 +34,9 @@ qint64 MemoryAccessor::replaceEntity(qint64 id, const NotifyEntity &entity)
         const auto index = (iter - m_entities.begin());
         Q_ASSERT(index >= 0);
         m_entities[index] = entity;
+        m_entities[index].setId(id);
     } else {
-        return -1;
+        return NotifyEntity::InvalidId;
     }
 
     return id;

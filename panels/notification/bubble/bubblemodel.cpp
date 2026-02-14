@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -83,7 +83,7 @@ void BubbleModel::clear()
     m_bubbles.clear();
     endResetModel();
     m_delayBubbles.clear();
-    m_delayRemovedBubble = -1;
+    m_delayRemovedBubble = NotifyEntity::InvalidId;
 
     updateLevel();
     m_updateTimeTipTimer->stop();
