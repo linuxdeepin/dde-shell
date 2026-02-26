@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -20,14 +20,51 @@ Window {
 
         let dockScreen = dockApplet.screenName
         let screen = root.screen.name
-        let dockHideState = dockApplet.hideState
-        let dockIsHide = dockHideState === 2
-        if (dockScreen !== screen || dockIsHide)
+        if (dockScreen !== screen)
             return 0
 
-        let dockSize = dockApplet.rootObject.dockSize
         let dockPosition = dockApplet.position
-        return dockPosition === position ? dockSize : 0
+        if (dockPosition !== position)
+            return 0
+
+        // Use frontendWindowRect to calculate the actual visible dock area,
+        // so the margin accurately tracks dock position during hide/show animations
+        let frontendRect = dockApplet.frontendWindowRect
+        let dpr = root.screen.devicePixelRatio
+        let dockGeometry = Qt.rect(
+            frontendRect.x / dpr,
+            frontendRect.y / dpr,
+            frontendRect.width / dpr,
+            frontendRect.height / dpr
+        )
+
+        let screenGeometry = Qt.rect(
+            root.screen.virtualX,
+            root.screen.virtualY,
+            root.screen.width,
+            root.screen.height
+        )
+
+        // Cap margin at dockSize to prevent incorrect values during position transitions
+        // (when frontendWindowRect may temporarily have wrong dimensions because
+        // position() changes immediately but window geometry hasn't updated yet)
+        let dockSize = dockApplet.dockSize
+
+        switch (position) {
+            case 0: { // DOCK_TOP
+                let visibleHeight = Math.max(0, dockGeometry.y + dockGeometry.height - screenGeometry.y)
+                return Math.min(visibleHeight, dockSize)
+            }
+            case 1: { // DOCK_RIGHT
+                let visibleWidth = Math.max(0, screenGeometry.x + screenGeometry.width - dockGeometry.x)
+                return Math.min(visibleWidth, dockSize)
+            }
+            case 2: { // DOCK_BOTTOM
+                let visibleHeight = Math.max(0, screenGeometry.y + screenGeometry.height - dockGeometry.y)
+                return Math.min(visibleHeight, dockSize)
+            }
+            return 0
+        }
     }
 
     visible: Applet.visible
