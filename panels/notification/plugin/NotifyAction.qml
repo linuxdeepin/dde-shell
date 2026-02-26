@@ -24,6 +24,15 @@ Control {
     signal gotoNextButton()  // Signal to Tab to next button (X button or next notify)
     signal gotoPrevItem()    // Signal to Shift+Tab to previous notify item
 
+    property Palette actionBackgroundColor: Palette {
+        normal {
+            common: Qt.rgba(0, 0, 0, 0.15)
+        }
+        normalDark {
+            common: Qt.rgba(0, 0, 0, 0.2)
+        }
+    }
+
     // Focus the first action button for Tab navigation
     // Returns true if an enabled button was found and focused
     function focusFirstButton() {
@@ -186,6 +195,8 @@ Control {
                     radius: 6
                     outsideBorderColor: null
                     insideBorderColor: null
+                    dropShadowColor: null
+                    backgroundColor: root.actionBackgroundColor
                     anchors.fill: parent
                 }
                 Keys.onBacktabPressed: function(event) {
@@ -262,6 +273,8 @@ Control {
             radius: 6
             outsideBorderColor: null
             insideBorderColor: null
+            dropShadowColor: null
+            backgroundColor: root.actionBackgroundColor
             anchors.fill: parent
         }
     }
