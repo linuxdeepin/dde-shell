@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -12,6 +12,27 @@ import org.deepin.ds.notificationcenter
 
 Window {
     id: root
+    
+    // 获取dock所在的屏幕
+    function getDockScreen() {
+        let dockApplet = DS.applet("org.deepin.ds.dock")
+        if (!dockApplet) {
+            return Qt.application.screens[0]
+        }
+        
+        let dockScreenName = dockApplet.screenName
+        
+        // 遍历所有屏幕，找到与dock屏幕名称匹配的屏幕
+        for (let i = 0; i < Qt.application.screens.length; i++) {
+            if (Qt.application.screens[i].name === dockScreenName) {
+                return Qt.application.screens[i]
+            }
+        }
+        
+        // 如果没有找到匹配的屏幕，返回默认屏幕
+        return Qt.application.screens[0]
+    }
+    
     function windowMargin(position) {
         let dockApplet = DS.applet("org.deepin.ds.dock")
         if (!dockApplet)
@@ -82,10 +103,12 @@ Window {
     // DWindow.enabled: false
     color: "transparent"
     // DWindow.enableBlurWindow: true
-    screen: Qt.application.screens[0]
+    // 修复：通知中心屏幕跟随任务栏屏幕，而不是硬编码为第一个屏幕
+    screen: getDockScreen()
     // TODO `Qt.application.screens[0]` maybe invalid, why screen is changed.
     onScreenChanged: {
-        root.screen = Qt.binding(function () { return Qt.application.screens[0]})
+        // 修复：屏幕变化时重新获取dock所在的屏幕
+        root.screen = Qt.binding(function () { return getDockScreen() })
     }
 
     onVisibleChanged: function (v) {
@@ -105,6 +128,10 @@ Window {
         target: DS.applet("org.deepin.ds.dock")
         function onRequestClosePopup() {
             Panel.close()
+        }
+        // 修复：监听dock屏幕变化，同步更新通知中心屏幕
+        function onScreenNameChanged() {
+            root.screen = getDockScreen()
         }
     }
 
