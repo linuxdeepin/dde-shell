@@ -1,3 +1,28 @@
+dde-shell (2.0.30) unstable; urgency=medium
+
+  * fix(bubble): use frontendWindowRect for dock margin to avoid overlap
+    during animations
+  * feat: show popup menu on NotifyHeader more button click
+  * fix: make notification center follow dock screen
+  * fix(notification): improve action button background styling
+  * fix(notification): improve combobox width calculation and styling
+  * fix: fix wild pointer issue when screen switching
+  * fix: prevent crash during static destruction of DPluginLoader
+  * fix(notification): avoid delayed-remove id collision
+  * fix: remove invalid DBus error message sending
+  * fix: disable tray item interactions during collapse
+  * fix(notification): emit layoutChanged after collapse to refresh
+    ListView
+  * Revert "fix: correct icon display order from right to left"
+  * style: replace shadows with borders in OSD notifications
+  * fix(notification): improve text rendering at high DPI scaling
+  * fix: Fix the issue of the close button and shadow being cut off
+  * feat: add left edge click signal for dock panel
+  * feat: add hover background and adjust window indicator position
+  * feat(notification): improve keyboard navigation and focus management
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 27 Feb 2026 17:02:07 +0800
+
 dde-shell (2.0.29) unstable; urgency=medium
 
   * feat: add hover background and adjust spacing for dock app items
