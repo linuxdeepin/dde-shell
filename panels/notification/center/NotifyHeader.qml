@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -123,8 +123,21 @@ FocusScope {
                 event.accepted = true
             }
             onClicked: function () {
-                console.log("Notify setting")
-                NotifyAccessor.openNotificationSetting()
+                console.log("Notify setting menu")
+                headerSettingMenu.x = moreBtn.width / 2 - headerSettingMenu.width / 2
+                headerSettingMenu.y = moreBtn.height
+                headerSettingMenu.toggle()
+            }
+
+            NotifySettingMenu {
+                id: headerSettingMenu
+                MenuItem {
+                    text: qsTr("Notification Setting")
+                    onClicked: {
+                        console.log("Notification setting")
+                        NotifyAccessor.openNotificationSetting()
+                    }
+                }
             }
         }
 
