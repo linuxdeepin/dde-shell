@@ -255,12 +255,14 @@ protected:
     virtual void plugin_popup_destroy_resource(Resource *resource) override;
     virtual void plugin_popup_destroy(Resource *resource) override;
     virtual void plugin_popup_source_size(Resource *resource, int32_t width, int32_t height) override;
+    virtual void plugin_popup_set_cursor(Resource *resource, int32_t cursor_shape) override;
 
 Q_SIGNALS:
     void xChanged();
     void yChanged();
     void heightChanged();
     void widthChanged();
+    void cursorShapeRequested(int cursorShape);
 
 private:
     PluginManager* m_manager;

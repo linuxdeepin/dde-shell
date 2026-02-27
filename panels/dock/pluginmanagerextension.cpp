@@ -400,6 +400,12 @@ void PluginPopup::plugin_popup_source_size(Resource *resource, int32_t width, in
     }
 }
 
+void PluginPopup::plugin_popup_set_cursor(Resource *resource, int32_t cursor_shape)
+{
+    Q_UNUSED(resource);
+    Q_EMIT cursorShapeRequested(cursor_shape);
+}
+
 PluginManager::PluginManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
 {

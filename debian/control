@@ -6,7 +6,7 @@ Build-Depends:
  debhelper-compat (= 13),
  cmake,
  dde-application-manager-api (>= 1.2.23),
- dde-tray-loader-dev (>= 1.99.14),
+ dde-tray-loader-dev (> 2.0.24),
  extra-cmake-modules,
  libdtk6core-bin,
  libdtk6core-dev,
