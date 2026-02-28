@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -12,11 +12,6 @@
 namespace dock
 {
 Q_LOGGING_CATEGORY(textCalculatorLog, "ds.taskmanager.textcalculator");
-
-static bool isValidElidedText(const QString &text)
-{
-    return !text.isEmpty() && text != "…";
-}
 
 TextCalculator::TextCalculator(QObject *parent)
     : QObject(parent)
@@ -196,11 +191,19 @@ qreal TextCalculator::calculateElidedTextWidth(const QString &text, qreal maxWid
     }
 
     QFontMetricsF fontMetrics(m_font);
-    QString elidedText = fontMetrics.elidedText(text, Qt::ElideRight, maxWidth);
-    if (!isValidElidedText(elidedText))
-        return 0.0;
+    QString visibleText = text;
 
-    return fontMetrics.horizontalAdvance(elidedText);
+    while (!visibleText.isEmpty() &&
+        fontMetrics.horizontalAdvance(visibleText) > maxWidth)
+    {
+        visibleText.chop(1);
+    }
+
+    if (visibleText.isEmpty()) {
+        return 0.0;
+    }
+
+    return fontMetrics.horizontalAdvance(visibleText);
 }
 
 QStringList TextCalculator::getApplicationTitles() const
@@ -258,8 +261,8 @@ void TextCalculator::calculateOptimalTextWidth()
     qreal newTotalWidth = 0.0;
     int charCount = 7; // Maximum character count limit
 
-    // Iterate from 7 characters to 1 character, finding the optimal solution
-    for (; charCount >= 1; --charCount) {
+    // Iterate from 7 characters to 2 characters, finding the optimal solution
+    for (; charCount >= 2; --charCount) {
         // 1. Calculate baseline width (based on character count)
         qreal baselineWidth = calculateBaselineWidth(charCount);
 
@@ -401,19 +404,36 @@ void TextCalculatorAttached::updateElidedText()
     if (!m_calculator) {
         qCDebug(textCalculatorLog) << "No calculator available for elided text update";
         m_elidedText.clear();
+        m_ellipsisWidth = 0.0;
         emit elidedTextChanged();
+        emit ellipsisWidthChanged();
         return;
     }
 
     QFontMetricsF fontMetrics(m_calculator->font());
     qreal maxWidth = m_calculator->optimalSingleTextWidth();
+    QString visibleText = m_text;
 
-    QString newElidedText = fontMetrics.elidedText(m_text, Qt::ElideRight, maxWidth);
-    if (!isValidElidedText(newElidedText)) {
-        newElidedText = {};
+    while (!visibleText.isEmpty() &&
+        fontMetrics.horizontalAdvance(visibleText) > maxWidth)
+    {
+        visibleText.chop(1);
     }
-    if (m_elidedText != newElidedText) {
-        m_elidedText = newElidedText;
+
+    if (visibleText.isEmpty()) {
+        visibleText = {};
+    }
+    
+    if (visibleText != m_text) {
+        m_ellipsisWidth = fontMetrics.horizontalAdvance(QString::fromUtf8("…"));
+        emit ellipsisWidthChanged();
+    } else {
+        m_ellipsisWidth = 0.0;
+        emit ellipsisWidthChanged();
+    }
+
+    if (m_elidedText != visibleText) {
+        m_elidedText = visibleText;
         emit elidedTextChanged();
     }
 }
