@@ -5,6 +5,7 @@
 #include "notifyitem.h"
 
 #include <QDateTime>
+#include <QLocale>
 #include <QLoggingCategory>
 
 #include <unicode/reldatefmt.h> // For RelativeDateTimeFormatter
@@ -135,7 +136,7 @@ void AppNotifyItem::updateTime()
         formatter->combineDateAndTime(result, timeString, combinedString, status);
         ret = toQString(combinedString);
     } else if (elapsedDay >= 2 && elapsedDay < 7) {
-        ret = time.toString("ddd hh:mm");
+        ret = QLocale::system().toString(time, "ddd hh:mm");
     } else {
         ret = time.toString(QLocale::system().dateFormat(QLocale::ShortFormat));
     }
