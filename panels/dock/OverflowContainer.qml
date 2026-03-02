@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -16,6 +16,9 @@ Item {
     property alias remove: listView.remove
     property alias move: listView.move
     property alias displaced: listView.displaced
+    property alias addDisplaced: listView.addDisplaced
+    property alias removeDisplaced: listView.removeDisplaced
+    property alias moveDisplaced: listView.moveDisplaced
     ListView {
         id: listView
         anchors.fill: parent
