@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -124,6 +124,9 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
         this,
         [this](const QModelIndex &parent, int first, int last) {
             Q_UNUSED(parent)
+
+            QList<int> pendingDataChangedRows;
+
             for (int i = first; i <= last; ++i) {
                 auto it = std::find_if(m_data.begin(), m_data.end(), [this, i](auto data) {
                     return std::get<1>(data) == m_activeAppModel && std::get<2>(data) == i;
@@ -142,7 +145,6 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                 });
 
                 if (oit == m_data.constEnd() && m_dockedElements.contains(std::make_tuple("desktop", id))) {
-                    auto pIndex = this->index(pos, 0);
                     auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
                     if (res.isEmpty()) {
                         beginRemoveRows(QModelIndex(), pos, pos);
@@ -151,9 +153,8 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                     } else {
                         auto row = res.first().row();
                         *it = std::make_tuple(id, m_appsModel, row);
-                        Q_EMIT dataChanged(pIndex,
-                                           pIndex,
-                                           {TaskManager::ActiveRole, TaskManager::AttentionRole, TaskManager::WindowsRole, TaskManager::MenusRole, TaskManager::WinTitleRole});
+                        // DEFER emitter until internal model shift is done!
+                        pendingDataChangedRows.append(pos);
                     }
                 } else {
                     beginRemoveRows(QModelIndex(), pos, pos);
@@ -161,11 +162,21 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                     endRemoveRows();
                 }
             }
+
+            // Adjust remaining row mappings for the active app model BEFORE any outer access
             std::for_each(m_data.begin(), m_data.end(), [this, first, last](auto &data) {
                 if (std::get<1>(data) == m_activeAppModel && std::get<2>(data) >= first) {
                     data = std::make_tuple(std::get<0>(data), std::get<1>(data), std::get<2>(data) - ((last - first) + 1));
                 }
             });
+
+            // Now it is safe to emit dataChanged for rows that were swapped to docked elements
+            for (int pos : pendingDataChangedRows) {
+                auto pIndex = this->index(pos, 0);
+                Q_EMIT dataChanged(pIndex,
+                                   pIndex,
+                                   {TaskManager::ActiveRole, TaskManager::AttentionRole, TaskManager::WindowsRole, TaskManager::MenusRole, TaskManager::WinTitleRole});
+            }
         },
         Qt::QueuedConnection);
 
