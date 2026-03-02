@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "x11utils.h"
 
 #include <cstddef>
+#include <csignal>
 #include <unistd.h>
 #include <xcb/xcb.h>
 #include <xcb/res.h>
@@ -386,7 +387,17 @@ void X11Utils::closeWindow(const xcb_window_t &window)
 
 void X11Utils::killClient(const xcb_window_t &winid)
 {
-    xcb_kill_client_checked(getXcbConnection(), winid);
+    if (winid == XCB_WINDOW_NONE)
+        return;
+
+    pid_t pid = getWindowPid(winid);
+    if (pid <= 0) {
+        qCWarning(x11UtilsLog()) << "Cannot get pid for window:" << winid;
+        return;
+    }
+
+    // 直接强杀进程
+    ::kill(pid, SIGKILL);
 }
 
 void X11Utils::setActiveWindow(const xcb_window_t &window)
