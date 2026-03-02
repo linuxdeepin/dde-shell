@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -165,6 +165,34 @@ bool DBAccessor::open(const QString &dataPath)
     if (!m_connection.open()) {
         qWarning(notifyLog) << "Open database error" << m_connection.lastError().text();
         return false;
+    }
+
+    // === Performance Optimization: WAL Mode and Sync Level ===
+    QSqlQuery query(m_connection);
+
+    // WAL mode: Reads don't block writes, writes don't block reads
+    if (!query.exec("PRAGMA journal_mode=WAL")) {
+        qWarning(notifyLog) << "Failed to set WAL mode:" << query.lastError().text();
+    }
+
+    // Lower sync level: NORMAL balances performance and safety
+    if (!query.exec("PRAGMA synchronous=NORMAL")) {
+        qWarning(notifyLog) << "Failed to set synchronous:" << query.lastError().text();
+    }
+
+    // Increase cache size: 10MB for better performance
+    if (!query.exec("PRAGMA cache_size=-10000")) {
+        qWarning(notifyLog) << "Failed to set cache_size:" << query.lastError().text();
+    }
+
+    // Optimize query plan cache
+    if (!query.exec("PRAGMA optimize")) {
+        qWarning(notifyLog) << "Failed to optimize:" << query.lastError().text();
+    }
+
+    // Enable read_uncommitted for better concurrency with WAL
+    if (!query.exec("PRAGMA read_uncommitted=0")) {
+        qWarning(notifyLog) << "Failed to set read_uncommitted:" << query.lastError().text();
     }
 
     return true;
