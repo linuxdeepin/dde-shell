@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -68,6 +68,14 @@ ContainmentItem {
         remainingSpace: taskmanager.remainingSpacesForSplitWindow
         font.family: D.DTK.fontManager.t6.family
         font.pixelSize: Math.max(10, Math.min(20, Math.round(textCalculator.iconSize * 0.35)))
+        onOptimalSingleTextWidthChanged: {                                                                                                                                                               
+            appContainer.addDisplaced = null                                                                                                                                                                
+            appContainer.removeDisplaced = null                                                                                                                                                                     
+            Qt.callLater(function() {                                                                                                                                                                  
+                appContainer.addDisplaced = addDisplacedTransition                                                                                                                                 
+                appContainer.removeDisplaced = removeDisplacedTransition                                                                                                                                             
+            })                                                                                                                                                           
+        }   
     }
 
     OverflowContainer {
@@ -83,7 +91,7 @@ ContainmentItem {
                 duration: 200
             }
         }
-        displaced: Transition {
+        moveDisplaced: Transition {
             NumberAnimation {
                 properties: "x,y"
                 easing.type: Easing.OutQuad
@@ -99,7 +107,45 @@ ContainmentItem {
                 duration: 200
             }
         }
-        move: displaced
+        addDisplaced: Transition {
+            id: addDisplacedTransition
+            NumberAnimation {
+                properties: "x,y"
+                easing.type: Easing.OutQuad
+            }
+            NumberAnimation {
+                properties: "scale"
+                from: 0
+                to: 1
+                duration: 200
+            }
+            NumberAnimation {
+                properties: "opacity"
+                from: 0
+                to: 1
+                duration: 200
+            }
+        }
+        removeDisplaced: Transition {
+            id: removeDisplacedTransition
+            NumberAnimation {
+                properties: "x,y"
+                easing.type: Easing.OutQuad
+            }
+            NumberAnimation {
+                properties: "scale"
+                from: 0
+                to: 1
+                duration: 200
+            }
+            NumberAnimation {
+                properties: "opacity"
+                from: 0
+                to: 1
+                duration: 200
+            }
+        }
+        move: moveDisplaced
         model: DelegateModel {
             id: visualModel
             model: taskmanager.Applet.dataModel
