@@ -329,6 +329,7 @@ NotifyItem {
                     active: root.actions.length > 0
                     visible: active
                     Layout.alignment: Qt.AlignRight | Qt.AlignBottom
+                    Layout.topMargin: 8
                     sourceComponent: NotifyAction {
                         actions: root.actions
                         onActionInvoked: function (actionId) {
