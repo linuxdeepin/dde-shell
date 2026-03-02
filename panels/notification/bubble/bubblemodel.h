@@ -18,6 +18,7 @@ class BubbleModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(qint64 delayRemovedBubble READ delayRemovedBubble WRITE setDelayRemovedBubble NOTIFY delayRemovedBubbleChanged FINAL)
+    Q_PROPERTY(int removeAnimationDuration READ removeAnimationDuration WRITE setRemoveAnimationDuration NOTIFY removeAnimationDurationChanged FINAL)
 public:
     enum {
         AppName = Qt::UserRole + 1,
@@ -64,10 +65,15 @@ public:
     qint64 delayRemovedBubble() const;
     void setDelayRemovedBubble(qint64 newDelayRemovedBubble);
 
+    int removeAnimationDuration() const;
+    void setRemoveAnimationDuration(int duration);
+
     void clearInvalidBubbles();
 
 signals:
     void delayRemovedBubbleChanged();
+    void bubbleAboutToRemove(qint64 id);
+    void removeAnimationDurationChanged();
 
 private:
     void updateBubbleCount(int count);
@@ -85,6 +91,7 @@ private:
     QList<qint64> m_delayBubbles;
     qint64 m_delayRemovedBubble{NotifyEntity::InvalidId};
     const int DelayRemovBubbleTime{1000};
+    int m_removeAnimationDuration{700};
 };
 
 }

@@ -137,12 +137,33 @@ BubbleItem *BubbleModel::removeById(qint64 id)
     for (const auto &item : m_bubbles) {
         if (item->id() == id) {
             m_delayBubbles.removeAll(id);
-            remove(m_bubbles.indexOf(item));
+            // Emit signal before removing to trigger QML animation
+            Q_EMIT bubbleAboutToRemove(id);
+            // Delay the actual removal to allow animation to complete
+            QTimer::singleShot(m_removeAnimationDuration, this, [this, id]() {
+                for (const auto &item : m_bubbles) {
+                    if (item->id() == id) {
+                        remove(m_bubbles.indexOf(item));
+                        break;
+                    }
+                }
+            });
             return item;
         }
     }
 
     return nullptr;
+}
+
+int BubbleModel::removeAnimationDuration() const
+{
+    return m_removeAnimationDuration;
+}
+
+void BubbleModel::setRemoveAnimationDuration(int duration)
+{
+    m_removeAnimationDuration = duration + 100;
+    Q_EMIT removeAnimationDurationChanged();
 }
 
 BubbleItem *BubbleModel::bubbleItem(int bubbleIndex) const

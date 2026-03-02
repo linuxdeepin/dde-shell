@@ -12,6 +12,17 @@ Control {
     id: control
     height: loader.height
     property var bubble
+    property bool isRemoving: false
+    
+    Connections {
+        target: Applet.bubbles
+        function onBubbleAboutToRemove(id) {
+            if (id === bubble.id) {
+                control.isRemoving = true
+            }
+        }
+    }
+    
     onHoveredChanged: function () {
         if (control.hovered) {
             Applet.bubbles.delayRemovedBubble = bubble.id
@@ -19,6 +30,29 @@ Control {
             Applet.bubbles.delayRemovedBubble = NotifyEntity.InvalidId
         }
     }
+    
+    states: [
+        State {
+            name: "removing"
+            when: control.isRemoving
+            PropertyChanges {
+                target: control
+                x: control.width
+                opacity: 0
+            }
+        }
+    ]
+    
+    transitions: [
+        Transition {
+            to: "removing"
+            NumberAnimation {
+                properties: "x,opacity"
+                duration: Applet.bubbles.removeAnimationDuration
+                easing.type: Easing.InExpo
+            }
+        }
+    ]
 
     Loader {
         id: loader
