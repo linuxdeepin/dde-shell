@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -83,6 +83,10 @@ void X11WindowMonitor::stop()
 
 void X11WindowMonitor::clear()
 {
+    for (auto timer : m_wineWindows) {
+        delete timer;
+    }
+    m_wineWindows.clear();
     m_windows.clear();
     m_windowPreview.reset(nullptr);
 }
@@ -171,6 +175,10 @@ void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)
     window = QSharedPointer<X11Window>{new X11Window(xcb_window, this)};
     m_windows.insert(xcb_window, window);
 
+    if (X11->isWineWindow(xcb_window)) {
+        m_wineWindows.insert(xcb_window, nullptr);
+    }
+
     if (window->pid() == qApp->applicationPid()) return;
 
     uint32_t value_list[] = { XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_VISIBILITY_CHANGE};
@@ -186,6 +194,7 @@ void X11WindowMonitor::onWindowDestroyed(xcb_window_t xcb_window)
         destroyWindow(window.get());
         m_windows.remove(xcb_window);
     }
+    delete m_wineWindows.take(xcb_window);
 }
 
 void X11WindowMonitor::onWindowPropertyChanged(xcb_window_t window, xcb_atom_t atom)
@@ -231,14 +240,33 @@ void X11WindowMonitor::handleRootWindowClientListChanged()
     auto currentOpenedWindowList = X11->getWindowClientList(m_rootWindow);
 
     for (auto openedWindows : currentOpenedWindowList) {
-        if (!m_windows.contains(openedWindows)) {
+        // Wine window reappeared before debounce timeout — cancel pending destroy
+        if (auto timer = m_wineWindows.value(openedWindows, nullptr)) {
+            timer->stop();
+            timer->deleteLater();
+            m_wineWindows[openedWindows] = nullptr;
+        } else if (!m_windows.contains(openedWindows)) {
             onWindowMapped(openedWindows);
         }
     }
 
     for (auto alreadyOpenedWindow : m_windows.keys()) {
         if (!currentOpenedWindowList.contains(alreadyOpenedWindow)) {
-            Q_EMIT windowDestroyed(alreadyOpenedWindow);
+            auto it = m_wineWindows.find(alreadyOpenedWindow);
+            if (it != m_wineWindows.end()) {
+                if (*it) continue; // already has pending timer
+                auto timer = new QTimer(this);
+                timer->setSingleShot(true);
+                timer->setInterval(100);
+                *it = timer;
+                connect(timer, &QTimer::timeout, this, [this, alreadyOpenedWindow]() {
+                    m_wineWindows[alreadyOpenedWindow] = nullptr;
+                    Q_EMIT windowDestroyed(alreadyOpenedWindow);
+                });
+                timer->start();
+            } else {
+                Q_EMIT windowDestroyed(alreadyOpenedWindow);
+            }
         }
     }
 

@@ -273,6 +273,14 @@ QStringList X11Utils::getWindowWMClass(const xcb_window_t &window)
     return {};
 }
 
+bool X11Utils::isWineWindow(const xcb_window_t &window)
+{
+    xcb_atom_t atom = getAtomByName("__wine_prefix");
+    xcb_get_property_cookie_t cookie = xcb_get_property(m_connection, false, window, atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 1);
+    std::unique_ptr<xcb_get_property_reply_t> reply(xcb_get_property_reply(m_connection, cookie, nullptr));
+    return reply && reply->type != XCB_ATOM_NONE && reply->value_len > 0;
+}
+
 QRect X11Utils::getWindowGeometry(const xcb_window_t &window)
 {
     QRect geometry;

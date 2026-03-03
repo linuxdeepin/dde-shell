@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -56,6 +56,7 @@ public:
     QList<xcb_atom_t> getWindowAllowedActions(const xcb_window_t &window);
     MotifWMHints getWindowMotifWMHints(const xcb_window_t &window);
     QStringList getWindowWMClass(const xcb_window_t &window);
+    bool isWineWindow(const xcb_window_t &window);
     QRect getWindowGeometry(const xcb_window_t &window);
     xcb_window_t getDecorativeWindow(const xcb_window_t &window);
 

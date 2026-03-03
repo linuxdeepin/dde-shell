@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -14,6 +14,7 @@
 #include <xcb/xproto.h>
 
 #include <QHash>
+#include <QTimer>
 #include <QScopedPointer>
 #include <QAbstractNativeEventFilter>
 
@@ -66,6 +67,7 @@ private:
     QScopedPointer<XcbEventFilter> m_xcbEventFilter;
     QScopedPointer<X11WindowPreviewContainer> m_windowPreview;
     QHash<xcb_window_t, QSharedPointer<X11Window>> m_windows;
+    QHash<xcb_window_t, QTimer*> m_wineWindows; // value: nullptr=alive, QTimer*=pending destroy
     double m_opacity;
 
 };
