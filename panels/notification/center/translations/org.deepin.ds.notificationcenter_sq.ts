@@ -41,6 +41,10 @@
         <source>More</source>
         <translation>Më tepër</translation>
     </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation type="unfinished">Rregullime Njoftimesh</translation>
+    </message>
 </context>
 <context>
     <name>NotifySetting</name>

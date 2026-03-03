@@ -41,6 +41,10 @@
         <source>More</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation type="unfinished">إعداد الإشعارات</translation>
+    </message>
 </context>
 <context>
     <name>NotifySetting</name>
