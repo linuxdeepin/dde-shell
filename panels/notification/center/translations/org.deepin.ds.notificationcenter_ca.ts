@@ -41,6 +41,10 @@
         <source>More</source>
         <translation>Més</translation>
     </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation type="unfinished">Configuració de les notificacions</translation>
+    </message>
 </context>
 <context>
     <name>NotifySetting</name>

@@ -26,12 +26,12 @@
 <context>
     <name>NotifyHeader</name>
     <message>
-        <source>Notification Center</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Clear All</source>
         <translation>Очистить всё</translation>
+    </message>
+    <message>
+        <source>Notification Center</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Fold</source>
@@ -41,16 +41,20 @@
         <source>More</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>NotifySetting</name>
     <message>
-        <source>Unpin</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Pin</source>
         <translation>Прикрепить</translation>
+    </message>
+    <message>
+        <source>Unpin</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Notification Setting</source>

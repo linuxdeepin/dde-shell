@@ -4,15 +4,15 @@
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>More</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clear All</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -30,15 +30,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>More</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clear All</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -41,6 +41,10 @@
         <source>More</source>
         <translation>更多</translation>
     </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation type="unfinished">通知设置</translation>
+    </message>
 </context>
 <context>
     <name>NotifySetting</name>

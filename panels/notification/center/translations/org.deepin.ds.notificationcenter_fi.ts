@@ -41,6 +41,10 @@
         <source>More</source>
         <translation>Lisää</translation>
     </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation type="unfinished">Ilmoitusten asetukset</translation>
+    </message>
 </context>
 <context>
     <name>NotifySetting</name>

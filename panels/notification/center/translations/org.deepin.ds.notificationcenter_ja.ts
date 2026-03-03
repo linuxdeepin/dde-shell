@@ -41,6 +41,10 @@
         <source>More</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation type="unfinished">通知の設定</translation>
+    </message>
 </context>
 <context>
     <name>NotifySetting</name>
