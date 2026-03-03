@@ -16,7 +16,7 @@ Control {
         if (control.hovered) {
             Applet.bubbles.delayRemovedBubble = bubble.id
         } else {
-            Applet.bubbles.delayRemovedBubble = NotifyEntity.InvalidId
+            Applet.bubbles.delayRemovedBubble = 0
         }
     }
 
