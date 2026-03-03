@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -78,14 +78,6 @@ void DockItemModel::setSourceModel(QAbstractItemModel *model)
         auto first = topLeft.row();
         auto last = bottomRight.row();
         Q_EMIT dataChanged(index(first, 0), index(last, 0), roles);
-    });
-
-    connect(sourceModel(), &QAbstractItemModel::destroyed, this, [this]() {
-        if (m_isUpdating)
-            return;
-
-        beginResetModel();
-        endResetModel();
     });
 
     auto bottomRight = this->index(std::min(currentCount, newCount), 0);
