@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -275,6 +275,7 @@ void BubbleItem::updateActions()
         QVariantMap item;
         item["id"] = id;
         item["text"] = text;
+        item["enabled"] = true;
         array.append(item);
     }
 
