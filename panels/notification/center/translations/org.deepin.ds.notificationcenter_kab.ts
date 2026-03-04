@@ -2,16 +2,16 @@
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>Chella Ddihi</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Chella Ddihi</translation>
     </message>
 </context>
 <context>
@@ -28,16 +28,20 @@
         <translation>Ddihi di dihson</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Chella Ddihi</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Mnusuli di dihson</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Chella Ddihi</translation>
     </message>
 </context>
 <context>
