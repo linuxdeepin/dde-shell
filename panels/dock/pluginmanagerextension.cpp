@@ -15,6 +15,16 @@
 #include <QtWaylandCompositor/QWaylandResource>
 #include <QtWaylandCompositor/QWaylandCompositor>
 #include <QtWaylandCompositor/QWaylandView>
+#include <QtWaylandCompositor/QWaylandTextInputManager>
+#include <QtWaylandCompositor/QWaylandTextInputManagerV3>
+#include <QtWaylandCompositor/QWaylandQtTextInputMethodManager>
+#include <QtWaylandCompositor/QWaylandTextInput>
+#include <QtWaylandCompositor/QWaylandTextInputV3>
+#include <private/qwaylandtextinput_p.h>
+#include <private/qwaylandtextinputv3_p.h>
+#include <private/qwaylandqttextinputmethod_p.h>
+#include <QtWaylandCompositor/QWaylandQtTextInputMethod>
+#include <QtWaylandCompositor/QWaylandQuickItem>
 
 #include <QJsonObject>
 #include <QJsonParseError>
@@ -29,7 +39,54 @@
 #include <private/qwlqttouch_p.h>
 #endif
 
+#include <QtGui/qguiapplication.h>
+#include <QtGui/qinputmethod.h>
+
 DGUI_USE_NAMESPACE
+
+struct WlQtTextInputMethodHelper : public QtWaylandServer::qt_text_input_method_v1 {
+    static void setFocusCustom(QWaylandQtTextInputMethodPrivate *d, QWaylandSurface *surface) {
+        auto *base = static_cast<QtWaylandServer::qt_text_input_method_v1*>(d);
+        if (d->focusedSurface == surface) return;
+
+        QtWaylandServer::qt_text_input_method_v1::Resource *newResource = nullptr;
+        if (surface && surface->client()) {
+            auto resources = base->resourceMap().values(surface->client()->client());
+            if (!resources.isEmpty()) {
+                newResource = resources.first();
+            }
+        }
+
+        if (d->focusedSurface) {
+            if (d->resource) {
+                base->send_leave(d->resource->handle, d->focusedSurface->resource());
+            }
+            d->focusDestroyListener.reset();
+        }
+
+        d->focusedSurface = surface;
+        d->resource = newResource;
+
+        if (d->resource != nullptr && d->focusedSurface != nullptr) {
+            d->surroundingText.clear();
+            d->cursorPosition = 0;
+            d->anchorPosition = 0;
+            d->absolutePosition = 0;
+            d->cursorRectangle = QRect();
+            d->preferredLanguage.clear();
+            d->hints = Qt::InputMethodHints();
+            auto *helper = static_cast<WlQtTextInputMethodHelper*>(base);
+            helper->send_enter(d->resource->handle, d->focusedSurface->resource());
+            
+            helper->send_input_direction_changed(d->resource->handle, int(qApp->inputMethod()->inputDirection()));
+            helper->send_locale_changed(d->resource->handle, qApp->inputMethod()->locale().bcp47Name());
+            
+            d->focusDestroyListener.listenForDestruction(surface->resource());
+            if (d->inputPanelVisible && d->enabledSurfaces.values().contains(surface))
+                qApp->inputMethod()->show();
+        }
+    }
+};
 
 PluginScaleManager::PluginScaleManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
@@ -445,8 +502,20 @@ void PluginManager::initialize()
 
     init(compositor->display(), 1);
 
+    // We ONLY register QtTextInputMethodManager.
+    // If we register v2 or v3, they will intercept `inputMethodEvent` inside `QWaylandInputMethodControl::inputMethodEvent`
+    // because Qt's server-side logic checks v2 -> v3 -> QtTextInputMethod.
+    // But the Qt 6 client-side creates QWaylandInputMethodContext which only listens to QtTextInputMethod
+    // if it is available. This causes mismatched preferences: server sends via v2/v3, client listens to QtTextInputMethod.
+    // So ONLY register QtTextInputMethodManager.
+    auto qtTextInputMethodManager = new QWaylandQtTextInputMethodManager(compositor);
+    qtTextInputMethodManager->initialize();
+
     // 设置鼠标焦点监听器
     setupMouseFocusListener();
+
+    // 设置 text input 焦点代理
+    setupTextInputProxy(compositor);
 }
 
 void PluginManager::updateDockOverflowState(int state)
@@ -720,8 +789,105 @@ void PluginManager::setupMouseFocusListener()
                 return;
 
             if (auto surface = newFocus->surface()) {
-                qDebug()<<"setKeyboardFocus";
                 seat->setKeyboardFocus(surface);
             }
         });
+}
+
+void PluginManager::setupTextInputProxy(QWaylandCompositor *compositor)
+{
+    // === IME 事件转发的完整链路说明 ===
+    //
+    // 【步骤1】设置 text input 协议对象的 focus（keyboardFocusChanged 监听器）
+    // 当插件 surface 的键盘焦点发生变化时，需要同步更新所有 text input 协议对象的焦点。
+    // QWaylandSeat::setKeyboardFocus() 只处理 wl_keyboard 协议的 enter/leave，
+    // 不会自动通知 text input 协议对象（QWaylandTextInput/V3/QtTextInputMethod）。
+    // 因此需要在 keyboardFocusChanged 信号中手动调用各协议对象的 setFocus()。
+    // 这样，当插件进程的输入框触发 text_input::enable 时，compositor 端的 text input
+    // 对象已有正确的 focus surface，surfaceEnabled 信号会正确触发，进而：
+    //   → QWaylandInputMethodControl::setEnabled(true)
+    //   → QWaylandQuickItem::updateInputMethod() 设上 ItemAcceptsInputMethod flag
+    //
+    // 【步骤2】让 QWaylandQuickItem 获取 Qt active focus（surfaceEnabled 监听器）
+    // Qt 的 QInputMethodEvent 只会发给当前有 active focus 的 QQuickItem。
+    // 即便 ShellSurfaceItem/QWaylandQuickItem 已设上 ItemAcceptsInputMethod flag，
+    // 如果它没有 Qt active focus，外层 compositor 发来的 commit_string 生成的
+    // QInputMethodEvent 就会丢失，中文字无法提交到插件进程的输入框。
+    // 因此，当 surfaceEnabled 触发时（插件进程输入框 enable IME），需要通过
+    // surface->views() 找到对应的 QWaylandQuickItem，调用 forceActiveFocus()，
+    // 确保 QInputMethodEvent 能正确路由到
+    //   QWaylandQuickItem::inputMethodEvent()
+    //   → QWaylandInputMethodControl::inputMethodEvent()
+    //   → QWaylandTextInput::sendInputMethodEvent()
+    //   → send_commit_string() 到插件进程
+    //
+    // 注意：QWaylandTextInput 等 per-seat 对象是在客户端绑定全局时懒创建的，
+    // 初始化时 seat->extensions() 为空。因此步骤2的连接放在
+    // keyboardFocusChanged lambda 内部（那时扩展已经存在）。
+
+    QWaylandSeat *seat = compositor->defaultSeat();
+    if (!seat)
+        return;
+
+    // 【步骤1 & 2 实现】在 keyboardFocusChanged 中同时完成两件事：
+    //   a) 同步 text input 协议对象的焦点（步骤1）
+    //   b) 用 Qt::UniqueConnection 连接 surfaceEnabled，让 QWaylandQuickItem 获取 active focus（步骤2）
+    QObject::connect(seat, &QWaylandSeat::keyboardFocusChanged, this, [this, seat]
+        (QWaylandSurface *newFocus, QWaylandSurface *oldFocus) {
+        Q_UNUSED(oldFocus);
+
+        // 由于 Deepin Qt6 构建中 QWaylandTextInput/V3 的公开类符号没有导出，
+        // 无法使用 findIn() 和公开的 setFocus()。
+        // 改用 Private API：遍历 seat 的 extension 列表，
+        // 通过 QObject 元对象系统找到 text input 对象，
+        // 再通过 d_func() 调用 Private 类的 setFocus()。
+        const auto extensions = seat->extensions();
+        for (auto *ext : extensions) {
+            const QString className = ext->metaObject()->className();
+            if (className == QStringLiteral("QWaylandTextInput")) {
+                // 步骤1：设置 text input 焦点
+                auto *d = static_cast<QWaylandTextInputPrivate *>(QObjectPrivate::get(ext));
+                d->setFocus(newFocus);
+                // 步骤2：连接 surfaceEnabled，当插件输入框 enable IME 时，
+                // 让对应的 QWaylandQuickItem 获取 Qt active focus。
+                // Qt::UniqueConnection 防止重复连接。
+                QObject::connect(ext, SIGNAL(surfaceEnabled(QWaylandSurface*)),
+                    this, SLOT(onTextInputSurfaceEnabled(QWaylandSurface*)),
+                    Qt::UniqueConnection);
+            } else if (className == QStringLiteral("QWaylandTextInputV3")) {
+                auto *d = static_cast<QWaylandTextInputV3Private *>(QObjectPrivate::get(ext));
+                d->setFocus(newFocus);
+                // 同样连接 v3 的 surfaceEnabled（fcitx5/ibus 等可能使用 v3）
+                QObject::connect(ext, SIGNAL(surfaceEnabled(QWaylandSurface*)),
+                    this, SLOT(onTextInputSurfaceEnabled(QWaylandSurface*)),
+                    Qt::UniqueConnection);
+            } else if (className == QStringLiteral("QWaylandQtTextInputMethod")) {
+                auto *qtMethodPriv = static_cast<QWaylandQtTextInputMethodPrivate *>(QObjectPrivate::get(ext));
+                qtMethodPriv->inputPanelVisible = true; // ensure IME panel can be shown
+                WlQtTextInputMethodHelper::setFocusCustom(qtMethodPriv, newFocus);
+                // Qt6 WPA 默认优先使用此私有协议（qt_text_input_method_manager_v1），
+                // 插件进程通常通过此协议发 enable，必须连接其 surfaceEnabled。
+                QObject::connect(ext, SIGNAL(surfaceEnabled(QWaylandSurface*)),
+                    this, SLOT(onTextInputSurfaceEnabled(QWaylandSurface*)),
+                    Qt::UniqueConnection);
+            }
+        }
+    });
+}
+
+void PluginManager::onTextInputSurfaceEnabled(QWaylandSurface *surface)
+{
+    if (!surface)
+        return;
+
+    // 通过 surface 的 views 找到对应的 QWaylandQuickItem，
+    // 调用 forceActiveFocus() 使其成为 Qt 的 active focus item，
+    // 这样外层 compositor 的 QInputMethodEvent 才能被路由到它。
+    const auto views = surface->views();
+    for (auto *view : views) {
+        if (auto *quickItem = qobject_cast<QWaylandQuickItem *>(view->renderObject())) {
+            quickItem->forceActiveFocus(Qt::OtherFocusReason);
+            break;
+        }
+    }
 }

@@ -80,6 +80,8 @@ public:
 
     //处理鼠标焦点给到相应插件
     void setupMouseFocusListener();
+    //处理 IME 输入代理：将插件进程的 text input 请求透传给外层 compositor
+    void setupTextInputProxy(QWaylandCompositor *compositor);
 
 Q_SIGNALS:
     void pluginPopupCreated(PluginPopup*);
@@ -94,6 +96,7 @@ private Q_SLOTS:
     void onFontChanged();
     void onActiveColorChanged();
     void onThemeChanged();
+    void onTextInputSurfaceEnabled(QWaylandSurface *surface);
 
 protected:
     virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg) override;
