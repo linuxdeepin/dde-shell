@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -234,12 +234,11 @@ Window {
                 dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) !== 1);
             }
 
+            dock.positionForAnimation = Panel.position;
+            changeDragAreaAnchor()
             // If this was a hide animation during position change, prepare for show animation
             if (isPositionChanging && !isShowing) {
                 isPositionChanging = false;
-
-                // Update position for animation to new position for show animation
-                dock.positionForAnimation = Panel.position;
 
                 // Set transform to hidden position before showing
                 setTransformToHiddenPosition();
@@ -731,7 +730,6 @@ Window {
         }
 
         function onPositionChanged() {
-            changeDragAreaAnchor()
             Panel.requestClosePopup()
 
             // If dock was hidden when position change started, show it now at new position
