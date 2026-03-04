@@ -2,16 +2,16 @@
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>সব সাফাকরণ</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>সব সাফাকরণ</translation>
     </message>
 </context>
 <context>
@@ -28,16 +28,20 @@
         <translation>নোটিফিকেশন সেন্টার</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>সব সাফাকরণ</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>নোটিফিকেশন সেটিং</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>সব সাফাকরণ</translation>
     </message>
 </context>
 <context>
