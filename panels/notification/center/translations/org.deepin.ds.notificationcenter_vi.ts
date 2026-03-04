@@ -2,16 +2,16 @@
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>Xóa tất cả</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Xóa tất cả</translation>
     </message>
 </context>
 <context>
@@ -28,16 +28,20 @@
         <translation>Trung tâm thông báo</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Xóa tất cả</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Cài đặt thông báo</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Xóa tất cả</translation>
     </message>
 </context>
 <context>
