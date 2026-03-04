@@ -2,16 +2,16 @@
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>Alles wissen</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Invouwen</translation>
     </message>
     <message>
         <source>More</source>
         <translation>Meer</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Alles wissen</translation>
     </message>
 </context>
 <context>
@@ -28,16 +28,20 @@
         <translation>Meldingencentrum</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Alles wissen</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Invouwen</translation>
     </message>
     <message>
         <source>More</source>
         <translation>Meer</translation>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Meldingsinstellingen</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Alles wissen</translation>
     </message>
 </context>
 <context>
