@@ -2,16 +2,16 @@
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>Počistite vse</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Počistite vse</translation>
     </message>
 </context>
 <context>
@@ -28,16 +28,20 @@
         <translation>Centar za oznake</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Počistite vse</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Nastavitve oznak</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Počistite vse</translation>
     </message>
 </context>
 <context>
