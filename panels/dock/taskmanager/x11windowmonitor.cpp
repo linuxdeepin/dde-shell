@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -50,6 +50,14 @@ X11WindowMonitor::X11WindowMonitor(QObject* parent)
     connect(this, &X11WindowMonitor::windowMapped, this, &X11WindowMonitor::onWindowMapped);
     connect(this, &X11WindowMonitor::windowDestroyed, this, &X11WindowMonitor::onWindowDestroyed);
     connect(this, &X11WindowMonitor::windowPropertyChanged, this, &X11WindowMonitor::onWindowPropertyChanged);
+}
+
+X11WindowMonitor::~X11WindowMonitor()
+{
+    // don't delete preview directly, it may cause crash when deleting QWidget in XIO error case.
+    if (auto preview = m_windowPreview.release()) {
+        preview->deleteLater();
+    }
 }
 
 void X11WindowMonitor::start()
@@ -104,7 +112,8 @@ void X11WindowMonitor::presentWindows(QList<uint32_t> windows)
 
 void X11WindowMonitor::hideItemPreview()
 {
-    if (m_windowPreview.isNull()) return;
+    if (!m_windowPreview)
+        return;
     m_windowPreview->hidePreView();
 }
 
@@ -130,7 +139,7 @@ void X11WindowMonitor::cancelPreviewWindow()
 void X11WindowMonitor::setPreviewOpacity(double opacity)
 {
     m_opacity = opacity;
-    if (!m_windowPreview.isNull()) {
+    if (m_windowPreview) {
         m_windowPreview->setMaskAlpha(static_cast<int>(m_opacity * 255));
     }
 }
@@ -141,7 +150,7 @@ void X11WindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
                                       int32_t previewYoffset,
                                       uint32_t direction)
 {
-    if (m_windowPreview.isNull()) {
+    if (!m_windowPreview) {
         m_windowPreview.reset(new X11WindowPreviewContainer(this));
         m_windowPreview->setMaskAlpha(static_cast<int>(m_opacity * 255));
         m_windowPreview->windowHandle()->setTransientParent(relativePositionItem);
