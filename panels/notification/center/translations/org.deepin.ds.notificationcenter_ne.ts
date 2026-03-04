@@ -2,16 +2,16 @@
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>सम्पूर्ण माथि कुनै भन्दा छुट्याउनुहोस्</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>सम्पूर्ण माथि कुनै भन्दा छुट्याउनुहोस्</translation>
     </message>
 </context>
 <context>
@@ -28,16 +28,20 @@
         <translation>नोटिफिकेशन केन्द्र</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>सम्पूर्ण माथि कुनै भन्दा छुट्याउनुहोस्</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>नोटिफिकेशन सेटिंग</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>सम्पूर्ण माथि कुनै भन्दा छुट्याउनुहोस्</translation>
     </message>
 </context>
 <context>
