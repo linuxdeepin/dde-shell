@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -79,6 +79,17 @@ Control {
             positionViewAtIndex(idx, ListView.Contain)
             expandFocusTimer.retries = 15
             expandFocusTimer.start()
+        }
+
+        // Jiggles scroll ±1px to force ListView to re-render displaced delegates
+        function jiggleUpdate() {
+            if (contentY > 0) {
+                contentY--;
+                Qt.callLater(function() { contentY++; });
+            } else {
+                contentY++;
+                Qt.callLater(function() { contentY--; });
+            }
         }
 
         Timer {
