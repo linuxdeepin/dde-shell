@@ -96,16 +96,6 @@ ContainmentItem {
                 properties: "x,y"
                 easing.type: Easing.OutQuad
             }
-            NumberAnimation {
-                properties: "scale"
-                to: 1
-                duration: 200
-            }
-            NumberAnimation {
-                properties: "opacity"
-                to: 1
-                duration: 200
-            }
         }
         addDisplaced: Transition {
             id: addDisplacedTransition
@@ -113,36 +103,12 @@ ContainmentItem {
                 properties: "x,y"
                 easing.type: Easing.OutQuad
             }
-            NumberAnimation {
-                properties: "scale"
-                from: 0
-                to: 1
-                duration: 200
-            }
-            NumberAnimation {
-                properties: "opacity"
-                from: 0
-                to: 1
-                duration: 200
-            }
         }
         removeDisplaced: Transition {
             id: removeDisplacedTransition
             NumberAnimation {
                 properties: "x,y"
                 easing.type: Easing.OutQuad
-            }
-            NumberAnimation {
-                properties: "scale"
-                from: 0
-                to: 1
-                duration: 200
-            }
-            NumberAnimation {
-                properties: "opacity"
-                from: 0
-                to: 1
-                duration: 200
             }
         }
         move: moveDisplaced
