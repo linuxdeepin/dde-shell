@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,6 +10,7 @@
 #include "x11window.h"
 
 #include <cstdint>
+#include <memory>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
@@ -30,6 +31,7 @@ class X11WindowMonitor : public AbstractWindowMonitor
 
 public:
     explicit X11WindowMonitor(QObject* parent = nullptr);
+    ~X11WindowMonitor() override;
     virtual void start() override;
     virtual void stop() override;
     virtual void clear() override;
@@ -64,7 +66,7 @@ private:
 private:
     xcb_window_t m_rootWindow;
     QScopedPointer<XcbEventFilter> m_xcbEventFilter;
-    QScopedPointer<X11WindowPreviewContainer> m_windowPreview;
+    std::unique_ptr<X11WindowPreviewContainer> m_windowPreview;
     QHash<xcb_window_t, QSharedPointer<X11Window>> m_windows;
     double m_opacity;
 
