@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -69,6 +69,7 @@ DelegateChooser {
                 console.log("collapse group", model.appName)
                 let collapseIndex = index
                 notifyModel.collapseApp(index)
+                root.view.jiggleUpdate()
                 root.view.requestFocusOnExpand(collapseIndex)
             }
 
@@ -211,6 +212,7 @@ DelegateChooser {
                 console.log("expand")
                 let expandIndex = model.index
                 notifyModel.expandApp(expandIndex)
+                root.view.jiggleUpdate()
                 root.view.requestFocusOnExpand(expandIndex + 1)
             }
             onSetting: function (pos) {
