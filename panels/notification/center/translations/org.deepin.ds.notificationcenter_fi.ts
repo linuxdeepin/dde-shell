@@ -1,12 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="fi">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="fi">
 <context>
     <name>GroupNotify</name>
-    <message>
-        <source>Clear All</source>
-        <translation>Tyhjennä kaikki</translation>
-    </message>
     <message>
         <source>Fold</source>
         <translation>Taita</translation>
@@ -14,6 +8,10 @@
     <message>
         <source>More</source>
         <translation>Lisää</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Tyhjennä kaikki</translation>
     </message>
 </context>
 <context>
@@ -30,16 +28,20 @@
         <translation>Ilmoituskeskus</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Tyhjennä kaikki</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Taita</translation>
     </message>
     <message>
         <source>More</source>
         <translation>Lisää</translation>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Ilmoitusten asetukset</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Tyhjennä kaikki</translation>
     </message>
 </context>
 <context>
@@ -61,7 +63,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished">Puhdista kaikki</translation>
+        <translation>Puhdista kaikki</translation>
     </message>
 </context>
 <context>
