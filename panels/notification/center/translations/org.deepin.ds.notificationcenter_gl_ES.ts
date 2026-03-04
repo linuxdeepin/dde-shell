@@ -2,16 +2,16 @@
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>Limpar todo</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Limpar todo</translation>
     </message>
 </context>
 <context>
@@ -28,16 +28,20 @@
         <translation>Centro de notificación</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Limpar todo</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Configuración de notificación</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Limpar todo</translation>
     </message>
 </context>
 <context>
