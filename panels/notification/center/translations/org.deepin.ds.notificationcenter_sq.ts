@@ -1,12 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="sq">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="sq">
 <context>
     <name>GroupNotify</name>
-    <message>
-        <source>Clear All</source>
-        <translation>Spastroji Krejt</translation>
-    </message>
     <message>
         <source>Fold</source>
         <translation>Palose</translation>
@@ -14,6 +8,10 @@
     <message>
         <source>More</source>
         <translation>Më tepër</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Spastroji Krejt</translation>
     </message>
 </context>
 <context>
@@ -30,16 +28,20 @@
         <translation>Qendër Njoftimesh</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Spastroji Krejt</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Palose</translation>
     </message>
     <message>
         <source>More</source>
         <translation>Më tepër</translation>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Rregullime Njoftimesh</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Spastroji Krejt</translation>
     </message>
 </context>
 <context>
