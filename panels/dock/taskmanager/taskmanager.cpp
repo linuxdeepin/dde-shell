@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -482,6 +482,12 @@ void TaskManager::saveDockElementsOrder(const QStringList &appIds)
         }
     }
     TaskManagerSettings::instance()->setDockedElements(newDockedElements);
+}
+
+void TaskManager::moveItem(int from, int to)
+{
+    if (m_dockGlobalElementModel)
+        m_dockGlobalElementModel->moveItem(from, to);
 }
 
 QString TaskManager::getTrashTipText()

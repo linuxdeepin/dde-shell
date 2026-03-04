@@ -29,6 +29,8 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
     , m_activeAppModel(activeAppModel)
 {
     connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedElementsChanged, this, &DockGlobalElementModel::loadDockedElements);
+    connect(TaskManagerSettings::instance(), &TaskManagerSettings::windowSplitChanged, this, &DockGlobalElementModel::groupItemsByApp);
+
     connect(
         m_appsModel,
         &QAbstractItemModel::rowsRemoved,
@@ -96,10 +98,13 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                 }
 
                 // There are already windows for this app: insert the new window
-                // right after the last existing one so that all windows stay together.
+                // right after the last (rightmost) existing one.
+                // Search the entire list since windows may not be consecutive after drag reorder.
                 auto lastIt = firstIt;
-                while (lastIt + 1 != m_data.end() && std::get<0>(*(lastIt + 1)) == desktopId) {
-                    ++lastIt;
+                for (auto it = firstIt + 1; it != m_data.end(); ++it) {
+                    if (std::get<0>(*it) == desktopId) {
+                        lastIt = it;
+                    }
                 }
 
                 auto insertRow = (lastIt - m_data.begin()) + 1;
@@ -486,5 +491,53 @@ void DockGlobalElementModel::requestUpdateWindowIconGeometry(const QModelIndex &
 void DockGlobalElementModel::requestWindowsView(const QModelIndexList &indexes) const
 {
     Q_UNUSED(indexes)
+}
+
+void DockGlobalElementModel::moveItem(int from, int to)
+{
+    if (from < 0 || from >= m_data.size() || to < 0 || to >= m_data.size() || from == to)
+        return;
+
+    int destRow = from < to ? to + 1 : to;
+
+    if (!beginMoveRows(QModelIndex(), from, from, QModelIndex(), destRow))
+        return;
+
+    m_data.move(from, to);
+    endMoveRows();
+}
+
+void DockGlobalElementModel::groupItemsByApp()
+{
+    if (m_data.isEmpty())
+        return;
+
+    if (TaskManagerSettings::instance()->isWindowSplit())
+        return;
+
+    for (int i = 0; i < m_data.size(); ++i) {
+        const QString currentId = std::get<0>(m_data.at(i));
+
+        int insertPos = i + 1;
+
+        while (insertPos < m_data.size() && std::get<0>(m_data.at(insertPos)) == currentId) {
+            ++insertPos;
+        }
+
+        for (int j = insertPos; j < m_data.size(); ++j) {
+            if (std::get<0>(m_data.at(j)) != currentId)
+                continue;
+
+            int destRow = insertPos < j ? insertPos : insertPos + 1;
+            if (!beginMoveRows(QModelIndex(), j, j, QModelIndex(), destRow))
+                continue;
+            m_data.move(j, insertPos);
+            endMoveRows();
+
+            ++insertPos;
+        }
+
+        i = insertPos - 1;
+    }
 }
 }

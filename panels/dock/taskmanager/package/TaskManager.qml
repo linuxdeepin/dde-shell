@@ -228,7 +228,11 @@ ContainmentItem {
                 let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
                 let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
                 if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
-                    visualModel.items.move(currentIndex, targetIndex)
+                    if (taskmanager.Applet.windowSplit) {
+                        taskmanager.Applet.moveItem(currentIndex, targetIndex)
+                    } else {
+                        visualModel.items.move(currentIndex, targetIndex)
+                    }
                 }
             }
 
@@ -239,7 +243,11 @@ ContainmentItem {
                 let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
                 let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
                 if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
-                    visualModel.items.move(currentIndex, targetIndex)
+                    if (taskmanager.Applet.windowSplit) {
+                        taskmanager.Applet.moveItem(currentIndex, targetIndex)
+                    } else {
+                        visualModel.items.move(currentIndex, targetIndex)
+                    }
                 }
                 let appIds = []
                 for (let i = 0; i < visualModel.items.count; i++) {
