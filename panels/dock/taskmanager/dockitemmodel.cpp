@@ -79,6 +79,13 @@ void DockItemModel::setSourceModel(QAbstractItemModel *model)
         auto last = bottomRight.row();
         Q_EMIT dataChanged(index(first, 0), index(last, 0), roles);
     });
+    connect(sourceModel(), &QAbstractItemModel::rowsMoved, this, [this](const QModelIndex &parent, int start, int end, const QModelIndex &destination, int row) {
+        Q_UNUSED(destination)
+        if (parent.isValid() || m_isUpdating)
+            return;
+        beginMoveRows(QModelIndex(), start, end, QModelIndex(), row);
+        endMoveRows();
+    });
 
     auto bottomRight = this->index(std::min(currentCount, newCount), 0);
     Q_EMIT dataChanged(index(0, 0), bottomRight);
