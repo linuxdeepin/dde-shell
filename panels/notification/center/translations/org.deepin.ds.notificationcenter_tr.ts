@@ -2,16 +2,16 @@
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>Tümünü Temizle</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Katla</translation>
     </message>
     <message>
         <source>More</source>
         <translation>Daha</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Tümünü Temizle</translation>
     </message>
 </context>
 <context>
@@ -28,16 +28,20 @@
         <translation>Bildirim Merkezi</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Tümünü Temizle</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Katla</translation>
     </message>
     <message>
         <source>More</source>
         <translation>Daha</translation>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Bildirim Ayarı</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Tümünü Temizle</translation>
     </message>
 </context>
 <context>
