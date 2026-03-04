@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
@@ -36,12 +36,15 @@ public:
 
     void requestWindowsView(const QModelIndexList &indexes) const override;
 
+    void moveItem(int from, int to);
+
 public slots:
     void initDockedElements(bool unused);
 
 private:
     void loadDockedElements();
     QString getMenus(const QModelIndex &index) const;
+    void groupItemsByApp();
 
 private:
     // id, model, and pos
