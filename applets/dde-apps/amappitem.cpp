@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -83,6 +83,9 @@ AMAppItem::AMAppItem(const QDBusObjectPath &path, const ObjectInterfaceMap &sour
 
     auto execs = qdbus_cast<QStringMap>(appInfo.value(u8"Execs"));
     AppItem::setExecs(execs);
+
+    auto desktopSourcePath = appInfo.value(u8"DesktopSourcePath").toString();
+    AppItem::setDesktopSourcePath(desktopSourcePath);
 }
 
 void AMAppItem::launch(const QString &action, const QStringList &fields, const QVariantMap &options)
