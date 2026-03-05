@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -36,7 +36,7 @@ QString AppItem::appId() const
 
 void AppItem::setAppId(const QString &appid)
 {
-    return setData(appid, AppItemModel::DesktopIdRole);
+    setData(appid, AppItemModel::DesktopIdRole);
 }
 
 AppItemModel::AppTypes AppItem::appType() const
@@ -46,7 +46,7 @@ AppItemModel::AppTypes AppItem::appType() const
 
 void AppItem::setAppType(AppItemModel::AppTypes appType)
 {
-    return setData(appType, AppItemModel::AppTypeRole);
+    setData(appType, AppItemModel::AppTypeRole);
 }
 
 QString AppItem::appName() const
@@ -56,7 +56,7 @@ QString AppItem::appName() const
 
 void AppItem::setAppName(const QString &appName)
 {
-    return setData(appName, AppItemModel::NameRole);
+    setData(appName, AppItemModel::NameRole);
 }
 
 QString AppItem::appIconName() const
@@ -66,7 +66,7 @@ QString AppItem::appIconName() const
 
 void AppItem::setAppIconName(const QString &appIconName)
 {
-    return setData(appIconName, AppItemModel::IconNameRole);
+    setData(appIconName, AppItemModel::IconNameRole);
 }
 
 QString AppItem::startupWMClass() const
@@ -76,7 +76,7 @@ QString AppItem::startupWMClass() const
 
 void AppItem::setStartupWMclass(const QString &wmClass)
 {
-    return setData(wmClass, AppItemModel::StartUpWMClassRole);
+    setData(wmClass, AppItemModel::StartUpWMClassRole);
 }
 
 bool AppItem::noDisplay() const
@@ -86,7 +86,7 @@ bool AppItem::noDisplay() const
 
 void AppItem::setNoDisPlay(bool noDisplay)
 {
-    return setData(noDisplay, AppItemModel::NoDisplayRole);
+    setData(noDisplay, AppItemModel::NoDisplayRole);
 }
 
 AppItemModel::DDECategories AppItem::ddeCategories() const
@@ -96,7 +96,7 @@ AppItemModel::DDECategories AppItem::ddeCategories() const
 
 void AppItem::setDDECategories(const AppItemModel::DDECategories &categories)
 {
-    return setData(categories, AppItemModel::DDECategoryRole);
+    setData(categories, AppItemModel::DDECategoryRole);
 }
 
 QStringList AppItem::categories() const
@@ -106,7 +106,7 @@ QStringList AppItem::categories() const
 
 void AppItem::setCategories(const QStringList &categories)
 {
-    return setData(categories, AppItemModel::CategoriesRole);
+    setData(categories, AppItemModel::CategoriesRole);
 }
 
 QString AppItem::actions() const
@@ -116,7 +116,7 @@ QString AppItem::actions() const
 
 void AppItem::setActions(const QString &actions)
 {
-    return setData(actions, AppItemModel::ActionsRole);
+    setData(actions, AppItemModel::ActionsRole);
 }
 
 quint64 AppItem::lastLaunchedTime() const
@@ -126,7 +126,7 @@ quint64 AppItem::lastLaunchedTime() const
 
 void AppItem::setLastLaunchedTime(const quint64 &time)
 {
-    return setData(time, AppItemModel::LastLaunchedTimeRole);
+    setData(time, AppItemModel::LastLaunchedTimeRole);
 }
 
 quint64 AppItem::installedTime() const
@@ -136,7 +136,7 @@ quint64 AppItem::installedTime() const
 
 void AppItem::setInstalledTime(const quint64 &time)
 {
-    return setData(time, AppItemModel::InstalledTimeRole);
+    setData(time, AppItemModel::InstalledTimeRole);
 }
 
 quint64 AppItem::launchedTimes() const
@@ -147,7 +147,7 @@ quint64 AppItem::launchedTimes() const
 void AppItem::setLaunchedTimes(const quint64 &times)
 {
     AppsLaunchTimesHelper::instance()->setLaunchTimesFor(appId(), times);
-    return setData(times, AppItemModel::LaunchedTimesRole);
+    setData(times, AppItemModel::LaunchedTimesRole);
 }
 
 bool AppItem::docked() const
@@ -158,7 +158,7 @@ bool AppItem::docked() const
 void AppItem::setDocked(bool docked)
 {
     AppsDockedHelper::instance()->setDocked(appId(), docked);
-    return setData(docked, AppItemModel::DockedRole);
+    setData(docked, AppItemModel::DockedRole);
 }
 
 bool AppItem::onDesktop() const
@@ -168,7 +168,7 @@ bool AppItem::onDesktop() const
 
 void AppItem::setOnDesktop(bool on)
 {
-    return setData(on, AppItemModel::OnDesktopRole);
+    setData(on, AppItemModel::OnDesktopRole);
 }
 
 bool AppItem::autoStart() const
@@ -178,7 +178,7 @@ bool AppItem::autoStart() const
 
 void AppItem::setAutoStart(bool start)
 {
-    return setData(start, AppItemModel::AutoStartRole);
+    setData(start, AppItemModel::AutoStartRole);
 }
 
 bool AppItem::XLingLong() const
@@ -188,7 +188,7 @@ bool AppItem::XLingLong() const
 
 void AppItem::setXLingLong(const bool &isLingLong)
 {
-    return setData(isLingLong, AppItemModel::XLingLongRole);
+    setData(isLingLong, AppItemModel::XLingLongRole);
 }
 
 QString AppItem::id() const
@@ -198,7 +198,7 @@ QString AppItem::id() const
 
 void AppItem::setId(const QString &id)
 {
-    return setData(id, AppItemModel::IdRole);
+    setData(id, AppItemModel::IdRole);
 }
 
 QString AppItem::XCreatedBy() const
@@ -208,7 +208,7 @@ QString AppItem::XCreatedBy() const
 
 void AppItem::setXCreatedBy(const QString &XCreatedBy)
 {
-    return setData(XCreatedBy, AppItemModel::XCreatedByRole);
+    setData(XCreatedBy, AppItemModel::XCreatedByRole);
 }
 
 QStringMap AppItem::execs() const
@@ -218,6 +218,16 @@ QStringMap AppItem::execs() const
 
 void AppItem::setExecs(const QStringMap &execs)
 {
-    return setData(QVariant::fromValue<QStringMap>(execs), AppItemModel::ExecsRole);
+    setData(QVariant::fromValue<QStringMap>(execs), AppItemModel::ExecsRole);
+}
+
+QString AppItem::desktopSourcePath() const
+{
+    return data(AppItemModel::DesktopSourcePathRole).toString();
+}
+
+void AppItem::setDesktopSourcePath(const QString &desktopSourcePath)
+{
+    setData(desktopSourcePath, AppItemModel::DesktopSourcePathRole);
 }
 }
