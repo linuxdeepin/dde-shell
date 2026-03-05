@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -100,6 +100,7 @@ public:
 
     Q_INVOKABLE void activateWindow(uint32_t windowID);
     Q_INVOKABLE void saveDockElementsOrder(const QStringList &appIds);
+    Q_INVOKABLE void moveItem(int from, int to);
     Q_INVOKABLE QString getTrashTipText();
 
     Q_INVOKABLE bool isTrashEmpty() const;
