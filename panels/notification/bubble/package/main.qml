@@ -12,6 +12,12 @@ import org.deepin.dtk 1.0
 
 Window {
     id: root
+    
+    readonly property int removeAnimationDuration: 600
+    
+    Component.onCompleted: {
+        Applet.bubbles.removeAnimationDuration = removeAnimationDuration
+    }
 
     function windowMargin(position) {
         let dockApplet = DS.applet("org.deepin.ds.dock")
@@ -105,6 +111,7 @@ Window {
         model: Applet.bubbles
         interactive: false
         verticalLayoutDirection: ListView.BottomToTop
+        cacheBuffer: 0
         add: Transition {
             id: addTrans
             // Before starting the new animation, forcibly complete the previous notification bubble's animation
@@ -126,6 +133,31 @@ Window {
                 to: 0
                 duration: 600
                 easing.type: Easing.OutExpo
+            }
+        }
+        remove: Transition {
+            NumberAnimation {
+                target: removeTrans.ViewTransition.item
+                property: "x"
+                from: 0
+                to: removeTrans.ViewTransition.item.width
+                duration: root.removeAnimationDuration
+                easing.type: Easing.InExpo
+            }
+            NumberAnimation {
+                target: removeTrans.ViewTransition.item
+                property: "opacity"
+                from: 1.0
+                to: 0.0
+                duration: root.removeAnimationDuration
+                easing.type: Easing.InExpo
+            }
+        }
+        removeDisplaced: Transition {
+            NumberAnimation {
+                properties: "y"
+                duration: 400
+                easing.type: Easing.OutCubic
             }
         }
         delegate: Bubble {
