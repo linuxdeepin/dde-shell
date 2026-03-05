@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -26,6 +26,11 @@
 #include <QtWaylandCompositor/QWaylandQtTextInputMethod>
 #include <QtWaylandCompositor/QWaylandQuickItem>
 
+#include <QGuiApplication>
+#include <QInputMethod>
+#include <QClipboard>
+#include <QMimeData>
+
 #include <QJsonObject>
 #include <QJsonParseError>
 
@@ -38,9 +43,6 @@
 #include <private/qwlqtkey_p.h>
 #include <private/qwlqttouch_p.h>
 #endif
-
-#include <QtGui/qguiapplication.h>
-#include <QtGui/qinputmethod.h>
 
 DGUI_USE_NAMESPACE
 
@@ -75,11 +77,9 @@ struct WlQtTextInputMethodHelper : public QtWaylandServer::qt_text_input_method_
             d->cursorRectangle = QRect();
             d->preferredLanguage.clear();
             d->hints = Qt::InputMethodHints();
-            auto *helper = static_cast<WlQtTextInputMethodHelper*>(base);
-            helper->send_enter(d->resource->handle, d->focusedSurface->resource());
-            
-            helper->send_input_direction_changed(d->resource->handle, int(qApp->inputMethod()->inputDirection()));
-            helper->send_locale_changed(d->resource->handle, qApp->inputMethod()->locale().bcp47Name());
+            base->send_enter(d->resource->handle, d->focusedSurface->resource());
+            base->send_input_direction_changed(d->resource->handle, int(qApp->inputMethod()->inputDirection()));
+            base->send_locale_changed(d->resource->handle, qApp->inputMethod()->locale().bcp47Name());
             
             d->focusDestroyListener.listenForDestruction(surface->resource());
             if (d->inputPanelVisible && d->enabledSurfaces.values().contains(surface))
@@ -516,6 +516,21 @@ void PluginManager::initialize()
 
     // 设置 text input 焦点代理
     setupTextInputProxy(compositor);
+
+    // 启用剪贴板保留并在宿主系统剪贴板更新时同步给插件 Wayland 客户端，实现粘贴功能
+    compositor->setRetainedSelectionEnabled(true);
+    if (auto *clipboard = QGuiApplication::clipboard()) {
+        QObject::connect(clipboard, &QClipboard::changed, this, [compositor](QClipboard::Mode mode) {
+            if (mode == QClipboard::Clipboard) {
+                if (const QMimeData *mimeData = QGuiApplication::clipboard()->mimeData(mode)) {
+                    compositor->overrideSelection(mimeData);
+                }
+            }
+        });
+        if (const QMimeData *mimeData = clipboard->mimeData(QClipboard::Clipboard)) {
+            compositor->overrideSelection(mimeData);
+        }
+    }
 }
 
 void PluginManager::updateDockOverflowState(int state)
@@ -835,6 +850,10 @@ void PluginManager::setupTextInputProxy(QWaylandCompositor *compositor)
     QObject::connect(seat, &QWaylandSeat::keyboardFocusChanged, this, [this, seat]
         (QWaylandSurface *newFocus, QWaylandSurface *oldFocus) {
         Q_UNUSED(oldFocus);
+
+        if (newFocus) {
+            newFocus->updateSelection();
+        }
 
         // 由于 Deepin Qt6 构建中 QWaylandTextInput/V3 的公开类符号没有导出，
         // 无法使用 findIn() 和公开的 setFocus()。
