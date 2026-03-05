@@ -1,3 +1,33 @@
+dde-shell (2.0.31) unstable; urgency=medium
+
+  * fix(dock): fix pasting text in Wayland plugin windows
+  * fix(dock): support wayland text input on plugin popup windows
+  * feat: add desktop source path support for app items
+  * fix: sync dock position before position change operations
+  * fix(notification): fix invisible delegates after collapsing expanded
+    notifications
+  * fix: remove scale and opacity animations from task manager
+    transitions
+  * fix: prevent crash when destroying QWidget during XIO error
+  * feat: add window title to PanelPopupWindow
+  * fix: remove source model destroyed handler to prevent crash
+  * feat(notification): add notification setting translation
+  * fix(notification): align notification items in staging area
+  * fix(notification): Enable WAL mode and optimize SQLite configuration
+    for notification performance
+  * fix: update copyright year and fix notification bubble actions
+  * fix: adjust notification UI spacing and action margins
+  * feat: Add support for modifying the plugin popup cursor shape via
+    the protocol.
+  * fix: prevent animation glitch during task text width changes
+  * fix: change killClient to use SIGKILL instead of WM_DELETE_WINDOW
+  * fix: prevent premature dataChanged emission causing dock state
+    desync
+  * fix: improve text truncation with gradient fade effect
+  * fix: Information time display in English
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 05 Mar 2026 20:43:09 +0800
+
 dde-shell (2.0.30) unstable; urgency=medium
 
   * fix(bubble): use frontendWindowRect for dock margin to avoid overlap
