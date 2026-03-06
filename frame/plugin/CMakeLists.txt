@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -14,6 +14,7 @@ PUBLIC
     dde-shell-frame
 PRIVATE
     Qt${QT_VERSION_MAJOR}::QuickPrivate
+    Qt${QT_VERSION_MAJOR}::QuickTemplates2Private
 )
 
 string(REPLACE "." "/" URI_PATH ${URI})

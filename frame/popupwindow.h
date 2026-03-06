@@ -1,14 +1,14 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
 
 #include "dsglobal.h"
-#include <private/qquickwindowmodule_p.h>
+#include <QtQuickTemplates2/private/qquickapplicationwindow_p.h>
 
 DS_BEGIN_NAMESPACE
-class PopupWindow : public QQuickWindowQmlImpl
+class PopupWindow : public QQuickApplicationWindow
 {
     Q_OBJECT
     Q_PROPERTY(QWindow *transientParent READ transientParent WRITE setTransientParent NOTIFY transientParentChanged)
