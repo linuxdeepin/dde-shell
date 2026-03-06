@@ -113,9 +113,11 @@ DelegateChooser {
 
             TapHandler {
                 acceptedButtons: Qt.RightButton
-                onTapped: function (eventPoint, button) {
-                    let pos = eventPoint.position
-                    setting(pos)
+                onPressedChanged: function () {
+                    if (pressed) {
+                        let pos = point.position
+                        setting(pos)
+                    }
                 }
             }
 
@@ -201,9 +203,11 @@ DelegateChooser {
 
             TapHandler {
                 acceptedButtons: Qt.RightButton
-                onTapped: function (eventPoint, button) {
-                    let pos = eventPoint.position
-                    setting(pos)
+                onPressedChanged: function () {
+                    if (pressed) {
+                        let pos = point.position
+                        setting(pos)
+                    }
                 }
             }
 
