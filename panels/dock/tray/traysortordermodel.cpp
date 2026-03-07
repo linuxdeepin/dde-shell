@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "traysortordermodel.h"
 #include "constants.h"
+#include "trayitempositionmanager.h"
 
 #include <QDebug>
 #include <QDBusMessage>
@@ -361,6 +362,11 @@ void TraySortOrderModel::updateVisualIndexes()
     m_isUpdating = true;
     emit isUpdatingChanged(true);
     
+    // Clear registered sizes before re-assigning visual indexes
+    // This ensures that when items are repositioned, the empty placeholder
+    // will use the default item size instead of retaining the previous item's size
+    TrayItemPositionManager::instance().clearRegisteredSizes();
+    
     for (int i = 0; i < rowCount(); i++) {
         item(i)->setData(-1, TraySortOrderModel::VisualIndexRole);
     }
@@ -421,6 +427,7 @@ void TraySortOrderModel::updateVisualIndexes()
         if (itemVisible && dockVisible) {
             toogleCollapseActionVisible = true;
             if (!m_collapsed) {
+                reserveStagedDropSpace(currentVisualIndex);
                 results[0]->setData(currentVisualIndex++, TraySortOrderModel::VisualIndexRole);
             } else {
                 // When collapsed, collapsable items should be hidden (visualIndex = -1)
@@ -434,6 +441,7 @@ void TraySortOrderModel::updateVisualIndexes()
     Q_ASSERT(!results.isEmpty());
     results[0]->setData(toogleCollapseActionVisible, TraySortOrderModel::VisibilityRole);
     if (toogleCollapseActionVisible) {
+        reserveStagedDropSpace(currentVisualIndex);
         results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
         currentVisualIndex++;
     }
@@ -450,6 +458,7 @@ void TraySortOrderModel::updateVisualIndexes()
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
         results[0]->setData(dockVisible, TraySortOrderModel::DockVisibleRole);
         if (itemVisible && dockVisible) {
+            reserveStagedDropSpace(currentVisualIndex);
             results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
             currentVisualIndex++;
         }
@@ -459,6 +468,7 @@ void TraySortOrderModel::updateVisualIndexes()
     results = findItems("internal/action-toggle-quick-settings");
     Q_ASSERT(!results.isEmpty());
     results[0]->setData(SECTION_FIXED, TraySortOrderModel::SectionTypeRole);
+    reserveStagedDropSpace(currentVisualIndex);
     results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
     currentVisualIndex++;
 
@@ -598,6 +608,58 @@ QModelIndex TraySortOrderModel::getModelIndexByVisualIndex(int visualIndex) cons
         }
     }
     return QModelIndex();
+}
+
+void TraySortOrderModel::reserveStagedDropSpace(int &currentVisualIndex)
+{
+    if (!m_stagedSurfaceId.isEmpty() && currentVisualIndex == m_stagedVisualIndex) {
+        currentVisualIndex++;
+    }
+}
+
+void TraySortOrderModel::stageDropPosition(const QString &surfaceId, int visualIndex)
+{
+    if (m_stagedSurfaceId == surfaceId && m_stagedVisualIndex == visualIndex) {
+        return;
+    }
+    
+    m_stagedSurfaceId = surfaceId;
+    m_stagedVisualIndex = visualIndex;
+    emit stagedDropChanged();
+    
+    // Update visual indexes to show preview position
+    updateVisualIndexes();
+}
+
+void TraySortOrderModel::commitStagedDrop()
+{
+    if (m_stagedSurfaceId.isEmpty() || m_stagedVisualIndex < 0) {
+        return;
+    }
+    
+    // Reuse dropToDockTray logic for consistency
+    // isBefore is always true for staged drops (insert before the target position)
+    dropToDockTray(m_stagedSurfaceId, m_stagedVisualIndex, true);
+    
+    // Clear staged state (dropToDockTray already called updateVisualIndexes)
+    m_stagedSurfaceId.clear();
+    m_stagedVisualIndex = -1;
+    emit stagedDropChanged();
+}
+
+void TraySortOrderModel::clearStagedDrop()
+{
+    // Avoid redundant work if there is no staged drop
+    if (m_stagedSurfaceId.isEmpty() && m_stagedVisualIndex < 0) {
+        return;
+    }
+    
+    m_stagedSurfaceId.clear();
+    m_stagedVisualIndex = -1;
+    emit stagedDropChanged();
+    
+    // Update visual indexes to remove preview
+    updateVisualIndexes();
 }
 
 }

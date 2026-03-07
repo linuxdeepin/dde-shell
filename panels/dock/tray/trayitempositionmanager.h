@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -58,6 +58,7 @@ public:
     Qt::Orientation orientation() const;
     int dockHeight() const;
     Q_INVOKABLE void layoutHealthCheck(int delayMs = 200);
+    Q_INVOKABLE void clearRegisteredSizes();
 
 signals:
     void orientationChanged(Qt::Orientation);

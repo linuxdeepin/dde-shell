@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -172,7 +172,7 @@ Item {
             
             // 检查当前悬停位置是否是禁止拖拽的插件
             let modelIndex = DDT.TraySortOrderModel.getModelIndexByVisualIndex(currentItemIndex)
-            let sectionType =root.model.data(modelIndex, DDT.TraySortOrderModel.SectionTypeRole)
+            let sectionType = root.model.data(modelIndex, DDT.TraySortOrderModel.SectionTypeRole)
             if (sectionType === "fixed") {
                 dragEvent.accepted = false
                 return
@@ -189,34 +189,45 @@ Item {
                 }
             }
             
-            // TODO: If this method is used in the stash area, it will cause the drag state to be terminated when dragging to the tray area
-            if (!isStash) {
-                // 根据 ActionShowStashDelegate 的显示状态动态改变条件
-                let shouldAllowDrop = showStashActionVisible ? (dropHoverIndex !== 0) : (dropHoverIndex !== -1)
-                if (shouldAllowDrop) {
-                    dropTrayTimer.handleDrop = function() {
-                        if (isDropped || dragExited) return
-                        DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
-                    }
-                    dropTrayTimer.start()
-                } else if (!surfaceId.startsWith("application-tray")){
-                    dragEvent.accepted = false
+            // 根据 ActionShowStashDelegate 的显示状态动态改变条件
+            let shouldAllowDrop = showStashActionVisible ? (dropHoverIndex !== 0) : (dropHoverIndex !== -1)
+            
+            // 使用暂存机制
+            if (isStash && shouldAllowDrop) {
+                // 调用 stageDropPosition 来预览拖放位置，预留空位
+                DDT.TraySortOrderModel.stageDropPosition(surfaceId, Math.floor(currentItemIndex))
+            } else if (!isStash && shouldAllowDrop) {
+                dropTrayTimer.handleDrop = function() {
+                    if (isDropped || dragExited) return
+                    DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
                 }
+                dropTrayTimer.start()
+            } else if (!surfaceId.startsWith("application-tray")){
+                dragEvent.accepted = false
             }
         }
+        
         onDropped: function (dropEvent) {
             isDropped = true
             let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
             let dropIdx = DDT.TrayItemPositionManager.itemIndexByPoint(Qt.point(drag.x, drag.y))
             let currentItemIndex = dropIdx.index
             let isBefore = dropIdx.isBefore
-            console.log("dropped", currentItemIndex, isBefore)
-            DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
+            let isStash = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType") === "stashed"
+            console.log("dropped", currentItemIndex, isBefore, isStash)
+            
+            if (isStash) {
+                // 提交暂存的拖放位置
+                DDT.TraySortOrderModel.commitStagedDrop()
+            } else {
+                DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
+            }
             DDT.TraySortOrderModel.actionsAlwaysVisible = false
         }
 
         onExited: function () {
             dragExited = true
+            DDT.TraySortOrderModel.clearStagedDrop()
             // dragging from quickPanel, entered trayContainer, but not dropped in this area
             if (source !== "" && !isDropped) {
                 dropTrayTimer.stop()

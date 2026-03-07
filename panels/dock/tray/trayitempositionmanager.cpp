@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -117,6 +117,17 @@ void TrayItemPositionManager::layoutHealthCheck(int delayMs)
         }
     });
     qDebug() << "layout health check scheduled!";
+}
+
+void TrayItemPositionManager::clearRegisteredSizes()
+{
+    // Avoid emitting signal if there's nothing to clear
+    if (m_registeredItemsSize.isEmpty()) {
+        return;
+    }
+    
+    m_registeredItemsSize.clear();
+    emit visualItemSizeChanged();
 }
 
 TrayItemPositionManager::TrayItemPositionManager(QObject *parent)
