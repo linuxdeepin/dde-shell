@@ -70,10 +70,10 @@ Window {
     // 目前直接处理shadowColor(透明和默认值的切换)和borderWidth(0和1的切换)，来控制阴影和边框
     // 参数默认值见： https://github.com/linuxdeepin/qt5platform-plugins/blob/master/xcb/dframewindow.h#L122
     // 需要注意，shadowRadius不能直接套用于“扩散”参数，拿到不透明度100%的设计图确定radius更合适一些。
-    D.DWindow.shadowColor: hideShowAnimation.running ? Qt.rgba(0, 0, 0, 0) : Qt.rgba(0, 0, 0, 0.1)
+    D.DWindow.shadowColor: (hideShowAnimation.running || dockAnimation.running) ? Qt.rgba(0, 0, 0, 0) : Qt.rgba(0, 0, 0, 0.1)
     D.DWindow.shadowOffset: Qt.point(0, 0)
     D.DWindow.shadowRadius: 40
-    D.DWindow.borderWidth:  hideShowAnimation.running ? 0 : 1
+    D.DWindow.borderWidth:  (hideShowAnimation.running || dockAnimation.running) ? 0 : 1
     D.DWindow.enableBlurWindow: Qt.platform.pluginName !== "xcb"
     D.DWindow.themeType: Panel.colorTheme
     D.DWindow.borderColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, dock.blendColorAlpha(0.6) + 20 / 255) : Qt.rgba(0, 0, 0, 0.15)
@@ -207,11 +207,11 @@ Window {
                     }
                     return 1;
                 }
-                return 0;
+                return dockAnimation.useTransformBasedAnimation ? 0 : Panel.dockSize;
             }
             to: {
                 if (dockAnimation.isShowing) {
-                    return 0;
+                    return dockAnimation.useTransformBasedAnimation ? 0 : Panel.dockSize;
                 } else {
                     if (dockAnimation.useTransformBasedAnimation) {
                         return (dock.positionForAnimation === Dock.Left || dock.positionForAnimation === Dock.Top) ? -Panel.dockSize : Panel.dockSize;
