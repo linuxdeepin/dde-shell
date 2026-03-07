@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -11,6 +11,8 @@
 
 #include <cstdint>
 #include <unistd.h>
+#include <fcntl.h>
+#include <poll.h>
 
 #include <DIconButton>
 #include <QByteArray>
@@ -73,7 +75,7 @@ QPixmap fetchWindowPreview(const uint32_t &winId)
     // pipe read write fd
     int fd[2];
 
-    if (pipe(fd) < 0) {
+    if (pipe2(fd, O_CLOEXEC) < 0) {
         qDebug() << "failed to create pipe";
         return QPixmap();
     }
@@ -113,20 +115,51 @@ QPixmap fetchWindowPreview(const uint32_t &winId)
         return QPixmap();
     }
 
-    QFile file;
-    if (!file.open(fd[0], QIODevice::ReadOnly)) {
-        file.close();
-        ::close(fd[0]);
+    QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
+
+    // imageStride 是每行实际字节数（含内存对齐 padding），必须用它而非 width*bpp/8
+    qsizetype expectedSize = static_cast<qsizetype>(imageHeight) * imageStride;
+    QByteArray fileContent(expectedSize, Qt::Uninitialized);
+    qsizetype totalRead = 0;
+
+    // 用 poll() + 超时保护替代阻塞的 QFile::read()：
+    // 若 KWin 内部异常（持有写端但不写也不关），read() 会永久阻塞；
+    // poll() 超时后直接放弃，避免主线程（此处为正常 UI 线程上下文）死锁。
+    constexpr int kTimeoutMs = 5000;
+    while (totalRead < expectedSize) {
+        struct pollfd pfd{fd[0], POLLIN, 0};
+        int ret = ::poll(&pfd, 1, kTimeoutMs);
+        if (ret == 0) {
+            qWarning(x11WindowPreview) << "fetchWindowPreview: pipe read timeout, KWin may have stalled";
+            break;
+        }
+        if (ret < 0) {
+            qWarning(x11WindowPreview) << "fetchWindowPreview: poll error:" << strerror(errno);
+            break;
+        }
+        if (pfd.revents & (POLLERR | POLLNVAL)) {
+            qWarning(x11WindowPreview) << "fetchWindowPreview: pipe error, revents=" << pfd.revents;
+            break;
+        }
+        // POLLHUP（写端已关闭 EOF）：继续读出剩余数据，下次 read 返回 0 退出
+        ssize_t n = ::read(fd[0], fileContent.data() + totalRead, expectedSize - totalRead);
+        if (n <= 0) {
+            if (n < 0)
+                qWarning(x11WindowPreview) << "fetchWindowPreview: read error:" << strerror(errno);
+            break; // n==0: EOF
+        }
+        totalRead += n;
+    }
+
+    ::close(fd[0]);
+
+    if (totalRead < expectedSize) {
+        qWarning(x11WindowPreview) << "fetchWindowPreview: incomplete data, got" << totalRead << "/ expected" << expectedSize;
         return QPixmap();
     }
 
-    QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
-    int bitsCountPerPixel = QImage::toPixelFormat(qimageFormat).bitsPerPixel();
-
-    QByteArray fileContent = file.read(imageHeight * imageWidth * bitsCountPerPixel / 8);
-    QImage image(reinterpret_cast<uchar *>(fileContent.data()), imageWidth, imageHeight, imageStride, qimageFormat);
-    // close read
-    ::close(fd[0]);
+    QImage image(reinterpret_cast<const uchar *>(fileContent.constData()),
+                 imageWidth, imageHeight, imageStride, qimageFormat);
     auto pixmap = QPixmap::fromImage(image);
 
     if (!pixmap.isNull()) {
