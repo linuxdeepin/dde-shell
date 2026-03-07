@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -27,6 +27,8 @@ class TraySortOrderModel : public QStandardItemModel
     Q_PROPERTY(bool actionsAlwaysVisible MEMBER m_actionsAlwaysVisible NOTIFY actionsAlwaysVisibleChanged)
     Q_PROPERTY(bool isUpdating MEMBER m_isUpdating NOTIFY isUpdatingChanged)
     Q_PROPERTY(QList<QVariantMap> availableSurfaces MEMBER m_availableSurfaces NOTIFY availableSurfacesChanged)
+    Q_PROPERTY(QString stagedSurfaceId MEMBER m_stagedSurfaceId NOTIFY stagedDropChanged)
+    Q_PROPERTY(int stagedVisualIndex MEMBER m_stagedVisualIndex NOTIFY stagedDropChanged)
 public:
     // enum SectionTypes {
     //     TrayAction,
@@ -67,6 +69,11 @@ public:
     Q_INVOKABLE void setDockVisible(const QString & surfaceId, bool visible);
     Q_INVOKABLE bool isDockVisible(const QString &surfaceId) const;
     Q_INVOKABLE QModelIndex getModelIndexByVisualIndex(int visualIndex) const;
+    
+    // Staged drop methods for drag preview
+    Q_INVOKABLE void stageDropPosition(const QString &surfaceId, int visualIndex);
+    Q_INVOKABLE void commitStagedDrop();
+    Q_INVOKABLE void clearStagedDrop();
 
 signals:
     void collapsedChanged(bool);
@@ -75,6 +82,7 @@ signals:
     void isUpdatingChanged(bool);
     void visualItemCountChanged(int);
     void availableSurfacesChanged(const QList<QVariantMap> &);
+    void stagedDropChanged();
 
 private:
     int m_visualItemCount = 0;
@@ -94,9 +102,16 @@ private:
     QStringList m_hiddenIds;
     // surface IDs that should be hidden from dock tray but keep VisibilityRole true.
     QStringList m_dockHiddenIds;
+    
+    // Staged drop state for drag preview
+    QString m_stagedSurfaceId;
+    int m_stagedVisualIndex = -1;
 
     QStandardItem * findItemByVisualIndex(int visualIndex, VisualSections visualSection) const;
     QStringList * getSection(const QString & sectionType);
+    
+    // Helper function for reserving space during staged drop
+    void reserveStagedDropSpace(int &currentVisualIndex);
     QString findSection(const QString &surfaceId, const QString &fallback, const QStringList &forbiddenSections, int pluginFlags);
     void registerToSection(const QString & surfaceId, const QString & sectionType);
     QStandardItem *createTrayItem(const QString &name,
