@@ -329,7 +329,9 @@ void TraySortOrderModel::registerToSection(const QString & surfaceId, const QStr
     }
 
     if (!section->contains(surfaceId)) {
-        section->prepend(surfaceId);
+        // 新项添加到末尾，保持已有项的位置顺序
+        // 这样可以确保应用重启后，托盘图标按上次保存的顺序显示
+        section->append(surfaceId);
     }
 }
 
