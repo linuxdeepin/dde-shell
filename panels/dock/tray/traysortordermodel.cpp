@@ -170,7 +170,17 @@ bool TraySortOrderModel::dropToDockTray(const QString &draggedSurfaceId, int dro
     }
 
     if (dropOnSurfaceId == QLatin1String("internal/action-toggle-quick-settings")) {
-        return false;
+        if (forbiddenSections.contains(SECTION_PINNED)) return false;
+        if (sourceSection == &m_pinnedIds) {
+            int idx = m_pinnedIds.indexOf(draggedSurfaceId);
+            if (idx >= 0) {
+                m_pinnedIds.move(idx, m_pinnedIds.count() - 1);
+            }
+        } else {
+            sourceSection->removeOne(draggedSurfaceId);
+            m_pinnedIds.append(draggedSurfaceId);
+        }
+        return true;
     }
 
     if (dropOnSurfaceId == draggedSurfaceId) {
@@ -637,14 +647,16 @@ void TraySortOrderModel::commitStagedDrop()
         return;
     }
     
-    // Reuse dropToDockTray logic for consistency
-    // isBefore is always true for staged drops (insert before the target position)
-    dropToDockTray(m_stagedSurfaceId, m_stagedVisualIndex, true);
+    // Save staged values before clearing
+    QString surfaceId = m_stagedSurfaceId;
+    int visualIndex = m_stagedVisualIndex;
     
-    // Clear staged state (dropToDockTray already called updateVisualIndexes)
     m_stagedSurfaceId.clear();
     m_stagedVisualIndex = -1;
     emit stagedDropChanged();
+    
+    updateVisualIndexes();
+    dropToDockTray(surfaceId, visualIndex, true);
 }
 
 void TraySortOrderModel::clearStagedDrop()
