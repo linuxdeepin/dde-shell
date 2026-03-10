@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -8,6 +8,7 @@
 #include "dataaccessorproxy.h"
 #include "pluginfactory.h"
 
+#include <QTimer>
 #include <QLoggingCategory>
 #include <QQueue>
 
@@ -110,7 +111,13 @@ void BubblePanel::onNotificationStateChanged(qint64 id, int processedType)
 void BubblePanel::onBubbleCountChanged()
 {
     bool isEmpty = m_bubbles->items().isEmpty();
-    setVisible(!isEmpty && enabled());
+    if (isEmpty) {
+        QTimer::singleShot(400, this, [this]() {
+            setVisible(false);
+        });
+    } else {
+        setVisible(!isEmpty && enabled());
+    }
 }
 
 void BubblePanel::addBubble(qint64 id)
