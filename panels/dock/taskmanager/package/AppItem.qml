@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -492,25 +492,38 @@ Item {
         }
     }
 
+    Timer {
+        id: dragToolTipCloseTimer
+        interval: 100
+        onTriggered: {
+            dragToolTip.close()
+        }
+    }
+
     DropArea {
         anchors.fill: parent
         keys: ["dfm_app_type_for_drag"]
 
         onEntered: function (drag) {
             if (root.itemId === "dde-trash") {
-                var point = root.mapToItem(null, root.width / 2, root.height / 2)
-                dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
-                dragToolTip.open()
+                dragToolTipCloseTimer.stop()
+                if (!dragToolTip.toolTipVisible) {
+                    var point = root.mapToItem(null, root.width / 2, root.height / 2)
+                    dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
+                    dragToolTip.open()
+                }
             }
         }
 
         onExited: function (drag) {
             if (root.itemId === "dde-trash") {
-                dragToolTip.close()
+                dragToolTipCloseTimer.restart()
             }
         }
 
         onDropped: function (drop){
+            dragToolTipCloseTimer.stop()
+            dragToolTip.close()
             root.dropFilesOnItem(root.itemId, drop.urls)
         }
     }
