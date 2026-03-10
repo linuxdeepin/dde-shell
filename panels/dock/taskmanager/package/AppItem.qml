@@ -159,6 +159,7 @@ Item {
                 sourceSize: Qt.size(iconSize, iconSize)
                 anchors.centerIn: parent
                 retainWhileLoading: true
+                smooth: iconSize > 32
 
                 LaunchAnimation {
                     id: launchAnimation
