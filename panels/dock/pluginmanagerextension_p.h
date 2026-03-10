@@ -4,12 +4,13 @@
 
 #pragma once
 
-#include <QtWaylandCompositor/QWaylandShellSurfaceTemplate>
-#include <QtWaylandCompositor/QWaylandQuickExtension>
+#include <QPointer>
 #include <QtWaylandCompositor/QWaylandCompositor>
-#include <QtWaylandCompositor/QWaylandSurface>
+#include <QtWaylandCompositor/QWaylandQuickExtension>
 #include <QtWaylandCompositor/QWaylandResource>
 #include <QtWaylandCompositor/QWaylandSeat>
+#include <QtWaylandCompositor/QWaylandShellSurfaceTemplate>
+#include <QtWaylandCompositor/QWaylandSurface>
 
 #include <cstdint>
 
@@ -195,7 +196,7 @@ protected:
 
 private:
     PluginManager* m_manager;
-    QWaylandSurface* m_surface;
+    QPointer<QWaylandSurface> m_surface;
 
     QString m_itemKey;
     QString m_pluginId;
@@ -269,7 +270,7 @@ Q_SIGNALS:
 
 private:
     PluginManager* m_manager;
-    QWaylandSurface* m_surface;
+    QPointer<QWaylandSurface> m_surface;
 
     QString m_itemKey;
     QString m_pluginId;
