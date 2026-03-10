@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -84,7 +84,7 @@ AppletItem {
     Connections {
         target: DDT.TraySortOrderModel
         function onActionsAlwaysVisibleChanged(val) {
-            if (!val && !Panel.contextDragging) {
+            if (!val && !Panel.contextDragging && !stashedPopup.dropHover) {
                 closeStashPopupTimer.start()
             }
         }
@@ -96,7 +96,7 @@ AppletItem {
         interval: 10
         repeat: false
         onTriggered: {
-            if (!Panel.contextDragging) {
+            if (!Panel.contextDragging && !stashedPopup.dropHover) {
                 stashedPopup.close()
             }
         }
