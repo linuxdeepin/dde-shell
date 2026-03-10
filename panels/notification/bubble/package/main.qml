@@ -92,7 +92,7 @@ Window {
     ListView  {
         id: bubbleView
         width: 360
-        height: contentHeight
+        height: Math.max(contentHeight, childrenRect.height)
         anchors {
             right: parent.right
             bottom: parent.bottom
@@ -128,6 +128,30 @@ Window {
                 easing.type: Easing.OutExpo
             }
         }
+        
+        remove: Transition {
+            SequentialAnimation {
+                PropertyAction { 
+                    property: "ListView.delayRemove"
+                    value: true 
+                }
+                
+                ParallelAnimation {
+                    NumberAnimation {
+                        property: "x"
+                        to: 360
+                        duration: 400
+                        easing.type: Easing.InExpo
+                    }
+                }
+                
+                PropertyAction { 
+                    property: "ListView.delayRemove"
+                    value: false 
+                }
+            }
+        }
+
         delegate: Bubble {
             width: 360
             bubble: model

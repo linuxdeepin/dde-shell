@@ -12,6 +12,7 @@
 #include <QQueue>
 
 #include <appletbridge.h>
+#include <qtimer.h>
 
 namespace notification {
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
@@ -110,7 +111,14 @@ void BubblePanel::onNotificationStateChanged(qint64 id, int processedType)
 void BubblePanel::onBubbleCountChanged()
 {
     bool isEmpty = m_bubbles->items().isEmpty();
-    setVisible(!isEmpty && enabled());
+    const bool visible = !isEmpty && enabled();
+    if (!visible) {
+        QTimer::singleShot(400, this, [this]() {
+            setVisible(false);
+        });
+    } else {
+        setVisible(visible);
+    }
 }
 
 void BubblePanel::addBubble(qint64 id)
