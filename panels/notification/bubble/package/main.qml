@@ -70,7 +70,7 @@ Window {
     visible: Applet.visible
     width: 390
     height: Math.max(10, bubbleView.height + bubbleView.anchors.topMargin + bubbleView.anchors.bottomMargin)
-    DLayerShellWindow.layer: DLayerShellWindow.LayerTop
+    DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
     DLayerShellWindow.topMargin: windowMargin(0)
     DLayerShellWindow.rightMargin: windowMargin(1)
