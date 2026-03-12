@@ -129,29 +129,8 @@ Window {
             }
         }
         delegate: Bubble {
-            id: delegateItem
             width: 360
             bubble: model
-
-            ListView.onRemove: SequentialAnimation {
-                PropertyAction {
-                    target: delegateItem
-                    property: "ListView.delayRemove"
-                    value: true
-                }
-                NumberAnimation {
-                    target: delegateItem
-                    property: "x"
-                    to: 360
-                    duration: 400
-                    easing.type: Easing.InExpo
-                }
-                PropertyAction {
-                    target: delegateItem
-                    property: "ListView.delayRemove"
-                    value: false
-                }
-            }
         }
     }
 }
