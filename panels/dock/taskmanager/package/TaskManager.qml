@@ -68,14 +68,6 @@ ContainmentItem {
         remainingSpace: taskmanager.remainingSpacesForSplitWindow
         font.family: D.DTK.fontManager.t6.family
         font.pixelSize: Math.max(10, Math.min(20, Math.round(textCalculator.iconSize * 0.35)))
-        onOptimalSingleTextWidthChanged: {                                                                                                                                                               
-            appContainer.addDisplaced = null                                                                                                                                                                
-            appContainer.removeDisplaced = null                                                                                                                                                                     
-            Qt.callLater(function() {                                                                                                                                                                  
-                appContainer.addDisplaced = addDisplacedTransition                                                                                                                                 
-                appContainer.removeDisplaced = removeDisplacedTransition                                                                                                                                             
-            })                                                                                                                                                           
-        }   
     }
 
     OverflowContainer {
@@ -91,27 +83,6 @@ ContainmentItem {
                 duration: 200
             }
         }
-        moveDisplaced: Transition {
-            NumberAnimation {
-                properties: "x,y"
-                easing.type: Easing.OutQuad
-            }
-        }
-        addDisplaced: Transition {
-            id: addDisplacedTransition
-            NumberAnimation {
-                properties: "x,y"
-                easing.type: Easing.OutQuad
-            }
-        }
-        removeDisplaced: Transition {
-            id: removeDisplacedTransition
-            NumberAnimation {
-                properties: "x,y"
-                easing.type: Easing.OutQuad
-            }
-        }
-        move: moveDisplaced
         model: DelegateModel {
             id: visualModel
             model: taskmanager.Applet.dataModel
@@ -168,31 +139,56 @@ ContainmentItem {
                 property int visualIndex: DelegateModel.itemsIndex
                 property var modelIndex: visualModel.modelIndex(index)
 
-                AppItem {
-                    id: appItem
-                    anchors.fill: parent // This is mandatory for draggable item center in drop area
-
-                    displayMode: Panel.indicatorStyle
-                    colorTheme: Panel.colorTheme
-                    active: delegateRoot.active
-                    attention: delegateRoot.attention
-                    itemId: delegateRoot.itemId
-                    name: delegateRoot.name
-                    iconName: delegateRoot.iconName
-                    menus: delegateRoot.menus
-                    windows: delegateRoot.windows
-                    visualIndex: delegateRoot.visualIndex
-                    modelIndex: delegateRoot.modelIndex
-                    blendOpacity: taskmanager.blendOpacity
-                    title: delegateRoot.title
-                    enableTitle: textCalculator.enabled
-                    appTitleSpacing: taskmanager.appTitleSpacing
-                    ListView.delayRemove: Drag.active
-                    Component.onCompleted: {
-                        dropFilesOnItem.connect(taskmanager.Applet.dropFilesOnItem)
+                Rectangle {
+                    // kept for debug purpose
+                    // border.color: "red"
+                    // border.width: 1
+                    color: "transparent"
+                    parent: appContainer
+                    x: delegateRoot.x
+                    y: delegateRoot.y
+                    width: delegateRoot.width
+                    height: delegateRoot.height
+                    scale: delegateRoot.scale
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 200
+                            easing.type: Easing.OutCubic
+                        }
                     }
-                    onDragFinished: function() {
-                        launcherDndDropArea.resetDndState()
+                    Behavior on y {
+                        NumberAnimation {
+                            duration: 200
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    AppItem {
+                        id: appItem
+                        anchors.fill: parent // This is mandatory for draggable item center in drop area
+
+                        displayMode: Panel.indicatorStyle
+                        colorTheme: Panel.colorTheme
+                        active: delegateRoot.active
+                        attention: delegateRoot.attention
+                        itemId: delegateRoot.itemId
+                        name: delegateRoot.name
+                        iconName: delegateRoot.iconName
+                        menus: delegateRoot.menus
+                        windows: delegateRoot.windows
+                        visualIndex: delegateRoot.visualIndex
+                        modelIndex: delegateRoot.modelIndex
+                        blendOpacity: taskmanager.blendOpacity
+                        title: delegateRoot.title
+                        enableTitle: textCalculator.enabled
+                        appTitleSpacing: taskmanager.appTitleSpacing
+                        ListView.delayRemove: Drag.active
+                        Component.onCompleted: {
+                            dropFilesOnItem.connect(taskmanager.Applet.dropFilesOnItem)
+                        }
+                        onDragFinished: function() {
+                            launcherDndDropArea.resetDndState()
+                        }
                     }
                 }
             }
@@ -201,6 +197,7 @@ ContainmentItem {
         DropArea {
             id: launcherDndDropArea
             anchors.fill: parent
+            z: 3
             keys: ["text/x-dde-dock-dnd-appid"]
             property string launcherDndDesktopId: ""
             property string launcherDndDragSource: ""
