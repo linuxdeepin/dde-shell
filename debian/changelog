@@ -1,3 +1,30 @@
+dde-shell (2.0.32) unstable; urgency=medium
+
+  * fix(notification): change bubble window layer from LayerTop to
+    LayerOverlay
+  * fix: remove bubble removal animation and simplify visibility logic
+  * fix: prevent negative margins in dock center alignment
+  * fix: replace raw pointers with QPointer to prevent wild pointers
+  * fix: improve window grouping and drag reordering in dock
+  * fix: improve notification bubble panel hide animation
+  * fix(dock): disable smooth rendering for tray icons
+  * fix: Abnormal behavior when dragging app icons to the tray window
+  * fix(taskmanager): fix tooltip flickering when dragging files to
+    trash icon
+  * fix: Optimized tray window icon sorting
+  * docs: add plugin development documentation
+  * fix: Fix the issue of tray area icons moving when released
+  * fix: font not updating in windowed launcher popup on system font
+    change
+  * fix: prevent indefinite blocking in fetchWindowPreview pipe read
+  * fix: Fix the issue where no space is reserved after dragging out the
+    tray icon
+  * fix: prevent visual ghosting and flashing during dock position
+    change
+  * fix: correct touchscreen right-click menu interaction
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 12 Mar 2026 21:32:15 +0800
+
 dde-shell (2.0.31) unstable; urgency=medium
 
   * fix(dock): fix pasting text in Wayland plugin windows
