@@ -695,6 +695,9 @@ void X11WindowPreviewContainer::initUI()
 
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     winId();
+    if (auto handle = this->windowHandle()) {
+        handle->setProperty("isDockPreview", true);
+    }
     DPlatformHandle handler(this->windowHandle());
     handler.setShadowRadius(12 * qApp->devicePixelRatio());
     handler.setShadowColor(QColor(0, 0, 0, 0.6 * 255));

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -69,7 +69,9 @@ bool DockHelper::eventFilter(QObject *watched, QEvent *event)
 
     // skip tooltip windows
     if (window->flags().testFlags(Qt::ToolTip)) {
-        return false;
+        if (!window->property("isDockPreview").toBool()) {
+            return false;
+        }
     }
 
     auto topTransientParent = window;
