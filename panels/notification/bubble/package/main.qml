@@ -69,8 +69,8 @@ Window {
 
     visible: Applet.visible
     width: 390
-    height: Math.max(10, bubbleView.height + bubbleView.anchors.topMargin + bubbleView.anchors.bottomMargin)
-    DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
+    height: 0
+    DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
     DLayerShellWindow.topMargin: windowMargin(0)
     DLayerShellWindow.rightMargin: windowMargin(1)
@@ -89,6 +89,11 @@ Window {
         root.screen = Qt.binding(function () { return Qt.application.screens[0]})
     }
 
+    // Function to trigger position update with custom width and height
+    function updatePosition(width, height) {
+        DLayerShellWindow.requestPositionUpdate(width, height)
+    }
+
     ListView  {
         id: bubbleView
         width: 360
@@ -98,13 +103,18 @@ Window {
             bottom: parent.bottom
             bottomMargin: 10
             rightMargin: 10
-            margins: 30
+            topMargin: 10
         }
 
         spacing: 10
         model: Applet.bubbles
         interactive: false
         verticalLayoutDirection: ListView.BottomToTop
+
+        // Monitor height changes and update position
+        onHeightChanged: {
+            updatePosition(390, bubbleView.height + bubbleView.anchors.topMargin + bubbleView.anchors.bottomMargin)
+        }
         add: Transition {
             id: addTrans
             // Before starting the new animation, forcibly complete the previous notification bubble's animation
@@ -129,8 +139,31 @@ Window {
             }
         }
         delegate: Bubble {
+            id: delegateItem
             width: 360
             bubble: model
+
+            ListView.onRemove: SequentialAnimation {
+                PropertyAction {
+                    target: delegateItem
+                    property: "ListView.delayRemove"
+                    value: true
+                }
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: delegateItem
+                        property: "x"
+                        to: 360
+                        duration: 400
+                        easing.type: Easing.InExpo
+                    }
+                }
+                PropertyAction {
+                    target: delegateItem
+                    property: "ListView.delayRemove"
+                    value: false
+                }
+            }
         }
     }
 }

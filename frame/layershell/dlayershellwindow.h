@@ -131,6 +131,14 @@ public:
     bool closeOnDismissed() const;
 
     /**
+     * Request position update with specified width and height
+     * This can be called from QML to trigger a position recalculation
+     * @param width The window width to use for position calculation
+     * @param height The window height to use for position calculation
+     */
+    Q_INVOKABLE void requestPositionUpdate(int width, int height);
+
+    /**
      * Gets the LayerShell Window for a given Qt Window
      * Ownership is not transferred
      */
@@ -145,6 +153,7 @@ Q_SIGNALS:
     void keyboardInteractivityChanged();
     void layerChanged();
     void scopeChanged();
+    void positionUpdateRequested(int width, int height);
 
 private:
     DLayerShellWindow(QWindow* window);
