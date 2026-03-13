@@ -62,7 +62,7 @@ Control {
         keyNavigationEnabled: false
         activeFocusOnTab: false
         ScrollBar.vertical: ScrollBar { }
-        topMargin: 10
+        topMargin: 20
         leftMargin: NotifyStyle.leftMargin
         property int nextIndex: -1
         property int pendingFocusIndex: -1  // Index to focus after expand operation
