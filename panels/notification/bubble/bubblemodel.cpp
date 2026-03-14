@@ -82,8 +82,6 @@ void BubbleModel::clear()
     qDeleteAll(m_bubbles);
     m_bubbles.clear();
     endResetModel();
-    m_delayBubbles.clear();
-    m_delayRemovedBubble = NotifyEntity::InvalidId;
 
     updateLevel();
     m_updateTimeTipTimer->stop();
@@ -127,16 +125,8 @@ void BubbleModel::remove(const BubbleItem *bubble)
 
 BubbleItem *BubbleModel::removeById(qint64 id)
 {
-    if (id == m_delayRemovedBubble) {
-        // Delayed remove
-        if (!m_delayBubbles.contains(id)) {
-            m_delayBubbles.append(id);
-        }
-        return nullptr;
-    }
     for (const auto &item : m_bubbles) {
         if (item->id() == id) {
-            m_delayBubbles.removeAll(id);
             remove(m_bubbles.indexOf(item));
             return item;
         }
@@ -250,27 +240,6 @@ void BubbleModel::updateBubbleCount(int count)
 
     layoutChanged();
     updateLevel();
-}
-
-qint64 BubbleModel::delayRemovedBubble() const
-{
-    return m_delayRemovedBubble;
-}
-
-void BubbleModel::setDelayRemovedBubble(qint64 newDelayRemovedBubble)
-{
-    if (m_delayRemovedBubble == newDelayRemovedBubble)
-        return;
-    const auto oldDelayRemovedBubble = m_delayRemovedBubble;
-    if (m_delayBubbles.contains(oldDelayRemovedBubble)) {
-        // Remove last delayed bubble.
-        QTimer::singleShot(DelayRemovBubbleTime, this, [this, oldDelayRemovedBubble]() {
-            removeById(oldDelayRemovedBubble);
-        });
-    }
-
-    m_delayRemovedBubble = newDelayRemovedBubble;
-    emit delayRemovedBubbleChanged();
 }
 
 void BubbleModel::clearInvalidBubbles()

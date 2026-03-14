@@ -12,14 +12,6 @@ Control {
     id: control
     height: loader.height
     property var bubble
-    onHoveredChanged: function () {
-        if (control.hovered) {
-            Applet.bubbles.delayRemovedBubble = bubble.id
-        } else {
-            Applet.bubbles.delayRemovedBubble = 0
-        }
-    }
-
     Loader {
         id: loader
         width: control.width
