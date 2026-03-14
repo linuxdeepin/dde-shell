@@ -132,5 +132,23 @@ Window {
             width: 360
             bubble: model
         }
+
+        HoverHandler {
+            onPointChanged: {
+                const local = point.position
+                let hoveredItem = bubbleView.itemAt(local.x, local.y)
+                if (hoveredItem && hoveredItem.bubble) {
+                    Applet.setHoveredId(hoveredItem.bubble.id)
+                } else {
+                    Applet.setHoveredId(0)
+                }
+            }
+
+            onHoveredChanged: {
+                if (!hovered) {
+                    Applet.setHoveredId(0)
+                }
+            }
+        }
     }
 }

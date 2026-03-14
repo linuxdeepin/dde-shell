@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -37,6 +37,7 @@ namespace notification {
 
 static const uint NoReplacesId = 0;
 static const int DefaultTimeOutMSecs = 5000;
+static const int BlockItemTimeout = 1000;
 static const QString NotificationsDBusService = "org.freedesktop.Notifications";
 static const QString NotificationsDBusPath = "/org/freedesktop/Notifications";
 static const QString DDENotifyDBusServer = "org.deepin.dde.Notification1";
@@ -345,6 +346,30 @@ QVariant NotificationManager::GetSystemInfo(uint configItem)
 {
     qDebug(notifyLog) << "Get systemInfo" << configItem;
     return m_setting->systemValue(static_cast<NotificationSetting::SystemConfigItem>(configItem));
+}
+
+void NotificationManager::setBlockClosedId(qint64 id)
+{
+    if (id == m_blockClosedId) {
+        return;
+    }
+
+    if(m_blockClosedId != NotifyEntity::InvalidId) {
+        auto findIter = std::find_if(m_pendingTimeoutEntities.begin(), m_pendingTimeoutEntities.end(), [this](const NotifyEntity &entity) {
+            return entity.id() == m_blockClosedId;
+        });
+
+        const auto current = QDateTime::currentMSecsSinceEpoch();
+        if (findIter != m_pendingTimeoutEntities.end()) {
+            if (current > findIter.key() - BlockItemTimeout) {
+                qDebug(notifyLog) << "Delay close bubble id:" << m_blockClosedId << "for the new block bubble id:" << id;
+                m_pendingTimeoutEntities.insert(current + BlockItemTimeout, findIter.value());
+                m_pendingTimeoutEntities.erase(findIter);
+            }
+        }
+    }
+    m_blockClosedId = id;
+    onHandingPendingEntities();
 }
 
 bool NotificationManager::isDoNotDisturb() const
@@ -670,6 +695,12 @@ void NotificationManager::onHandingPendingEntities()
         if (!item.isValid()) {
             qWarning(notifyLog) << "Skipping timeout processing for invalid entity id:" << item.id() << "appName:" << item.appName()
                                 << "cTime:" << item.cTime();
+            continue;
+        }
+
+        if (item.id() == m_blockClosedId) {
+            qDebug(notifyLog) << "bubble id:" << item.bubbleId() << "entity id:" << item.id();
+            m_pendingTimeoutEntities.insert(current, item);
             continue;
         }
 
