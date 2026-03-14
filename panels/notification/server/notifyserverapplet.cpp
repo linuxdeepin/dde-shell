@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -102,6 +102,11 @@ void NotifyServerApplet::removeNotifications()
 void NotifyServerApplet::removeExpiredNotifications()
 {
     m_manager->removeExpiredNotifications();
+}
+
+void NotifyServerApplet::setBlockClosedId(qint64 id)
+{
+    m_manager->setBlockClosedId(id);
 }
 
 D_APPLET_CLASS(NotifyServerApplet)

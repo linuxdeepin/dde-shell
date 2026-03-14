@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -39,6 +39,7 @@ public Q_SLOTS:
     void close(int bubbleIndex, int reason);
     void delayProcess(int bubbleIndex);
     void setEnabled(bool newEnabled);
+    void setHoveredId(qint64 id);
 
 Q_SIGNALS:
     void visibleChanged();

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -347,6 +347,21 @@ QVariant NotificationManager::GetSystemInfo(uint configItem)
     return m_setting->systemValue(static_cast<NotificationSetting::SystemConfigItem>(configItem));
 }
 
+void NotificationManager::setBlockClosedId(qint64 id)
+{
+    auto findIter = std::find_if(m_pendingTimeoutEntities.begin(), m_pendingTimeoutEntities.end(), [this](const NotifyEntity &entity) {
+        return entity.id() == m_blockClosedId;
+    });
+    const auto current = QDateTime::currentMSecsSinceEpoch();
+    if(m_blockClosedId != NotifyEntity::InvalidId && findIter != m_pendingTimeoutEntities.end() && current > findIter.key()) {
+        qDebug(notifyLog) << "Block close bubble id:" << m_blockClosedId << "for the new block bubble id:" << id;
+        m_pendingTimeoutEntities.insert(QDateTime::currentMSecsSinceEpoch() + 1000, findIter.value());
+        m_pendingTimeoutEntities.erase(findIter);
+    }
+    m_blockClosedId = id;
+    onHandingPendingEntities();
+}
+
 bool NotificationManager::isDoNotDisturb() const
 {
     if (!m_setting->systemValue(NotificationSetting::DNDMode).toBool())
@@ -670,6 +685,12 @@ void NotificationManager::onHandingPendingEntities()
         if (!item.isValid()) {
             qWarning(notifyLog) << "Skipping timeout processing for invalid entity id:" << item.id() << "appName:" << item.appName()
                                 << "cTime:" << item.cTime();
+            continue;
+        }
+
+        if (item.id() == m_blockClosedId) {
+            qDebug(notifyLog) << "bubble id:" << item.bubbleId() << "entity id:" << item.id();
+            m_pendingTimeoutEntities.insert(current + 1000, item);
             continue;
         }
 
