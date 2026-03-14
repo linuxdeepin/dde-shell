@@ -7,6 +7,7 @@
 #include "bubblemodel.h"
 #include "dataaccessorproxy.h"
 #include "pluginfactory.h"
+#include <qtimer.h>
 
 #include <QTimer>
 #include <QLoggingCategory>
@@ -54,6 +55,7 @@ bool BubblePanel::init()
     connect(m_bubbles, &BubbleModel::rowsInserted, this, &BubblePanel::onBubbleCountChanged);
     connect(m_bubbles, &BubbleModel::rowsRemoved, this, &BubblePanel::onBubbleCountChanged);
 
+    setVisible(true);
     return true;
 }
 
@@ -111,7 +113,14 @@ void BubblePanel::onNotificationStateChanged(qint64 id, int processedType)
 void BubblePanel::onBubbleCountChanged()
 {
     bool isEmpty = m_bubbles->items().isEmpty();
-    setVisible(!isEmpty && enabled());
+
+    if (isEmpty) {
+        QTimer::singleShot(400, this, [this]() {
+            setVisible(false);
+        });
+    } else {
+        setVisible(!isEmpty && enabled());
+    }
 }
 
 void BubblePanel::addBubble(qint64 id)

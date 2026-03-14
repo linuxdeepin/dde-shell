@@ -231,6 +231,11 @@ DLayerShellWindow* DLayerShellWindow::get(QWindow* window)
     return new DLayerShellWindow(window);
 }
 
+void DLayerShellWindow::requestPositionUpdate(int width, int height)
+{
+    Q_EMIT positionUpdateRequested(width, height);
+}
+
 DLayerShellWindow* DLayerShellWindow::qmlAttachedProperties(QObject *object)
 {
     auto window = qobject_cast<QWindow*>(object);

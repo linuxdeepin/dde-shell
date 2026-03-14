@@ -26,6 +26,7 @@ private slots:
     void onLayerChanged();
     // margins or anchor changed
     void onPositionChanged();
+    void onPositionUpdateRequested(int width, int height);
     void onExclusionZoneChanged();
     void onScopeChanged();
     // void onKeyboardInteractivityChanged();
