@@ -14,9 +14,9 @@ Control {
     property var bubble
     onHoveredChanged: function () {
         if (control.hovered) {
-            Applet.bubbles.delayRemovedBubble = bubble.id
+            Applet.setHoveredId(control.bubble.id)
         } else {
-            Applet.bubbles.delayRemovedBubble = 0
+            Applet.setHoveredId(0)
         }
     }
 

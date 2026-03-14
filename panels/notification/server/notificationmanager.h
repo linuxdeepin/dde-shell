@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -65,6 +65,7 @@ public Q_SLOTS:
     void SetSystemInfo(uint configItem, const QVariant &value);
     QVariant GetSystemInfo(uint configItem);
 
+    void setBlockClosedId(qint64 id);
 private:
     bool isDoNotDisturb() const;
     bool recordNotification(NotifyEntity &entity);
@@ -97,6 +98,7 @@ private:
     QStringList m_systemApps;
     QMap<QString, QVariant> m_appNamesMap;
     int m_cleanupDays = 7;
+    qint64 m_blockClosedId = 0;
 };
 
 } // notification

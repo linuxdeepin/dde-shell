@@ -206,6 +206,10 @@ void BubblePanel::setEnabled(bool newEnabled)
     setVisible(!isEmpty && enabled());
 }
 
+void BubblePanel::setHoveredId(qint64 id)
+{
+    QMetaObject::invokeMethod(m_notificationServer, "setBlockClosedId", Qt::DirectConnection, Q_ARG(qint64, id));
+}
 }
 
 #include "bubblepanel.moc"
