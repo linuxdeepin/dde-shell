@@ -1,12 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="tr">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="tr">
 <context>
     <name>GroupNotify</name>
-    <message>
-        <source>Clear All</source>
-        <translation>Tümünü Temizle</translation>
-    </message>
     <message>
         <source>Fold</source>
         <translation>Katla</translation>
@@ -14,6 +8,10 @@
     <message>
         <source>More</source>
         <translation>Daha</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Tümünü Temizle</translation>
     </message>
 </context>
 <context>
@@ -30,10 +28,6 @@
         <translation>Bildirim Merkezi</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Tümünü Temizle</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Katla</translation>
     </message>
@@ -43,7 +37,11 @@
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished">Bildirim Ayarı</translation>
+        <translation>Bildirim Ayarı</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Tümünü Temizle</translation>
     </message>
 </context>
 <context>
