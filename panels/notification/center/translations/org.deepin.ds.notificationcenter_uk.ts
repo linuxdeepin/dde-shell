@@ -1,12 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="uk">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="uk">
 <context>
     <name>GroupNotify</name>
-    <message>
-        <source>Clear All</source>
-        <translation>Вилучити все</translation>
-    </message>
     <message>
         <source>Fold</source>
         <translation>Згорнути</translation>
@@ -14,6 +8,10 @@
     <message>
         <source>More</source>
         <translation>Більше</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Вилучити все</translation>
     </message>
 </context>
 <context>
@@ -30,10 +28,6 @@
         <translation>Центр сповіщень</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Вилучити все</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Згорнути</translation>
     </message>
@@ -43,7 +37,11 @@
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished">Параметри сповіщень</translation>
+        <translation>Параметри сповіщень</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Вилучити все</translation>
     </message>
 </context>
 <context>
