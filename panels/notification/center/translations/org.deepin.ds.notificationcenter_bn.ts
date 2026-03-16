@@ -1,26 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="bn">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="bn">
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>সব সাফাকরণ</translation>
-    </message>
-    <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>সব সাফাকরণ</translation>
     </message>
 </context>
 <context>
     <name>NotifyCenter</name>
     <message>
         <source>No recent notifications</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -30,20 +28,20 @@
         <translation>নোটিফিকেশন সেন্টার</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>সব সাফাকরণ</translation>
-    </message>
-    <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished">নোটিফিকেশন সেটিং</translation>
+        <translation>নোটিফিকেশন সেটিং</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>সব সাফাকরণ</translation>
     </message>
 </context>
 <context>
@@ -65,7 +63,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
