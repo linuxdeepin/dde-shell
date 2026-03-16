@@ -1,19 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ja">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ja">
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>すべて消去</translation>
-    </message>
-    <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>すべて消去</translation>
     </message>
 </context>
 <context>
@@ -30,20 +28,20 @@
         <translation>通知センター</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>すべて消去</translation>
-    </message>
-    <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished">通知の設定</translation>
+        <translation>通知の設定</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>すべて消去</translation>
     </message>
 </context>
 <context>
@@ -65,7 +63,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
