@@ -1,12 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="nl">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="nl">
 <context>
     <name>GroupNotify</name>
-    <message>
-        <source>Clear All</source>
-        <translation>Alles wissen</translation>
-    </message>
     <message>
         <source>Fold</source>
         <translation>Invouwen</translation>
@@ -14,6 +8,10 @@
     <message>
         <source>More</source>
         <translation>Meer</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Alles wissen</translation>
     </message>
 </context>
 <context>
@@ -30,10 +28,6 @@
         <translation>Meldingencentrum</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Alles wissen</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Invouwen</translation>
     </message>
@@ -43,7 +37,11 @@
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished">Meldingsinstellingen</translation>
+        <translation>Meldingsinstellingen</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Alles wissen</translation>
     </message>
 </context>
 <context>
