@@ -1,19 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ja">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ja">
 <context>
     <name>main</name>
     <message>
         <source>Indicator Style</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Fashion Mode</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Efficient Mode</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Classic Mode</source>
