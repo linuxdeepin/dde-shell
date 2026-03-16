@@ -1,12 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ca">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ca">
 <context>
     <name>GroupNotify</name>
-    <message>
-        <source>Clear All</source>
-        <translation>Neteja-ho tot</translation>
-    </message>
     <message>
         <source>Fold</source>
         <translation>Replega</translation>
@@ -14,6 +8,10 @@
     <message>
         <source>More</source>
         <translation>Més</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Neteja-ho tot</translation>
     </message>
 </context>
 <context>
@@ -30,10 +28,6 @@
         <translation>Centre de notificacions</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Neteja-ho tot</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Replega</translation>
     </message>
@@ -43,7 +37,11 @@
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished">Configuració de les notificacions</translation>
+        <translation>Configuració de les notificacions</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Neteja-ho tot</translation>
     </message>
 </context>
 <context>
@@ -65,7 +63,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished">Neteja-ho tot</translation>
+        <translation>Neteja-ho tot</translation>
     </message>
 </context>
 <context>
