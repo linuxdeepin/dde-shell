@@ -1,26 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="kk">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="kk">
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>Біріктірілгеніні жою</translation>
-    </message>
-    <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Біріктірілгеніні жою</translation>
     </message>
 </context>
 <context>
     <name>NotifyCenter</name>
     <message>
         <source>No recent notifications</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -30,20 +28,20 @@
         <translation>Натигмалар центрі</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Біріктірілгеніні жою</translation>
-    </message>
-    <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished">Натигма шығару айлағы</translation>
+        <translation>Натигма шығару айлағы</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Біріктірілгеніні жою</translation>
     </message>
 </context>
 <context>
@@ -65,7 +63,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
