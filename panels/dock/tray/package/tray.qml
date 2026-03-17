@@ -43,6 +43,9 @@ AppletItem {
 
         property alias dropHover: stashContainer.dropHover
         property alias stashItemDragging: stashContainer.stashItemDragging
+        property bool preCreating: false
+
+        opacity: preCreating ? 0 : 1
 
         popupX: DockPanelPositioner.x
         popupY: DockPanelPositioner.y
@@ -79,8 +82,25 @@ AppletItem {
             DockPanelPositioner.bounding = Qt.binding(function () {
                 return Qt.rect(collapsedBtnCenterPoint.x, collapsedBtnCenterPoint.y, stashedPopup.width, stashedPopup.height)
             })
+            // Pre-create popup to avoid first-open lag
+            Qt.callLater(function() {
+                stashedPopup.preCreating = true
+                stashedPopup.open()
+                preCreateCloseTimer.start()
+            })
         }
     }
+
+    Timer {
+        id: preCreateCloseTimer
+        interval: 200
+        repeat: false
+        onTriggered: {
+            stashedPopup.close()
+            stashedPopup.preCreating = false
+        }
+    }
+
     Connections {
         target: DDT.TraySortOrderModel
         function onActionsAlwaysVisibleChanged(val) {
