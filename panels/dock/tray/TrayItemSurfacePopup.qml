@@ -57,6 +57,7 @@ Item {
 
         onMenuVisibleChanged: {
             if (menuVisible) {
+                subMenuLoaderDelayTimer.stop()
                 subMenuLoader.active = true
             } else {
                 subMenuLoaderDelayTimer.start()
