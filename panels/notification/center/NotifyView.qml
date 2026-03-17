@@ -61,6 +61,7 @@ Control {
         snapMode: ListView.SnapToItem
         keyNavigationEnabled: false
         activeFocusOnTab: false
+        boundsBehavior: Flickable.StopAtBounds
         ScrollBar.vertical: ScrollBar { }
         topMargin: 20
         leftMargin: NotifyStyle.leftMargin
