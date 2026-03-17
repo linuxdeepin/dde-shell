@@ -17,7 +17,7 @@ AppletItem {
     id: tray
 
     readonly property int nextAppletSpacing: 6
-    property bool useColumnLayout: Panel.position % 2
+    property bool useColumnLayout: Panel.rootObject.positionForAnimation % 2
     property int dockOrder: 25
     readonly property string quickpanelTrayItemPluginId: "sound"
     readonly property var filterTrayPlugins: [quickpanelTrayItemPluginId]
