@@ -1,12 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="pl">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pl">
 <context>
     <name>GroupNotify</name>
-    <message>
-        <source>Clear All</source>
-        <translation>Wyczyść wszystkie</translation>
-    </message>
     <message>
         <source>Fold</source>
         <translation>Zwiń</translation>
@@ -14,6 +8,10 @@
     <message>
         <source>More</source>
         <translation>Więcej</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Wyczyść wszystkie</translation>
     </message>
 </context>
 <context>
@@ -30,10 +28,6 @@
         <translation>Centrum powiadomień</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Wyczyść wszystkie</translation>
-    </message>
-    <message>
         <source>Fold</source>
         <translation>Zwiń</translation>
     </message>
@@ -43,7 +37,11 @@
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished">Ustawienia powiadomień</translation>
+        <translation>Ustawienia powiadomień</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Wyczyść wszystkie</translation>
     </message>
 </context>
 <context>

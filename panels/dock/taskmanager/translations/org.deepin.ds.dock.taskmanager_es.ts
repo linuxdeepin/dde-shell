@@ -53,7 +53,7 @@
     </message>
     <message>
         <source>Close this window</source>
-        <translation type="unfinished"/>
+        <translation>Cerrar esta ventana</translation>
     </message>
 </context>
 <context>

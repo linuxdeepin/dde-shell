@@ -1,19 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="es">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="es">
 <context>
     <name>GroupNotify</name>
     <message>
-        <source>Clear All</source>
-        <translation>Limpiar todo</translation>
-    </message>
-    <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation>Plegar</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation>Más</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Limpiar todo</translation>
     </message>
 </context>
 <context>
@@ -30,20 +28,20 @@
         <translation>Centro de notificaciones</translation>
     </message>
     <message>
-        <source>Clear All</source>
-        <translation>Limpiar todo</translation>
-    </message>
-    <message>
         <source>Fold</source>
-        <translation type="unfinished"></translation>
+        <translation>Plegar</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation>Más</translation>
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished">Ajustes de notificaciones</translation>
+        <translation>Ajustes de notificaciones</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Limpiar todo</translation>
     </message>
 </context>
 <context>
@@ -65,7 +63,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpiar todo</translation>
     </message>
 </context>
 <context>
