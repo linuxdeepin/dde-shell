@@ -266,7 +266,7 @@ NotifyItem {
                     color: palette.windowText
                     renderType: Text.QtRendering
                     wrapMode: Text.NoWrap
-                    elide: Text.ElideMiddle
+                    elide: Text.ElideRight
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 }
