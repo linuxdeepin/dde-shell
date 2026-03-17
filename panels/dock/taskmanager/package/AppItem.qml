@@ -427,6 +427,12 @@ Item {
         }
     }
 
+    function requestAppItemMenu() {
+        contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
+        contextMenuLoader.active = true
+        MenuHelper.openMenu(contextMenuLoader.item)
+    }
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
@@ -451,12 +457,16 @@ Item {
             toolTip.close()
             closeItemPreview()
         }
+        // touchscreen long press.
+        onPressAndHold: function (mouse) {
+            if (mouse.button === Qt.NoButton) {
+                requestAppItemMenu()
+            }
+        }
         onClicked: function (mouse) {
             let index = root.modelIndex;
             if (mouse.button === Qt.RightButton) {
-                contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
-                contextMenuLoader.active = true
-                MenuHelper.openMenu(contextMenuLoader.item)
+                requestAppItemMenu()
             } else {
                 if (root.windows.length === 0) {
                     launchAnimation.start();

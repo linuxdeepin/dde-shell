@@ -56,6 +56,14 @@ Window {
         return appearance.opacity
     }
 
+    function requestShowDockMenu() {
+        // maybe has popup visible, close it.
+        Panel.requestClosePopup()
+        viewDeactivated()
+        hideTimer.stop()
+        MenuHelper.openMenu(dockMenuLoader.item)
+    }
+
     DLayerShellWindow.anchors: position2Anchors(positionForAnimation)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing ? Applet.dockSize : 0
@@ -413,16 +421,34 @@ Window {
                 MenuHelper.closeCurrent()
                 dockMenuLoader.active = true
                 if (button === Qt.RightButton && lastActive !== dockMenuLoader.item) {
-                    // maybe has popup visible, close it.
-                    Panel.requestClosePopup()
-                    viewDeactivated()
-                    hideTimer.stop()
-                    MenuHelper.openMenu(dockMenuLoader.item)
+                    requestShowDockMenu()
                 }
                 if (button === Qt.LeftButton) {
                     // try to close popup when clicked empty, because dock does not have focus.
                     Panel.requestClosePopup()
                     viewDeactivated()
+                }
+            }
+        }
+
+        //Touch screen click
+        TapHandler {
+            acceptedButtons: Qt.NoButton
+            acceptedDevices: PointerDevice.TouchScreen
+            onTapped: function(eventPoint, button) {
+                let lastActive = MenuHelper.activeMenu
+                MenuHelper.closeCurrent()
+                dockMenuLoader.active = true
+                // try to close popup when clicked empty, because dock does not have focus.
+                Panel.requestClosePopup()
+                viewDeactivated()
+            }
+            onLongPressed: {
+                let lastActive = MenuHelper.activeMenu
+                MenuHelper.closeCurrent()
+                dockMenuLoader.active = true
+                if (lastActive !== dockMenuLoader.item) {
+                    requestShowDockMenu()
                 }
             }
         }
