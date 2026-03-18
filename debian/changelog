@@ -1,3 +1,21 @@
+dde-shell (2.0.33) unstable; urgency=medium
+
+  * fix: stop submenu loader delay timer when menu becomes visible
+  * fix: add touch screen support for dock menu
+  * fix: prevent notification list overscrolling
+  * fix: change notification title elide mode to right
+  * fix(tray): use positionForAnimation to prevent layout direction
+    abrupt change
+  * feat: add hover protection for notification bubbles
+  * i18n: Updates for project Deepin Desktop Environment (#1504)
+  * fix(notification): increase ListView topMargin to prevent focus
+    border clipping
+  * fix: prevent dock from hiding when hovering over preview windows
+  * fix: avoid icon overlap caused by ListView move and displace
+    animation
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 18 Mar 2026 14:13:18 +0800
+
 dde-shell (2.0.32) unstable; urgency=medium
 
   * fix(notification): change bubble window layer from LayerTop to
