@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -162,6 +162,8 @@ Item {
                     return Qt.rect(point.x, point.y, popupMenu.width, popupMenu.height)
                 })
                 popupMenu.open()
+                // TODO: 解决自定义右键菜单上下键无法切换的问题
+                popupMenuContent.takeFocus()
             }
         }
     }

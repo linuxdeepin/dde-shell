@@ -62,6 +62,7 @@ Item {
             menuWindow.title = windowTitle
             menuWindow.show()
             DS.grabMouse(menuWindow)
+            DS.grabKeyboard(menuWindow)
         })
     }
 
@@ -75,6 +76,7 @@ Item {
         
         menuWindow.close()
         menuWindow.currentItem = null
+        DS.grabKeyboard(menuWindow, false)
     }
 
     Connections {
