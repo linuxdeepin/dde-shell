@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2022 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -15,6 +15,8 @@ Item {
     property int popupX: 0
     property int popupY: 0
     property bool readyBinding: false
+    // WM_NAME, used for kwin.
+    property string windowTitle: "dde-shell/panelpopup"
     width: popup.childrenRect.width
     height: popup.childrenRect.height
 
@@ -77,6 +79,7 @@ Item {
             if (!readyBinding)
                 return
 
+            popupWindow.title = windowTitle
             popupWindow.show()
             popupWindow.requestActivate()
         }
