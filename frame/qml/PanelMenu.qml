@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -15,6 +15,8 @@ Item {
     property int menuX: 0
     property int menuY: 0
     property bool readyBinding: false
+    // WM_NAME, used for kwin.
+    property string windowTitle: "dde-shell/panelmenu"
     width: menu.childrenRect.width
     height: menu.childrenRect.height
 
@@ -57,6 +59,7 @@ Item {
 
         menuWindow.currentItem = control
         Qt.callLater(function () {
+            menuWindow.title = windowTitle
             menuWindow.show()
             DS.grabMouse(menuWindow)
         })

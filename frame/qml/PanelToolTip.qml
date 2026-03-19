@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2022 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -18,6 +18,8 @@ Item {
     property int toolTipX: 0
     property int toolTipY: 0
     property bool readyBinding: false
+    // WM_NAME, used for kwin.
+    property string windowTitle: "dde-shell/paneltooltip"
     width: toolTip.width
     height: toolTip.height
 
@@ -67,6 +69,7 @@ Item {
             if (!readyBinding)
                 return
 
+            toolTipWindow.title = windowTitle
             toolTipWindow.show()
         }
     }

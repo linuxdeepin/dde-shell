@@ -69,8 +69,6 @@ PopupWindow {
     height: 10
     flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint) : Qt.Popup)
     font: D.DTK.fontManager.t6
-    // WM_NAME, used for kwin.
-    title: "dde-shell/panelpopup"
     D.DWindow.enabled: true
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableSystemResize: false
