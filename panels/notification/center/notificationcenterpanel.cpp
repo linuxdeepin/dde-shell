@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -9,24 +9,26 @@
 #include "notificationcenterproxy.h"
 #include "notifyaccessor.h"
 
+#include <applet.h>
+#include <appletbridge.h>
+#include <containment.h>
 #include <pluginfactory.h>
 #include <pluginloader.h>
-#include <applet.h>
-#include <containment.h>
-#include <appletbridge.h>
 
-#include <QQueue>
 #include <QDBusConnection>
+#include <QDBusConnectionInterface>
 #include <QDBusInterface>
 #include <QLoggingCategory>
-#include <QDBusConnectionInterface>
+#include <QQueue>
 
 DS_USE_NAMESPACE
 
-namespace notification {
+namespace notification
+{
 Q_DECLARE_LOGGING_CATEGORY(notifyLog)
 }
-namespace notification {
+namespace notification
+{
 
 static const QString DDENotifyDBusServer = "org.deepin.dde.Notification1";
 static const QString DDENotifyDBusInterface = "org.deepin.dde.Notification1";
@@ -99,6 +101,10 @@ bool NotificationCenterPanel::visible() const
 
 void NotificationCenterPanel::setVisible(bool newVisible)
 {
+    if (m_hasTrayMenuOpen) {
+        qDebug(notifyLog) << "Blocked: tray menu is open";
+        return;
+    }
     if (m_visible == newVisible)
         return;
     m_visible = newVisible;
@@ -126,6 +132,19 @@ void NotificationCenterPanel::setBubblePanelEnabled(bool enabled)
     DAppletBridge bridge("org.deepin.ds.notificationbubble");
     if (auto applet = bridge.applet())
         QMetaObject::invokeMethod(applet, "setEnabled", Qt::DirectConnection, Q_ARG(bool, enabled));
+}
+
+bool NotificationCenterPanel::hasTrayMenuOpen() const
+{
+    return m_hasTrayMenuOpen;
+}
+
+void NotificationCenterPanel::setHasTrayMenuOpen(bool hasOpen)
+{
+    if (m_hasTrayMenuOpen == hasOpen)
+        return;
+    m_hasTrayMenuOpen = hasOpen;
+    emit hasTrayMenuOpenChanged();
 }
 
 D_APPLET_CLASS(NotificationCenterPanel)

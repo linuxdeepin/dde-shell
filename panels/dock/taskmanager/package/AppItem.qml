@@ -430,6 +430,10 @@ Item {
     function requestAppItemMenu() {
         contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
         contextMenuLoader.active = true
+        let notifyPanel = DS.applet("org.deepin.ds.notificationcenter")
+        if (notifyPanel && notifyPanel.visible) {
+            notifyPanel.close()
+        }
         MenuHelper.openMenu(contextMenuLoader.item)
     }
 

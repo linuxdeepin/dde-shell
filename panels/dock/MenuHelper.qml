@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -8,12 +8,14 @@ import Qt.labs.platform
 
 Item {
     property Menu activeMenu: null
+    property bool hasTrayMenuOpen: false
     
     signal menuClosed()
     Connections {
         target: activeMenu
         function onAboutToHide() {
             activeMenu = null
+            hasTrayMenuOpen = false
             menuClosed()
         }
     }

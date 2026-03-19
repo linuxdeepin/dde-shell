@@ -80,7 +80,7 @@ Window {
     }
 
     // visible: true
-    visible: Panel.visible
+    visible: Panel.visible && !Panel.hasTrayMenuOpen
     flags: Qt.Tool
 
     property int contentPadding: 20

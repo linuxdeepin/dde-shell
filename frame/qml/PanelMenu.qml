@@ -17,6 +17,7 @@ Item {
     property bool readyBinding: false
     // WM_NAME, used for kwin.
     property string windowTitle: "dde-shell/panelmenu"
+    property bool autoCloseOnDeactivate: true
     width: menu.childrenRect.width
     height: menu.childrenRect.height
 
@@ -83,8 +84,7 @@ Item {
         {
             if (!menuWindow)
                 return
-            // TODO why activeChanged is not emit.
-            if (menuWindow && !menuWindow.active) {
+            if (autoCloseOnDeactivate && menuWindow && !menuWindow.active) {
                 control.close()
             }
         }

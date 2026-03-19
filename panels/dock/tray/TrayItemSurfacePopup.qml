@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -20,6 +20,52 @@ Item {
         return false
     }
     readonly property bool isOpened: popup.popupVisible
+    property var pendingTrayMenu: null
+    Timer {
+        id: trayMenuOpenTimer
+        interval: 150
+        repeat: false
+        onTriggered: {
+            if (pendingTrayMenu) {
+                pendingTrayMenu.open()
+                pendingTrayMenu = null
+            }
+        }
+    }
+    Timer {
+        id: restoreAutoCloseTimer
+        interval: 200
+        repeat: false
+        onTriggered: {
+            if (pendingTrayMenu) {
+                pendingTrayMenu.autoCloseOnDeactivate = true
+            }
+        }
+    }
+    Connections {
+        target: popupMenu
+        function onMenuVisibleChanged() {
+            if (!popupMenu.menuVisible) {
+                MenuHelper.hasTrayMenuOpen = false
+                let notifyPanel = DS.applet("org.deepin.ds.notificationcenter")
+                if (notifyPanel) {
+                    notifyPanel.hasTrayMenuOpen = false
+                }
+            }
+        }
+    }
+    Connections {
+        target: popupMenu.menuWindow
+        function onActiveChanged() {
+            if (popupMenu.menuWindow && !popupMenu.menuWindow.active && !popupMenu.menuVisible) {
+                MenuHelper.hasTrayMenuOpen = false
+                let notifyPanel = DS.applet("org.deepin.ds.notificationcenter")
+                if (notifyPanel) {
+                    notifyPanel.hasTrayMenuOpen = false
+                }
+            }
+        }
+    }
     function closeTooltip() {
         if (toolTip.toolTipVisible) {
             toolTip.close()
@@ -161,7 +207,18 @@ Item {
                     var point = Qt.point(popupMenu.shellSurface.x, popupMenu.shellSurface.y)
                     return Qt.rect(point.x, point.y, popupMenu.width, popupMenu.height)
                 })
-                popupMenu.open()
+                let notifyPanel = DS.applet("org.deepin.ds.notificationcenter")
+                if (notifyPanel && notifyPanel.visible) {
+                    notifyPanel.close()
+                }
+                popupMenu.autoCloseOnDeactivate = false
+                MenuHelper.hasTrayMenuOpen = true
+                if (notifyPanel) {
+                    notifyPanel.hasTrayMenuOpen = true
+                }
+                root.pendingTrayMenu = popupMenu
+                trayMenuOpenTimer.restart()
+                restoreAutoCloseTimer.restart()
             }
         }
     }

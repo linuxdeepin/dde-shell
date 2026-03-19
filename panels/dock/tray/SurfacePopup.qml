@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -16,6 +16,52 @@ Item {
     }
     property int toolTipVOffset: 0
     signal popupCreated(var surfaceId)
+    property var pendingTrayMenu: null
+    Timer {
+        id: trayMenuOpenTimer
+        interval: 150
+        repeat: false
+        onTriggered: {
+            if (pendingTrayMenu) {
+                pendingTrayMenu.open()
+                pendingTrayMenu = null
+            }
+        }
+    }
+    Timer {
+        id: restoreAutoCloseTimer
+        interval: 200
+        repeat: false
+        onTriggered: {
+            if (pendingTrayMenu) {
+                pendingTrayMenu.autoCloseOnDeactivate = true
+            }
+        }
+    }
+    Connections {
+        target: menu
+        function onMenuVisibleChanged() {
+            if (!menu.menuVisible) {
+                MenuHelper.hasTrayMenuOpen = false
+                let notifyPanel = DS.applet("org.deepin.ds.notificationcenter")
+                if (notifyPanel) {
+                    notifyPanel.hasTrayMenuOpen = false
+                }
+            }
+        }
+    }
+    Connections {
+        target: menu.menuWindow
+        function onActiveChanged() {
+            if (menu.menuWindow && !menu.menuWindow.active && !menu.menuVisible) {
+                MenuHelper.hasTrayMenuOpen = false
+                let notifyPanel = DS.applet("org.deepin.ds.notificationcenter")
+                if (notifyPanel) {
+                    notifyPanel.hasTrayMenuOpen = false
+                }
+            }
+        }
+    }
 
     PanelToolTipWindow {
         id: toolTipWindow
@@ -144,7 +190,18 @@ Item {
                 menu.menuY = Qt.binding(function () {
                     return menu.shellSurface.y
                 })
-                menu.open()
+                let notifyPanel = DS.applet("org.deepin.ds.notificationcenter")
+                if (notifyPanel && notifyPanel.visible) {
+                    notifyPanel.close()
+                }
+                menu.autoCloseOnDeactivate = false
+                MenuHelper.hasTrayMenuOpen = true
+                if (notifyPanel) {
+                    notifyPanel.hasTrayMenuOpen = true
+                }
+                root.pendingTrayMenu = menu
+                trayMenuOpenTimer.restart()
+                restoreAutoCloseTimer.restart()
             }
         }
     }

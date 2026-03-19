@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,13 +6,15 @@
 
 #include "panel.h"
 
-namespace notification {
+namespace notification
+{
 
 class NotificationCenterProxy;
 class NotificationCenterPanel : public DS_NAMESPACE::DPanel
 {
     Q_OBJECT
     Q_PROPERTY(bool visible READ visible NOTIFY visibleChanged FINAL)
+    Q_PROPERTY(bool hasTrayMenuOpen READ hasTrayMenuOpen WRITE setHasTrayMenuOpen NOTIFY hasTrayMenuOpenChanged FINAL)
 public:
     explicit NotificationCenterPanel(QObject *parent = nullptr);
     ~NotificationCenterPanel();
@@ -24,14 +26,19 @@ public:
     void setVisible(bool newVisible);
     Q_INVOKABLE void close();
 
+    bool hasTrayMenuOpen() const;
+    void setHasTrayMenuOpen(bool hasOpen);
+
 Q_SIGNALS:
     void visibleChanged();
+    void hasTrayMenuOpenChanged();
 
 private slots:
     void setBubblePanelEnabled(bool enabled);
 
 private:
     bool m_visible = false;
+    bool m_hasTrayMenuOpen = false;
     NotificationCenterProxy *m_proxy = nullptr;
 };
 }
