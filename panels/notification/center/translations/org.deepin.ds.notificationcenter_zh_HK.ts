@@ -37,7 +37,7 @@
     </message>
     <message>
         <source>Notification Setting</source>
-        <translation type="unfinished"/>
+        <translation>通知設置</translation>
     </message>
     <message>
         <source>Clear All</source>
