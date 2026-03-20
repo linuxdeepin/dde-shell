@@ -150,7 +150,6 @@ FocusScope {
             text: qsTr("Clear All")
             Layout.alignment: Qt.AlignRight
             Keys.onTabPressed: function(event) {
-                clearAllBtn.focus = false  // Clear focus before signal to prevent focus state residue
                 root.gotoFirstNotify()
                 event.accepted = true
             }

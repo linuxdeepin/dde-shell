@@ -16,10 +16,11 @@ NotifyItem {
     // Maximum retry attempts for focus operations when loader content is pending
     readonly property int maxFocusRetries: 5
     property bool parentHovered: false  // External hover state from parent component
-    property bool closeVisible: activeFocus || impl.hovered || parentHovered || (clearLoader.item && clearLoader.item.activeFocus)
+    property bool closeVisible: activeFocus || impl.hovered || parentHovered
     property int miniContentHeight: NotifyStyle.contentItem.miniHeight
     property bool enableDismissed: true
     property alias clearButton: clearLoader.sourceComponent
+    readonly property alias clearButtonItem: clearLoader.item
 
     signal gotoNextItem()  // Signal to navigate to next notify item
     signal gotoPrevItem()  // Signal to navigate to previous notify item
@@ -111,8 +112,7 @@ NotifyItem {
                 id: clearLoader
                 anchors.right: parent.right
                 // Show when mouse hovers or notification item has focus
-                // Keep active when button itself has focus to prevent unloading during Tab navigation
-                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered || (clearLoader.item && clearLoader.item.activeFocus))
+                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered)
                 sourceComponent: SettingActionButton {
                     id: closeBtn
                     objectName: "closeNotify-" + root.appName
