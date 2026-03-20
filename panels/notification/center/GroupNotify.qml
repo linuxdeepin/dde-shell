@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -111,7 +111,6 @@ NotifyItem {
                 icon.name: "clean-group"
                 text: qsTr("Clear All")
                 Keys.onTabPressed: function(event) {
-                    groupClearBtn.focus = false  // Clear focus before signal to prevent focus state residue
                     root.gotoNextItem()
                     event.accepted = true
                 }

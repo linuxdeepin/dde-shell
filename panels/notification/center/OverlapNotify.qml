@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,7 +17,6 @@ NotifyItem {
     property int count: 1
     readonly property int overlapItemRadius: 12
     property bool enableDismissed: true
-    property bool shouldShowClose: false  // True when item gets focus from keyboard navigation
     property var removedCallback
     property alias notifyContent: notifyContent
 
@@ -25,7 +24,7 @@ NotifyItem {
     signal gotoNextItem()
     signal gotoPrevItem()
 
-    property var clearButton: null  // Reference to the externally defined clear button
+    property var clearButton: notifyContent.clearButtonItem
 
     function focusFirstButton() {
         // Focus clear button first, then action buttons
@@ -77,18 +76,16 @@ NotifyItem {
         focus: true
 
         Keys.onTabPressed: function(event) {
-            root.shouldShowClose = true
-            if (notifyContent.focusFirstButton()) {
-                event.accepted = true
-            } else {
+            if (!notifyContent.focusFirstButton()) {
                 root.gotoNextItem()
-                event.accepted = true
             }
+            event.accepted = true
         }
 
         Keys.onBacktabPressed: function(event) {
-            root.shouldShowClose = true
-            root.gotoPrevItem()
+            if (!notifyContent.focusLastButton()) {
+                root.gotoPrevItem()
+            }
             event.accepted = true
         }
 
@@ -106,7 +103,7 @@ NotifyItem {
                 actions: root.actions
                 defaultAction: root.defaultAction
                 // Show close button when: mouse hovers, or item has focus from keyboard navigation
-                parentHovered: impl.hovered || (root.activeFocus && root.shouldShowClose)
+                parentHovered: impl.hovered || root.activeFocus
                 strongInteractive: root.strongInteractive
                 contentIcon: root.contentIcon
                 contentRowCount: root.contentRowCount

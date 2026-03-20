@@ -26,7 +26,6 @@ DelegateChooser {
             Qt.callLater(function() {
                 let nextItem = view.itemAtIndex(currentIndex + 1)
                 if (nextItem && nextItem.enabled) {
-                    // Focus on the item itself first, not directly to buttons
                     nextItem.forceActiveFocus()
                 }
             })
@@ -43,7 +42,6 @@ DelegateChooser {
             Qt.callLater(function() {
                 let prevItem = view.itemAtIndex(currentIndex - 1)
                 if (prevItem && prevItem.enabled) {
-                    // Focus on the item itself first, not directly to buttons
                     prevItem.forceActiveFocus()
                 }
             })
@@ -177,8 +175,8 @@ DelegateChooser {
                 activeFocusOnTab: false
                 focusBorderVisible: activeFocus
                 Keys.onTabPressed: function(event) {
-                    // Try to focus first action button
-                    if (overlapNotify.focusFirstButton()) {
+                    // Try to focus first action button (skip clear button to avoid loop)
+                    if (notifyContent.focusFirstActionOnly()) {
                         event.accepted = true
                         return
                     }
@@ -194,11 +192,6 @@ DelegateChooser {
                 onClicked: function () {
                     notifyContent.remove()
                 }
-            }
-
-            Component.onCompleted: {
-                // Pass clear button reference to OverlapNotify
-                overlapNotify.clearButton = clearBtn
             }
 
             TapHandler {
