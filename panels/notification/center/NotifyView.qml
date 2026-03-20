@@ -61,7 +61,7 @@ Control {
         id: view
         clip: true
         spacing: 10
-        snapMode: ListView.SnapToItem
+        snapMode: ListView.NoSnap
         keyNavigationEnabled: false
         activeFocusOnTab: false
         boundsBehavior: Flickable.StopAtBounds
