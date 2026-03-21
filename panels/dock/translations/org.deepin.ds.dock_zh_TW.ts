@@ -51,11 +51,11 @@
     </message>
     <message>
         <source>Keep Shown</source>
-        <translation>壹直顯示</translation>
+        <translation>一直顯示</translation>
     </message>
     <message>
         <source>Keep Hidden</source>
-        <translation>壹直隱藏</translation>
+        <translation>一直隱藏</translation>
     </message>
     <message>
         <source>Smart Hide</source>
