@@ -17,6 +17,10 @@ NotifyItem {
     signal gotoNextItem()
     signal gotoPrevItem()
 
+    function resetFocus() {
+        impl.forceActiveFocus()
+    }
+
     function focusFirstButton() {
         return notifyContent.focusFirstButton()
     }

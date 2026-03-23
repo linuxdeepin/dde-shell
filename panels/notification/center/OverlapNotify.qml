@@ -26,6 +26,10 @@ NotifyItem {
 
     property var clearButton: notifyContent.clearButtonItem
 
+    function resetFocus() {
+        impl.forceActiveFocus()
+    }
+
     function focusFirstButton() {
         // Focus clear button first, then action buttons
         if (clearButton && clearButton.enabled && clearButton.visible) {

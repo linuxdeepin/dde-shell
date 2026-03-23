@@ -340,7 +340,14 @@ NotifyItem {
                             // From action buttons, go directly to next notification item
                             root.gotoNextItem()
                         }
-                        onGotoPrevItem: root.gotoPrevItem()
+                        onGotoPrevItem: {
+                            // Try to focus close button first, if not available go to prev item
+                            if (clearLoader.item && clearLoader.item.enabled) {
+                                clearLoader.item.forceActiveFocus()
+                            } else {
+                                root.gotoPrevItem()
+                            }
+                        }
                     }
                 }
             }
