@@ -18,6 +18,10 @@ NotifyItem {
     signal gotoNextItem()  // Signal to navigate to next notify item
     signal gotoPrevItem()  // Signal to navigate to previous notify item
 
+    function resetFocus() {
+        impl.forceActiveFocus()
+    }
+
     // Focus the first button for Tab navigation into group
     function focusFirstButton() {
         foldBtn.forceActiveFocus()

@@ -38,6 +38,7 @@ Control {
         function tryFocus(retries) {
             let item = view.itemAtIndex(idx)
             if (item && item.enabled) {
+                item.resetFocus()
                 if (!item.focusFirstButton()) {
                     item.forceActiveFocus()
                 }
