@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -36,12 +36,10 @@ ActionButton {
         color1: Palette {
             normal {
                 common: ("transparent")
-                // TODO crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
-                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 1.0)
+                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
             }
             normalDark {
-                // TODO crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
-                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 1.0)
+                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.5)
             }
         }
 

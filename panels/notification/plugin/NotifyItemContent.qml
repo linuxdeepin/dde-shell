@@ -104,7 +104,7 @@ NotifyItem {
                 top: parent.top
                 topMargin: -height / 2
                 right: parent.right
-                rightMargin: -width / 2
+                rightMargin: -width / 2 + 6
             }
             width: 20
             height: 20
@@ -149,12 +149,10 @@ NotifyItem {
                         color1: Palette {
                             normal {
                                 common: ("transparent")
-                                // TODO crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
-                                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 1.0)
+                                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
                             }
                             normalDark {
-                                // TODO crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
-                                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 1.0)
+                                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.5)
                             }
                         }
                         color2: color1
