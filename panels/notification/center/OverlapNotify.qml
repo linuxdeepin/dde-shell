@@ -120,6 +120,18 @@ NotifyItem {
                 }
                 onGotoNextItem: root.gotoNextItem()
                 onGotoPrevItem: root.gotoPrevItem()
+
+                background: NotifyItemBackground {
+                    backgroundColor: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(255 / 255.0, 255 / 255.0, 255 / 255.0, 0.7)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.7)
+                        }
+                    }
+                }
             }
 
             OverlapIndicator {
@@ -134,6 +146,29 @@ NotifyItem {
                 }
                 z: -1
                 count: root.count
+                background: NotifyItemBackground {
+                    backgroundColor: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.7)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.7)
+                        }
+                    }
+                    borderColor: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(0, 0, 0, 0.1)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(0, 0, 0, 0.6)
+                        }
+                    }
+                    insideBorderColor: null
+                    outsideBorderColor: null
+                    dropShadowColor: null
+                }
             }
         }
 

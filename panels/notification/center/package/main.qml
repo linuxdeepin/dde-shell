@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import org.deepin.dtk 1.0
+import org.deepin.dtk.style 1.0 as DStyle
 import org.deepin.ds 1.0
 import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
@@ -96,13 +97,12 @@ Window {
     palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
     // DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
-    // DWindow.windowRadius: DTK.platformTheme.windowRadius
-    // DWindow.enableSystemResize: false
-    // DWindow.enableSystemMove: false
-    // DWindow.windowRadius: 0
-    // DWindow.enabled: false
+    DWindow.windowRadius: DTK.platformTheme.windowRadius
+    DWindow.enableSystemResize: false
+    DWindow.enableSystemMove: false
+    DWindow.enabled: true
     color: "transparent"
-    // DWindow.enableBlurWindow: true
+    DWindow.enableBlurWindow: true
     // 修复：通知中心屏幕跟随任务栏屏幕，而不是硬编码为第一个屏幕
     screen: getDockScreen()
     // TODO `Qt.application.screens[0]` maybe invalid, why screen is changed.
@@ -132,6 +132,24 @@ Window {
         // 修复：监听dock屏幕变化，同步更新通知中心屏幕
         function onScreenNameChanged() {
             root.screen = getDockScreen()
+        }
+    }
+
+    // only add blendColor effect when DWindow.enableBlurWindow is true,
+    // avoid to updating blur area frequently.--
+    StyledBehindWindowBlur {
+        control: parent
+        anchors.fill: parent
+        cornerRadius: 0
+        blendColor: {
+            if (valid) {
+                return DStyle.Style.control.selectColor(undefined,
+                                                    Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, dock.blendColorAlpha(0.6)),
+                                                    Qt.rgba(10 / 255, 10 / 255, 10 /255, dock.blendColorAlpha(85 / 255)))
+            }
+            return DStyle.Style.control.selectColor(undefined,
+                                                DStyle.Style.behindWindowBlur.lightNoBlurColor,
+                                                DStyle.Style.behindWindowBlur.darkNoBlurColor)
         }
     }
 
