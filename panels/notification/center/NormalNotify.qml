@@ -60,6 +60,17 @@ NotifyItem {
             contentIcon: root.contentIcon
             contentRowCount: root.contentRowCount
             indexInGroup: root.indexInGroup
+            background: NotifyItemBackground {
+                backgroundColor: Palette {
+                    normal {
+                        common: ("transparent")
+                        crystal: Qt.rgba(255 / 255.0, 255 / 255.0, 255 / 255.0, 0.7)
+                    }
+                    normalDark {
+                        crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.7)
+                    }
+                }
+            }
 
             onRemove: function () {
                 root.remove()

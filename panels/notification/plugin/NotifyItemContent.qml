@@ -21,6 +21,7 @@ NotifyItem {
     property bool enableDismissed: true
     property alias clearButton: clearLoader.sourceComponent
     readonly property alias clearButtonItem: clearLoader.item
+    property alias background: impl.background
 
     signal gotoNextItem()  // Signal to navigate to next notify item
     signal gotoPrevItem()  // Signal to navigate to previous notify item
