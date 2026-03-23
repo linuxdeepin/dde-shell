@@ -129,7 +129,7 @@ NotifyItem {
                     backgroundColor: Palette {
                         normal {
                             common: ("transparent")
-                            crystal: Qt.rgba(255 / 255.0, 255 / 255.0, 255 / 255.0, 0.7)
+                            crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.7)
                         }
                         normalDark {
                             crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.7)
@@ -141,6 +141,7 @@ NotifyItem {
             OverlapIndicator {
                 id: indicator
                 enableAnimation: root.ListView.view.panelShown
+                clipItems: true
                 anchors {
                     bottom: parent.bottom
                     left: parent.left
@@ -151,6 +152,7 @@ NotifyItem {
                 z: -1
                 count: root.count
                 background: NotifyItemBackground {
+                    opacity: realIndex === 0 ? 0.6 : 0.4
                     backgroundColor: Palette {
                         normal {
                             common: ("transparent")

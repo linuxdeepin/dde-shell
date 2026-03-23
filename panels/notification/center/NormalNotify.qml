@@ -68,7 +68,7 @@ NotifyItem {
                 backgroundColor: Palette {
                     normal {
                         common: ("transparent")
-                        crystal: Qt.rgba(255 / 255.0, 255 / 255.0, 255 / 255.0, 0.7)
+                        crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.7)
                     }
                     normalDark {
                         crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.7)

@@ -11,6 +11,7 @@ Control {
 
     padding: radius / 2
 
+    property int realIndex: 0
     property int radius: 12
     property Palette borderColor: Palette {
         normal {

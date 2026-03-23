@@ -15,6 +15,7 @@ Item {
     property int overlapHeight: 8
     property bool revert: false
     property bool enableAnimation: false
+    property bool clipItems: false
 
     implicitHeight: layout.height
     implicitWidth: 360
@@ -35,7 +36,7 @@ Item {
                 Layout.preferredWidth: root.width - (realIndex) * radius * 2
                 Layout.alignment: Qt.AlignHCenter
                 z: -realIndex
-                clip: true
+                clip: root.clipItems
 
                 Loader {
                     id: contentLoader
@@ -52,6 +53,7 @@ Item {
                     sourceComponent: root.background
 
                     onLoaded: function() {
+                        contentLoader.item.realIndex = Qt.binding(function() { return item.realIndex; })
                         if (root.enableAnimation) {
                             fadeInAnimation.start()
                         } else {
