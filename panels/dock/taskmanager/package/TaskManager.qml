@@ -143,6 +143,7 @@ ContainmentItem {
                     // kept for debug purpose
                     // border.color: "red"
                     // border.width: 1
+                    id: appItemRect
                     color: "transparent"
                     parent: appContainer
                     x: delegateRoot.x
@@ -150,17 +151,26 @@ ContainmentItem {
                     width: delegateRoot.width
                     height: delegateRoot.height
                     scale: delegateRoot.scale
+                    property bool positionAnimationEnabled: false
                     Behavior on x {
+                        enabled: appItemRect.positionAnimationEnabled
                         NumberAnimation {
                             duration: 200
                             easing.type: Easing.OutCubic
                         }
                     }
                     Behavior on y {
+                        enabled: appItemRect.positionAnimationEnabled
                         NumberAnimation {
                             duration: 200
                             easing.type: Easing.OutCubic
                         }
+                    }
+
+                    Component.onCompleted: {
+                        Qt.callLater(function() {
+                            appItemRect.positionAnimationEnabled = true
+                        })
                     }
 
                     AppItem {
