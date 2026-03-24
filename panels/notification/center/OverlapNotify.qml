@@ -20,6 +20,9 @@ NotifyItem {
     property var removedCallback
     property alias notifyContent: notifyContent
 
+    property bool focusedByNavigation: false
+    onActiveFocusChanged: if (!activeFocus) focusedByNavigation = false
+
     signal expand()
     signal gotoNextItem()
     signal gotoPrevItem()
@@ -107,7 +110,7 @@ NotifyItem {
                 actions: root.actions
                 defaultAction: root.defaultAction
                 // Show close button when: mouse hovers, or item has focus from keyboard navigation
-                parentHovered: impl.hovered || root.activeFocus
+                parentHovered: impl.hovered || (root.activeFocus && root.focusedByNavigation)
                 strongInteractive: root.strongInteractive
                 contentIcon: root.contentIcon
                 contentRowCount: root.contentRowCount

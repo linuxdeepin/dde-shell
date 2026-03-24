@@ -14,6 +14,9 @@ NotifyItem {
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
 
+    property bool focusedByNavigation: false
+    onActiveFocusChanged: if (!activeFocus) focusedByNavigation = false
+
     signal gotoNextItem()
     signal gotoPrevItem()
 
@@ -59,7 +62,7 @@ NotifyItem {
             actions: root.actions
             defaultAction: root.defaultAction
             // Show close button when: mouse hovers, or item has focus from keyboard navigation
-            parentHovered: impl.hovered || root.activeFocus
+            parentHovered: impl.hovered || (root.activeFocus && root.focusedByNavigation)
             strongInteractive: root.strongInteractive
             contentIcon: root.contentIcon
             contentRowCount: root.contentRowCount

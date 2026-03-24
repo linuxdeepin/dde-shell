@@ -26,6 +26,7 @@ DelegateChooser {
             Qt.callLater(function() {
                 let nextItem = view.itemAtIndex(currentIndex + 1)
                 if (nextItem && nextItem.enabled) {
+                    nextItem.focusedByNavigation = true
                     nextItem.resetFocus()
                     nextItem.forceActiveFocus()
                 }
@@ -43,6 +44,7 @@ DelegateChooser {
             Qt.callLater(function() {
                 let prevItem = view.itemAtIndex(currentIndex - 1)
                 if (prevItem && prevItem.enabled) {
+                    prevItem.focusedByNavigation = true
                     prevItem.forceActiveFocus()
                 }
             })
