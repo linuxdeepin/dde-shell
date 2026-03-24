@@ -190,6 +190,17 @@ NotifyItem {
                 root.expand()
             }
         }
+
+        TapHandler {
+            acceptedButtons: Qt.RightButton
+            onPressedChanged: function () {
+                if (pressed) {
+                    let pos = point.position
+                    root.setting(pos)
+                }
+            }
+        }
+
         Keys.onEnterPressed: root.expand()
         Keys.onReturnPressed: root.expand()
     }
