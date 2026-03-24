@@ -149,56 +149,8 @@ Control {
             visible: active
             Layout.maximumWidth: 200
             Layout.alignment: Qt.AlignHCenter
-            sourceComponent: ComboBox {
-                id: comboBox
-                flat: false
-                rightPadding: 8
-                leftPadding: 2
-                topPadding: 0
-                bottomPadding: 0
-                property var expandActions: actions.slice(1)
-                property real maxItemWidth: 0
-                textRole: "text"
-                implicitHeight: 30
-                model: expandActions
-                activeFocusOnTab: false
-                popup.width: maxItemWidth + comboBox.padding + 28                
-                TextMetrics {
-                    id: textMetrics
-                    font: comboBox.font
-                    text: comboBox.displayText
-                }
-                
-                TextMetrics {
-                    id: itemTextMetrics
-                    font: comboBox.font
-                }
-                
-                popup.onAboutToShow: {
-                    let maxWidth = 0
-                    for (let i = 0; i < comboBox.model.length; i++) {
-                        if (comboBox.model[i] && comboBox.model[i].text) {
-                            itemTextMetrics.text = comboBox.model[i].text
-                            if (itemTextMetrics.width > maxWidth) {
-                                maxWidth = itemTextMetrics.width
-                            }
-                        }
-                    }
-                    maxItemWidth = maxWidth
-                }
-                
-                implicitWidth: textMetrics.width + comboBox.padding + 30
-                background: NotifyItemBackground {
-                    leftInset: 2
-                    implicitHeight: 30
-                    implicitWidth: comboBox.width
-                    radius: 6
-                    outsideBorderColor: null
-                    insideBorderColor: null
-                    dropShadowColor: null
-                    backgroundColor: root.actionBackgroundColor
-                    anchors.fill: parent
-                }
+            sourceComponent: NotifyActionButton {
+                actionData: actions.length > 2 ? actions[1] : null
                 Keys.onBacktabPressed: function(event) {
                     // Go back to first action button
                     if (firstActionBtn.enabled) {
@@ -214,25 +166,14 @@ Control {
                     root.gotoNextButton()
                     event.accepted = true
                 }
-                delegate: MenuItem {
-                    required property int index
-                    text: model[index] ? model[index].text : ""
-
-                    contentItem: Text {                        
-                        text: model[index] ? model[index].text : ""
-                        font: DTK.fontManager.t6
-                        color: parent.hovered ? parent.palette.highlightedText : parent.palette.text
+                actionMenu: NotifyActionMenu {
+                    onActionInvoked: function(actionId) {
+                        console.log("Action invoked from menu with ID:", actionId)
+                        root.actionInvoked(actionId)
                     }
-                    onTriggered: {
-                        if (model[index]) {
-                            actionInvoked(model[index].id)
-                            comboBox.popup.close()
-                        }
-                    }
-                    background: Rectangle {
-                        radius: 6
-                        color: parent.hovered ? parent.palette.highlight : "transparent"
-                    }
+                }
+                indicator: ButtonIndicator {
+                    color: "transparent"
                 }
             }
         }
@@ -241,6 +182,7 @@ Control {
     component NotifyActionButton: Button {
         id: actionButton
         required property var actionData
+        property var actionMenu: null
         text: actionData ? actionData.text : ""
         enabled: actionData ? actionData.enabled : false
         topPadding: undefined
@@ -251,9 +193,15 @@ Control {
         spacing: 0
         font: DTK.fontManager.t6
         onClicked: {
-            if (actionData) {
-                console.log("action invoked", actionData.id)
-                actionInvoked(actionData.id)
+            // Open the action menu when clicking the "More" button
+            if (actionMenu) {
+                actionMenu.actions = root.actions.slice(1)
+                actionMenu.open(actionButton)
+            } else {
+                if (actionData) {
+                    console.log("action invoked", actionData.id)
+                    actionInvoked(actionData.id)
+                }
             }
         }
 
