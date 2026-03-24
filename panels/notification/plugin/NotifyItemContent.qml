@@ -102,7 +102,7 @@ NotifyItem {
             id: closePlaceHolder
             anchors {
                 top: parent.top
-                topMargin: -height / 2
+                topMargin: -height / 2 + 2
                 right: parent.right
                 rightMargin: -width / 2 + 6
             }
@@ -149,10 +149,10 @@ NotifyItem {
                         color1: Palette {
                             normal {
                                 common: ("transparent")
-                                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
+                                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.9)
                             }
                             normalDark {
-                                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.5)
+                                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.9)
                             }
                         }
                         color2: color1

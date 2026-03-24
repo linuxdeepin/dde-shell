@@ -36,10 +36,10 @@ ActionButton {
         color1: Palette {
             normal {
                 common: ("transparent")
-                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
+                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.9)
             }
             normalDark {
-                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.5)
+                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.9)
             }
         }
 
