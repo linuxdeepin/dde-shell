@@ -180,17 +180,16 @@ NotifyItem {
                 }
             }
         }
-
-        // expand
-        TapHandler {
-            enabled: !root.enableDismissed
-            acceptedButtons: Qt.LeftButton
-            onTapped: {
-                root.forceActiveFocus()
-                root.expand()
-            }
-        }
         Keys.onEnterPressed: root.expand()
         Keys.onReturnPressed: root.expand()
+    }
+    // expand
+    TapHandler {
+        enabled: !root.enableDismissed
+        acceptedButtons: Qt.LeftButton
+        onTapped: {
+            root.forceActiveFocus()
+            root.expand()
+        }
     }
 }
