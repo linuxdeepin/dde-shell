@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -19,6 +19,7 @@ qt_add_qml_module(notificationplugin
         SettingActionButton.qml
         OverlapIndicator.qml
         DropShadowText.qml
+        NotifyActionMenu.qml
     OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/notification/
 )
