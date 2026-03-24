@@ -13,6 +13,8 @@ NotifyItem {
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
+    property bool focusedByNavigation: false
+    onActiveFocusChanged: if (!activeFocus) focusedByNavigation = false
 
     signal collapse()
     signal gotoNextItem()  // Signal to navigate to next notify item
