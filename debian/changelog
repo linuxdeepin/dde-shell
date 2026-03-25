@@ -1,3 +1,25 @@
+dde-shell (2.0.34) unstable; urgency=medium
+
+  * fix(notification): adjust notification sound playback timing
+  * fix: fix notification settings opening via direct D-Bus call
+  * fix: move TapHandler outside MouseArea to fix event handling
+  * fix: adjust notification UI colors and positions
+  * fix: delay enable taskmanager icon position animation
+  * fix: improve notification close button visibility logic
+  * feat: close other popups when opening context menus
+  * fix: prevent ListView overscroll in notification panel
+  * fix: replace ComboBox with Menu for notification actions
+  * feat: adjust notification center UI styling and layout
+  * fix: improve notification center keyboard navigation
+  * feat: add blur background to notification center
+  * i18n: Updates for project Deepin Desktop Environment (#1518)
+  * fix: fix warning with closebtn and binding loop.
+  * i18n: Updates for project Deepin Desktop Environment (#1515)
+  * fix: improve menu interaction and notification center handling
+  * feat: add windowTitle property for popup windows
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 25 Mar 2026 17:13:14 +0800
+
 dde-shell (2.0.33) unstable; urgency=medium
 
   * fix: stop submenu loader delay timer when menu becomes visible
