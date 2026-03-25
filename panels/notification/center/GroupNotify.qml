@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,10 +13,16 @@ NotifyItem {
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
+    property bool focusedByNavigation: false
+    onActiveFocusChanged: if (!activeFocus) focusedByNavigation = false
 
     signal collapse()
     signal gotoNextItem()  // Signal to navigate to next notify item
     signal gotoPrevItem()  // Signal to navigate to previous notify item
+
+    function resetFocus() {
+        impl.forceActiveFocus()
+    }
 
     // Focus the first button for Tab navigation into group
     function focusFirstButton() {
@@ -111,7 +117,6 @@ NotifyItem {
                 icon.name: "clean-group"
                 text: qsTr("Clear All")
                 Keys.onTabPressed: function(event) {
-                    groupClearBtn.focus = false  // Clear focus before signal to prevent focus state residue
                     root.gotoNextItem()
                     event.accepted = true
                 }

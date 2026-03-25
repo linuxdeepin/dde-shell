@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,10 +13,16 @@ NotifyItem {
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
-    property bool shouldShowClose: false  // True when item gets focus from keyboard navigation
+
+    property bool focusedByNavigation: false
+    onActiveFocusChanged: if (!activeFocus) focusedByNavigation = false
 
     signal gotoNextItem()
     signal gotoPrevItem()
+
+    function resetFocus() {
+        impl.forceActiveFocus()
+    }
 
     function focusFirstButton() {
         return notifyContent.focusFirstButton()
@@ -32,19 +38,16 @@ NotifyItem {
         focus: true
 
         Keys.onTabPressed: function(event) {
-            // Mark that this item got focus from Tab navigation
-            root.shouldShowClose = true
-            if (notifyContent.focusFirstButton()) {
-                event.accepted = true
-            } else {
+            if (!notifyContent.focusFirstButton()) {
                 root.gotoNextItem()
-                event.accepted = true
             }
+            event.accepted = true
         }
 
         Keys.onBacktabPressed: function(event) {
-            root.shouldShowClose = true
-            root.gotoPrevItem()
+            if (!notifyContent.focusLastButton()) {
+                root.gotoPrevItem()
+            }
             event.accepted = true
         }
 
@@ -59,11 +62,22 @@ NotifyItem {
             actions: root.actions
             defaultAction: root.defaultAction
             // Show close button when: mouse hovers, or item has focus from keyboard navigation
-            parentHovered: impl.hovered || (root.activeFocus && root.shouldShowClose)
+            parentHovered: impl.hovered || (root.activeFocus && root.focusedByNavigation)
             strongInteractive: root.strongInteractive
             contentIcon: root.contentIcon
             contentRowCount: root.contentRowCount
             indexInGroup: root.indexInGroup
+            background: NotifyItemBackground {
+                backgroundColor: Palette {
+                    normal {
+                        common: ("transparent")
+                        crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.7)
+                    }
+                    normalDark {
+                        crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.7)
+                    }
+                }
+            }
 
             onRemove: function () {
                 root.remove()

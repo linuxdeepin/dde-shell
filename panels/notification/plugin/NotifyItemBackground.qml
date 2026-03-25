@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -11,7 +11,13 @@ Control {
 
     padding: radius / 2
 
+    property int realIndex: 0
     property int radius: 12
+    property Palette borderColor: Palette {
+        normal {
+            common: ("transparent")
+        }
+    }
     property Palette backgroundColor: Palette {
         normal {
             common: ("transparent")
@@ -73,6 +79,7 @@ Control {
             anchors.fill: parent
             radius: control.radius
             color: control.ColorSelector.backgroundColor
+            border.color: control.ColorSelector.borderColor
         }
 
         Loader {

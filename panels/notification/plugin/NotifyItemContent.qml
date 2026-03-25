@@ -16,10 +16,12 @@ NotifyItem {
     // Maximum retry attempts for focus operations when loader content is pending
     readonly property int maxFocusRetries: 5
     property bool parentHovered: false  // External hover state from parent component
-    property bool closeVisible: activeFocus || impl.hovered || parentHovered || (clearLoader.item && clearLoader.item.activeFocus)
+    property bool closeVisible: activeFocus || impl.hovered || parentHovered
     property int miniContentHeight: NotifyStyle.contentItem.miniHeight
     property bool enableDismissed: true
     property alias clearButton: clearLoader.sourceComponent
+    readonly property alias clearButtonItem: clearLoader.item
+    property alias background: impl.background
 
     signal gotoNextItem()  // Signal to navigate to next notify item
     signal gotoPrevItem()  // Signal to navigate to previous notify item
@@ -100,9 +102,9 @@ NotifyItem {
             id: closePlaceHolder
             anchors {
                 top: parent.top
-                topMargin: -height / 2
+                topMargin: -height / 2 + 2
                 right: parent.right
-                rightMargin: -width / 2
+                rightMargin: -width / 2 + 6
             }
             width: 20
             height: 20
@@ -111,8 +113,7 @@ NotifyItem {
                 id: clearLoader
                 anchors.right: parent.right
                 // Show when mouse hovers or notification item has focus
-                // Keep active when button itself has focus to prevent unloading during Tab navigation
-                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered || (clearLoader.item && clearLoader.item.activeFocus))
+                active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered)
                 sourceComponent: SettingActionButton {
                     id: closeBtn
                     objectName: "closeNotify-" + root.appName
@@ -148,12 +149,10 @@ NotifyItem {
                         color1: Palette {
                             normal {
                                 common: ("transparent")
-                                // TODO crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
-                                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 1.0)
+                                crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.9)
                             }
                             normalDark {
-                                // TODO crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.5)
-                                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 1.0)
+                                crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.9)
                             }
                         }
                         color2: color1
@@ -339,7 +338,14 @@ NotifyItem {
                             // From action buttons, go directly to next notification item
                             root.gotoNextItem()
                         }
-                        onGotoPrevItem: root.gotoPrevItem()
+                        onGotoPrevItem: {
+                            // Try to focus close button first, if not available go to prev item
+                            if (clearLoader.item && clearLoader.item.enabled) {
+                                clearLoader.item.forceActiveFocus()
+                            } else {
+                                root.gotoPrevItem()
+                            }
+                        }
                     }
                 }
             }

@@ -161,6 +161,7 @@ Item {
                     var point = Qt.point(popupMenu.shellSurface.x, popupMenu.shellSurface.y)
                     return Qt.rect(point.x, point.y, popupMenu.width, popupMenu.height)
                 })
+                Panel.requestClosePopup()
                 popupMenu.open()
                 // TODO: 解决自定义右键菜单上下键无法切换的问题
                 popupMenuContent.takeFocus()

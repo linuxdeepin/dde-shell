@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,15 +17,21 @@ NotifyItem {
     property int count: 1
     readonly property int overlapItemRadius: 12
     property bool enableDismissed: true
-    property bool shouldShowClose: false  // True when item gets focus from keyboard navigation
     property var removedCallback
     property alias notifyContent: notifyContent
+
+    property bool focusedByNavigation: false
+    onActiveFocusChanged: if (!activeFocus) focusedByNavigation = false
 
     signal expand()
     signal gotoNextItem()
     signal gotoPrevItem()
 
-    property var clearButton: null  // Reference to the externally defined clear button
+    property var clearButton: notifyContent.clearButtonItem
+
+    function resetFocus() {
+        impl.forceActiveFocus()
+    }
 
     function focusFirstButton() {
         // Focus clear button first, then action buttons
@@ -77,18 +83,16 @@ NotifyItem {
         focus: true
 
         Keys.onTabPressed: function(event) {
-            root.shouldShowClose = true
-            if (notifyContent.focusFirstButton()) {
-                event.accepted = true
-            } else {
+            if (!notifyContent.focusFirstButton()) {
                 root.gotoNextItem()
-                event.accepted = true
             }
+            event.accepted = true
         }
 
         Keys.onBacktabPressed: function(event) {
-            root.shouldShowClose = true
-            root.gotoPrevItem()
+            if (!notifyContent.focusLastButton()) {
+                root.gotoPrevItem()
+            }
             event.accepted = true
         }
 
@@ -106,7 +110,7 @@ NotifyItem {
                 actions: root.actions
                 defaultAction: root.defaultAction
                 // Show close button when: mouse hovers, or item has focus from keyboard navigation
-                parentHovered: impl.hovered || (root.activeFocus && root.shouldShowClose)
+                parentHovered: impl.hovered || (root.activeFocus && root.focusedByNavigation)
                 strongInteractive: root.strongInteractive
                 contentIcon: root.contentIcon
                 contentRowCount: root.contentRowCount
@@ -123,11 +127,24 @@ NotifyItem {
                 }
                 onGotoNextItem: root.gotoNextItem()
                 onGotoPrevItem: root.gotoPrevItem()
+
+                background: NotifyItemBackground {
+                    backgroundColor: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.7)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.7)
+                        }
+                    }
+                }
             }
 
             OverlapIndicator {
                 id: indicator
                 enableAnimation: root.ListView.view.panelShown
+                clipItems: true
                 anchors {
                     bottom: parent.bottom
                     left: parent.left
@@ -137,19 +154,42 @@ NotifyItem {
                 }
                 z: -1
                 count: root.count
-            }
-        }
-
-        // expand
-        TapHandler {
-            enabled: !root.enableDismissed
-            acceptedButtons: Qt.LeftButton
-            onTapped: {
-                root.forceActiveFocus()
-                root.expand()
+                background: NotifyItemBackground {
+                    opacity: realIndex === 0 ? 0.6 : 0.4
+                    backgroundColor: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(240 / 255.0, 240 / 255.0, 240 / 255.0, 0.7)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(24 / 255.0, 24 / 255.0, 24 / 255.0, 0.7)
+                        }
+                    }
+                    borderColor: Palette {
+                        normal {
+                            common: ("transparent")
+                            crystal: Qt.rgba(0, 0, 0, 0.1)
+                        }
+                        normalDark {
+                            crystal: Qt.rgba(0, 0, 0, 0.6)
+                        }
+                    }
+                    insideBorderColor: null
+                    outsideBorderColor: null
+                    dropShadowColor: null
+                }
             }
         }
         Keys.onEnterPressed: root.expand()
         Keys.onReturnPressed: root.expand()
+    }
+    // expand
+    TapHandler {
+        enabled: !root.enableDismissed
+        acceptedButtons: Qt.LeftButton
+        onTapped: {
+            root.forceActiveFocus()
+            root.expand()
+        }
     }
 }

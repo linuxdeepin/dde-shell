@@ -428,6 +428,7 @@ Item {
     }
 
     function requestAppItemMenu() {
+        Panel.requestClosePopup()
         contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
         contextMenuLoader.active = true
         MenuHelper.openMenu(contextMenuLoader.item)

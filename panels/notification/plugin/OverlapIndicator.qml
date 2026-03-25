@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -15,39 +15,49 @@ Item {
     property int overlapHeight: 8
     property bool revert: false
     property bool enableAnimation: false
+    property bool clipItems: false
 
     implicitHeight: layout.height
     implicitWidth: 360
+    property Component background: NotifyItemBackground {
+                        radius: parent ? parent.radius : root.radius
+                        opacity: 0
+                    }
+
     ColumnLayout {
         id: layout
-        spacing: 0
+        spacing: -1
         Repeater {
             model: root.count
             delegate: Item {
                 id: item
                 readonly property int realIndex: revert ? count - index - 1 : index
-                Layout.preferredHeight: overlapHeight + 2
-                Layout.preferredWidth: root.width - (realIndex) * radius *2
+                Layout.preferredHeight: root.radius
+                Layout.preferredWidth: root.width - (realIndex) * radius * 2
                 Layout.alignment: Qt.AlignHCenter
                 z: -realIndex
+                clip: root.clipItems
 
-                NotifyItemBackground {
-                    id: background
-                    radius: root.radius
+                Loader {
+                    id: contentLoader
                     width: parent.width
-                    height: radius * 2
+                    height: root.radius * 2
+                    property int overlapHeight: root.overlapHeight
+                    property int radius: root.radius
+                    property alias realIndex: item.realIndex
+                    property bool revert: root.revert
                     anchors {
-                        top: revert ? undefined : parent.top
-                        topMargin: revert ? undefined : -(height - overlapHeight)
-                        bottomMargin: revert ? -(height - overlapHeight) : undefined
+                        top: revert ? parent.top : undefined
+                        bottom: revert ? undefined : parent.bottom
                     }
-                    opacity: 0
+                    sourceComponent: root.background
 
-                    Component.onCompleted: {
+                    onLoaded: function() {
+                        contentLoader.item.realIndex = Qt.binding(function() { return item.realIndex; })
                         if (root.enableAnimation) {
                             fadeInAnimation.start()
                         } else {
-                            opacity = 1
+                            contentLoader.item.opacity = 1
                         }
                     }
 
@@ -60,7 +70,7 @@ Item {
 
                         ParallelAnimation {
                             NumberAnimation {
-                                target: background
+                                target: contentLoader.item
                                 property: "opacity"
                                 from: 0
                                 to: 1

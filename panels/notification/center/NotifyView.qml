@@ -38,7 +38,11 @@ Control {
         function tryFocus(retries) {
             let item = view.itemAtIndex(idx)
             if (item && item.enabled) {
-                item.forceActiveFocus()
+                item.focusedByNavigation = true
+                item.resetFocus()
+                if (!item.focusFirstButton()) {
+                    item.forceActiveFocus()
+                }
             } else if (retries > 0) {
                 Qt.callLater(function() { tryFocus(retries - 1) })
             }
@@ -58,7 +62,7 @@ Control {
         id: view
         clip: true
         spacing: 10
-        snapMode: ListView.SnapToItem
+        snapMode: ListView.NoSnap
         keyNavigationEnabled: false
         activeFocusOnTab: false
         boundsBehavior: Flickable.StopAtBounds

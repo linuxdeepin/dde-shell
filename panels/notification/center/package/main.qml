@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import org.deepin.dtk 1.0
+import org.deepin.dtk.style 1.0 as DStyle
 import org.deepin.ds 1.0
 import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
@@ -66,7 +67,7 @@ Window {
         switch (position) {
             case 0: { // DOCK_TOP
                 let visibleHeight = Math.max(0, dockGeometry.y + dockGeometry.height - screenGeometry.y)
-                return Math.min(visibleHeight, dockGeometry.height)
+                return Math.min(visibleHeight, dockGeometry.height) 
             }
             case 1: { // DOCK_RIGHT
                 let visibleWidth = Math.max(0, screenGeometry.x + screenGeometry.width - dockGeometry.x)
@@ -83,26 +84,27 @@ Window {
     visible: Panel.visible
     flags: Qt.Tool
 
-    property int contentPadding: 20
-    width: NotifyStyle.contentItem.width + NotifyStyle.leftMargin +contentPadding * 2
+    property int contentPadding: 10
+    width: NotifyStyle.contentItem.width + contentPadding * 2
     // height: 800
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorRight | DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom
-    DLayerShellWindow.topMargin: windowMargin(0)
-    DLayerShellWindow.rightMargin: windowMargin(1)
-    DLayerShellWindow.bottomMargin: windowMargin(2)
+    DLayerShellWindow.topMargin: windowMargin(0) + contentPadding
+    DLayerShellWindow.rightMargin: windowMargin(1) + contentPadding
+    DLayerShellWindow.bottomMargin: windowMargin(2) + contentPadding
     DLayerShellWindow.exclusionZone: -1
     DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
     palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
     // DWindow.windowEffect: PlatformHandle.EffectNoBorder | PlatformHandle.EffectNoShadow
-    // DWindow.windowRadius: DTK.platformTheme.windowRadius
-    // DWindow.enableSystemResize: false
-    // DWindow.enableSystemMove: false
-    // DWindow.windowRadius: 0
-    // DWindow.enabled: false
+    DWindow.windowRadius: DTK.platformTheme.windowRadius
+    DWindow.enableSystemResize: false
+    DWindow.enableSystemMove: false
+    DWindow.enabled: true
     color: "transparent"
-    // DWindow.enableBlurWindow: true
+    DWindow.enableBlurWindow: true
+    DWindow.borderColor: DTK.themeType === ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.8) : Qt.rgba(0, 0, 0, 0.06)
+
     // 修复：通知中心屏幕跟随任务栏屏幕，而不是硬编码为第一个屏幕
     screen: getDockScreen()
     // TODO `Qt.application.screens[0]` maybe invalid, why screen is changed.
@@ -135,6 +137,39 @@ Window {
         }
     }
 
+
+    function blendColorAlpha(fallback) {
+        var appearance = DS.applet("org.deepin.ds.dde-appearance")
+        if (!appearance || appearance.opacity < 0)
+            return fallback
+        return appearance.opacity
+    }
+
+    // only add blendColor effect when DWindow.enableBlurWindow is true,
+    // avoid to updating blur area frequently.--
+    StyledBehindWindowBlur {
+        InsideBoxBorder {
+            anchors.fill: parent
+            radius: DTK.platformTheme.windowRadius
+            color: DTK.themeType === ApplicationHelper.DarkType ?
+                Qt.rgba(1, 1, 1, 0.1) :
+                Qt.rgba(0, 0, 0, 0.1)
+        }
+        control: parent
+        anchors.fill: parent
+        cornerRadius: 0
+        blendColor: {
+            if (valid) {
+                return DStyle.Style.control.selectColor(undefined,
+                                                    Qt.rgba(238 / 255.0, 238 / 255.0, 238 / 255.0, blendColorAlpha(0.8)),
+                                                    Qt.rgba(20 / 255, 20 / 255, 20 /255, blendColorAlpha(0.8)))
+            }
+            return DStyle.Style.control.selectColor(undefined,
+                                                DStyle.Style.behindWindowBlur.lightNoBlurColor,
+                                                DStyle.Style.behindWindowBlur.darkNoBlurColor)
+        }
+    }
+
     Item {
         id: view
         // clear focus when NotificationCenter is closed.
@@ -143,7 +178,6 @@ Window {
             top: parent.top
             topMargin: contentPadding
             left: parent.left
-            leftMargin: contentPadding
             right: parent.right
             bottom: parent.bottom
         }
@@ -154,7 +188,6 @@ Window {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-                rightMargin: contentPadding
             }
             // Tab navigation: staging -> header
             onGotoHeaderFirst: notifyCenter.focusHeaderFirst()
