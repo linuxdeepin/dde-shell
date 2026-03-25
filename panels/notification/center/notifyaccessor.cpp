@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -26,14 +26,6 @@ namespace notifycenter {
 static const uint ShowNotificationTop = 7;
 static const QString InvalidApp {"DS-Invalid-Apps"};
 static const QStringList InvalidPinnedApps {InvalidApp};
-
-static QDBusInterface controlCenterInterface()
-{
-    return QDBusInterface("org.deepin.dde.ControlCenter1",
-                          "/org/deepin/dde/ControlCenter1",
-                          "org.deepin.dde.ControlCenter1");
-}
-
 class EventFilter : public QObject
 {
     // QObject interface
@@ -219,12 +211,20 @@ bool NotifyAccessor::applicationPin(const QString &appId) const
 void NotifyAccessor::openNotificationSetting()
 {
     qDebug(notifyLog) << "Open notification setting";
-    QDBusReply<void> reply = controlCenterInterface().call("ShowPage",
-                                                           "notification");
-    if (reply.error().isValid()) {
-        qWarning(notifyLog) << "Failed to Open notifycation setting" << reply.error().message();
-        return;
-    }
+    QDBusMessage msg = QDBusMessage::createMethodCall("org.deepin.dde.ControlCenter1",
+                                                       "/org/deepin/dde/ControlCenter1",
+                                                       "org.deepin.dde.ControlCenter1",
+                                                       "ShowPage");
+    msg << "notification";
+    QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(msg);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(call, this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *self) {
+        QDBusReply<void> reply = *self;
+        if (!reply.isValid()) {
+            qWarning(notifyLog) << "Failed to open notification setting:" << reply.error().message();
+        }
+        self->deleteLater();
+    });
 }
 
 void NotifyAccessor::onNotificationStateChanged(qint64 id, int processedType)
