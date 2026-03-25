@@ -245,8 +245,6 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     }
     const bool onDesktopShow = m_setting->appValue(appId, NotificationSetting::ShowOnDesktop).toBool();
 
-    tryPlayNotificationSound(entity, appId, dndMode);
-
     // new one
     if (replacesId == NoReplacesId) {
         entity.setBubbleId(++m_replacesCount);
@@ -291,6 +289,8 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
             pushPendingEntity(entity, expireTimeout);
         }
     }
+
+    tryPlayNotificationSound(entity, appId, dndMode);
 
     qInfo(notifyLog) << "Notify done, bubbleId:" << entity.bubbleId() << ", id:" << entity.id() << ", type:" << entity.processedType();
 
