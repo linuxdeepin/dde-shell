@@ -17,7 +17,9 @@ class PopupWindow : public QQuickApplicationWindow
 
 public:
     PopupWindow(QWindow *parent = nullptr);
+
     bool x11GrabFocusTransition() const { return m_x11GrabFocusTransition; }
+    Q_INVOKABLE void setWindowGeometry(int px, int py, int pw, int ph);
 
 protected:
     void mouseReleaseEvent(QMouseEvent *event) override;

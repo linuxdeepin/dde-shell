@@ -24,12 +24,12 @@ Item {
 
     Binding {
         when: readyBinding
-        target: popupWindow; property: "width"
+        target: popupWindow; property: "requestedWidth"
         value: popup.width
     }
     Binding {
         when: readyBinding
-        target: popupWindow; property: "height"
+        target: popupWindow; property: "requestedHeight"
         value: popup.height
     }
     Binding {
