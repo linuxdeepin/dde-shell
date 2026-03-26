@@ -16,6 +16,7 @@ class PopupWindow : public QQuickApplicationWindow
 
 public:
     PopupWindow(QWindow *parent = nullptr);
+    Q_INVOKABLE void setWindowGeometry(int px, int py, int pw, int ph);
 
 protected:
     void mouseReleaseEvent(QMouseEvent *event) override;

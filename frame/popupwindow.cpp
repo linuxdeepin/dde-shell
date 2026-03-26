@@ -24,6 +24,11 @@ PopupWindow::PopupWindow(QWindow *parent)
     setMaximumSize();
 }
 
+void PopupWindow::setWindowGeometry(int px, int py, int pw, int ph)
+{
+    this->setGeometry(px, py, pw, ph);
+}
+
 void PopupWindow::mouseReleaseEvent(QMouseEvent *event)
 {
     QQuickApplicationWindow::mouseReleaseEvent(event);
