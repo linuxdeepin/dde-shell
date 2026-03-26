@@ -11,6 +11,7 @@ Item {
     visible: false
     default property alias popupContent: popup.children
     property alias popupVisible: popup.visible
+    property bool closeOnInactive: true
     property var popupWindow: Panel.popupWindow
     property int popupX: 0
     property int popupY: 0
@@ -103,8 +104,7 @@ Item {
         {
             if (!popupWindow)
                 return
-            // TODO why activeChanged is not emit.
-            if (popupWindow && !popupWindow.active) {
+            if (control.closeOnInactive && popupWindow && !popupWindow.active) {
                 control.close()
             }
         }
