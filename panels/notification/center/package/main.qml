@@ -142,7 +142,7 @@ Window {
         var appearance = DS.applet("org.deepin.ds.dde-appearance")
         if (!appearance || appearance.opacity < 0)
             return fallback
-        return appearance.opacity
+        return Math.max(appearance.opacity, 0.4)
     }
 
     // only add blendColor effect when DWindow.enableBlurWindow is true,
@@ -212,6 +212,7 @@ Window {
             id: notifyCenter
             anchors {
                 top: notifyStaging.bottom
+                topMargin: notifyStaging.viewCount > 0 ? contentPadding : 0
                 left: parent.left
                 right: parent.right
                 bottom: parent.bottom
