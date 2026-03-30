@@ -68,6 +68,7 @@ Control {
         boundsBehavior: Flickable.StopAtBounds
         ScrollBar.vertical: ScrollBar { }
         topMargin: 20
+        bottomMargin: 10
         leftMargin: NotifyStyle.leftMargin
         property int nextIndex: -1
         property int pendingFocusIndex: -1  // Index to focus after expand operation
