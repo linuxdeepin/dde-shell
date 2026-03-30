@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "dsglobal.h"
@@ -40,6 +40,8 @@ public:
     int topMargin = 0;
     int bottomMargin = 0;
     DLayerShellWindow::ScreenConfiguration screenConfiguration = DLayerShellWindow::ScreenFromQWindow;
+    int preferredWidth = -1;
+    int preferredHeight = -1;
     bool closeOnDismissed = true;
 };
 
@@ -152,6 +154,42 @@ void DLayerShellWindow::setScreenConfiguration(DLayerShellWindow::ScreenConfigur
     if (screenConfiguration != d->screenConfiguration) {
         d->screenConfiguration = screenConfiguration;
     }
+}
+
+void DLayerShellWindow::setPreferredWidth(int width)
+{
+    if (width != d->preferredWidth) {
+        d->preferredWidth = width;
+        Q_EMIT geometryHintsChanged();
+    }
+}
+
+void DLayerShellWindow::resetPreferredWidth()
+{
+    setPreferredWidth(-1);
+}
+
+int DLayerShellWindow::preferredWidth() const
+{
+    return d->preferredWidth;
+}
+
+void DLayerShellWindow::setPreferredHeight(int height)
+{
+    if (height != d->preferredHeight) {
+        d->preferredHeight = height;
+        Q_EMIT geometryHintsChanged();
+    }
+}
+
+void DLayerShellWindow::resetPreferredHeight()
+{
+    setPreferredHeight(-1);
+}
+
+int DLayerShellWindow::preferredHeight() const
+{
+    return d->preferredHeight; 
 }
 
 bool DLayerShellWindow::closeOnDismissed() const

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -33,6 +33,7 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     onPositionChanged();
     connect(m_dlayerShellWindow, &DLayerShellWindow::anchorsChanged, this, &LayerShellEmulation::onPositionChanged);
     connect(m_dlayerShellWindow, &DLayerShellWindow::marginsChanged, this, &LayerShellEmulation::onPositionChanged);
+    connect(m_dlayerShellWindow, &DLayerShellWindow::geometryHintsChanged, this, &LayerShellEmulation::onPositionChanged);
 
     onExclusionZoneChanged();
     m_exclusionZoneChangedTimer.setSingleShot(true);
@@ -117,17 +118,30 @@ void LayerShellEmulation::onPositionChanged()
 {
     auto anchors = m_dlayerShellWindow->anchors();
     auto screen = m_window->screen();
+    if (!screen) {
+        return;
+    }
+
+    int targetWidth = m_window->width();
+    int targetHeight = m_window->height();
+    if (m_dlayerShellWindow->preferredWidth() > 0) {
+        targetWidth = m_dlayerShellWindow->preferredWidth();
+    }
+    if (m_dlayerShellWindow->preferredHeight() > 0) {
+        targetHeight = m_dlayerShellWindow->preferredHeight();
+    }
+
     auto screenRect = screen->geometry();
-    auto x = screenRect.left() + (screenRect.width() - m_window->width()) / 2;
-    auto y = screenRect.top() + (screenRect.height() - m_window->height()) / 2;
+    auto x = screenRect.left() + (screenRect.width() - targetWidth) / 2;
+    auto y = screenRect.top() + (screenRect.height() - targetHeight) / 2;
     if (anchors & DLayerShellWindow::AnchorRight) {
         // https://doc.qt.io/qt-6/qrect.html#right
-        x = (screen->geometry().right() + 1 - m_window->width() - m_dlayerShellWindow->rightMargin());
+        x = (screen->geometry().right() + 1 - targetWidth - m_dlayerShellWindow->rightMargin());
     }
 
     if (anchors & DLayerShellWindow::AnchorBottom) {
         // https://doc.qt.io/qt-6/qrect.html#bottom
-        y = (screen->geometry().bottom() + 1 - m_window->height() - m_dlayerShellWindow->bottomMargin());
+        y = (screen->geometry().bottom() + 1 - targetHeight - m_dlayerShellWindow->bottomMargin());
     }
     if (anchors & DLayerShellWindow::AnchorLeft) {
         x = (screen->geometry().left() + m_dlayerShellWindow->leftMargin());
@@ -136,7 +150,7 @@ void LayerShellEmulation::onPositionChanged()
         y = (screen->geometry().top() + m_dlayerShellWindow->topMargin());
     }
 
-    QRect rect(x, y, m_window->width(), m_window->height());
+    QRect rect(x, y, targetWidth, targetHeight);
 
     const bool horizontallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorLeft, DLayerShellWindow::AnchorRight});
     const bool verticallyConstrained = anchors.testFlags({DLayerShellWindow::AnchorTop, DLayerShellWindow::AnchorBottom});
@@ -150,7 +164,9 @@ void LayerShellEmulation::onPositionChanged()
         rect.setHeight(screen->geometry().height() - m_dlayerShellWindow->topMargin() - m_dlayerShellWindow->bottomMargin());
     }
 
-    m_window->setGeometry(rect);
+    if (m_window->geometry() != rect) {
+        m_window->setGeometry(rect);
+    }
 }
 
 /**
