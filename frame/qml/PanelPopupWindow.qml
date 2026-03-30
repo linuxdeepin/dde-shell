@@ -15,14 +15,18 @@ PopupWindow {
     property real yOffset: 0
     property int margins: 10
     property Item currentItem
+    property int requestedWidth: 10
+    property int requestedHeight: 10
     signal requestUpdateGeometry()
     signal updateGeometryFinished()
 
     // order to update screen and (x,y)
     property var updateGeometryer : function updateGeometry()
     {
-        if (root.width <= 10 || root.height <= 10) {
-            return
+        if (root.requestedWidth <= 10 || root.requestedHeight <= 10) {
+            root.width = root.requestedWidth;
+            root.height = root.requestedHeight;
+            return;
         }
         if (!root.transientParent)
             return
@@ -33,9 +37,11 @@ PopupWindow {
         let bounding = Qt.rect(root.screen.virtualX + margins, root.screen.virtualY + margins,
                                root.screen.width - margins * 2, root.screen.height - margins * 2)
         let pos = Qt.point(transientParent ? transientParent.x + xOffset : xOffset,
-                           transientParent ? transientParent.y + yOffset : YOffset)
-        x = selectValue(pos.x, bounding.left, bounding.right - root.width)
-        y = selectValue(pos.y, bounding.top, bounding.bottom - root.height)
+                           transientParent ? transientParent.y + yOffset : yOffset)
+        let newX = selectValue(pos.x, bounding.left, bounding.right - root.requestedWidth)
+        let newY = selectValue(pos.y, bounding.top, bounding.bottom - root.requestedHeight)
+        
+        root.setWindowGeometry(newX, newY, root.requestedWidth, root.requestedHeight)
     }
 
     function selectValue(value, min, max) {
@@ -84,6 +90,8 @@ PopupWindow {
         if(root.visible)
             return
         currentItem = null
+        root.requestedWidth = 10
+        root.requestedHeight = 10
         root.width = 10
         root.height = 10
         DS.closeChildrenWindows(root)
@@ -117,8 +125,12 @@ PopupWindow {
         }
     }
 
-    onHeightChanged: requestUpdateGeometry()
-    onWidthChanged: requestUpdateGeometry()
+    onRequestedHeightChanged: {
+        requestUpdateGeometry()
+    }
+    onRequestedWidthChanged: {
+        requestUpdateGeometry()
+    }
     onXOffsetChanged: requestUpdateGeometry()
     onYOffsetChanged: requestUpdateGeometry()
 
