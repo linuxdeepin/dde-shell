@@ -187,6 +187,7 @@ NotifyItem {
     TapHandler {
         enabled: !root.enableDismissed
         acceptedButtons: Qt.LeftButton
+        acceptedDevices: PointerDevice.Mouse
         onTapped: {
             root.forceActiveFocus()
             root.expand()
