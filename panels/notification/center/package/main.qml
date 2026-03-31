@@ -74,7 +74,8 @@ Window {
                 return Math.min(visibleWidth, dockGeometry.width)
             }
             case 2: { // DOCK_BOTTOM
-                return dockApplet.dockSize
+                let visibleHeight = Math.max(0, screenGeometry.y + screenGeometry.height - dockGeometry.y)
+                return Math.min(visibleHeight, dockGeometry.height)
             }
             return 0
         }
