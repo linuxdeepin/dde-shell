@@ -36,7 +36,7 @@ FocusScope {
 
     signal remove()
     signal dismiss()
-    signal setting(var pos)
+    signal setting(var pos, bool isTouch)
     signal actionInvoked(var actionId)
     signal linkActivated(var link)
 

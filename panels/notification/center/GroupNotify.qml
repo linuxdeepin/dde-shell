@@ -106,7 +106,7 @@ NotifyItem {
                 onClicked: function () {
                     console.log("group setting", root.appName)
                     let pos = mapToItem(root, Qt.point(width / 2, height))
-                    root.setting(pos)
+                    root.setting(pos, false)
                 }
             }
             AnimationSettingButton {
