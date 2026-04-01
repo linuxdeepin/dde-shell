@@ -140,7 +140,7 @@ Item {
                 width: root.statusIndicatorSize
                 height: root.statusIndicatorSize
                 anchors.centerIn: iconContainer
-                visible: root.displayMode === Dock.Efficient && root.windows.length > 0
+                visible: root.displayMode === Dock.Efficient && root.windows.length > 0 && !root.titleActive
             }
 
             Connections {
