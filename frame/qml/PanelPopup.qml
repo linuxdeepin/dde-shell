@@ -15,6 +15,8 @@ Item {
     property int popupX: 0
     property int popupY: 0
     property bool readyBinding: false
+    property bool grabInactivePending: false
+    property int grabInactiveTimeout: 200
     // WM_NAME, used for kwin.
     property string windowTitle: "dde-shell/panelpopup"
     width: popup.childrenRect.width
@@ -84,8 +86,24 @@ Item {
             popupWindow.requestActivate()
         }
     }
+    Timer {
+        id: grabInactiveTimer
+        interval: control.grabInactiveTimeout
+        repeat: false
+        onTriggered: {
+            control.grabInactivePending = false
+            if (!popupWindow || !readyBinding || popupWindow.currentItem !== control || !popup.visible) {
+                return
+            }
+            if (!popupWindow.active) {
+                control.close()
+            }
+        }
+    }
     function close()
     {
+        grabInactivePending = false
+        grabInactiveTimer.stop()
         if (!popupWindow)
             return
 
@@ -103,10 +121,54 @@ Item {
         {
             if (!popupWindow)
                 return
+            if (popupWindow.currentItem !== control || !popup.visible) {
+                control.grabInactivePending = false
+                grabInactiveTimer.stop()
+                return
+            }
+            if (popupWindow.active) {
+                control.grabInactivePending = false
+                grabInactiveTimer.stop()
+                return
+            }
+            if (control.grabInactivePending || popupWindow.x11GrabFocusTransition) {
+                return
+            }
             // TODO why activeChanged is not emit.
-            if (popupWindow && !popupWindow.active) {
+            if (!popupWindow.active) {
                 control.close()
             }
+        }
+
+        function onX11FocusOutByGrab()
+        {
+            if (!popupWindow || !readyBinding || !popup.visible || popupWindow.currentItem !== control) {
+                return
+            }
+            control.grabInactivePending = true
+            grabInactiveTimer.start()
+        }
+
+        function onX11FocusInByUngrab()
+        {
+            if (!popupWindow || popupWindow.currentItem !== control || !control.grabInactivePending) {
+                return
+            }
+            control.grabInactivePending = false
+            grabInactiveTimer.stop()
+
+            Qt.callLater(function() {
+                if (!popupWindow
+                        || !readyBinding
+                        || popupWindow.currentItem !== control
+                        || !popup.visible
+                        || control.grabInactivePending) {
+                    return
+                }
+                if (!popupWindow.active) {
+                    control.close()
+                }
+            })
         }
     }
 
