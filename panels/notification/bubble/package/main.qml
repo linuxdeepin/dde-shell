@@ -68,8 +68,8 @@ Window {
     }
 
     visible: Applet.visible
-    width: 390
-    height: Math.max(10, bubbleView.height + bubbleView.anchors.topMargin + bubbleView.anchors.bottomMargin)
+    DLayerShellWindow.preferredWidth: 390
+    DLayerShellWindow.preferredHeight: Math.max(10, bubbleView.height + bubbleView.anchors.topMargin + bubbleView.anchors.bottomMargin)
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
     DLayerShellWindow.topMargin: windowMargin(0)
@@ -107,27 +107,27 @@ Window {
         verticalLayoutDirection: ListView.BottomToTop
         add: Transition {
             id: addTrans
-            // Before starting the new animation, forcibly complete the previous notification bubble's animation
-            ScriptAction {
-                script: {
-                    // Only handle the previous notification bubble (at index count - 1); no need to iterate through all of them
-                    if (bubbleView.count > 1) {
-                        let prevItem = bubbleView.itemAtIndex(bubbleView.count - 2)
-                        if (prevItem) {
-                            // Directly set x to 0 to forcibly complete the animation
-                            prevItem.x = 0
-                        }
-                    }
-                }
-            }
-            XAnimator { 
+            PropertyAnimation {
                 target: addTrans.ViewTransition.item
+                properties: "x"
                 from: addTrans.ViewTransition.item.width
                 to: 0
                 duration: 600
                 easing.type: Easing.OutExpo
             }
         }
+
+        addDisplaced: Transition {
+            id: addDisplacedTrans
+            PropertyAnimation {
+                target: addDisplacedTrans.ViewTransition.item
+                properties: "x"
+                to: 0
+                duration: 600
+                easing.type: Easing.OutExpo
+            }
+        }
+
         delegate: Bubble {
             width: 360
             bubble: model
