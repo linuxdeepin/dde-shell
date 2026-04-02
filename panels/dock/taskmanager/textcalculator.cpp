@@ -277,8 +277,7 @@ void TextCalculator::calculateOptimalTextWidth()
             qreal textWidth = calculateElidedTextWidth(title, baselineWidth);
             // Only add spacing between icon and text when text is present
             if (textWidth > 0.0) {
-                qreal appTitleSpacing = qMax(10.0, m_iconSize / 3.0);
-                itemWidth = m_iconSize + m_itemPadding + textWidth + appTitleSpacing;
+                itemWidth = m_iconSize + m_itemPadding + textWidth;
             } else {
                 itemWidth = m_cellSize;
             }
