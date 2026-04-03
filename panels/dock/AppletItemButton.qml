@@ -25,7 +25,6 @@ IconButton {
 
     icon.width: 16
     icon.height: 16
-    smooth: false
 
     Connections {
         target: control
@@ -38,5 +37,9 @@ IconButton {
     background: AppletItemBackground {
         radius: control.radius
         isActive: control.isActive
+    }
+
+    Component.onCompleted: {
+        contentItem.smooth = false
     }
 }
