@@ -159,8 +159,48 @@ Item {
                 sourceSize: Qt.size(iconSize, iconSize)
                 anchors.centerIn: parent
                 retainWhileLoading: true
-                smooth: iconSize > 32
+                smooth: false
 
+                function mapToScene(px, py) {
+                    return parent.mapToItem(Window.window.contentItem, Qt.point(px, py))
+                }
+
+                function mapFromScene(px, py) {
+                    return parent.mapFromItem(Window.window.contentItem, Qt.point(px, py))
+                }
+
+                function fixPosition() {
+                    anchors.centerIn = undefined
+                    var targetX = (parent.width - width) / 2
+                    var targetY = (parent.height - height) / 2
+
+                    var scenePos = mapToScene(targetX, targetY)
+                    
+                    var physicalX = Math.round(scenePos.x * Panel.devicePixelRatio)
+                    var physicalY = Math.round(scenePos.y * Panel.devicePixelRatio)
+
+                    var localPos = mapFromScene(physicalX / Panel.devicePixelRatio, physicalY / Panel.devicePixelRatio)
+                    
+                    x = localPos.x
+                    y = localPos.y
+                }
+
+                Timer {
+                    id: fixPositionTimer
+                    interval: 100
+                    repeat: false
+                    running: false
+                    onTriggered: {
+                        icon.fixPosition()
+                    }
+                }
+
+                Connections {
+                    target: root
+                    function onIconGlobalPointChanged() {
+                        fixPositionTimer.start()
+                    }
+                }
                 LaunchAnimation {
                     id: launchAnimation
                     launchSpace: {

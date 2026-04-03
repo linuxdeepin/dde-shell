@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -105,6 +105,7 @@ Item {
         }
 
         Loader {
+            id: proxyLoader
             active: isFallbackIcon && root.dragItem.DQuickDrag.isDragging
             anchors.centerIn: parent
             anchors.verticalCenterOffset: -root.fallbackIconSize.height / 3 * 2
@@ -112,6 +113,12 @@ Item {
                 shellSurface: root.fallbackDragImage
                 width: root.fallbackIconSize.width
                 height: root.fallbackIconSize.height
+            }
+        }
+
+        onCurrentDragPointChanged: {
+            if (proxyLoader.item) {
+                proxyLoader.item.fixPosition()
             }
         }
     }
