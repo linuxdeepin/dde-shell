@@ -75,18 +75,17 @@ AppletItemButton {
 
         HoverHandler {
             id: hoverHandler
-            parent: surfaceItem
+            parent: surfaceItem.shellSurfaceItem
         }
         TapHandler {
             id: tapHandler
-            parent: surfaceItem
+            parent: surfaceItem.shellSurfaceItem
         }
 
-        ShellSurfaceItem {
+        DDT.ShellSurfaceItemProxy {
             id: surfaceItem
             anchors.fill: parent
             shellSurface: pluginItem.plugin
-            smooth: false
         }
 
         Component.onCompleted: {
@@ -130,6 +129,7 @@ AppletItemButton {
 
         onItemGlobalPosChanged: {
             updatePluginItemPosTimer.start()
+            surfaceItem.fixPosition()
         }
 
         onVisibleChanged: {

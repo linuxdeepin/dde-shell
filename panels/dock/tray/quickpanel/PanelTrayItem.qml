@@ -57,6 +57,7 @@ Control {
                 name: "dock-control-panel"
                 palette: DTK.makeIconPalette(root.palette)
                 theme: root.ColorSelector.controlTheme
+                smooth: false
             }
             HoverHandler {
                 enabled: !root.isOpened

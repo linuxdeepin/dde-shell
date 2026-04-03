@@ -17,12 +17,17 @@ Item {
     property bool hovered: hoverHandler.hovered
     property bool pressed: tapHandler.pressed
     property int cursorShape: Qt.ArrowCursor
-
+    property alias shellSurfaceItem: impl
+    
     implicitWidth: shellSurface ? shellSurface.width : 10
     implicitHeight: shellSurface ? shellSurface.height : 10
 
     function takeFocus() {
         impl.takeFocus()
+    }
+
+    function fixPosition() {
+        fixPositionTimer.start()
     }
 
     ShellSurfaceItem {
