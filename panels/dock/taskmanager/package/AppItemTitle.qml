@@ -14,6 +14,7 @@ Item {
 
     property bool active: titleLoader.active
     property string text: ""
+    property color textColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? "#FFFFFF" : "#000000"
 
     implicitWidth: titleLoader.width
     implicitHeight: titleLoader.height
@@ -28,7 +29,7 @@ Item {
 
             text: root.TextCalculator.elidedText
             
-            color: D.DTK.themeType === D.ApplicationHelper.DarkType ? "#FFFFFF" : "#000000"            
+            color: root.textColor            
             font: root.TextCalculator.calculator.font
             verticalAlignment: Text.AlignVCenter
                     

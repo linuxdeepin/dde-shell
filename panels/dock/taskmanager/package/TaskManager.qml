@@ -64,7 +64,7 @@ ContainmentItem {
         iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
         spacing: appContainer.spacing
         cellSize: visualModel.cellWidth
-        itemPadding: 4
+        itemPadding: taskmanager.appTitleSpacing
         remainingSpace: taskmanager.remainingSpacesForSplitWindow
         font.family: D.DTK.fontManager.t6.family
         font.pixelSize: Math.max(10, Math.min(20, Math.round(textCalculator.iconSize * 0.35)))
@@ -74,7 +74,7 @@ ContainmentItem {
         id: appContainer
         anchors.fill: parent
         useColumnLayout: taskmanager.useColumnLayout
-        spacing: 0
+        spacing: taskmanager.appTitleSpacing
         remove: Transition {
             NumberAnimation {
                 properties: "scale,opacity"
@@ -190,8 +190,8 @@ ContainmentItem {
                         modelIndex: delegateRoot.modelIndex
                         blendOpacity: taskmanager.blendOpacity
                         title: delegateRoot.title
+                        windowSplit: taskmanager.Applet.windowSplit
                         enableTitle: textCalculator.enabled
-                        appTitleSpacing: taskmanager.appTitleSpacing
                         ListView.delayRemove: Drag.active
                         Component.onCompleted: {
                             dropFilesOnItem.connect(taskmanager.Applet.dropFilesOnItem)

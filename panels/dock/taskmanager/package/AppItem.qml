@@ -24,6 +24,7 @@ Item {
     required property int visualIndex
     required property var modelIndex
     required property string title
+    required property bool windowSplit
 
     property real blendOpacity: 1.0
 
@@ -38,11 +39,10 @@ Item {
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
     
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
-    property int statusIndicatorSize: useColumnLayout ? root.width * 0.72 : root.height * 0.72
     property int iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
     property bool enableTitle: false
     property bool titleActive: enableTitle && titleLoader.active
-    property int appTitleSpacing: 0
+    property bool splitBackgroundVisible: root.windowSplit && root.enableTitle
     property var iconGlobalPoint: {
         var a = icon
         var x = 0, y = 0
@@ -79,16 +79,15 @@ Item {
     Control {
         anchors.fill: parent
         id: appItem
-        implicitWidth: root.titleActive ? (iconContainer.width + 4 + titleLoader.width + root.appTitleSpacing) : iconContainer.width + root.appTitleSpacing
+        implicitWidth: root.titleActive ? (root.iconSize + hoverBackground.horizontalSpacing + titleLoader.width) : iconContainer.width
         visible: !root.Drag.active // When in dragging, hide app item
-        background: AppletItemBackground {
+        background: AppItemBackground {
             id: hoverBackground
 
             readonly property int verticalSpacing: Math.round(root.iconSize / 8) + 1
             readonly property int horizontalSpacing: Math.round(root.iconSize / 8)
             readonly property int nonSplitHeight: root.iconSize + verticalSpacing * 2
-            readonly property int hoverPadding: Math.round((Panel.rootObject.dockItemMaxSize * 0.8 - root.iconSize) / 2)
-            readonly property int splitWidth: Math.round(icon.width + titleLoader.width + hoverPadding * 2)
+            readonly property int splitWidth: Math.round(root.iconSize + titleLoader.width + horizontalSpacing * 3)
             readonly property int nonSplitWidth: Math.round(root.iconSize + horizontalSpacing * 2)
 
             enabled: false
@@ -98,10 +97,9 @@ Item {
             radius: height / 5
             anchors.centerIn: parent
             isActive: root.active
-            opacity: (hoverHandler.hovered || (root.active && root.windows.length > 0)) ? 1.0 : 0.0
-            Behavior on opacity {
-                NumberAnimation { duration: 150 }
-            }
+            splitBackgroundVisible: root.splitBackgroundVisible
+            windowCount: root.windows.length
+            displayMode: root.displayMode
         }
         Item {
             id: iconContainer
@@ -118,10 +116,6 @@ Item {
                         anchors.left: parent.left
                         anchors.horizontalCenter: undefined
                     }
-                    PropertyChanges {
-                        target: iconContainer
-                        anchors.leftMargin: hoverBackground.horizontalSpacing
-                    }
                 },
                 State {
                     name: "nonTitleActive"
@@ -134,13 +128,12 @@ Item {
                     }
                 }
             ]
-            StatusIndicator {
-                id: statusIndicator
-                palette: itemPalette
-                width: root.statusIndicatorSize
-                height: root.statusIndicatorSize
-                anchors.centerIn: iconContainer
-                visible: root.displayMode === Dock.Efficient && root.windows.length > 0
+
+            Connections {
+                function onDisplayModeChanged() {
+                    windowIndicator.updateIndicatorAnchors()
+                }
+                target: root
             }
 
             Connections {
@@ -215,28 +208,30 @@ Item {
                 windowIndicator.anchors.horizontalCenter = undefined
                 windowIndicator.anchors.verticalCenter = undefined
 
+                const anchorTarget = root.displayMode === Dock.Efficient ? appItem : hoverBackground
+
                 switch(Panel.position) {
                 case Dock.Top: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.top = hoverBackground.top
+                    windowIndicator.anchors.top = anchorTarget.top
                     windowIndicator.anchors.topMargin = 1
                     return
                 }
                 case Dock.Bottom: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.bottom = hoverBackground.bottom
+                    windowIndicator.anchors.bottom = anchorTarget.bottom
                     windowIndicator.anchors.bottomMargin = 1
                     return
                 }
                 case Dock.Left: {
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
-                    windowIndicator.anchors.left = hoverBackground.left
+                    windowIndicator.anchors.left = anchorTarget.left
                     windowIndicator.anchors.leftMargin = 1
                     return
                 }
                 case Dock.Right:{
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
-                    windowIndicator.anchors.right = hoverBackground.right
+                    windowIndicator.anchors.right = anchorTarget.right
                     windowIndicator.anchors.rightMargin = 1
                     return
                 }
@@ -251,13 +246,18 @@ Item {
         AppItemTitle {
             id: titleLoader
             anchors.left: iconContainer.right
-            anchors.leftMargin: 4
+            anchors.leftMargin: Math.round(root.iconSize / 8)
             anchors.verticalCenter: parent.verticalCenter
             enabled: root.enableTitle && root.windows.length > 0
             text: root.title
+            textColor: {
+                if (root.displayMode === Dock.Efficient && root.active) {
+                    return "#000000"
+                }
+                return D.DTK.themeType === D.ApplicationHelper.DarkType ? "#FFFFFF" : "#000000"
+            }
         }
 
-        // TODO: value can set during debugPanel
         Loader {
             id: animationRoot
             anchors.fill: parent
