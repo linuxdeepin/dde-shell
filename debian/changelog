@@ -1,3 +1,11 @@
+dde-shell (2.0.35) unstable; urgency=medium
+
+  * fix: disable smooth rendering for tray icons to prevent blur
+  * feat: adjust notification list margins
+  * feat: adjust notification center styling and opacity
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 07 Apr 2026 17:17:04 +0800
+
 dde-shell (2.0.34) unstable; urgency=medium
 
   * fix(notification): adjust notification sound playback timing
