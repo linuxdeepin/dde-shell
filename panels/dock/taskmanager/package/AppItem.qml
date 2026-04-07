@@ -170,6 +170,9 @@ Item {
                 }
 
                 function fixPosition() {
+                    if (root.Drag.active || !parent || launchAnimation.running) {
+                        return
+                    }
                     anchors.centerIn = undefined
                     var targetX = (parent.width - width) / 2
                     var targetY = (parent.height - height) / 2
