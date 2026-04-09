@@ -22,12 +22,12 @@ Item {
 
     Binding {
         when: readyBinding
-        target: menuWindow; property: "width"
+        target: menuWindow; property: "requestedWidth"
         value: menu.width
     }
     Binding {
         when: readyBinding
-        target: menuWindow; property: "height"
+        target: menuWindow; property: "requestedHeight"
         value: menu.height
     }
     Binding {

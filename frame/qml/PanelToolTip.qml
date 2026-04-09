@@ -25,12 +25,12 @@ Item {
 
     Binding {
         when: readyBinding
-        target: toolTipWindow; property: "width"
+        target: toolTipWindow; property: "requestedWidth"
         value: toolTip.width + toolTip.leftPadding + toolTip.rightPadding
     }
     Binding {
         when: readyBinding
-        target: toolTipWindow; property: "height"
+        target: toolTipWindow; property: "requestedHeight"
         value: toolTip.height
     }
     Binding {
