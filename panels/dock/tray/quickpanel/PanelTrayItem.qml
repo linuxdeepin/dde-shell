@@ -25,6 +25,12 @@ Control {
     property Palette textColor: DockPalette.iconTextPalette
     palette.windowText: ColorSelector.textColor
 
+    onIsOpenedChanged: {
+        if (root.isOpened) {
+            toolTip.close()
+        }
+    }
+
     PanelToolTip {
         id: toolTip
         text: qsTr("Quick actions")
@@ -60,7 +66,6 @@ Control {
                 smooth: false
             }
             HoverHandler {
-                enabled: !root.isOpened
                 onHoveredChanged: function () {
                     root.contentHovered = hovered
                     if (hovered && !root.isOpened) {
