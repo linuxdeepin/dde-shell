@@ -1,3 +1,16 @@
+dde-shell (2.0.37) unstable; urgency=medium
+
+  * fix: update tooltip window property bindings and hover behavior
+  * fix: resolve abnormal compositor window size due to popup panel
+    height change
+  * feat: add split window background support for dock app items
+  * feat: fix notification center height calculation for bottom dock
+  * fix: guard PanelPopup close behavior against transient X11 grab
+    focus changes
+  * fix: fix notification bubble animation glitch
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 09 Apr 2026 20:27:14 +0800
+
 dde-shell (2.0.36) unstable; urgency=medium
 
   * fix: prevent position fix during drag or animation
