@@ -14,18 +14,17 @@ ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int dockOrder: 16
-    property real remainingSpacesForTaskManager: Panel.itemAlignment === Dock.LeftAlignment ? Panel.rootObject.dockLeftSpaceForCenter : Panel.rootObject.dockRemainingSpaceForCenter
-
+    property real remainingSpacesForTaskManager: Panel.rootObject.dockRemainingSpaceForCenter 
     readonly property int appTitleSpacing: Math.max(10, Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14) / 3)
-    property real remainingSpacesForSplitWindow: Panel.rootObject.dockLeftSpaceForCenter - (
-        (Panel.rootObject.dockCenterPartCount - 1) * (visualModel.cellWidth + appTitleSpacing) + (Panel.rootObject.dockCenterPartCount) * Panel.rootObject.dockPartSpacing)
-    // 用于居中计算的实际应用区域尺寸
-    property int appContainerWidth: useColumnLayout ? Panel.rootObject.dockSize : appContainer.implicitWidth
-    property int appContainerHeight: useColumnLayout ? appContainer.implicitHeight : Panel.rootObject.dockSize
-    
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : Math.max(remainingSpacesForTaskManager, appContainer.implicitWidth)
-    implicitHeight: useColumnLayout ? Math.max(remainingSpacesForTaskManager, appContainer.implicitHeight) : Panel.rootObject.dockSize
 
+    implicitWidth: {
+        let maxW = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, appContainer.implicitWidth) : Math.min(remainingSpacesForTaskManager, appContainer.implicitWidth)
+        return useColumnLayout ? Panel.rootObject.dockSize : maxW
+    }
+    implicitHeight: {
+        let maxH = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, appContainer.implicitHeight) : Math.min(remainingSpacesForTaskManager, appContainer.implicitHeight)
+        return useColumnLayout ? maxH : Panel.rootObject.dockSize
+    }
     // Helper function to find the current index of an app by its appId in the visualModel
     function findAppIndex(appId) {
         for (let i = 0; i < visualModel.items.count; i++) {
@@ -65,7 +64,7 @@ ContainmentItem {
         spacing: appContainer.spacing
         cellSize: visualModel.cellWidth
         itemPadding: taskmanager.appTitleSpacing
-        remainingSpace: taskmanager.remainingSpacesForSplitWindow
+        remainingSpace: taskmanager.remainingSpacesForTaskManager
         font.family: D.DTK.fontManager.t6.family
         font.pixelSize: Math.max(10, Math.min(20, Math.round(textCalculator.iconSize * 0.35)))
     }
@@ -133,8 +132,24 @@ ContainmentItem {
                 Behavior on opacity { NumberAnimation { duration: 200 } }
                 Behavior on scale { NumberAnimation { duration: 200 } }
 
-                implicitWidth: useColumnLayout ? taskmanager.implicitWidth : appItem.implicitWidth
-                implicitHeight: useColumnLayout ? visualModel.cellWidth : taskmanager.implicitHeight
+                implicitWidth: {
+                    let targetW = useColumnLayout ? taskmanager.implicitWidth : appItem.implicitWidth;
+                    if (useColumnLayout || visualModel.count <= 0) return targetW;
+                    
+                    let totalSpacing = Math.max(0, visualModel.count - 1) * taskmanager.appTitleSpacing;
+                    let availableW = taskmanager.remainingSpacesForTaskManager - totalSpacing;
+                    let maxW = availableW / visualModel.count;
+                    return Math.min(targetW, Math.max(1, maxW));
+                }
+                implicitHeight: {
+                    let targetH = useColumnLayout ? visualModel.cellWidth : taskmanager.implicitHeight;
+                    if (!useColumnLayout || visualModel.count <= 0) return targetH;
+                    
+                    let totalSpacing = Math.max(0, visualModel.count - 1) * taskmanager.appTitleSpacing;
+                    let availableH = taskmanager.remainingSpacesForTaskManager - totalSpacing;
+                    let maxH = availableH / visualModel.count;
+                    return Math.min(targetH, Math.max(1, maxH));
+                }
 
                 property int visualIndex: DelegateModel.itemsIndex
                 property var modelIndex: visualModel.modelIndex(index)
@@ -274,7 +289,7 @@ ContainmentItem {
 
     Component.onCompleted: {
         Panel.rootObject.dockItemMaxSize = Qt.binding(function(){
-            return Math.min(Panel.rootObject.dockSize, Panel.rootObject.dockLeftSpaceForCenter * 1.2 / (Panel.rootObject.dockCenterPartCount - 1 + visualModel.count) - 2)
+            return Math.min(Panel.rootObject.dockSize, Panel.rootObject.dockRemainingSpaceForCenter * 1.2 / (Panel.rootObject.dockCenterPartCount - 1 + visualModel.count) - 2)
         })
     }
 }

@@ -19,20 +19,29 @@ Window {
     id: dock
     property int positionForAnimation: Panel.position
     property bool useColumnLayout: positionForAnimation % 2
-    // TODO: 临时溢出逻辑，待后面修改
-    property int dockLeftSpaceForCenter: useColumnLayout ?
-        (Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight) :
-        (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth)
-    property int dockRemainingSpaceForCenter: useColumnLayout ?
-        (Screen.height / 1.8 - dockRightPart.implicitHeight)  :
-        (Screen.width / 1.8 - dockRightPart.implicitWidth) 
+    property int dockCenterPartCount: dockCenterPartModel.count
+
+    property int dockRemainingSpaceForCenter: {
+        const otherCount = dockCenterPartCount - 1; // not include taskmanager
+        const spacing = useColumnLayout ? gridLayout.rowSpacing : gridLayout.columnSpacing;
+            
+        let otherOccupied = 0;
+        if (otherCount > 0) {
+            otherOccupied = otherCount * dockItemMaxSize + otherCount * spacing;
+        }
+
+        if (useColumnLayout) {
+            return Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight - otherOccupied;
+        } else {
+            return Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth - otherOccupied;
+        }
+    }
+
     property int dockPartSpacing: gridLayout.columnSpacing
     // TODO
     signal dockCenterPartPosChanged()
     signal pressedAndDragging(bool isDragging)
     signal viewDeactivated()
-
-    property int dockCenterPartCount: dockCenterPartModel.count
 
     property int dockSize: Applet.dockSize
     property int dockItemMaxSize: dockSize
@@ -527,18 +536,8 @@ Window {
 
             Item {  
                 id: dockCenterPart
-                property var taskmanagerRootObject: {
-                    let applet = DS.applet("org.deepin.ds.dock.taskmanager")
-                    return applet ? applet.rootObject : null
-                }
-                
-                readonly property real taskmanagerImplicitWidth: taskmanagerRootObject ? taskmanagerRootObject.implicitWidth : 0
-                readonly property real taskmanagerImplicitHeight: taskmanagerRootObject ? taskmanagerRootObject.implicitHeight : 0
-                readonly property real taskmanagerAppContainerWidth: taskmanagerRootObject ? taskmanagerRootObject.appContainerWidth : 0
-                readonly property real taskmanagerAppContainerHeight: taskmanagerRootObject ? taskmanagerRootObject.appContainerHeight : 0
-                
-                implicitWidth: centerLoader.implicitWidth - taskmanagerImplicitWidth + taskmanagerAppContainerWidth
-                implicitHeight: centerLoader.implicitHeight - taskmanagerImplicitHeight + taskmanagerAppContainerHeight
+                implicitWidth: centerLoader.implicitWidth
+                implicitHeight: centerLoader.implicitHeight
                 onXChanged: dockCenterPartPosChanged()
                 onYChanged: dockCenterPartPosChanged()
                 Layout.leftMargin: !useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
