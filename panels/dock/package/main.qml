@@ -19,13 +19,33 @@ Window {
     id: dock
     property int positionForAnimation: Panel.position
     property bool useColumnLayout: positionForAnimation % 2
-    // TODO: 临时溢出逻辑，待后面修改
-    property int dockLeftSpaceForCenter: useColumnLayout ?
-        (Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight) :
-        (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth)
-    property int dockRemainingSpaceForCenter: useColumnLayout ?
-        (Screen.height / 1.8 - dockRightPart.implicitHeight)  :
-        (Screen.width / 1.8 - dockRightPart.implicitWidth) 
+    property int otherCenterAppletsCount: 0
+    function updateOtherCenterAppletsCount() {
+        let count = 0;
+        for (let i = 0; i < Applet.appletItems.rowCount(); i++) {
+            let itemData = Applet.appletItems.data(Applet.appletItems.index(i, 0), Qt.UserRole + 1);
+            if (itemData) {
+                let isVisible = (itemData.shouldVisible === undefined || itemData.shouldVisible);
+                // 属于 center 区域（10 <= dockOrder < 20），且不是 16（TaskManager）
+                if (isVisible && itemData.dockOrder >= 10 && itemData.dockOrder < 20 && itemData.dockOrder !== 16) {
+                    count++;
+                }
+            }
+        }
+        otherCenterAppletsCount = count;
+    }
+
+    property int dockRemainingSpaceForCenter: {
+        let otherCount = otherCenterAppletsCount;
+        
+        let otherHeight = otherCount > 0 ? (otherCount * (useColumnLayout ? dockItemMaxSize : dock.dockSize) + otherCount * gridLayout.rowSpacing) : 0;
+        let otherWidth = otherCount > 0 ? (otherCount * (useColumnLayout ? dock.dockSize : dockItemMaxSize) + otherCount * gridLayout.columnSpacing) : 0;
+
+        return useColumnLayout ?
+            (Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight - otherHeight) :
+            (Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth - otherWidth)
+    }
+
     property int dockPartSpacing: gridLayout.columnSpacing
     // TODO
     signal dockCenterPartPosChanged()
@@ -289,6 +309,7 @@ Window {
 
     function updateAppItems()
     {
+        updateOtherCenterAppletsCount()
         dockLeftPartModel.update()
         dockCenterPartModel.update()
         dockRightPartModel.update()
@@ -460,6 +481,9 @@ Window {
         // TODO missing property binding to update ProxyModel's filter and sort opearation.
         Repeater {
             model: Applet.appletItems
+            onCountChanged: {
+                updateAppItems()
+            }
             delegate: Item {
                 property var order: model.data.dockOrder
                 property bool itemVisible: model.data.shouldVisible === undefined || model.data.shouldVisible
@@ -527,18 +551,8 @@ Window {
 
             Item {  
                 id: dockCenterPart
-                property var taskmanagerRootObject: {
-                    let applet = DS.applet("org.deepin.ds.dock.taskmanager")
-                    return applet ? applet.rootObject : null
-                }
-                
-                readonly property real taskmanagerImplicitWidth: taskmanagerRootObject ? taskmanagerRootObject.implicitWidth : 0
-                readonly property real taskmanagerImplicitHeight: taskmanagerRootObject ? taskmanagerRootObject.implicitHeight : 0
-                readonly property real taskmanagerAppContainerWidth: taskmanagerRootObject ? taskmanagerRootObject.appContainerWidth : 0
-                readonly property real taskmanagerAppContainerHeight: taskmanagerRootObject ? taskmanagerRootObject.appContainerHeight : 0
-                
-                implicitWidth: centerLoader.implicitWidth - taskmanagerImplicitWidth + taskmanagerAppContainerWidth
-                implicitHeight: centerLoader.implicitHeight - taskmanagerImplicitHeight + taskmanagerAppContainerHeight
+                implicitWidth: centerLoader.implicitWidth
+                implicitHeight: centerLoader.implicitHeight
                 onXChanged: dockCenterPartPosChanged()
                 onYChanged: dockCenterPartPosChanged()
                 Layout.leftMargin: !useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
