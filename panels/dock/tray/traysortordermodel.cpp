@@ -23,6 +23,7 @@ const QString SECTION_PINNED = QLatin1String("pinned");
 TraySortOrderModel::TraySortOrderModel(QObject *parent)
     : QStandardItemModel(parent)
     , m_dconfig(Dtk::Core::DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dock.tray"))
+    , m_startupPhase(true)
 {
     QHash<int, QByteArray> defaultRoleNames = roleNames();
     defaultRoleNames.insert({
@@ -63,6 +64,31 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
         qDebug() << "actionsAlwaysVisibleChanged";
         updateVisualIndexes();
     });
+    
+    // Initialize startup phase management
+    m_expectedPluginCount = calculateExpectedPluginCount();
+    qDebug() << "Expected plugin count from config:" << m_expectedPluginCount;
+    
+    // Initialize startup timeout timer (5 seconds)
+    m_startupTimeoutTimer = new QTimer(this);
+    m_startupTimeoutTimer->setSingleShot(true);
+    m_startupTimeoutTimer->setInterval(5000);
+    connect(m_startupTimeoutTimer, &QTimer::timeout, this, [this](){
+        if (m_startupPhase) {
+            int loadedCount = 0;
+            for (const QVariantMap &surface : m_availableSurfaces) {
+                QString surfaceId = surface.value("surfaceId").toString();
+                if (!surfaceId.startsWith("internal/")) {
+                    loadedCount++;
+                }
+            }
+            qWarning() << "Startup phase timeout, forcing completion. Expected:" 
+                       << m_expectedPluginCount << "Loaded:" << loadedCount;
+            setStartupPhase(false);
+        }
+    });
+    m_startupTimeoutTimer->start();
+    
     updateVisualIndexes();
 }
 
@@ -577,6 +603,9 @@ void TraySortOrderModel::onAvailableSurfacesChanged()
     updateVisualIndexes();
     // and also save the current sort order
     saveDataToDConfig();
+    
+    // Check if startup phase should end
+    checkStartupCompletion();
 }
 
 void TraySortOrderModel::handlePluginVisibleChanged(const QString &surfaceId, bool visible)
@@ -674,6 +703,93 @@ void TraySortOrderModel::clearStagedDrop()
     
     // Update visual indexes to remove preview
     updateVisualIndexes();
+}
+
+bool TraySortOrderModel::startupPhase() const
+{
+    return m_startupPhase;
+}
+
+void TraySortOrderModel::setStartupPhase(bool phase)
+{
+    if (m_startupPhase == phase)
+        return;
+    m_startupPhase = phase;
+    emit startupPhaseChanged(phase);
+    
+    if (!phase && m_startupTimeoutTimer) {
+        m_startupTimeoutTimer->stop();
+    }
+}
+
+int TraySortOrderModel::calculateExpectedPluginCount() const
+{
+    // Calculate the count of all plugins recorded in config
+    // Note: internal/* items are not counted as they are built-in
+    QSet<QString> allIds;
+    
+    for (const QString &id : m_stashedIds) {
+        if (!id.startsWith("internal/")) {
+            allIds.insert(id);
+        }
+    }
+    for (const QString &id : m_collapsableIds) {
+        if (!id.startsWith("internal/")) {
+            allIds.insert(id);
+        }
+    }
+    for (const QString &id : m_pinnedIds) {
+        if (!id.startsWith("internal/")) {
+            allIds.insert(id);
+        }
+    }
+    for (const QString &id : m_fixedIds) {
+        if (!id.startsWith("internal/")) {
+            allIds.insert(id);
+        }
+    }
+    
+    return allIds.size();
+}
+
+void TraySortOrderModel::checkStartupCompletion()
+{
+    if (!m_startupPhase) {
+        return;
+    }
+    
+    // Calculate the count of currently loaded non-internal plugins
+    int loadedCount = 0;
+    for (const QVariantMap &surface : m_availableSurfaces) {
+        QString surfaceId = surface.value("surfaceId").toString();
+        if (!surfaceId.startsWith("internal/")) {
+            loadedCount++;
+        }
+    }
+    
+    qDebug() << "Startup check - Expected:" << m_expectedPluginCount 
+             << "Loaded:" << loadedCount;
+    
+    // If config has no recorded plugins, it's first run, wait for timeout or at least one plugin
+    if (m_expectedPluginCount == 0) {
+        // First run, wait for at least one plugin then show
+        if (loadedCount > 0) {
+            // Give a short buffer time, there might be more plugins loading
+            QTimer::singleShot(300, [this](){
+                if (m_startupPhase) {
+                    qDebug() << "First run, showing tray items";
+                    setStartupPhase(false);
+                }
+            });
+        }
+        return;
+    }
+    
+    // When loaded count reaches expected, end startup phase
+    if (loadedCount >= m_expectedPluginCount) {
+        qDebug() << "All expected plugins loaded, ending startup phase";
+        setStartupPhase(false);
+    }
 }
 
 }

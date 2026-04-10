@@ -7,6 +7,7 @@
 #include "constants.h"
 #include <QQmlEngine>
 #include <QStandardItemModel>
+#include <QTimer>
 
 namespace Dtk {
 namespace Core {
@@ -26,6 +27,7 @@ class TraySortOrderModel : public QStandardItemModel
     Q_PROPERTY(bool isCollapsing MEMBER m_isCollapsing NOTIFY isCollapsingChanged)
     Q_PROPERTY(bool actionsAlwaysVisible MEMBER m_actionsAlwaysVisible NOTIFY actionsAlwaysVisibleChanged)
     Q_PROPERTY(bool isUpdating MEMBER m_isUpdating NOTIFY isUpdatingChanged)
+    Q_PROPERTY(bool startupPhase READ startupPhase NOTIFY startupPhaseChanged)
     Q_PROPERTY(QList<QVariantMap> availableSurfaces MEMBER m_availableSurfaces NOTIFY availableSurfacesChanged)
     Q_PROPERTY(QString stagedSurfaceId MEMBER m_stagedSurfaceId NOTIFY stagedDropChanged)
     Q_PROPERTY(int stagedVisualIndex MEMBER m_stagedVisualIndex NOTIFY stagedDropChanged)
@@ -75,11 +77,14 @@ public:
     Q_INVOKABLE void commitStagedDrop();
     Q_INVOKABLE void clearStagedDrop();
 
+    bool startupPhase() const;
+
 signals:
     void collapsedChanged(bool);
     void isCollapsingChanged(bool);
     void actionsAlwaysVisibleChanged(bool);
     void isUpdatingChanged(bool);
+    void startupPhaseChanged(bool);
     void visualItemCountChanged(int);
     void availableSurfacesChanged(const QList<QVariantMap> &);
     void stagedDropChanged();
@@ -90,6 +95,7 @@ private:
     bool m_isCollapsing = false;
     bool m_actionsAlwaysVisible = false;
     bool m_isUpdating = false;
+    bool m_startupPhase = true;
     std::unique_ptr<Dtk::Core::DConfig> m_dconfig;
     // this is for the plugins that currently available.
     QList<QVariantMap> m_availableSurfaces;
@@ -106,6 +112,10 @@ private:
     // Staged drop state for drag preview
     QString m_stagedSurfaceId;
     int m_stagedVisualIndex = -1;
+    
+    // Startup phase management
+    QTimer *m_startupTimeoutTimer = nullptr;
+    int m_expectedPluginCount = 0;
 
     QStandardItem * findItemByVisualIndex(int visualIndex, VisualSections visualSection) const;
     QStringList * getSection(const QString & sectionType);
@@ -124,6 +134,11 @@ private:
     void loadDataFromDConfig();
     void saveDataToDConfig();
     void handlePluginVisibleChanged(const QString &surfaceId, bool visible);
+    
+    // Startup phase management
+    void checkStartupCompletion();
+    int calculateExpectedPluginCount() const;
+    void setStartupPhase(bool phase);
 
 private slots:
     void onAvailableSurfacesChanged();
