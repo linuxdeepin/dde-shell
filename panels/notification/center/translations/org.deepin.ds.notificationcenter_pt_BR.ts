@@ -3,11 +3,11 @@
     <name>GroupNotify</name>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>Recolher</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"/>
+        <translation>Mais</translation>
     </message>
     <message>
         <source>Clear All</source>
@@ -29,7 +29,7 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>Recolher</translation>
     </message>
     <message>
         <source>More</source>
