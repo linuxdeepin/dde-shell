@@ -63,7 +63,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"/>
+        <translation>Limpar tudo</translation>
     </message>
 </context>
 <context>
