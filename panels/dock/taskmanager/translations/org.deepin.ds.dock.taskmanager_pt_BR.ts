@@ -3,7 +3,7 @@
     <name>AppItem</name>
     <message>
         <source>Move to Trash</source>
-        <translation type="unfinished"/>
+        <translation>Mover para a lixeira</translation>
     </message>
 </context>
 <context>
