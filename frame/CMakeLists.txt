@@ -17,6 +17,7 @@ set(PUBLIC_HEADERS
     layershell/dlayershellwindow.h
     models/listtotableproxymodel.h
     dsutility.h
+    dockiteminfo.h
 )
 
 set(PRIVATE_HEADERS
@@ -63,6 +64,7 @@ add_library(dde-shell-frame SHARED
     qmlengine.cpp
     appletitemmodel.h
     appletitemmodel.cpp
+    dockiteminfo.cpp
     dsqmlglobal.cpp
     layershell/dlayershellwindow.cpp
     layershell/qwaylandlayershellsurface.cpp

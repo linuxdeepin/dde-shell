@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -18,8 +18,6 @@ file(
     dockabstractsettingsconfig.h
     dockdbusproxy.cpp
     dockdbusproxy.h
-    dockiteminfo.cpp
-    dockiteminfo.h
     dockpanel.cpp
     dockpanel.h
     docksettings.cpp
