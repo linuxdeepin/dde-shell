@@ -13,14 +13,35 @@ Menu {
     closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
     modal: true
 
-    function toggle()
+    Timer {
+        id: closePolicyTimer
+        interval: 1000
+        onTriggered: {
+            if (root.visible) {
+                root.closePolicy = Popup.CloseOnPressOutside | Popup.CloseOnEscape
+            }
+        }
+    }
+
+    function toggle(isTouch)
     {
         if (!visible) {
             console.log("Open menu")
+            if (isTouch) {
+                closePolicy = Popup.CloseOnEscape
+            }
             open()
+            if (isTouch) {
+                closePolicyTimer.restart()
+            }
         } else {
             console.log("Close menu")
             close()
         }
+    }
+
+    onClosed: {
+        closePolicyTimer.stop()
+        closePolicy = Popup.CloseOnPressOutside | Popup.CloseOnEscape
     }
 }

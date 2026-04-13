@@ -14,7 +14,7 @@ DelegateChooser {
     required property NotifyModel notifyModel
     required property Item view
 
-    signal setting(var pos, var params)
+    signal setting(var pos, var params, bool isTouch)
 
     role: "type"
 
@@ -74,12 +74,12 @@ DelegateChooser {
                 root.view.requestFocusOnExpand(collapseIndex)
             }
 
-            onSetting: function (pos) {
+            onSetting: function (pos, isTouch) {
                 let tmp = mapToItem(root.view, pos)
                 root.setting(tmp, {
                                  appName: model.appName,
                                  pinned: model.pinned
-                             })
+                             }, isTouch)
             }
             onRemove: function () {
                 console.log("remove group", model.appName)
@@ -116,18 +116,20 @@ DelegateChooser {
                 acceptedButtons: Qt.RightButton
                 onPressedChanged: function () {
                     if (pressed) {
+                        if (point.device.type === PointerDevice.TouchScreen)
+                            return
                         let pos = point.position
-                        setting(pos)
+                        setting(pos, false)
                     }
                 }
             }
 
-            onSetting: function (pos) {
+            onSetting: function (pos, isTouch) {
                 let tmp = mapToItem(root.view, pos)
                 root.setting(tmp, {
                                  appName: model.appName,
                                  pinned: model.pinned
-                             })
+                             }, isTouch)
             }
             onRemove: function () {
                 console.log("remove normal", model.id)
@@ -201,9 +203,23 @@ DelegateChooser {
                 acceptedButtons: Qt.RightButton
                 onPressedChanged: function () {
                     if (pressed) {
+                        if (point.device.type === PointerDevice.TouchScreen)
+                            return
                         let pos = point.position
-                        setting(pos)
+                        setting(pos, false)
                     }
+                }
+            }
+
+            TapHandler {
+                acceptedDevices: PointerDevice.TouchScreen
+                onTapped: {
+                    overlapNotify.forceActiveFocus()
+                    overlapNotify.expand()
+                }
+                onLongPressed: {
+                    let pos = point.position
+                    setting(pos, true)
                 }
             }
 
@@ -215,12 +231,12 @@ DelegateChooser {
                 root.view.jiggleUpdate()
                 root.view.requestFocusOnExpand(expandIndex + 1)
             }
-            onSetting: function (pos) {
+            onSetting: function (pos, isTouch) {
                 let tmp = mapToItem(root.view, pos)
                 root.setting(tmp, {
                                  appName: model.appName,
                                  pinned: model.pinned
-                             })
+                             }, isTouch)
             }
             onRemove: function () {
                 console.log("remove overlap", model.appName)

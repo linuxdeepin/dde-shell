@@ -128,7 +128,7 @@ Control {
             id: notifyDelegate
             notifyModel: root.notifyModel
             view: view
-            onSetting: function (pos, params) {
+            onSetting: function (pos, params, isTouch) {
                 let appName = params.appName
                 let pinned = params.pinned
                 notifySetting.x = pos.x - notifySetting.width / 2
@@ -137,7 +137,7 @@ Control {
                 notifySetting.pinned = pinned
 
                 console.log("setting", appName, pinned)
-                notifySetting.toggle();
+                notifySetting.toggle(isTouch);
             }
         }
         add: Transition {
