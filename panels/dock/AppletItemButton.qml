@@ -42,4 +42,27 @@ IconButton {
     Component.onCompleted: {
         contentItem.smooth = false
     }
+
+    property var contentGlobalPoint: {
+        var a = contentItem
+        if (!a) return Qt.point(0, 0)
+        var x = 0, y = 0
+        while (a && a.parent) {
+            x += a.x
+            y += a.y
+            a = a.parent
+        }
+
+        return Qt.point(x, y)
+    }
+
+    PositionFixer {
+        id: positionFixer
+        item: control
+        container: control
+    }
+
+    onContentGlobalPointChanged: {
+        positionFixer.fix()
+    }
 }

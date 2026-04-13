@@ -110,6 +110,8 @@ file(
     pluginmanagerintegration.cpp
     dockpositioner.h
     dockpositioner.cpp
+    positionfixer.h
+    positionfixer.cpp
 )
 
 set_source_files_properties(DockCompositor.qml PROPERTIES

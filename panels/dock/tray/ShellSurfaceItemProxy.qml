@@ -27,7 +27,12 @@ Item {
     }
 
     function fixPosition() {
-        fixPositionTimer.start()
+        positionFixer.fix()
+    }
+
+    PositionFixer {
+        id: positionFixer
+        item: impl
     }
 
     ShellSurfaceItem {
@@ -56,11 +61,10 @@ Item {
 
         onVisibleChanged: function () {
             if (visible) {
-                fixPositionTimer.start()
+                positionFixer.fix()
             }
 
             if (autoClose && !visible) {
-                // surface is valid but client's shellSurface maybe invalid.
                 Qt.callLater(closeShellSurface)
             }
         }
@@ -71,37 +75,8 @@ Item {
             }
         }
 
-        function mapToScene(x, y) {
-            const point = Qt.point(x, y)
-            // Must use parent.mapFoo, because the impl's position is relative to the parent Item
-            const mappedPoint = parent.mapToItem(Window.window.contentItem, point)
-            return mappedPoint
-        }
-
-        function mapFromScene(x, y) {
-            const point = Qt.point(x, y)
-            // Must use parent.mapFoo, because the impl's position is relative to the parent Item
-            const mappedPoint = parent.mapFromItem(Window.window.contentItem, point)
-            return mappedPoint
-        }
-
-        function fixPosition() {
-            // See QTBUG: https://bugreports.qt.io/browse/QTBUG-135833
-            // TODO: should get the devicePixelRatio from the Window
-            x = mapFromScene(Math.ceil(mapToScene(0, 0).x * Panel.devicePixelRatio) / Panel.devicePixelRatio, 0).x
-            y = mapFromScene(0, Math.ceil(mapToScene(0, 0).y * Panel.devicePixelRatio) / Panel.devicePixelRatio).y
-        }
-
-        Timer {
-            id: fixPositionTimer
-            interval: 100
-            repeat: false
-            running: false
-            onTriggered: {
-                impl.fixPosition()
-            }
-        }
     }
+
     Component.onCompleted: function () {
         impl.surfaceDestroyed.connect(root.surfaceDestroyed)
     }

@@ -140,88 +140,63 @@ Item {
                 }
                 target: Panel
             }
-
-            D.DciIcon {
-                id: icon
-                name: root.iconName
-                height: iconSize
-                width: iconSize
-                sourceSize: Qt.size(iconSize, iconSize)
+            //加一层Item为了实现图标centerIn，不受到icon中fixposition的影响
+            Item {
+                width: root.iconSize
+                height: root.iconSize
                 anchors.centerIn: parent
-                retainWhileLoading: true
-                smooth: false
 
-                function mapToScene(px, py) {
-                    return parent.mapToItem(Window.window.contentItem, Qt.point(px, py))
-                }
+                D.DciIcon {
+                    id: icon
+                    name: root.iconName
+                    anchors.fill: parent
+                    sourceSize: Qt.size(iconSize, iconSize)
+                    retainWhileLoading: true
+                    smooth: false
 
-                function mapFromScene(px, py) {
-                    return parent.mapFromItem(Window.window.contentItem, Qt.point(px, py))
-                }
-
-                function fixPosition() {
-                    if (root.Drag.active || !parent || launchAnimation.running) {
-                        return
+                    PositionFixer {
+                        id: positionFixer
+                        item: icon
                     }
-                    anchors.centerIn = undefined
-                    var targetX = (parent.width - width) / 2
-                    var targetY = (parent.height - height) / 2
 
-                    var scenePos = mapToScene(targetX, targetY)
-                    
-                    var physicalX = Math.round(scenePos.x * Panel.devicePixelRatio)
-                    var physicalY = Math.round(scenePos.y * Panel.devicePixelRatio)
-
-                    var localPos = mapFromScene(physicalX / Panel.devicePixelRatio, physicalY / Panel.devicePixelRatio)
-                    
-                    x = localPos.x
-                    y = localPos.y
-                }
-
-                Timer {
-                    id: fixPositionTimer
-                    interval: 100
-                    repeat: false
-                    running: false
-                    onTriggered: {
-                        icon.fixPosition()
-                    }
-                }
-
-                Connections {
-                    target: root
-                    function onIconGlobalPointChanged() {
-                        fixPositionTimer.start()
-                    }
-                }
-                LaunchAnimation {
-                    id: launchAnimation
-                    launchSpace: {
-                        switch (Panel.position) {
-                        case Dock.Top:
-                        case Dock.Bottom:
-                            return (root.height - icon.height) / 2
-                        case Dock.Left:
-                        case Dock.Right:
-                            return (root.width - icon.width) / 2
+                    Connections {
+                        target: root
+                        function onIconGlobalPointChanged() {
+                            if (root.Drag.active || !parent || launchAnimation.running) {
+                                return
+                            }
+                            positionFixer.fix()
                         }
                     }
-
-                    direction: {
-                        switch (Panel.position) {
-                        case Dock.Top:
-                            return LaunchAnimation.Direction.Down
-                        case Dock.Bottom:
-                            return LaunchAnimation.Direction.Up
-                        case Dock.Left:
-                            return LaunchAnimation.Direction.Right
-                        case Dock.Right:
-                            return LaunchAnimation.Direction.Left
+                    LaunchAnimation {
+                        id: launchAnimation
+                        launchSpace: {
+                            switch (Panel.position) {
+                            case Dock.Top:
+                            case Dock.Bottom:
+                                return (root.height - icon.height) / 2
+                            case Dock.Left:
+                            case Dock.Right:
+                                return (root.width - icon.width) / 2
+                            }
                         }
+
+                        direction: {
+                            switch (Panel.position) {
+                            case Dock.Top:
+                                return LaunchAnimation.Direction.Down
+                            case Dock.Bottom:
+                                return LaunchAnimation.Direction.Up
+                            case Dock.Left:
+                                return LaunchAnimation.Direction.Right
+                            case Dock.Right:
+                                return LaunchAnimation.Direction.Left
+                            }
+                        }
+                        target: icon
+                        loops: 1
+                        running: false
                     }
-                    target: icon
-                    loops: 1
-                    running: false
                 }
             }
         }
