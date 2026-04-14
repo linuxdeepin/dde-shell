@@ -112,13 +112,25 @@ DelegateChooser {
             defaultAction: model.defaultAction
             indexInGroup: model.indexInGroup
 
+            // Mouse/other devices right-click for context menu
+            // Note: TouchScreen is excluded because its events bypass acceptedButtons check in Qt
             TapHandler {
                 acceptedButtons: Qt.RightButton
+                acceptedDevices: PointerDevice.AllDevices & ~PointerDevice.TouchScreen
                 onPressedChanged: function () {
                     if (pressed) {
                         let pos = point.position
                         setting(pos)
                     }
+                }
+            }
+
+            // Touchscreen long-press for context menu
+            TapHandler {
+                acceptedDevices: PointerDevice.TouchScreen
+                onLongPressed: {
+                    let pos = point.position
+                    setting(pos)
                 }
             }
 
@@ -197,13 +209,25 @@ DelegateChooser {
                 }
             }
 
+            // Mouse/other devices right-click for context menu
+            // Note: TouchScreen is excluded because its events bypass acceptedButtons check in Qt
             TapHandler {
                 acceptedButtons: Qt.RightButton
+                acceptedDevices: PointerDevice.AllDevices & ~PointerDevice.TouchScreen
                 onPressedChanged: function () {
                     if (pressed) {
                         let pos = point.position
                         setting(pos)
                     }
+                }
+            }
+
+            // Touchscreen long-press for context menu
+            TapHandler {
+                acceptedDevices: PointerDevice.TouchScreen
+                onLongPressed: {
+                    let pos = point.position
+                    setting(pos)
                 }
             }
 
