@@ -303,6 +303,11 @@ Item {
             anchors.fill: parent
             z: -1
             active: root.attention && !Panel.rootObject.isDragging
+            onActiveChanged: {
+                if (!active) {
+                    icon.scale = 1.0
+                }
+            }
             sourceComponent: Repeater {
                 model: 5
                 Rectangle {
