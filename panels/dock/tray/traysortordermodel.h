@@ -27,7 +27,7 @@ class TraySortOrderModel : public QStandardItemModel
     Q_PROPERTY(bool isCollapsing MEMBER m_isCollapsing NOTIFY isCollapsingChanged)
     Q_PROPERTY(bool actionsAlwaysVisible MEMBER m_actionsAlwaysVisible NOTIFY actionsAlwaysVisibleChanged)
     Q_PROPERTY(bool isUpdating MEMBER m_isUpdating NOTIFY isUpdatingChanged)
-    Q_PROPERTY(bool startupPhase READ startupPhase NOTIFY startupPhaseChanged)
+    Q_PROPERTY(bool startupPhase READ startupPhase WRITE setStartupPhase NOTIFY startupPhaseChanged)
     Q_PROPERTY(QList<QVariantMap> availableSurfaces MEMBER m_availableSurfaces NOTIFY availableSurfacesChanged)
     Q_PROPERTY(QString stagedSurfaceId MEMBER m_stagedSurfaceId NOTIFY stagedDropChanged)
     Q_PROPERTY(int stagedVisualIndex MEMBER m_stagedVisualIndex NOTIFY stagedDropChanged)
@@ -76,8 +76,10 @@ public:
     Q_INVOKABLE void stageDropPosition(const QString &surfaceId, int visualIndex);
     Q_INVOKABLE void commitStagedDrop();
     Q_INVOKABLE void clearStagedDrop();
-
+    
+    // Startup phase control
     bool startupPhase() const;
+    Q_INVOKABLE void setStartupPhase(bool phase);
 
 signals:
     void collapsedChanged(bool);
@@ -97,6 +99,7 @@ private:
     bool m_isUpdating = false;
     bool m_startupPhase = true;
     std::unique_ptr<Dtk::Core::DConfig> m_dconfig;
+    QTimer *m_startupTimer = nullptr;
     // this is for the plugins that currently available.
     QList<QVariantMap> m_availableSurfaces;
     // these are the sort order data source, it might contain items that are no longer existed.
@@ -112,10 +115,6 @@ private:
     // Staged drop state for drag preview
     QString m_stagedSurfaceId;
     int m_stagedVisualIndex = -1;
-    
-    // Startup phase management
-    QTimer *m_startupTimeoutTimer = nullptr;
-    int m_expectedPluginCount = 0;
 
     QStandardItem * findItemByVisualIndex(int visualIndex, VisualSections visualSection) const;
     QStringList * getSection(const QString & sectionType);
@@ -134,11 +133,6 @@ private:
     void loadDataFromDConfig();
     void saveDataToDConfig();
     void handlePluginVisibleChanged(const QString &surfaceId, bool visible);
-    
-    // Startup phase management
-    void checkStartupCompletion();
-    int calculateExpectedPluginCount() const;
-    void setStartupPhase(bool phase);
 
 private slots:
     void onAvailableSurfacesChanged();
