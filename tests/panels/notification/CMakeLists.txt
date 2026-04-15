@@ -2,5 +2,4 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-add_subdirectory(dock)
-add_subdirectory(notification)
+add_subdirectory(server)
