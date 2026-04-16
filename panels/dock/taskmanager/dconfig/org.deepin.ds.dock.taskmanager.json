@@ -22,6 +22,17 @@
 			"permissions": "readwrite",
 			"visibility": "private"
 		},
+		"showAttentionAnimation": {
+			"value": true,
+			"serial": 0,
+			"flags": [],
+			"name": "Show Attention Animation",
+			"name[zh_CN]": "显示消息通知动画",
+			"description": "Show attention animation for applications",
+			"description[zh_CN]": "显示应用有新消息时的水波纹动画",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
 		"noTaskGrouping": {
 			"value": false,
 			"serial": 0,
