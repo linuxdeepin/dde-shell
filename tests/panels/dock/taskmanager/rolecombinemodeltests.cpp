@@ -68,7 +68,8 @@ TEST(RoleGroupModel, ModelTest)
         return QModelIndex();
     });
 
-    [[maybe_unused]] auto tester = new QAbstractItemModelTester(&model, QAbstractItemModelTester::FailureReportingMode::Fatal);
+    auto tester = new QAbstractItemModelTester(&model, QAbstractItemModelTester::FailureReportingMode::Fatal);
+    delete tester;
 }
 
 TEST(RoleCombineModel, dataTest) {

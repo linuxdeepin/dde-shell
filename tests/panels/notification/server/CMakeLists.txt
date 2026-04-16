@@ -28,7 +28,9 @@ add_executable(notifyserverapplet_tests
     notifyserverapplet_test.cpp
 )
 
-target_link_libraries(notifyserverapplet_tests
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+
+target_link_libraries(notifyserverapplet_tests PRIVATE
     GTest::GTest
     GTest::gmock
     GTest::gmock_main
