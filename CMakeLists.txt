@@ -24,12 +24,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(BUILD_WITH_X11 "Build X11 emulation" ON)
 
-# Memory leak detection and debugging flags
-set(CMAKE_CXX_FLAGS "-O0 -fsanitize=undefined,address -Wall -g -ggdb3")
-set(CMAKE_C_FLAGS "-O0 -fsanitize=undefined,address -Wall -g -ggdb3")
-set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=undefined,address")
-set(CMAKE_SHARED_LINKER_FLAGS "-fsanitize=undefined,address")
-
 set(DS_BUILD_WITH_QT6 ON CACHE BOOL "Build dde-shell with Qt6")
 
 if (DS_BUILD_WITH_QT6)
