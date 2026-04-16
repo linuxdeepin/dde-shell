@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,6 +13,8 @@ add_library(dock-appruntimeitem SHARED
     xcbgetinfo.h
     xcbgetinfo.cpp
     qmlappruntime.qrc
+    ${CMAKE_SOURCE_DIR}/panels/dock/dockiteminfo.cpp
+    ${CMAKE_SOURCE_DIR}/panels/dock/dockiteminfo.h
     ${CMAKE_SOURCE_DIR}/panels/dock/constants.h
     ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/x11utils.h
     ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/x11utils.cpp
