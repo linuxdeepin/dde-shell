@@ -25,6 +25,7 @@ class TaskManager : public DS_NAMESPACE::DContainment, public AbstractTaskManage
     Q_PROPERTY(bool windowSplit READ windowSplit NOTIFY windowSplitChanged)
     Q_PROPERTY(bool windowFullscreen READ windowFullscreen NOTIFY windowFullscreenChanged)
     Q_PROPERTY(bool allowForceQuit READ allowForceQuit NOTIFY allowedForceQuitChanged)
+    Q_PROPERTY(bool showAttentionAnimation READ showAttentionAnimation NOTIFY showAttentionAnimationChanged)
 
 public:
     enum Roles {
@@ -78,6 +79,7 @@ public:
     bool windowSplit();
     bool windowFullscreen();
     bool allowForceQuit();
+    bool showAttentionAnimation();
 
     Q_INVOKABLE void requestActivate(const QModelIndex &index) const override;
     Q_INVOKABLE void requestNewInstance(const QModelIndex &index, const QString &action = QString()) const override;
@@ -110,6 +112,7 @@ Q_SIGNALS:
     void windowSplitChanged();
     void windowFullscreenChanged(bool);
     void allowedForceQuitChanged();
+    void showAttentionAnimationChanged();
 
 private Q_SLOTS:
     void handleWindowAdded(QPointer<AbstractWindow> window);

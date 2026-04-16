@@ -302,7 +302,7 @@ Item {
             id: animationRoot
             anchors.fill: parent
             z: -1
-            active: root.attention && !Panel.rootObject.isDragging
+            active: root.attention && !Panel.rootObject.isDragging && TaskManager.showAttentionAnimation 
             onActiveChanged: {
                 if (!active) {
                     icon.scale = 1.0

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -26,6 +26,8 @@ public:
     bool isAllowedForceQuit();
     void setAllowedForceQuit(bool allowed);
 
+    bool showAttentionAnimation() const;
+
     bool isWindowSplit();
     void setWindowSplit(bool split);
 
@@ -47,6 +49,7 @@ private:
 
 Q_SIGNALS:
     void allowedForceQuitChanged();
+    void showAttentionAnimationChanged();
     void windowSplitChanged();
     void dockedItemsChanged();
     void dockedElementsChanged();
@@ -55,6 +58,7 @@ private:
     DConfig* m_taskManagerDconfig;
 
     bool m_allowForceQuit;
+    bool m_showAttentionAnimation;
     bool m_windowSplit;
     bool m_cgroupsBasedGrouping;
     QStringList m_dockedElements;
