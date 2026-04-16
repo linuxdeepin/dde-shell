@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -284,6 +284,295 @@ TEST(RoleGroupModel, HasChildrenTest)
     // 清空后根节点不应该有子节点
     EXPECT_FALSE(groupModel.hasChildren());
     EXPECT_EQ(groupModel.rowCount(), 0);
+}
+
+// 测试析构函数是否正确释放内存（内存泄漏检测）
+TEST(RoleGroupModel, DestructorMemoryLeakTest)
+{
+    // 这个测试验证当 RoleGroupModel 被销毁时，所有内部分配的 QList 对象都被正确释放
+    
+    auto role = Qt::UserRole + 1;
+    
+    // 创建源模型并添加数据
+    QStandardItemModel *sourceModel = new QStandardItemModel();
+    for (int i = 0; i < 5; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("group%1").arg(i % 2), role);
+        sourceModel->appendRow(item);
+    }
+    
+    // 创建 RoleGroupModel 并验证数据
+    RoleGroupModel *groupModel = new RoleGroupModel(sourceModel, role);
+    EXPECT_EQ(groupModel->rowCount(), 2); // 应该有2个分组
+    
+    // 销毁 RoleGroupModel - 应该释放所有内部 QList 对象
+    EXPECT_NO_THROW({
+        delete groupModel;
+        groupModel = nullptr;
+    });
+    
+    // 销毁源模型
+    delete sourceModel;
+    
+    // 如果存在内存泄漏，ASan 会在这里报告
+    EXPECT_EQ(groupModel, nullptr);
+}
+
+// 测试多次重建数据源时的内存管理
+TEST(RoleGroupModel, RebuildTreeSourceMemoryTest)
+{
+    QStandardItemModel model;
+    auto role = Qt::UserRole + 1;
+    RoleGroupModel groupModel(&model, role);
+    
+    // 第一次添加数据
+    for (int i = 0; i < 3; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("group1"), role);
+        model.appendRow(item);
+    }
+    EXPECT_EQ(groupModel.rowCount(), 1);
+    
+    // 修改数据触发重建（通过 dataChanged 信号）
+    for (int i = 0; i < model.rowCount(); ++i) {
+        model.setData(model.index(i, 0), QString("group%1").arg(i), role);
+    }
+    
+    // 重建后应该有3个分组
+    EXPECT_EQ(groupModel.rowCount(), 3);
+    
+    // 再次修改数据触发重建
+    for (int i = 0; i < model.rowCount(); ++i) {
+        model.setData(model.index(i, 0), QString("newgroup"), role);
+    }
+    
+    // 重建后应该只有1个分组
+    EXPECT_EQ(groupModel.rowCount(), 1);
+
+}
+
+// 测试设置不同的 sourceModel 时的内存管理
+TEST(RoleGroupModel, SetSourceModelMemoryTest)
+{
+    auto role = Qt::UserRole + 1;
+    
+    // 创建第一个源模型
+    QStandardItemModel model1;
+    for (int i = 0; i < 3; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("group1"), role);
+        model1.appendRow(item);
+    }
+    
+    // 创建 RoleGroupModel
+    RoleGroupModel groupModel(&model1, role);
+    EXPECT_EQ(groupModel.rowCount(), 1);
+    
+    // 创建第二个源模型
+    QStandardItemModel model2;
+    for (int i = 0; i < 5; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("group%1").arg(i), role);
+        model2.appendRow(item);
+    }
+    
+    // 切换到新的源模型
+    groupModel.setSourceModel(&model2);
+    EXPECT_EQ(groupModel.rowCount(), 5);
+    
+    // 设置空源模型
+    groupModel.setSourceModel(nullptr);
+    EXPECT_EQ(groupModel.rowCount(), 0);
+    
+    // 再次设置源模型
+    groupModel.setSourceModel(&model1);
+    EXPECT_EQ(groupModel.rowCount(), 1);
+    
+}
+
+// 测试空模型和边界情况的内存管理
+TEST(RoleGroupModel, EmptyModelMemoryTest)
+{
+    QStandardItemModel model;
+    auto role = Qt::UserRole + 1;
+    
+    // 创建空的 RoleGroupModel
+    RoleGroupModel groupModel(&model, role);
+    EXPECT_EQ(groupModel.rowCount(), 0);
+    
+    // 添加一些数据
+    QStandardItem *item1 = new QStandardItem;
+    item1->setData(QString("group1"), role);
+    model.appendRow(item1);
+    EXPECT_EQ(groupModel.rowCount(), 1);
+    
+    // 清空模型
+    model.clear();
+    EXPECT_EQ(groupModel.rowCount(), 0);
+    
+    // 再次添加数据
+    QStandardItem *item2 = new QStandardItem;
+    item2->setData(QString("group2"), role);
+    model.appendRow(item2);
+    EXPECT_EQ(groupModel.rowCount(), 1);
+    
+    // 再次清空
+    model.clear();
+    EXPECT_EQ(groupModel.rowCount(), 0);
+    
+}
+
+// 测试大量数据操作的内存稳定性
+TEST(RoleGroupModel, LargeDataMemoryStabilityTest)
+{
+    QStandardItemModel model;
+    auto role = Qt::UserRole + 1;
+    RoleGroupModel groupModel(&model, role);
+    
+    // 添加大量数据
+    const int itemCount = 100;
+    for (int i = 0; i < itemCount; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("group%1").arg(i % 10), role);
+        model.appendRow(item);
+    }
+    
+    EXPECT_EQ(groupModel.rowCount(), 10);
+    
+    // 删除一半数据
+    model.removeRows(0, itemCount / 2);
+    EXPECT_EQ(groupModel.rowCount(), 10); // 分组可能还在，但子项减少
+    
+    // 再次添加数据
+    for (int i = 0; i < itemCount / 2; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("newgroup%1").arg(i % 5), role);
+        model.appendRow(item);
+    }
+    
+}
+
+// 测试 setDeduplicationRole 改变时的内存管理
+TEST(RoleGroupModel, SetDeduplicationRoleMemoryTest)
+{
+    QStandardItemModel model;
+    auto role1 = Qt::UserRole + 1;
+    auto role2 = Qt::UserRole + 2;
+    
+    // 设置两个角色的数据
+    for (int i = 0; i < 5; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("groupA"), role1);
+        item->setData(QString("group%1").arg(i % 3), role2);
+        model.appendRow(item);
+    }
+    
+    RoleGroupModel groupModel(&model, role1);
+    EXPECT_EQ(groupModel.rowCount(), 1); // role1: 1个分组
+    
+    // 切换到 role2
+    groupModel.setDeduplicationRole(role2);
+    EXPECT_EQ(groupModel.rowCount(), 3); // role2: 3个分组
+    
+    // 切换回 role1
+    groupModel.setDeduplicationRole(role1);
+    EXPECT_EQ(groupModel.rowCount(), 1); // role1: 1个分组
+    
+}
+
+// 测试 rowsInserted 信号处理时的内存管理
+TEST(RoleGroupModel, RowsInsertedMemoryTest)
+{
+    QStandardItemModel model;
+    auto role = Qt::UserRole + 1;
+    RoleGroupModel groupModel(&model, role);
+    
+    // 初始添加数据
+    for (int i = 0; i < 3; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("group1"), role);
+        model.appendRow(item);
+    }
+    EXPECT_EQ(groupModel.rowCount(), 1);
+    EXPECT_EQ(groupModel.rowCount(groupModel.index(0, 0)), 3);
+    
+    // 插入新行到现有分组
+    QStandardItem *item1 = new QStandardItem;
+    item1->setData(QString("group1"), role);
+    model.insertRow(1, item1);
+    EXPECT_EQ(groupModel.rowCount(groupModel.index(0, 0)), 4);
+    
+    // 插入新行创建新分组
+    QStandardItem *item2 = new QStandardItem;
+    item2->setData(QString("group2"), role);
+    model.appendRow(item2);
+    EXPECT_EQ(groupModel.rowCount(), 2);
+    
+}
+
+// 测试 rowsRemoved 信号处理时的内存管理（包括删除空分组）
+TEST(RoleGroupModel, RowsRemovedWithEmptyGroupMemoryTest)
+{
+    QStandardItemModel model;
+    auto role = Qt::UserRole + 1;
+    RoleGroupModel groupModel(&model, role);
+    
+    // 添加数据到分组
+    QStandardItem *item1 = new QStandardItem;
+    item1->setData(QString("group1"), role);
+    model.appendRow(item1);
+    
+    QStandardItem *item2 = new QStandardItem;
+    item2->setData(QString("group1"), role);
+    model.appendRow(item2);
+    
+    QStandardItem *item3 = new QStandardItem;
+    item3->setData(QString("group2"), role);
+    model.appendRow(item3);
+    
+    EXPECT_EQ(groupModel.rowCount(), 2);
+    
+    // 删除 group1 的所有项目，触发分组删除
+    model.removeRow(0);
+    model.removeRow(0); // 注意：删除第一行后，原来的第二行变成了第一行
+    
+    // 现在应该只有 group2
+    EXPECT_EQ(groupModel.rowCount(), 1);
+    
+    // 删除最后一个项目
+    model.removeRow(0);
+    EXPECT_EQ(groupModel.rowCount(), 0);
+    
+}
+
+
+// 测试 modelReset 信号处理时的内存管理
+TEST(RoleGroupModel, ModelResetMemoryTest)
+{
+    QStandardItemModel model;
+    auto role = Qt::UserRole + 1;
+    RoleGroupModel groupModel(&model, role);
+    
+    // 添加数据
+    for (int i = 0; i < 5; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("group%1").arg(i % 2), role);
+        model.appendRow(item);
+    }
+    EXPECT_EQ(groupModel.rowCount(), 2);
+    
+    // 使用 clear() 方法会触发 modelReset 信号
+    model.clear();
+    
+    // 重新添加不同的数据
+    for (int i = 0; i < 3; ++i) {
+        QStandardItem *item = new QStandardItem;
+        item->setData(QString("newgroup"), role);
+        model.appendRow(item);
+    }
+    
+    EXPECT_EQ(groupModel.rowCount(), 1);
+    
 }
 
 // 测试大量索引访问的边界情况（模拟滚动场景）
