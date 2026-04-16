@@ -80,7 +80,7 @@ struct WlQtTextInputMethodHelper : public QtWaylandServer::qt_text_input_method_
             base->send_enter(d->resource->handle, d->focusedSurface->resource());
             base->send_input_direction_changed(d->resource->handle, int(qApp->inputMethod()->inputDirection()));
             base->send_locale_changed(d->resource->handle, qApp->inputMethod()->locale().bcp47Name());
-            
+
             d->focusDestroyListener.listenForDestruction(surface->resource());
             if (d->inputPanelVisible && d->enabledSurfaces.values().contains(surface))
                 qApp->inputMethod()->show();
@@ -520,16 +520,31 @@ void PluginManager::initialize()
     // 启用剪贴板保留并在宿主系统剪贴板更新时同步给插件 Wayland 客户端，实现粘贴功能
     compositor->setRetainedSelectionEnabled(true);
     if (auto *clipboard = QGuiApplication::clipboard()) {
-        QObject::connect(clipboard, &QClipboard::changed, this, [compositor](QClipboard::Mode mode) {
-            if (mode == QClipboard::Clipboard) {
-                if (const QMimeData *mimeData = QGuiApplication::clipboard()->mimeData(mode)) {
-                    compositor->overrideSelection(mimeData);
+        auto syncClipboardData = [compositor](const QMimeData *mimeData) {
+            if (!mimeData) return;
+            QMimeData lightweightData;
+            static QStringList allowedFormats = {"text/plain", "text/html"};
+            bool hasData = false;
+            
+            for (const QString &format : mimeData->formats()) {
+                if (allowedFormats.contains(format)) {
+                    lightweightData.setData(format, mimeData->data(format));
+                    hasData = true;
                 }
             }
+
+            if (hasData) {
+                compositor->overrideSelection(&lightweightData);
+            }
+        };
+
+        QObject::connect(clipboard, &QClipboard::changed, this, [clipboard, syncClipboardData](QClipboard::Mode mode) {
+            if (mode == QClipboard::Clipboard) {
+                syncClipboardData(clipboard->mimeData(mode));
+            }
         });
-        if (const QMimeData *mimeData = clipboard->mimeData(QClipboard::Clipboard)) {
-            compositor->overrideSelection(mimeData);
-        }
+
+        syncClipboardData(clipboard->mimeData(QClipboard::Clipboard));
     }
 }
 
