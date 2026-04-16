@@ -1,0 +1,3 @@
+usr/include/dde-shell/dock/*.h
+usr/lib/*/libdde-shell-dock.so*
+usr/lib/*/cmake/DDEShellDock/*.cmake

@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
 
-#include "../dockiteminfo.h"
+#include "../frame/dappletdock.h"
+#include "../frame/dockiteminfo.h"
 #include "applet.h"
 #include "dsglobal.h"
 #include "treelandmultitaskview.h"
@@ -13,11 +14,10 @@
 
 namespace dock {
 
-class MultiTaskView : public DS_NAMESPACE::DApplet
+class MultiTaskView : public DS_NAMESPACE::DAppletDock
 {
     Q_OBJECT
     Q_PROPERTY(QString iconName READ iconName WRITE setIconName NOTIFY iconNameChanged FINAL)
-    Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 
 public:
     explicit MultiTaskView(QObject *parent = nullptr);
@@ -28,17 +28,12 @@ public:
     bool hasComposite();
 
     Q_INVOKABLE void openWorkspace();
-    Q_INVOKABLE DockItemInfo dockItemInfo();
-
-    Q_INVOKABLE bool visible() const;
-    Q_INVOKABLE void setVisible(bool visible);
+    DockItemInfo dockItemInfo() override;
 
 Q_SIGNALS:
     void iconNameChanged();
-    void visibleChanged();
 
 private:
-    bool m_visible = true;
     bool m_kWinEffect = true;
     QString m_iconName;
     QScopedPointer<TreeLandMultitaskview> m_multitaskview;

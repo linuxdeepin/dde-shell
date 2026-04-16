@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -12,8 +12,6 @@ add_library(dock-multitaskview SHARED
     multitaskview.h
     treelandmultitaskview.cpp
     treelandmultitaskview.h
-    ../dockiteminfo.cpp
-    ../dockiteminfo.h
 )
 
 target_include_directories(dock-multitaskview PRIVATE
@@ -31,6 +29,7 @@ target_link_libraries(dock-multitaskview PRIVATE
     PkgConfig::WaylandClient
     Qt${QT_VERSION_MAJOR}::WaylandClient
     dde-shell-frame
+    dde-shell-dock
 )
 
 ds_install_package(PACKAGE org.deepin.ds.dock.multitaskview TARGET dock-multitaskview)
