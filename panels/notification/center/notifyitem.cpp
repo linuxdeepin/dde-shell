@@ -1,15 +1,11 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "notifyitem.h"
 
 #include <QDateTime>
-#include <QLocale>
 #include <QLoggingCategory>
-
-#include <unicode/reldatefmt.h> // For RelativeDateTimeFormatter
-#include <unicode/smpdtfmt.h> // For SimpleDateFormat
 
 #include "notifyaccessor.h"
 
@@ -66,81 +62,14 @@ QString AppNotifyItem::time() const
     return m_time;
 }
 
-namespace
-{
-QString toQString(const icu::UnicodeString &icuString)
-{
-    // Get a pointer to the internal UTF-16 buffer of the icu::UnicodeString.
-    // The buffer is not necessarily null-terminated, so we also need the length.
-    const UChar *ucharData = icuString.getBuffer();
-    int32_t length = icuString.length();
-
-    // QString has a constructor that takes a const QChar* and a length.
-    // UChar is typically a 16-bit unsigned integer, which is compatible with QChar.
-    // Static_cast is used here for explicit type conversion, though often
-    // UChar and QChar are typedefs to the same underlying type (e.g., unsigned short).
-    return QString(reinterpret_cast<const QChar *>(ucharData), length);
-}
-
-[[maybe_unused]] icu::UnicodeString fromQString(const QString &qstr)
-{
-    return icu::UnicodeString(qstr.utf16(), qstr.length());
-}
-
-} // anonymous namespace
-
 void AppNotifyItem::updateTime()
 {
-    QDateTime time = QDateTime::fromMSecsSinceEpoch(m_entity.cTime());
-    if (!time.isValid())
-        return;
-
-    using namespace icu;
-    static std::unique_ptr<RelativeDateTimeFormatter> formatter;
-    static UErrorCode cachedStatus = U_ZERO_ERROR;
-    if (!formatter) {
-        cachedStatus = U_ZERO_ERROR;
-        formatter = std::make_unique<RelativeDateTimeFormatter>(icu::Locale::getDefault(),
-                                                                nullptr, // Use default NumberFormat
-                                                                UDAT_STYLE_LONG,
-                                                                UDISPCTX_CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE,
-                                                                cachedStatus);
+    QString ret = NotifyEntity::formatRelativeTime(m_entity.cTime());
+    if (ret.isEmpty()) {
+        if (!QDateTime::fromMSecsSinceEpoch(m_entity.cTime()).isValid())
+            return;
+        ret = tr("Just now");
     }
-    UErrorCode status = U_ZERO_ERROR; // For any per-call ICU operations
-    UnicodeString result;
-
-    QString ret;
-    QDateTime currentTime = QDateTime::currentDateTime();
-    auto elapsedDay = time.daysTo(currentTime);
-    if (elapsedDay == 0) {
-        qint64 msec = QDateTime::currentMSecsSinceEpoch() - m_entity.cTime();
-        auto minute = msec / 1000 / 60;
-        if (minute <= 0) {
-            ret = tr("Just now");
-        } else if (minute > 0 && minute < 60) {
-            formatter->format(minute, UDAT_DIRECTION_LAST, UDAT_RELATIVE_MINUTES, result, status);
-            ret = toQString(result);
-        } else {
-            const auto hour = minute / 60;
-            formatter->format(hour, UDAT_DIRECTION_LAST, UDAT_RELATIVE_HOURS, result, status);
-            ret = toQString(result);
-        }
-    } else if (elapsedDay >= 1 && elapsedDay < 2) {
-        formatter->format(1, UDAT_DIRECTION_LAST, UDAT_RELATIVE_DAYS, result, status);
-        UnicodeString combinedString;
-        UErrorCode timeStatus = U_ZERO_ERROR;
-        SimpleDateFormat timeFormatter("HH:mm", icu::Locale::getDefault(), timeStatus);
-        UnicodeString timeString;
-        UDate udate = static_cast<UDate>(m_entity.cTime());
-        timeFormatter.format(udate, timeString, timeStatus);
-        formatter->combineDateAndTime(result, timeString, combinedString, status);
-        ret = toQString(combinedString);
-    } else if (elapsedDay >= 2 && elapsedDay < 7) {
-        ret = QLocale::system().toString(time, "ddd hh:mm");
-    } else {
-        ret = time.toString(QLocale::system().dateFormat(QLocale::ShortFormat));
-    }
-
     m_time = ret;
 }
 

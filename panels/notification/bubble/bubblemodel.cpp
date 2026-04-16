@@ -10,7 +10,6 @@
 
 #include <QTimer>
 #include <QLoggingCategory>
-#include <QDateTime>
 #include <QImage>
 #include <QTemporaryFile>
 #include <QUrl>
@@ -289,13 +288,10 @@ void BubbleModel::updateBubbleTimeTip()
     }
 
     for (auto item : m_bubbles) {
-        qint64 diff = QDateTime::currentMSecsSinceEpoch() - item->ctime();
-        diff /= 1000; // secs
-        if (diff >= 60) {
-            QString timeTip;
-            timeTip = tr("%1 minutes ago").arg(diff / 60);
+        QString timeTip = NotifyEntity::formatRelativeTime(item->ctime());
+        if (!timeTip.isEmpty()) {
             item->setTimeTip(timeTip);
-        };
+        }
     }
 
     Q_EMIT dataChanged(index(0), index(m_bubbles.size() - 1), {BubbleModel::TimeTip});
