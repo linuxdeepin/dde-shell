@@ -1,8 +1,7 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "applet.h"
 #include "multitaskview.h"
 #include "pluginfactory.h"
 #include "../constants.h"
@@ -23,7 +22,7 @@ constexpr int KWinOptimalPerformance = 4;
 const QString windowEffectTypeKey = QStringLiteral("user_type");
 
 MultiTaskView::MultiTaskView(QObject *parent)
-    : DApplet(parent)
+    : DAppletDock(parent)
     , m_iconName("deepin-multitasking-view")
 {
     connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, &MultiTaskView::visibleChanged);
@@ -48,7 +47,7 @@ MultiTaskView::MultiTaskView(QObject *parent)
 
 bool MultiTaskView::init()
 {
-    DApplet::init();
+    DAppletDock::init();
     return true;
 }
 
@@ -80,11 +79,6 @@ void MultiTaskView::setIconName(const QString& iconName)
     }
 }
 
-bool MultiTaskView::visible() const
-{
-    return m_kWinEffect && m_visible && DWindowManagerHelper::instance()->hasComposite();
-}
-
 DockItemInfo MultiTaskView::dockItemInfo()
 {
     DockItemInfo info;
@@ -92,18 +86,9 @@ DockItemInfo MultiTaskView::dockItemInfo()
     info.displayName = tr("Multitasking View");
     info.itemKey = "multitasking-view";
     info.settingKey = "multitasking-view";
-    info.visible = visible();
+    info.visible = m_kWinEffect && DWindowManagerHelper::instance()->hasComposite();
     info.dccIcon = DCCIconPath + "multitasking-view.svg";
     return info;
-}
-
-void MultiTaskView::setVisible(bool visible)
-{
-    if (m_visible != visible) {
-        m_visible = visible;
-
-        Q_EMIT visibleChanged();
-    }
 }
 
 D_APPLET_CLASS(MultiTaskView)

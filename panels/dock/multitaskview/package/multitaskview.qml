@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -9,14 +9,9 @@ import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
 import org.deepin.ds.dock 1.0
 
-AppletItem {
+AppletDockItem {
     id: toggleworkspace
-    property bool useColumnLayout: Panel.position % 2
-    property int dockOrder: 15
-    property bool shouldVisible: Applet.visible
-    // 1:4 the distance between app : dock height; get width/height≈0.8
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : Panel.rootObject.dockItemMaxSize * 0.8
-    implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 0.8 : Panel.rootObject.dockSize
+    dockOrder: 15
 
     PanelToolTip {
         id: toolTip

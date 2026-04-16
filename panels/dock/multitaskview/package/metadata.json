@@ -1,6 +1,9 @@
 {
     "Plugin": {
         "Version": "1.0",
+        "dock": {
+            "version": "1.0"
+        },
         "Id": "org.deepin.ds.dock.multitaskview",
         "Url": "multitaskview.qml",
         "Parent": "org.deepin.ds.dock"

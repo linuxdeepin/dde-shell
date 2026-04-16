@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -15,22 +15,38 @@
 
 DGUI_USE_NAMESPACE
 DS_USE_NAMESPACE
+namespace {
+constexpr auto DockVersionV1 = "1.0";
 
+QList<DS_NAMESPACE::DAppletDock *> dockApplets(dock::DockPanel *panel)
+{
+    QList<DS_NAMESPACE::DAppletDock *> list;
+    if (!panel) return list;
+
+    for (auto *applet : panel->applets()) {
+        if (applet->pluginMetaData().value("dock").toMap().value("version").toString() == DockVersionV1) {
+            if (auto dockApplet = qobject_cast<DS_NAMESPACE::DAppletDock *>(applet)) {
+                list.append(dockApplet);
+            }
+        }
+    }
+    return list;
+}
+}
 namespace dock {
 DockDBusProxy::DockDBusProxy(DockPanel* parent)
     : QObject(parent)
     , m_oldDockApplet(nullptr)
-    , m_multitaskviewApplet(nullptr)
     , m_trayApplet(nullptr)
 {
     registerPluginInfoMetaType();
 
     connect(DockSettings::instance(), &DockSettings::pluginsVisibleChanged, this, [this] (const QVariantMap &pluginsVisible) {
-        setPluginVisible("org.deepin.ds.dock.multitaskview", pluginsVisible);
+        updateDockPluginsVisible(pluginsVisible);
     });
     connect(parent, &DockPanel::rootObjectChanged, this, [this]() {
         auto pluginsVisible = DockSettings::instance()->pluginsVisible();
-        setPluginVisible("org.deepin.ds.dock.multitaskview", pluginsVisible);
+        updateDockPluginsVisible(pluginsVisible);
     });
 
     // Communicate with the other module
@@ -39,12 +55,8 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
             DAppletBridge bridge("org.deepin.ds.dock.tray");
             m_trayApplet = bridge.applet();
         }
-        {
-            DAppletBridge bridge("org.deepin.ds.dock.multitaskview");
-            m_multitaskviewApplet = bridge.applet();
-        }
 
-        return m_trayApplet && m_multitaskviewApplet;
+        return m_trayApplet;
     };
 
     // TODO: DQmlGlobal maybe missing a  signal which named `appletListChanged`?
@@ -77,14 +89,13 @@ QRect DockDBusProxy::geometry()
     return parent()->window() ? parent()->window()->geometry() : QRect();
 }
 
-void DockDBusProxy::setPluginVisible(const QString &pluginId, const QVariantMap &pluginsVisible)
+void DockDBusProxy::updateDockPluginsVisible(const QVariantMap &pluginsVisible)
 {
-    if (DAppletBridge bridge(pluginId); auto item = bridge.applet()) {
-        DockItemInfo itemInfo;
-        QMetaObject::invokeMethod(item, "dockItemInfo", Qt::DirectConnection, qReturnArg(itemInfo));
+    for (auto *dockApplet : dockApplets(parent())) {
+        DockItemInfo itemInfo = dockApplet->dockItemInfo();
         QString itemKey = itemInfo.itemKey;
         if (pluginsVisible.contains(itemKey)) {
-            QMetaObject::invokeMethod(item, "setVisible", Qt::QueuedConnection, pluginsVisible[itemKey].toBool());
+           dockApplet->setVisible(pluginsVisible[itemKey].toBool());
         } else {
             auto settingPluginsVisible = DockSettings::instance()->pluginsVisible();
             settingPluginsVisible[itemKey] = true;
@@ -223,12 +234,10 @@ DockItemInfos DockDBusProxy::plugins()
         QMetaObject::invokeMethod(m_trayApplet, "dockItemInfos", Qt::DirectConnection, qReturnArg(iteminfos));
     }
 
-    if (m_multitaskviewApplet && DWindowManagerHelper::instance()->hasBlurWindow()) {
-        DockItemInfo info;
-        if (QMetaObject::invokeMethod(m_multitaskviewApplet, "dockItemInfo", Qt::DirectConnection, qReturnArg(info))) {
-            iteminfos.append(info);
-        }
+    for (auto *dockApplet : dockApplets(parent())) {
+        iteminfos.append(dockApplet->dockItemInfo());
     }
+
     return iteminfos;
 }
 
@@ -244,13 +253,18 @@ void DockDBusProxy::callShow()
 
 void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible)
 {
-    if (itemKey == "multitasking-view" && m_multitaskviewApplet) {
-        QMetaObject::invokeMethod(m_multitaskviewApplet, "setVisible", Qt::QueuedConnection, visible);
-        auto pluginsVisible = DockSettings::instance()->pluginsVisible();
-        pluginsVisible[itemKey] = visible;
-        DockSettings::instance()->setPluginsVisible(pluginsVisible);
-        Q_EMIT pluginVisibleChanged(itemKey, visible);
-    } else if (m_trayApplet) {
+    for (auto *dockApplet : dockApplets(parent())) {
+        if (dockApplet->dockItemInfo().itemKey == itemKey) {
+            dockApplet->setVisible(visible);
+            auto pluginsVisible = DockSettings::instance()->pluginsVisible();
+            pluginsVisible[itemKey] = visible;
+            DockSettings::instance()->setPluginsVisible(pluginsVisible);
+            Q_EMIT pluginVisibleChanged(itemKey, visible);
+            return;
+        }
+    }
+
+    if (m_trayApplet) {
         Q_EMIT pluginVisibleChanged(itemKey, visible);
         QMetaObject::invokeMethod(m_trayApplet, "setItemOnDock", Qt::QueuedConnection, settingKey, itemKey, visible);
     }

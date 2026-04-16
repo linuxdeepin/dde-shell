@@ -93,3 +93,13 @@ Depends:
  ${misc:Depends},
 Description: DDE Shell devel library
  DDE Shell is a plugin system that integrates plugins developed based on this plugin system into DDE.
+
+Package: libdde-shell-dock-dev
+Architecture: any
+Depends:
+ libdde-shell-dev (= ${binary:Version}),
+ qt6-base-dev,
+ qt6-declarative-dev,
+ ${misc:Depends},
+Description: DDE Shell dock devel library
+ DDE Shell Dock is a library for dock item info.
