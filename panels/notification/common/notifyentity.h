@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -92,6 +92,10 @@ public:
     void setBubbleId(qint64 bubbleId);
 
     QString bodyIcon() const;
+
+    // Formats a creation time (ms since epoch) as a locale-aware relative
+    // time string. Returns empty string if less than 1 minute or invalid.
+    static QString formatRelativeTime(qint64 ctimeMs);
 
 private:
     static QString convertHintsToString(const QVariantMap &map);

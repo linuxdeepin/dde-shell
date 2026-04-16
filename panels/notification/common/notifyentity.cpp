@@ -1,12 +1,18 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "notifyentity.h"
 
 #include <QDateTime>
+#include <QLocale>
 #include <QStringList>
 #include <QLoggingCategory>
+
+#include <unicode/reldatefmt.h>
+#include <unicode/smpdtfmt.h>
+
+#include <memory>
 
 namespace notification {
 Q_LOGGING_CATEGORY(notifyLog, "org.deepin.dde.shell.notification")
@@ -348,6 +354,71 @@ QVariantMap NotifyEntity::parseHint(const QString &hint)
     }
 
     return map;
+}
+
+namespace {
+
+QString toQString(const icu::UnicodeString &icuString)
+{
+    const UChar *ucharData = icuString.getBuffer();
+    int32_t length = icuString.length();
+    return QString(reinterpret_cast<const QChar *>(ucharData), length);
+}
+
+} // anonymous namespace
+
+QString NotifyEntity::formatRelativeTime(qint64 ctimeMs)
+{
+    QDateTime time = QDateTime::fromMSecsSinceEpoch(ctimeMs);
+    if (!time.isValid())
+        return {};
+
+    using namespace icu;
+    static std::unique_ptr<RelativeDateTimeFormatter> formatter;
+    static UErrorCode cachedStatus = U_ZERO_ERROR;
+    if (!formatter) {
+        cachedStatus = U_ZERO_ERROR;
+        formatter = std::make_unique<RelativeDateTimeFormatter>(
+            icu::Locale::getDefault(),
+            nullptr,
+            UDAT_STYLE_LONG,
+            UDISPCTX_CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE,
+            cachedStatus);
+    }
+    UErrorCode status = U_ZERO_ERROR;
+    UnicodeString result;
+
+    QDateTime currentTime = QDateTime::currentDateTime();
+    auto elapsedDay = time.daysTo(currentTime);
+
+    if (elapsedDay == 0) {
+        qint64 msec = QDateTime::currentMSecsSinceEpoch() - ctimeMs;
+        auto minute = msec / 1000 / 60;
+        if (minute <= 0) {
+            return {};
+        } else if (minute > 0 && minute < 60) {
+            formatter->format(minute, UDAT_DIRECTION_LAST, UDAT_RELATIVE_MINUTES, result, status);
+            return toQString(result);
+        } else {
+            const auto hour = minute / 60;
+            formatter->format(hour, UDAT_DIRECTION_LAST, UDAT_RELATIVE_HOURS, result, status);
+            return toQString(result);
+        }
+    } else if (elapsedDay >= 1 && elapsedDay < 2) {
+        formatter->format(1, UDAT_DIRECTION_LAST, UDAT_RELATIVE_DAYS, result, status);
+        UnicodeString combinedString;
+        UErrorCode timeStatus = U_ZERO_ERROR;
+        SimpleDateFormat timeFormatter("HH:mm", icu::Locale::getDefault(), timeStatus);
+        UnicodeString timeString;
+        UDate udate = static_cast<UDate>(ctimeMs);
+        timeFormatter.format(udate, timeString, timeStatus);
+        formatter->combineDateAndTime(result, timeString, combinedString, status);
+        return toQString(combinedString);
+    } else if (elapsedDay >= 2 && elapsedDay < 7) {
+        return QLocale::system().toString(time, "ddd hh:mm");
+    } else {
+        return time.toString(QLocale::system().dateFormat(QLocale::ShortFormat));
+    }
 }
 
 }
