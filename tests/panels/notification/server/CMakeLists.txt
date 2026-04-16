@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2026 UnionTech Software Technology Co., Ltd.
 #
-# SPDX-License-Identifier: CC0-1.0
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 find_package(GTest REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Test DBus)
