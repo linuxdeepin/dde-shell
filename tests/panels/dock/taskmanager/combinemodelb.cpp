@@ -43,6 +43,12 @@ TestModelB::TestModelB(QObject *parent)
 
 }
 
+TestModelB::~TestModelB()
+{
+    qDeleteAll(m_list);
+    m_list.clear();
+}
+
 QHash<int, QByteArray> TestModelB::roleNames() const
 {
     return {
