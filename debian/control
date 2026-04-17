@@ -15,6 +15,7 @@ Build-Depends:
  libdtk6widget-dev,
  libdtkcommon-dev,
  libgtest-dev,
+ libgmock-dev,
  libicu-dev,
  libqt6svg6,
  libxcb-ewmh-dev,
