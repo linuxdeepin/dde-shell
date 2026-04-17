@@ -49,6 +49,14 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
         updateDockPluginsVisible(pluginsVisible);
     });
 
+    for (auto *dockApplet : dockApplets(parent)) {
+        connect(dockApplet, &DS_NAMESPACE::DAppletDock::supportedChanged, this, [this]() {
+            auto pluginsVisible = DockSettings::instance()->pluginsVisible();
+            updateDockPluginsVisible(pluginsVisible);
+            Q_EMIT pluginsChanged();
+        });
+    }
+
     // Communicate with the other module
     auto getOtherApplet = [ = ] {
         {
@@ -92,6 +100,9 @@ QRect DockDBusProxy::geometry()
 void DockDBusProxy::updateDockPluginsVisible(const QVariantMap &pluginsVisible)
 {
     for (auto *dockApplet : dockApplets(parent())) {
+        if (!dockApplet->isSupported()) {
+            continue;
+        }
         DockItemInfo itemInfo = dockApplet->dockItemInfo();
         QString itemKey = itemInfo.itemKey;
         if (pluginsVisible.contains(itemKey)) {
@@ -235,6 +246,9 @@ DockItemInfos DockDBusProxy::plugins()
     }
 
     for (auto *dockApplet : dockApplets(parent())) {
+        if (!dockApplet->isSupported()) {
+            continue;
+        }
         iteminfos.append(dockApplet->dockItemInfo());
     }
 

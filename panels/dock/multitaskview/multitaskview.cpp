@@ -25,7 +25,9 @@ MultiTaskView::MultiTaskView(QObject *parent)
     : DAppletDock(parent)
     , m_iconName("deepin-multitasking-view")
 {
-    connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, &MultiTaskView::visibleChanged);
+    connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, [this]() {
+        setSupported(m_kWinEffect && DWindowManagerHelper::instance()->hasComposite());
+    });
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
         m_multitaskview.reset(new TreeLandMultitaskview);
@@ -38,7 +40,7 @@ MultiTaskView::MultiTaskView(QObject *parent)
                 bool kWinEffect = m_kWinCompositingConfig->value(windowEffectTypeKey).toInt() != KWinOptimalPerformance;
                 if (kWinEffect != m_kWinEffect) {
                     m_kWinEffect = kWinEffect;
-                    Q_EMIT visibleChanged();
+                    setSupported(m_kWinEffect && DWindowManagerHelper::instance()->hasComposite());
                 }
             }
         });
@@ -47,6 +49,7 @@ MultiTaskView::MultiTaskView(QObject *parent)
 
 bool MultiTaskView::init()
 {
+    setSupported(m_kWinEffect && DWindowManagerHelper::instance()->hasComposite());
     DAppletDock::init();
     return true;
 }
@@ -86,7 +89,7 @@ DockItemInfo MultiTaskView::dockItemInfo()
     info.displayName = tr("Multitasking View");
     info.itemKey = "multitasking-view";
     info.settingKey = "multitasking-view";
-    info.visible = m_kWinEffect && DWindowManagerHelper::instance()->hasComposite();
+    info.visible = visible();
     info.dccIcon = DCCIconPath + "multitasking-view.svg";
     return info;
 }

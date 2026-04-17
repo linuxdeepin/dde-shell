@@ -16,6 +16,7 @@ class DS_SHARE DAppletDock : public DApplet
 {
     Q_OBJECT
     Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
+    Q_PROPERTY(bool supported READ isSupported WRITE setSupported NOTIFY supportedChanged)
     D_DECLARE_PRIVATE(DAppletDock)
 
 public:
@@ -27,8 +28,12 @@ public:
     bool visible() const;
     void setVisible(bool visible);
 
+    bool isSupported() const;
+    void setSupported(bool supported);
+
 Q_SIGNALS:
     void visibleChanged();
+    void supportedChanged();
 
 protected:
     explicit DAppletDock(DAppletDockPrivate &dd, QObject *parent = nullptr);
