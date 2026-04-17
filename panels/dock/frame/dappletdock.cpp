@@ -17,6 +17,7 @@ public:
     ~DAppletDockPrivate() override = default;
 
     bool m_visible = true;
+    bool m_isSupported = true;
 
     D_DECLARE_PUBLIC(DAppletDock)
 };
@@ -45,6 +46,22 @@ void DAppletDock::setVisible(bool visible)
 
     d->m_visible = visible;
     Q_EMIT visibleChanged();
+}
+
+bool DAppletDock::isSupported() const
+{
+    D_DC(DAppletDock);
+    return d->m_isSupported;
+}
+
+void DAppletDock::setSupported(bool supported)
+{
+    D_D(DAppletDock);
+    if (d->m_isSupported == supported)
+        return;
+
+    d->m_isSupported = supported;
+    Q_EMIT supportedChanged();
 }
 
 DockItemInfo DAppletDock::dockItemInfo()
