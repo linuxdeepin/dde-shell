@@ -6,17 +6,56 @@
 #include "constants.h"
 #include "dockpanel.h"
 
+#include <QCursor>
+#include <QEnterEvent>
 #include <QGuiApplication>
+#include <QHoverEvent>
+#include <QMouseEvent>
+#include <QWindow>
 
 namespace dock
 {
+namespace {
+
+QWindow *topTransientParent(QWindow *window)
+{
+    QWindow *topLevelWindow = window;
+    while (topLevelWindow && topLevelWindow->transientParent()) {
+        topLevelWindow = topLevelWindow->transientParent();
+    }
+
+    return topLevelWindow;
+}
+
+bool isDockRelatedWindow(QWindow *window, QWindow *dockWindow)
+{
+    if (!window || !dockWindow) {
+        return false;
+    }
+
+    if (window == dockWindow) {
+        return true;
+    }
+
+    return topTransientParent(window) == dockWindow;
+}
+
+QRect expandedGeometry(const QRect &geometry, int margin)
+{
+    return geometry.adjusted(-margin, -margin, margin, margin);
+}
+
+}
+
 DockHelper::DockHelper(DockPanel *parent)
     : QObject(parent)
     , m_hideTimer(new QTimer(this))
     , m_showTimer(new QTimer(this))
+    , m_cursorMonitorTimer(new QTimer(this))
 {
     m_hideTimer->setInterval(400);
     m_showTimer->setInterval(400);
+    m_cursorMonitorTimer->setInterval(16);
     m_hideTimer->setSingleShot(true);
     m_showTimer->setSingleShot(true);
 
@@ -39,6 +78,8 @@ DockHelper::DockHelper(DockPanel *parent)
 
     connect(m_hideTimer, &QTimer::timeout, this, &DockHelper::checkNeedHideOrNot);
     connect(m_showTimer, &QTimer::timeout, this, &DockHelper::checkNeedShowOrNot);
+    connect(m_cursorMonitorTimer, &QTimer::timeout, this, &DockHelper::updatePanelMouseState);
+    m_cursorMonitorTimer->start();
 
     connect(this, &DockHelper::isWindowOverlapChanged, this, [this](bool overlap) {
         if (overlap) {
@@ -87,11 +128,17 @@ bool DockHelper::eventFilter(QObject *watched, QEvent *event)
     switch (event->type()) {
     case QEvent::Enter: {
         m_enters.insert(window, true);
+        updateCursorPosition(event);
         if (m_hideTimer->isActive()) {
             m_hideTimer->stop();
         }
 
         m_showTimer->start();
+        break;
+    }
+    case QEvent::MouseMove:
+    case QEvent::HoverMove: {
+        updateCursorPosition(event);
         break;
     }
     case QEvent::Leave: {
@@ -127,6 +174,7 @@ bool DockHelper::eventFilter(QObject *watched, QEvent *event)
     }
     }
 
+    updatePanelMouseState();
     return false;
 }
 
@@ -186,6 +234,76 @@ void DockHelper::updateAllDockWakeArea()
             area->close();
         }
     }
+}
+
+void DockHelper::updatePanelMouseState()
+{
+    auto *window = parent()->window();
+    if (!window || !window->isVisible()) {
+        parent()->setContainsMouse(false);
+        return;
+    }
+
+    const QPoint globalCursorPos = QCursor::pos();
+    const int geometryMargin = qMax(6, qRound(parent()->dockSize() * 0.14));
+    bool containsMouse = expandedGeometry(window->geometry(), geometryMargin).contains(globalCursorPos);
+
+    if (!containsMouse) {
+        const auto topLevelWindows = QGuiApplication::topLevelWindows();
+        for (QWindow *candidateWindow : topLevelWindows) {
+            if (!candidateWindow || !candidateWindow->isVisible() || !isDockRelatedWindow(candidateWindow, window)) {
+                continue;
+            }
+
+            if (expandedGeometry(candidateWindow->geometry(), geometryMargin).contains(globalCursorPos)) {
+                containsMouse = true;
+                break;
+            }
+        }
+    }
+
+    parent()->setContainsMouse(containsMouse);
+    if (containsMouse) {
+        parent()->setCursorPosition(globalCursorPos - window->position());
+    }
+}
+
+void DockHelper::updateCursorPosition(QEvent *event)
+{
+    if (!parent()->window() || !event) {
+        return;
+    }
+
+    QPointF globalPosition;
+    bool valid = false;
+    switch (event->type()) {
+    case QEvent::Enter: {
+        auto *enterEvent = static_cast<QEnterEvent *>(event);
+        globalPosition = enterEvent->globalPosition();
+        valid = true;
+        break;
+    }
+    case QEvent::MouseMove: {
+        auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        globalPosition = mouseEvent->globalPosition();
+        valid = true;
+        break;
+    }
+    case QEvent::HoverMove: {
+        auto *hoverEvent = static_cast<QHoverEvent *>(event);
+        globalPosition = hoverEvent->globalPosition();
+        valid = true;
+        break;
+    }
+    default:
+        break;
+    }
+
+    if (!valid) {
+        return;
+    }
+
+    parent()->setCursorPosition(globalPosition - parent()->window()->position());
 }
 
 void DockHelper::checkNeedHideOrNot()

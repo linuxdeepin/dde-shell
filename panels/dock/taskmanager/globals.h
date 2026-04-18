@@ -16,6 +16,7 @@ static inline const QString DOCK_ACTION_CLOSEALL = "dock-action-closeAll";
 static inline const QString DOCK_ACTION_CLOSEWINDOW = "dock-action-closeWindow";
 static inline const QString DOCK_ACTIN_LAUNCH = "dock-action-launch";
 static inline const QString DOCK_ACTION_DOCK = "dock-action-dock";
+static inline const QString DOCK_ACTION_OPEN_IN_FILEMANAGER = "dock-action-openInFileManager";
 
 // setting keys
 static inline const QString TASKMANAGER_ALLOWFOCEQUIT_KEY = "Allow_Force_Quit";

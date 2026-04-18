@@ -10,6 +10,7 @@
 #include <QObject>
 #include <DConfig>
 #include <QScopedPointer>
+#include <QSettings>
 
 DCORE_USE_NAMESPACE
 
@@ -22,6 +23,7 @@ class DockSettings : public QObject
     Q_PROPERTY(uint dockSize READ dockSize WRITE setDockSize NOTIFY dockSizeChanged FINAL)
     Q_PROPERTY(HideMode hidemode READ hideMode WRITE setHideMode NOTIFY hideModeChanged FINAL)
     Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged FINAL)
+    Q_PROPERTY(ViewMode viewMode READ viewMode WRITE setViewMode NOTIFY viewModeChanged FINAL)
     Q_PROPERTY(ItemAlignment itemAlignment READ itemAlignment WRITE setItemAlignment NOTIFY itemAlignmentChanged FINAL)
     Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
     Q_PROPERTY(QVariantMap pluginsVisible READ pluginsVisible WRITE setPluginsVisible NOTIFY pluginsVisibleChanged FINAL)
@@ -34,6 +36,7 @@ public:
     uint dockSize();
     HideMode hideMode();
     Position position();
+    ViewMode viewMode();
     ItemAlignment itemAlignment();
     IndicatorStyle indicatorStyle();
     QVariantMap pluginsVisible();
@@ -43,6 +46,7 @@ public:
     void setDockSize(const uint& size);
     void setHideMode(const HideMode& mode);
     void setPosition(const Position& position);
+    void setViewMode(const ViewMode& mode);
     void setItemAlignment(const ItemAlignment& alignment);
     void setIndicatorStyle(const IndicatorStyle& style);
     void setPluginsVisible(const QVariantMap & pluginsVisible);
@@ -54,8 +58,9 @@ private:
         dockSizeJob = 0,
         hideModeJob = 1,
         positionJob = 2,
-        itemAlignmentJob = 3,
-        indicatorStyleJob = 4,
+        viewModeJob = 3,
+        itemAlignmentJob = 4,
+        indicatorStyleJob = 5,
     };
 
     explicit DockSettings(QObject *parent = nullptr);
@@ -68,6 +73,7 @@ Q_SIGNALS:
     void dockSizeChanged(uint size);
     void hideModeChanged(HideMode mode);
     void positionChanged(Position position);
+    void viewModeChanged(ViewMode mode);
     void itemAlignmentChanged(ItemAlignment alignment);
     void indicatorStyleChanged(IndicatorStyle style);
     void pluginsVisibleChanged(const QVariantMap &pluginsVisible);
@@ -77,12 +83,14 @@ Q_SIGNALS:
 
 private:
     QScopedPointer<DConfig> m_dockConfig;
+    QScopedPointer<QSettings> m_viewModeSettings;
     QTimer* m_writeTimer;
     QList<WriteJob> m_writeJob;
 
     uint m_dockSize;
     HideMode m_hideMode;
     Position m_dockPosition;
+    ViewMode m_viewMode;
     ItemAlignment m_alignment;
     IndicatorStyle m_style;
     QVariantMap m_pluginsVisible;

@@ -12,7 +12,9 @@
 #include "dockitemmodel.h"
 #include "hoverpreviewproxymodel.h"
 
+#include <QAbstractItemModel>
 #include <QPointer>
+#include <QVariantMap>
 
 namespace dock {
 class AppItem;
@@ -43,6 +45,9 @@ public:
         ItemIdRole,
         MenusRole,
         WindowsRole,
+        DockElementRole,
+        ItemKindRole,
+        PreviewIconsRole,
 
         // from dde-apps
         DesktopIdRole = 0x1000,
@@ -91,9 +96,15 @@ public:
     requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
     Q_INVOKABLE void requestWindowsView(const QModelIndexList &indexes) const override;
 
-    Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId);
+    Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId) const;
+    Q_INVOKABLE QString dockElementFromLauncherId(const QString &launcherId) const;
+    Q_INVOKABLE QString folderUrlToElementId(const QString &folderUrl) const;
     Q_INVOKABLE bool requestDockByDesktopId(const QString& desktopID);
     Q_INVOKABLE bool requestUndockByDesktopId(const QString& desktopID);
+    Q_INVOKABLE bool requestDockByFolderUrl(const QString &folderUrl);
+    Q_INVOKABLE bool requestUndockByFolderUrl(const QString &folderUrl);
+    Q_INVOKABLE QVariantMap popupDescriptor(const QString &dockElement, const QString &location = QString()) const;
+    Q_INVOKABLE void activatePopupEntry(const QString &dockElement, const QString &entryId) const;
     Q_INVOKABLE bool RequestDock(QString appID);
     Q_INVOKABLE bool IsDocked(QString appID);
     Q_INVOKABLE bool RequestUndock(QString appID);
@@ -125,8 +136,9 @@ private:
     DockGlobalElementModel *m_dockGlobalElementModel = nullptr;
     DockItemModel *m_itemModel = nullptr;
     HoverPreviewProxyModel *m_hoverPreviewModel = nullptr;
+    QAbstractItemModel *m_launcherAppModel = nullptr;
+    QAbstractItemModel *m_launcherGroupModel = nullptr;
     int queryTrashCount() const;
 };
 
 }
-

@@ -7,7 +7,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 configure_file(environments.h.in environments.h @ONLY)
 
 find_package(PkgConfig REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS Core DBus Gui Qml WaylandCompositor Widgets WaylandClient)
+find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS Core DBus Gui Network Qml WaylandCompositor Widgets WaylandClient)
 find_package(DdeTrayLoader REQUIRED)
 find_package(TreelandProtocols REQUIRED)
 pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
@@ -106,6 +106,8 @@ file(
     constants.h
     # dockfilterproxymodel.cpp
     # dockfilterproxymodel.h
+    fashionleftpluginprovider.h
+    fashionleftpluginprovider.cpp
     pluginmanagerextension_p.h
     pluginmanagerextension.cpp
     pluginmanagerintegration_p.h
@@ -147,7 +149,9 @@ qt_generate_wayland_protocol_server_sources(dock-plugin
 
 target_link_libraries(dock-plugin PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::DBus
     Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Qml
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::WaylandCompositor

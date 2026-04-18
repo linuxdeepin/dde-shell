@@ -59,8 +59,18 @@ void AppearanceApplet::initDBusProxy()
         return;
     }
 
-    m_interface->setSync(false);
-    QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::OpacityChanged, this, &AppearanceApplet::opacityChanged);
+    QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::Changed, this,
+                     [this](const QString &type, const QString &) {
+        if (type.compare(QStringLiteral("opacity"), Qt::CaseInsensitive) == 0) {
+            Q_EMIT opacityChanged();
+        }
+    });
+    QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::Refreshed, this,
+                     [this](const QString &type) {
+        if (type.compare(QStringLiteral("opacity"), Qt::CaseInsensitive) == 0) {
+            Q_EMIT opacityChanged();
+        }
+    });
     Q_EMIT opacityChanged();
 }
 

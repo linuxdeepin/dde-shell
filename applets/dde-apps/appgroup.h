@@ -19,6 +19,7 @@ public:
     ItemsPage * itemsPage();
 
     static bool idIsFolder(const QString & id);
+    static QString normalizeGroupId(const QString &id);
     static QString groupIdFromNumber(int groupId);
     static int parseGroupId(const QString & id);
 

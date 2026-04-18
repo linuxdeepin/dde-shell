@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+pragma ComponentBehavior: Bound
+
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
@@ -17,8 +19,11 @@ Item {
     required property bool active
     required property bool attention
     required property string itemId
+    required property string dockElement
+    required property string itemKind
     required property string name
     required property string iconName
+    required property var previewIcons
     required property string menus
     required property list<string> windows
     required property int visualIndex
@@ -26,6 +31,7 @@ Item {
     required property string title
 
     property real blendOpacity: 1.0
+    property point lastSpotlightPoint: Qt.point(0, 0)
 
     signal dropFilesOnItem(itemId: string, files: list<string>)
     signal dragFinished()
@@ -35,12 +41,21 @@ Item {
     Drag.hotSpot.x: icon.width / 2
     Drag.hotSpot.y: icon.height / 2
     Drag.dragType: Drag.Automatic
-    Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
+    Drag.mimeData: {
+        "text/x-dde-dock-dnd-appid": itemId,
+        "text/x-dde-dock-dnd-element": dockElement,
+        "text/x-dde-dock-dnd-itemkind": itemKind,
+        "text/x-dde-dock-dnd-source": "taskbar",
+        "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""
+    }
     
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
+    property int statusIndicatorSize: useColumnLayout ? root.width * 0.72 : root.height * 0.72
     property int iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
     property bool enableTitle: false
     property bool titleActive: enableTitle && titleLoader.active
+    property int appTitleSpacing: 0
+    property bool popupItem: root.itemKind === "group" || root.itemKind === "folder"
     property var iconGlobalPoint: {
         var a = icon
         var x = 0, y = 0
@@ -54,6 +69,20 @@ Item {
     }
 
     implicitWidth: appItem.implicitWidth
+
+    function mapSpotlightPoint(localPoint) {
+        const point = localPoint || Qt.point(appItem.width / 2, appItem.height / 2)
+        return appItem.mapToItem(null, point.x, point.y)
+    }
+
+    function updateSpotlight(localPoint) {
+        lastSpotlightPoint = mapSpotlightPoint(localPoint)
+        Panel.reportMousePresence(true, lastSpotlightPoint)
+    }
+
+    function clearSpotlight() {
+        Panel.reportMousePresence(false, lastSpotlightPoint)
+    }
 
     // Monitor Panel position changes to update icon geometry
     Connections {
@@ -77,15 +106,16 @@ Item {
     Control {
         anchors.fill: parent
         id: appItem
-        implicitWidth: root.titleActive ? (root.iconSize + hoverBackground.horizontalSpacing + titleLoader.width) : iconContainer.width
+        implicitWidth: root.titleActive ? (iconContainer.width + 4 + titleLoader.width + root.appTitleSpacing) : iconContainer.width + root.appTitleSpacing
         visible: !root.Drag.active // When in dragging, hide app item
-        background: AppItemBackground {
+        background: AppletItemBackground {
             id: hoverBackground
 
             readonly property int verticalSpacing: Math.round(root.iconSize / 8) + 1
             readonly property int horizontalSpacing: Math.round(root.iconSize / 8)
             readonly property int nonSplitHeight: root.iconSize + verticalSpacing * 2
-            readonly property int splitWidth: Math.round(root.iconSize + titleLoader.width + horizontalSpacing * 3)
+            readonly property int hoverPadding: Math.round((Panel.rootObject.dockItemMaxSize * 0.8 - root.iconSize) / 2)
+            readonly property int splitWidth: Math.round(icon.width + titleLoader.width + hoverPadding * 2)
             readonly property int nonSplitWidth: Math.round(root.iconSize + horizontalSpacing * 2)
 
             enabled: false
@@ -95,8 +125,10 @@ Item {
             radius: height / 5
             anchors.centerIn: parent
             isActive: root.active
-            windowCount: root.windows.length
-            displayMode: root.displayMode
+            opacity: (hoverHandler.hovered || (root.active && root.windows.length > 0)) ? 1.0 : 0.0
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
         }
         Item {
             id: iconContainer
@@ -113,6 +145,10 @@ Item {
                         anchors.left: parent.left
                         anchors.horizontalCenter: undefined
                     }
+                    PropertyChanges {
+                        target: iconContainer
+                        anchors.leftMargin: hoverBackground.horizontalSpacing
+                    }
                 },
                 State {
                     name: "nonTitleActive"
@@ -125,12 +161,13 @@ Item {
                     }
                 }
             ]
-
-            Connections {
-                function onDisplayModeChanged() {
-                    windowIndicator.updateIndicatorAnchors()
-                }
-                target: root
+            StatusIndicator {
+                id: statusIndicator
+                palette: itemPalette
+                width: root.statusIndicatorSize
+                height: root.statusIndicatorSize
+                anchors.centerIn: iconContainer
+                visible: root.displayMode === Dock.Efficient && root.windows.length > 0
             }
 
             Connections {
@@ -150,6 +187,7 @@ Item {
                 anchors.centerIn: parent
                 retainWhileLoading: true
                 smooth: false
+                visible: !root.popupItem
 
                 function mapToScene(px, py) {
                     return parent.mapToItem(Window.window.contentItem, Qt.point(px, py))
@@ -224,6 +262,17 @@ Item {
                     running: false
                 }
             }
+
+            PinnedItemIcon {
+                anchors.centerIn: parent
+                width: root.iconSize
+                height: root.iconSize
+                iconName: root.iconName
+                previewIcons: root.previewIcons
+                iconSize: root.iconSize
+                colorTheme: root.colorTheme
+                visible: root.popupItem
+            }
         }
 
         WindowIndicator {
@@ -248,30 +297,28 @@ Item {
                 windowIndicator.anchors.horizontalCenter = undefined
                 windowIndicator.anchors.verticalCenter = undefined
 
-                const anchorTarget = root.displayMode === Dock.Efficient ? appItem : hoverBackground
-
                 switch(Panel.position) {
                 case Dock.Top: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.top = anchorTarget.top
+                    windowIndicator.anchors.top = hoverBackground.top
                     windowIndicator.anchors.topMargin = 1
                     return
                 }
                 case Dock.Bottom: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.bottom = anchorTarget.bottom
+                    windowIndicator.anchors.bottom = hoverBackground.bottom
                     windowIndicator.anchors.bottomMargin = 1
                     return
                 }
                 case Dock.Left: {
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
-                    windowIndicator.anchors.left = anchorTarget.left
+                    windowIndicator.anchors.left = hoverBackground.left
                     windowIndicator.anchors.leftMargin = 1
                     return
                 }
                 case Dock.Right:{
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
-                    windowIndicator.anchors.right = anchorTarget.right
+                    windowIndicator.anchors.right = hoverBackground.right
                     windowIndicator.anchors.rightMargin = 1
                     return
                 }
@@ -286,28 +333,19 @@ Item {
         AppItemTitle {
             id: titleLoader
             anchors.left: iconContainer.right
-            anchors.leftMargin: Math.round(root.iconSize / 8)
+            anchors.leftMargin: 4
             anchors.verticalCenter: parent.verticalCenter
             enabled: root.enableTitle && root.windows.length > 0
             text: root.title
-            textColor: {
-                if (root.displayMode === Dock.Efficient && root.active) {
-                    return "#000000"
-                }
-                return D.DTK.themeType === D.ApplicationHelper.DarkType ? "#FFFFFF" : "#000000"
-            }
+            colorTheme: root.colorTheme
         }
 
+        // TODO: value can set during debugPanel
         Loader {
             id: animationRoot
             anchors.fill: parent
             z: -1
-            active: root.attention && !Panel.rootObject.isDragging && TaskManager.showAttentionAnimation 
-            onActiveChanged: {
-                if (!active) {
-                    icon.scale = 1.0
-                }
-            }
+            active: root.attention && !Panel.rootObject.isDragging
             sourceComponent: Repeater {
                 model: 5
                 Rectangle {
@@ -366,12 +404,35 @@ Item {
 
         HoverHandler {
             id: hoverHandler
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
+
+            onPointChanged: {
+                if (hovered) {
+                    appItemSpotlightClearTimer.stop()
+                    root.updateSpotlight(hoverHandler.point.position)
+                }
+            }
+
             onHoveredChanged: function () {
                 if (hovered) {
+                    appItemSpotlightClearTimer.stop()
+                    root.updateSpotlight()
                     root.onEntered()
                 } else {
+                    appItemSpotlightClearTimer.restart()
                     root.onExited()
                 }
+            }
+        }
+    }
+
+    Timer {
+        id: appItemSpotlightClearTimer
+        interval: 70
+        repeat: false
+        onTriggered: {
+            if (!hoverHandler.hovered) {
+                root.clearSpotlight()
             }
         }
     }
@@ -382,21 +443,74 @@ Item {
         property bool trashEmpty: true
         sourceComponent: LP.Menu {
             id: contextMenu
+            property var menuItems: {
+                try {
+                    return JSON.parse(root.menus || "[]")
+                } catch (error) {
+                    console.warn("failed to parse taskmanager menu", error, root.menus)
+                    return []
+                }
+            }
             Instantiator {
                 id: menuItemInstantiator
-                model: JSON.parse(menus)
+                model: contextMenu.menuItems
                 delegate: LP.MenuItem {
-                    text: modelData.name
-                    enabled: (root.itemId === "dde-trash" && modelData.id === "clean-trash")
+                    required property var modelData
+
+                    readonly property string menuId: modelData && modelData.id !== undefined ? String(modelData.id) : ""
+                    readonly property string menuText: modelData && modelData.name !== undefined ? String(modelData.name) : ""
+
+                    text: menuText
+                    enabled: (root.itemId === "dde-trash" && menuId === "clean-trash")
                             ? !contextMenuLoader.trashEmpty
                             : true
                     onTriggered: {
-                        TaskManager.requestNewInstance(root.modelIndex, modelData.id);
+                        TaskManager.requestNewInstance(root.modelIndex, menuId);
                     }
                 }
                 onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
                 onObjectRemoved: (index, object) => contextMenu.removeItem(object)
             }
+        }
+    }
+
+    PanelPopup {
+        id: pinnedPopup
+        property point popupAnchorPoint: Qt.point(0, 0)
+        width: pinnedPopupContent.width
+        height: pinnedPopupContent.height
+        popupX: {
+            switch (Panel.position) {
+            case Dock.Top:
+            case Dock.Bottom:
+                return popupAnchorPoint.x - pinnedPopup.width / 2
+            case Dock.Right:
+                return -pinnedPopup.width - 10
+            case Dock.Left:
+                return Panel.rootObject.dockSize + 10
+            }
+            return popupAnchorPoint.x - pinnedPopup.width / 2
+        }
+        popupY: {
+            switch (Panel.position) {
+            case Dock.Top:
+                return Panel.rootObject.dockSize + 10
+            case Dock.Right:
+            case Dock.Left:
+                return popupAnchorPoint.y - pinnedPopup.height / 2
+            case Dock.Bottom:
+                return -pinnedPopup.height - 10
+            }
+            return -pinnedPopup.height - 10
+        }
+
+        DockPinnedPopup {
+            id: pinnedPopupContent
+            applet: taskmanager.Applet
+            dockElement: root.dockElement
+            colorTheme: root.colorTheme
+            popupWindow: pinnedPopup.popupWindow
+            onCloseRequested: pinnedPopup.close()
         }
     }
 
@@ -420,6 +534,10 @@ Item {
         property int xOffset: 0
         property int yOffset: 0
         onTriggered: {
+            if (root.popupItem) {
+                return
+            }
+
             if (root.windows.length != 0 || Qt.platform.pluginName === "wayland") {
                 // 使用基于 modelIndex 的预览API，确保精确匹配
                 taskmanager.Applet.requestPreview(root.modelIndex, Panel.rootObject, xOffset, yOffset, Panel.position);
@@ -427,9 +545,27 @@ Item {
         }
     }
 
+    function togglePinnedPopup() {
+        if (pinnedPopup.popupVisible) {
+            pinnedPopup.close()
+            return
+        }
+
+        Panel.requestClosePopup()
+        pinnedPopupContent.beginPopupSession()
+        pinnedPopupContent.refresh("", false)
+        pinnedPopup.popupAnchorPoint = root.mapToItem(null, root.width / 2, root.height / 2)
+        pinnedPopup.open()
+    }
+
 
     function onEntered() {
-        if (windows.length === 0) {
+        if (root.popupItem) {
+            toolTipShowTimer.start()
+            return
+        }
+
+        if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
             toolTipShowTimer.start()
             return
         }
@@ -457,7 +593,7 @@ Item {
             previewTimer.stop()
         }
 
-        if (windows.length === 0) {
+        if (root.popupItem || (Qt.platform.pluginName === "xcb" && windows.length === 0)) {
             toolTip.close()
             return
         }
@@ -465,6 +601,10 @@ Item {
     }
 
     function closeItemPreview() {
+        if (root.popupItem) {
+            return
+        }
+
         if (previewTimer.running) {
             previewTimer.stop()
         } else {
@@ -499,6 +639,7 @@ Item {
                 appItem.grabToImage(function(result) {
                     root.Drag.imageSource = result.url;
                 })
+                appItemSpotlightClearTimer.stop()
             }
             toolTip.close()
             closeItemPreview()
@@ -514,6 +655,11 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 requestAppItemMenu()
             } else {
+                if (root.popupItem) {
+                    togglePinnedPopup()
+                    return
+                }
+
                 if (root.windows.length === 0) {
                     launchAnimation.start();
                     TaskManager.requestNewInstance(index, "");
@@ -579,6 +725,9 @@ Item {
         }
 
         onDropped: function (drop){
+            if (root.popupItem) {
+                return
+            }
             dragToolTipCloseTimer.stop()
             dragToolTip.close()
             root.dropFilesOnItem(root.itemId, drop.urls)
@@ -596,4 +745,5 @@ Item {
     onIconGlobalPointChanged: {
         updateWindowIconGeometryTimer.start()
     }
+
 }

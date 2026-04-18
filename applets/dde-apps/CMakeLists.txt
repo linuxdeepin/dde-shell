@@ -6,29 +6,46 @@ find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS DB
 find_package(DDEApplicationManager REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
+set(DDE_APPS_DBUS_API_FALLBACK_DIR "${PROJECT_SOURCE_DIR}/panels/dock/taskmanager/api/amdbus")
+set(DDE_APPS_APPLICATION_XML "${DDE_APPLICATION_MANAGER_DBUS_API_DIR}/org.desktopspec.ApplicationManager1.Application.xml")
+set(DDE_APPS_APPLICATION_MANAGER_XML "${DDE_APPLICATION_MANAGER_DBUS_API_DIR}/org.desktopspec.ApplicationManager1.xml")
+set(DDE_APPS_OBJECT_MANAGER_XML "${DDE_APPLICATION_MANAGER_DBUS_API_DIR}/org.desktopspec.ObjectManager1.xml")
+
+if (NOT EXISTS "${DDE_APPS_APPLICATION_XML}")
+    set(DDE_APPS_APPLICATION_XML "${DDE_APPS_DBUS_API_FALLBACK_DIR}/org.desktopspec.ApplicationManager1.Application.xml")
+endif()
+
+if (NOT EXISTS "${DDE_APPS_APPLICATION_MANAGER_XML}")
+    set(DDE_APPS_APPLICATION_MANAGER_XML "${DDE_APPS_DBUS_API_FALLBACK_DIR}/org.desktopspec.ApplicationManager1.xml")
+endif()
+
+if (NOT EXISTS "${DDE_APPS_OBJECT_MANAGER_XML}")
+    set(DDE_APPS_OBJECT_MANAGER_XML "${DDE_APPS_DBUS_API_FALLBACK_DIR}/org.desktopspec.ObjectManager1.xml")
+endif()
+
 set_source_files_properties(
-    ${DDE_APPLICATION_MANAGER_DBUS_API_DIR}/org.desktopspec.ApplicationManager1.Application.xml
+    ${DDE_APPS_APPLICATION_XML}
     PROPERTIES  INCLUDE api/types/am.h
                 CLASSNAME Application
 )
 
 set_source_files_properties(
-    ${DDE_APPLICATION_MANAGER_DBUS_API_DIR}/org.desktopspec.ApplicationManager1.xml
+    ${DDE_APPS_APPLICATION_MANAGER_XML}
     PROPERTIES  INCLUDE api/types/am.h
                 CLASSNAME ApplicationManager
 )
 
 set_source_files_properties(
-    ${DDE_APPLICATION_MANAGER_DBUS_API_DIR}/org.desktopspec.ObjectManager1.xml
+    ${DDE_APPS_OBJECT_MANAGER_XML}
     PROPERTIES  INCLUDE api/types/am.h
                 CLASSNAME ObjectManager
 )
 
 qt_add_dbus_interfaces(
     DBUS_INTERFACES
-    ${DDE_APPLICATION_MANAGER_DBUS_API_DIR}/org.desktopspec.ApplicationManager1.Application.xml
-    ${DDE_APPLICATION_MANAGER_DBUS_API_DIR}/org.desktopspec.ApplicationManager1.xml
-    ${DDE_APPLICATION_MANAGER_DBUS_API_DIR}/org.desktopspec.ObjectManager1.xml
+    ${DDE_APPS_APPLICATION_XML}
+    ${DDE_APPS_APPLICATION_MANAGER_XML}
+    ${DDE_APPS_OBJECT_MANAGER_XML}
 )
 
 

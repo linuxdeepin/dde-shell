@@ -14,6 +14,7 @@ PopupWindow {
     property real xOffset: 0
     property real yOffset: 0
     property int margins: 10
+    property int windowThemeType: D.ApplicationHelper.LightType
     property Item currentItem
     property int requestedWidth: 10
     property int requestedHeight: 10
@@ -76,13 +77,14 @@ PopupWindow {
     flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint) : Qt.Popup)
     font: D.DTK.fontManager.t6
     D.DWindow.enabled: true
+    D.DWindow.themeType: root.windowThemeType
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableSystemResize: false
     D.DWindow.enableSystemMove: false
     D.DWindow.enableBlurWindow: true
     // TODO set shadowOffset maunally.
     D.DWindow.shadowOffset: Qt.point(0, 25)
-    D.DWindow.shadowColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.5) : Qt.rgba(0, 0, 0, 0.2)
+    D.DWindow.shadowColor: root.windowThemeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.5) : Qt.rgba(0, 0, 0, 0.2)
     D.ColorSelector.family: D.Palette.CrystalColor
     color: "transparent"
 

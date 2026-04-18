@@ -17,6 +17,7 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 AppletItemButton {
     id: root
     property alias inputEventsEnabled: surfaceItem.inputEventsEnabled
+    property point lastSpotlightPoint: Qt.point(0, 0)
 
     property size visualSize: isHorizontal ? Qt.size(pluginItem.implicitWidth, Math.min(itemHeight, pluginItem.implicitHeight))
                                            : Qt.size(Math.min(itemWidth, pluginItem.implicitWidth), pluginItem.implicitHeight)
@@ -31,6 +32,21 @@ AppletItemButton {
 
     visible: !Drag.active && itemVisible
     hoverEnabled: inputEventsEnabled
+
+    function reportSpotlight(point) {
+        const localPoint = point || Qt.point(width / 2, height / 2)
+        const mappedPoint = root.mapToItem(null, localPoint.x, localPoint.y)
+        lastSpotlightPoint = mappedPoint
+        Panel.reportMousePresence(true, lastSpotlightPoint)
+    }
+
+    function scheduleSpotlightClear() {
+        spotlightClearTimer.restart()
+    }
+
+    function clearSpotlight() {
+        Panel.reportMousePresence(false, lastSpotlightPoint)
+    }
 
     function updatePluginMargins()
     {
@@ -76,6 +92,26 @@ AppletItemButton {
         HoverHandler {
             id: hoverHandler
             parent: surfaceItem.shellSurfaceItem
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
+
+            onPointChanged: {
+                if (hovered) {
+                    spotlightClearTimer.stop()
+                    root.reportSpotlight(hoverHandler.point.position)
+                }
+            }
+
+            onHoveredChanged: {
+                if (hovered) {
+                    spotlightClearTimer.stop()
+                    root.reportSpotlight()
+                    return
+                }
+
+                if (!root.hovered) {
+                    root.scheduleSpotlightClear()
+                }
+            }
         }
         TapHandler {
             id: tapHandler
@@ -140,7 +176,7 @@ AppletItemButton {
         }
     }
 
-    D.ColorSelector.hovered: root.inputEventsEnabled && (pluginItem.plugin && pluginItem.plugin.isItemActive || hoverHandler.hovered)
+    D.ColorSelector.hovered: root.inputEventsEnabled && (pluginItem.plugin && pluginItem.plugin.isItemActive || hoverHandler.hovered || root.hovered)
     D.ColorSelector.pressed: tapHandler.pressed
 
     property Component overlayWindow: QuickDragWindow {
@@ -193,6 +229,29 @@ AppletItemButton {
             root.grabToImage(function(result) {
                 root.Drag.imageSource = result.url;
             })
+        }
+    }
+
+    onHoveredChanged: {
+        if (hovered) {
+            spotlightClearTimer.stop()
+            reportSpotlight(Qt.point(width / 2, height / 2))
+            return
+        }
+
+        if (!hoverHandler.hovered) {
+            scheduleSpotlightClear()
+        }
+    }
+
+    Timer {
+        id: spotlightClearTimer
+        interval: 70
+        repeat: false
+        onTriggered: {
+            if (!root.hovered && !hoverHandler.hovered && !surfaceItem.hovered) {
+                root.clearSpotlight()
+            }
         }
     }
 

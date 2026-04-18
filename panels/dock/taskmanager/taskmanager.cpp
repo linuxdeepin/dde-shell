@@ -22,11 +22,17 @@
 #include "textcalculator.h"
 #include "treelandwindowmonitor.h"
 
+#include <QDesktopServices>
+#include <QDir>
+#include <QFileInfo>
 #include <QGuiApplication>
+#include <QMetaObject>
+#include <QMimeDatabase>
 #include <QProcess>
 #include <QStandardPaths>
 #include <QStringLiteral>
 #include <QUrl>
+#include <QVariantList>
 #include <QtQml/QtQml>
 
 #include <appletbridge.h>
@@ -111,6 +117,256 @@ static QModelIndex tryMatchByApplicationManager(const QStringList &identifies,
     return res;
 }
 
+static QPair<QString, QString> splitDockElement(const QString &dockElement)
+{
+    const int separatorIndex = dockElement.indexOf(QLatin1Char('/'));
+    if (separatorIndex <= 0) {
+        return {};
+    }
+
+    return {dockElement.left(separatorIndex), dockElement.mid(separatorIndex + 1)};
+}
+
+static QString normalizedFolderPath(const QString &folderUrlOrPath)
+{
+    QUrl url(folderUrlOrPath);
+    QString folderPath = url.isLocalFile() ? url.toLocalFile() : folderUrlOrPath;
+    if (folderPath.isEmpty()) {
+        return {};
+    }
+
+    QFileInfo fileInfo(folderPath);
+    const QString canonicalPath = fileInfo.canonicalFilePath();
+    if (!canonicalPath.isEmpty()) {
+        return canonicalPath;
+    }
+
+    if (fileInfo.exists()) {
+        return fileInfo.absoluteFilePath();
+    }
+
+    if (folderPath.startsWith(QLatin1Char('/'))) {
+        return QDir::cleanPath(folderPath);
+    }
+
+    return {};
+}
+
+static bool isWithinBasePath(const QString &basePath, const QString &candidatePath)
+{
+    if (basePath.isEmpty() || candidatePath.isEmpty()) {
+        return false;
+    }
+
+    if (basePath == candidatePath) {
+        return true;
+    }
+
+    const QString prefix = basePath.endsWith(QLatin1Char('/')) ? basePath : basePath + QLatin1Char('/');
+    return candidatePath.startsWith(prefix);
+}
+
+static QString displayNameForPath(const QString &path)
+{
+    QFileInfo fileInfo(path);
+    QString name = fileInfo.fileName();
+    if (name.isEmpty()) {
+        name = fileInfo.absoluteFilePath();
+    }
+    if (name.isEmpty()) {
+        name = path;
+    }
+    return name;
+}
+
+static QString fileIconName(const QFileInfo &fileInfo)
+{
+    if (fileInfo.isDir()) {
+        return QStringLiteral("folder");
+    }
+
+    static QMimeDatabase mimeDatabase;
+    const auto mimeType = mimeDatabase.mimeTypeForFile(fileInfo, QMimeDatabase::MatchDefault);
+    if (!mimeType.iconName().isEmpty()) {
+        return mimeType.iconName();
+    }
+    if (!mimeType.genericIconName().isEmpty()) {
+        return mimeType.genericIconName();
+    }
+
+    return QStringLiteral("text-x-generic");
+}
+
+static QVariantMap popupEntry(const QString &entryId, const QString &name, const QString &iconName, bool directory)
+{
+    return {
+        {QStringLiteral("entryId"), entryId},
+        {QStringLiteral("name"), name},
+        {QStringLiteral("iconName"), iconName},
+        {QStringLiteral("directory"), directory},
+    };
+}
+
+static QVariantList directoryEntriesForPath(const QString &path)
+{
+    QVariantList entries;
+
+    QDir directory(path);
+    const QFileInfoList fileInfos = directory.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot,
+                                                            QDir::DirsFirst | QDir::Name | QDir::IgnoreCase);
+    for (const QFileInfo &fileInfo : fileInfos) {
+        entries.append(popupEntry(fileInfo.absoluteFilePath(),
+                                  fileInfo.fileName(),
+                                  fileIconName(fileInfo),
+                                  fileInfo.isDir()));
+    }
+
+    return entries;
+}
+
+static QStringList previewIconsForDirectory(const QString &path, int limit = 4)
+{
+    QStringList iconNames;
+
+    QDir directory(path);
+    const QFileInfoList fileInfos = directory.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot,
+                                                            QDir::DirsFirst | QDir::Name | QDir::IgnoreCase);
+    for (const QFileInfo &fileInfo : fileInfos) {
+        iconNames.append(fileIconName(fileInfo));
+        if (iconNames.size() >= limit) {
+            break;
+        }
+    }
+
+    return iconNames;
+}
+
+static QModelIndex findIndexByRole(QAbstractItemModel *model, int role, const QString &value)
+{
+    if (!model || value.isEmpty()) {
+        return {};
+    }
+
+    return model->match(model->index(0, 0), role, value, 1, Qt::MatchExactly).value(0);
+}
+
+static int modelRole(QAbstractItemModel *model, const QByteArray &roleName, int fallbackRole)
+{
+    if (!model) {
+        return fallbackRole;
+    }
+
+    return model->roleNames().key(roleName, fallbackRole);
+}
+
+static QModelIndex findIndexByNamedRole(QAbstractItemModel *model,
+                                        const QByteArray &roleName,
+                                        const QString &value,
+                                        int fallbackRole)
+{
+    return findIndexByRole(model, modelRole(model, roleName, fallbackRole), value);
+}
+
+static bool isLauncherFolderId(const QString &launcherId)
+{
+    return launcherId.startsWith(QStringLiteral("internal/folder/")) ||
+           launcherId.startsWith(QStringLiteral("internal/folders/")) ||
+           launcherId.startsWith(QStringLiteral("internal/group/"));
+}
+
+static int launcherGroupNumber(const QString &launcherId)
+{
+    if (launcherId.isEmpty()) {
+        return -1;
+    }
+
+    if (isLauncherFolderId(launcherId)) {
+        return launcherId.section(QLatin1Char('/'), -1).toInt();
+    }
+
+    bool ok = false;
+    const int groupId = launcherId.toInt(&ok);
+    return ok ? groupId : -1;
+}
+
+static bool isLauncherRootFolderId(const QString &launcherId)
+{
+    return launcherGroupNumber(launcherId) == 0;
+}
+
+static QString alternateLauncherFolderId(const QString &launcherId)
+{
+    const QString singularPrefix = QStringLiteral("internal/folder/");
+    const QString pluralPrefix = QStringLiteral("internal/folders/");
+    const QString legacyPrefix = QStringLiteral("internal/group/");
+
+    if (launcherId.startsWith(singularPrefix)) {
+        return pluralPrefix + launcherId.mid(singularPrefix.size());
+    }
+
+    if (launcherId.startsWith(pluralPrefix)) {
+        return singularPrefix + launcherId.mid(pluralPrefix.size());
+    }
+
+    if (launcherId.startsWith(legacyPrefix)) {
+        return pluralPrefix + launcherId.mid(legacyPrefix.size());
+    }
+
+    return {};
+}
+
+static QString resolveLauncherGroupId(QAbstractItemModel *groupModel, const QString &groupId)
+{
+    if (!groupModel || !isLauncherFolderId(groupId)) {
+        return groupId;
+    }
+
+    const QString suffix = groupId.section(QLatin1Char('/'), -1);
+    const QStringList candidates = {
+        groupId,
+        alternateLauncherFolderId(groupId),
+        QStringLiteral("internal/folders/%1").arg(suffix),
+        QStringLiteral("internal/folder/%1").arg(suffix),
+        QStringLiteral("internal/group/%1").arg(suffix),
+        suffix
+    };
+
+    for (const QString &candidate : candidates) {
+        if (!candidate.isEmpty() &&
+            findIndexByNamedRole(groupModel, MODEL_DESKTOPID, candidate, TaskManager::DesktopIdRole).isValid()) {
+            return candidate;
+        }
+    }
+
+    return groupId;
+}
+
+static QStringList invokeLauncherGroupItems(QObject *groupModel, const QString &groupId)
+{
+    if (!groupModel || groupId.isEmpty()) {
+        return {};
+    }
+
+    const QString resolvedGroupId = resolveLauncherGroupId(qobject_cast<QAbstractItemModel *>(groupModel), groupId);
+    QStringList items;
+    QMetaObject::invokeMethod(groupModel,
+                              "groupItems",
+                              Q_RETURN_ARG(QStringList, items),
+                              Q_ARG(QString, resolvedGroupId));
+    return items;
+}
+
+static QString launcherGroupDisplayName(QAbstractItemModel *groupModel, const QString &groupId)
+{
+    const QString resolvedGroupId = resolveLauncherGroupId(groupModel, groupId);
+    const QModelIndex groupIndex = findIndexByNamedRole(groupModel, MODEL_DESKTOPID, resolvedGroupId, TaskManager::DesktopIdRole);
+    QString groupName = groupIndex.data(modelRole(groupModel, MODEL_NAME, TaskManager::NameRole)).toString();
+    if (groupName.isEmpty() || groupName.startsWith(QStringLiteral("internal/category/"))) {
+        groupName = QObject::tr("App Group");
+    }
+    return groupName;
+}
+
 class BoolFilterModel : public QSortFilterProxyModel, public AbstractTaskManagerInterface
 {
     Q_OBJECT
@@ -147,7 +403,6 @@ TaskManager::TaskManager(QObject *parent)
     qmlRegisterUncreatableType<TextCalculatorAttached>("org.deepin.ds.dock.taskmanager", 1, 0, "TextCalculatorAttached", "TextCalculator Attached");
 
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
-    connect(Settings, &TaskManagerSettings::showAttentionAnimationChanged, this, &TaskManager::showAttentionAnimationChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
 }
 
@@ -181,7 +436,22 @@ bool TaskManager::init()
     BoolFilterModel *leftModel = new BoolFilterModel(m_windowMonitor.data(), m_windowMonitor->roleNames().key("shouldSkip"), this);
     if (auto applet = bridge.applet()) {
         auto model = applet->property("appModel").value<QAbstractItemModel *>();
+        auto groupModel = applet->property("appGroupModel").value<QAbstractItemModel *>();
         Q_ASSERT(model);
+        m_launcherAppModel = model;
+        m_launcherGroupModel = groupModel;
+        if (m_launcherGroupModel) {
+            const int desktopIdRole = modelRole(m_launcherGroupModel, MODEL_DESKTOPID, DesktopIdRole);
+            const int nameRole = modelRole(m_launcherGroupModel, MODEL_NAME, NameRole);
+            qCWarning(taskManagerLog) << "launcher group model rows" << m_launcherGroupModel->rowCount();
+            for (int i = 0; i < m_launcherGroupModel->rowCount(); ++i) {
+                const QModelIndex groupIndex = m_launcherGroupModel->index(i, 0);
+                qCWarning(taskManagerLog) << "launcher group model item"
+                                          << i
+                                          << groupIndex.data(desktopIdRole).toString()
+                                          << groupIndex.data(nameRole).toString();
+            }
+        }
         m_activeAppModel = new DockCombineModel(leftModel, model, TaskManager::IdentityRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
             auto roleNames = model->roleNames();
             QList<QByteArray> identifiedOrders = {MODEL_DESKTOPID, MODEL_STARTUPWMCLASS, MODEL_NAME, MODEL_ICONNAME};
@@ -212,7 +482,7 @@ bool TaskManager::init()
             return res.value(0);
         });
 
-        m_dockGlobalElementModel = new DockGlobalElementModel(model, m_activeAppModel, this);
+        m_dockGlobalElementModel = new DockGlobalElementModel(model, m_activeAppModel, groupModel, this);
         m_itemModel = new DockItemModel(m_dockGlobalElementModel, this);
 
         // 初始化预览代理模型，基于合并后的数据
@@ -380,31 +650,220 @@ bool TaskManager::allowForceQuit()
     return Settings->isAllowedForceQuit();
 }
 
-bool TaskManager::showAttentionAnimation()
-{
-    return Settings->showAttentionAnimation();
-}
-
-QString TaskManager::desktopIdToAppId(const QString& desktopId)
+QString TaskManager::desktopIdToAppId(const QString& desktopId) const
 {
     return Q_LIKELY(desktopId.endsWith(".desktop")) ? desktopId.chopped(8) : desktopId;
 }
 
+QString TaskManager::dockElementFromLauncherId(const QString &launcherId) const
+{
+    if (launcherId.isEmpty()) {
+        return {};
+    }
+
+    if (isLauncherFolderId(launcherId)) {
+        const QString resolvedGroupId = resolveLauncherGroupId(m_launcherGroupModel, launcherId);
+        if (isLauncherRootFolderId(resolvedGroupId)) {
+            return {};
+        }
+        return QStringLiteral("group/%1").arg(resolvedGroupId);
+    }
+
+    if (launcherId.startsWith(QStringLiteral("internal/"))) {
+        return {};
+    }
+
+    return QStringLiteral("desktop/%1").arg(desktopIdToAppId(launcherId));
+}
+
+QString TaskManager::folderUrlToElementId(const QString &folderUrl) const
+{
+    const QString folderPath = normalizedFolderPath(folderUrl);
+    if (folderPath.isEmpty()) {
+        return {};
+    }
+
+    return QStringLiteral("folder/%1").arg(folderPath);
+}
+
 bool TaskManager::requestDockByDesktopId(const QString& desktopID)
 {
+    qCWarning(taskManagerLog) << "requestDockByDesktopId" << desktopID;
+    if (isLauncherFolderId(desktopID)) {
+        if (!m_launcherGroupModel || isLauncherRootFolderId(desktopID)) {
+            qCWarning(taskManagerLog) << "reject launcher group dock request due to missing model or root group" << desktopID;
+            return false;
+        }
+
+        const QString resolvedGroupId = resolveLauncherGroupId(m_launcherGroupModel, desktopID);
+        const QString dockElement = dockElementFromLauncherId(desktopID);
+        if (dockElement.isEmpty() || Settings->isDocked(dockElement)) {
+            qCWarning(taskManagerLog) << "reject launcher group dock request due to empty/already docked element"
+                                      << desktopID << resolvedGroupId << dockElement;
+            return false;
+        }
+
+        const QModelIndex groupIndex = findIndexByNamedRole(m_launcherGroupModel, MODEL_DESKTOPID, resolvedGroupId, DesktopIdRole);
+        if (!groupIndex.isValid()) {
+            qCWarning(taskManagerLog) << "reject launcher group dock request due to invalid group index"
+                                      << desktopID << resolvedGroupId;
+            return false;
+        }
+
+        Settings->appendDockedElement(dockElement);
+        qCWarning(taskManagerLog) << "accepted launcher group dock request" << desktopID << resolvedGroupId << dockElement;
+        return true;
+    }
+
     if (desktopID.startsWith("internal/")) return false;
     QString appId = desktopIdToAppId(desktopID);
     // 检查应用是否已经在任务栏中，如果是则返回 false
-    if (IsDocked(appId))
+    if (IsDocked(appId)) {
+        qCWarning(taskManagerLog) << "reject app dock request because already docked" << desktopID << appId;
         return false;
+    }
 
-    return RequestDock(appId);
+    const bool ok = RequestDock(appId);
+    qCWarning(taskManagerLog) << "app dock request result" << desktopID << appId << ok;
+    return ok;
 }
 
 bool TaskManager::requestUndockByDesktopId(const QString& desktopID)
 {
+    if (isLauncherFolderId(desktopID)) {
+        const QString dockElement = dockElementFromLauncherId(desktopID);
+        if (dockElement.isEmpty()) {
+            qCWarning(taskManagerLog) << "reject launcher group undock request due to empty element" << desktopID;
+            return false;
+        }
+
+        Settings->removeDockedElement(dockElement);
+        qCWarning(taskManagerLog) << "accepted launcher group undock request" << desktopID << dockElement;
+        return true;
+    }
+
     if (desktopID.startsWith("internal/")) return false;
-    return RequestUndock(desktopIdToAppId(desktopID));
+    const QString appId = desktopIdToAppId(desktopID);
+    const bool ok = RequestUndock(appId);
+    qCWarning(taskManagerLog) << "app undock request result" << desktopID << appId << ok;
+    return ok;
+}
+
+bool TaskManager::requestDockByFolderUrl(const QString &folderUrl)
+{
+    qCWarning(taskManagerLog) << "requestDockByFolderUrl" << folderUrl;
+    const QString folderPath = normalizedFolderPath(folderUrl);
+    if (folderPath.isEmpty()) {
+        qCWarning(taskManagerLog) << "reject folder dock request due to empty normalized path" << folderUrl;
+        return false;
+    }
+
+    QFileInfo folderInfo(folderPath);
+    if (!folderInfo.exists() || !folderInfo.isDir()) {
+        qCWarning(taskManagerLog) << "reject folder dock request due to invalid folder" << folderUrl << folderPath;
+        return false;
+    }
+
+    const QString dockElement = QStringLiteral("folder/%1").arg(folderPath);
+    if (Settings->isDocked(dockElement)) {
+        qCWarning(taskManagerLog) << "reject folder dock request because already docked" << folderUrl << dockElement;
+        return false;
+    }
+
+    Settings->appendDockedElement(dockElement);
+    qCWarning(taskManagerLog) << "accepted folder dock request" << folderUrl << dockElement;
+    return true;
+}
+
+bool TaskManager::requestUndockByFolderUrl(const QString &folderUrl)
+{
+    const QString folderPath = normalizedFolderPath(folderUrl);
+    if (folderPath.isEmpty()) {
+        qCWarning(taskManagerLog) << "reject folder undock request due to empty normalized path" << folderUrl;
+        return false;
+    }
+
+    const QString dockElement = QStringLiteral("folder/%1").arg(folderPath);
+    Settings->removeDockedElement(dockElement);
+    qCWarning(taskManagerLog) << "accepted folder undock request" << folderUrl << dockElement;
+    return true;
+}
+
+QVariantMap TaskManager::popupDescriptor(const QString &dockElement, const QString &location) const
+{
+    const auto [type, id] = splitDockElement(dockElement);
+    if (type.isEmpty() || id.isEmpty()) {
+        return {};
+    }
+
+    if (type == QStringLiteral("group")) {
+        QVariantList entries;
+        for (const QString &appId : invokeLauncherGroupItems(m_launcherGroupModel, id)) {
+            const QModelIndex appIndex = findIndexByNamedRole(m_launcherAppModel, MODEL_DESKTOPID, appId, DesktopIdRole);
+            const QString iconName = appIndex.data(IconNameRole).toString().isEmpty() ?
+                                         QString::fromLatin1(DEFAULT_APP_ICONNAME) :
+                                         appIndex.data(IconNameRole).toString();
+            const QString appName = appIndex.data(NameRole).toString().isEmpty() ?
+                                        appId :
+                                        appIndex.data(NameRole).toString();
+            entries.append(popupEntry(appId, appName, iconName, false));
+        }
+
+        return {
+            {QStringLiteral("kind"), type},
+            {QStringLiteral("title"), launcherGroupDisplayName(m_launcherGroupModel, id)},
+            {QStringLiteral("location"), QString()},
+            {QStringLiteral("parentLocation"), QString()},
+            {QStringLiteral("canGoBack"), false},
+            {QStringLiteral("entries"), entries},
+        };
+    }
+
+    if (type == QStringLiteral("folder")) {
+        const QString rootLocation = normalizedFolderPath(id);
+        if (rootLocation.isEmpty()) {
+            return {};
+        }
+
+        QString currentLocation = location.isEmpty() ? rootLocation : normalizedFolderPath(location);
+        if (currentLocation.isEmpty() || !isWithinBasePath(rootLocation, currentLocation) || !QFileInfo(currentLocation).isDir()) {
+            currentLocation = rootLocation;
+        }
+
+        QString parentLocation = QFileInfo(currentLocation).dir().absolutePath();
+        if (!isWithinBasePath(rootLocation, parentLocation)) {
+            parentLocation = rootLocation;
+        }
+
+        return {
+            {QStringLiteral("kind"), type},
+            {QStringLiteral("title"), displayNameForPath(currentLocation)},
+            {QStringLiteral("location"), currentLocation},
+            {QStringLiteral("parentLocation"), parentLocation},
+            {QStringLiteral("canGoBack"), currentLocation != rootLocation},
+            {QStringLiteral("entries"), directoryEntriesForPath(currentLocation)},
+        };
+    }
+
+    return {};
+}
+
+void TaskManager::activatePopupEntry(const QString &dockElement, const QString &entryId) const
+{
+    const auto [type, id] = splitDockElement(dockElement);
+    Q_UNUSED(id)
+
+    if (type == QStringLiteral("group")) {
+        auto desktopfileParser = DESKTOPFILEFACTORY::createById(entryId, "amAPP");
+        if (desktopfileParser && desktopfileParser->isValied().first) {
+            desktopfileParser->launch();
+        }
+        return;
+    }
+
+    if (type == QStringLiteral("folder")) {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(entryId));
+    }
 }
 
 bool TaskManager::RequestDock(QString appID)
@@ -477,14 +936,13 @@ void TaskManager::activateWindow(uint32_t windowID)
 #endif
 }
 
-void TaskManager::saveDockElementsOrder(const QStringList &appIds)
+void TaskManager::saveDockElementsOrder(const QStringList &dockElements)
 {
     const QStringList &dockedElements = TaskManagerSettings::instance()->dockedElements();
     QStringList newDockedElements;
-    for (const auto &appId : appIds) {
-        auto desktopElement = QString("desktop/%1").arg(appId);
-        if (dockedElements.contains(desktopElement) && !newDockedElements.contains(desktopElement)) {
-            newDockedElements.append(desktopElement);
+    for (const auto &dockElement : dockElements) {
+        if (dockedElements.contains(dockElement) && !newDockedElements.contains(dockElement)) {
+            newDockedElements.append(dockElement);
         }
     }
     TaskManagerSettings::instance()->setDockedElements(newDockedElements);

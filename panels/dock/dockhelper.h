@@ -38,6 +38,8 @@ private:
     bool wakeUpAreaNeedShowOnThisScreen(QScreen *screen);
 
     void updateAllDockWakeArea();
+    void updatePanelMouseState();
+    void updateCursorPosition(QEvent *event);
 
 public Q_SLOTS:
     void checkNeedHideOrNot();
@@ -52,6 +54,7 @@ private:
     QHash<QWindow *, bool> m_transientChildShows;
     QTimer *m_hideTimer;
     QTimer *m_showTimer;
+    QTimer *m_cursorMonitorTimer;
 };
 
 class DockWakeUpArea

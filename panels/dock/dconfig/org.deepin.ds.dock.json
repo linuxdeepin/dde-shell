@@ -42,6 +42,16 @@
 			"permissions": "readwrite",
 			"visibility": "private"
 		},
+		"View_Mode": {
+			"value": "center",
+			"serial": 0,
+			"flags": [],
+			"name": "View_Mode",
+			"name[zh_CN]": "*****",
+			"description": "",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
 		"Indicator_Style": {
 			"value": "Fashion",
 			"serial": 0,

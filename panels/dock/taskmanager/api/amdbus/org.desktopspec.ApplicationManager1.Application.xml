@@ -18,6 +18,12 @@
 
         <property name="NoDisplay" type="b" access="read" />
         <property name="MimeTypes" type="as" access="readwrite" />
+        <property name="StartupWMClass" type="s" access="read" />
+        <property name="X_CreatedBy" type="s" access="read" />
+        <property name="DesktopSourcePath" type="s" access="read" />
+        <property name="Execs" type="a{ss}" access="read">
+            <annotation name="org.qtproject.QtDBus.QtTypeName" value="QStringMap"/>
+        </property>
 
         <property name="Actions" type="as" access="read">
             <annotation

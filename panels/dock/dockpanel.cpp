@@ -23,6 +23,7 @@
 #include <QGuiApplication>
 #include <QQuickItem>
 #include <DGuiApplicationHelper>
+#include <DPlatformTheme>
 
 #define SETTINGS DockSettings::instance()
 
@@ -39,7 +40,11 @@ DockPanel::DockPanel(QObject *parent)
     , m_compositorReady(false)
     , m_launcherShown(false)
     , m_contextDragging(false)
+    , m_containsMouse(false)
+    , m_reportedContainsMouse(false)
     , m_isResizing(false)
+    , m_cursorPosition(0, 0)
+    , m_reportedCursorPosition(0, 0)
 {
     connect(this, &DockPanel::compositorReadyChanged, this, [this] {
         if (!m_compositorReady) return;
@@ -110,6 +115,7 @@ bool DockPanel::init()
     connect(this, &DockPanel::frontendWindowRectChanged, dockDaemonAdaptor, &DockDaemonAdaptor::FrontendWindowRectChanged);
     connect(SETTINGS, &DockSettings::dockSizeChanged, this, &DockPanel::dockSizeChanged);
     connect(SETTINGS, &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
+    connect(SETTINGS, &DockSettings::viewModeChanged, this, &DockPanel::viewModeChanged);
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
     connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
     connect(SETTINGS, &DockSettings::lockedChanged, this, &DockPanel::lockedChanged);
@@ -150,16 +156,19 @@ bool DockPanel::init()
         }
     });
 
-    m_theme = static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType());
+    auto *guiHelper = Dtk::Gui::DGuiApplicationHelper::instance();
+    QObject::connect(guiHelper, &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
+                     this, &DockPanel::syncColorThemeWithSystem);
+    if (auto *platformTheme = guiHelper->applicationTheme()) {
+        QObject::connect(platformTheme, &DPlatformTheme::themeNameChanged,
+                         this, &DockPanel::syncColorThemeWithSystem);
+    }
+    syncColorThemeWithSystem();
+
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
-        // TODO: support get color type from wayland
         m_helper = new WaylandDockHelper(this);
     } else if (QStringLiteral("xcb") == platformName) {
-        QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
-                            this, [this](){
-            setColorTheme(static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType()));
-        });
         m_helper = new X11DockHelper(this);
     }
 
@@ -230,6 +239,11 @@ void DockPanel::setColorTheme(const ColorTheme& theme)
     Q_EMIT this->colorThemeChanged(theme);
 }
 
+void DockPanel::syncColorThemeWithSystem()
+{
+    setColorTheme(static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType()));
+}
+
 uint DockPanel::dockSize()
 {
     return SETTINGS->dockSize();
@@ -260,6 +274,11 @@ Position DockPanel::position()
     return SETTINGS->position();
 }
 
+ViewMode DockPanel::viewMode()
+{
+    return SETTINGS->viewMode();
+}
+
 void DockPanel::setPosition(const Position& position)
 {
     if (position == SETTINGS->position()) return;
@@ -271,6 +290,27 @@ void DockPanel::setPosition(const Position& position)
     SETTINGS->setPosition(position);
 }
 
+void DockPanel::setViewMode(const ViewMode &mode)
+{
+    if (SETTINGS->viewMode() == mode)
+        return;
+
+    SETTINGS->setViewMode(mode);
+
+    switch (mode) {
+    case ViewMode::CenteredMode:
+        SETTINGS->setItemAlignment(ItemAlignment::CenterAlignment);
+        break;
+    case ViewMode::LeftAlignedMode:
+        SETTINGS->setItemAlignment(ItemAlignment::LeftAlignment);
+        break;
+    case ViewMode::FashionMode:
+        SETTINGS->setItemAlignment(ItemAlignment::LeftAlignment);
+        SETTINGS->setIndicatorStyle(IndicatorStyle::Fashion);
+        break;
+    }
+}
+
 ItemAlignment DockPanel::itemAlignment()
 {
     return SETTINGS->itemAlignment();
@@ -278,6 +318,9 @@ ItemAlignment DockPanel::itemAlignment()
 
 void DockPanel::setItemAlignment(const ItemAlignment& alignment)
 {
+    if (SETTINGS->viewMode() != ViewMode::FashionMode) {
+        SETTINGS->setViewMode(alignment == ItemAlignment::CenterAlignment ? ViewMode::CenteredMode : ViewMode::LeftAlignedMode);
+    }
     SETTINGS->setItemAlignment(alignment);
 }
 
@@ -356,6 +399,35 @@ void DockPanel::notifyDockPositionChanged(int offsetX, int offsetY)
 {
     setFrontendWindowRect(offsetX, offsetY);
     Q_EMIT frontendWindowRectChanged(m_frontendWindowRect);
+}
+
+void DockPanel::reportMousePresence(bool containsMouse, const QPointF &cursorPosition)
+{
+    const bool previousContainsMouse = this->containsMouse();
+    const QPointF previousCursorPosition = this->cursorPosition();
+
+    const auto isSameReportedPosition = [](const QPointF &lhs, const QPointF &rhs) {
+        constexpr qreal epsilon = 0.5;
+        return qAbs(lhs.x() - rhs.x()) <= epsilon && qAbs(lhs.y() - rhs.y()) <= epsilon;
+    };
+
+    // Ignore delayed clear requests from a previously hovered delegate once a new
+    // delegate has already taken over spotlight reporting.
+    if (!containsMouse && m_reportedContainsMouse && cursorPosition != QPointF() && !isSameReportedPosition(m_reportedCursorPosition, cursorPosition)) {
+        return;
+    }
+
+    m_reportedContainsMouse = containsMouse;
+    if (containsMouse) {
+        m_reportedCursorPosition = cursorPosition;
+    }
+
+    if (previousContainsMouse != this->containsMouse()) {
+        emit containsMouseChanged(this->containsMouse());
+    }
+    if (previousCursorPosition != this->cursorPosition()) {
+        emit cursorPositionChanged(this->cursorPosition());
+    }
 }
 
 void DockPanel::launcherVisibleChanged(bool visible)
@@ -466,6 +538,44 @@ void DockPanel::setContextDragging(bool newContextDragging)
     if (!m_contextDragging)
         m_helper->checkNeedHideOrNot();
     emit contextDraggingChanged();
+}
+
+bool DockPanel::containsMouse() const
+{
+    return m_containsMouse || m_reportedContainsMouse;
+}
+
+QPointF DockPanel::cursorPosition() const
+{
+    return m_reportedContainsMouse ? m_reportedCursorPosition : m_cursorPosition;
+}
+
+void DockPanel::setContainsMouse(bool containsMouse)
+{
+    const bool previousContainsMouse = this->containsMouse();
+    const QPointF previousCursorPosition = this->cursorPosition();
+    if (m_containsMouse == containsMouse)
+        return;
+
+    m_containsMouse = containsMouse;
+    if (previousContainsMouse != this->containsMouse()) {
+        emit containsMouseChanged(this->containsMouse());
+    }
+    if (previousCursorPosition != this->cursorPosition()) {
+        emit cursorPositionChanged(this->cursorPosition());
+    }
+}
+
+void DockPanel::setCursorPosition(const QPointF &cursorPosition)
+{
+    const QPointF previousCursorPosition = this->cursorPosition();
+    if (m_cursorPosition == cursorPosition)
+        return;
+
+    m_cursorPosition = cursorPosition;
+    if (previousCursorPosition != this->cursorPosition()) {
+        emit cursorPositionChanged(this->cursorPosition());
+    }
 }
 
 bool DockPanel::isResizing() const
