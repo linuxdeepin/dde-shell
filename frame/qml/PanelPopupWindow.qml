@@ -15,6 +15,7 @@ PopupWindow {
     property real yOffset: 0
     property int margins: 10
     property int windowThemeType: D.ApplicationHelper.LightType
+    readonly property bool darkTheme: root.windowThemeType === D.ApplicationHelper.DarkType
     property Item currentItem
     property int requestedWidth: 10
     property int requestedHeight: 10
@@ -84,7 +85,7 @@ PopupWindow {
     D.DWindow.enableBlurWindow: true
     // TODO set shadowOffset maunally.
     D.DWindow.shadowOffset: Qt.point(0, 25)
-    D.DWindow.shadowColor: root.windowThemeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.5) : Qt.rgba(0, 0, 0, 0.2)
+    D.DWindow.shadowColor: root.darkTheme ? Qt.rgba(0, 0, 0, 0.5) : Qt.rgba(0, 0, 0, 0.2)
     D.ColorSelector.family: D.Palette.CrystalColor
     color: "transparent"
 
@@ -155,14 +156,15 @@ PopupWindow {
             return appearance.opacity
         }
         blendColor: {
+            const isDark = root.darkTheme
             if (valid) {
-                return DStyle.Style.control.selectColor(undefined,
-                                                    Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, blendColorAlpha(0.6)),
-                                                    Qt.rgba(0, 0, 0, blendColorAlpha(85 / 255)))
+                return isDark
+                    ? Qt.rgba(0, 0, 0, blendColorAlpha(85 / 255))
+                    : Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, blendColorAlpha(0.6))
             }
-            return DStyle.Style.control.selectColor(undefined,
-                                                DStyle.Style.behindWindowBlur.lightNoBlurColor,
-                                                DStyle.Style.behindWindowBlur.darkNoBlurColor)
+            return isDark
+                ? DStyle.Style.behindWindowBlur.darkNoBlurColor
+                : DStyle.Style.behindWindowBlur.lightNoBlurColor
         }
     }
 }

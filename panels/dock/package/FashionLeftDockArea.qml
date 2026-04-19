@@ -181,9 +181,12 @@ Control {
             return
         }
 
-        const panelPoint = root.mapToItem(null, 0, 0)
-        const globalPoint = root.mapToGlobal(0, 0)
-        surface.updatePluginGeometry(Qt.rect(Math.round(panelPoint.x), Math.round(panelPoint.y), 0, 0))
+        const panelPoint = weatherPage.mapToItem(null, 0, 0)
+        const globalPoint = weatherPage.mapToGlobal(0, 0)
+        surface.updatePluginGeometry(Qt.rect(Math.round(panelPoint.x),
+                                             Math.round(panelPoint.y),
+                                             Math.round(weatherPage.width),
+                                             Math.round(weatherPage.height)))
         surface.setGlobalPos(Qt.point(Math.round(globalPoint.x), Math.round(globalPoint.y)))
     }
 

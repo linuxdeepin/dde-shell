@@ -6,10 +6,7 @@
 #include "abstracttaskmanagerinterface.h"
 #include "rolegroupmodel.h"
 #include "taskmanager.h"
-#include "taskmanagersettings.h"
 #include "globals.h"
-
-#include <QProcess>
 
 namespace dock
 {
@@ -195,21 +192,28 @@ void DockGroupModel::requestWindowsView(const QModelIndexList &indexes) const
 
 void DockGroupModel::requestNewInstance(const QModelIndex &index, const QString &action) const
 {
-    if (action == DOCK_ACTION_DOCK) {
-        auto desktopId = index.data(TaskManager::DesktopIdRole).toString();
-        TaskManagerSettings::instance()->toggleDockedElement(QStringLiteral("desktop/%1").arg(desktopId));
-    } else if (action == DOCK_ACTION_FORCEQUIT) {
+    if (action == DOCK_ACTION_FORCEQUIT) {
         requestClose(index, true);
-    } else if (action == DOCK_ACTION_CLOSEALL) {
+    } else if (action == DOCK_ACTION_CLOSEALL || action == DOCK_ACTION_CLOSEWINDOW) {
         requestClose(index);
-    } else {
-        auto desktopId = index.data(TaskManager::DesktopIdRole).toString();
-        QProcess process;
-        process.setProcessChannelMode(QProcess::MergedChannels);
-        process.start("dde-am", {"--by-user", desktopId, action});
-        process.waitForFinished();
         return;
     }
+
+    auto interface = dynamic_cast<AbstractTaskManagerInterface *>(sourceModel());
+    if (nullptr == interface) {
+        return;
+    }
+
+    QModelIndex sourceIndex = mapToSource(index);
+    if (RoleGroupModel::rowCount(index) > 0) {
+        sourceIndex = mapToSource(RoleGroupModel::index(0, 0, index));
+    }
+
+    if (!sourceIndex.isValid()) {
+        return;
+    }
+
+    interface->requestNewInstance(sourceIndex, action);
 }
 
 void DockGroupModel::resetActiveWindow(int parentRow)

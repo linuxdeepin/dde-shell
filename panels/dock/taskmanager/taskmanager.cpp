@@ -26,6 +26,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QGuiApplication>
+#include <QLocale>
 #include <QMetaObject>
 #include <QMimeDatabase>
 #include <QProcess>
@@ -356,13 +357,90 @@ static QStringList invokeLauncherGroupItems(QObject *groupModel, const QString &
     return items;
 }
 
+static QString invokeLauncherGroupDisplayName(QObject *groupModel, const QString &groupId)
+{
+    if (!groupModel || groupId.isEmpty()) {
+        return {};
+    }
+
+    const QString resolvedGroupId = resolveLauncherGroupId(qobject_cast<QAbstractItemModel *>(groupModel), groupId);
+    QString displayName;
+    QMetaObject::invokeMethod(groupModel,
+                              "groupDisplayName",
+                              Q_RETURN_ARG(QString, displayName),
+                              Q_ARG(QString, resolvedGroupId));
+    return displayName;
+}
+
+static bool preferChineseLauncherGroupNames()
+{
+    return QLocale().language() == QLocale::Chinese;
+}
+
+static QString launcherGroupFallbackName()
+{
+    return preferChineseLauncherGroupNames() ? QStringLiteral("应用组") : TaskManager::tr("App Group");
+}
+
+static QString translatedLauncherCategoryName(const QString &groupName)
+{
+    if (!groupName.startsWith(QStringLiteral("internal/category/"))) {
+        return {};
+    }
+
+    bool ok = false;
+    const int category = groupName.section(QLatin1Char('/'), -1).toInt(&ok);
+    if (!ok) {
+        return {};
+    }
+
+    if (preferChineseLauncherGroupNames()) {
+        switch (category) {
+        case 0: return QStringLiteral("网络");
+        case 1: return QStringLiteral("社交");
+        case 2: return QStringLiteral("音乐");
+        case 3: return QStringLiteral("视频");
+        case 4: return QStringLiteral("图形图像");
+        case 5: return QStringLiteral("游戏");
+        case 6: return QStringLiteral("办公");
+        case 7: return QStringLiteral("阅读");
+        case 8: return QStringLiteral("编程开发");
+        case 9: return QStringLiteral("系统管理");
+        case 10: return QStringLiteral("其他");
+        default: return {};
+        }
+    }
+
+    switch (category) {
+    case 0: return TaskManager::tr("Internet");
+    case 1: return TaskManager::tr("Chat");
+    case 2: return TaskManager::tr("Music");
+    case 3: return TaskManager::tr("Video");
+    case 4: return TaskManager::tr("Graphics");
+    case 5: return TaskManager::tr("Game");
+    case 6: return TaskManager::tr("Office");
+    case 7: return TaskManager::tr("Reading");
+    case 8: return TaskManager::tr("Development");
+    case 9: return TaskManager::tr("System");
+    case 10: return TaskManager::tr("Others");
+    default: return {};
+    }
+}
+
 static QString launcherGroupDisplayName(QAbstractItemModel *groupModel, const QString &groupId)
 {
-    const QString resolvedGroupId = resolveLauncherGroupId(groupModel, groupId);
-    const QModelIndex groupIndex = findIndexByNamedRole(groupModel, MODEL_DESKTOPID, resolvedGroupId, TaskManager::DesktopIdRole);
-    QString groupName = groupIndex.data(modelRole(groupModel, MODEL_NAME, TaskManager::NameRole)).toString();
-    if (groupName.isEmpty() || groupName.startsWith(QStringLiteral("internal/category/"))) {
-        groupName = QObject::tr("App Group");
+    QString groupName = invokeLauncherGroupDisplayName(groupModel, groupId);
+    if (groupName.isEmpty()) {
+        const QString resolvedGroupId = resolveLauncherGroupId(groupModel, groupId);
+        const QModelIndex groupIndex = findIndexByNamedRole(groupModel, MODEL_DESKTOPID, resolvedGroupId, TaskManager::DesktopIdRole);
+        groupName = groupIndex.data(modelRole(groupModel, MODEL_NAME, TaskManager::NameRole)).toString();
+    }
+    const QString categoryName = translatedLauncherCategoryName(groupName);
+    if (!categoryName.isEmpty()) {
+        return categoryName;
+    }
+    if (groupName.isEmpty()) {
+        groupName = launcherGroupFallbackName();
     }
     return groupName;
 }

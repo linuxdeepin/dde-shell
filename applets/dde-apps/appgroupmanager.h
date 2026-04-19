@@ -65,6 +65,7 @@ public:
     AppGroup * group(QModelIndex idx);
     Q_INVOKABLE ItemsPage * groupPages(int groupId);
     Q_INVOKABLE QStringList groupItems(const QString &groupId) const;
+    Q_INVOKABLE QString groupDisplayName(const QString &groupId) const;
     Q_INVOKABLE void bringToFromt(const QString & id);
     Q_INVOKABLE void commitRearrangeOperation(const QString & dragId, const QString & dropId, DndOperation operation, int pageHint = -1);
 

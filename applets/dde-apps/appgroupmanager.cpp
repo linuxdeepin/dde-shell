@@ -12,6 +12,22 @@
 
 namespace apps {
 
+static QString normalizeResolvableGroupId(const QString &groupId)
+{
+    bool isNumericGroupId = false;
+    groupId.toInt(&isNumericGroupId);
+
+    if (AppGroup::idIsFolder(groupId)) {
+        return AppGroup::normalizeGroupId(groupId);
+    }
+
+    if (isNumericGroupId) {
+        return AppGroup::groupIdFromNumber(groupId.toInt());
+    }
+
+    return {};
+}
+
 AppGroupManager::AppGroupManager(AMAppItemModel * referenceModel, QObject *parent)
     : QStandardItemModel(parent)
     , m_referenceModel(referenceModel)
@@ -147,15 +163,8 @@ ItemsPage * AppGroupManager::groupPages(int groupId)
 
 QStringList AppGroupManager::groupItems(const QString &groupId) const
 {
-    QString normalizedGroupId = groupId;
-    bool isNumericGroupId = false;
-    groupId.toInt(&isNumericGroupId);
-
-    if (AppGroup::idIsFolder(groupId)) {
-        normalizedGroupId = AppGroup::normalizeGroupId(groupId);
-    } else if (isNumericGroupId) {
-        normalizedGroupId = AppGroup::groupIdFromNumber(groupId.toInt());
-    } else {
+    const QString normalizedGroupId = normalizeResolvableGroupId(groupId);
+    if (normalizedGroupId.isEmpty()) {
         return {};
     }
 
@@ -166,6 +175,25 @@ QStringList AppGroupManager::groupItems(const QString &groupId) const
         }
 
         return folder->itemsPage()->allArrangedItems();
+    }
+
+    return {};
+}
+
+QString AppGroupManager::groupDisplayName(const QString &groupId) const
+{
+    const QString normalizedGroupId = normalizeResolvableGroupId(groupId);
+    if (normalizedGroupId.isEmpty()) {
+        return {};
+    }
+
+    for (int i = 0; i < rowCount(); ++i) {
+        auto folder = static_cast<AppGroup *>(item(i));
+        if (!folder || AppGroup::normalizeGroupId(folder->appId()) != normalizedGroupId) {
+            continue;
+        }
+
+        return folder->itemsPage() ? folder->itemsPage()->name() : folder->appName();
     }
 
     return {};
@@ -411,7 +439,7 @@ void AppGroupManager::saveAppGroupInfo()
     for (int i = 0; i < rowCount(); i++) {
         auto folder = group(index(i, 0));
         QVariantMap valueMap;
-        valueMap.insert("name", folder->data(AppItemModel::NameRole));
+        valueMap.insert("name", folder->itemsPage() ? folder->itemsPage()->name() : folder->data(AppItemModel::NameRole));
         valueMap.insert("groupId", folder->appId());
         valueMap.insert("appItems", fromListOfStringList(folder->pages()));
         list << valueMap;

@@ -7,12 +7,23 @@
 #include "pluginfactory.h"
 
 #include <QDBusError>
+#include <QDBusMessage>
+#include <QDBusReply>
+#include <QDBusVariant>
 #include <QDebug>
 #include <QDBusServiceWatcher>
 
 DCORE_USE_NAMESPACE
 DS_BEGIN_NAMESPACE
 namespace dde {
+
+namespace {
+bool isOpacityChangeType(const QString &type)
+{
+    return type.compare(QStringLiteral("opacity"), Qt::CaseInsensitive) == 0
+        || type.compare(QStringLiteral("windowopacity"), Qt::CaseInsensitive) == 0;
+}
+}
 
 AppearanceApplet::AppearanceApplet(QObject *parent)
     : DApplet(parent)
@@ -39,11 +50,11 @@ bool AppearanceApplet::load()
 
 qreal AppearanceApplet::opacity() const
 {
-    if (!m_interface)
+    if (m_opacity < 0)
         return -1;
 
     // The minimum opacity is 0.2
-    return std::max(0.2, m_interface->opacity());
+    return std::max(0.2, m_opacity);
 }
 
 void AppearanceApplet::initDBusProxy()
@@ -61,17 +72,38 @@ void AppearanceApplet::initDBusProxy()
 
     QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::Changed, this,
                      [this](const QString &type, const QString &) {
-        if (type.compare(QStringLiteral("opacity"), Qt::CaseInsensitive) == 0) {
+        if (isOpacityChangeType(type)) {
+            refreshOpacity();
             Q_EMIT opacityChanged();
         }
     });
     QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::Refreshed, this,
                      [this](const QString &type) {
-        if (type.compare(QStringLiteral("opacity"), Qt::CaseInsensitive) == 0) {
+        if (isOpacityChangeType(type)) {
+            refreshOpacity();
             Q_EMIT opacityChanged();
         }
     });
+    refreshOpacity();
     Q_EMIT opacityChanged();
+}
+
+void AppearanceApplet::refreshOpacity()
+{
+    QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("org.deepin.dde.Appearance1"),
+                                                          QStringLiteral("/org/deepin/dde/Appearance1"),
+                                                          QStringLiteral("org.freedesktop.DBus.Properties"),
+                                                          QStringLiteral("Get"));
+    message << QStringLiteral("org.deepin.dde.Appearance1") << QStringLiteral("Opacity");
+
+    QDBusReply<QDBusVariant> reply = QDBusConnection::sessionBus().call(message);
+    if (!reply.isValid()) {
+        qWarning() << "Failed to get Appearance opacity, error:" << reply.error();
+        m_opacity = -1;
+        return;
+    }
+
+    m_opacity = reply.value().variant().toReal();
 }
 
 D_APPLET_CLASS(AppearanceApplet)

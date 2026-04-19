@@ -19,6 +19,9 @@ AppGroup::AppGroup(const QString &groupId, const QString &name, const QList<QStr
 {
     setItemsPerPage(m_itemsPage->maxItemCountPerPage());
     setAppName(m_itemsPage->name());
+    QObject::connect(m_itemsPage, &ItemsPage::nameChanged, m_itemsPage, [this]() {
+        setAppName(m_itemsPage->name());
+    });
     // folder id is the numeric suffix of the normalized launcher group id.
     setFolderId(parseGroupId(groupId));
 

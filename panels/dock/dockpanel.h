@@ -122,6 +122,8 @@ private Q_SLOTS:
     void onWindowGeometryChanged();
     void launcherVisibleChanged(bool visible);
     void updateDockScreen();
+    void onAppearanceChanged(const QString &type, const QString &value);
+    void onAppearanceRefreshed(const QString &type);
     void syncColorThemeWithSystem();
 
 Q_SIGNALS:

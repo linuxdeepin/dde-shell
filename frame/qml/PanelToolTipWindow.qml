@@ -13,4 +13,5 @@ PanelPopupWindow {
     flags: Qt.ToolTip | Qt.WindowStaysOnTopHint
     D.DWindow.windowRadius: 8
     D.DWindow.shadowRadius: 8
+    D.DWindow.shadowOffset: Qt.point(0, 8)
 }

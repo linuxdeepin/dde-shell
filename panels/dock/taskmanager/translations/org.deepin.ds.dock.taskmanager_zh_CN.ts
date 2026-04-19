@@ -62,5 +62,53 @@
         <source>%1 files</source>
         <translation>%1个文件</translation>
     </message>
+    <message>
+        <source>Internet</source>
+        <translation>网络</translation>
+    </message>
+    <message>
+        <source>Chat</source>
+        <translation>社交</translation>
+    </message>
+    <message>
+        <source>Music</source>
+        <translation>音乐</translation>
+    </message>
+    <message>
+        <source>Video</source>
+        <translation>视频</translation>
+    </message>
+    <message>
+        <source>Graphics</source>
+        <translation>图形图像</translation>
+    </message>
+    <message>
+        <source>Game</source>
+        <translation>游戏</translation>
+    </message>
+    <message>
+        <source>Office</source>
+        <translation>办公</translation>
+    </message>
+    <message>
+        <source>Reading</source>
+        <translation>阅读</translation>
+    </message>
+    <message>
+        <source>Development</source>
+        <translation>编程开发</translation>
+    </message>
+    <message>
+        <source>System</source>
+        <translation>系统管理</translation>
+    </message>
+    <message>
+        <source>Others</source>
+        <translation>其他</translation>
+    </message>
+    <message>
+        <source>App Group</source>
+        <translation>应用组</translation>
+    </message>
 </context>
 </TS>

@@ -16,7 +16,7 @@ Item {
     id: root
     required property int displayMode
     required property int colorTheme
-    required property bool active
+    required property bool itemActive
     required property bool attention
     required property string itemId
     required property string dockElement
@@ -99,7 +99,7 @@ Item {
         id: itemPalette
         displayMode: root.displayMode
         colorTheme: root.colorTheme
-        active: root.active
+        itemActive: root.itemActive
         backgroundColor: D.DTK.palette.highlight
     }
 
@@ -124,8 +124,8 @@ Item {
             height: nonSplitHeight
             radius: height / 5
             anchors.centerIn: parent
-            isActive: root.active
-            opacity: (hoverHandler.hovered || (root.active && root.windows.length > 0)) ? 1.0 : 0.0
+            isActive: root.itemActive
+            opacity: (hoverHandler.hovered || (root.itemActive && root.windows.length > 0)) ? 1.0 : 0.0
             Behavior on opacity {
                 NumberAnimation { duration: 150 }
             }

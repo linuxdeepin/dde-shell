@@ -32,6 +32,19 @@ Window {
     readonly property int fashionShadowRadius: adaptiveFashionMode ? Math.max(52, Math.round(dockSurfaceThickness * 0.8)) : 40
     readonly property int fashionShadowVerticalOffset: adaptiveFashionMode ? Math.max(6, Math.round(fashionBackgroundRadius * 0.35)) : 0
     readonly property bool darkTheme: Panel.colorTheme === Dock.Dark
+    readonly property var appearanceApplet: DS.applet("org.deepin.ds.dde-appearance")
+    readonly property real appearanceOpacity: appearanceApplet ? appearanceApplet.opacity : -1
+    readonly property real dockBackgroundOpacity: appearanceOpacity >= 0 ? appearanceOpacity : (darkTheme ? 85 / 255 : 0.6)
+    readonly property color dockBlurBlendColor: darkTheme
+        ? Qt.rgba(10 / 255, 10 / 255, 10 / 255, dockBackgroundOpacity)
+        : Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, dockBackgroundOpacity)
+    readonly property color dockNoBlurBaseColor: darkTheme
+        ? DStyle.Style.behindWindowBlur.darkNoBlurColor
+        : DStyle.Style.behindWindowBlur.lightNoBlurColor
+    readonly property color dockNoBlurBlendColor: Qt.rgba(dockNoBlurBaseColor.r,
+        dockNoBlurBaseColor.g,
+        dockNoBlurBaseColor.b,
+        appearanceOpacity >= 0 ? dockBackgroundOpacity : dockNoBlurBaseColor.a)
     readonly property color fashionShadowColor: darkTheme ?
         Qt.rgba(0, 0, 0, 0.34) :
         Qt.rgba(0, 0, 0, 0.2)
@@ -100,7 +113,7 @@ Window {
     readonly property real spotlightOpacity: darkTheme ? 0.14 : 0.2
     readonly property real spotlightCoreOpacity: darkTheme ? 0.23 : 0.32
     readonly property color dockWindowBorderColor: darkTheme ?
-        Qt.rgba(0, 0, 0, dock.blendColorAlpha(0.6) + 20 / 255) :
+        Qt.rgba(0, 0, 0, dock.dockBackgroundOpacity + 20 / 255) :
         Qt.rgba(0, 0, 0, 0.15)
 
     // NOTE: -1 means not set its size, follow the platform size
@@ -108,13 +121,6 @@ Window {
     height: positionForAnimation === Dock.Left || positionForAnimation === Dock.Right ? -1 : windowThickness
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
-
-    function blendColorAlpha(fallback) {
-        var appearance = DS.applet("org.deepin.ds.dde-appearance")
-        if (!appearance || appearance.opacity < 0)
-            return fallback
-        return appearance.opacity
-    }
 
     function requestShowDockMenu() {
         // maybe has popup visible, close it.
@@ -182,7 +188,7 @@ Window {
             return Dock.MIN_DOCK_SIZE
         }
 
-        const currentWidth = Math.max(dock.width, adaptiveDockContentWidth + fashionHorizontalPadding * 2)
+        const currentWidth = adaptiveDockContentWidth + fashionHorizontalPadding * 2
         if (currentWidth <= 0) {
             return proposedDockSize
         }
@@ -212,7 +218,6 @@ Window {
         const fittedDockSize = dock.clampDockSizeByScreenLimit(dock.preferredDockSize)
         if (dock.dockSize !== fittedDockSize) {
             dock.dockSize = fittedDockSize
-            dock.scheduleAdaptiveFashionDockSizeSync()
         }
     }
 
@@ -291,13 +296,11 @@ Window {
     // 目前直接处理shadowColor(透明和默认值的切换)和borderWidth(0和1的切换)，来控制阴影和边框
     // 参数默认值见： https://github.com/linuxdeepin/qt5platform-plugins/blob/master/xcb/dframewindow.h#L122
     // 需要注意，shadowRadius不能直接套用于“扩散”参数，拿到不透明度100%的设计图确定radius更合适一些。
-    D.DWindow.shadowColor: (hideShowAnimation.running || dockAnimation.running) ?
+    D.DWindow.shadowColor: (hideShowAnimation.running || dockAnimation.running || dock.adaptiveFashionMode) ?
         Qt.rgba(0, 0, 0, 0) :
-        (dock.useTopRoundedFashionBackground ? dock.fashionShadowColor : Qt.rgba(0, 0, 0, 0.1))
-    D.DWindow.shadowOffset: dock.useTopRoundedFashionBackground ?
-        Qt.point(0, dock.fashionShadowVerticalOffset) :
-        Qt.point(0, 0)
-    D.DWindow.shadowRadius: dock.useTopRoundedFashionBackground ? dock.fashionShadowRadius : 40
+        Qt.rgba(0, 0, 0, 0.1)
+    D.DWindow.shadowOffset: Qt.point(0, 0)
+    D.DWindow.shadowRadius: dock.adaptiveFashionMode ? 0 : 40
     D.DWindow.borderWidth:  (hideShowAnimation.running || dockAnimation.running) ? 0 : (dock.useTopRoundedFashionBackground ? 0 : 1)
     D.DWindow.enableBlurWindow: Qt.platform.pluginName !== "xcb"
     D.DWindow.themeType: Panel.colorTheme
@@ -648,13 +651,9 @@ Window {
             cornerRadius: dock.adaptiveFashionMode ? dock.fashionBackgroundRadius : 0
             blendColor: {
                 if (valid) {
-                    return DStyle.Style.control.selectColor(undefined,
-                                                        Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, dock.blendColorAlpha(0.6)),
-                                                        Qt.rgba(10 / 255, 10 / 255, 10 /255, dock.blendColorAlpha(85 / 255)))
+                    return dock.dockBlurBlendColor
                 }
-                return DStyle.Style.control.selectColor(undefined,
-                                                    DStyle.Style.behindWindowBlur.lightNoBlurColor,
-                                                    DStyle.Style.behindWindowBlur.darkNoBlurColor)
+                return dock.dockNoBlurBlendColor
             }
         }
 
@@ -673,13 +672,9 @@ Window {
                     cornerRadius: 0
                     blendColor: {
                         if (valid) {
-                            return DStyle.Style.control.selectColor(undefined,
-                                                                Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, dock.blendColorAlpha(0.6)),
-                                                                Qt.rgba(10 / 255, 10 / 255, 10 /255, dock.blendColorAlpha(85 / 255)))
+                            return dock.dockBlurBlendColor
                         }
-                        return DStyle.Style.control.selectColor(undefined,
-                                                            DStyle.Style.behindWindowBlur.lightNoBlurColor,
-                                                            DStyle.Style.behindWindowBlur.darkNoBlurColor)
+                        return dock.dockNoBlurBlendColor
                     }
                 }
 

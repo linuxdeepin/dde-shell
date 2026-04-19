@@ -22,6 +22,9 @@
 #include <QLoggingCategory>
 #include <QGuiApplication>
 #include <QQuickItem>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDBusVariant>
 #include <DGuiApplicationHelper>
 #include <DPlatformTheme>
 
@@ -30,6 +33,24 @@
 Q_LOGGING_CATEGORY(dockLog, "org.deepin.dde.shell.dock")
 
 namespace dock {
+
+namespace {
+constexpr auto kAppearanceService = "org.deepin.dde.Appearance1";
+constexpr auto kAppearancePath = "/org/deepin/dde/Appearance1";
+constexpr auto kAppearanceInterface = "org.deepin.dde.Appearance1";
+constexpr auto kPropertiesInterface = "org.freedesktop.DBus.Properties";
+
+ColorTheme colorThemeFromGlobalThemeName(const QString &themeName, const ColorTheme &fallbackTheme)
+{
+    if (themeName.endsWith(QStringLiteral(".dark"), Qt::CaseInsensitive))
+        return Dark;
+
+    if (themeName.endsWith(QStringLiteral(".light"), Qt::CaseInsensitive))
+        return Light;
+
+    return fallbackTheme;
+}
+}
 
 DockPanel::DockPanel(QObject *parent)
     : DPanel(parent)
@@ -160,9 +181,13 @@ bool DockPanel::init()
     QObject::connect(guiHelper, &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
                      this, &DockPanel::syncColorThemeWithSystem);
     if (auto *platformTheme = guiHelper->applicationTheme()) {
-        QObject::connect(platformTheme, &DPlatformTheme::themeNameChanged,
+        QObject::connect(platformTheme, &Dtk::Gui::DPlatformTheme::themeNameChanged,
                          this, &DockPanel::syncColorThemeWithSystem);
     }
+    QDBusConnection::sessionBus().connect(kAppearanceService, kAppearancePath, kAppearanceInterface,
+                                          "Changed", this, SLOT(onAppearanceChanged(QString,QString)));
+    QDBusConnection::sessionBus().connect(kAppearanceService, kAppearancePath, kAppearanceInterface,
+                                          "Refreshed", this, SLOT(onAppearanceRefreshed(QString)));
     syncColorThemeWithSystem();
 
     auto platformName = QGuiApplication::platformName();
@@ -239,9 +264,41 @@ void DockPanel::setColorTheme(const ColorTheme& theme)
     Q_EMIT this->colorThemeChanged(theme);
 }
 
+void DockPanel::onAppearanceChanged(const QString &type, const QString &value)
+{
+    Q_UNUSED(value)
+    if (type.compare(QStringLiteral("GlobalTheme"), Qt::CaseInsensitive) != 0)
+        return;
+
+    syncColorThemeWithSystem();
+}
+
+void DockPanel::onAppearanceRefreshed(const QString &type)
+{
+    if (type.compare(QStringLiteral("GlobalTheme"), Qt::CaseInsensitive) != 0)
+        return;
+
+    syncColorThemeWithSystem();
+}
+
 void DockPanel::syncColorThemeWithSystem()
 {
-    setColorTheme(static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType()));
+    const auto fallbackTheme = static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType());
+    QDBusInterface appearanceProperties(kAppearanceService,
+                                        kAppearancePath,
+                                        kPropertiesInterface,
+                                        QDBusConnection::sessionBus());
+    if (appearanceProperties.isValid()) {
+        const QDBusReply<QDBusVariant> reply = appearanceProperties.call(QStringLiteral("Get"),
+                                                                         QString::fromLatin1(kAppearanceInterface),
+                                                                         QStringLiteral("GlobalTheme"));
+        if (reply.isValid()) {
+            setColorTheme(colorThemeFromGlobalThemeName(reply.value().variant().toString(), fallbackTheme));
+            return;
+        }
+    }
+
+    setColorTheme(fallbackTheme);
 }
 
 uint DockPanel::dockSize()

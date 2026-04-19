@@ -78,6 +78,7 @@ const QString WeatherDockPluginPath = QStringLiteral("/usr/lib/dde-dock/plugins/
 const QString MessageIconPath = QStringLiteral("/usr/share/icons/bloom/actions/24/mail-unread-new.svg");
 const QString DefaultMailIconName = QStringLiteral("deepin-mail");
 const QString DefaultMusicIconName = QStringLiteral("audio-x-generic");
+constexpr int WeatherPopupTaskbarGap = 10;
 
 using WeatherCodeToDescriptionFunction = QString (*)(int);
 using WeatherCodeToIconNameFunction = QString (*)(int, bool);
@@ -310,14 +311,18 @@ bool callDBusMethod(const QString &service,
                     const QString &path,
                     const QString &interfaceName,
                     const QString &method,
-                    const QVariantList &arguments = {})
+                    const QVariantList &arguments = {},
+                    QDBus::CallMode callMode = QDBus::Block)
 {
     QDBusInterface interface(service, path, interfaceName, QDBusConnection::sessionBus());
     if (!interface.isValid()) {
         return false;
     }
 
-    const QDBusMessage reply = interface.callWithArgumentList(QDBus::Block, method, arguments);
+    const QDBusMessage reply = interface.callWithArgumentList(callMode, method, arguments);
+    if (callMode == QDBus::NoBlock) {
+        return true;
+    }
     return reply.type() != QDBusMessage::ErrorMessage;
 }
 
@@ -337,32 +342,122 @@ bool splitStatusNotifierItemReference(const QString &itemReference, QString *ser
     return !service->isEmpty() && !path->isEmpty();
 }
 
-bool activateStatusNotifierItem(const QString &expectedId, int x, int y)
+QString canonicalExecutablePath(const QString &path)
 {
+    if (path.isEmpty()) {
+        return {};
+    }
+
+    const QFileInfo fileInfo(path);
+    const QString canonicalPath = fileInfo.canonicalFilePath();
+    if (!canonicalPath.isEmpty()) {
+        return canonicalPath;
+    }
+
+    return fileInfo.exists() ? fileInfo.absoluteFilePath() : QString();
+}
+
+QString executablePathForPid(uint pid)
+{
+    if (pid == 0) {
+        return {};
+    }
+
+    const QString executableLinkPath = QStringLiteral("/proc/%1/exe").arg(pid);
+    return canonicalExecutablePath(QFileInfo(executableLinkPath).symLinkTarget());
+}
+
+QString preferredWeatherExecutablePath()
+{
+    const QString resolvedExecutablePath = canonicalExecutablePath(QStandardPaths::findExecutable(QStringLiteral("deepin-weather")));
+    if (!resolvedExecutablePath.isEmpty()) {
+        return resolvedExecutablePath;
+    }
+
+    return canonicalExecutablePath(QStringLiteral("/usr/bin/deepin-weather"));
+}
+
+uint serviceProcessId(const QString &serviceName);
+
+bool findStatusNotifierItem(const QString &expectedId,
+                            QString *service,
+                            QString *path,
+                            const QString &preferredExecutablePath = {})
+{
+    if (!service || !path) {
+        return false;
+    }
+
     const QVariantMap watcherProperties = dbusProperties(QLatin1String(StatusNotifierWatcherService),
                                                          QLatin1String(StatusNotifierWatcherPath),
                                                          QLatin1String(StatusNotifierWatcherInterface));
     const QStringList registeredItems = stringListFromDBusValue(watcherProperties.value(QStringLiteral("RegisteredStatusNotifierItems")));
+    const QString preferredBaseName = QFileInfo(preferredExecutablePath).fileName();
+    QString bestService;
+    QString bestPath;
+    int bestScore = std::numeric_limits<int>::min();
+    uint bestPid = 0;
+
     for (const QString &itemReference : registeredItems) {
-        QString service;
-        QString path;
-        if (!splitStatusNotifierItemReference(itemReference, &service, &path)) {
+        QString candidateService;
+        QString candidatePath;
+        if (!splitStatusNotifierItemReference(itemReference, &candidateService, &candidatePath)) {
             continue;
         }
 
-        const QVariantMap itemProperties = dbusProperties(service, path, QLatin1String(StatusNotifierItemInterface));
+        const QVariantMap itemProperties = dbusProperties(candidateService,
+                                                          candidatePath,
+                                                          QLatin1String(StatusNotifierItemInterface));
         if (stringFromDBusValue(itemProperties.value(QStringLiteral("Id"))) != expectedId) {
             continue;
         }
 
-        return callDBusMethod(service,
+        const uint pid = serviceProcessId(candidateService);
+        const QString executablePath = executablePathForPid(pid);
+        int score = 0;
+        if (!preferredExecutablePath.isEmpty() && executablePath == preferredExecutablePath) {
+            score += 300;
+        } else if (!preferredBaseName.isEmpty() && QFileInfo(executablePath).fileName() == preferredBaseName) {
+            score += 200;
+        } else if (!executablePath.isEmpty()) {
+            score += 100;
+        }
+
+        if (score > bestScore || (score == bestScore && pid >= bestPid)) {
+            bestScore = score;
+            bestPid = pid;
+            bestService = candidateService;
+            bestPath = candidatePath;
+        }
+    }
+
+    if (bestService.isEmpty() || bestPath.isEmpty()) {
+        return false;
+    }
+
+    *service = bestService;
+    *path = bestPath;
+    return true;
+}
+
+bool activateStatusNotifierItem(const QString &expectedId,
+                                int x,
+                                int y,
+                                QDBus::CallMode callMode = QDBus::Block,
+                                const QString &preferredExecutablePath = {})
+{
+    QString service;
+    QString path;
+    if (!findStatusNotifierItem(expectedId, &service, &path, preferredExecutablePath)) {
+        return false;
+    }
+
+    return callDBusMethod(service,
                               path,
                               QLatin1String(StatusNotifierItemInterface),
                               QStringLiteral("Activate"),
-                              {x, y});
-    }
-
-    return false;
+                              {x, y},
+                              callMode);
 }
 
 bool runCommand(const QString &program, const QStringList &arguments = {}, int timeoutMs = 1500)
@@ -484,6 +579,43 @@ bool canManipulateWindows()
     return available && x11Session;
 }
 
+QPoint nativePointForScreen(QScreen *screen, const QPoint &logicalPoint)
+{
+    if (!screen) {
+        return logicalPoint;
+    }
+
+    const QRect screenGeometry = screen->geometry();
+    const qreal scale = screen->devicePixelRatio();
+    return QPoint(qRound((logicalPoint.x() - screenGeometry.x()) * scale + screenGeometry.x()),
+                  qRound((logicalPoint.y() - screenGeometry.y()) * scale + screenGeometry.y()));
+}
+
+QRect nativeRectForScreen(QScreen *screen, const QRect &logicalRect)
+{
+    if (!screen) {
+        return logicalRect;
+    }
+
+    const QPoint topLeft = nativePointForScreen(screen, logicalRect.topLeft());
+    const qreal scale = screen->devicePixelRatio();
+    return QRect(topLeft,
+                 QSize(qRound(logicalRect.width() * scale),
+                       qRound(logicalRect.height() * scale)));
+}
+
+QScreen *screenForNativePoint(const QPoint &nativePoint)
+{
+    const QList<QScreen *> screens = QGuiApplication::screens();
+    for (QScreen *screen : screens) {
+        if (nativeRectForScreen(screen, screen->geometry()).contains(nativePoint)) {
+            return screen;
+        }
+    }
+
+    return QGuiApplication::primaryScreen();
+}
+
 uint serviceProcessId(const QString &serviceName)
 {
     if (serviceName.isEmpty()) {
@@ -579,10 +711,44 @@ QString bestWindowIdForSearches(const QList<QStringList> &searches, bool onlyVis
     return bestWindowId;
 }
 
+QString weatherWindowId(bool onlyVisible = true, const QString &preferredExecutablePath = {})
+{
+    QString service;
+    QString path;
+    if (findStatusNotifierItem(QStringLiteral("org.deepin.weather"), &service, &path, preferredExecutablePath)) {
+        const uint pid = serviceProcessId(service);
+        if (pid > 0) {
+            const QString windowId = bestWindowIdForSearches({QStringList{QStringLiteral("--pid"), QString::number(pid)}},
+                                                             onlyVisible);
+            if (!windowId.isEmpty()) {
+                return windowId;
+            }
+        }
+    }
+
+    return bestWindowIdForSearches({
+        QStringList{QStringLiteral("--class"), QStringLiteral("deepin-weather")},
+        QStringList{QStringLiteral("--class"), QStringLiteral("org.deepin.weather")},
+        QStringList{QStringLiteral("--name"), QStringLiteral("org.deepin.weather")},
+    }, onlyVisible);
+}
+
 bool activateWindow(const QString &windowId)
 {
     return !windowId.isEmpty()
         && runCommand(QStringLiteral("xdotool"), {QStringLiteral("windowactivate"), QStringLiteral("--sync"), windowId}, 1200);
+}
+
+bool activateWindowWithoutSync(const QString &windowId)
+{
+    return !windowId.isEmpty()
+        && runCommand(QStringLiteral("xdotool"), {QStringLiteral("windowactivate"), windowId}, 400);
+}
+
+bool raiseWindow(const QString &windowId)
+{
+    return !windowId.isEmpty()
+        && runCommand(QStringLiteral("xdotool"), {QStringLiteral("windowraise"), windowId}, 400);
 }
 
 bool moveWindow(const QString &windowId, int x, int y)
@@ -662,19 +828,13 @@ bool activateWindowForServiceOrDesktop(const QString &serviceName,
     return activateWindow(windowId);
 }
 
-bool moveWeatherWindowToRequestedPosition(int taskbarLeft, int taskbarTop)
+bool moveWeatherWindowToRequestedPosition(int taskbarLeft,
+                                          int taskbarTop,
+                                          const QString &preferredExecutablePath = {})
 {
-    QString windowId = bestWindowIdForSearches({
-        QStringList{QStringLiteral("--class"), QStringLiteral("deepin-weather")},
-        QStringList{QStringLiteral("--class"), QStringLiteral("org.deepin.weather")},
-        QStringList{QStringLiteral("--name"), QStringLiteral("org.deepin.weather")},
-    });
+    QString windowId = weatherWindowId(true, preferredExecutablePath);
     if (windowId.isEmpty()) {
-        windowId = bestWindowIdForSearches({
-            QStringList{QStringLiteral("--class"), QStringLiteral("deepin-weather")},
-            QStringList{QStringLiteral("--class"), QStringLiteral("org.deepin.weather")},
-            QStringList{QStringLiteral("--name"), QStringLiteral("org.deepin.weather")},
-        }, false);
+        windowId = weatherWindowId(false, preferredExecutablePath);
     }
     if (windowId.isEmpty()) {
         return false;
@@ -685,33 +845,31 @@ bool moveWeatherWindowToRequestedPosition(int taskbarLeft, int taskbarTop)
         return false;
     }
 
-    QScreen *screen = QGuiApplication::screenAt(geometry.center());
+    QScreen *screen = screenForNativePoint(geometry.center());
     if (!screen) {
-        screen = QGuiApplication::screenAt(QPoint(taskbarLeft, taskbarTop));
+        screen = screenForNativePoint(QPoint(taskbarLeft, taskbarTop));
     }
     if (!screen) {
         screen = QGuiApplication::primaryScreen();
     }
 
-    const QRect availableGeometry = screen ? screen->availableGeometry()
+    const QRect availableGeometry = screen ? nativeRectForScreen(screen, screen->availableGeometry())
                                            : QRect(taskbarLeft, geometry.y(), geometry.width(), geometry.height());
     int targetX = taskbarLeft;
-    int targetY = geometry.y();
+    int targetY = taskbarTop - geometry.height() - WeatherPopupTaskbarGap;
     const int maxX = availableGeometry.left() + qMax(0, availableGeometry.width() - geometry.width());
     const int maxY = availableGeometry.top() + qMax(0, availableGeometry.height() - geometry.height());
-
-    if (targetY < availableGeometry.top() || targetY > maxY) {
-        targetY = taskbarTop - geometry.height() - 10;
-    }
 
     targetX = qBound(availableGeometry.left(), targetX, maxX);
     targetY = qBound(availableGeometry.top(), targetY, maxY);
 
-    if (!moveWindow(windowId, targetX, targetY)) {
+    if ((geometry.x() != targetX || geometry.y() != targetY)
+            && !moveWindow(windowId, targetX, targetY)) {
         return false;
     }
 
-    return activateWindow(windowId);
+    raiseWindow(windowId);
+    return activateWindowWithoutSync(windowId);
 }
 
 MprisMetadataFallback metadataFallbackFromCommand(const QString &service)
@@ -1461,30 +1619,81 @@ void FashionLeftPluginProvider::openWeatherPage()
 
 void FashionLeftPluginProvider::openWeatherPopup(int taskbarLeft, int taskbarTop, int activationX, int activationY)
 {
-    const int popupLeft = qMax(0, taskbarLeft);
-    const int popupTop = qMax(0, taskbarTop);
-    const int popupX = qMax(0, activationX);
-    const int popupY = qMax(0, activationY);
-    const auto scheduleWeatherWindowPlacement = [this, popupLeft, popupTop] {
-        moveWeatherWindowToRequestedPosition(popupLeft, popupTop);
-        for (const int delay : {0, 16, 48, 120}) {
-            QTimer::singleShot(delay, this, [popupLeft, popupTop] {
-                moveWeatherWindowToRequestedPosition(popupLeft, popupTop);
+    const QPoint logicalPopupPoint(qMax(0, taskbarLeft), qMax(0, taskbarTop));
+    QScreen *popupScreen = QGuiApplication::screenAt(logicalPopupPoint);
+    if (!popupScreen) {
+        popupScreen = QGuiApplication::primaryScreen();
+    }
+
+    const QPoint popupPoint = nativePointForScreen(popupScreen, logicalPopupPoint);
+    const QPoint activationPoint = nativePointForScreen(popupScreen,
+                                                        QPoint(qMax(0, activationX), qMax(0, activationY)));
+    const int popupLeft = popupPoint.x();
+    const int popupTop = popupPoint.y();
+    const int popupX = activationPoint.x();
+    const int popupY = activationPoint.y();
+    const QString weatherExecutablePath = preferredWeatherExecutablePath();
+    const auto scheduleWeatherWindowPlacement = [this, popupLeft, popupTop, weatherExecutablePath] {
+        for (const int delay : {0, 40, 140, 320}) {
+            QTimer::singleShot(delay, this, [popupLeft, popupTop, weatherExecutablePath] {
+                moveWeatherWindowToRequestedPosition(popupLeft, popupTop, weatherExecutablePath);
             });
         }
     };
+    const auto scheduleWeatherActivationRetry = [this,
+                                                 popupLeft,
+                                                 popupTop,
+                                                 popupX,
+                                                 popupY,
+                                                 scheduleWeatherWindowPlacement,
+                                                 weatherExecutablePath] {
+        QTimer::singleShot(700,
+                           this,
+                           [this, popupLeft, popupTop, popupX, popupY, scheduleWeatherWindowPlacement, weatherExecutablePath] {
+            if (moveWeatherWindowToRequestedPosition(popupLeft, popupTop, weatherExecutablePath)) {
+                scheduleWeatherWindowPlacement();
+                return;
+            }
 
-    if (activateStatusNotifierItem(QStringLiteral("org.deepin.weather"), popupX, popupY)) {
+            if (activateStatusNotifierItem(QStringLiteral("org.deepin.weather"),
+                                           popupX,
+                                           popupY,
+                                           QDBus::NoBlock,
+                                           weatherExecutablePath)) {
+                scheduleWeatherWindowPlacement();
+            }
+        });
+    };
+    const auto openWeatherPageWithRetry = [this, scheduleWeatherActivationRetry] {
+        openWeatherPage();
+        scheduleWeatherActivationRetry();
+    };
+
+    if (activateStatusNotifierItem(QStringLiteral("org.deepin.weather"),
+                                   popupX,
+                                   popupY,
+                                   QDBus::NoBlock,
+                                   weatherExecutablePath)) {
+        scheduleWeatherWindowPlacement();
+        QTimer::singleShot(450,
+                           this,
+                           [this, popupLeft, popupTop, scheduleWeatherWindowPlacement, openWeatherPageWithRetry, weatherExecutablePath] {
+            if (moveWeatherWindowToRequestedPosition(popupLeft, popupTop, weatherExecutablePath)) {
+                scheduleWeatherWindowPlacement();
+                return;
+            }
+
+            openWeatherPageWithRetry();
+        });
+        return;
+    }
+
+    if (moveWeatherWindowToRequestedPosition(popupLeft, popupTop, weatherExecutablePath)) {
         scheduleWeatherWindowPlacement();
         return;
     }
 
-    openWeatherPage();
-    QTimer::singleShot(700, this, [this, popupLeft, popupTop, popupX, popupY, scheduleWeatherWindowPlacement] {
-        if (activateStatusNotifierItem(QStringLiteral("org.deepin.weather"), popupX, popupY)) {
-            scheduleWeatherWindowPlacement();
-        }
-    });
+    openWeatherPageWithRetry();
 }
 
 void FashionLeftPluginProvider::openMailClient()

@@ -16,7 +16,6 @@
 #include <QtWaylandClient/private/qwaylandscreen_p.h>
 #include <QtWaylandClient/private/qwaylandsurface_p.h>
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
-
 namespace dock {
 WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     : DockHelper(panel)

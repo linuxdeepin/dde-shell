@@ -24,8 +24,10 @@ signals:
     void opacityChanged();
 private:
     void initDBusProxy();
+    void refreshOpacity();
 private:
     QScopedPointer<org::deepin::dde::Appearance1> m_interface;
+    qreal m_opacity = -1;
 };
 
 }

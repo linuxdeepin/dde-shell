@@ -33,14 +33,14 @@ Item {
     readonly property var entries: descriptor && descriptor.entries ? descriptor.entries : []
     readonly property int sidePadding: 0
     readonly property int headerHeight: 36
-    readonly property int headerBottomSpacing: 4
+    readonly property int headerBottomSpacing: 0
     readonly property int bottomPadding: 8
     readonly property int gridSpacing: 8
     readonly property int itemIconSize: 48
-    readonly property int cellWidth: 88
+    readonly property int cellWidth: 96
     readonly property int cellHeight: 104
     readonly property int gridWidthExtra: 10
-    readonly property int itemTextMaxWidth: 72
+    readonly property int itemTextMaxWidth: 84
     readonly property int itemTopPadding: 4
     readonly property int itemInnerSpacing: 6
     readonly property int itemHoverPadding: 10
@@ -54,6 +54,7 @@ Item {
     readonly property int columnCount: lockedColumnCount > 0 ? lockedColumnCount : preferredColumnCount(descriptor)
     readonly property int totalRows: entries.length === 0 ? 0 : Math.ceil(entries.length / columnCount)
     readonly property int visibleRows: Math.max(1, Math.min(3, totalRows))
+    readonly property real wheelOvershootDistance: 28
     readonly property int gridContentHeight: entries.length === 0 ?
                                                 72 :
                                                 totalRows * cellHeight + Math.max(0, totalRows - 1) * gridSpacing
@@ -63,7 +64,7 @@ Item {
     readonly property int cornerRadius: D.DTK.platformTheme.windowRadius < 0 ? 18 : D.DTK.platformTheme.windowRadius
     readonly property real contentScrollY: contentLoader.item && contentLoader.item.scrollY !== undefined ? contentLoader.item.scrollY : 0
     readonly property bool showHeaderSeparator: contentScrollY > 0.5
-    readonly property string middleEllipsis: "..."
+    readonly property string middleEllipsis: "\u2026"
 
     width: sidePadding * 2 + gridAreaWidth + scrollBarLaneWidth
     height: popupHeightValue
@@ -108,33 +109,86 @@ Item {
 
     function trimTextToWidth(metrics, text, maxWidth, fromRight) {
         if (!metrics || !text || maxWidth <= 0) {
-            return ""
+            return ({
+                text: "",
+                width: 0,
+                length: 0
+            })
         }
 
-        if (metrics.advanceWidth(text) <= maxWidth) {
-            return text
+        const fullWidth = metrics.advanceWidth(text)
+        if (fullWidth <= maxWidth) {
+            return ({
+                text: text,
+                width: fullWidth,
+                length: text.length
+            })
         }
 
         let result = ""
+        let resultWidth = 0
         if (fromRight) {
             for (let index = text.length - 1; index >= 0; --index) {
                 const candidate = text.charAt(index) + result
-                if (metrics.advanceWidth(candidate) > maxWidth) {
+                const candidateWidth = metrics.advanceWidth(candidate)
+                if (candidateWidth > maxWidth) {
                     break
                 }
                 result = candidate
+                resultWidth = candidateWidth
             }
-            return result
+            return ({
+                text: result,
+                width: resultWidth,
+                length: result.length
+            })
         }
 
         for (let index = 0; index < text.length; ++index) {
             const candidate = result + text.charAt(index)
-            if (metrics.advanceWidth(candidate) > maxWidth) {
+            const candidateWidth = metrics.advanceWidth(candidate)
+            if (candidateWidth > maxWidth) {
                 break
             }
             result = candidate
+            resultWidth = candidateWidth
         }
-        return result
+        return ({
+            text: result,
+            width: resultWidth,
+            length: result.length
+        })
+    }
+
+    function twoLineElideCandidate(metrics, text, maxWidth, ellipsisOnFirstLine) {
+        const ellipsisWidth = metrics.advanceWidth(middleEllipsis)
+        const firstLineBudget = Math.max(0, maxWidth - (ellipsisOnFirstLine ? ellipsisWidth : 0))
+        const secondLineBudget = Math.max(0, maxWidth - (ellipsisOnFirstLine ? 0 : ellipsisWidth))
+        const prefix = trimTextToWidth(metrics, text, firstLineBudget, false)
+        const suffix = trimTextToWidth(metrics, text, secondLineBudget, true)
+        const hiddenLength = Math.max(0, text.length - prefix.length - suffix.length)
+
+        if (!prefix.length || !suffix.length || hiddenLength <= 0) {
+            return null
+        }
+
+        const visibleLength = prefix.length + suffix.length
+        const balancedLength = Math.min(prefix.length, suffix.length)
+        const suffixPenalty = suffix.length <= 1 ? 5000 : (suffix.length === 2 ? 800 : 0)
+        const prefixPenalty = prefix.length <= 1 ? 3000 : 0
+
+        return ({
+            text: ellipsisOnFirstLine ?
+                      prefix.text + middleEllipsis + "\n" + suffix.text :
+                      prefix.text + "\n" + middleEllipsis + suffix.text,
+            score: visibleLength * 1000 +
+                   balancedLength * 2000 +
+                   prefix.width +
+                   suffix.width -
+                   suffixPenalty -
+                   prefixPenalty +
+                   (ellipsisOnFirstLine ? 100 : 0)
+        })
     }
 
     function twoLineMiddleElidedText(metrics, text, maxWidth, needsElide) {
@@ -146,15 +200,54 @@ Item {
             return text
         }
 
-        const ellipsisWidth = metrics.advanceWidth(middleEllipsis)
-        const firstLine = trimTextToWidth(metrics, text, maxWidth, false)
-        const secondLineTail = trimTextToWidth(metrics, text, Math.max(0, maxWidth - ellipsisWidth), true)
+        const candidates = [
+            twoLineElideCandidate(metrics, text, maxWidth, true),
+            twoLineElideCandidate(metrics, text, maxWidth, false)
+        ].filter(function(candidate) { return candidate !== null })
 
-        if (!firstLine.length || !secondLineTail.length) {
-            return firstLine.length ? firstLine : secondLineTail
+        if (!candidates.length) {
+            return trimTextToWidth(metrics, text, maxWidth, false).text
         }
 
-        return firstLine + "\n" + middleEllipsis + secondLineTail
+        let bestCandidate = candidates[0]
+        for (let index = 1; index < candidates.length; ++index) {
+            if (candidates[index].score > bestCandidate.score) {
+                bestCandidate = candidates[index]
+            }
+        }
+
+        return bestCandidate.text
+    }
+
+    function clampContentY(flickable, value) {
+        if (!flickable) {
+            return 0
+        }
+
+        return Math.max(0, Math.min(value, Math.max(0, flickable.contentHeight - flickable.height)))
+    }
+
+    function overshootContentY(flickable, value) {
+        if (!flickable) {
+            return 0
+        }
+
+        const maxContentY = Math.max(0, flickable.contentHeight - flickable.height)
+        if (value < 0) {
+            return Math.max(-wheelOvershootDistance, value * 0.35)
+        }
+
+        if (value > maxContentY) {
+            return maxContentY + Math.min(wheelOvershootDistance, (value - maxContentY) * 0.35)
+        }
+
+        return value
+    }
+
+    function backIconSource() {
+        return Qt.resolvedUrl(root.colorTheme === Dock.Dark ?
+                                  "icons/back-chevron-dark.svg" :
+                                  "icons/back-chevron-light.svg")
     }
 
     function refresh(location, animated) {
@@ -215,20 +308,41 @@ Item {
                 anchors.top: parent.top
                 anchors.topMargin: 6
                 visible: !!(root.descriptor && root.descriptor.canGoBack)
-                icon.name: "go-previous"
-                icon.width: 14
-                icon.height: 14
+                width: 24
+                height: 24
                 display: AbstractButton.IconOnly
                 flat: true
-                implicitWidth: 24
-                implicitHeight: 24
-                background: AppletItemBackground {
-                    enabled: false
-                    radius: 10
-                    isActive: false
-                    opacity: backButton.hovered || backButton.down ? 1.0 : 0.0
-                    Behavior on opacity {
-                        NumberAnimation { duration: 150 }
+                padding: 0
+                implicitWidth: width
+                implicitHeight: height
+                contentItem: Item {
+                    implicitWidth: 24
+                    implicitHeight: 24
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 16
+                        height: 16
+                        source: root.backIconSource()
+                        sourceSize: Qt.size(Math.round(width * (Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0)),
+                                            Math.round(height * (Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0)))
+                        fillMode: Image.PreserveAspectFit
+                        smooth: false
+                    }
+                }
+                background: Item {
+                    implicitWidth: 24
+                    implicitHeight: 24
+
+                    AppletItemBackground {
+                        anchors.fill: parent
+                        enabled: false
+                        radius: 10
+                        isActive: false
+                        opacity: backButton.hovered || backButton.down ? 1.0 : 0.0
+                        Behavior on opacity {
+                            NumberAnimation { duration: 150 }
+                        }
                     }
                 }
                 onClicked: root.refresh(root.descriptor.parentLocation, true)
@@ -248,6 +362,8 @@ Item {
             Rectangle {
                 anchors.left: parent.left
                 anchors.right: parent.right
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
                 anchors.bottom: parent.bottom
                 height: 1
                 color: root.colorTheme === Dock.Dark ?
@@ -309,11 +425,68 @@ Item {
                 height: root.gridViewportHeight
                 anchors.left: parent.left
                 anchors.top: parent.top
+                property real wheelTargetY: contentY
                 contentWidth: root.gridAreaWidth
                 contentHeight: root.gridContentHeight
                 clip: true
-                boundsBehavior: Flickable.StopAtBounds
+                flickableDirection: Flickable.VerticalFlick
+                boundsBehavior: Flickable.DragAndOvershootBounds
+                maximumFlickVelocity: 3200
+                flickDeceleration: 2800
                 interactive: root.totalRows > root.visibleRows
+                rebound: Transition {
+                    NumberAnimation {
+                        properties: "x,y"
+                        duration: 180
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                onDraggingChanged: {
+                    if (dragging) {
+                        wheelScrollAnimation.stop()
+                        wheelTargetY = contentY
+                    }
+                }
+                onContentYChanged: {
+                    if (!wheelScrollAnimation.running) {
+                        wheelTargetY = contentY
+                    }
+                }
+                onContentHeightChanged: wheelTargetY = root.clampContentY(gridFlickable, wheelTargetY)
+                onHeightChanged: wheelTargetY = root.clampContentY(gridFlickable, wheelTargetY)
+
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    onWheel: function(event) {
+                        if (!gridFlickable.interactive) {
+                            return
+                        }
+
+                        const deltaY = event.pixelDelta.y !== 0 ? event.pixelDelta.y : (event.angleDelta.y / 120) * 40
+                        const baseTarget = wheelScrollAnimation.running ? gridFlickable.wheelTargetY : gridFlickable.contentY
+                        gridFlickable.wheelTargetY = root.overshootContentY(gridFlickable, baseTarget - deltaY)
+
+                        wheelScrollAnimation.from = gridFlickable.contentY
+                        wheelScrollAnimation.to = gridFlickable.wheelTargetY
+                        wheelScrollAnimation.restart()
+                        event.accepted = true
+                    }
+                }
+
+                NumberAnimation {
+                    id: wheelScrollAnimation
+                    target: gridFlickable
+                    property: "contentY"
+                    duration: 220
+                    easing.type: Easing.OutCubic
+                    onFinished: {
+                        const clampedTarget = root.clampContentY(gridFlickable, gridFlickable.wheelTargetY)
+                        if (Math.abs(clampedTarget - gridFlickable.wheelTargetY) > 0.5) {
+                            gridFlickable.returnToBounds()
+                        }
+                    }
+                }
 
                 ScrollBar.vertical: ScrollBar {
                     id: verticalScrollBar

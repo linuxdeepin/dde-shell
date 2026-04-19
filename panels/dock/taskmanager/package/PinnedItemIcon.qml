@@ -13,7 +13,6 @@ Item {
     property var previewIcons: []
     property int iconSize: 32
     property int colorTheme: Dock.Dark
-
     readonly property var visiblePreviewIcons: {
         const icons = []
         if (!previewIcons) {

@@ -18,6 +18,7 @@ Item {
     property int toolTipX: 0
     property int toolTipY: 0
     property bool readyBinding: false
+    readonly property int toolTipTopFrameInset: 1
     // WM_NAME, used for kwin.
     property string windowTitle: "dde-shell/paneltooltip"
     width: toolTip.width
@@ -25,13 +26,13 @@ Item {
 
     Binding {
         when: readyBinding
-        target: toolTipWindow; property: "requestedWidth"
+        target: toolTipWindow; property: "width"
         value: toolTip.width + toolTip.leftPadding + toolTip.rightPadding
     }
     Binding {
         when: readyBinding
-        target: toolTipWindow; property: "requestedHeight"
-        value: toolTip.height
+        target: toolTipWindow; property: "height"
+        value: toolTip.height + toolTipTopFrameInset
     }
     Binding {
         when: readyBinding
@@ -43,7 +44,7 @@ Item {
         when: readyBinding
         delayed: true
         target: toolTipWindow; property: "yOffset"
-        value: control.toolTipY
+        value: control.toolTipY - toolTipTopFrameInset
     }
 
     function open()

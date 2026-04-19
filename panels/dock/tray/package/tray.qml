@@ -16,7 +16,10 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 AppletItem {
     id: tray
 
-    readonly property int nextAppletSpacing: 6
+    readonly property bool adaptiveFashionMode: Panel.rootObject
+        && Panel.rootObject.positionForAnimation === Dock.Bottom
+        && Panel.viewMode === Dock.FashionMode
+    readonly property int nextAppletSpacing: adaptiveFashionMode ? 0 : 6
     property bool useColumnLayout: Panel.rootObject.positionForAnimation % 2
     property int dockOrder: 25
     readonly property string quickpanelTrayItemPluginId: "sound"

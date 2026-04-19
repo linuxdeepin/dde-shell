@@ -195,7 +195,7 @@ ContainmentItem {
 
                         displayMode: Panel.indicatorStyle
                         colorTheme: Panel.colorTheme
-                        active: delegateRoot.active
+                        itemActive: delegateRoot.active
                         attention: delegateRoot.attention
                         itemId: delegateRoot.itemId
                         dockElement: delegateRoot.dockElement
