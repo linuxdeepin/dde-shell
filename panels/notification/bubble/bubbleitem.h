@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -39,8 +39,6 @@ public:
     QVariantList actions() const;
     void updateActions();
 
-    int level() const;
-    void setLevel(int level);
 
     QString timeTip() const;
     void setTimeTip(const QString &timeTip);
@@ -51,7 +49,6 @@ public:
     bool isValid() const;
 
 signals:
-    void levelChanged();
     void timeTipChanged();
 
 private:
@@ -59,7 +56,6 @@ private:
 
 private:
     NotifyEntity m_entity;
-    int m_level = 0;
     int m_urgency = NotifyEntity::Normal;
     QString m_timeTip;
     bool m_enablePreview = true;

@@ -68,8 +68,8 @@ Window {
     }
 
     visible: Applet.visible
-    DLayerShellWindow.preferredWidth: 390
-    DLayerShellWindow.preferredHeight: Math.max(10, bubbleView.height + bubbleView.anchors.topMargin + bubbleView.anchors.bottomMargin)
+    width: 390
+    height: root.screen.height
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
     DLayerShellWindow.topMargin: windowMargin(0)
@@ -96,10 +96,21 @@ Window {
         anchors {
             right: parent.right
             bottom: parent.bottom
-            bottomMargin: 10
             rightMargin: 10
-            margins: 30
+            bottomMargin: 10
         }
+
+        function updateInputRegion() {
+            root.DLayerShellWindow.setInputRegionRect(
+                Math.ceil(bubbleView.x),
+                Math.ceil(bubbleView.y),
+                Math.ceil(bubbleView.width), 
+                Math.ceil(Math.max(10, bubbleView.contentHeight))
+            )
+        }
+        onContentHeightChanged: updateInputRegion()
+        onHeightChanged: updateInputRegion()
+        onYChanged: updateInputRegion()
 
         spacing: 10
         model: Applet.bubbles
@@ -126,11 +137,37 @@ Window {
                 duration: 600
                 easing.type: Easing.OutExpo
             }
+            PropertyAnimation {
+                target: addDisplacedTrans.ViewTransition.item
+                properties: "y"
+                duration: 600
+                easing.type: Easing.OutExpo
+            }
         }
 
-        delegate: Bubble {
-            width: 360
-            bubble: model
+        remove: Transition {
+            id: removeTrans
+            ParallelAnimation {
+                PropertyAnimation {
+                    target: removeTrans.ViewTransition.item
+                    property: "opacity"
+                    to: 0
+                    duration: 400
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+
+        removeDisplaced: Transition {
+            PropertyAnimation {
+                properties: "opacity,y"
+                duration: 400
+                easing.type: Easing.OutExpo
+            }
+        }
+
+        delegate: BubbleDelegate {
+            maxCount: model.bubbleCount
         }
 
         HoverHandler {

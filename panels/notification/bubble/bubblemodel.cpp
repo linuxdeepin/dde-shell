@@ -23,18 +23,33 @@ namespace notification {
 BubbleModel::BubbleModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_updateTimeTipTimer(new QTimer(this))
+    , m_processPendingTimer(new QTimer(this))
 {
     m_updateTimeTipTimer->setInterval(1000);
     m_updateTimeTipTimer->setSingleShot(false);
-    BubbleMaxCount = NotifySetting::instance()->bubbleCount();
+
+    m_processPendingTimer->setInterval(300);
+    m_processPendingTimer->setSingleShot(true);
+
+    m_maxKeep = NotifySetting::instance()->bubbleCount() + 2; // max keep folds.
 
     connect(m_updateTimeTipTimer, &QTimer::timeout, this, &BubbleModel::updateBubbleTimeTip);
+    connect(m_processPendingTimer, &QTimer::timeout, this, [this] {
+        if (!m_pendingBubbles.isEmpty()) {
+            auto bubble = m_pendingBubbles.dequeue();
+            insertBubble(bubble);
+            m_processPendingTimer->start();
+        }
+    });
+
     connect(NotifySetting::instance(), &NotifySetting::contentRowCountChanged, this, &BubbleModel::updateContentRowCount);
     connect(NotifySetting::instance(), &NotifySetting::bubbleCountChanged, this, &BubbleModel::updateBubbleCount);
 }
 
 BubbleModel::~BubbleModel()
 {
+    qDeleteAll(m_pendingBubbles);
+    m_pendingBubbles.clear();
     qDeleteAll(m_bubbles);
     m_bubbles.clear();
 }
@@ -45,16 +60,28 @@ void BubbleModel::push(BubbleItem *bubble)
         m_updateTimeTipTimer->start();
     }
 
-    bool more = displayRowCount() >= BubbleMaxCount;
-    if (more) {
-        beginRemoveRows(QModelIndex(), BubbleMaxCount - 1, BubbleMaxCount - 1);
+    if (m_processPendingTimer->isActive()) {
+        m_pendingBubbles.enqueue(bubble);
+    } else {
+        insertBubble(bubble);
+        m_processPendingTimer->start();
+    }
+}
+
+void BubbleModel::insertBubble(BubbleItem *bubble)
+{
+    // Retain only enough bubbles to show requested number + folded overlay space.
+    // This offloads disappearance smoothly to the QML remove transition.
+    if (m_bubbles.size() >= m_maxKeep) {
+        beginRemoveRows(QModelIndex(), m_bubbles.size() - 1, m_bubbles.size() - 1);
+        auto old = m_bubbles.takeLast();
+        old->deleteLater();
         endRemoveRows();
     }
+
     beginInsertRows(QModelIndex(), 0, 0);
     m_bubbles.prepend(bubble);
     endInsertRows();
-
-    updateLevel();
 }
 
 bool BubbleModel::isReplaceBubble(const BubbleItem *bubble) const
@@ -75,6 +102,12 @@ BubbleItem *BubbleModel::replaceBubble(BubbleItem *bubble)
 
 void BubbleModel::clear()
 {
+    if (m_processPendingTimer) {
+        m_processPendingTimer->stop();
+    }
+    qDeleteAll(m_pendingBubbles);
+    m_pendingBubbles.clear();
+
     if (m_bubbles.count() <= 0)
         return;
     beginResetModel();
@@ -82,7 +115,6 @@ void BubbleModel::clear()
     m_bubbles.clear();
     endResetModel();
 
-    updateLevel();
     m_updateTimeTipTimer->stop();
 }
 
@@ -96,22 +128,11 @@ void BubbleModel::remove(int index)
     if (index < 0 || index >= m_bubbles.size())
         return;
 
-    if (index >= rowCount(QModelIndex())) {
-        auto bubble = m_bubbles.takeAt(index);
-        bubble->deleteLater();
-        return;
-    }
-
     beginRemoveRows(QModelIndex(), index, index);
     auto bubble = m_bubbles.takeAt(index);
     bubble->deleteLater();
     endRemoveRows();
 
-    if (m_bubbles.count() >= BubbleMaxCount) {
-        beginInsertRows(QModelIndex(), displayRowCount() - 1, displayRowCount() - 1);
-        endInsertRows();
-    }
-    updateLevel();
 }
 
 void BubbleModel::remove(const BubbleItem *bubble)
@@ -165,16 +186,12 @@ QVariant BubbleModel::data(const QModelIndex &index, int role) const
         return m_bubbles[row]->summary();
     case BubbleModel::IconName:
         return m_bubbles[row]->appIcon();
-    case BubbleModel::Level:
-        return m_bubbles[row]->level();
     case BubbleModel::CTime:
         return m_bubbles[row]->ctime();
     case BubbleModel::TimeTip:
         return m_bubbles[row]->timeTip();
     case BubbleModel::BodyImagePath:
         return m_bubbles[row]->bodyImagePath();
-    case BubbleModel::OverlayCount:
-        return overlayCount();
     case BubbleModel::DefaultAction:
         return m_bubbles[row]->defaultAction();
     case BubbleModel::Actions:
@@ -183,6 +200,8 @@ QVariant BubbleModel::data(const QModelIndex &index, int role) const
         return m_bubbles[row]->urgency();
     case BubbleModel::ContentRowCount:
         return NotifySetting::instance()->contentRowCount();
+    case BubbleModel::BubbleCount:
+        return NotifySetting::instance()->bubbleCount();
     default:
         break;
     }
@@ -197,48 +216,31 @@ QHash<int, QByteArray> BubbleModel::roleNames() const
     mapRoleNames[BubbleModel::Body] = "body";
     mapRoleNames[BubbleModel::Summary] = "summary";
     mapRoleNames[BubbleModel::IconName] = "iconName";
-    mapRoleNames[BubbleModel::Level] = "level";
     mapRoleNames[BubbleModel::CTime] = "ctime";
     mapRoleNames[BubbleModel::TimeTip] = "timeTip";
     mapRoleNames[BubbleModel::Urgency] = "urgency";
     mapRoleNames[BubbleModel::BodyImagePath] = "bodyImagePath";
-    mapRoleNames[BubbleModel::OverlayCount] = "overlayCount";
     mapRoleNames[BubbleModel::DefaultAction] = "defaultAction";
     mapRoleNames[BubbleModel::Actions] = "actions";
     mapRoleNames[BubbleModel::ContentRowCount] = "contentRowCount";
+    mapRoleNames[BubbleModel::BubbleCount] = "bubbleCount";
     return mapRoleNames;
 }
 
 int BubbleModel::displayRowCount() const
 {
-    return qMin(m_bubbles.count(), BubbleMaxCount);
-}
-
-int BubbleModel::overlayCount() const
-{
-    return qMin(m_bubbles.count() - displayRowCount(), OverlayMaxCount);
+    return m_bubbles.count();
 }
 
 void BubbleModel::updateBubbleCount(int count)
 {
-    if (count == BubbleMaxCount)
-        return;
+    m_maxKeep = count + 2;
+    // We don't dynamically add/remove based on setting here anymore
+    // to let QML handle Repeater logic fully mapped to the model size
 
-    int currentRowCount = rowCount(QModelIndex());
-
-    if (count < currentRowCount) {
-        beginRemoveRows(QModelIndex(), count, currentRowCount - 1);
-        endRemoveRows();
-    } else if (count > currentRowCount) {
-        int maxInsertCount = std::min(count, (int)m_bubbles.size());
-        beginInsertRows(QModelIndex(), currentRowCount, maxInsertCount - 1);
-        endInsertRows();
+    if (!m_bubbles.isEmpty()) {
+        Q_EMIT dataChanged(index(0), index(m_bubbles.size() - 1), {BubbleModel::BubbleCount});
     }
-
-    BubbleMaxCount = count;
-
-    layoutChanged();
-    updateLevel();
 }
 
 void BubbleModel::clearInvalidBubbles()
@@ -265,19 +267,6 @@ int BubbleModel::replaceBubbleIndex(const BubbleItem *bubble) const
         }
     }
     return -1;
-}
-
-void BubbleModel::updateLevel()
-{
-    if (m_bubbles.isEmpty())
-        return;
-
-    int lastBubbleMaxIndex = BubbleMaxCount - 1;
-    for (int i = 0; i < displayRowCount(); i++) {
-        auto item = m_bubbles.at(i);
-        item->setLevel(i == lastBubbleMaxIndex ? 1 + overlayCount() : 1);
-    }
-    Q_EMIT dataChanged(index(0), index(displayRowCount() - 1), {BubbleModel::Level});
 }
 
 void BubbleModel::updateBubbleTimeTip()

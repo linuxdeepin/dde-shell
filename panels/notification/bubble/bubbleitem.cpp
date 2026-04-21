@@ -282,19 +282,6 @@ void BubbleItem::updateActions()
     m_actions = array;
 }
 
-int BubbleItem::level() const
-{
-    return m_level;
-}
-
-void BubbleItem::setLevel(int level)
-{
-    if (m_level == level)
-        return;
-
-    m_level = level;
-    emit levelChanged();
-}
 
 QString BubbleItem::timeTip() const
 {

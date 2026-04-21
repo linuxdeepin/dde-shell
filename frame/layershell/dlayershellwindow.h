@@ -30,6 +30,7 @@ class DS_SHARE DLayerShellWindow : public QObject
     Q_PROPERTY(ScreenConfiguration screenConfiguration READ screenConfiguration WRITE setScreenConfiguration)
     Q_PROPERTY(int preferredWidth READ preferredWidth WRITE setPreferredWidth RESET resetPreferredWidth NOTIFY geometryHintsChanged)
     Q_PROPERTY(int preferredHeight READ preferredHeight WRITE setPreferredHeight RESET resetPreferredHeight NOTIFY geometryHintsChanged)
+    Q_PROPERTY(QRegion inputRegion READ inputRegion WRITE setInputRegion RESET resetInputRegion NOTIFY inputRegionChanged)
     
     Q_PROPERTY(bool closeOnDismissed READ closeOnDismissed WRITE setCloseOnDismissed)
 
@@ -121,6 +122,12 @@ public:
     void resetPreferredHeight();
     int preferredHeight() const;
 
+    void setInputRegion(const QRegion &region);
+    void resetInputRegion();
+    QRegion inputRegion() const;
+    
+    Q_INVOKABLE void setInputRegionRect(int x, int y, int width, int height);
+
     /**
      * Sets a string based identifier for this window.
      * This may be used by a compositor to determine stacking
@@ -156,6 +163,7 @@ Q_SIGNALS:
     void layerChanged();
     void scopeChanged();
     void geometryHintsChanged();
+    void inputRegionChanged();
 
 private:
     DLayerShellWindow(QWindow* window);
