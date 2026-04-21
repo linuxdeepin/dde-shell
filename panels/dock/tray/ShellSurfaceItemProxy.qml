@@ -19,8 +19,8 @@ Item {
     property int cursorShape: Qt.ArrowCursor
     property alias shellSurfaceItem: impl
     
-    implicitWidth: shellSurface ? shellSurface.width : 10
-    implicitHeight: shellSurface ? shellSurface.height : 10
+    implicitWidth: shellSurface ? shellSurface.width : 16
+    implicitHeight: shellSurface ? shellSurface.height : 16
 
     function takeFocus() {
         impl.takeFocus()

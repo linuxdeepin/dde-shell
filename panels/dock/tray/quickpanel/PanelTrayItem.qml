@@ -38,13 +38,14 @@ Control {
         toolTipY: DockPanelPositioner.y
     }
 
-    contentItem: Grid {
-        rows: root.useColumnLayout ? 2 : 1
-        spacing: 0
-        padding: 0
+    contentItem: GridLayout {
+        flow: root.useColumnLayout ? GridLayout.TopToBottom : GridLayout.LeftToRight
+        rowSpacing: 0
+        columnSpacing: 0
 
         Loader {
             id: placeholder
+            Layout.alignment: Qt.AlignCenter
             active: root.shellSurface
             visible: active
             sourceComponent: TrayItemSurface {
@@ -56,8 +57,8 @@ Control {
         }
         Control {
             id: quickpanelPlaceholder
-            width: placeholder.active ? placeholder.width : 16 + itemMargins
-            height: placeholder.active ? placeholder.height : 16 + itemMargins
+            Layout.alignment: Qt.AlignCenter
+            padding: itemMargins
             contentItem: DciIcon {
                 sourceSize: Qt.size(16, 16)
                 name: "dock-control-panel"
