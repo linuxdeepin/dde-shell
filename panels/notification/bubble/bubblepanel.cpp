@@ -111,7 +111,16 @@ void BubblePanel::onNotificationStateChanged(qint64 id, int processedType)
 void BubblePanel::onBubbleCountChanged()
 {
     bool isEmpty = m_bubbles->items().isEmpty();
-    setVisible(!isEmpty && enabled());
+    if (isEmpty) {
+        // 延迟发送 false ，好让 QML 中的 remove: Transition 有足够的时间播放完动画
+        QTimer::singleShot(500, this, [this]() {
+            if (m_bubbles->items().isEmpty()) {
+                setVisible(false);
+            }
+        });
+    } else {
+        setVisible(enabled());
+    }
 }
 
 void BubblePanel::addBubble(qint64 id)

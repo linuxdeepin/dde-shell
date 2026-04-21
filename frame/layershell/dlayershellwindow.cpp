@@ -43,6 +43,7 @@ public:
     int preferredWidth = -1;
     int preferredHeight = -1;
     bool closeOnDismissed = true;
+    QRegion inputRegion;
 };
 
 void DLayerShellWindow::setAnchors(DLayerShellWindow::Anchors anchors)
@@ -190,6 +191,29 @@ void DLayerShellWindow::resetPreferredHeight()
 int DLayerShellWindow::preferredHeight() const
 {
     return d->preferredHeight; 
+}
+
+void DLayerShellWindow::setInputRegion(const QRegion &region)
+{
+    if (d->inputRegion != region) {
+        d->inputRegion = region;
+        Q_EMIT inputRegionChanged();
+    }
+}
+
+void DLayerShellWindow::resetInputRegion()
+{
+    setInputRegion(QRegion());
+}
+
+QRegion DLayerShellWindow::inputRegion() const
+{
+    return d->inputRegion;
+}
+
+void DLayerShellWindow::setInputRegionRect(int x, int y, int width, int height)
+{
+    setInputRegion(QRegion(x, y, width, height));
 }
 
 bool DLayerShellWindow::closeOnDismissed() const

@@ -22,6 +22,7 @@ Build-Depends:
  libxcb-res0-dev,
  libxcb-util-dev,
  libxcb1-dev,
+ libxcb-shape0-dev,
  libxtst-dev,
  libyaml-cpp-dev,
  qml6-module-qtquick-controls2-styles-chameleon,

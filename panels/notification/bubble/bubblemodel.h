@@ -8,6 +8,7 @@
 #include "notifyentity.h"
 
 #include <QAbstractListModel>
+#include <QQueue>
 
 class QTimer;
 
@@ -24,15 +25,14 @@ public:
         Body,
         Summary,
         IconName,
-        Level,
         CTime,
         TimeTip,
         BodyImagePath,
-        OverlayCount,
         DefaultAction,
         Actions,
         Urgency,
-        ContentRowCount
+        ContentRowCount,
+        BubbleCount
     } BubbleRole;
 
     explicit BubbleModel(QObject *parent = nullptr);
@@ -58,23 +58,23 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     int displayRowCount() const;
-    int overlayCount() const;
 
     void clearInvalidBubbles();
 
 private:
+    void insertBubble(BubbleItem *bubble);
     void updateBubbleCount(int count);
     int replaceBubbleIndex(const BubbleItem *bubble) const;
-    void updateLevel();
     void updateBubbleTimeTip();
     void updateContentRowCount(int rowCount);
 
 private:
     QTimer *m_updateTimeTipTimer = nullptr;
+    QTimer *m_processPendingTimer = nullptr;
     QList<BubbleItem *> m_bubbles;
-    int BubbleMaxCount{3};
+    QQueue<BubbleItem *> m_pendingBubbles;
+    int m_maxKeep{5};
     int m_contentRowCount{6};
-    const int OverlayMaxCount{2};
 };
 
 }

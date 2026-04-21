@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -74,6 +74,13 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
         set_keyboard_interactivity(m_dlayerShellWindow->keyboardInteractivity());
         window->waylandSurface()->commit();
     });
+
+    auto applyInputRegion = [this, window]() {
+        window->window()->setMask(m_dlayerShellWindow->inputRegion());
+        window->waylandSurface()->commit();
+    };
+
+    connect(m_dlayerShellWindow, &DLayerShellWindow::inputRegionChanged, this, applyInputRegion);
 
     calcAndSetRequestSize(window->surfaceSize());
 
