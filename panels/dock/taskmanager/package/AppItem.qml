@@ -429,7 +429,7 @@ Item {
 
 
     function onEntered() {
-        if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
+        if (windows.length === 0) {
             toolTipShowTimer.start()
             return
         }
@@ -457,7 +457,7 @@ Item {
             previewTimer.stop()
         }
 
-        if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
+        if (windows.length === 0) {
             toolTip.close()
             return
         }
