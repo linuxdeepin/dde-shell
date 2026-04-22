@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/shell">
         <file>SceneWindow.qml</file>
+        <file>fonts/ElmsSans-Regular.ttf</file>
     </qresource>
 </RCC>

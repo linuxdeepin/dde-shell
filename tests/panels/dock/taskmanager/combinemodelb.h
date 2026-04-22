@@ -39,6 +39,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
 
     void addData(DataB *data);
+    void insertData(int row, DataB *data);
     void removeData(DataB *data);
 
 

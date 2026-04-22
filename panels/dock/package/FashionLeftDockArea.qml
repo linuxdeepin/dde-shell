@@ -53,11 +53,13 @@ Control {
     readonly property int musicLeadingBias: Math.max(4, Math.round(dockSize * 0.12))
     readonly property int musicPageExtraLeadingWidth: root.foregroundContentOffset + root.musicLeadingBias
     readonly property int timeFontSize: Math.max(14, Math.round(pageContentHeight * 0.47))
-    readonly property int temperatureUnitFontSize: Math.max(9, timeFontSize - 2)
+    readonly property int temperatureUnitFontSize: timeFontSize - 2
     readonly property int headlineFontSize: Math.max(13, Math.round(pageContentHeight * 0.4))
     readonly property int metricFontSize: Math.max(13, Math.round(pageContentHeight * 0.4))
     readonly property int secondaryFontSize: Math.max(9, Math.round(pageContentHeight * 0.24))
     readonly property int captionFontSize: Math.max(9, Math.round(pageContentHeight * 0.2))
+    readonly property int weatherSecondaryFontSize: secondaryFontSize + 2
+    readonly property int monitorDetailFontSize: captionFontSize + 2
     readonly property int weatherTextSpacing: root.tightSpacing - 2
     readonly property bool musicPageVisible: provider.musicAvailable
     readonly property var pageIds: {
@@ -127,6 +129,7 @@ Control {
     readonly property color primaryTextColor: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.96) : Qt.rgba(0, 0, 0, 0.92)
     readonly property color secondaryTextColor: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.68) : Qt.rgba(0, 0, 0, 0.58)
     readonly property color musicControlForegroundColor: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 1) : Qt.rgba(0, 0, 0, 1)
+    readonly property string dataFontFamily: DS.dataFontFamily.length > 0 ? DS.dataFontFamily : D.DTK.fontManager.t6.family
     readonly property int taskbarWidth: Panel.rootObject && Panel.rootObject.adaptiveFashionLeftWidth !== undefined
         ? Panel.rootObject.adaptiveFashionLeftWidth
         : 160
@@ -148,6 +151,7 @@ Control {
         Text {
             id: systemMetricValueProbe
             text: "100%"
+            font.family: root.dataFontFamily
             font.pixelSize: root.metricFontSize
             font.weight: Font.DemiBold
             renderType: Text.NativeRendering
@@ -156,7 +160,8 @@ Control {
         Text {
             id: systemTrafficProbe
             text: "999.9mb/s ↓"
-            font.pixelSize: root.captionFontSize
+            font.family: root.dataFontFamily
+            font.pixelSize: root.monitorDetailFontSize
             renderType: Text.NativeRendering
         }
     }
@@ -920,6 +925,7 @@ Control {
                                 id: temperatureValueText
                                 text: root.weatherTemperatureValue(provider.weatherTemperatureText)
                                 color: root.primaryTextColor
+                                font.family: root.dataFontFamily
                                 font.pixelSize: root.timeFontSize
                                 font.weight: Font.DemiBold
                                 renderType: Text.NativeRendering
@@ -931,6 +937,7 @@ Control {
                                 anchors.baseline: temperatureValueText.baseline
                                 text: "°C"
                                 color: root.primaryTextColor
+                                font.family: root.dataFontFamily
                                 font.pixelSize: root.temperatureUnitFontSize
                                 font.weight: Font.DemiBold
                                 renderType: Text.NativeRendering
@@ -940,7 +947,7 @@ Control {
                         Text {
                             text: provider.weatherSummaryText
                             color: root.secondaryTextColor
-                            font.pixelSize: root.secondaryFontSize
+                            font.pixelSize: root.weatherSecondaryFontSize
                             renderType: Text.NativeRendering
                             Layout.fillWidth: true
                             elide: Text.ElideRight
@@ -1187,6 +1194,7 @@ Control {
                             Text {
                                 text: provider.mailUnreadCountText
                                 color: root.primaryTextColor
+                                font.family: root.dataFontFamily
                                 font.pixelSize: root.headlineFontSize
                                 font.weight: Font.DemiBold
                                 renderType: Text.NativeRendering
@@ -1253,6 +1261,7 @@ Control {
                                 width: systemMetricValueProbe.implicitWidth
                                 text: qsTr("%1%").arg(provider.cpuUsage)
                                 color: root.primaryTextColor
+                                font.family: root.dataFontFamily
                                 font.pixelSize: root.metricFontSize
                                 font.weight: Font.DemiBold
                                 renderType: Text.NativeRendering
@@ -1285,6 +1294,7 @@ Control {
                                 width: systemMetricValueProbe.implicitWidth
                                 text: qsTr("%1%").arg(provider.memoryUsage)
                                 color: root.primaryTextColor
+                                font.family: root.dataFontFamily
                                 font.pixelSize: root.metricFontSize
                                 font.weight: Font.DemiBold
                                 renderType: Text.NativeRendering
@@ -1321,7 +1331,8 @@ Control {
                             width: systemTrafficProbe.implicitWidth
                             text: qsTr("%1 ↓").arg(provider.downloadSpeedText)
                             color: root.secondaryTextColor
-                            font.pixelSize: root.captionFontSize
+                            font.family: root.dataFontFamily
+                            font.pixelSize: root.monitorDetailFontSize
                             renderType: Text.NativeRendering
                             horizontalAlignment: Text.AlignLeft
                             elide: Text.ElideRight
@@ -1339,7 +1350,8 @@ Control {
                             width: systemTrafficProbe.implicitWidth
                             text: qsTr("%1 ↑").arg(provider.uploadSpeedText)
                             color: root.secondaryTextColor
-                            font.pixelSize: root.captionFontSize
+                            font.family: root.dataFontFamily
+                            font.pixelSize: root.monitorDetailFontSize
                             renderType: Text.NativeRendering
                             horizontalAlignment: Text.AlignLeft
                             elide: Text.ElideRight

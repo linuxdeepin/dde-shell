@@ -40,28 +40,69 @@ constexpr auto kAppearancePath = "/org/deepin/dde/Appearance1";
 constexpr auto kAppearanceInterface = "org.deepin.dde.Appearance1";
 constexpr auto kPropertiesInterface = "org.freedesktop.DBus.Properties";
 
-ColorTheme colorThemeFromGlobalThemeName(const QString &themeName, const ColorTheme &fallbackTheme)
+Dtk::Gui::DGuiApplicationHelper::ColorType explicitThemeTypeFromName(const QString &themeName)
 {
-    if (themeName.endsWith(QStringLiteral(".dark"), Qt::CaseInsensitive))
-        return Dark;
+    const QString normalizedThemeName = themeName.trimmed().toLower();
+    if (normalizedThemeName.isEmpty())
+        return Dtk::Gui::DGuiApplicationHelper::UnknownType;
 
-    if (themeName.endsWith(QStringLiteral(".light"), Qt::CaseInsensitive))
-        return Light;
+    if (normalizedThemeName == QStringLiteral("dark")
+        || normalizedThemeName.endsWith(QStringLiteral(".dark"))
+        || normalizedThemeName.endsWith(QStringLiteral("-dark"))
+        || normalizedThemeName.endsWith(QStringLiteral("_dark"))) {
+        return Dtk::Gui::DGuiApplicationHelper::DarkType;
+    }
 
-    return fallbackTheme;
+    if (normalizedThemeName == QStringLiteral("light")
+        || normalizedThemeName.endsWith(QStringLiteral(".light"))
+        || normalizedThemeName.endsWith(QStringLiteral("-light"))
+        || normalizedThemeName.endsWith(QStringLiteral("_light"))) {
+        return Dtk::Gui::DGuiApplicationHelper::LightType;
+    }
+
+    return Dtk::Gui::DGuiApplicationHelper::UnknownType;
 }
 
-Dtk::Gui::DGuiApplicationHelper::ColorType helperThemeTypeFromGlobalThemeName(
-    const QString &themeName,
-    Dtk::Gui::DGuiApplicationHelper::ColorType fallbackTheme)
+Dtk::Gui::DGuiApplicationHelper::ColorType currentEffectiveThemeType(Dtk::Gui::DGuiApplicationHelper *helper)
 {
-    if (themeName.endsWith(QStringLiteral(".dark"), Qt::CaseInsensitive))
-        return Dtk::Gui::DGuiApplicationHelper::DarkType;
-
-    if (themeName.endsWith(QStringLiteral(".light"), Qt::CaseInsensitive))
+    if (!helper)
         return Dtk::Gui::DGuiApplicationHelper::LightType;
 
-    return fallbackTheme;
+    const auto currentThemeType = helper->themeType();
+    if (currentThemeType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return currentThemeType;
+
+    const auto currentPaletteType = helper->paletteType();
+    if (currentPaletteType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return currentPaletteType;
+
+    return Dtk::Gui::DGuiApplicationHelper::LightType;
+}
+
+Dtk::Gui::DGuiApplicationHelper::ColorType effectiveThemeTypeFromAppearance(
+    const QString &globalThemeName,
+    const QString &gtkThemeName,
+    const QString &iconThemeName,
+    Dtk::Gui::DGuiApplicationHelper *helper)
+{
+    const auto globalThemeType = explicitThemeTypeFromName(globalThemeName);
+    if (globalThemeType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return globalThemeType;
+
+    const auto gtkThemeType = explicitThemeTypeFromName(gtkThemeName);
+    if (gtkThemeType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return gtkThemeType;
+
+    const auto iconThemeType = explicitThemeTypeFromName(iconThemeName);
+    if (iconThemeType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return iconThemeType;
+
+    return currentEffectiveThemeType(helper);
+}
+
+ColorTheme colorThemeFromHelperThemeType(Dtk::Gui::DGuiApplicationHelper::ColorType themeType)
+{
+    return themeType == Dtk::Gui::DGuiApplicationHelper::DarkType ? Dark : Light;
 }
 
 QString readAppearanceStringProperty(const QString &propertyName)
@@ -87,7 +128,9 @@ void syncApplicationTheme(Dtk::Gui::DGuiApplicationHelper *helper,
     if (!helper)
         return;
 
-    const auto targetThemeType = helperThemeTypeFromGlobalThemeName(globalThemeName, helper->themeType());
+    const auto explicitThemeType = explicitThemeTypeFromName(globalThemeName);
+    const bool followSystemTheme = explicitThemeType == Dtk::Gui::DGuiApplicationHelper::UnknownType;
+    const auto targetPaletteType = followSystemTheme ? Dtk::Gui::DGuiApplicationHelper::UnknownType : explicitThemeType;
 
     if (auto *applicationTheme = helper->applicationTheme()) {
         const QByteArray gtkThemeNameBytes = gtkThemeName.toUtf8();
@@ -101,10 +144,11 @@ void syncApplicationTheme(Dtk::Gui::DGuiApplicationHelper *helper,
         }
     }
 
-    if (helper->paletteType() != targetThemeType) {
-        helper->setPaletteType(targetThemeType);
+    if (helper->paletteType() != targetPaletteType) {
+        helper->setPaletteType(targetPaletteType);
     }
 
+    const auto targetThemeType = effectiveThemeTypeFromAppearance(globalThemeName, gtkThemeName, iconThemeName, helper);
     const QPalette targetPalette = helper->applicationPalette(targetThemeType);
     if (helper->applicationPalette() != targetPalette) {
         helper->setApplicationPalette(targetPalette);
@@ -353,7 +397,6 @@ void DockPanel::onAppearanceRefreshed(const QString &type)
 void DockPanel::syncColorThemeWithSystem()
 {
     auto *guiHelper = Dtk::Gui::DGuiApplicationHelper::instance();
-    const auto fallbackTheme = static_cast<ColorTheme>(guiHelper->themeType());
     QDBusInterface appearanceProperties(kAppearanceService,
                                         kAppearancePath,
                                         kPropertiesInterface,
@@ -367,13 +410,14 @@ void DockPanel::syncColorThemeWithSystem()
             const QString gtkThemeName = readAppearanceStringProperty(QStringLiteral("GtkTheme"));
             const QString iconThemeName = readAppearanceStringProperty(QStringLiteral("IconTheme"));
             syncApplicationTheme(guiHelper, globalThemeName, gtkThemeName, iconThemeName);
-            setColorTheme(colorThemeFromGlobalThemeName(globalThemeName, fallbackTheme));
+            setColorTheme(colorThemeFromHelperThemeType(
+                effectiveThemeTypeFromAppearance(globalThemeName, gtkThemeName, iconThemeName, guiHelper)));
             return;
         }
     }
 
     syncApplicationTheme(guiHelper, QString(), QString(), QString());
-    setColorTheme(fallbackTheme);
+    setColorTheme(colorThemeFromHelperThemeType(currentEffectiveThemeType(guiHelper)));
 }
 
 uint DockPanel::dockSize()

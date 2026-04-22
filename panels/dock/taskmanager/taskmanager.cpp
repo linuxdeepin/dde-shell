@@ -122,6 +122,105 @@ static QModelIndex tryMatchByApplicationManager(const QStringList &identifies,
     return res;
 }
 
+static QStringList filteredIdentityCandidates(const QStringList &identifies, bool allowNumeric)
+{
+    QStringList filtered;
+    for (const QString &identity : identifies) {
+        if (identity.isEmpty() || filtered.contains(identity)) {
+            continue;
+        }
+
+        bool isNumeric = false;
+        identity.toLongLong(&isNumeric);
+        if (!allowNumeric && isNumeric) {
+            continue;
+        }
+
+        filtered.append(identity);
+    }
+
+    return filtered;
+}
+
+static QModelIndex matchLauncherAppByRoles(const QStringList &identifies,
+                                           QAbstractItemModel *model,
+                                           const QHash<int, QByteArray> &roleNames,
+                                           const QList<QByteArray> &roleOrder)
+{
+    if (!model || identifies.isEmpty()) {
+        return {};
+    }
+
+    const QModelIndex startIndex = model->index(0, 0);
+    for (const QByteArray &roleName : roleOrder) {
+        const int role = roleNames.key(roleName, -1);
+        if (role < 0) {
+            continue;
+        }
+
+        for (const QString &identity : identifies) {
+            const QModelIndex result = model->match(startIndex,
+                                                    role,
+                                                    identity,
+                                                    1,
+                                                    Qt::MatchFixedString | Qt::MatchWrap).value(0);
+            if (result.isValid()) {
+                qCDebug(taskManagerLog) << "matched by role:" << roleName << identity << result;
+                return result;
+            }
+        }
+    }
+
+    return {};
+}
+
+static QModelIndex matchLauncherApplication(const QStringList &identifies,
+                                            QAbstractItemModel *model,
+                                            const QHash<int, QByteArray> &roleNames)
+{
+    const QStringList exactCandidates = filteredIdentityCandidates(identifies, true);
+    const QModelIndex exactResult = matchLauncherAppByRoles(exactCandidates,
+                                                            model,
+                                                            roleNames,
+                                                            {MODEL_DESKTOPID, MODEL_STARTUPWMCLASS});
+    if (exactResult.isValid()) {
+        return exactResult;
+    }
+
+    const QModelIndex amMatchResult = tryMatchByApplicationManager(identifies, model, roleNames);
+    if (amMatchResult.isValid()) {
+        return amMatchResult;
+    }
+
+    const QStringList textCandidates = filteredIdentityCandidates(identifies, false);
+    const QModelIndex fallbackResult = matchLauncherAppByRoles(textCandidates,
+                                                               model,
+                                                               roleNames,
+                                                               {MODEL_NAME, MODEL_ICONNAME});
+    if (fallbackResult.isValid()) {
+        return fallbackResult;
+    }
+
+    const int desktopIdRole = roleNames.key(MODEL_DESKTOPID, -1);
+    if (desktopIdRole < 0) {
+        return {};
+    }
+
+    const QString fallbackIdentity = !textCandidates.isEmpty() ? textCandidates.constFirst()
+                                                               : exactCandidates.value(0);
+    if (fallbackIdentity.isEmpty()) {
+        return {};
+    }
+
+    const QModelIndex result = model->match(model->index(0, 0),
+                                            desktopIdRole,
+                                            fallbackIdentity,
+                                            1,
+                                            Qt::MatchEndsWith).value(0);
+    qCDebug(taskManagerLog) << "matched by desktopId suffix:" << fallbackIdentity << result;
+    return result;
+}
+
 static QPair<QString, QString> splitDockElement(const QString &dockElement)
 {
     const int separatorIndex = dockElement.indexOf(QLatin1Char('/'));
@@ -690,33 +789,7 @@ bool TaskManager::init()
             }
         }
         m_activeAppModel = new DockCombineModel(leftModel, model, TaskManager::IdentityRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
-            auto roleNames = model->roleNames();
-            QList<QByteArray> identifiedOrders = {MODEL_DESKTOPID, MODEL_STARTUPWMCLASS, MODEL_NAME, MODEL_ICONNAME};
-
-            auto identifies = data.toStringList();
-            for (auto id : identifies) {
-                if (id.isEmpty()) {
-                    continue;
-                }
-
-                for (auto identifiedOrder : identifiedOrders) {
-                    auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
-                    if (res.isValid()) {
-                        qCDebug(taskManagerLog) << "matched" << res;
-                        return res;
-                    }
-                }
-            }
-
-            // 尝试通过AM(Application Manager)匹配应用程序
-            auto amMatchResult = tryMatchByApplicationManager(identifies, model, roleNames);
-            if (amMatchResult.isValid()) {
-                return amMatchResult;
-            }
-
-            auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), identifies.value(0), 1, Qt::MatchEndsWith);
-            qCDebug(taskManagerLog) << "matched" << res.value(0);
-            return res.value(0);
+            return matchLauncherApplication(data.toStringList(), model, model->roleNames());
         });
 
         m_dockGlobalElementModel = new DockGlobalElementModel(model, m_activeAppModel, groupModel, this);

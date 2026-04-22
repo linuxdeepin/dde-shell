@@ -11,15 +11,69 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
 {
     setSourceModel(major);
     m_minor = minor;
+    auto resolveMinorIndex = [this, majorRoles, func](int row, int column) -> QPair<int, int> {
+        if (!sourceModel()) {
+            return qMakePair(-1, -1);
+        }
+
+        const QModelIndex majorIndex = sourceModel()->index(row, column);
+        if (!majorIndex.isValid()) {
+            return qMakePair(-1, -1);
+        }
+
+        const QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
+        if (!minorIndex.isValid()) {
+            return qMakePair(-1, -1);
+        }
+
+        return qMakePair(minorIndex.row(), minorIndex.column());
+    };
+
+    auto rebuildAllMappings = [this, resolveMinorIndex]() {
+        QMap<QPair<int, int>, QPair<int, int>> newIndexMap;
+        if (!sourceModel()) {
+            m_indexMap = newIndexMap;
+            return;
+        }
+
+        const int rowCount = sourceModel()->rowCount();
+        const int columnCount = sourceModel()->columnCount();
+        for (int i = 0; i < rowCount; ++i) {
+            for (int j = 0; j < columnCount; ++j) {
+                const QPair<int, int> minorPos = resolveMinorIndex(i, j);
+                if (minorPos.first != -1 && minorPos.second != -1) {
+                    newIndexMap.insert(qMakePair(i, j), minorPos);
+                }
+            }
+        }
+
+        m_indexMap = newIndexMap;
+    };
+
+    auto emitMinorDataChangedForAllRows = [this]() {
+        if (!sourceModel() || m_minorRolesMap.isEmpty()) {
+            return;
+        }
+
+        const int rowCount = sourceModel()->rowCount();
+        const int columnCount = sourceModel()->columnCount();
+        if (rowCount <= 0 || columnCount <= 0) {
+            return;
+        }
+
+        Q_EMIT dataChanged(index(0, 0),
+                           index(rowCount - 1, columnCount - 1),
+                           m_minorRolesMap.keys());
+    };
+
     // create minor row & column map
     int rowCount = major->rowCount();
     int columnCount = major->columnCount();
     for (int i = 0; i < rowCount; i++) {
         for (int j = 0; j < columnCount; j++) {
-            QModelIndex majorIndex = major->index(i, j);
-            QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
-            if (majorIndex.isValid() && minorIndex.isValid())
-                m_indexMap[qMakePair(i, j)] = qMakePair(minorIndex.row(), minorIndex.column());
+            const QPair<int, int> minorPos = resolveMinorIndex(i, j);
+            if (minorPos.first != -1 && minorPos.second != -1)
+                m_indexMap[qMakePair(i, j)] = minorPos;
         }
     }
 
@@ -173,7 +227,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
 
             Q_EMIT dataChanged(index(topLeft.row(), topLeft.column()),
                 index(bottomRight.row(), bottomRight.column()),
-                roles + (roles.contains(majorRoles) ? m_minorRolesMap.values() : QList<int>())
+                roles + (roles.contains(majorRoles) ? m_minorRolesMap.keys() : QList<int>())
             );
     });
 
@@ -181,24 +235,36 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     connect(m_minor, &QAbstractItemModel::dataChanged, this,
         [this, majorRoles, func](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles){
             Q_UNUSED(roles)
-            for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
-                for (int j =  topLeft.column(); j <= bottomRight.column(); j++) {
-                    auto majorPos = m_indexMap.key(qMakePair(i, j), qMakePair(-1, -1));
-                    if (-1 == majorPos.first && -1 == majorPos.second)
-                        continue;
-
-                    auto majorIndex = sourceModel()->index(majorPos.first, majorPos.second);
-                    if (!majorIndex.isValid())
-                        continue;
-
-                    auto minorIndex = func(majorIndex.data(majorRoles), m_minor);
-                    if (!minorIndex.isValid())
-                        continue;
-
-                    m_indexMap[majorPos] = qMakePair(minorIndex.row(), minorIndex.column());
-                    Q_EMIT dataChanged(majorIndex, majorIndex, m_minorRolesMap.values());
+            QList<QPair<int, int>> affectedMajorPositions;
+            for (auto it = m_indexMap.constBegin(); it != m_indexMap.constEnd(); ++it) {
+                const auto &minorPos = it.value();
+                if (minorPos.first < topLeft.row() || minorPos.first > bottomRight.row()
+                    || minorPos.second < topLeft.column() || minorPos.second > bottomRight.column()) {
+                    continue;
                 }
+
+                affectedMajorPositions.append(it.key());
             }
+
+            for (const auto &majorPos : affectedMajorPositions) {
+                auto majorIndex = sourceModel()->index(majorPos.first, majorPos.second);
+                if (!majorIndex.isValid())
+                    continue;
+
+                auto minorIndex = func(majorIndex.data(majorRoles), m_minor);
+                if (minorIndex.isValid()) {
+                    m_indexMap[majorPos] = qMakePair(minorIndex.row(), minorIndex.column());
+                } else {
+                    m_indexMap.remove(majorPos);
+                }
+
+                Q_EMIT dataChanged(majorIndex, majorIndex, m_minorRolesMap.keys());
+            }
+    });
+
+    connect(m_minor, &QAbstractItemModel::modelReset, this, [rebuildAllMappings, emitMinorDataChangedForAllRows]() {
+        rebuildAllMappings();
+        emitMinorDataChangedForAllRows();
     });
 
     // 添加对minor模型删除操作的处理
@@ -243,7 +309,7 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
 
         // 对受影响的major索引发送数据变化信号
         for (const auto &majorIndex : affectedMajorIndexes) {
-            Q_EMIT dataChanged(majorIndex, majorIndex, m_minorRolesMap.values());
+            Q_EMIT dataChanged(majorIndex, majorIndex, m_minorRolesMap.keys());
         }
     });
 
@@ -262,24 +328,31 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     });
 
     connect(m_minor, &QAbstractItemModel::rowsInserted, this,
-        [this, majorRoles, func](const QModelIndex &parent, int first, int last){
+        [this, resolveMinorIndex, emitMinorDataChangedForAllRows](const QModelIndex &parent, int firstRow, int lastRow){
             Q_UNUSED(parent)
-            Q_UNUSED(first)
-            Q_UNUSED(last)
-        auto rowCount = sourceModel()->rowCount();
-        auto columnCount = sourceModel()->columnCount();
-        for (int i = 0; i < rowCount; i++) {
-            for (int j = 0; j < columnCount; j++) {
-                // already bind, pass this
-                if (m_indexMap.contains(qMakePair(i ,j)))
-                    continue;
-
-                QModelIndex majorIndex = sourceModel()->index(i, j);
-                QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
-                if (majorIndex.isValid() && minorIndex.isValid())
-                    m_indexMap[qMakePair(i, j)] = qMakePair(minorIndex.row(), minorIndex.column());
+            const int offset = lastRow - firstRow + 1;
+            for (auto it = m_indexMap.begin(); it != m_indexMap.end(); ++it) {
+                if (it.value().first >= firstRow) {
+                    it.value().first += offset;
+                }
             }
-        }
+
+            auto rowCount = sourceModel()->rowCount();
+            auto columnCount = sourceModel()->columnCount();
+            for (int i = 0; i < rowCount; i++) {
+                for (int j = 0; j < columnCount; j++) {
+                    const auto key = qMakePair(i, j);
+                    if (m_indexMap.contains(key))
+                        continue;
+
+                    const auto minorPos = resolveMinorIndex(i, j);
+                    if (minorPos.first != -1 && minorPos.second != -1) {
+                        m_indexMap[key] = minorPos;
+                    }
+                }
+            }
+
+            emitMinorDataChangedForAllRows();
     });
 
     // TODO: support columsInserted

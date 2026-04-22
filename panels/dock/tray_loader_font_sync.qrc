@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/tray_loader_font_sync">
+        <file alias="fonts/ElmsSans-Regular.ttf">../../shell/fonts/ElmsSans-Regular.ttf</file>
+    </qresource>
+</RCC>

@@ -59,6 +59,25 @@ add_library(dockpanel SHARED
     ${dock_panel_sources}
 )
 
+add_dependencies(dockpanel tray_loader_font_sync)
+
+add_library(tray_loader_font_sync SHARED
+    tray_loader_font_sync.cpp
+    tray_loader_font_sync.qrc
+)
+
+set_target_properties(tray_loader_font_sync PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+)
+
+target_link_libraries(tray_loader_font_sync PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+)
+
+install(TARGETS tray_loader_font_sync DESTINATION "${CMAKE_INSTALL_LIBDIR}/dde-shell")
+
 qt_generate_wayland_protocol_client_sources(dockpanel
     NO_INCLUDE_CORE_ONLY
     FILES

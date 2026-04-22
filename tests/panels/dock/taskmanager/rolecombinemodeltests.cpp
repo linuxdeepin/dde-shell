@@ -259,6 +259,41 @@ TEST(RoleCombineModel, MinorModelChangesHandlingBug)
     });
 }
 
+TEST(RoleCombineModel, MinorRowInsertBeforeMappedRowKeepsCorrectMapping)
+{
+    TestModelA modelA;
+    TestModelB modelB;
+
+    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        auto matches = model->match(model->index(0, 0), TestModelB::idRole, data);
+        return matches.isEmpty() ? QModelIndex() : matches.first();
+    });
+
+    modelA.addData(new DataA(1, "dataA1", &modelA));
+    modelA.addData(new DataA(2, "dataA2", &modelA));
+
+    modelB.addData(new DataB(1, "dataB1", &modelB));
+    modelB.addData(new DataB(2, "dataB2", &modelB));
+
+    auto combinedRoleNames = model.roleNames();
+    int minorDataRole = -1;
+    for (auto it = combinedRoleNames.constBegin(); it != combinedRoleNames.constEnd(); ++it) {
+        if (it.value() == "bData") {
+            minorDataRole = it.key();
+            break;
+        }
+    }
+
+    ASSERT_NE(minorDataRole, -1);
+    EXPECT_EQ(model.index(0, 0).data(minorDataRole).toString(), "dataB1");
+    EXPECT_EQ(model.index(1, 0).data(minorDataRole).toString(), "dataB2");
+
+    modelB.insertData(0, new DataB(0, "dataB0", &modelB));
+
+    EXPECT_EQ(model.index(0, 0).data(minorDataRole).toString(), "dataB1");
+    EXPECT_EQ(model.index(1, 0).data(minorDataRole).toString(), "dataB2");
+}
+
 // 新增测试用例：验证角色映射修复
 TEST(RoleCombineModel, RoleMappingFix)
 {

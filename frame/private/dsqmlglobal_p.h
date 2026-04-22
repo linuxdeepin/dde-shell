@@ -24,6 +24,7 @@ class DQmlGlobal : public QObject, public DTK_CORE_NAMESPACE::DObject
     Q_OBJECT
     D_DECLARE_PRIVATE(DQmlGlobal)
     Q_PROPERTY(DApplet* rootApplet READ rootApplet NOTIFY rootAppletChanged FINAL)
+    Q_PROPERTY(QString dataFontFamily READ dataFontFamily CONSTANT FINAL)
 public:
     explicit DQmlGlobal(QObject *parent = nullptr);
     ~DQmlGlobal() override;
@@ -36,6 +37,7 @@ public:
     Q_INVOKABLE void singleShot(int msec, QJSValue callback);
 
     DApplet *rootApplet() const;
+    QString dataFontFamily() const;
 
     static DQmlGlobal *instance();
     static QList<QWindow *> allChildrenWindows(QWindow *target);

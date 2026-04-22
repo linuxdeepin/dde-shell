@@ -76,17 +76,91 @@ static QString readAppearanceStringProperty(const QString &propertyName)
     return reply.isValid() ? reply.value().variant().toString() : QString();
 }
 
-static DGuiApplicationHelper::ColorType themeTypeFromGlobalThemeName(const QString &themeName,
-                                                                     DGuiApplicationHelper::ColorType fallbackTheme)
+static double readAppearanceDoubleProperty(const QString &propertyName)
 {
-    if (themeName.endsWith(QStringLiteral(".dark"), Qt::CaseInsensitive)) {
+    static constexpr auto kAppearanceService = "org.deepin.dde.Appearance1";
+    static constexpr auto kAppearancePath = "/org/deepin/dde/Appearance1";
+    static constexpr auto kAppearanceInterface = "org.deepin.dde.Appearance1";
+    static constexpr auto kPropertiesInterface = "org.freedesktop.DBus.Properties";
+
+    QDBusInterface appearanceProperties(QString::fromLatin1(kAppearanceService),
+                                        QString::fromLatin1(kAppearancePath),
+                                        QString::fromLatin1(kPropertiesInterface),
+                                        QDBusConnection::sessionBus());
+    if (!appearanceProperties.isValid()) {
+        return 0.0;
+    }
+
+    const QDBusReply<QDBusVariant> reply = appearanceProperties.call(QStringLiteral("Get"),
+                                                                     QString::fromLatin1(kAppearanceInterface),
+                                                                     propertyName);
+    return reply.isValid() ? reply.value().variant().toDouble() : 0.0;
+}
+
+static DGuiApplicationHelper::ColorType explicitThemeTypeFromName(const QString &themeName)
+{
+    const QString normalizedThemeName = themeName.trimmed().toLower();
+    if (normalizedThemeName.isEmpty()) {
+        return DGuiApplicationHelper::UnknownType;
+    }
+
+    if (normalizedThemeName == QStringLiteral("dark")
+        || normalizedThemeName.endsWith(QStringLiteral(".dark"))
+        || normalizedThemeName.endsWith(QStringLiteral("-dark"))
+        || normalizedThemeName.endsWith(QStringLiteral("_dark"))) {
         return DGuiApplicationHelper::DarkType;
     }
-    if (themeName.endsWith(QStringLiteral(".light"), Qt::CaseInsensitive)) {
+
+    if (normalizedThemeName == QStringLiteral("light")
+        || normalizedThemeName.endsWith(QStringLiteral(".light"))
+        || normalizedThemeName.endsWith(QStringLiteral("-light"))
+        || normalizedThemeName.endsWith(QStringLiteral("_light"))) {
         return DGuiApplicationHelper::LightType;
     }
 
-    return fallbackTheme;
+    return DGuiApplicationHelper::UnknownType;
+}
+
+static DGuiApplicationHelper::ColorType currentEffectiveThemeType(DGuiApplicationHelper *guiHelper)
+{
+    if (!guiHelper) {
+        return DGuiApplicationHelper::LightType;
+    }
+
+    const auto currentThemeType = guiHelper->themeType();
+    if (currentThemeType != DGuiApplicationHelper::UnknownType) {
+        return currentThemeType;
+    }
+
+    const auto currentPaletteType = guiHelper->paletteType();
+    if (currentPaletteType != DGuiApplicationHelper::UnknownType) {
+        return currentPaletteType;
+    }
+
+    return DGuiApplicationHelper::LightType;
+}
+
+static DGuiApplicationHelper::ColorType effectiveThemeTypeFromAppearance(const QString &globalThemeName,
+                                                                         const QString &gtkThemeName,
+                                                                         const QString &iconThemeName,
+                                                                         DGuiApplicationHelper *guiHelper)
+{
+    const auto globalThemeType = explicitThemeTypeFromName(globalThemeName);
+    if (globalThemeType != DGuiApplicationHelper::UnknownType) {
+        return globalThemeType;
+    }
+
+    const auto gtkThemeType = explicitThemeTypeFromName(gtkThemeName);
+    if (gtkThemeType != DGuiApplicationHelper::UnknownType) {
+        return gtkThemeType;
+    }
+
+    const auto iconThemeType = explicitThemeTypeFromName(iconThemeName);
+    if (iconThemeType != DGuiApplicationHelper::UnknownType) {
+        return iconThemeType;
+    }
+
+    return currentEffectiveThemeType(guiHelper);
 }
 
 static void syncApplicationThemeFromAppearance()
@@ -99,7 +173,11 @@ static void syncApplicationThemeFromAppearance()
     const QString globalThemeName = readAppearanceStringProperty(QStringLiteral("GlobalTheme"));
     const QString gtkThemeName = readAppearanceStringProperty(QStringLiteral("GtkTheme"));
     const QString iconThemeName = readAppearanceStringProperty(QStringLiteral("IconTheme"));
-    const auto targetThemeType = themeTypeFromGlobalThemeName(globalThemeName, guiHelper->themeType());
+    const QString standardFontName = readAppearanceStringProperty(QStringLiteral("StandardFont"));
+    const double fontSize = readAppearanceDoubleProperty(QStringLiteral("FontSize"));
+    const auto explicitThemeType = explicitThemeTypeFromName(globalThemeName);
+    const bool followSystemTheme = explicitThemeType == DGuiApplicationHelper::UnknownType;
+    const auto targetPaletteType = followSystemTheme ? DGuiApplicationHelper::UnknownType : explicitThemeType;
 
     if (auto *applicationTheme = guiHelper->applicationTheme()) {
         const QByteArray gtkThemeNameBytes = gtkThemeName.toUtf8();
@@ -111,12 +189,22 @@ static void syncApplicationThemeFromAppearance()
         if (!iconThemeNameBytes.isEmpty() && applicationTheme->iconThemeName() != iconThemeNameBytes) {
             applicationTheme->setIconThemeName(iconThemeNameBytes);
         }
+
+        const QByteArray standardFontNameBytes = standardFontName.toUtf8();
+        if (!standardFontNameBytes.isEmpty() && applicationTheme->fontName() != standardFontNameBytes) {
+            applicationTheme->setFontName(standardFontNameBytes);
+        }
+
+        if (fontSize > 0.0 && !qFuzzyCompare(applicationTheme->fontPointSize() + 1.0, fontSize + 1.0)) {
+            applicationTheme->setFontPointSize(fontSize);
+        }
     }
 
-    if (guiHelper->paletteType() != targetThemeType) {
-        guiHelper->setPaletteType(targetThemeType);
+    if (guiHelper->paletteType() != targetPaletteType) {
+        guiHelper->setPaletteType(targetPaletteType);
     }
 
+    const auto targetThemeType = effectiveThemeTypeFromAppearance(globalThemeName, gtkThemeName, iconThemeName, guiHelper);
     const QPalette targetPalette = guiHelper->applicationPalette(targetThemeType);
     if (guiHelper->applicationPalette() != targetPalette) {
         guiHelper->setApplicationPalette(targetPalette);
@@ -124,6 +212,25 @@ static void syncApplicationThemeFromAppearance()
 
     if (!iconThemeName.isEmpty() && QIcon::themeName() != iconThemeName) {
         QIcon::setThemeName(iconThemeName);
+    }
+
+    if (qApp) {
+        QFont appFont = qApp->font();
+        bool fontChanged = false;
+
+        if (!standardFontName.isEmpty() && appFont.family() != standardFontName) {
+            appFont.setFamily(standardFontName);
+            fontChanged = true;
+        }
+
+        if (fontSize > 0.0 && !qFuzzyCompare(appFont.pointSizeF() + 1.0, fontSize + 1.0)) {
+            appFont.setPointSizeF(fontSize);
+            fontChanged = true;
+        }
+
+        if (fontChanged) {
+            qApp->setFont(appFont);
+        }
     }
 }
 
@@ -151,6 +258,10 @@ public:
         if (auto *platformTheme = helper->applicationTheme()) {
             QObject::connect(platformTheme, &DPlatformTheme::themeNameChanged,
                              this, &NativeMenuThemeSync::syncAllMenus);
+            QObject::connect(platformTheme, &DPlatformTheme::fontNameChanged,
+                             this, &NativeMenuThemeSync::syncAllMenus);
+            QObject::connect(platformTheme, &DPlatformTheme::fontPointSizeChanged,
+                             this, &NativeMenuThemeSync::syncAllMenus);
         }
     }
 
@@ -176,6 +287,8 @@ protected:
         case QEvent::Polish:
         case QEvent::PolishRequest:
         case QEvent::PaletteChange:
+        case QEvent::ApplicationFontChange:
+        case QEvent::FontChange:
         case QEvent::Show:
             syncMenu(menu);
             break;
@@ -199,6 +312,9 @@ private:
             paletteType = helper->themeType();
         }
 
+        if (qApp && menu->font() != qApp->font()) {
+            menu->setFont(qApp->font());
+        }
         menu->setPalette(helper->applicationPalette(paletteType));
         menu->ensurePolished();
         if (auto *style = menu->style()) {
@@ -287,20 +403,19 @@ private Q_SLOTS:
             return;
         }
 
-        if (globalThemeName == m_lastGlobalThemeName
-            && gtkThemeName == m_lastGtkThemeName
-            && iconThemeName == m_lastIconThemeName
-            && activeColor == m_lastActiveColor) {
-            return;
-        }
-
-        m_lastGlobalThemeName = globalThemeName;
-        m_lastGtkThemeName = gtkThemeName;
-        m_lastIconThemeName = iconThemeName;
-        m_lastActiveColor = activeColor;
         syncApplicationThemeFromAppearance();
-        if (m_menuThemeSync) {
-            m_menuThemeSync->syncAllMenus();
+
+        if (globalThemeName != m_lastGlobalThemeName
+            || gtkThemeName != m_lastGtkThemeName
+            || iconThemeName != m_lastIconThemeName
+            || activeColor != m_lastActiveColor) {
+            m_lastGlobalThemeName = globalThemeName;
+            m_lastGtkThemeName = gtkThemeName;
+            m_lastIconThemeName = iconThemeName;
+            m_lastActiveColor = activeColor;
+            if (m_menuThemeSync) {
+                m_menuThemeSync->syncAllMenus();
+            }
         }
     }
 
