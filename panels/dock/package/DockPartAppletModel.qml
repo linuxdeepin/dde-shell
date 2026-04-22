@@ -5,6 +5,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import org.deepin.ds 1.0
+import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0 as D
 
 D.SortFilterModel {
@@ -45,8 +46,36 @@ D.SortFilterModel {
 
         property var appletItem: model.data
         property var attachedAppletItem: null
+        readonly property string pluginId: appletItem && appletItem.applet ? appletItem.applet.pluginId : ""
+        readonly property bool useUnifiedDockHoverBackground: [
+            "org.deepin.ds.dock.launcherapplet",
+            "org.deepin.ds.dock.aibar",
+            "org.deepin.ds.dock.searchitem",
+            "org.deepin.ds.dock.multitaskview"
+        ].indexOf(pluginId) >= 0
+        readonly property int unifiedHoverBackgroundSize: Math.round((Panel.rootObject ? Panel.rootObject.dockItemMaxSize * 9 / 14 : 0) + 8)
 
         contentItem: appletItem
+        background: AppletItemBackground {
+            anchors.centerIn: parent
+            width: delegateRoot.unifiedHoverBackgroundSize
+            height: delegateRoot.unifiedHoverBackgroundSize
+            radius: height / 5
+            enabled: false
+            visible: delegateRoot.useUnifiedDockHoverBackground
+            opacity: delegateHoverHandler.hovered ? 1 : 0
+            D.ColorSelector.hovered: delegateHoverHandler.hovered
+
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
+        }
+
+        HoverHandler {
+            id: delegateHoverHandler
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
+            enabled: delegateRoot.useUnifiedDockHoverBackground && delegateRoot.visible
+        }
 
         function syncAppletItem() {
             if (attachedAppletItem && attachedAppletItem !== appletItem && attachedAppletItem.parent === delegateRoot) {

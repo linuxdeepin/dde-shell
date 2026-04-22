@@ -6,11 +6,11 @@ pragma ComponentBehavior: Bound
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import Qt.labs.platform 1.1 as LP
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0 as D
-import Qt.labs.platform 1.1 as LP
 
 Item {
     id: root
@@ -50,8 +50,10 @@ Item {
     }
     
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
+    property bool compactFashionIndicator: root.displayMode === Dock.Fashion && Panel.position === Dock.Bottom
     property int statusIndicatorSize: useColumnLayout ? root.width * 0.72 : root.height * 0.72
     property int iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
+    property int popupIconSize: Math.max(1, Math.round(iconSize * 0.92))
     property bool enableTitle: false
     property bool titleActive: enableTitle && titleLoader.active
     property int appTitleSpacing: 0
@@ -111,11 +113,14 @@ Item {
         background: AppletItemBackground {
             id: hoverBackground
 
-            readonly property int verticalSpacing: Math.round(root.iconSize / 8) + 1
-            readonly property int horizontalSpacing: Math.round(root.iconSize / 8)
+            readonly property int hoverInset: 4
+            readonly property int verticalSpacing: hoverInset
+            readonly property int horizontalSpacing: hoverInset
             readonly property int nonSplitHeight: root.iconSize + verticalSpacing * 2
-            readonly property int hoverPadding: Math.round((Panel.rootObject.dockItemMaxSize * 0.8 - root.iconSize) / 2)
-            readonly property int splitWidth: Math.round(icon.width + titleLoader.width + hoverPadding * 2)
+            readonly property int splitWidth: Math.round(icon.width
+                                                         + titleLoader.anchors.leftMargin
+                                                         + titleLoader.width
+                                                         + horizontalSpacing * 2)
             readonly property int nonSplitWidth: Math.round(root.iconSize + horizontalSpacing * 2)
 
             enabled: false
@@ -126,6 +131,7 @@ Item {
             anchors.centerIn: parent
             isActive: root.itemActive
             opacity: (hoverHandler.hovered || (root.itemActive && root.windows.length > 0)) ? 1.0 : 0.0
+            D.ColorSelector.hovered: hoverHandler.hovered
             Behavior on opacity {
                 NumberAnimation { duration: 150 }
             }
@@ -265,11 +271,11 @@ Item {
 
             PinnedItemIcon {
                 anchors.centerIn: parent
-                width: root.iconSize
-                height: root.iconSize
+                width: root.popupIconSize
+                height: root.popupIconSize
                 iconName: root.iconName
                 previewIcons: root.previewIcons
-                iconSize: root.iconSize
+                iconSize: root.popupIconSize
                 colorTheme: root.colorTheme
                 visible: root.popupItem
             }
@@ -277,11 +283,14 @@ Item {
 
         WindowIndicator {
             id: windowIndicator
-            dotWidth: root.useColumnLayout  ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2)
-            dotHeight: root.useColumnLayout ? Math.max(iconSize / 3, 2) : Math.max(iconSize / 16, 2)
+            dotWidth: root.compactFashionIndicator ? 4 : (root.useColumnLayout ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2))
+            dotHeight: root.compactFashionIndicator ? 3 : (root.useColumnLayout ? Math.max(iconSize / 3, 2) : Math.max(iconSize / 16, 2))
+            multiDotWidth: root.compactFashionIndicator ? 3 : (root.useColumnLayout ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2))
+            multiDotHeight: root.compactFashionIndicator ? 3 : (root.useColumnLayout ? Math.max(iconSize / 3, 2) : Math.max(iconSize / 16, 2))
             windows: root.windows
             displayMode: root.displayMode
             useColumnLayout: root.useColumnLayout
+            compactFashionIndicator: root.compactFashionIndicator
             palette: itemPalette
             visible: (root.displayMode === Dock.Efficient && root.windows.length > 1) || (root.displayMode === Dock.Fashion && root.windows.length > 0)
 
@@ -306,7 +315,7 @@ Item {
                 }
                 case Dock.Bottom: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.bottom = hoverBackground.bottom
+                    windowIndicator.anchors.bottom = root.compactFashionIndicator ? appItem.bottom : hoverBackground.bottom
                     windowIndicator.anchors.bottomMargin = 1
                     return
                 }
@@ -327,6 +336,13 @@ Item {
 
             Component.onCompleted: {
                 windowIndicator.updateIndicatorAnchors()
+            }
+
+            Connections {
+                target: root
+                function onCompactFashionIndicatorChanged() {
+                    windowIndicator.updateIndicatorAnchors()
+                }
             }
         }
 
@@ -451,6 +467,75 @@ Item {
                     return []
                 }
             }
+            property var popupSortInfo: ({})
+            readonly property bool preferChineseText: {
+                const localeName = String(Qt.locale().name || "").toLowerCase()
+                const uiLanguage = String(Qt.uiLanguage || "").toLowerCase()
+                return localeName.indexOf("zh") === 0 || uiLanguage.indexOf("zh") === 0
+            }
+
+            function localizedMenuText(text) {
+                const sourceText = String(text || "")
+                if (!preferChineseText || !sourceText.length) {
+                    return sourceText
+                }
+
+                const textMap = {
+                    "Open": "打开",
+                    "Undock": "移除驻留",
+                    "Dock": "驻留",
+                    "Force Quit": "强制退出",
+                    "Close All": "关闭所有",
+                    "Close this window": "关闭当前窗口",
+                    "Open in File Manager": "在文件管理器中打开",
+                    "Move to Trash": "移动到回收站",
+                    "Sort": "排序方式",
+                    "Ascending": "升序",
+                    "Descending": "降序",
+                    "Name": "名称",
+                    "Modified Time": "修改时间",
+                    "Created Time": "创建时间",
+                    "Size": "大小",
+                    "Type": "类型",
+                    "Sort by Name": "按名称排序",
+                    "Sort by Modified Time": "按修改时间排序",
+                    "Sort by Created Time": "按创建时间排序",
+                    "Sort by Size": "按大小排序",
+                    "Sort by Type": "按类型排序"
+                }
+
+                return textMap[sourceText] !== undefined ? textMap[sourceText] : sourceText
+            }
+
+            function refreshPopupSortInfo() {
+                popupSortInfo = root.popupItem ? TaskManager.popupSortState(root.dockElement) : ({})
+            }
+
+            function isCurrentPopupSort(fieldName) {
+                return popupSortInfo && popupSortInfo.sortField === fieldName
+            }
+
+            function popupSortText(baseText, fieldName) {
+                if (!isCurrentPopupSort(fieldName)) {
+                    return localizedMenuText(baseText)
+                }
+
+                const localizedBaseText = localizedMenuText(baseText)
+                return localizedBaseText + (popupSortInfo.sortDescending ?
+                                                " (" + localizedMenuText(qsTr("Descending")) + ")" :
+                                                " (" + localizedMenuText(qsTr("Ascending")) + ")")
+            }
+
+            function applyPopupSort(fieldName) {
+                TaskManager.cyclePopupSort(root.dockElement, fieldName)
+                refreshPopupSortInfo()
+                if (pinnedPopup.popupVisible) {
+                    pinnedPopupContent.refresh(pinnedPopupContent.currentLocation(), false)
+                }
+            }
+
+            Component.onCompleted: refreshPopupSortInfo()
+            onAboutToShow: refreshPopupSortInfo()
             Instantiator {
                 id: menuItemInstantiator
                 model: contextMenu.menuItems
@@ -460,7 +545,7 @@ Item {
                     readonly property string menuId: modelData && modelData.id !== undefined ? String(modelData.id) : ""
                     readonly property string menuText: modelData && modelData.name !== undefined ? String(modelData.name) : ""
 
-                    text: menuText
+                    text: contextMenu.localizedMenuText(menuText)
                     enabled: (root.itemId === "dde-trash" && menuId === "clean-trash")
                             ? !contextMenuLoader.trashEmpty
                             : true
@@ -470,6 +555,46 @@ Item {
                 }
                 onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
                 onObjectRemoved: (index, object) => contextMenu.removeItem(object)
+            }
+            Instantiator {
+                id: popupSortMenuInstantiator
+                model: root.popupItem ? 1 : 0
+                delegate: LP.Menu {
+                    title: contextMenu.localizedMenuText(qsTr("Sort"))
+
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Name"), "name")
+                        checked: contextMenu.isCurrentPopupSort("name")
+                        onTriggered: contextMenu.applyPopupSort("name")
+                    }
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Modified Time"), "modified")
+                        checked: contextMenu.isCurrentPopupSort("modified")
+                        onTriggered: contextMenu.applyPopupSort("modified")
+                    }
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Created Time"), "created")
+                        checked: contextMenu.isCurrentPopupSort("created")
+                        onTriggered: contextMenu.applyPopupSort("created")
+                    }
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Size"), "size")
+                        checked: contextMenu.isCurrentPopupSort("size")
+                        onTriggered: contextMenu.applyPopupSort("size")
+                    }
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Type"), "type")
+                        checked: contextMenu.isCurrentPopupSort("type")
+                        onTriggered: contextMenu.applyPopupSort("type")
+                    }
+                }
+                onObjectAdded: (index, object) => contextMenu.insertMenu(contextMenu.items.length, object)
+                onObjectRemoved: (index, object) => contextMenu.removeMenu(object)
             }
         }
     }
@@ -512,6 +637,39 @@ Item {
             popupWindow: pinnedPopup.popupWindow
             onCloseRequested: pinnedPopup.close()
         }
+
+        Component.onCompleted: {
+            if ("keyEventTarget" in pinnedPopup) {
+                pinnedPopup.keyEventTarget = pinnedPopupContent
+            }
+        }
+    }
+
+    Connections {
+        target: pinnedPopup.popupWindow
+
+        function onVisibleChanged() {
+            if (!pinnedPopup.popupWindow || pinnedPopup.popupWindow.visible) {
+                return
+            }
+
+            DS.grabKeyboard(pinnedPopup.popupWindow, false)
+        }
+    }
+
+    Timer {
+        id: pinnedPopupKeyboardGrabTimer
+        interval: 1
+        repeat: false
+        onTriggered: {
+            if (!pinnedPopup.popupWindow || !pinnedPopup.popupWindow.visible) {
+                return
+            }
+
+            pinnedPopup.popupWindow.requestActivate()
+            DS.grabKeyboard(pinnedPopup.popupWindow)
+            pinnedPopupContent.forceActiveFocus(Qt.OtherFocusReason)
+        }
     }
 
     Timer {
@@ -528,7 +686,7 @@ Item {
 
     Timer {
         id: previewTimer
-        interval: 500
+        interval: 220
         running: false
         repeat: false
         property int xOffset: 0
@@ -540,7 +698,7 @@ Item {
 
             if (root.windows.length != 0 || Qt.platform.pluginName === "wayland") {
                 // 使用基于 modelIndex 的预览API，确保精确匹配
-                taskmanager.Applet.requestPreview(root.modelIndex, Panel.rootObject, xOffset, yOffset, Panel.position);
+                root.requestPreviewNow(xOffset, yOffset)
             }
         }
     }
@@ -554,19 +712,45 @@ Item {
         Panel.requestClosePopup()
         pinnedPopupContent.beginPopupSession()
         pinnedPopupContent.refresh("", false)
+        if ("keyEventTarget" in pinnedPopup) {
+            pinnedPopup.keyEventTarget = pinnedPopupContent
+        }
         pinnedPopup.popupAnchorPoint = root.mapToItem(null, root.width / 2, root.height / 2)
         pinnedPopup.open()
+        pinnedPopupKeyboardGrabTimer.restart()
     }
 
+    function showToolTipNow() {
+        var point = root.mapToItem(null, root.width / 2, root.height / 2)
+        toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
+        toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+        toolTip.open()
+    }
+
+    function requestPreviewNow(xOffset, yOffset) {
+        taskmanager.Applet.requestPreview(root.modelIndex,
+                                          Panel.rootObject,
+                                          xOffset,
+                                          yOffset,
+                                          Panel.position)
+    }
 
     function onEntered() {
         if (root.popupItem) {
-            toolTipShowTimer.start()
+            if (toolTip.toolTipWindow && toolTip.toolTipWindow.visible) {
+                showToolTipNow()
+            } else {
+                toolTipShowTimer.start()
+            }
             return
         }
 
         if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
-            toolTipShowTimer.start()
+            if (toolTip.toolTipWindow && toolTip.toolTipWindow.visible) {
+                showToolTipNow()
+            } else {
+                toolTipShowTimer.start()
+            }
             return
         }
 
@@ -579,23 +763,32 @@ Item {
             xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
             yOffset = itemPos.y + (root.height / 2)
         }
+        if (root.windows.length > 0 && taskmanager.previewSwitchActive) {
+            taskmanager.endPreviewSwitch()
+            requestPreviewNow(xOffset, yOffset)
+            return
+        }
         previewTimer.xOffset = xOffset
         previewTimer.yOffset = yOffset
         previewTimer.start()
     }
 
     function onExited() {
+        var hadPendingPreview = previewTimer.running
         if (toolTipShowTimer.running) {
             toolTipShowTimer.stop()
         }
 
-        if (previewTimer.running) {
+        if (hadPendingPreview) {
             previewTimer.stop()
         }
 
         if (root.popupItem || (Qt.platform.pluginName === "xcb" && windows.length === 0)) {
             toolTip.close()
             return
+        }
+        if (root.windows.length > 0 && !hadPendingPreview) {
+            taskmanager.beginPreviewSwitch()
         }
         closeItemPreview()
     }
@@ -673,6 +866,7 @@ Item {
             id: toolTip
             toolTipX: DockPanelPositioner.x
             toolTipY: DockPanelPositioner.y
+            closeGraceInterval: 90
         }
 
         PanelToolTip {
@@ -687,10 +881,7 @@ Item {
             id: toolTipShowTimer
             interval: 50
             onTriggered: {
-                var point = root.mapToItem(null, root.width / 2, root.height / 2)
-                toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
-                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-                toolTip.open()
+                root.showToolTipNow()
             }
         }
     }

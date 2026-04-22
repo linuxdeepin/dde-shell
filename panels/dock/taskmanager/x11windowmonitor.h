@@ -45,7 +45,11 @@ public:
     void clearPreviewState();
 
     void
-    requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
+    requestPreview(QAbstractItemModel *sourceModel,
+                   QWindow *relativePositionItem,
+                   int32_t previewXoffset,
+                   int32_t previewYoffset,
+                   uint32_t direction) override;
     void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
 
 Q_SIGNALS:

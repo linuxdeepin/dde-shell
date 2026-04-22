@@ -113,6 +113,6 @@ private:
     xcb_window_t m_triggerWindow;
     xcb_window_t m_rootWindow;
     xcb_connection_t *m_connection;
+    bool m_isOpen = false;
 };
 }
-

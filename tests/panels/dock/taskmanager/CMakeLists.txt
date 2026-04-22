@@ -49,3 +49,22 @@ target_include_directories(rolegroupmodel_tests PRIVATE
 )
 
 gtest_discover_tests(rolegroupmodel_tests)
+
+add_executable(popupsortutils_tests
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/popupsortutils.h
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/popupsortutils.cpp
+    popupsortutilstests.cpp
+)
+
+target_link_libraries(popupsortutils_tests
+    GTest::GTest
+    GTest::Main
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Test
+)
+target_include_directories(popupsortutils_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/
+)
+
+gtest_discover_tests(popupsortutils_tests)

@@ -79,6 +79,8 @@ function(ds_handle_package_translation)
     )
 
     set(package_dirs ${PROJECT_BINARY_DIR}/packages/${_config_PACKAGE}/)
+    set(translation_lupdate_target ${_config_PACKAGE}_translation_lupdate)
+    set(translation_lrelease_target ${_config_PACKAGE}_translation_lrelease)
 
     # FIXME: not working on Qt 6.7
     # set_source_files_properties(${TRANSLATION_FILES}
@@ -93,9 +95,13 @@ function(ds_handle_package_translation)
         TS_FILES ${TRANSLATION_FILES}
         SOURCES ${_config_QML_FILES} ${_config_SOURCE_FILES}
         QM_FILES_OUTPUT_VARIABLE TRANSLATED_FILES
+        LUPDATE_TARGET ${translation_lupdate_target}
+        LRELEASE_TARGET ${translation_lrelease_target}
         LUPDATE_OPTIONS -no-obsolete -no-ui-lines -locations none
         IMMEDIATE_CALL
     )
+
+    add_dependencies(${_config_PACKAGE}_translation ${translation_lrelease_target})
 
     # /usr/share/dde-shell/org.deepin.xxx/translations/org.deepin.xxx.qm
     install(FILES ${TRANSLATED_FILES} DESTINATION ${DDE_SHELL_TRANSLATION_INSTALL_DIR}/${_config_PACKAGE}/translations)

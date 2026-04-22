@@ -83,16 +83,28 @@ DockHelper::DockHelper(DockPanel *parent)
 
     connect(this, &DockHelper::isWindowOverlapChanged, this, [this](bool overlap) {
         if (overlap) {
+            if (m_showTimer->isActive()) {
+                m_showTimer->stop();
+            }
             m_hideTimer->start();
         } else {
+            if (m_hideTimer->isActive()) {
+                m_hideTimer->stop();
+            }
             m_showTimer->start();
         }
     });
     connect(this, &DockHelper::currentActiveWindowFullscreenChanged, this, [this] (bool isFullscreen) {
+        if (m_hideTimer->isActive()) {
+            m_hideTimer->stop();
+        }
+        if (m_showTimer->isActive()) {
+            m_showTimer->stop();
+        }
         if (isFullscreen) {
-            checkNeedHideOrNot();
+            m_hideTimer->start();
         } else {
-            checkNeedShowOrNot();
+            m_showTimer->start();
         }
     });
 }
@@ -193,6 +205,13 @@ bool DockHelper::wakeUpAreaNeedShowOnThisScreen(QScreen *screen)
 
 void DockHelper::enterScreen(QScreen *screen)
 {
+    if (m_hideTimer->isActive()) {
+        m_hideTimer->stop();
+    }
+    if (m_showTimer->isActive()) {
+        m_showTimer->stop();
+    }
+
     auto nowScreen = parent()->dockScreen();
 
     if (nowScreen == screen) {
@@ -328,6 +347,7 @@ void DockHelper::checkNeedHideOrNot()
     }
 
     needHide &= !parent()->contextDragging();
+    needHide &= !parent()->containsMouse();
 
     // any enter will not make hide
     for (auto enter : m_enters) {
@@ -380,8 +400,11 @@ void DockHelper::initAreas()
 {
     // clear old area
     for (auto area : m_areas) {
-        area->close();
-        delete area;
+        if (!area) {
+            continue;
+        }
+
+        destroyArea(area);
     }
 
     m_areas.clear();

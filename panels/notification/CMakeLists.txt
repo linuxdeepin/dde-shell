@@ -30,14 +30,15 @@ set_target_properties(ds-notification-shared PROPERTIES
 )
 target_include_directories(ds-notification-shared PUBLIC
     ${CMAKE_SOURCE_DIR}/panels/notification/common
+    ${ICU_INCLUDE_DIR}
 )
 target_link_libraries(ds-notification-shared PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Sql
     Dtk${DTK_VERSION_MAJOR}::Core
-    ICU::uc
-    ICU::i18n
-    ICU::io
+    ${DS_ICU_UC_LIBRARY}
+    ${DS_ICU_I18N_LIBRARY}
+    ${DS_ICU_IO_LIBRARY}
 )
 
 install(TARGETS ds-notification-shared DESTINATION "${LIB_INSTALL_DIR}")

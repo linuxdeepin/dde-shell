@@ -69,6 +69,15 @@ ContainmentItem {
         return appearance.opacity
     }
     property real blendOpacity: blendColorAlpha(Panel.colorTheme === Dock.Dark ? 0.25 : 1.0)
+    readonly property bool previewSwitchActive: previewSwitchGraceTimer.running
+
+    function beginPreviewSwitch() {
+        previewSwitchGraceTimer.restart()
+    }
+
+    function endPreviewSwitch() {
+        previewSwitchGraceTimer.stop()
+    }
 
     TextCalculator {
         id: textCalculator
@@ -81,6 +90,12 @@ ContainmentItem {
         remainingSpace: taskmanager.remainingSpacesForSplitWindow
         font.family: D.DTK.fontManager.t6.family
         font.pixelSize: Math.max(10, Math.min(20, Math.round(textCalculator.iconSize * 0.35)))
+    }
+
+    Timer {
+        id: previewSwitchGraceTimer
+        interval: 96
+        repeat: false
     }
 
     OverflowContainer {

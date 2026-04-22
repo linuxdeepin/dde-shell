@@ -8,10 +8,11 @@ import QtQuick.Layouts 2.15
 import QtQuick.Window 2.15
 
 import QtQml
-import Qt.labs.platform as LP
+import Qt.labs.platform 1.1 as LP
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
+import org.deepin.ds.dock.tray 1.0 as DDT
 import org.deepin.dtk 1.0 as D
 import org.deepin.dtk.style 1.0 as DStyle
 
@@ -23,14 +24,21 @@ Window {
     property int positionForAnimation: Panel.position
     property bool useColumnLayout: positionForAnimation % 2
     readonly property bool adaptiveFashionMode: positionForAnimation === Dock.Bottom && Panel.viewMode === Dock.FashionMode
+    readonly property bool adaptiveFashionUsesDirectWindowGeometry: adaptiveFashionMode && Qt.platform.pluginName === "xcb"
+    readonly property bool useWindowMarginBasedHideAnimation: adaptiveFashionMode
+    readonly property bool useTransformBasedHideAnimation: Qt.platform.pluginName === "xcb" && !useWindowMarginBasedHideAnimation
     readonly property var promotedCenterPluginIds: ["org.deepin.ds.dock.aibar", "org.deepin.ds.dock.searchitem"]
-    readonly property int fashionDockSpacing: Math.max(8, Math.round(dockItemMaxSize * 0.18))
-    readonly property int fashionPartSpacing: fashionDockSpacing + dockItemMaxSize
+    readonly property int fashionDockSpacing: Math.round(dockItemIconSize * 0.75)
+    readonly property int fashionPartSpacing: fashionDockSpacing
+    readonly property int fashionFloatingMargin: adaptiveFashionMode ? 8 : 0
     readonly property int fashionHorizontalPadding: 0
     readonly property int fashionVerticalPadding: adaptiveFashionMode ? Math.max(6, Math.round(dockSize * 0.16)) : 0
     readonly property int fashionBackgroundRadius: adaptiveFashionMode ? Math.round(dockSurfaceThickness / 4) : 0
     readonly property int fashionShadowRadius: adaptiveFashionMode ? Math.max(52, Math.round(dockSurfaceThickness * 0.8)) : 40
     readonly property int fashionShadowVerticalOffset: adaptiveFashionMode ? Math.max(6, Math.round(fashionBackgroundRadius * 0.35)) : 0
+    readonly property bool useExternalFashionAutoHideSurface: adaptiveFashionMode && useTransformBasedHideAnimation
+    property real animatedBottomMargin: adaptiveFashionMode ? fashionFloatingMargin : 0
+    readonly property real panelDevicePixelRatio: Panel.devicePixelRatio > 0 ? Panel.devicePixelRatio : Screen.devicePixelRatio
     readonly property bool darkTheme: Panel.colorTheme === Dock.Dark
     readonly property var appearanceApplet: DS.applet("org.deepin.ds.dde-appearance")
     readonly property real appearanceOpacity: appearanceApplet ? appearanceApplet.opacity : -1
@@ -44,20 +52,32 @@ Window {
     readonly property color dockNoBlurBlendColor: Qt.rgba(dockNoBlurBaseColor.r,
         dockNoBlurBaseColor.g,
         dockNoBlurBaseColor.b,
-        appearanceOpacity >= 0 ? dockBackgroundOpacity : dockNoBlurBaseColor.a)
+        (appearanceOpacity >= 0 ? dockBackgroundOpacity : dockNoBlurBaseColor.a))
     readonly property color fashionShadowColor: darkTheme ?
         Qt.rgba(0, 0, 0, 0.34) :
         Qt.rgba(0, 0, 0, 0.2)
-    readonly property bool useTopRoundedFashionBackground: adaptiveFashionMode && positionForAnimation === Dock.Bottom
+    readonly property color fashionInnerBorderTopColor: darkTheme
+        ? Qt.rgba(1, 1, 1, 0.10)
+        : Qt.rgba(1, 1, 1, 0.30)
+    readonly property color fashionInnerBorderBottomColor: darkTheme
+        ? Qt.rgba(1, 1, 1, 0.05)
+        : Qt.rgba(1, 1, 1, 0.10)
+    readonly property bool useTopRoundedFashionBackground: false
     readonly property int dockSurfaceThickness: useColumnLayout ? dockSize : (adaptiveFashionMode ? dockSize + fashionVerticalPadding * 2 : dockSize)
     readonly property int windowThickness: dockSize
-    readonly property int exclusionZoneThickness: dockSize
-    readonly property int adaptiveDockContentWidth: {
+    readonly property int exclusionZoneThickness: dock.windowThickness + (adaptiveFashionMode ? fashionFloatingMargin : 0)
+    readonly property real adaptiveFashionGridDisplayedWidth: adaptiveFashionMode
+        ? dock.ceilToPhysicalPixel(gridLayout.implicitWidth)
+        : 0
+    readonly property real adaptiveFashionGridDisplayedHeight: adaptiveFashionMode
+        ? dock.ceilToPhysicalPixel(gridLayout.implicitHeight)
+        : 0
+    readonly property real adaptiveDockContentWidth: {
         if (!adaptiveFashionMode) {
             return 0
         }
 
-        let width = gridLayout.implicitWidth
+        let width = adaptiveFashionGridDisplayedWidth
         if (dockRightPart.visible) {
             if (width > 0) {
                 width += fashionPartSpacing
@@ -66,14 +86,34 @@ Window {
         }
         return width
     }
-    readonly property int adaptiveHorizontalMargin: {
+    readonly property real adaptiveDockContentTargetWidth: {
         if (!adaptiveFashionMode) {
             return 0
         }
 
-        const desiredWidth = adaptiveDockContentWidth + fashionHorizontalPadding * 2
-        return Math.max(0, Math.floor((adaptiveFashionMaximumWidth - desiredWidth) / 2))
+        let width = adaptiveFashionGridDisplayedWidth
+        if (dockRightPart.visible) {
+            const rightWidth = dockRightPart.targetImplicitWidth
+            if (rightWidth > 0) {
+                if (width > 0) {
+                    width += fashionPartSpacing
+                }
+                width += rightWidth
+            }
+        }
+
+        return width
     }
+    readonly property int adaptiveFashionWidthAnimationDuration: 200
+    readonly property int adaptiveFashionWidthAnimationEasingType: DDT.TraySortOrderModel.collapsed || !DDT.TraySortOrderModel.isCollapsing
+        ? Easing.OutQuad
+        : Easing.InQuad
+    readonly property bool adaptiveFashionWidthAnimationEnabled: adaptiveFashionMode
+        && dock.adaptiveFashionUsesDirectWindowGeometry
+        && !dock.isDragging
+        && !Panel.isResizing
+        && !DDT.TraySortOrderModel.actionsAlwaysVisible
+    property real adaptiveDockShellWidth: 0
     // TODO: 临时溢出逻辑，待后面修改
     property int dockLeftSpaceForCenter: adaptiveFashionMode ? 0 : (useColumnLayout ?
         (Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight) :
@@ -117,7 +157,13 @@ Window {
         Qt.rgba(0, 0, 0, 0.15)
 
     // NOTE: -1 means not set its size, follow the platform size
-    width: positionForAnimation === Dock.Top || positionForAnimation === Dock.Bottom ? -1 : dockSize
+    width: {
+        if (dock.adaptiveFashionUsesDirectWindowGeometry) {
+            return Math.max(1, dock.adaptiveDockShellWidth + dock.fashionHorizontalPadding * 2)
+        }
+
+        return positionForAnimation === Dock.Top || positionForAnimation === Dock.Bottom ? -1 : dockSize
+    }
     height: positionForAnimation === Dock.Left || positionForAnimation === Dock.Right ? -1 : windowThickness
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
@@ -130,8 +176,86 @@ Window {
         MenuHelper.openMenu(dockMenuLoader.item)
     }
 
+    function handleDockBackgroundClick(button) {
+        const lastActive = MenuHelper.activeMenu
+        MenuHelper.closeCurrent()
+        dockMenuLoader.active = true
+
+        if (button === Qt.RightButton) {
+            if (lastActive !== dockMenuLoader.item) {
+                requestShowDockMenu()
+            }
+            return
+        }
+
+        if (button === Qt.LeftButton) {
+            // try to close popup when clicked empty, because dock does not have focus.
+            Panel.requestClosePopup()
+            viewDeactivated()
+        }
+    }
+
+    function containsItemPoint(item, x, y) {
+        if (!item || !item.visible || item.width <= 0 || item.height <= 0) {
+            return false
+        }
+
+        const mapped = item.mapFromItem(dockContainer, x, y)
+        return mapped.x >= 0 && mapped.x < item.width && mapped.y >= 0 && mapped.y < item.height
+    }
+
+    function isLeftAlignedBlankAreaPoint(x, y) {
+        if (dock.adaptiveFashionMode || dock.useColumnLayout || Panel.viewMode !== Dock.LeftAlignedMode) {
+            return false
+        }
+
+        return dock.containsItemPoint(leftMarginArea, x, y)
+            || dock.containsItemPoint(dockTrailingBlankArea, x, y)
+    }
+
     function clampSpotlightPosition(value, maximum) {
         return Math.max(0, Math.min(maximum, value))
+    }
+
+    function hiddenBottomMargin() {
+        return dock.fashionFloatingMargin
+            - dock.windowThickness
+            - dock.fashionShadowRadius
+            - dock.fashionShadowVerticalOffset
+            - 4
+    }
+
+    function restingBottomMargin() {
+        if (!dock.adaptiveFashionMode) {
+            return 0
+        }
+
+        return Panel.hideState !== Dock.Hide ? dock.fashionFloatingMargin : dock.hiddenBottomMargin()
+    }
+
+    function adaptiveHorizontalMarginForContentWidth(contentWidth) {
+        if (!adaptiveFashionMode) {
+            return 0
+        }
+
+        const desiredWidth = Math.max(0, contentWidth) + fashionHorizontalPadding * 2
+        return Math.max(0, Math.floor((adaptiveFashionMaximumWidth - desiredWidth) / 2))
+    }
+
+    function roundToPhysicalPixel(value) {
+        if (!Number.isFinite(value) || dock.panelDevicePixelRatio <= 0) {
+            return value
+        }
+
+        return Math.round(value * dock.panelDevicePixelRatio) / dock.panelDevicePixelRatio
+    }
+
+    function ceilToPhysicalPixel(value) {
+        if (!Number.isFinite(value) || dock.panelDevicePixelRatio <= 0) {
+            return value
+        }
+
+        return Math.ceil(value * dock.panelDevicePixelRatio) / dock.panelDevicePixelRatio
     }
 
     function appletPluginId(item) {
@@ -188,7 +312,7 @@ Window {
             return Dock.MIN_DOCK_SIZE
         }
 
-        const currentWidth = adaptiveDockContentWidth + fashionHorizontalPadding * 2
+        const currentWidth = adaptiveDockContentTargetWidth + fashionHorizontalPadding * 2
         if (currentWidth <= 0) {
             return proposedDockSize
         }
@@ -221,6 +345,18 @@ Window {
         }
     }
 
+    function effectiveAdaptiveFashionShellWidth() {
+        if (!adaptiveFashionMode) {
+            return 0
+        }
+
+        if (adaptiveDockContentTargetWidth > 0) {
+            return dock.ceilToPhysicalPixel(adaptiveDockContentTargetWidth)
+        }
+
+        return dock.ceilToPhysicalPixel(adaptiveDockContentWidth)
+    }
+
     function scheduleAdaptiveFashionDockSizeSync() {
         if (dock.useColumnLayout) {
             return
@@ -235,6 +371,26 @@ Window {
             dock._adaptiveFashionDockSizeSyncPending = false
             dock.syncAdaptiveFashionDockSize()
         })
+    }
+
+    function scheduleFrontendGeometrySync() {
+        if (dock._frontendGeometrySyncPending) {
+            return
+        }
+
+        dock._frontendGeometrySyncPending = true
+        Qt.callLater(function() {
+            dock._frontendGeometrySyncPending = false
+            Panel.notifyDockPositionChanged(0, 0)
+        })
+    }
+
+    function refreshAdaptiveFashionGeometry() {
+        dockTransform.x = 0
+        dockTransform.y = 0
+        dock.animatedBottomMargin = dock.restingBottomMargin()
+        dock.scheduleAdaptiveFashionDockSizeSync()
+        dock.scheduleFrontendGeometrySync()
     }
 
     function setDockViewMode(mode) {
@@ -278,12 +434,20 @@ Window {
         }
     }
 
-    DLayerShellWindow.anchors: position2Anchors(positionForAnimation)
+    DLayerShellWindow.anchors: dock.adaptiveFashionUsesDirectWindowGeometry
+        ? DLayerShellWindow.AnchorBottom
+        : position2Anchors(positionForAnimation)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing ? dock.exclusionZoneThickness : 0
-    DLayerShellWindow.leftMargin: adaptiveFashionMode ? adaptiveHorizontalMargin : 0
-    DLayerShellWindow.rightMargin: adaptiveFashionMode ? adaptiveHorizontalMargin : 0
-    DLayerShellWindow.bottomMargin: 0
+    DLayerShellWindow.leftMargin: dock.adaptiveFashionUsesDirectWindowGeometry
+        ? 0
+        : (adaptiveFashionMode ? dock.adaptiveHorizontalMarginForContentWidth(dock.adaptiveDockShellWidth) : 0)
+    DLayerShellWindow.rightMargin: dock.adaptiveFashionUsesDirectWindowGeometry
+        ? 0
+        : (adaptiveFashionMode ? dock.adaptiveHorizontalMarginForContentWidth(dock.adaptiveDockShellWidth) : 0)
+    DLayerShellWindow.bottomMargin: (dock.useWindowMarginBasedHideAnimation && hideShowAnimation.running)
+        ? dock.animatedBottomMargin
+        : dock.restingBottomMargin()
     DLayerShellWindow.scope: "dde-shell/dock"
     DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
 
@@ -296,12 +460,24 @@ Window {
     // 目前直接处理shadowColor(透明和默认值的切换)和borderWidth(0和1的切换)，来控制阴影和边框
     // 参数默认值见： https://github.com/linuxdeepin/qt5platform-plugins/blob/master/xcb/dframewindow.h#L122
     // 需要注意，shadowRadius不能直接套用于“扩散”参数，拿到不透明度100%的设计图确定radius更合适一些。
-    D.DWindow.shadowColor: (hideShowAnimation.running || dockAnimation.running || dock.adaptiveFashionMode) ?
-        Qt.rgba(0, 0, 0, 0) :
-        Qt.rgba(0, 0, 0, 0.1)
-    D.DWindow.shadowOffset: Qt.point(0, 0)
-    D.DWindow.shadowRadius: dock.adaptiveFashionMode ? 0 : 40
-    D.DWindow.borderWidth:  (hideShowAnimation.running || dockAnimation.running) ? 0 : (dock.useTopRoundedFashionBackground ? 0 : 1)
+    D.DWindow.shadowColor: {
+        if (dockAnimation.running) {
+            return Qt.rgba(0, 0, 0, 0)
+        }
+
+        if (dock.adaptiveFashionMode) {
+            return dock.fashionShadowColor
+        }
+
+        if (hideShowAnimation.running) {
+            return Qt.rgba(0, 0, 0, 0)
+        }
+
+        return Qt.rgba(0, 0, 0, 0.1)
+    }
+    D.DWindow.shadowOffset: dock.adaptiveFashionMode ? Qt.point(0, dock.fashionShadowVerticalOffset) : Qt.point(0, 0)
+    D.DWindow.shadowRadius: dock.adaptiveFashionMode ? dock.fashionShadowRadius : 40
+    D.DWindow.borderWidth: dock.adaptiveFashionMode ? 1 : ((hideShowAnimation.running || dockAnimation.running) ? 0 : 1)
     D.DWindow.enableBlurWindow: Qt.platform.pluginName !== "xcb"
     D.DWindow.themeType: Panel.colorTheme
     D.DWindow.borderColor: dock.dockWindowBorderColor
@@ -319,10 +495,17 @@ Window {
 
     onAdaptiveFashionModeChanged: {
         updateAppItems()
-        dock.scheduleAdaptiveFashionDockSizeSync()
+        dock.refreshAdaptiveFashionGeometry()
     }
 
-    onAdaptiveDockContentWidthChanged: dock.scheduleAdaptiveFashionDockSizeSync()
+    onAdaptiveDockContentWidthChanged: {
+        if (dock.adaptiveFashionMode) {
+            Panel.notifyDockPositionChanged(0, 0)
+        }
+    }
+    onAdaptiveDockContentTargetWidthChanged: {
+        dock.scheduleAdaptiveFashionDockSizeSync()
+    }
     onAdaptiveFashionMaximumWidthChanged: dock.scheduleAdaptiveFashionDockSizeSync()
     onWidthChanged: {
         if (dock.adaptiveFashionMode) {
@@ -331,6 +514,22 @@ Window {
     }
 
     property bool _adaptiveFashionDockSizeSyncPending: false
+    property bool _frontendGeometrySyncPending: false
+
+    Binding {
+        target: dock
+        property: "adaptiveDockShellWidth"
+        value: dock.effectiveAdaptiveFashionShellWidth()
+        restoreMode: Binding.RestoreNone
+    }
+
+    Behavior on adaptiveDockShellWidth {
+        enabled: dock.adaptiveFashionWidthAnimationEnabled
+        NumberAnimation {
+            duration: dock.adaptiveFashionWidthAnimationDuration
+            easing.type: dock.adaptiveFashionWidthAnimationEasingType
+        }
+    }
 
     Binding on itemIconSizeBase {
         when: !isDragging
@@ -341,13 +540,16 @@ Window {
     PropertyAnimation {
         id: hideShowAnimation;
         // Currently, Wayland (Treeland) doesn't support StyledBehindWindowBlur inside the window, thus we keep using the window size approach on Wayland
-        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
-        target: useTransformBasedAnimation ? dockTransform : dock;
+        property bool useWindowMarginBasedAnimation: dock.useWindowMarginBasedHideAnimation
+        property bool useTransformBasedAnimation: dock.useTransformBasedHideAnimation
+        target: useWindowMarginBasedAnimation ? dock : (useTransformBasedAnimation ? dockTransform : dock);
         property: {
+            if (useWindowMarginBasedAnimation) return "animatedBottomMargin";
             if (useTransformBasedAnimation) return dock.useColumnLayout ? "x" : "y";
             return dock.useColumnLayout ? "width" : "height";
         }
         to: {
+            if (useWindowMarginBasedAnimation) return dock.restingBottomMargin();
             if (useTransformBasedAnimation) return Panel.hideState !== Dock.Hide ? 0 : ((dock.positionForAnimation === Dock.Left || dock.positionForAnimation === Dock.Top) ? -dock.windowThickness : dock.windowThickness);
             return Panel.hideState !== Dock.Hide ? dock.windowThickness : 1;
         }
@@ -357,7 +559,9 @@ Window {
             dock.visible = true
         }
         onStopped: {
-            if (useTransformBasedAnimation) {
+            if (useWindowMarginBasedAnimation) {
+                dock.visible = Panel.hideState !== Dock.Hide
+            } else if (useTransformBasedAnimation) {
                 dock.visible = ((dock.useColumnLayout ? dockTransform.x : dockTransform.y) === 0)
             } else {
                 dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) !== 1)
@@ -367,7 +571,7 @@ Window {
 
     Connections {
         target: dockTransform
-        enabled: Qt.platform.pluginName === "xcb" && hideShowAnimation.running
+        enabled: hideShowAnimation.useTransformBasedAnimation && hideShowAnimation.running
         
         function onXChanged() {
             if (dock.useColumnLayout) {
@@ -384,7 +588,18 @@ Window {
 
     Connections {
         target: dock
-        enabled: Qt.platform.pluginName !== "xcb" && hideShowAnimation.running
+        enabled: hideShowAnimation.useWindowMarginBasedAnimation && hideShowAnimation.running
+
+        function onAnimatedBottomMarginChanged() {
+            Panel.notifyDockPositionChanged(0, 0)
+        }
+    }
+
+    Connections {
+        target: dock
+        enabled: !hideShowAnimation.useTransformBasedAnimation
+            && !hideShowAnimation.useWindowMarginBasedAnimation
+            && hideShowAnimation.running
         
         function onWidthChanged() {
             if (dock.useColumnLayout) {
@@ -401,7 +616,7 @@ Window {
 
     Timer {
         id: hideTimer
-        interval: 500
+        interval: 1
         running: false
         repeat: false
         onTriggered: {
@@ -630,7 +845,39 @@ Window {
     }
 
     Item {
+        id: fashionAutoHideSurfaceLayer
+        visible: dock.useExternalFashionAutoHideSurface
+        width: dock.useColumnLayout ? dock.dockSize : dock.width
+        height: dock.useColumnLayout ? dock.height : dock.windowThickness
+        x: dock.useColumnLayout ? dockTransform.x : 0
+        y: dock.useColumnLayout ? 0 : dockTransform.y
+        z: 0
+
+        D.StyledBehindWindowBlur {
+            control: fashionAutoHideSurfaceLayer
+            anchors.fill: parent
+            cornerRadius: dock.fashionBackgroundRadius
+            blendColor: {
+                if (valid) {
+                    return dock.dockBlurBlendColor
+                }
+                return dock.dockNoBlurBlendColor
+            }
+        }
+
+        FashionBackgroundInnerBorder {
+            anchors.fill: parent
+            visible: dock.adaptiveFashionMode
+            cornerRadius: dock.fashionBackgroundRadius
+            devicePixelRatio: dock.panelDevicePixelRatio
+            topColor: dock.fashionInnerBorderTopColor
+            bottomColor: dock.fashionInnerBorderBottomColor
+        }
+    }
+
+    Item {
         id: dockContainer
+        z: 1
         width: dock.useColumnLayout ? dock.dockSize : parent.width
         height: dock.useColumnLayout ? parent.height : dock.windowThickness
         anchors {
@@ -647,7 +894,7 @@ Window {
             id: dockBackgroundBlur
             control: parent
             anchors.fill: parent
-            visible: !dock.useTopRoundedFashionBackground
+            visible: !dock.useTopRoundedFashionBackground && !dock.useExternalFashionAutoHideSurface
             cornerRadius: dock.adaptiveFashionMode ? dock.fashionBackgroundRadius : 0
             blendColor: {
                 if (valid) {
@@ -657,10 +904,21 @@ Window {
             }
         }
 
+        FashionBackgroundInnerBorder {
+            anchors.fill: parent
+            visible: dock.adaptiveFashionMode
+                && !dock.useTopRoundedFashionBackground
+                && !dock.useExternalFashionAutoHideSurface
+            cornerRadius: dock.fashionBackgroundRadius
+            devicePixelRatio: dock.panelDevicePixelRatio
+            topColor: dock.fashionInnerBorderTopColor
+            bottomColor: dock.fashionInnerBorderBottomColor
+        }
+
         Item {
             id: topRoundedFashionBackground
             anchors.fill: parent
-            visible: dock.useTopRoundedFashionBackground
+            visible: dock.useTopRoundedFashionBackground && !dock.useExternalFashionAutoHideSurface
 
             Item {
                 id: topRoundedFashionSurface
@@ -724,21 +982,12 @@ Window {
             }
         }
 
-        TapHandler {
+        MouseArea {
+            id: dockBackgroundMouseArea
+            anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-            gesturePolicy: TapHandler.WithinBounds
-            onTapped: function(eventPoint, button) {
-                let lastActive = MenuHelper.activeMenu
-                MenuHelper.closeCurrent()
-                dockMenuLoader.active = true
-                if (button === Qt.RightButton && lastActive !== dockMenuLoader.item) {
-                    requestShowDockMenu()
-                }
-                if (button === Qt.LeftButton) {
-                    // try to close popup when clicked empty, because dock does not have focus.
-                    Panel.requestClosePopup()
-                    viewDeactivated()
-                }
+            onClicked: function(mouse) {
+                dock.handleDockBackgroundClick(mouse.button)
             }
         }
 
@@ -840,7 +1089,13 @@ Window {
             height: useColumnLayout ? gridLayout.rowSpacing : parent.height                                                                             
             anchors.left: parent.left
             anchors.top: parent.top
-            onClicked: {
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: function(mouse) {
+                if (mouse.button === Qt.RightButton) {
+                    dock.handleDockBackgroundClick(mouse.button)
+                    return
+                }
+
                 let minOrder = Number.MAX_VALUE
                 
                 for (let i = 0; i < Applet.appletItems.rowCount(); i++) {
@@ -853,6 +1108,21 @@ Window {
             }                                                                       
         } 
         // TODO: remove GridLayout and use delegatechosser manager all items
+        DockPartAppletModel {
+            id: dockRightPartModel
+            leftDockOrder: 20
+            rightDockOrder: 30
+        }
+
+        Component {
+            id: rightPartContent
+
+            OverflowContainer {
+                useColumnLayout: dock.useColumnLayout
+                model: dockRightPartModel
+            }
+        }
+
         GridLayout {
             id: gridLayout
             anchors.left: parent.left
@@ -884,14 +1154,14 @@ Window {
                 target: gridLayout
                 property: "width"
                 when: dock.adaptiveFashionMode
-                value: gridLayout.implicitWidth
+                value: dock.adaptiveFashionGridDisplayedWidth
             }
 
             Binding {
                 target: gridLayout
                 property: "height"
                 when: dock.adaptiveFashionMode
-                value: gridLayout.implicitHeight
+                value: dock.adaptiveFashionGridDisplayedHeight
             }
 
             Item {
@@ -904,6 +1174,8 @@ Window {
             Item {
                 id: dockLeftPart
                 visible: dock.adaptiveFashionMode || dockLeftPartModel.count > 0
+                readonly property real targetImplicitWidth: implicitWidth
+                readonly property real displayedImplicitWidth: implicitWidth
                 implicitWidth: dock.adaptiveFashionMode ? dock.adaptiveFashionLeftWidth : leftLoader.implicitWidth
                 implicitHeight: leftLoader.implicitHeight
                 width: implicitWidth
@@ -953,6 +1225,8 @@ Window {
                 readonly property real taskmanagerAppContainerWidth: taskmanagerRootObject ? taskmanagerRootObject.appContainerWidth : 0
                 readonly property real taskmanagerAppContainerHeight: taskmanagerRootObject ? taskmanagerRootObject.appContainerHeight : 0
                 
+                readonly property real targetImplicitWidth: implicitWidth
+                readonly property real displayedImplicitWidth: implicitWidth
                 implicitWidth: centerLoader.implicitWidth - taskmanagerImplicitWidth + taskmanagerAppContainerWidth
                 implicitHeight: centerLoader.implicitHeight - taskmanagerImplicitHeight + taskmanagerAppContainerHeight
                 onXChanged: dockCenterPartPosChanged()
@@ -996,17 +1270,56 @@ Window {
             }
 
             Item {
+                id: dockTrailingBlankArea
                 Layout.fillWidth: !dock.adaptiveFashionMode
                 Layout.fillHeight: !dock.adaptiveFashionMode
                 visible: !dock.adaptiveFashionMode
             }
         }
 
+        MouseArea {
+            id: dockBlankContextMenuArea
+            anchors.fill: parent
+            z: dockRightPart.z + 2
+            visible: !dock.adaptiveFashionMode
+                && !dock.useColumnLayout
+                && Panel.viewMode === Dock.LeftAlignedMode
+            acceptedButtons: Qt.RightButton
+            preventStealing: true
+            propagateComposedEvents: true
+
+            onPressed: function(mouse) {
+                if (!dock.isLeftAlignedBlankAreaPoint(mouse.x, mouse.y)) {
+                    mouse.accepted = false
+                }
+            }
+
+            onClicked: function(mouse) {
+                if (!dock.isLeftAlignedBlankAreaPoint(mouse.x, mouse.y)) {
+                    mouse.accepted = false
+                    return
+                }
+
+                dock.handleDockBackgroundClick(mouse.button)
+            }
+        }
+
         Item {
             id: dockRightPart
             visible: dockRightPartModel.count > 0
-            implicitWidth: rightLoader.implicitWidth
-            implicitHeight: rightLoader.implicitHeight
+            readonly property int trailingInset: dock.adaptiveFashionMode ? DDT.TrayItemPositionManager.itemPadding + 16 : 0
+            readonly property real rightContentTargetWidth: rightLoader.item
+                ? (rightLoader.item.targetImplicitWidth !== undefined
+                    ? rightLoader.item.targetImplicitWidth
+                    : rightLoader.item.implicitWidth)
+                : 0
+            readonly property real targetImplicitWidth: dock.adaptiveFashionMode
+                ? dock.ceilToPhysicalPixel(rightContentTargetWidth + trailingInset)
+                : (rightContentTargetWidth + trailingInset)
+            implicitWidth: dock.adaptiveFashionMode
+                ? dock.ceilToPhysicalPixel((rightLoader.item ? rightLoader.item.implicitWidth : 0) + trailingInset)
+                : ((rightLoader.item ? rightLoader.item.implicitWidth : 0) + trailingInset)
+            implicitHeight: rightLoader.item ? rightLoader.item.implicitHeight : 0
             width: implicitWidth
             height: implicitHeight
             anchors.right: parent.right
@@ -1028,21 +1341,16 @@ Window {
                 target: dockRightPart
                 property: "x"
                 when: dock.adaptiveFashionMode
-                value: gridLayout.x + gridLayout.implicitWidth + (gridLayout.implicitWidth > 0 ? dock.fashionPartSpacing : 0)
+                value: dock.roundToPhysicalPixel(gridLayout.x + dock.adaptiveFashionGridDisplayedWidth + (dock.adaptiveFashionGridDisplayedWidth > 0 ? dock.fashionPartSpacing : 0))
             }
 
-            DockPartAppletModel {
-                id: dockRightPartModel
-                leftDockOrder: 20
-                rightDockOrder: 30
-            }
-
-            OverflowContainer {
+            Loader {
                 id: rightLoader
                 anchors.fill: parent
-                useColumnLayout: dock.useColumnLayout
-                model: dockRightPartModel
+                active: dockRightPart.visible
+                sourceComponent: rightPartContent
             }
+
         }
 
     }
@@ -1053,6 +1361,7 @@ Window {
         property int oldDockSize: 0
         property list<int> recentDeltas: []
         property int averageCount: 5
+        z: dockContainer.z + 1
         hoverEnabled: true
         propagateComposedEvents: true
         enabled: !Panel.locked
@@ -1222,6 +1531,10 @@ Window {
                 dockAnimation.startAnimation(true);
             }
         }
+        function onViewModeChanged() {
+            updateAppItems()
+            dock.refreshAdaptiveFashionGeometry()
+        }
         function onDockSizeChanged() {
             dock.preferredDockSize = Panel.dockSize
             if (!dock.adaptiveFashionMode || dock.useColumnLayout) {
@@ -1319,6 +1632,7 @@ Window {
         })
 
         dock.itemIconSizeBase = dock.dockItemMaxSize
+        dock.animatedBottomMargin = dock.restingBottomMargin()
         dock.visible = Panel.hideState !== Dock.Hide
         changeDragAreaAnchor()
     }

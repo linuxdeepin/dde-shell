@@ -77,6 +77,7 @@ Item {
 
     property string color: "red"
     property bool collapsed: false
+    property bool targetCollapsed: collapsed
     property bool isHorizontal: true
 
     readonly property int itemVisualSize: DDT.TrayItemPositionManager.itemVisualSize.width
@@ -85,6 +86,74 @@ Item {
 
     property int trayHeight: 50
     property size containerSize: DDT.TrayItemPositionManager.visualSize
+    readonly property int targetVisualItemCount: {
+        if (!model) {
+            return 0
+        }
+
+        let count = 0
+        for (let row = 0; row < model.rowCount(); ++row) {
+            const index = model.index(row, 0)
+            if (!index.valid) {
+                continue
+            }
+
+            const visibility = model.data(index, DDT.TraySortOrderModel.VisibilityRole)
+            const dockVisible = model.data(index, DDT.TraySortOrderModel.DockVisibleRole)
+            const sectionType = model.data(index, DDT.TraySortOrderModel.SectionTypeRole)
+            if (!visibility || !dockVisible || sectionType === "stashed") {
+                continue
+            }
+
+            if (sectionType === "collapsable" && targetCollapsed) {
+                continue
+            }
+
+            count++
+        }
+
+        return count
+    }
+    readonly property size targetContainerSize: {
+        if (targetVisualItemCount <= 0) {
+            return isHorizontal ? Qt.size(1, trayHeight) : Qt.size(trayHeight, 1)
+        }
+
+        let extent = 0
+        let visibleCount = 0
+        for (let row = 0; row < model.rowCount(); ++row) {
+            const index = model.index(row, 0)
+            if (!index.valid) {
+                continue
+            }
+
+            const visibility = model.data(index, DDT.TraySortOrderModel.VisibilityRole)
+            const dockVisible = model.data(index, DDT.TraySortOrderModel.DockVisibleRole)
+            const sectionType = model.data(index, DDT.TraySortOrderModel.SectionTypeRole)
+            if (!visibility || !dockVisible || sectionType === "stashed") {
+                continue
+            }
+
+            if (sectionType === "collapsable" && targetCollapsed) {
+                continue
+            }
+
+            const item = trayRepeater.itemAt(row)
+            const itemExtent = item ? (isHorizontal ? item.width : item.height) : itemVisualSize
+            if (visibleCount > 0) {
+                extent += itemSpacing
+            }
+
+            extent += itemExtent
+            visibleCount++
+        }
+
+        if (visibleCount <= 0) {
+            return isHorizontal ? Qt.size(1, trayHeight) : Qt.size(trayHeight, 1)
+        }
+
+        return isHorizontal ? Qt.size(extent, trayHeight) : Qt.size(trayHeight, extent)
+    }
     property bool isDragging: DDT.TraySortOrderModel.actionsAlwaysVisible
     property bool animationEnable: true
     // visiualIndex default value is -1
@@ -252,6 +321,7 @@ Item {
 
     // Tray items
     Repeater {
+        id: trayRepeater
         anchors.fill: parent
         model: root.model
         delegate: trayItemDelegateChooser

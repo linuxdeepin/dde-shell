@@ -42,7 +42,11 @@ public:
     void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
 
     virtual void
-    requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) = 0;
+    requestPreview(QAbstractItemModel *sourceModel,
+                   QWindow *relativePositionItem,
+                   int32_t previewXoffset,
+                   int32_t previewYoffset,
+                   uint32_t direction) = 0;
 
     void requestWindowsView(const QModelIndexList &indexes) const override;
 

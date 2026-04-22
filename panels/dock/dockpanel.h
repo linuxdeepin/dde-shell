@@ -11,6 +11,8 @@
 #include <QDBusContext>
 #include <QPointer>
 
+class QTimer;
+
 namespace dock {
 class DockHelper;
 class LoadTrayPlugins;
@@ -161,6 +163,7 @@ private:
     LoadTrayPlugins *m_loadTrayPlugins;
     bool m_compositorReady;
     bool m_launcherShown;
+    QTimer *m_themeSyncTimer;
     bool m_contextDragging;
     bool m_containsMouse;
     bool m_reportedContainsMouse;

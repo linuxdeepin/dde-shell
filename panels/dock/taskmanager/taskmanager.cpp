@@ -16,6 +16,7 @@
 #include "hoverpreviewproxymodel.h"
 #include "itemmodel.h"
 #include "pluginfactory.h"
+#include "popupsortutils.h"
 #include "taskmanager.h"
 #include "taskmanageradaptor.h"
 #include "taskmanagersettings.h"
@@ -23,6 +24,7 @@
 #include "treelandwindowmonitor.h"
 
 #include <QDesktopServices>
+#include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
 #include <QGuiApplication>
@@ -35,6 +37,8 @@
 #include <QUrl>
 #include <QVariantList>
 #include <QtQml/QtQml>
+
+#include <DThumbnailProvider>
 
 #include <appletbridge.h>
 #include <DSGApplication>
@@ -198,31 +202,121 @@ static QString fileIconName(const QFileInfo &fileInfo)
     return QStringLiteral("text-x-generic");
 }
 
-static QVariantMap popupEntry(const QString &entryId, const QString &name, const QString &iconName, bool directory)
+static QString thumbnailUrlForFile(const QFileInfo &fileInfo)
+{
+    if (fileInfo.isDir()) {
+        return {};
+    }
+
+    auto *provider = Dtk::Gui::DThumbnailProvider::instance();
+    if (!provider || !provider->hasThumbnail(fileInfo)) {
+        return {};
+    }
+
+    const QString thumbnailPath = provider->thumbnailFilePath(fileInfo, Dtk::Gui::DThumbnailProvider::Small);
+    if (!thumbnailPath.isEmpty() && QFileInfo::exists(thumbnailPath)) {
+        return QUrl::fromLocalFile(thumbnailPath).toString();
+    }
+
+    provider->appendToProduceQueue(fileInfo, Dtk::Gui::DThumbnailProvider::Small);
+    return {};
+}
+
+static QVariantMap popupEntry(const QString &entryId,
+                              const QString &name,
+                              const QString &iconName,
+                              bool directory,
+                              const QString &entryUrl = {},
+                              const QString &thumbnailUrl = {})
 {
     return {
         {QStringLiteral("entryId"), entryId},
         {QStringLiteral("name"), name},
         {QStringLiteral("iconName"), iconName},
         {QStringLiteral("directory"), directory},
+        {QStringLiteral("entryUrl"), entryUrl},
+        {QStringLiteral("thumbnailUrl"), thumbnailUrl},
     };
 }
 
-static QVariantList directoryEntriesForPath(const QString &path)
+static qint64 dateTimeToSortValue(const QDateTime &dateTime)
 {
-    QVariantList entries;
+    return dateTime.isValid() ? dateTime.toMSecsSinceEpoch() : 0;
+}
+
+static qint64 fileModifiedTimeForSort(const QFileInfo &fileInfo)
+{
+    return dateTimeToSortValue(fileInfo.lastModified());
+}
+
+static qint64 fileCreatedTimeForSort(const QFileInfo &fileInfo)
+{
+    const qint64 birthTime = dateTimeToSortValue(fileInfo.birthTime());
+    if (birthTime > 0) {
+        return birthTime;
+    }
+
+    const qint64 metadataTime = dateTimeToSortValue(fileInfo.metadataChangeTime());
+    if (metadataTime > 0) {
+        return metadataTime;
+    }
+
+    return fileModifiedTimeForSort(fileInfo);
+}
+
+static qint64 fileSizeForSort(const QFileInfo &fileInfo)
+{
+    return fileInfo.isDir() ? 0 : fileInfo.size();
+}
+
+static QString fileTypeSortText(const QFileInfo &fileInfo)
+{
+    if (fileInfo.isDir()) {
+        return QStringLiteral("inode/directory");
+    }
+
+    static QMimeDatabase mimeDatabase;
+    const auto mimeType = mimeDatabase.mimeTypeForFile(fileInfo, QMimeDatabase::MatchDefault);
+    if (!mimeType.name().isEmpty()) {
+        return mimeType.name();
+    }
+
+    return QStringLiteral("application/octet-stream");
+}
+
+static QVariantList directoryEntriesForPath(const QString &path, const PopupSortState &sortState)
+{
+    QList<PopupSortableEntry> entries;
 
     QDir directory(path);
     const QFileInfoList fileInfos = directory.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot,
-                                                            QDir::DirsFirst | QDir::Name | QDir::IgnoreCase);
+                                                            QDir::NoSort);
     for (const QFileInfo &fileInfo : fileInfos) {
-        entries.append(popupEntry(fileInfo.absoluteFilePath(),
-                                  fileInfo.fileName(),
-                                  fileIconName(fileInfo),
-                                  fileInfo.isDir()));
+        const QString entryPath = fileInfo.absoluteFilePath();
+        PopupSortableEntry entry;
+        entry.entryData = popupEntry(entryPath,
+                                     fileInfo.fileName(),
+                                     fileIconName(fileInfo),
+                                     fileInfo.isDir(),
+                                     QUrl::fromLocalFile(entryPath).toString(),
+                                     thumbnailUrlForFile(fileInfo));
+        entry.name = fileInfo.fileName();
+        entry.typeText = fileTypeSortText(fileInfo);
+        entry.modifiedTime = fileModifiedTimeForSort(fileInfo);
+        entry.createdTime = fileCreatedTimeForSort(fileInfo);
+        entry.size = fileSizeForSort(fileInfo);
+        entry.directory = fileInfo.isDir();
+        entries.append(entry);
     }
 
-    return entries;
+    sortPopupEntries(&entries, sortState, true);
+
+    QVariantList result;
+    for (const PopupSortableEntry &entry : std::as_const(entries)) {
+        result.append(entry.entryData);
+    }
+
+    return result;
 }
 
 static QStringList previewIconsForDirectory(const QString &path, int limit = 4)
@@ -382,18 +476,8 @@ static QString launcherGroupFallbackName()
     return preferChineseLauncherGroupNames() ? QStringLiteral("应用组") : TaskManager::tr("App Group");
 }
 
-static QString translatedLauncherCategoryName(const QString &groupName)
+static QString translatedLauncherCategoryName(int category)
 {
-    if (!groupName.startsWith(QStringLiteral("internal/category/"))) {
-        return {};
-    }
-
-    bool ok = false;
-    const int category = groupName.section(QLatin1Char('/'), -1).toInt(&ok);
-    if (!ok) {
-        return {};
-    }
-
     if (preferChineseLauncherGroupNames()) {
         switch (category) {
         case 0: return QStringLiteral("网络");
@@ -425,6 +509,71 @@ static QString translatedLauncherCategoryName(const QString &groupName)
     case 10: return TaskManager::tr("Others");
     default: return {};
     }
+}
+
+static QString translatedLauncherCategoryName(const QString &groupName)
+{
+    if (!groupName.startsWith(QStringLiteral("internal/category/"))) {
+        return {};
+    }
+
+    bool ok = false;
+    const int category = groupName.section(QLatin1Char('/'), -1).toInt(&ok);
+    if (!ok) {
+        return {};
+    }
+
+    return translatedLauncherCategoryName(category);
+}
+
+static qint64 launcherInstalledTimeForSort(const QModelIndex &appIndex)
+{
+    const qint64 installedTime = appIndex.data(TaskManager::InstalledTimeRole).toLongLong();
+    if (installedTime > 0) {
+        return installedTime;
+    }
+
+    const QFileInfo fileInfo(appIndex.data(TaskManager::DesktopSourcePathRole).toString());
+    if (!fileInfo.exists()) {
+        return 0;
+    }
+
+    return fileCreatedTimeForSort(fileInfo);
+}
+
+static qint64 launcherModifiedTimeForSort(const QModelIndex &appIndex)
+{
+    const QFileInfo fileInfo(appIndex.data(TaskManager::DesktopSourcePathRole).toString());
+    if (!fileInfo.exists()) {
+        return 0;
+    }
+
+    return fileModifiedTimeForSort(fileInfo);
+}
+
+static qint64 launcherSizeForSort(const QModelIndex &appIndex)
+{
+    const QFileInfo fileInfo(appIndex.data(TaskManager::DesktopSourcePathRole).toString());
+    if (!fileInfo.exists()) {
+        return 0;
+    }
+
+    return fileInfo.size();
+}
+
+static QString launcherEntryTypeText(const QModelIndex &appIndex)
+{
+    const QString categoryName = translatedLauncherCategoryName(appIndex.data(TaskManager::DDECategoryRole).toInt());
+    if (!categoryName.isEmpty()) {
+        return categoryName;
+    }
+
+    const QStringList categories = appIndex.data(TaskManager::CategoriesRole).toStringList();
+    if (!categories.isEmpty()) {
+        return categories.constFirst();
+    }
+
+    return QStringLiteral("application");
 }
 
 static QString launcherGroupDisplayName(QAbstractItemModel *groupModel, const QString &groupId)
@@ -482,6 +631,16 @@ TaskManager::TaskManager(QObject *parent)
 
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
+
+    if (auto *thumbnailProvider = Dtk::Gui::DThumbnailProvider::instance()) {
+        const auto notifyThumbnailChanged = [this](const QString &sourceFilePath, const QString &) {
+            if (!sourceFilePath.isEmpty()) {
+                Q_EMIT popupEntryThumbnailChanged(QDir::cleanPath(sourceFilePath));
+            }
+        };
+        connect(thumbnailProvider, &Dtk::Gui::DThumbnailProvider::thumbnailChanged, this, notifyThumbnailChanged);
+        connect(thumbnailProvider, &Dtk::Gui::DThumbnailProvider::createThumbnailFinished, this, notifyThumbnailChanged);
+    }
 }
 
 bool TaskManager::load()
@@ -632,7 +791,11 @@ void TaskManager::requestUpdateWindowIconGeometry(const QModelIndex &index, cons
     dataModel()->requestUpdateWindowIconGeometry(index, geometry, delegate);
 }
 
-void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+void TaskManager::requestPreview(const QModelIndex &index,
+                                 QObject *relativePositionItem,
+                                 int32_t previewXoffset,
+                                 int32_t previewYoffset,
+                                 uint32_t direction)
 {
     if (!m_hoverPreviewModel) {
         qCWarning(taskManagerLog) << "TaskManager::requestPreview: m_hoverPreviewModel is null";
@@ -655,7 +818,11 @@ void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePosi
         return;
     }
 
-    m_windowMonitor->requestPreview(m_hoverPreviewModel, qobject_cast<QWindow *>(relativePositionItem), previewXoffset, previewYoffset, direction);
+    m_windowMonitor->requestPreview(m_hoverPreviewModel,
+                                    qobject_cast<QWindow *>(relativePositionItem),
+                                    previewXoffset,
+                                    previewYoffset,
+                                    direction);
 }
 
 void TaskManager::requestWindowsView(const QModelIndexList &indexes) const
@@ -867,6 +1034,49 @@ bool TaskManager::requestUndockByFolderUrl(const QString &folderUrl)
     return true;
 }
 
+QVariantMap TaskManager::popupSortState(const QString &dockElement) const
+{
+    const auto [type, id] = splitDockElement(dockElement);
+    Q_UNUSED(id)
+
+    if (type == QStringLiteral("group") && !m_popupSortStates.contains(dockElement)) {
+        return {
+            {QStringLiteral("sortField"), QString()},
+            {QStringLiteral("sortDescending"), false},
+        };
+    }
+
+    const PopupSortState state = m_popupSortStates.value(dockElement, PopupSortState{});
+    return {
+        {QStringLiteral("sortField"), popupSortFieldToString(state.field)},
+        {QStringLiteral("sortDescending"), state.order == Qt::DescendingOrder},
+    };
+}
+
+QVariantMap TaskManager::cyclePopupSort(const QString &dockElement, const QString &fieldName)
+{
+    if (dockElement.isEmpty()) {
+        return popupSortState(dockElement);
+    }
+
+    const auto [type, id] = splitDockElement(dockElement);
+    Q_UNUSED(id)
+
+    const PopupSortField selectedField = popupSortFieldFromString(fieldName);
+    if (type == QStringLiteral("group") && !m_popupSortStates.contains(dockElement)) {
+        PopupSortState nextState;
+        nextState.field = selectedField;
+        nextState.order = Qt::AscendingOrder;
+        m_popupSortStates.insert(dockElement, nextState);
+        return popupSortState(dockElement);
+    }
+
+    const PopupSortState currentState = m_popupSortStates.value(dockElement, PopupSortState{});
+    const PopupSortState nextState = cyclePopupSortState(currentState, selectedField);
+    m_popupSortStates.insert(dockElement, nextState);
+    return popupSortState(dockElement);
+}
+
 QVariantMap TaskManager::popupDescriptor(const QString &dockElement, const QString &location) const
 {
     const auto [type, id] = splitDockElement(dockElement);
@@ -875,7 +1085,7 @@ QVariantMap TaskManager::popupDescriptor(const QString &dockElement, const QStri
     }
 
     if (type == QStringLiteral("group")) {
-        QVariantList entries;
+        QList<PopupSortableEntry> entries;
         for (const QString &appId : invokeLauncherGroupItems(m_launcherGroupModel, id)) {
             const QModelIndex appIndex = findIndexByNamedRole(m_launcherAppModel, MODEL_DESKTOPID, appId, DesktopIdRole);
             const QString iconName = appIndex.data(IconNameRole).toString().isEmpty() ?
@@ -884,7 +1094,25 @@ QVariantMap TaskManager::popupDescriptor(const QString &dockElement, const QStri
             const QString appName = appIndex.data(NameRole).toString().isEmpty() ?
                                         appId :
                                         appIndex.data(NameRole).toString();
-            entries.append(popupEntry(appId, appName, iconName, false));
+            PopupSortableEntry entry;
+            entry.entryData = popupEntry(appId, appName, iconName, false);
+            entry.name = appName;
+            entry.typeText = launcherEntryTypeText(appIndex);
+            entry.modifiedTime = launcherModifiedTimeForSort(appIndex);
+            entry.createdTime = launcherInstalledTimeForSort(appIndex);
+            entry.size = launcherSizeForSort(appIndex);
+            entries.append(entry);
+        }
+
+        const bool hasCustomSort = m_popupSortStates.contains(dockElement);
+        const PopupSortState state = hasCustomSort ? m_popupSortStates.value(dockElement) : PopupSortState{};
+        if (hasCustomSort) {
+            sortPopupEntries(&entries, state, false);
+        }
+
+        QVariantList entryData;
+        for (const PopupSortableEntry &entry : std::as_const(entries)) {
+            entryData.append(entry.entryData);
         }
 
         return {
@@ -893,7 +1121,9 @@ QVariantMap TaskManager::popupDescriptor(const QString &dockElement, const QStri
             {QStringLiteral("location"), QString()},
             {QStringLiteral("parentLocation"), QString()},
             {QStringLiteral("canGoBack"), false},
-            {QStringLiteral("entries"), entries},
+            {QStringLiteral("entries"), entryData},
+            {QStringLiteral("sortField"), hasCustomSort ? popupSortFieldToString(state.field) : QString()},
+            {QStringLiteral("sortDescending"), hasCustomSort && state.order == Qt::DescendingOrder},
         };
     }
 
@@ -913,13 +1143,17 @@ QVariantMap TaskManager::popupDescriptor(const QString &dockElement, const QStri
             parentLocation = rootLocation;
         }
 
+        const PopupSortState state = m_popupSortStates.value(dockElement, PopupSortState{});
+
         return {
             {QStringLiteral("kind"), type},
             {QStringLiteral("title"), displayNameForPath(currentLocation)},
             {QStringLiteral("location"), currentLocation},
             {QStringLiteral("parentLocation"), parentLocation},
             {QStringLiteral("canGoBack"), currentLocation != rootLocation},
-            {QStringLiteral("entries"), directoryEntriesForPath(currentLocation)},
+            {QStringLiteral("entries"), directoryEntriesForPath(currentLocation, state)},
+            {QStringLiteral("sortField"), popupSortFieldToString(state.field)},
+            {QStringLiteral("sortDescending"), state.order == Qt::DescendingOrder},
         };
     }
 

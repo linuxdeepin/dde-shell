@@ -18,6 +18,7 @@ Item {
     property int toolTipX: 0
     property int toolTipY: 0
     property bool readyBinding: false
+    property int closeGraceInterval: 90
     readonly property int toolTipTopFrameInset: 1
     // WM_NAME, used for kwin.
     property string windowTitle: "dde-shell/paneltooltip"
@@ -52,11 +53,19 @@ Item {
         if (!toolTipWindow)
             return
 
+        closeTimer.stop()
         readyBinding = Qt.binding(function () {
             return toolTipWindow && toolTipWindow.currentItem === control
         })
 
         toolTipWindow.currentItem = control
+        if (toolTipWindow.visible) {
+            toolTipWindow.title = windowTitle
+            if ("showAnimated" in toolTipWindow) {
+                toolTipWindow.showAnimated()
+            }
+            return
+        }
         timer.start()
     }
 
@@ -71,7 +80,11 @@ Item {
                 return
 
             toolTipWindow.title = windowTitle
-            toolTipWindow.show()
+            if ("showAnimated" in toolTipWindow) {
+                toolTipWindow.showAnimated()
+            } else {
+                toolTipWindow.show()
+            }
         }
     }
     
@@ -83,12 +96,43 @@ Item {
         if (!readyBinding)
             return
 
-        toolTipWindow.close()
-        toolTipWindow.currentItem = null
+        if (closeGraceInterval > 0 && toolTipWindow.visible) {
+            closeTimer.restart()
+            return
+        }
+
+        if (toolTipWindow.currentItem !== control) {
+            return
+        }
+
+        if ("closeAnimated" in toolTipWindow) {
+            toolTipWindow.closeAnimated()
+        } else {
+            toolTipWindow.close()
+            toolTipWindow.currentItem = null
+        }
     }
     function hide()
     {
         close()
+    }
+
+    Timer {
+        id: closeTimer
+        interval: control.closeGraceInterval
+        repeat: false
+        onTriggered: {
+            if (!toolTipWindow || toolTipWindow.currentItem !== control) {
+                return
+            }
+
+            if ("closeAnimated" in toolTipWindow) {
+                toolTipWindow.closeAnimated()
+            } else {
+                toolTipWindow.close()
+                toolTipWindow.currentItem = null
+            }
+        }
     }
 
     Control {

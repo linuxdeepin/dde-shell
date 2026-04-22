@@ -64,6 +64,7 @@ LQM.DelegateChooser {
         roleValue: "action-toggle-collapse"
         TrayItemPositioner {
             contentItem: ActionToggleCollapseDelegate {
+                collapsed: root.collapsed
                 isHorizontal: root.isHorizontal
                 inputEventsEnabled: !disableInputEvents
             }

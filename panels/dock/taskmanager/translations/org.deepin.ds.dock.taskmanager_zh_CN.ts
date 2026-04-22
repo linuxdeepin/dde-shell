@@ -5,6 +5,58 @@
         <source>Move to Trash</source>
         <translation>移动到回收站</translation>
     </message>
+    <message>
+        <source>Sort</source>
+        <translation>排序方式</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>名称</translation>
+    </message>
+    <message>
+        <source>Modified Time</source>
+        <translation>修改时间</translation>
+    </message>
+    <message>
+        <source>Created Time</source>
+        <translation>创建时间</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation>大小</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>类型</translation>
+    </message>
+    <message>
+        <source>Descending</source>
+        <translation>降序</translation>
+    </message>
+    <message>
+        <source>Ascending</source>
+        <translation>升序</translation>
+    </message>
+    <message>
+        <source>Sort by Name</source>
+        <translation>按名称排序</translation>
+    </message>
+    <message>
+        <source>Sort by Modified Time</source>
+        <translation>按修改时间排序</translation>
+    </message>
+    <message>
+        <source>Sort by Created Time</source>
+        <translation>按创建时间排序</translation>
+    </message>
+    <message>
+        <source>Sort by Size</source>
+        <translation>按大小排序</translation>
+    </message>
+    <message>
+        <source>Sort by Type</source>
+        <translation>按类型排序</translation>
+    </message>
 </context>
 <context>
     <name>dock::AppItem</name>
@@ -54,6 +106,17 @@
     <message>
         <source>Close this window</source>
         <translation>关闭当前窗口</translation>
+    </message>
+    <message>
+        <source>Open in File Manager</source>
+        <translation>在文件管理器中打开</translation>
+    </message>
+</context>
+<context>
+    <name>DockPinnedPopup</name>
+    <message>
+        <source>No items</source>
+        <translation>无项目</translation>
     </message>
 </context>
 <context>

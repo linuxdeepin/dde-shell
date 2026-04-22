@@ -13,21 +13,20 @@ PopupWindow {
 
     property real xOffset: 0
     property real yOffset: 0
+    property real positionXOffset: xOffset
+    property real positionYOffset: yOffset
     property int margins: 10
     property int windowThemeType: D.ApplicationHelper.LightType
     readonly property bool darkTheme: root.windowThemeType === D.ApplicationHelper.DarkType
     property Item currentItem
-    property int requestedWidth: 10
-    property int requestedHeight: 10
+    property bool geometryUpdatePending: false
     signal requestUpdateGeometry()
     signal updateGeometryFinished()
 
     // order to update screen and (x,y)
     property var updateGeometryer : function updateGeometry()
     {
-        if (root.requestedWidth <= 10 || root.requestedHeight <= 10) {
-            root.width = root.requestedWidth;
-            root.height = root.requestedHeight;
+        if (root.width <= 10 || root.height <= 10) {
             return;
         }
         if (!root.transientParent)
@@ -38,12 +37,10 @@ PopupWindow {
 
         let bounding = Qt.rect(root.screen.virtualX + margins, root.screen.virtualY + margins,
                                root.screen.width - margins * 2, root.screen.height - margins * 2)
-        let pos = Qt.point(transientParent ? transientParent.x + xOffset : xOffset,
-                           transientParent ? transientParent.y + yOffset : yOffset)
-        let newX = selectValue(pos.x, bounding.left, bounding.right - root.requestedWidth)
-        let newY = selectValue(pos.y, bounding.top, bounding.bottom - root.requestedHeight)
-        
-        root.setWindowGeometry(newX, newY, root.requestedWidth, root.requestedHeight)
+        let pos = Qt.point(transientParent ? transientParent.x + positionXOffset : positionXOffset,
+                           transientParent ? transientParent.y + positionYOffset : positionYOffset)
+        x = selectValue(pos.x, bounding.left, bounding.right - root.width)
+        y = selectValue(pos.y, bounding.top, bounding.bottom - root.height)
     }
 
     function selectValue(value, min, max) {
@@ -93,8 +90,6 @@ PopupWindow {
         if(root.visible)
             return
         currentItem = null
-        root.requestedWidth = 10
-        root.requestedHeight = 10
         root.width = 10
         root.height = 10
         DS.closeChildrenWindows(root)
@@ -128,18 +123,20 @@ PopupWindow {
         }
     }
 
-    onRequestedHeightChanged: {
-        requestUpdateGeometry()
-    }
-    onRequestedWidthChanged: {
-        requestUpdateGeometry()
-    }
-    onXOffsetChanged: requestUpdateGeometry()
-    onYOffsetChanged: requestUpdateGeometry()
+    onHeightChanged: requestUpdateGeometry()
+    onWidthChanged: requestUpdateGeometry()
+    onPositionXOffsetChanged: requestUpdateGeometry()
+    onPositionYOffsetChanged: requestUpdateGeometry()
 
     onRequestUpdateGeometry: {
         if (updateGeometryer) {
+            if (geometryUpdatePending) {
+                return
+            }
+
+            geometryUpdatePending = true
             Qt.callLater(function () {
+                geometryUpdatePending = false
                 updateGeometryer()
                 updateGeometryFinished()
             })

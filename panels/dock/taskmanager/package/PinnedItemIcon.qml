@@ -28,8 +28,12 @@ Item {
         return icons
     }
     readonly property bool useCompositePreview: visiblePreviewIcons.length > 1
-    readonly property int compositeInset: Math.max(2, Math.round(iconSize * 0.12))
-    readonly property int compositeIconSize: Math.max(10, Math.floor((iconSize - compositeInset * 3) / 2))
+    readonly property int desiredCompositeOuterInset: Math.max(2, Math.round(iconSize * 0.12))
+    readonly property int desiredCompositeGap: Math.max(1, Math.round(iconSize * 0.05))
+    readonly property int compositeIconSize: Math.max(1, Math.floor((iconSize - desiredCompositeOuterInset * 2 - desiredCompositeGap) / 2))
+    readonly property int compositeGap: Math.max(1, Math.min(desiredCompositeGap, Math.max(1, iconSize - compositeIconSize * 2)))
+    readonly property int compositeContentSize: compositeIconSize * 2 + compositeGap
+    readonly property int compositeOuterInset: Math.max(1, Math.floor((iconSize - compositeContentSize) / 2))
 
     width: iconSize
     height: iconSize
@@ -38,7 +42,7 @@ Item {
         anchors.fill: parent
         radius: Math.max(6, Math.round(root.iconSize / 4))
         color: root.colorTheme === Dock.Dark ?
-                   Qt.rgba(1, 1, 1, 0.30) :
+                   Qt.rgba(1, 1, 1, 0.10) :
                    Qt.rgba(0, 0, 0, 0.30)
         border.width: 1
         border.color: root.colorTheme === Dock.Dark ?
@@ -47,20 +51,32 @@ Item {
         visible: root.useCompositePreview
     }
 
-    Repeater {
-        model: root.useCompositePreview ? root.visiblePreviewIcons : 0
-        delegate: D.DciIcon {
-            required property int index
-            required property string modelData
+    Item {
+        anchors.centerIn: parent
+        width: root.compositeContentSize
+        height: root.compositeContentSize
+        visible: root.useCompositePreview
 
-            name: modelData
-            width: root.compositeIconSize
-            height: root.compositeIconSize
-            sourceSize: Qt.size(width, height)
-            x: root.compositeInset + (index % 2) * (width + root.compositeInset)
-            y: root.compositeInset + Math.floor(index / 2) * (height + root.compositeInset)
-            smooth: false
-            retainWhileLoading: true
+        Grid {
+            anchors.centerIn: parent
+            columns: 2
+            rows: 2
+            rowSpacing: root.compositeGap
+            columnSpacing: root.compositeGap
+
+            Repeater {
+                model: root.useCompositePreview ? root.visiblePreviewIcons : 0
+                delegate: D.DciIcon {
+                    required property string modelData
+
+                    name: modelData
+                    width: root.compositeIconSize
+                    height: root.compositeIconSize
+                    sourceSize: Qt.size(width, height)
+                    smooth: false
+                    retainWhileLoading: true
+                }
+            }
         }
     }
 

@@ -140,7 +140,7 @@ void X11WindowMonitor::setPreviewOpacity(double opacity)
 {
     m_opacity = opacity;
     if (m_windowPreview) {
-        m_windowPreview->setMaskAlpha(static_cast<int>(m_opacity * 255));
+        m_windowPreview->setPreviewOpacity(m_opacity);
     }
 }
 
@@ -152,12 +152,15 @@ void X11WindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
 {
     if (!m_windowPreview) {
         m_windowPreview.reset(new X11WindowPreviewContainer(this));
-        m_windowPreview->setMaskAlpha(static_cast<int>(m_opacity * 255));
+        m_windowPreview->setPreviewOpacity(m_opacity);
         m_windowPreview->windowHandle()->setTransientParent(relativePositionItem);
     }
 
-    m_windowPreview->showPreviewWithModel(sourceModel, relativePositionItem, previewXoffset, previewYoffset, direction);
-    m_windowPreview->updatePosition();
+    m_windowPreview->showPreviewWithModel(sourceModel,
+                                          relativePositionItem,
+                                          previewXoffset,
+                                          previewYoffset,
+                                          direction);
 }
 
 void X11WindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const

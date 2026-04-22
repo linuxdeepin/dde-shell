@@ -16,7 +16,6 @@
 #include "dockfrontadaptor.h"
 #include "dockdaemonadaptor.h"
 #include "loadtrayplugins.h"
-
 #include <DDBusSender>
 #include <QQuickWindow>
 #include <QLoggingCategory>
@@ -25,6 +24,7 @@
 #include <QDBusInterface>
 #include <QDBusReply>
 #include <QDBusVariant>
+#include <QIcon>
 #include <DGuiApplicationHelper>
 #include <DPlatformTheme>
 
@@ -50,6 +50,70 @@ ColorTheme colorThemeFromGlobalThemeName(const QString &themeName, const ColorTh
 
     return fallbackTheme;
 }
+
+Dtk::Gui::DGuiApplicationHelper::ColorType helperThemeTypeFromGlobalThemeName(
+    const QString &themeName,
+    Dtk::Gui::DGuiApplicationHelper::ColorType fallbackTheme)
+{
+    if (themeName.endsWith(QStringLiteral(".dark"), Qt::CaseInsensitive))
+        return Dtk::Gui::DGuiApplicationHelper::DarkType;
+
+    if (themeName.endsWith(QStringLiteral(".light"), Qt::CaseInsensitive))
+        return Dtk::Gui::DGuiApplicationHelper::LightType;
+
+    return fallbackTheme;
+}
+
+QString readAppearanceStringProperty(const QString &propertyName)
+{
+    QDBusInterface appearanceProperties(kAppearanceService,
+                                        kAppearancePath,
+                                        kPropertiesInterface,
+                                        QDBusConnection::sessionBus());
+    if (!appearanceProperties.isValid())
+        return QString();
+
+    const QDBusReply<QDBusVariant> reply = appearanceProperties.call(QStringLiteral("Get"),
+                                                                     QString::fromLatin1(kAppearanceInterface),
+                                                                     propertyName);
+    return reply.isValid() ? reply.value().variant().toString() : QString();
+}
+
+void syncApplicationTheme(Dtk::Gui::DGuiApplicationHelper *helper,
+                          const QString &globalThemeName,
+                          const QString &gtkThemeName,
+                          const QString &iconThemeName)
+{
+    if (!helper)
+        return;
+
+    const auto targetThemeType = helperThemeTypeFromGlobalThemeName(globalThemeName, helper->themeType());
+
+    if (auto *applicationTheme = helper->applicationTheme()) {
+        const QByteArray gtkThemeNameBytes = gtkThemeName.toUtf8();
+        if (!gtkThemeNameBytes.isEmpty() && applicationTheme->themeName() != gtkThemeNameBytes) {
+            applicationTheme->setThemeName(gtkThemeNameBytes);
+        }
+
+        const QByteArray iconThemeNameBytes = iconThemeName.toUtf8();
+        if (!iconThemeNameBytes.isEmpty() && applicationTheme->iconThemeName() != iconThemeNameBytes) {
+            applicationTheme->setIconThemeName(iconThemeNameBytes);
+        }
+    }
+
+    if (helper->paletteType() != targetThemeType) {
+        helper->setPaletteType(targetThemeType);
+    }
+
+    const QPalette targetPalette = helper->applicationPalette(targetThemeType);
+    if (helper->applicationPalette() != targetPalette) {
+        helper->setApplicationPalette(targetPalette);
+    }
+
+    if (!iconThemeName.isEmpty() && QIcon::themeName() != iconThemeName) {
+        QIcon::setThemeName(iconThemeName);
+    }
+}
 }
 
 DockPanel::DockPanel(QObject *parent)
@@ -60,6 +124,7 @@ DockPanel::DockPanel(QObject *parent)
     , m_loadTrayPlugins(new LoadTrayPlugins(this))
     , m_compositorReady(false)
     , m_launcherShown(false)
+    , m_themeSyncTimer(new QTimer(this))
     , m_contextDragging(false)
     , m_containsMouse(false)
     , m_reportedContainsMouse(false)
@@ -67,6 +132,10 @@ DockPanel::DockPanel(QObject *parent)
     , m_cursorPosition(0, 0)
     , m_reportedCursorPosition(0, 0)
 {
+    m_themeSyncTimer->setSingleShot(true);
+    m_themeSyncTimer->setInterval(80);
+    connect(m_themeSyncTimer, &QTimer::timeout, this, &DockPanel::syncColorThemeWithSystem);
+
     connect(this, &DockPanel::compositorReadyChanged, this, [this] {
         if (!m_compositorReady) return;
         m_loadTrayPlugins->loadDockPlugins();
@@ -161,9 +230,10 @@ bool DockPanel::init()
     QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
         if (rootObject()) {
             // those connections need connect after DPanel::init() which create QQuickWindow
-            // xChanged yChanged not worked on wayland, so use above positionChanged instead
-            // connect(window(), &QQuickWindow::xChanged, this, &DockPanel::onWindowGeometryChanged);
-            // connect(window(), &QQuickWindow::yChanged, this, &DockPanel::onWindowGeometryChanged);
+            if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
+                connect(window(), &QQuickWindow::xChanged, this, &DockPanel::onWindowGeometryChanged);
+                connect(window(), &QQuickWindow::yChanged, this, &DockPanel::onWindowGeometryChanged);
+            }
             connect(window(), &QQuickWindow::widthChanged, this, &DockPanel::onWindowGeometryChanged);
             connect(window(), &QQuickWindow::heightChanged, this, &DockPanel::onWindowGeometryChanged);
             QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
@@ -227,28 +297,13 @@ void DockPanel::setFrontendWindowRect(int transformOffsetX, int transformOffsetY
     auto ratio = window()->devicePixelRatio();
     auto screenGeometry = window()->screen()->geometry();
     auto geometry = window()->geometry();
-    auto xOffset = 0, yOffset = 0;
+    const int xOffset = geometry.x() - screenGeometry.x() + transformOffsetX;
+    const int yOffset = geometry.y() - screenGeometry.y() + transformOffsetY;
 
-    switch (position()) {
-        case Top:
-            xOffset = (screenGeometry.width() - geometry.width()) / 2;
-            yOffset = transformOffsetY;
-            break;
-        case Bottom:
-            xOffset = (screenGeometry.width() - geometry.width()) / 2;
-            yOffset = screenGeometry.height() - geometry.height() + transformOffsetY;
-            break;
-        case Right:
-            xOffset = screenGeometry.width() - geometry.width() + transformOffsetX;
-            yOffset = (screenGeometry.height() - geometry.height()) / 2;
-            break;
-        case Left:
-            xOffset = transformOffsetX;
-            yOffset = (screenGeometry.height() - geometry.height()) / 2;
-            break;
-    }
-
-    m_frontendWindowRect = QRect(screenGeometry.x() + xOffset * ratio, screenGeometry.y() + yOffset * ratio, geometry.width() * ratio, geometry.height() * ratio);
+    m_frontendWindowRect = QRect(screenGeometry.x() + xOffset * ratio,
+                                 screenGeometry.y() + yOffset * ratio,
+                                 geometry.width() * ratio,
+                                 geometry.height() * ratio);
 }
 
 ColorTheme DockPanel::colorTheme()
@@ -267,23 +322,38 @@ void DockPanel::setColorTheme(const ColorTheme& theme)
 void DockPanel::onAppearanceChanged(const QString &type, const QString &value)
 {
     Q_UNUSED(value)
-    if (type.compare(QStringLiteral("GlobalTheme"), Qt::CaseInsensitive) != 0)
+    static const QStringList kTrackedAppearanceKeys{
+        QStringLiteral("GlobalTheme"),
+        QStringLiteral("GtkTheme"),
+        QStringLiteral("IconTheme"),
+        QStringLiteral("QtActiveColor")
+    };
+
+    if (!kTrackedAppearanceKeys.contains(type, Qt::CaseInsensitive))
         return;
 
-    syncColorThemeWithSystem();
+    m_themeSyncTimer->start();
 }
 
 void DockPanel::onAppearanceRefreshed(const QString &type)
 {
-    if (type.compare(QStringLiteral("GlobalTheme"), Qt::CaseInsensitive) != 0)
+    static const QStringList kTrackedAppearanceKeys{
+        QStringLiteral("GlobalTheme"),
+        QStringLiteral("GtkTheme"),
+        QStringLiteral("IconTheme"),
+        QStringLiteral("QtActiveColor")
+    };
+
+    if (!type.isEmpty() && !kTrackedAppearanceKeys.contains(type, Qt::CaseInsensitive))
         return;
 
-    syncColorThemeWithSystem();
+    m_themeSyncTimer->start();
 }
 
 void DockPanel::syncColorThemeWithSystem()
 {
-    const auto fallbackTheme = static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType());
+    auto *guiHelper = Dtk::Gui::DGuiApplicationHelper::instance();
+    const auto fallbackTheme = static_cast<ColorTheme>(guiHelper->themeType());
     QDBusInterface appearanceProperties(kAppearanceService,
                                         kAppearancePath,
                                         kPropertiesInterface,
@@ -293,11 +363,16 @@ void DockPanel::syncColorThemeWithSystem()
                                                                          QString::fromLatin1(kAppearanceInterface),
                                                                          QStringLiteral("GlobalTheme"));
         if (reply.isValid()) {
-            setColorTheme(colorThemeFromGlobalThemeName(reply.value().variant().toString(), fallbackTheme));
+            const QString globalThemeName = reply.value().variant().toString();
+            const QString gtkThemeName = readAppearanceStringProperty(QStringLiteral("GtkTheme"));
+            const QString iconThemeName = readAppearanceStringProperty(QStringLiteral("IconTheme"));
+            syncApplicationTheme(guiHelper, globalThemeName, gtkThemeName, iconThemeName);
+            setColorTheme(colorThemeFromGlobalThemeName(globalThemeName, fallbackTheme));
             return;
         }
     }
 
+    syncApplicationTheme(guiHelper, QString(), QString(), QString());
     setColorTheme(fallbackTheme);
 }
 

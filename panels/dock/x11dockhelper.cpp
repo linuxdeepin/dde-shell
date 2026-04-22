@@ -25,6 +25,44 @@ Q_LOGGING_CATEGORY(dockX11Log, "org.deepin.dde.shell.dock.x11")
 const uint16_t monitorSize = 15;
 const uint32_t allWorkspace = 0xffffffff;
 
+QRect anchoredDockGeometry(DockPanel *panel)
+{
+    if (!panel) {
+        return {};
+    }
+
+    QRect rect = panel->geometry();
+    QScreen *screen = panel->dockScreen();
+    if (!screen && panel->window()) {
+        screen = panel->window()->screen();
+    }
+    if (!screen) {
+        return rect;
+    }
+
+    const QRect screenRect = screen->geometry();
+    switch (panel->position()) {
+    case Top:
+        rect.moveLeft(screenRect.left() + (screenRect.width() - rect.width()) / 2);
+        rect.moveTop(screenRect.top());
+        break;
+    case Bottom:
+        rect.moveLeft(screenRect.left() + (screenRect.width() - rect.width()) / 2);
+        rect.moveTop(screenRect.top() + screenRect.height() - rect.height());
+        break;
+    case Left:
+        rect.moveLeft(screenRect.left());
+        rect.moveTop(screenRect.top() + (screenRect.height() - rect.height()) / 2);
+        break;
+    case Right:
+        rect.moveLeft(screenRect.left() + screenRect.width() - rect.width());
+        rect.moveTop(screenRect.top() + (screenRect.height() - rect.height()) / 2);
+        break;
+    }
+
+    return rect;
+}
+
 // TODO: use taskmanager window data
 struct WindowData
 {
@@ -479,7 +517,7 @@ void X11DockHelper::updateWindowHideState(xcb_window_t window)
 
 void X11DockHelper::updateDockArea()
 {
-    QRect rect = parent()->geometry();
+    QRect rect = anchoredDockGeometry(parent());
     uint size = parent()->dockSize();
     switch (parent()->position()) {
     case Top:
@@ -560,6 +598,10 @@ X11DockWakeUpArea::~X11DockWakeUpArea()
 
 void X11DockWakeUpArea::open()
 {
+    if (m_isOpen) {
+        return;
+    }
+
     uint32_t values_list[] = {1};
     xcb_create_window(m_connection,
                       XCB_COPY_FROM_PARENT,
@@ -577,15 +619,27 @@ void X11DockWakeUpArea::open()
     uint32_t values[] = {XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW};
     xcb_change_window_attributes(m_connection, m_triggerWindow, XCB_CW_EVENT_MASK, values);
     xcb_map_window(m_connection, m_triggerWindow);
+    xcb_flush(m_connection);
+    m_isOpen = true;
 }
 
 void X11DockWakeUpArea::close()
 {
+    if (!m_isOpen) {
+        return;
+    }
+
     xcb_destroy_window(m_connection, m_triggerWindow);
+    xcb_flush(m_connection);
+    m_isOpen = false;
 }
 
 void X11DockWakeUpArea::updateDockWakeArea(Position pos)
 {
+    if (!m_isOpen) {
+        return;
+    }
+
     QRect triggerArea;
     auto rect = screen()->geometry();
 

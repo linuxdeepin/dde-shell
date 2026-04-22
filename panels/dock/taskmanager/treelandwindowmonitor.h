@@ -12,6 +12,7 @@
 #include <QList>
 #include <QObject>
 #include <QTimer>
+#include <QVariantAnimation>
 
 #include <QtWaylandClient/QWaylandClientExtension>
 
@@ -56,6 +57,12 @@ private:
     bool m_isPreviewEntered;
     bool m_isDockMouseAreaEnter;
     QTimer* m_hideTimer;
+    QVariantAnimation* m_positionAnimation;
+    QByteArray m_currentWindowsId;
+    int32_t m_currentPreviewXoffset;
+    int32_t m_currentPreviewYoffset;
+    uint32_t m_currentDirection;
+    bool m_positionInitialized;
 };
 
 class TreeLandWindowMonitor : public AbstractWindowMonitor
@@ -74,7 +81,11 @@ public:
     virtual void hideItemPreview() override;
 
     void
-    requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
+    requestPreview(QAbstractItemModel *sourceModel,
+                   QWindow *relativePositionItem,
+                   int32_t previewXoffset,
+                   int32_t previewYoffset,
+                   uint32_t direction) override;
     void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
 
 private Q_SLOTS:

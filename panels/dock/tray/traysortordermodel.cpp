@@ -373,11 +373,21 @@ void TraySortOrderModel::updateVisualIndexes()
 {
     m_isUpdating = true;
     emit isUpdatingChanged(true);
-    
-    // Clear registered sizes before re-assigning visual indexes
-    // This ensures that when items are repositioned, the empty placeholder
-    // will use the default item size instead of retaining the previous item's size
-    TrayItemPositionManager::instance().clearRegisteredSizes();
+
+    auto &positionManager = TrayItemPositionManager::instance();
+    positionManager.beginLayoutSync();
+    // Reset visual-index mapping before rebuilding it so reserved staged-drop slots
+    // fall back to the default item size instead of keeping the previous occupant's size.
+    positionManager.clearRegisteredSizes();
+
+    const auto assignDockVisualIndex = [&positionManager](QStandardItem *trayItem, int visualIndex) {
+        if (!trayItem || visualIndex < 0) {
+            return;
+        }
+
+        trayItem->setData(visualIndex, TraySortOrderModel::VisualIndexRole);
+        positionManager.registerVisualItem(trayItem->data(TraySortOrderModel::SurfaceIdRole).toString(), visualIndex);
+    };
     
     for (int i = 0; i < rowCount(); i++) {
         item(i)->setData(-1, TraySortOrderModel::VisualIndexRole);
@@ -420,7 +430,7 @@ void TraySortOrderModel::updateVisualIndexes()
     Q_ASSERT(!results.isEmpty());
     results[0]->setData(showStashActionVisible, TraySortOrderModel::VisibilityRole);
     if (showStashActionVisible) {
-        results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
+        assignDockVisualIndex(results[0], currentVisualIndex);
         currentVisualIndex++;
     }
 
@@ -440,7 +450,8 @@ void TraySortOrderModel::updateVisualIndexes()
             toogleCollapseActionVisible = true;
             if (!m_collapsed) {
                 reserveStagedDropSpace(currentVisualIndex);
-                results[0]->setData(currentVisualIndex++, TraySortOrderModel::VisualIndexRole);
+                assignDockVisualIndex(results[0], currentVisualIndex);
+                currentVisualIndex++;
             } else {
                 // When collapsed, collapsable items should be hidden (visualIndex = -1)
                 results[0]->setData(-1, TraySortOrderModel::VisualIndexRole);
@@ -454,7 +465,7 @@ void TraySortOrderModel::updateVisualIndexes()
     results[0]->setData(toogleCollapseActionVisible, TraySortOrderModel::VisibilityRole);
     if (toogleCollapseActionVisible) {
         reserveStagedDropSpace(currentVisualIndex);
-        results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
+        assignDockVisualIndex(results[0], currentVisualIndex);
         currentVisualIndex++;
     }
 
@@ -471,7 +482,7 @@ void TraySortOrderModel::updateVisualIndexes()
         results[0]->setData(dockVisible, TraySortOrderModel::DockVisibleRole);
         if (itemVisible && dockVisible) {
             reserveStagedDropSpace(currentVisualIndex);
-            results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
+            assignDockVisualIndex(results[0], currentVisualIndex);
             currentVisualIndex++;
         }
     }
@@ -481,7 +492,7 @@ void TraySortOrderModel::updateVisualIndexes()
     Q_ASSERT(!results.isEmpty());
     results[0]->setData(SECTION_FIXED, TraySortOrderModel::SectionTypeRole);
     reserveStagedDropSpace(currentVisualIndex);
-    results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
+    assignDockVisualIndex(results[0], currentVisualIndex);
     currentVisualIndex++;
 
     // fixed (not actually 'fixed' since it's just a section next to pinned)
@@ -499,13 +510,14 @@ void TraySortOrderModel::updateVisualIndexes()
         results[0]->setData(itemVisible, TraySortOrderModel::VisibilityRole);
         results[0]->setData(dockVisible, TraySortOrderModel::DockVisibleRole);
         if (itemVisible && dockVisible) {
-            results[0]->setData(currentVisualIndex, TraySortOrderModel::VisualIndexRole);
+            assignDockVisualIndex(results[0], currentVisualIndex);
             currentVisualIndex++;
         }
     }
 
     // update visible item count property
     setProperty("visualItemCount", currentVisualIndex);
+    positionManager.endLayoutSync();
     
     m_isUpdating = false;
     emit isUpdatingChanged(false);

@@ -7,12 +7,13 @@ pragma ComponentBehavior: Bound
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import Qt5Compat.GraphicalEffects
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0 as D
 
-Item {
+FocusScope {
     id: root
 
     required property var applet
@@ -29,6 +30,9 @@ Item {
     property real contentOpacity: 1.0
     property real contentOffsetX: 0.0
     property int lockedColumnCount: 0
+    property string typeAheadBuffer: ""
+    property int keyboardCurrentIndex: -1
+    property bool keyboardSelectionActive: false
 
     readonly property var entries: descriptor && descriptor.entries ? descriptor.entries : []
     readonly property int sidePadding: 0
@@ -46,15 +50,27 @@ Item {
     readonly property int itemHoverPadding: 10
     readonly property int itemHoverBottomMargin: 2
     readonly property int itemTextBottomMargin: 6
-    readonly property int scrollBarWidth: 6
+    readonly property int scrollBarWidth: 0
     readonly property int scrollBarGap: 0
     readonly property int scrollBarLaneWidth: scrollBarWidth
+    readonly property int thumbnailCornerRadius: 3
+    readonly property color selectionFillColor: Qt.rgba(1, 1, 1, 0.21)
+    readonly property color selectionInsideBorderColor: Qt.rgba(1, 1, 1, 0.15)
+    readonly property color selectionOutsideBorderColor: Qt.rgba(0, 0, 0, 0.14)
+    readonly property color hoverFillColor: Qt.rgba(1, 1, 1, 0.08)
+    readonly property color hoverInsideBorderColor: Qt.rgba(1, 1, 1, 0.06)
+    readonly property color hoverOutsideBorderColor: Qt.rgba(0, 0, 0, 0.06)
+    readonly property color thumbnailInsideBorderColor: root.colorTheme === Dock.Dark ?
+                                                         Qt.rgba(1, 1, 1, 0.14) :
+                                                         Qt.rgba(1, 1, 1, 0.45)
+    readonly property color thumbnailOutsideBorderColor: root.colorTheme === Dock.Dark ?
+                                                          Qt.rgba(0, 0, 0, 0.24) :
+                                                          Qt.rgba(0, 0, 0, 0.12)
     readonly property int gridWidth: columnCount * cellWidth + Math.max(0, columnCount - 1) * gridSpacing
     readonly property int gridAreaWidth: gridWidth + gridWidthExtra
     readonly property int columnCount: lockedColumnCount > 0 ? lockedColumnCount : preferredColumnCount(descriptor)
     readonly property int totalRows: entries.length === 0 ? 0 : Math.ceil(entries.length / columnCount)
     readonly property int visibleRows: Math.max(1, Math.min(3, totalRows))
-    readonly property real wheelOvershootDistance: 28
     readonly property int gridContentHeight: entries.length === 0 ?
                                                 72 :
                                                 totalRows * cellHeight + Math.max(0, totalRows - 1) * gridSpacing
@@ -65,11 +81,14 @@ Item {
     readonly property real contentScrollY: contentLoader.item && contentLoader.item.scrollY !== undefined ? contentLoader.item.scrollY : 0
     readonly property bool showHeaderSeparator: contentScrollY > 0.5
     readonly property string middleEllipsis: "\u2026"
+    readonly property bool popupOwnerActive: !!(root.parent && root.parent.visible)
 
     width: sidePadding * 2 + gridAreaWidth + scrollBarLaneWidth
     height: popupHeightValue
+    focus: true
 
     function beginPopupSession() {
+        clearTypeAhead()
         lockedColumnCount = 0
         if (popupWindow) {
             popupWindow.opacity = 1.0
@@ -100,11 +119,23 @@ Item {
         pendingDescriptor = null
         pendingPopupHeight = 0
         popupHeightValue = popupHeightFor(descriptor)
+        resetKeyboardNavigation()
         if (popupWindow) {
             popupWindow.opacity = 1.0
         }
         contentOpacity = 1.0
         contentOffsetX = 0.0
+        ensureKeyboardFocus()
+    }
+
+    function clearDescriptor() {
+        descriptor = ({ entries: [] })
+        pendingDescriptor = null
+        pendingPopupHeight = 0
+        popupHeightValue = popupHeightFor(descriptor)
+        contentOpacity = 1.0
+        contentOffsetX = 0.0
+        resetKeyboardNavigation()
     }
 
     function trimTextToWidth(metrics, text, maxWidth, fromRight) {
@@ -227,27 +258,249 @@ Item {
         return Math.max(0, Math.min(value, Math.max(0, flickable.contentHeight - flickable.height)))
     }
 
-    function overshootContentY(flickable, value) {
-        if (!flickable) {
-            return 0
+    function parentDirectoryFor(path) {
+        if (!path) {
+            return ""
         }
 
-        const maxContentY = Math.max(0, flickable.contentHeight - flickable.height)
-        if (value < 0) {
-            return Math.max(-wheelOvershootDistance, value * 0.35)
-        }
-
-        if (value > maxContentY) {
-            return maxContentY + Math.min(wheelOvershootDistance, (value - maxContentY) * 0.35)
-        }
-
-        return value
+        const normalizedPath = String(path)
+        const separatorIndex = normalizedPath.lastIndexOf("/")
+        return separatorIndex > 0 ? normalizedPath.substring(0, separatorIndex) : ""
     }
 
     function backIconSource() {
         return Qt.resolvedUrl(root.colorTheme === Dock.Dark ?
                                   "icons/back-chevron-dark.svg" :
                                   "icons/back-chevron-light.svg")
+    }
+
+    function currentLocation() {
+        return descriptor && descriptor.location ? String(descriptor.location) : ""
+    }
+
+    function clearTypeAhead() {
+        typeAheadResetTimer.stop()
+        typeAheadBuffer = ""
+    }
+
+    function clearKeyboardSelection() {
+        keyboardCurrentIndex = -1
+        keyboardSelectionActive = false
+    }
+
+    function resetKeyboardNavigation() {
+        clearTypeAhead()
+        clearKeyboardSelection()
+    }
+
+    function ensureKeyboardFocus() {
+        if (!root.popupOwnerActive || !root.popupWindow || !root.popupWindow.visible) {
+            return
+        }
+
+        focusRestoreTimer.restart()
+    }
+
+    function normalizedEntryName(value) {
+        return String(value || "").toLocaleLowerCase()
+    }
+
+    function typeAheadTextForKey(key, text) {
+        const keyText = String(text || "")
+        if (keyText.length === 1 && keyText.charCodeAt(0) >= 0x20) {
+            return keyText
+        }
+
+        if (key >= Qt.Key_A && key <= Qt.Key_Z) {
+            return String.fromCharCode("a".charCodeAt(0) + key - Qt.Key_A)
+        }
+
+        if (key >= Qt.Key_0 && key <= Qt.Key_9) {
+            return String.fromCharCode("0".charCodeAt(0) + key - Qt.Key_0)
+        }
+
+        return ""
+    }
+
+    function findPrefixMatch(prefix) {
+        if (!prefix) {
+            return -1
+        }
+
+        const normalizedPrefix = normalizedEntryName(prefix)
+        for (let index = 0; index < entries.length; ++index) {
+            const entryName = entries[index] && entries[index].name !== undefined ?
+                                  normalizedEntryName(entries[index].name) :
+                                  ""
+            if (entryName.startsWith(normalizedPrefix)) {
+                return index
+            }
+        }
+
+        return -1
+    }
+
+    function selectEntryIndex(index, animated) {
+        if (index < 0 || index >= entries.length) {
+            clearKeyboardSelection()
+            return false
+        }
+
+        keyboardCurrentIndex = index
+        keyboardSelectionActive = true
+        if (contentLoader.item && contentLoader.item.scrollToEntry) {
+            contentLoader.item.scrollToEntry(index, animated !== false)
+        }
+        return true
+    }
+
+    function moveKeyboardSelection(delta) {
+        if (!entries.length) {
+            clearKeyboardSelection()
+            return false
+        }
+
+        if (!keyboardSelectionActive || keyboardCurrentIndex < 0 || keyboardCurrentIndex >= entries.length) {
+            return selectEntryIndex(0, false)
+        }
+
+        const currentIndex = keyboardCurrentIndex
+        const nextIndex = Math.max(0, Math.min(entries.length - 1, currentIndex + delta))
+        return selectEntryIndex(nextIndex, true)
+    }
+
+    function moveKeyboardSelectionTo(index) {
+        if (!entries.length) {
+            clearKeyboardSelection()
+            return false
+        }
+
+        const nextIndex = Math.max(0, Math.min(entries.length - 1, index))
+        return selectEntryIndex(nextIndex, true)
+    }
+
+    function handleTypeAheadInput(text) {
+        const addition = String(text || "")
+        if (!addition.length) {
+            return
+        }
+
+        let nextBuffer = typeAheadBuffer + addition
+        let matchIndex = findPrefixMatch(nextBuffer)
+        if (matchIndex < 0) {
+            nextBuffer = addition
+            matchIndex = findPrefixMatch(nextBuffer)
+            if (matchIndex < 0) {
+                typeAheadResetTimer.restart()
+                return
+            }
+        }
+
+        typeAheadBuffer = nextBuffer
+        typeAheadResetTimer.restart()
+        selectEntryIndex(matchIndex, true)
+    }
+
+    function handleTypeAheadBackspace() {
+        if (!typeAheadBuffer.length) {
+            clearTypeAhead()
+            return
+        }
+
+        typeAheadBuffer = typeAheadBuffer.slice(0, -1)
+        if (!typeAheadBuffer.length) {
+            clearTypeAhead()
+            return
+        }
+
+        typeAheadResetTimer.restart()
+        selectEntryIndex(findPrefixMatch(typeAheadBuffer), true)
+    }
+
+    function handlePopupKeyPress(key, text, modifiers) {
+        if (!root.popupOwnerActive || !root.popupWindow || !root.popupWindow.visible) {
+            return false
+        }
+
+        if (key === Qt.Key_Escape) {
+            if (root.typeAheadBuffer.length || root.keyboardSelectionActive) {
+                root.resetKeyboardNavigation()
+                return true
+            }
+            return false
+        }
+
+        if (key === Qt.Key_Backspace) {
+            root.handleTypeAheadBackspace()
+            return true
+        }
+
+        if (key === Qt.Key_Left) {
+            return root.moveKeyboardSelection(-1)
+        }
+
+        if (key === Qt.Key_Right) {
+            return root.moveKeyboardSelection(1)
+        }
+
+        if (key === Qt.Key_Up) {
+            return root.moveKeyboardSelection(-root.columnCount)
+        }
+
+        if (key === Qt.Key_Down) {
+            return root.moveKeyboardSelection(root.columnCount)
+        }
+
+        if (key === Qt.Key_Home) {
+            return root.moveKeyboardSelectionTo(0)
+        }
+
+        if (key === Qt.Key_End) {
+            return root.moveKeyboardSelectionTo(root.entries.length - 1)
+        }
+
+        if (key === Qt.Key_Return || key === Qt.Key_Enter) {
+            if (root.keyboardSelectionActive) {
+                root.activateKeyboardSelection()
+                return true
+            }
+            return false
+        }
+
+        if ((modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier)) !== 0) {
+            return false
+        }
+
+        const keyText = root.typeAheadTextForKey(key, text)
+        if (!keyText.length) {
+            return false
+        }
+
+        root.handleTypeAheadInput(keyText)
+        return true
+    }
+
+    function handleApplicationKeyEvent(key, text, modifiers) {
+        return handlePopupKeyPress(Number(key), String(text || ""), Number(modifiers))
+    }
+
+    function activateKeyboardSelection() {
+        if (!keyboardSelectionActive || keyboardCurrentIndex < 0 || keyboardCurrentIndex >= entries.length) {
+            return
+        }
+
+        const currentEntry = entries[keyboardCurrentIndex]
+        if (!currentEntry) {
+            return
+        }
+
+        if (currentEntry.directory) {
+            refresh(currentEntry.entryId, true)
+            return
+        }
+
+        root.applet.activatePopupEntry(root.dockElement, currentEntry.entryId)
+        root.closeRequested()
     }
 
     function refresh(location, animated) {
@@ -285,8 +538,98 @@ Item {
         contentSwapAnimation.restart()
     }
 
-    onDockElementChanged: refresh("", false)
-    Component.onCompleted: refresh("", false)
+    onDockElementChanged: {
+        if (root.popupWindow && root.popupWindow.visible) {
+            refresh("", false)
+            return
+        }
+
+        clearDescriptor()
+    }
+
+    Keys.priority: Keys.BeforeItem
+    Keys.onPressed: function(event) {
+        event.accepted = root.handlePopupKeyPress(event.key, event.text, event.modifiers)
+    }
+
+    onActiveFocusChanged: {
+        if (root.popupOwnerActive && !root.activeFocus && root.popupWindow && root.popupWindow.visible) {
+            root.ensureKeyboardFocus()
+        }
+    }
+
+    Connections {
+        target: root.applet
+
+        function onPopupEntryThumbnailChanged(entryPath) {
+            if (!entryPath ||
+                !root.descriptor ||
+                root.descriptor.kind !== "folder" ||
+                !root.descriptor.location ||
+                (root.popupWindow && !root.popupWindow.visible)) {
+                return
+            }
+
+            if (root.parentDirectoryFor(entryPath) === String(root.descriptor.location)) {
+                thumbnailRefreshTimer.restart()
+            }
+        }
+    }
+
+    Connections {
+        target: root.popupWindow
+        enabled: root.popupOwnerActive
+
+        function onVisibleChanged() {
+            if (!root.popupWindow) {
+                return
+            }
+
+            if (root.popupWindow.visible) {
+                root.ensureKeyboardFocus()
+            } else {
+                root.resetKeyboardNavigation()
+            }
+        }
+
+        function onActiveChanged() {
+            if (root.popupWindow && root.popupWindow.active) {
+                root.ensureKeyboardFocus()
+            }
+        }
+    }
+
+    Timer {
+        id: thumbnailRefreshTimer
+        interval: 60
+        repeat: false
+        onTriggered: {
+            if (root.descriptor &&
+                root.descriptor.kind === "folder" &&
+                root.descriptor.location &&
+                (!root.popupWindow || root.popupWindow.visible)) {
+                root.refresh(String(root.descriptor.location), false)
+            }
+        }
+    }
+
+    Timer {
+        id: typeAheadResetTimer
+        interval: 900
+        repeat: false
+        onTriggered: root.clearTypeAhead()
+    }
+
+    Timer {
+        id: focusRestoreTimer
+        interval: 1
+        repeat: false
+        onTriggered: {
+            if (root.popupOwnerActive && root.popupWindow && root.popupWindow.visible) {
+                root.forceActiveFocus(Qt.OtherFocusReason)
+            }
+        }
+    }
 
     Rectangle {
         id: clippedContent
@@ -415,101 +758,251 @@ Item {
         id: gridContentComponent
 
         Item {
+            id: gridContentRoot
             width: root.gridAreaWidth
             height: root.gridViewportHeight
             property real scrollY: gridFlickable.contentY
+            property Item hoverTargetButton: null
+            property Item selectionTargetButton: null
+            property bool hoverSyncPending: false
 
-            Flickable {
-                id: gridFlickable
-                width: root.gridAreaWidth
-                height: root.gridViewportHeight
-                anchors.left: parent.left
-                anchors.top: parent.top
-                property real wheelTargetY: contentY
-                contentWidth: root.gridAreaWidth
-                contentHeight: root.gridContentHeight
+            function scheduleHoverSync() {
+                if (hoverSyncPending) {
+                    return
+                }
+
+                hoverSyncPending = true
+                Qt.callLater(function() {
+                    hoverSyncPending = false
+                    syncHoverTarget()
+                })
+            }
+
+            function syncHoverTarget() {
+                let nextTarget = null
+                for (let index = 0; index < gridRepeater.count; ++index) {
+                    const candidate = gridRepeater.itemAt(index)
+                    if (candidate && candidate.hoverActive) {
+                        nextTarget = candidate
+                        break
+                    }
+                }
+                hoverTargetButton = nextTarget
+            }
+
+            function syncSelectionTarget() {
+                if (!root.keyboardSelectionActive || root.keyboardCurrentIndex < 0 || root.keyboardCurrentIndex >= gridRepeater.count) {
+                    selectionTargetButton = null
+                    return
+                }
+
+                selectionTargetButton = gridRepeater.itemAt(root.keyboardCurrentIndex)
+            }
+
+            function scrollToEntry(entryIndex, animated) {
+                if (entryIndex < 0 || entryIndex >= root.entries.length) {
+                    return
+                }
+
+                const row = Math.floor(entryIndex / root.columnCount)
+                const rowHeight = root.cellHeight + root.gridSpacing
+                const targetContentY = root.clampContentY(gridFlickable,
+                                                          row * rowHeight - Math.max(0, Math.round((gridFlickable.height - root.cellHeight) / 2)))
+
+                if (!animated) {
+                    scrollToEntryAnimation.stop()
+                    gridFlickable.contentY = targetContentY
+                    return
+                }
+
+                scrollToEntryAnimation.from = gridFlickable.contentY
+                scrollToEntryAnimation.to = targetContentY
+                scrollToEntryAnimation.restart()
+            }
+
+            D.ScrollView {
+                id: gridScrollView
+                anchors.fill: parent
+                padding: 0
                 clip: true
-                flickableDirection: Flickable.VerticalFlick
-                boundsBehavior: Flickable.DragAndOvershootBounds
-                maximumFlickVelocity: 3200
-                flickDeceleration: 2800
-                interactive: root.totalRows > root.visibleRows
-                rebound: Transition {
+
+                Flickable {
+                    id: gridFlickable
+                    anchors.fill: parent
+                    contentWidth: root.gridAreaWidth
+                    contentHeight: root.gridContentHeight
+                    clip: true
+                    flickableDirection: Flickable.VerticalFlick
+                    boundsBehavior: Flickable.DragAndOvershootBounds
+                    maximumFlickVelocity: 3200
+                    flickDeceleration: 2800
+                    interactive: root.totalRows > root.visibleRows
+                    rebound: Transition {
+                        NumberAnimation {
+                            properties: "x,y"
+                            duration: 180
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    onContentHeightChanged: {
+                        const clampedContentY = root.clampContentY(gridFlickable, contentY)
+                        if (Math.abs(clampedContentY - contentY) > 0.5) {
+                            scrollToEntryAnimation.stop()
+                            contentY = clampedContentY
+                        }
+                    }
+                    onHeightChanged: {
+                        const clampedContentY = root.clampContentY(gridFlickable, contentY)
+                        if (Math.abs(clampedContentY - contentY) > 0.5) {
+                            scrollToEntryAnimation.stop()
+                            contentY = clampedContentY
+                        }
+                    }
+
                     NumberAnimation {
-                        properties: "x,y"
-                        duration: 180
+                        id: scrollToEntryAnimation
+                        target: gridFlickable
+                        property: "contentY"
+                        duration: 220
                         easing.type: Easing.OutCubic
                     }
-                }
 
-                onDraggingChanged: {
-                    if (dragging) {
-                        wheelScrollAnimation.stop()
-                        wheelTargetY = contentY
-                    }
-                }
-                onContentYChanged: {
-                    if (!wheelScrollAnimation.running) {
-                        wheelTargetY = contentY
-                    }
-                }
-                onContentHeightChanged: wheelTargetY = root.clampContentY(gridFlickable, wheelTargetY)
-                onHeightChanged: wheelTargetY = root.clampContentY(gridFlickable, wheelTargetY)
+                    Item {
+                        id: keyboardSelectionBackground
+                        x: gridContentRoot.selectionTargetButton ?
+                               contentGrid.x + gridContentRoot.selectionTargetButton.x +
+                               Math.round((gridContentRoot.selectionTargetButton.width - width) / 2) :
+                               0
+                        y: gridContentRoot.selectionTargetButton ?
+                               contentGrid.y + gridContentRoot.selectionTargetButton.y :
+                               0
+                        width: gridContentRoot.selectionTargetButton ? gridContentRoot.selectionTargetButton.hoverWidth : 0
+                        height: gridContentRoot.selectionTargetButton ? gridContentRoot.selectionTargetButton.hoverHeight : 0
+                        opacity: gridContentRoot.selectionTargetButton ? 1.0 : 0.0
 
-                WheelHandler {
-                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-                    onWheel: function(event) {
-                        if (!gridFlickable.interactive) {
-                            return
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 12
+                            color: root.selectionFillColor
                         }
 
-                        const deltaY = event.pixelDelta.y !== 0 ? event.pixelDelta.y : (event.angleDelta.y / 120) * 40
-                        const baseTarget = wheelScrollAnimation.running ? gridFlickable.wheelTargetY : gridFlickable.contentY
-                        gridFlickable.wheelTargetY = root.overshootContentY(gridFlickable, baseTarget - deltaY)
+                        D.InsideBoxBorder {
+                            anchors.fill: parent
+                            radius: 12
+                            color: root.selectionInsideBorderColor
+                            borderWidth: 1 / Screen.devicePixelRatio
+                        }
 
-                        wheelScrollAnimation.from = gridFlickable.contentY
-                        wheelScrollAnimation.to = gridFlickable.wheelTargetY
-                        wheelScrollAnimation.restart()
-                        event.accepted = true
-                    }
-                }
+                        D.OutsideBoxBorder {
+                            anchors.fill: parent
+                            radius: 12
+                            color: root.selectionOutsideBorderColor
+                            borderWidth: 1 / Screen.devicePixelRatio
+                        }
 
-                NumberAnimation {
-                    id: wheelScrollAnimation
-                    target: gridFlickable
-                    property: "contentY"
-                    duration: 220
-                    easing.type: Easing.OutCubic
-                    onFinished: {
-                        const clampedTarget = root.clampContentY(gridFlickable, gridFlickable.wheelTargetY)
-                        if (Math.abs(clampedTarget - gridFlickable.wheelTargetY) > 0.5) {
-                            gridFlickable.returnToBounds()
+                        Behavior on x {
+                            NumberAnimation { duration: 72; easing.type: Easing.OutQuad }
+                        }
+                        Behavior on y {
+                            NumberAnimation { duration: 72; easing.type: Easing.OutQuad }
+                        }
+                        Behavior on opacity {
+                            NumberAnimation { duration: 72; easing.type: Easing.OutQuad }
                         }
                     }
-                }
 
-                ScrollBar.vertical: ScrollBar {
-                    id: verticalScrollBar
-                    parent: listViewport
-                    x: listViewport.width - width
-                    y: 0
-                    height: listViewport.height
-                    implicitWidth: root.scrollBarWidth
-                    policy: root.totalRows > root.visibleRows ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
-                }
+                    Item {
+                        id: hoverBackground
+                        x: gridContentRoot.hoverTargetButton ?
+                               contentGrid.x + gridContentRoot.hoverTargetButton.x +
+                               Math.round((gridContentRoot.hoverTargetButton.width - width) / 2) :
+                               0
+                        y: gridContentRoot.hoverTargetButton ?
+                               contentGrid.y + gridContentRoot.hoverTargetButton.y :
+                               0
+                        width: gridContentRoot.hoverTargetButton ? gridContentRoot.hoverTargetButton.hoverWidth : 0
+                        height: gridContentRoot.hoverTargetButton ? gridContentRoot.hoverTargetButton.hoverHeight : 0
+                        opacity: gridContentRoot.hoverTargetButton && gridContentRoot.hoverTargetButton !== gridContentRoot.selectionTargetButton ? 1.0 : 0.0
 
-                Grid {
-                    id: contentGrid
-                    x: Math.round((root.gridAreaWidth - width) / 2)
-                    columns: root.columnCount
-                    spacing: root.gridSpacing
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 12
+                            color: root.hoverFillColor
+                        }
 
-                    Repeater {
-                        model: root.entries
+                        D.InsideBoxBorder {
+                            anchors.fill: parent
+                            radius: 12
+                            color: root.hoverInsideBorderColor
+                            borderWidth: 1 / Screen.devicePixelRatio
+                        }
 
-                        delegate: D.ToolButton {
-                            id: gridButton
-                            required property var modelData
+                        D.OutsideBoxBorder {
+                            anchors.fill: parent
+                            radius: 12
+                            color: root.hoverOutsideBorderColor
+                            borderWidth: 1 / Screen.devicePixelRatio
+                        }
+
+                        Behavior on x {
+                            NumberAnimation { duration: 72; easing.type: Easing.OutQuad }
+                        }
+                        Behavior on y {
+                            NumberAnimation { duration: 72; easing.type: Easing.OutQuad }
+                        }
+                        Behavior on opacity {
+                            NumberAnimation { duration: 72; easing.type: Easing.OutQuad }
+                        }
+                    }
+
+                    Grid {
+                        id: contentGrid
+                        x: Math.round((root.gridAreaWidth - width) / 2)
+                        columns: root.columnCount
+                        spacing: root.gridSpacing
+
+                        Repeater {
+                            id: gridRepeater
+                            model: root.entries
+
+                            delegate: D.ToolButton {
+                                id: gridButton
+                                required property int index
+                                required property var modelData
+                                readonly property string entryUrl: modelData && modelData.entryUrl ? String(modelData.entryUrl) : ""
+                                readonly property string thumbnailUrl: modelData && modelData.thumbnailUrl ? String(modelData.thumbnailUrl) : ""
+                                readonly property bool thumbnailAvailable: thumbnailUrl !== ""
+                                readonly property bool thumbnailReady: thumbnailAvailable && thumbnailImage.status === Image.Ready
+                                readonly property real thumbnailAspectRatio: thumbnailImage.implicitHeight > 0 ?
+                                                                               thumbnailImage.implicitWidth / thumbnailImage.implicitHeight :
+                                                                               1
+                                readonly property int thumbnailDisplayWidth: Math.max(1, Math.round(thumbnailAspectRatio >= 1 ?
+                                                                                                          root.itemIconSize :
+                                                                                                          root.itemIconSize * thumbnailAspectRatio))
+                                readonly property int thumbnailDisplayHeight: Math.max(1, Math.round(thumbnailAspectRatio >= 1 ?
+                                                                                                           root.itemIconSize / thumbnailAspectRatio :
+                                                                                                           root.itemIconSize))
+                            readonly property bool keyboardSelected: root.keyboardSelectionActive && index === root.keyboardCurrentIndex
+                            readonly property bool hoverActive: itemHoverHandler.hovered || down
+                            property string dragImageSource: ""
+                            property bool suppressClick: false
+                            readonly property color dragTitleBackgroundColor: root.colorTheme === Dock.Dark ?
+                                                                                 Qt.rgba(0, 0, 0, 0.58) :
+                                                                                 Qt.rgba(1, 1, 1, 0.92)
+                            readonly property color dragTitleBorderColor: root.colorTheme === Dock.Dark ?
+                                                                             Qt.rgba(1, 1, 1, 0.12) :
+                                                                             Qt.rgba(0, 0, 0, 0.10)
+                            readonly property int dragTitleLineCount: Math.max(1, Math.min(titleMeasure.lineCount > 0 ? titleMeasure.lineCount : 1, 2))
+                            readonly property int dragTitleWidth: Math.min(root.itemTextMaxWidth, Math.max(titleMetrics.advanceWidth, 24))
+                            readonly property int dragTitleHeight: dragTitleLineCount * titleFontMetrics.height
+                            readonly property int dragOverlayWidth: Math.max(root.itemIconSize + 24, dragTitleWidth + 18)
+                            readonly property int dragOverlayHeight: root.itemIconSize + 8 + dragTitleHeight + 10
+                            readonly property real sourceDragHotSpotX: width / 2
+                            readonly property real sourceDragHotSpotY: root.itemTopPadding + root.itemIconSize / 2
+                            readonly property real dragOverlayHotSpotScaleY: dragOverlayHeight > 0
+                                                                              ? (root.itemIconSize / 2) / dragOverlayHeight
+                                                                              : 0.5
 
                             property int hoverWidth: Math.min(root.cellWidth - 4,
                                                               Math.max(root.itemIconSize + root.itemHoverPadding * 2,
@@ -521,20 +1014,27 @@ Item {
                             height: root.cellHeight
                             flat: true
                             padding: 0
+                            Drag.dragType: Drag.Automatic
+                            Drag.hotSpot.x: Qt.platform.pluginName === "xcb" ? 0 : sourceDragHotSpotX
+                            Drag.hotSpot.y: Qt.platform.pluginName === "xcb" ? 0 : sourceDragHotSpotY
+                            Drag.supportedActions: Qt.CopyAction | Qt.MoveAction | Qt.LinkAction
+                            Drag.mimeData: ({
+                                "text/uri-list": gridButton.entryUrl
+                            })
+                            DQuickDrag.hotSpotScale: Qt.size(0.5, dragOverlayHotSpotScaleY)
+                            DQuickDrag.active: Drag.active && Qt.platform.pluginName === "xcb"
+                            DQuickDrag.overlay: dragOverlayWindow
 
-                            background: Item {
-                                AppletItemBackground {
-                                    enabled: false
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    anchors.top: parent.top
-                                    anchors.topMargin: 0
-                                    width: gridButton.hoverWidth
-                                    height: gridButton.hoverHeight
-                                    radius: 12
-                                    isActive: false
-                                    opacity: gridButton.hovered || gridButton.down ? 1.0 : 0.0
-                                    Behavior on opacity {
-                                        NumberAnimation { duration: 150 }
+                            background: Item {}
+
+                            HoverHandler {
+                                id: itemHoverHandler
+                                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
+                                onHoveredChanged: {
+                                    if (hovered || gridButton.down) {
+                                        gridContentRoot.hoverTargetButton = gridButton
+                                    } else if (gridContentRoot.hoverTargetButton === gridButton) {
+                                        gridContentRoot.scheduleHoverSync()
                                     }
                                 }
                             }
@@ -548,14 +1048,76 @@ Item {
                                     width: gridButton.hoverWidth - root.itemHoverPadding * 2
                                     spacing: root.itemInnerSpacing
 
-                                    D.DciIcon {
+                                    Item {
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         width: root.itemIconSize
                                         height: root.itemIconSize
-                                        sourceSize: Qt.size(width, height)
-                                        name: modelData.iconName
-                                        smooth: false
-                                        retainWhileLoading: true
+
+                                        Image {
+                                            id: thumbnailImage
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            source: gridButton.thumbnailUrl
+                                            sourceSize: Qt.size(Math.round(root.itemIconSize * (Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0)),
+                                                                Math.round(root.itemIconSize * (Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0)))
+                                            fillMode: Image.Stretch
+                                            asynchronous: true
+                                            cache: false
+                                            smooth: true
+                                            visible: false
+                                        }
+
+                                        Rectangle {
+                                            id: thumbnailMask
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            radius: root.thumbnailCornerRadius
+                                            color: "white"
+                                            visible: false
+                                        }
+
+                                        OpacityMask {
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            source: thumbnailImage
+                                            maskSource: thumbnailMask
+                                            cached: false
+                                            visible: gridButton.thumbnailReady
+                                        }
+
+                                        D.InsideBoxBorder {
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            radius: root.thumbnailCornerRadius
+                                            color: root.thumbnailInsideBorderColor
+                                            borderWidth: 1 / Screen.devicePixelRatio
+                                            visible: gridButton.thumbnailReady
+                                        }
+
+                                        D.OutsideBoxBorder {
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            radius: root.thumbnailCornerRadius
+                                            color: root.thumbnailOutsideBorderColor
+                                            borderWidth: 1 / Screen.devicePixelRatio
+                                            visible: gridButton.thumbnailReady
+                                        }
+
+                                        D.DciIcon {
+                                            anchors.centerIn: parent
+                                            width: root.itemIconSize
+                                            height: root.itemIconSize
+                                            sourceSize: Qt.size(width, height)
+                                            name: modelData.iconName
+                                            smooth: false
+                                            retainWhileLoading: true
+                                            visible: !gridButton.thumbnailReady
+                                        }
                                     }
 
                                     Label {
@@ -570,6 +1132,7 @@ Item {
                                         maximumLineCount: 2
                                         horizontalAlignment: Text.AlignHCenter
                                         elide: Text.ElideNone
+                                        color: root.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 1) : Qt.rgba(0, 0, 0, 1)
                                         font.pixelSize: 11
                                         font.weight: Font.Normal
                                     }
@@ -603,7 +1166,182 @@ Item {
                                 text: gridButton.modelData && gridButton.modelData.name ? String(gridButton.modelData.name) : ""
                             }
 
+                            property Component dragOverlayWindow: QuickDragWindow {
+                                width: gridButton.dragOverlayWidth
+                                height: gridButton.dragOverlayHeight
+
+                                Column {
+                                    id: dragVisual
+                                    anchors.centerIn: parent
+                                    spacing: 8
+                                    width: gridButton.dragOverlayWidth
+
+                                    Item {
+                                        id: dragIconPreview
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        implicitWidth: root.itemIconSize
+                                        implicitHeight: root.itemIconSize
+
+                                        Image {
+                                            id: dragThumbnailImage
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            source: gridButton.thumbnailUrl
+                                            sourceSize: Qt.size(Math.round(root.itemIconSize * (Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0)),
+                                                                Math.round(root.itemIconSize * (Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0)))
+                                            fillMode: Image.Stretch
+                                            asynchronous: true
+                                            cache: false
+                                            smooth: true
+                                            visible: false
+                                        }
+
+                                        Rectangle {
+                                            id: dragThumbnailMask
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            radius: root.thumbnailCornerRadius
+                                            color: "white"
+                                            visible: false
+                                        }
+
+                                        OpacityMask {
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            source: dragThumbnailImage
+                                            maskSource: dragThumbnailMask
+                                            cached: false
+                                            visible: gridButton.thumbnailAvailable && dragThumbnailImage.status === Image.Ready
+                                        }
+
+                                        D.InsideBoxBorder {
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            radius: root.thumbnailCornerRadius
+                                            color: root.thumbnailInsideBorderColor
+                                            borderWidth: 1 / Screen.devicePixelRatio
+                                            visible: gridButton.thumbnailAvailable && dragThumbnailImage.status === Image.Ready
+                                        }
+
+                                        D.OutsideBoxBorder {
+                                            anchors.centerIn: parent
+                                            width: gridButton.thumbnailDisplayWidth
+                                            height: gridButton.thumbnailDisplayHeight
+                                            radius: root.thumbnailCornerRadius
+                                            color: root.thumbnailOutsideBorderColor
+                                            borderWidth: 1 / Screen.devicePixelRatio
+                                            visible: gridButton.thumbnailAvailable && dragThumbnailImage.status === Image.Ready
+                                        }
+
+                                        D.DciIcon {
+                                            anchors.centerIn: parent
+                                            width: root.itemIconSize
+                                            height: root.itemIconSize
+                                            sourceSize: Qt.size(width, height)
+                                            name: gridButton.modelData && gridButton.modelData.iconName ? String(gridButton.modelData.iconName) : ""
+                                            visible: !gridButton.thumbnailAvailable || dragThumbnailImage.status !== Image.Ready
+                                            smooth: false
+                                            retainWhileLoading: true
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        id: dragTitleBackground
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        implicitWidth: gridButton.dragOverlayWidth
+                                        implicitHeight: gridButton.dragTitleHeight + 10
+                                        radius: 8
+                                        color: gridButton.dragTitleBackgroundColor
+
+                                        D.InsideBoxBorder {
+                                            anchors.fill: parent
+                                            radius: parent.radius
+                                            color: gridButton.dragTitleBorderColor
+                                            borderWidth: 1 / Screen.devicePixelRatio
+                                        }
+
+                                        Label {
+                                            id: dragTitleLabel
+                                            anchors.centerIn: parent
+                                            width: Math.min(root.itemTextMaxWidth, parent.width - 12)
+                                            horizontalAlignment: Text.AlignHCenter
+                                            wrapMode: Text.WrapAnywhere
+                                            maximumLineCount: 2
+                                            elide: Text.ElideNone
+                                            text: root.twoLineMiddleElidedText(titleFontMetrics,
+                                                                               titleMeasure.text,
+                                                                               width,
+                                                                               titleMeasure.lineCount > 2)
+                                            color: root.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 1) : Qt.rgba(0, 0, 0, 1)
+                                            font.pixelSize: 11
+                                            font.weight: Font.Normal
+                                        }
+                                    }
+                                }
+                            }
+
+                            Timer {
+                                id: suppressClickTimer
+                                interval: 120
+                                repeat: false
+                                onTriggered: {
+                                    gridButton.suppressClick = false
+                                }
+                            }
+
+                            DragHandler {
+                                id: fileDragHandler
+                                target: null
+                                enabled: gridButton.entryUrl !== ""
+                                acceptedButtons: Qt.LeftButton
+                                dragThreshold: 6
+                                onActiveChanged: {
+                                    if (active) {
+                                        gridButton.suppressClick = true
+                                        Panel.contextDragging = true
+                                        gridButton.dragImageSource = ""
+                                        gridButton.Drag.imageSource = ""
+                                        if (Qt.platform.pluginName !== "xcb") {
+                                            gridButton.grabToImage(function(result) {
+                                                if (!fileDragHandler.active) {
+                                                    return
+                                                }
+
+                                                const dragImagePath = "/tmp/dde-shell-dock-popup-drag-" +
+                                                                      Date.now() + "-" +
+                                                                      Math.random().toString(36).slice(2) + ".png"
+                                                result.saveToFile(dragImagePath)
+                                                const dragImageUrl = "file://" + dragImagePath
+                                                gridButton.dragImageSource = dragImageUrl
+                                                gridButton.Drag.imageSource = dragImageUrl
+                                            })
+                                        }
+                                    } else {
+                                        Panel.contextDragging = false
+                                        gridButton.dragImageSource = ""
+                                        gridButton.Drag.imageSource = ""
+                                        suppressClickTimer.restart()
+                                    }
+
+                                    Qt.callLater(function() {
+                                        gridButton.Drag.active = fileDragHandler.active
+                                        if (fileDragHandler.active) {
+                                            root.closeRequested()
+                                        }
+                                    })
+                                }
+                            }
+
                             onClicked: {
+                                if (gridButton.suppressClick || fileDragHandler.active || gridButton.Drag.active) {
+                                    return
+                                }
+
+                                root.selectEntryIndex(index, false)
                                 if (modelData.directory) {
                                     root.refresh(modelData.entryId, true)
                                     return
@@ -612,8 +1350,44 @@ Item {
                                 root.applet.activatePopupEntry(root.dockElement, modelData.entryId)
                                 root.closeRequested()
                             }
+
+                            hoverEnabled: false
+
+                            onDownChanged: {
+                                if (down) {
+                                    gridContentRoot.hoverTargetButton = gridButton
+                                } else if (!itemHoverHandler.hovered && gridContentRoot.hoverTargetButton === gridButton) {
+                                    gridContentRoot.scheduleHoverSync()
+                                }
+                            }
+                            onKeyboardSelectedChanged: gridContentRoot.syncSelectionTarget()
+                            Component.onCompleted: {
+                                gridContentRoot.scheduleHoverSync()
+                                gridContentRoot.syncSelectionTarget()
+                            }
+                        }
+
+                        onItemAdded: function(index, item) {
+                            gridContentRoot.scheduleHoverSync()
+                            gridContentRoot.syncSelectionTarget()
+                        }
+
+                        onItemRemoved: function(index, item) {
+                            gridContentRoot.scheduleHoverSync()
+                            gridContentRoot.syncSelectionTarget()
                         }
                     }
+                }
+            }
+            }
+
+            Connections {
+                target: root
+                function onKeyboardCurrentIndexChanged() {
+                    gridContentRoot.syncSelectionTarget()
+                }
+                function onKeyboardSelectionActiveChanged() {
+                    gridContentRoot.syncSelectionTarget()
                 }
             }
         }
@@ -653,6 +1427,7 @@ Item {
             script: {
                 root.descriptor = root.pendingDescriptor || ({ entries: [] })
                 root.popupHeightValue = root.pendingPopupHeight > 0 ? root.pendingPopupHeight : root.popupHeightFor(root.descriptor)
+                root.resetKeyboardNavigation()
                 root.contentOpacity = 0
                 root.contentOffsetX = contentSwapInAnimation.from
             }

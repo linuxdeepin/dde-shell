@@ -17,7 +17,6 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 AppletItemButton {
     id: root
     property alias inputEventsEnabled: surfaceItem.inputEventsEnabled
-    property point lastSpotlightPoint: Qt.point(0, 0)
 
     property size visualSize: isHorizontal ? Qt.size(pluginItem.implicitWidth, Math.min(itemHeight, pluginItem.implicitHeight))
                                            : Qt.size(Math.min(itemWidth, pluginItem.implicitWidth), pluginItem.implicitHeight)
@@ -34,18 +33,11 @@ AppletItemButton {
     hoverEnabled: inputEventsEnabled
 
     function reportSpotlight(point) {
-        const localPoint = point || Qt.point(width / 2, height / 2)
-        const mappedPoint = root.mapToItem(null, localPoint.x, localPoint.y)
-        lastSpotlightPoint = mappedPoint
-        Panel.reportMousePresence(true, lastSpotlightPoint)
+        root.updateSpotlight(point || Qt.point(width / 2, height / 2))
     }
 
     function scheduleSpotlightClear() {
         spotlightClearTimer.restart()
-    }
-
-    function clearSpotlight() {
-        Panel.reportMousePresence(false, lastSpotlightPoint)
     }
 
     function updatePluginMargins()
@@ -59,34 +51,33 @@ AppletItemButton {
         implicitHeight: plugin ? plugin.height : 0
         implicitWidth: plugin ? plugin.width : 0
 
-        property var itemGlobalPoint: {
-            var a = pluginItem
-            var x = 0, y = 0
-            while(a.parent) {
-                x += a.x
-                y += a.y
-                a = a.parent
+        function localItemPoint() {
+            let current = pluginItem
+            let x = 0
+            let y = 0
+            while (current.parent) {
+                x += current.x
+                y += current.y
+                current = current.parent
             }
 
             return Qt.point(x, y)
         }
-        
+
+        property var itemScenePoint: {
+            Panel.frontendWindowRect
+            pluginItem.localItemPoint()
+            return pluginItem.mapToItem(null, 0, 0)
+        }
+
         property var itemGlobalPos: {
-            var a = pluginItem
-            var x = 0, y = 0
-
-            if (a.Window.window && surfaceItem.visible) {
-                while (a.parent) {
-                    x += a.x
-                    y += a.y
-                    a = a.parent
-                }
-                x += pluginItem.Window.window.x
-                y += pluginItem.Window.window.y
-
+            if (!pluginItem.Window.window || !surfaceItem.visible) {
+                return Qt.point(0, 0)
             }
 
-            return Qt.point(x, y)
+            Panel.frontendWindowRect
+            pluginItem.localItemPoint()
+            return pluginItem.mapToGlobal(0, 0)
         }
 
         HoverHandler {
@@ -122,14 +113,21 @@ AppletItemButton {
             id: surfaceItem
             anchors.fill: parent
             shellSurface: pluginItem.plugin
+
+            onWidthChanged: updatePluginItemGeometryTimer.start()
+            onHeightChanged: updatePluginItemGeometryTimer.start()
         }
 
         Component.onCompleted: {
             if (!pluginItem.plugin || !itemVisible)
                 return
             updatePluginMargins()
-            pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
-            pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
+            pluginItem.plugin.updatePluginGeometry(Qt.rect(Math.round(pluginItem.itemScenePoint.x),
+                                                           Math.round(pluginItem.itemScenePoint.y),
+                                                           Math.round(surfaceItem.width),
+                                                           Math.round(surfaceItem.height)))
+            pluginItem.plugin.setGlobalPos(Qt.point(Math.round(pluginItem.itemGlobalPos.x),
+                                                    Math.round(pluginItem.itemGlobalPos.y)))
         }
 
         Timer {
@@ -141,8 +139,11 @@ AppletItemButton {
                 if (!pluginItem.plugin || !itemVisible)
                     return
                 updatePluginMargins()
-                if (pluginItem.itemGlobalPoint.x >= 0 && pluginItem.itemGlobalPoint.y >= 0) {
-                    pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
+                if (pluginItem.itemScenePoint.x >= 0 && pluginItem.itemScenePoint.y >= 0) {
+                    pluginItem.plugin.updatePluginGeometry(Qt.rect(Math.round(pluginItem.itemScenePoint.x),
+                                                                   Math.round(pluginItem.itemScenePoint.y),
+                                                                   Math.round(surfaceItem.width),
+                                                                   Math.round(surfaceItem.height)))
                 }
             }
         }
@@ -155,11 +156,12 @@ AppletItemButton {
             onTriggered: {
                 if (!pluginItem.plugin || !itemVisible)
                     return
-                pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
+                pluginItem.plugin.setGlobalPos(Qt.point(Math.round(pluginItem.itemGlobalPos.x),
+                                                        Math.round(pluginItem.itemGlobalPos.y)))
             }
         }
 
-        onItemGlobalPointChanged: {
+        onItemScenePointChanged: {
             updatePluginItemGeometryTimer.start()
         }
 
@@ -172,7 +174,8 @@ AppletItemButton {
             if (!pluginItem.plugin || !itemVisible)
                 return
             updatePluginMargins()
-            pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
+            pluginItem.plugin.setGlobalPos(Qt.point(Math.round(pluginItem.itemGlobalPos.x),
+                                                    Math.round(pluginItem.itemGlobalPos.y)))
         }
     }
 

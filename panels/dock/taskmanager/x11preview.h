@@ -13,6 +13,8 @@
 #include <DToolButton>
 #include <QListView>
 #include <QPointer>
+#include <QPropertyAnimation>
+#include <QRect>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QWindow>
@@ -67,9 +69,14 @@ public:
     explicit X11WindowPreviewContainer(X11WindowMonitor* monitor, QWidget *parent = nullptr);
 
     void
-    showPreviewWithModel(QAbstractItemModel *sourceModel, const QPointer<QWindow> &window, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    showPreviewWithModel(QAbstractItemModel *sourceModel,
+                         const QPointer<QWindow> &window,
+                         int32_t previewXoffset,
+                         int32_t previewYoffset,
+                         uint32_t direction);
 
     void hidePreView();
+    void setPreviewOpacity(double opacity);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -80,12 +87,15 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
+    void applyTheme();
     inline void updatePreviewTitle(const QString& title);
     inline void initUI();
     inline void updateSize(int windowCount = -1);
     void updatePreviewIconFromString(const QString &stringData);
+    QRect previewGeometry() const;
 
 public Q_SLOTS:
+    void dismissPreview();
     void updatePosition();
 
 private Q_SLOTS:
@@ -106,10 +116,13 @@ private:
     DIconButton* m_closeAllButton;
 
     QTimer* m_hideTimer;
+    QPropertyAnimation* m_positionAnimation;
 
     int32_t m_previewXoffset;
     int32_t m_previewYoffset;
     uint32_t m_direction;
+    bool m_positionInitialized;
+    double m_previewOpacity;
 
     QPointer<QWindow> m_baseWindow;
 

@@ -27,16 +27,23 @@ AppletItemButton {
 
     D.ColorSelector.hovered: (isDropHover && DDT.TraySortOrderModel.actionsAlwaysVisible) || hovered || stashedPopup.popupVisible
 
-    property var itemGlobalPoint: {
-        var a = root
-        var x = 0, y = 0
-        while(a.parent) {
-            x += a.x
-            y += a.y
-            a = a.parent
+    function localItemPoint() {
+        let current = root
+        let x = 0
+        let y = 0
+        while (current.parent) {
+            x += current.x
+            y += current.y
+            current = current.parent
         }
 
-        return Qt.point(x + width / 2, y + height / 2)
+        return Qt.point(x, y)
+    }
+
+    property var itemGlobalPoint: {
+        Panel.frontendWindowRect
+        root.localItemPoint()
+        return root.mapToItem(null, root.width / 2, root.height / 2)
     }
     Connections {
         target: stashedPopup
@@ -111,14 +118,16 @@ AppletItemButton {
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
     }
+
+    function showToolTipNow() {
+        var point = root.mapToItem(null, root.width / 2, root.height / 2)
+        toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+        toolTip.open()
+    }
     Timer {
         id: toolTipShowTimer
         interval: 200
-        onTriggered: {
-            var point = root.mapToItem(null, root.width / 2, root.height / 2)
-            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-            toolTip.open()
-        }
+        onTriggered: root.showToolTipNow()
     }
     
     onHoveredChanged: {
@@ -127,7 +136,11 @@ AppletItemButton {
         }
 
         if (hovered) {
-            toolTipShowTimer.start()
+            if (toolTip.toolTipWindow && toolTip.toolTipWindow.visible) {
+                root.showToolTipNow()
+            } else {
+                toolTipShowTimer.start()
+            }
         } else {
             if (toolTipShowTimer.running) {
                 toolTipShowTimer.stop()

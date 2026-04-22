@@ -76,6 +76,8 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     dockgroupmodel.h
     hoverpreviewproxymodel.cpp
     hoverpreviewproxymodel.h
+    popupsortutils.cpp
+    popupsortutils.h
     taskmanager.cpp
     taskmanager.h
     treelandwindow.cpp
@@ -129,3 +131,8 @@ ds_install_package(PACKAGE org.deepin.ds.dock.taskmanager TARGET dock-taskmanage
 dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.taskmanager.json) # compat
 dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES dconfig/org.deepin.ds.dock.taskmanager.json)
 ds_handle_package_translation(PACKAGE org.deepin.ds.dock.taskmanager)
+
+add_dependencies(dock-taskmanager
+    org.deepin.ds.dock.taskmanager_package
+    org.deepin.ds.dock.taskmanager_translation
+)
