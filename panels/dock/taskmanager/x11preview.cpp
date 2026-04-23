@@ -22,6 +22,7 @@
 #include <QDBusUnixFileDescriptor>
 #include <QEvent>
 #include <QFile>
+#include <QFutureWatcher>
 #include <QHash>
 #include <QLayout>
 #include <QLoggingCategory>
@@ -105,22 +106,18 @@ QColor previewTextColor(const DGuiApplicationHelper::ColorType themeType)
 
 static QHash<uint32_t, QPixmap> s_windowPreviewCache;
 
-QPixmap fetchWindowPreview(const uint32_t &winId)
+QImage captureWindowPreviewImage(const uint32_t &winId)
 {
     // TODO: check kwin is load screenshot plugin
     if (!WM_HELPER->hasComposite())
-        return QPixmap();
-
-    if (s_windowPreviewCache.contains(winId)) {
-        return s_windowPreviewCache.value(winId);
-    }
+        return QImage();
 
     // pipe read write fd
     int fd[2];
 
     if (pipe2(fd, O_CLOEXEC) < 0) {
         qDebug() << "failed to create pipe";
-        return QPixmap();
+        return QImage();
     }
 
     QDBusInterface interface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/ScreenShot2"), QStringLiteral("org.kde.KWin.ScreenShot2"));
@@ -144,7 +141,7 @@ QPixmap fetchWindowPreview(const uint32_t &winId)
     if (!reply.isValid()) {
         ::close(fd[0]);
         qDebug() << "get current workspace background error: " << reply.error().message();
-        return QPixmap();
+        return QImage();
     }
 
     QVariantMap imageInfo = reply.value();
@@ -155,7 +152,7 @@ QPixmap fetchWindowPreview(const uint32_t &winId)
 
     if (imageWidth <= 1 || imageHeight <= 1) {
         ::close(fd[0]);
-        return QPixmap();
+        return QImage();
     }
 
     QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
@@ -198,18 +195,12 @@ QPixmap fetchWindowPreview(const uint32_t &winId)
 
     if (totalRead < expectedSize) {
         qWarning(x11WindowPreview) << "fetchWindowPreview: incomplete data, got" << totalRead << "/ expected" << expectedSize;
-        return QPixmap();
+        return QImage();
     }
 
     QImage image(reinterpret_cast<const uchar *>(fileContent.constData()),
                  imageWidth, imageHeight, imageStride, qimageFormat);
-    auto pixmap = QPixmap::fromImage(image);
-
-    if (!pixmap.isNull()) {
-        s_windowPreviewCache.insert(winId, pixmap);
-    }
-
-    return pixmap;
+    return image.copy();
 }
 
 class PreviewsListView : public QListView
@@ -274,7 +265,7 @@ public:
         QPen pen;
         if (WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
             uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
-            auto pixmap = fetchWindowPreview(winId);
+            const QPixmap pixmap = m_parent->previewPixmap(winId);
             auto size = calSize(pixmap.size());
 
             DStyleHelper dstyle(m_listView->style());
@@ -304,7 +295,9 @@ public:
             QPainterPath clipPath;
             clipPath.addRoundedRect(imageRect, radius, radius);
             painter->setClipPath(clipPath);
-            painter->drawPixmap(imageRect, pixmap);
+            if (!pixmap.isNull()) {
+                painter->drawPixmap(imageRect, pixmap);
+            }
             painter->setClipping(false);
             painter->drawRoundedRect(imageRect, radius, radius);
             if (option.state.testFlag(QStyle::State_MouseOver)) {
@@ -353,7 +346,10 @@ public:
         }
 
         uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
-        auto pixmap = fetchWindowPreview(winId);
+        const QPixmap pixmap = m_parent->previewPixmap(winId);
+        if (pixmap.isNull()) {
+            return QSize(PREVIEW_MINI_WIDTH, PREVIEW_CONTENT_HEIGHT) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2);
+        }
         int width = qBound(PREVIEW_CONTENT_MIN_WIDTH, calSize(pixmap.size()).width(), PREVIEW_CONTENT_MAX_WIDTH);
         return QSize(width, PREVIEW_CONTENT_HEIGHT) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2);
     }
@@ -487,6 +483,52 @@ void X11WindowPreviewContainer::setPreviewOpacity(double opacity)
     applyTheme();
 }
 
+QPixmap X11WindowPreviewContainer::previewPixmap(uint32_t winId)
+{
+    if (winId == 0) {
+        return {};
+    }
+
+    const auto cachedPixmap = s_windowPreviewCache.constFind(winId);
+    if (cachedPixmap != s_windowPreviewCache.cend()) {
+        return cachedPixmap.value();
+    }
+
+    ensurePreviewFetch(winId);
+    return {};
+}
+
+void X11WindowPreviewContainer::ensurePreviewFetch(uint32_t winId)
+{
+    if (winId == 0 || m_pendingPreviewFetches.contains(winId) || s_windowPreviewCache.contains(winId)) {
+        return;
+    }
+
+    m_pendingPreviewFetches.insert(winId);
+    auto *watcher = new QFutureWatcher<QImage>(this);
+    connect(watcher, &QFutureWatcher<QImage>::finished, this, [this, watcher, winId]() {
+        const QImage image = watcher->result();
+        if (!image.isNull()) {
+            s_windowPreviewCache.insert(winId, QPixmap::fromImage(image));
+        }
+
+        m_pendingPreviewFetches.remove(winId);
+        watcher->deleteLater();
+
+        if (m_view) {
+            m_view->viewport()->update();
+            m_view->updateGeometry();
+            m_view->adjustSize();
+        }
+        if (isVisible()) {
+            updateSize(m_sourceModel ? m_sourceModel->rowCount() : -1);
+        }
+    });
+    watcher->setFuture(QtConcurrent::run([winId]() {
+        return captureWindowPreviewImage(winId);
+    }));
+}
+
 void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceModel,
                                                      const QPointer<QWindow> &window,
                                                      int32_t previewXoffset,
@@ -548,6 +590,10 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
     }
 
     if (sourceModel && sourceModel->rowCount() > 0) {
+        for (int i = 0; i < sourceModel->rowCount(); ++i) {
+            const uint32_t winId = sourceModel->index(i, 0).data(TaskManager::WinIdRole).toUInt();
+            ensurePreviewFetch(winId);
+        }
         const QModelIndex &firstIndex = sourceModel->index(0, 0);
         // 获取图标，优先使用窗口图标，如果为空则使用应用图标
         QVariant iconData = firstIndex.data(TaskManager::WinIconRole);

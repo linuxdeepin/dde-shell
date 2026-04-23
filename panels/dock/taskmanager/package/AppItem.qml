@@ -33,7 +33,7 @@ Item {
     property real blendOpacity: 1.0
     property point lastSpotlightPoint: Qt.point(0, 0)
     readonly property string toolTipText: root.itemId === "dde-trash"
-                                          ? root.name + "-" + taskmanager.Applet.getTrashTipText()
+                                          ? root.name + "-" + taskmanager.Applet.trashTipText
                                           : root.name
 
     signal dropFilesOnItem(itemId: string, files: list<string>)
@@ -809,7 +809,7 @@ Item {
 
     function requestAppItemMenu() {
         Panel.requestClosePopup()
-        contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
+        contextMenuLoader.trashEmpty = taskmanager.Applet.trashEmpty
         contextMenuLoader.active = true
         MenuHelper.openMenu(contextMenuLoader.item)
     }

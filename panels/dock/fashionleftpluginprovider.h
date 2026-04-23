@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <QFutureWatcher>
 #include <QFileSystemWatcher>
 #include <QObject>
 #include <QElapsedTimer>
@@ -154,6 +155,7 @@ private:
     static QString weatherIconPathFor(const QString &iconName, bool isDay);
     static QString formatTransferRate(double bytesPerSecond);
     static quint64 totalInterfaceBytes(bool receiveBytes, const QStringList &preferredInterfaces = {});
+    void applyAiRefreshResult(const QVariantMap &result);
     void ensureWeatherWatchPaths();
     void refreshMailClient();
 
@@ -210,6 +212,8 @@ private:
     quint64 m_previousAggregateTransmitBytes = 0;
     QElapsedTimer m_networkSampleTimer;
     QFileSystemWatcher *m_weatherWatcher = nullptr;
+    QFutureWatcher<QVariantMap> *m_aiRefreshWatcher = nullptr;
+    bool m_aiRefreshPending = false;
 };
 
 } // namespace dock

@@ -35,6 +35,7 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QStringLiteral>
+#include <QTemporaryFile>
 #include <QUrl>
 #include <QVariantList>
 #include <QtQml/QtQml>
@@ -960,6 +961,42 @@ TaskManager::TaskManager(QObject *parent)
         connect(thumbnailProvider, &Dtk::Gui::DThumbnailProvider::thumbnailChanged, this, notifyThumbnailChanged);
         connect(thumbnailProvider, &Dtk::Gui::DThumbnailProvider::createThumbnailFinished, this, notifyThumbnailChanged);
     }
+
+    m_trashCountProcess = new QProcess(this);
+    m_trashCountProcess->setProgram(QStringLiteral("gio"));
+    m_trashCountProcess->setArguments({QStringLiteral("trash"), QStringLiteral("--list")});
+    connect(m_trashCountProcess,
+            QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            this,
+            [this](int exitCode, QProcess::ExitStatus exitStatus) {
+                const int nextTrashCount = (exitStatus == QProcess::NormalExit && exitCode == 0)
+                    ? trashCountFromOutput(m_trashCountProcess->readAllStandardOutput())
+                    : m_cachedTrashCount;
+                const bool stateChanged = !m_trashStateInitialized || m_cachedTrashCount != nextTrashCount;
+                m_cachedTrashCount = nextTrashCount;
+                m_trashStateInitialized = true;
+                if (m_trashCountRefreshTimer.isValid()) {
+                    m_trashCountRefreshTimer.restart();
+                } else {
+                    m_trashCountRefreshTimer.start();
+                }
+                if (stateChanged) {
+                    emit trashStateChanged();
+                }
+            });
+    connect(m_trashCountProcess, &QProcess::errorOccurred, this, [this](QProcess::ProcessError) {
+        if (!m_trashStateInitialized) {
+            m_trashStateInitialized = true;
+            if (m_trashCountRefreshTimer.isValid()) {
+                m_trashCountRefreshTimer.restart();
+            } else {
+                m_trashCountRefreshTimer.start();
+            }
+            emit trashStateChanged();
+        }
+    });
+
+    refreshTrashCount(true);
 }
 
 bool TaskManager::load()
@@ -1148,6 +1185,15 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     if (Settings->cgroupsBasedGrouping() && (desktopfile.isNull() || !desktopfile->isValied().first)) {
         desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
         qCDebug(taskManagerLog()) << "identify by Fallback:" << desktopId;
+    }
+
+    if (desktopfile.isNull()) {
+        desktopfile = DesktopfileParserFactory<DesktopfileAbstractParser>::createByWindow(window);
+    }
+
+    if (desktopfile.isNull()) {
+        qCWarning(taskManagerLog()) << "Unable to create desktop file parser for window:" << window->id();
+        return;
     }
 
     auto appitem = desktopfile->getAppItem();
@@ -1594,30 +1640,128 @@ void TaskManager::moveItem(int from, int to)
 
 QString TaskManager::getTrashTipText()
 {
-    const auto count = queryTrashCount();
-    return tr("%1 files").arg(count);
+    refreshTrashCount();
+    return tr("%1 files").arg(m_cachedTrashCount);
 }
 
 bool TaskManager::isTrashEmpty() const
 {
-    return queryTrashCount() == 0;
+    refreshTrashCount();
+    return m_cachedTrashCount == 0;
 }
 
-int TaskManager::queryTrashCount() const
+void TaskManager::refreshTrashCount(bool force) const
+{
+    if (!m_trashCountProcess || m_trashCountProcess->state() != QProcess::NotRunning) {
+        return;
+    }
+
+    if (!force
+        && m_trashStateInitialized
+        && m_trashCountRefreshTimer.isValid()
+        && m_trashCountRefreshTimer.elapsed() < 5000) {
+        return;
+    }
+
+    m_trashCountProcess->start();
+}
+
+int TaskManager::trashCountFromOutput(const QByteArray &output)
 {
     int count = 0;
-
-    QProcess gio;
-    gio.start("gio", QStringList() << "trash" << "--list");
-    if (gio.waitForFinished(1000) && gio.exitStatus() == QProcess::NormalExit && gio.exitCode() == 0) {
-        const QByteArray &out = gio.readAllStandardOutput();
-        const QList<QByteArray> lines = out.split('\n');
-        for (const QByteArray &l : lines) {
-            if (!l.trimmed().isEmpty()) count++;
+    const QList<QByteArray> lines = output.split('\n');
+    for (const QByteArray &line : lines) {
+        if (!line.trimmed().isEmpty()) {
+            ++count;
         }
-        return count;
     }
     return count;
+}
+
+QString TaskManager::managedTempDirectoryPath()
+{
+    QString basePath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    if (basePath.isEmpty()) {
+        basePath = QDir::tempPath();
+    }
+
+    return QDir(basePath).filePath(QStringLiteral("dde-shell/taskmanager"));
+}
+
+QString TaskManager::normalizedManagedTempFilePath(const QString &pathOrUrl)
+{
+    if (pathOrUrl.trimmed().isEmpty()) {
+        return {};
+    }
+
+    const QUrl url(pathOrUrl);
+    const QString rawPath = url.isValid() && url.isLocalFile() ? url.toLocalFile() : pathOrUrl;
+    return rawPath.isEmpty() ? QString() : QDir::cleanPath(rawPath);
+}
+
+void TaskManager::pruneManagedTempFiles() const
+{
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (m_lastManagedTempPruneMs > 0 && nowMs - m_lastManagedTempPruneMs < 10LL * 60LL * 1000LL) {
+        return;
+    }
+
+    m_lastManagedTempPruneMs = nowMs;
+    const QDir directory(managedTempDirectoryPath());
+    if (!directory.exists()) {
+        return;
+    }
+
+    for (const QFileInfo &fileInfo : directory.entryInfoList(QDir::Files | QDir::NoDotAndDotDot)) {
+        const QString cleanPath = QDir::cleanPath(fileInfo.absoluteFilePath());
+        if (m_managedTempFiles.contains(cleanPath)) {
+            continue;
+        }
+
+        if (fileInfo.lastModified().msecsTo(QDateTime::currentDateTime()) >= 6LL * 60LL * 60LL * 1000LL) {
+            QFile::remove(cleanPath);
+        }
+    }
+}
+
+QString TaskManager::createManagedTempFilePath(const QString &prefix, const QString &suffix) const
+{
+    pruneManagedTempFiles();
+
+    QDir directory(managedTempDirectoryPath());
+    if (!directory.exists() && !directory.mkpath(QStringLiteral("."))) {
+        return {};
+    }
+
+    const QString safePrefix = prefix.trimmed().isEmpty() ? QStringLiteral("dde-shell-") : prefix.trimmed();
+    const QString safeSuffix = suffix.trimmed();
+    QTemporaryFile temporaryFile(directory.filePath(QStringLiteral("%1XXXXXX%2").arg(safePrefix, safeSuffix)));
+    temporaryFile.setAutoRemove(false);
+    if (!temporaryFile.open()) {
+        return {};
+    }
+
+    const QString path = QDir::cleanPath(temporaryFile.fileName());
+    temporaryFile.close();
+    m_managedTempFiles.insert(path);
+    return path;
+}
+
+void TaskManager::releaseManagedTempFile(const QString &pathOrUrl) const
+{
+    const QString path = normalizedManagedTempFilePath(pathOrUrl);
+    if (path.isEmpty()) {
+        return;
+    }
+
+    const QString managedDirectory = QDir(managedTempDirectoryPath()).absolutePath();
+    const QString fileDirectory = QFileInfo(path).absolutePath();
+    if (fileDirectory != managedDirectory && !fileDirectory.startsWith(managedDirectory + QLatin1Char('/'))) {
+        return;
+    }
+
+    m_managedTempFiles.remove(path);
+    QFile::remove(path);
 }
 
 void TaskManager::modifyOpacityChanged()

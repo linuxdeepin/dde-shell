@@ -1049,10 +1049,10 @@ void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const 
     }
 
     if (sourceModel == m_activeAppModel || sourceModel == m_appsModel) {
-        QProcess process;
-        process.setProcessChannelMode(QProcess::MergedChannels);
-        process.start("dde-am", {"--by-user", id, action});
-        process.waitForFinished();
+        const QStringList arguments = {QStringLiteral("--by-user"), id, action};
+        if (!QProcess::startDetached(QStringLiteral("dde-am"), arguments)) {
+            qWarning() << "Failed to launch dde-am for:" << id << "action:" << action;
+        }
     }
 }
 

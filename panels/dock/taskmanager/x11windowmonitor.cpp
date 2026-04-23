@@ -15,6 +15,8 @@
 
 #include <DDBusSender>
 
+#include <QDBusConnection>
+#include <QDBusMessage>
 #include <QPointer>
 #include <QWindow>
 #include <QGuiApplication>
@@ -102,12 +104,12 @@ QPointer<AbstractWindow> X11WindowMonitor::getWindowByWindowId(ulong windowId)
 
 void X11WindowMonitor::presentWindows(QList<uint32_t> windows)
 {
-    DDBusSender().interface("com.deepin.wm")
-                .path("/com/deepin/wm")
-                .service("com.deepin.wm")
-                .method("PresentWindows")
-                .arg(windows)
-                .call().waitForFinished();
+    QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("com.deepin.wm"),
+                                                          QStringLiteral("/com/deepin/wm"),
+                                                          QStringLiteral("com.deepin.wm"),
+                                                          QStringLiteral("PresentWindows"));
+    message << QVariant::fromValue(windows);
+    QDBusConnection::sessionBus().asyncCall(message);
 }
 
 void X11WindowMonitor::hideItemPreview()
@@ -119,21 +121,21 @@ void X11WindowMonitor::hideItemPreview()
 
 void X11WindowMonitor::previewWindow(uint32_t winId)
 {
-    DDBusSender().interface("com.deepin.wm")
-            .path("/com/deepin/wm")
-            .service("com.deepin.wm")
-            .method("PreviewWindow")
-            .arg(winId)
-            .call().waitForFinished();
+    QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("com.deepin.wm"),
+                                                          QStringLiteral("/com/deepin/wm"),
+                                                          QStringLiteral("com.deepin.wm"),
+                                                          QStringLiteral("PreviewWindow"));
+    message << QVariant::fromValue(winId);
+    QDBusConnection::sessionBus().asyncCall(message);
 }
 
 void X11WindowMonitor::cancelPreviewWindow()
 {
-    DDBusSender().interface("com.deepin.wm")
-            .path("/com/deepin/wm")
-            .service("com.deepin.wm")
-            .method("CancelPreviewWindow")
-            .call().waitForFinished();
+    QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("com.deepin.wm"),
+                                                          QStringLiteral("/com/deepin/wm"),
+                                                          QStringLiteral("com.deepin.wm"),
+                                                          QStringLiteral("CancelPreviewWindow"));
+    QDBusConnection::sessionBus().asyncCall(message);
 }
 
 void X11WindowMonitor::setPreviewOpacity(double opacity)

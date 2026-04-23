@@ -25,6 +25,8 @@
 #include <QJsonObject>
 #include <QLibrary>
 #include <QLocale>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QNetworkInterface>
 #include <QProcess>
 #include <QRegularExpression>
@@ -32,6 +34,7 @@
 #include <QStandardPaths>
 #include <QSettings>
 #include <QTimer>
+#include <QtConcurrent>
 
 #include <algorithm>
 #include <limits>
@@ -150,6 +153,19 @@ struct MusicDesktopCandidate
     QString appName;
 };
 
+struct MetadataFallbackCacheEntry
+{
+    MprisMetadataFallback metadata;
+    qint64 capturedAtMs = 0;
+};
+
+struct RunningMusicPlayerSnapshotCacheEntry
+{
+    MusicSnapshot snapshot;
+    QString previousDesktopEntry;
+    qint64 capturedAtMs = 0;
+};
+
 constexpr qint64 AiCliRecentCompletedWindowMs = 30LL * 60LL * 1000LL;
 
 QString aiCliSessionRootPath()
@@ -167,6 +183,96 @@ QHash<QString, AiCliSessionLogCacheEntry> &aiCliSessionLogCache()
 {
     static QHash<QString, AiCliSessionLogCacheEntry> cache;
     return cache;
+}
+
+QMutex &aiCliSessionLogCacheMutex()
+{
+    static QMutex mutex;
+    return mutex;
+}
+
+QHash<QString, QString> &desktopFileByExecutableCache()
+{
+    static QHash<QString, QString> cache;
+    return cache;
+}
+
+QMutex &desktopFileByExecutableCacheMutex()
+{
+    static QMutex mutex;
+    return mutex;
+}
+
+QHash<QString, MetadataFallbackCacheEntry> &metadataFallbackCache()
+{
+    static QHash<QString, MetadataFallbackCacheEntry> cache;
+    return cache;
+}
+
+QMutex &metadataFallbackCacheMutex()
+{
+    static QMutex mutex;
+    return mutex;
+}
+
+RunningMusicPlayerSnapshotCacheEntry &runningMusicPlayerSnapshotCache()
+{
+    static RunningMusicPlayerSnapshotCacheEntry cache;
+    return cache;
+}
+
+QVariantMap variantMapFromIntHash(const QHash<QString, int> &hash)
+{
+    QVariantMap map;
+    for (auto it = hash.cbegin(); it != hash.cend(); ++it) {
+        map.insert(it.key(), it.value());
+    }
+    return map;
+}
+
+QVariantMap variantMapFromLongLongHash(const QHash<QString, qint64> &hash)
+{
+    QVariantMap map;
+    for (auto it = hash.cbegin(); it != hash.cend(); ++it) {
+        map.insert(it.key(), static_cast<qlonglong>(it.value()));
+    }
+    return map;
+}
+
+QVariantMap variantMapFromStringHash(const QHash<QString, QString> &hash)
+{
+    QVariantMap map;
+    for (auto it = hash.cbegin(); it != hash.cend(); ++it) {
+        map.insert(it.key(), it.value());
+    }
+    return map;
+}
+
+QHash<QString, int> intHashFromVariantMap(const QVariantMap &map)
+{
+    QHash<QString, int> hash;
+    for (auto it = map.cbegin(); it != map.cend(); ++it) {
+        hash.insert(it.key(), it.value().toInt());
+    }
+    return hash;
+}
+
+QHash<QString, qint64> longLongHashFromVariantMap(const QVariantMap &map)
+{
+    QHash<QString, qint64> hash;
+    for (auto it = map.cbegin(); it != map.cend(); ++it) {
+        hash.insert(it.key(), it.value().toLongLong());
+    }
+    return hash;
+}
+
+QHash<QString, QString> stringHashFromVariantMap(const QVariantMap &map)
+{
+    QHash<QString, QString> hash;
+    for (auto it = map.cbegin(); it != map.cend(); ++it) {
+        hash.insert(it.key(), it.value().toString());
+    }
+    return hash;
 }
 
 QString aiCliTaskStateKey(AiCliTaskState state)
@@ -469,11 +575,14 @@ AiCliSessionLogSnapshot sessionLogSnapshot(const QString &sessionLogPath)
     const qint64 lastModifiedMs = fileInfo.lastModified().toMSecsSinceEpoch();
 
     auto &cache = aiCliSessionLogCache();
-    const auto cachedEntry = cache.constFind(sessionLogPath);
-    if (cachedEntry != cache.cend()
-        && cachedEntry->fileSize == fileSize
-        && cachedEntry->lastModifiedMs == lastModifiedMs) {
-        return cachedEntry->snapshot;
+    {
+        QMutexLocker locker(&aiCliSessionLogCacheMutex());
+        const auto cachedEntry = cache.constFind(sessionLogPath);
+        if (cachedEntry != cache.cend()
+            && cachedEntry->fileSize == fileSize
+            && cachedEntry->lastModifiedMs == lastModifiedMs) {
+            return cachedEntry->snapshot;
+        }
     }
 
     AiCliSessionLogSnapshot snapshot;
@@ -493,7 +602,10 @@ AiCliSessionLogSnapshot sessionLogSnapshot(const QString &sessionLogPath)
     cacheEntry.fileSize = fileSize;
     cacheEntry.lastModifiedMs = lastModifiedMs;
     cacheEntry.snapshot = snapshot;
-    cache.insert(sessionLogPath, cacheEntry);
+    {
+        QMutexLocker locker(&aiCliSessionLogCacheMutex());
+        cache.insert(sessionLogPath, cacheEntry);
+    }
     return snapshot;
 }
 
@@ -829,6 +941,14 @@ QList<AiCliProcessInfo> currentAiCliProcesses()
 
 MusicSnapshot runningMusicPlayerSnapshot(const QString &previousDesktopEntry)
 {
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    RunningMusicPlayerSnapshotCacheEntry &snapshotCache = runningMusicPlayerSnapshotCache();
+    if (snapshotCache.capturedAtMs > 0
+        && nowMs - snapshotCache.capturedAtMs <= 2500
+        && snapshotCache.previousDesktopEntry == previousDesktopEntry) {
+        return snapshotCache.snapshot;
+    }
+
     MusicSnapshot bestSnapshot;
     qint64 bestPid = 0;
     QString previousDesktopId = previousDesktopEntry.trimmed();
@@ -880,6 +1000,9 @@ MusicSnapshot runningMusicPlayerSnapshot(const QString &previousDesktopEntry)
         }
     }
 
+    snapshotCache.snapshot = bestSnapshot;
+    snapshotCache.previousDesktopEntry = previousDesktopEntry;
+    snapshotCache.capturedAtMs = nowMs;
     return bestSnapshot;
 }
 
@@ -1589,6 +1712,7 @@ QString bestWindowIdForDesktopEntry(const QString &desktopFilePath,
                                     const QString &fallbackExecutablePath,
                                     bool onlyVisible = true)
 {
+    Q_UNUSED(fallbackAppName)
     QList<QStringList> searches;
     if (!desktopFilePath.isEmpty()) {
         const QString startupWmClass = desktopEntryText(desktopFilePath, QStringLiteral("StartupWMClass"));
@@ -1596,34 +1720,16 @@ QString bestWindowIdForDesktopEntry(const QString &desktopFilePath,
             searches << QStringList{QStringLiteral("--class"), startupWmClass};
         }
 
-        const QString localizedName = localizedDesktopEntryText(desktopFilePath, QStringLiteral("Name"));
-        if (!localizedName.isEmpty()) {
-            searches << QStringList{QStringLiteral("--name"), localizedName};
-            searches << QStringList{QStringLiteral("--class"), localizedName};
-        }
-
-        const QString genericName = localizedDesktopEntryText(desktopFilePath, QStringLiteral("GenericName"));
-        if (!genericName.isEmpty()) {
-            searches << QStringList{QStringLiteral("--name"), genericName};
-        }
-
         const QString desktopExecutable = desktopEntryExecutable(desktopFilePath);
         const QString executableBaseName = QFileInfo(desktopExecutable).fileName();
         if (!executableBaseName.isEmpty()) {
             searches << QStringList{QStringLiteral("--class"), executableBaseName};
-            searches << QStringList{QStringLiteral("--name"), executableBaseName};
         }
-    }
-
-    if (!fallbackAppName.isEmpty()) {
-        searches << QStringList{QStringLiteral("--name"), fallbackAppName};
-        searches << QStringList{QStringLiteral("--class"), fallbackAppName};
     }
 
     const QString fallbackExecutableBaseName = QFileInfo(fallbackExecutablePath).fileName();
     if (!fallbackExecutableBaseName.isEmpty()) {
         searches << QStringList{QStringLiteral("--class"), fallbackExecutableBaseName};
-        searches << QStringList{QStringLiteral("--name"), fallbackExecutableBaseName};
     }
 
     return bestWindowIdForSearches(searches, onlyVisible);
@@ -1730,6 +1836,16 @@ MprisMetadataFallback metadataFallbackFromCommand(const QString &service)
         return {};
     }
 
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    {
+        QMutexLocker locker(&metadataFallbackCacheMutex());
+        const auto cachedEntry = metadataFallbackCache().constFind(service);
+        if (cachedEntry != metadataFallbackCache().cend()
+            && nowMs - cachedEntry->capturedAtMs <= 2500) {
+            return cachedEntry->metadata;
+        }
+    }
+
     QProcess process;
     process.start(QStringLiteral("dbus-send"),
                   {
@@ -1773,6 +1889,14 @@ MprisMetadataFallback metadataFallbackFromCommand(const QString &service)
     const QRegularExpressionMatch artMatch = artPattern.match(output);
     if (artMatch.hasMatch()) {
         metadata.artUrl = artMatch.captured(1).trimmed();
+    }
+
+    {
+        QMutexLocker locker(&metadataFallbackCacheMutex());
+        MetadataFallbackCacheEntry cacheEntry;
+        cacheEntry.metadata = metadata;
+        cacheEntry.capturedAtMs = nowMs;
+        metadataFallbackCache().insert(service, cacheEntry);
     }
 
     return metadata;
@@ -1865,6 +1989,25 @@ QUrl stableMusicArtSource(const QString &artUrl)
     QDir cacheDirectory(QDir(cacheRoot).filePath(QStringLiteral("fashion-left-plugin/music-art")));
     if (!cacheDirectory.exists() && !cacheDirectory.mkpath(QStringLiteral("."))) {
         return sourceUrl;
+    }
+
+    static qint64 lastPruneMs = 0;
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (lastPruneMs <= 0 || nowMs - lastPruneMs >= 12LL * 60LL * 60LL * 1000LL) {
+        lastPruneMs = nowMs;
+        const QFileInfoList cacheFiles = cacheDirectory.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Time | QDir::Reversed);
+        constexpr qint64 kMaxAgeMs = 7LL * 24LL * 60LL * 60LL * 1000LL;
+        constexpr int kMaxCachedFiles = 128;
+        int preservedFiles = 0;
+        for (const QFileInfo &cacheFileInfo : cacheFiles) {
+            const bool expired = cacheFileInfo.lastModified().msecsTo(QDateTime::currentDateTime()) > kMaxAgeMs;
+            if (expired || preservedFiles >= kMaxCachedFiles) {
+                QFile::remove(cacheFileInfo.absoluteFilePath());
+                continue;
+            }
+
+            ++preservedFiles;
+        }
     }
 
     const QByteArray imageFormat = QImageReader::imageFormat(sourcePath).toLower();
@@ -2038,10 +2181,13 @@ MusicSnapshot currentMusicSnapshot(const QString &previousService)
         QString title = stringFromDBusValue(metadata.value(QStringLiteral("xesam:title")));
         QString subtitle = joinMusicSubtitleParts(stringListFromDBusValue(metadata.value(QStringLiteral("xesam:artist"))));
         QString artUrl = stringFromDBusValue(metadata.value(QStringLiteral("mpris:artUrl")));
-        if (title.isEmpty() || artUrl.isEmpty()) {
+        if (title.isEmpty() || subtitle.isEmpty() || artUrl.isEmpty()) {
             const MprisMetadataFallback fallbackMetadata = metadataFallbackFromCommand(serviceName);
             if (title.isEmpty()) {
                 title = fallbackMetadata.title;
+            }
+            if (subtitle.isEmpty()) {
+                subtitle = fallbackMetadata.artist;
             }
             if (artUrl.isEmpty()) {
                 artUrl = fallbackMetadata.artUrl;
@@ -2094,19 +2240,6 @@ MusicSnapshot currentMusicSnapshot(const QString &previousService)
 
         if (!bestSnapshot.available || snapshot.score > bestSnapshot.score) {
             bestSnapshot = snapshot;
-        }
-    }
-
-    if (bestSnapshot.available) {
-        const MprisMetadataFallback fallbackMetadata = metadataFallbackFromCommand(bestSnapshot.service);
-        if (bestSnapshot.title.isEmpty()) {
-            bestSnapshot.title = fallbackMetadata.title;
-        }
-        if (bestSnapshot.subtitle.isEmpty()) {
-            bestSnapshot.subtitle = fallbackMetadata.artist;
-        }
-        if (!bestSnapshot.artSource.isValid() && !fallbackMetadata.artUrl.isEmpty()) {
-            bestSnapshot.artSource = stableMusicArtSource(fallbackMetadata.artUrl);
         }
     }
 
@@ -2290,6 +2423,15 @@ FashionLeftPluginProvider::FashionLeftPluginProvider(QObject *parent)
     });
     connect(m_weatherWatcher, &QFileSystemWatcher::directoryChanged, this, [this] {
         refreshWeather();
+    });
+
+    m_aiRefreshWatcher = new QFutureWatcher<QVariantMap>(this);
+    connect(m_aiRefreshWatcher, &QFutureWatcher<QVariantMap>::finished, this, [this]() {
+        applyAiRefreshResult(m_aiRefreshWatcher->result());
+        if (m_aiRefreshPending) {
+            m_aiRefreshPending = false;
+            refreshAiState();
+        }
     });
 
     QDBusConnection::sessionBus().connect(NotificationService,
@@ -3049,268 +3191,312 @@ void FashionLeftPluginProvider::refreshSystemStats()
 
 void FashionLeftPluginProvider::refreshAiState()
 {
-    const QList<AiCliProcessInfo> processes = currentAiCliProcesses();
-    QHash<QString, int> currentRunningCounts;
-    QHash<QString, int> currentCompletedCounts;
-    QHash<QString, qint64> currentActivityMsByTool;
-    QHash<QString, QString> currentSessionStates;
-    struct ObservedAiSession
-    {
-        QString key;
-        QString toolId;
-        AiCliTaskState taskState = AiCliTaskState::Unknown;
-        bool counted = false;
-    };
-    QList<ObservedAiSession> observedSessions;
-    const QDateTime nowUtc = QDateTime::currentDateTimeUtc();
-    const qint64 nowMs = nowUtc.toMSecsSinceEpoch();
-
-    for (const AiCliProcessInfo &process : processes) {
-        m_aiLastSeenPidByTool[process.toolId] = qMax(m_aiLastSeenPidByTool.value(process.toolId), process.pid);
-
-        AiCliTaskState taskState = AiCliTaskState::Running;
-        AiCliSessionLogSnapshot snapshot;
-        bool hasSessionSnapshot = false;
-        if (process.toolId == QStringLiteral("codex") && !process.sessionLogPath.isEmpty()) {
-            snapshot = sessionLogSnapshot(process.sessionLogPath);
-            if (snapshot.taskState != AiCliTaskState::Unknown) {
-                taskState = snapshot.taskState;
-                hasSessionSnapshot = true;
-            }
-        }
-
-        const bool counted = !hasSessionSnapshot
-            || taskState == AiCliTaskState::Running
-            || shouldCountCompletedSession(snapshot, nowUtc);
-        if (counted) {
-            if (taskState == AiCliTaskState::Completed) {
-                currentCompletedCounts[process.toolId] = currentCompletedCounts.value(process.toolId) + 1;
-            } else {
-                currentRunningCounts[process.toolId] = currentRunningCounts.value(process.toolId) + 1;
-            }
-
-            const qint64 activityMs = snapshot.eventTimeUtc.isValid()
-                ? snapshot.eventTimeUtc.toMSecsSinceEpoch()
-                : nowMs;
-            currentActivityMsByTool[process.toolId] = qMax(currentActivityMsByTool.value(process.toolId), activityMs);
-        }
-
-        const QString sessionKey = !process.sessionLogPath.isEmpty()
-            ? process.sessionLogPath
-            : QStringLiteral("%1:%2").arg(process.toolId).arg(process.pid);
-        currentSessionStates.insert(sessionKey, aiCliTaskStateKey(taskState));
-
-        ObservedAiSession observedSession;
-        observedSession.key = sessionKey;
-        observedSession.toolId = process.toolId;
-        observedSession.taskState = taskState;
-        observedSession.counted = counted;
-        observedSessions << observedSession;
+    if (!m_aiRefreshWatcher) {
+        return;
     }
 
-    const qint64 activeWindowPid = activeWindowPidForX11();
-    QString currentPrimaryToolId;
-    const AiCliProcessInfo *primaryProcess = nullptr;
-    if (activeWindowPid > 0) {
+    if (m_aiRefreshWatcher->isRunning()) {
+        m_aiRefreshPending = true;
+        return;
+    }
+
+    const QHash<QString, qint64> previousLastSeenPidByTool = m_aiLastSeenPidByTool;
+    const QString previousLastPrimaryToolId = m_aiLastPrimaryToolId;
+    m_aiRefreshWatcher->setFuture(QtConcurrent::run([previousLastSeenPidByTool, previousLastPrimaryToolId]() -> QVariantMap {
+        const QList<AiCliProcessInfo> processes = currentAiCliProcesses();
+        QHash<QString, int> currentRunningCounts;
+        QHash<QString, int> currentCompletedCounts;
+        QHash<QString, qint64> currentActivityMsByTool;
+        QHash<QString, QString> currentSessionStates;
+        QHash<QString, qint64> nextLastSeenPidByTool = previousLastSeenPidByTool;
+        QVariantList completedSessions;
+        const QDateTime nowUtc = QDateTime::currentDateTimeUtc();
+        const qint64 nowMs = nowUtc.toMSecsSinceEpoch();
+
         for (const AiCliProcessInfo &process : processes) {
-            if (processHasAncestor(process.pid, activeWindowPid)) {
-                currentPrimaryToolId = process.toolId;
-                primaryProcess = &process;
-                break;
+            nextLastSeenPidByTool[process.toolId] = qMax(nextLastSeenPidByTool.value(process.toolId), process.pid);
+
+            AiCliTaskState taskState = AiCliTaskState::Running;
+            AiCliSessionLogSnapshot snapshot;
+            bool hasSessionSnapshot = false;
+            if (process.toolId == QStringLiteral("codex") && !process.sessionLogPath.isEmpty()) {
+                snapshot = sessionLogSnapshot(process.sessionLogPath);
+                if (snapshot.taskState != AiCliTaskState::Unknown) {
+                    taskState = snapshot.taskState;
+                    hasSessionSnapshot = true;
+                }
+            }
+
+            const bool counted = !hasSessionSnapshot
+                || taskState == AiCliTaskState::Running
+                || shouldCountCompletedSession(snapshot, nowUtc);
+            if (counted) {
+                if (taskState == AiCliTaskState::Completed) {
+                    currentCompletedCounts[process.toolId] = currentCompletedCounts.value(process.toolId) + 1;
+                } else {
+                    currentRunningCounts[process.toolId] = currentRunningCounts.value(process.toolId) + 1;
+                }
+
+                const qint64 activityMs = snapshot.eventTimeUtc.isValid()
+                    ? snapshot.eventTimeUtc.toMSecsSinceEpoch()
+                    : nowMs;
+                currentActivityMsByTool[process.toolId] = qMax(currentActivityMsByTool.value(process.toolId), activityMs);
+            }
+
+            const QString sessionKey = !process.sessionLogPath.isEmpty()
+                ? process.sessionLogPath
+                : QStringLiteral("%1:%2").arg(process.toolId).arg(process.pid);
+            currentSessionStates.insert(sessionKey, aiCliTaskStateKey(taskState));
+            if (counted && taskState == AiCliTaskState::Completed) {
+                QVariantMap completedSession;
+                completedSession.insert(QStringLiteral("key"), sessionKey);
+                completedSession.insert(QStringLiteral("toolId"), process.toolId);
+                completedSessions << completedSession;
             }
         }
-    }
-    if (currentPrimaryToolId.isEmpty() && !processes.isEmpty()) {
-        currentPrimaryToolId = processes.constFirst().toolId;
-        primaryProcess = &processes.constFirst();
-    }
 
-    QString nextPrimaryToolId = currentPrimaryToolId;
-    if (nextPrimaryToolId.isEmpty()) {
-        nextPrimaryToolId = m_aiLastPrimaryToolId;
-    }
-    if (!currentPrimaryToolId.isEmpty()) {
-        m_aiLastPrimaryToolId = currentPrimaryToolId;
-    }
-
-    if (!primaryProcess && !nextPrimaryToolId.isEmpty()) {
-        for (const AiCliProcessInfo &process : processes) {
-            if (process.toolId == nextPrimaryToolId) {
-                primaryProcess = &process;
-                break;
+        const qint64 activeWindowPid = activeWindowPidForX11();
+        QString currentPrimaryToolId;
+        const AiCliProcessInfo *primaryProcess = nullptr;
+        if (activeWindowPid > 0) {
+            for (const AiCliProcessInfo &process : processes) {
+                if (processHasAncestor(process.pid, activeWindowPid)) {
+                    currentPrimaryToolId = process.toolId;
+                    primaryProcess = &process;
+                    break;
+                }
             }
         }
-    }
+        if (currentPrimaryToolId.isEmpty() && !processes.isEmpty()) {
+            currentPrimaryToolId = processes.constFirst().toolId;
+            primaryProcess = &processes.constFirst();
+        }
 
-    qint64 nextAiPrimaryHostPid = 0;
-    QString nextAiPrimaryHostDesktopFilePath;
-    QString nextAiPrimaryHostExecutablePath;
-    QString nextAiPrimaryHostAppName;
-    const auto resolveAiHostApplication = [this](const AiCliProcessInfo &process,
+        QString nextPrimaryToolId = currentPrimaryToolId;
+        if (nextPrimaryToolId.isEmpty()) {
+            nextPrimaryToolId = previousLastPrimaryToolId;
+        }
+        QString nextLastPrimaryToolId = previousLastPrimaryToolId;
+        if (!currentPrimaryToolId.isEmpty()) {
+            nextLastPrimaryToolId = currentPrimaryToolId;
+        }
+
+        if (!primaryProcess && !nextPrimaryToolId.isEmpty()) {
+            for (const AiCliProcessInfo &process : processes) {
+                if (process.toolId == nextPrimaryToolId) {
+                    primaryProcess = &process;
+                    break;
+                }
+            }
+        }
+
+        qint64 nextAiPrimaryHostPid = 0;
+        QString nextAiPrimaryHostDesktopFilePath;
+        QString nextAiPrimaryHostExecutablePath;
+        QString nextAiPrimaryHostAppName;
+        const auto resolveAiHostApplication = [](const AiCliProcessInfo &process,
                                                  qint64 *hostPid,
                                                  QString *hostDesktopFilePath,
                                                  QString *hostExecutablePath,
                                                  QString *hostAppName) {
-        if (!hostPid || !hostDesktopFilePath || !hostExecutablePath || !hostAppName) {
-            return;
+            if (!hostPid || !hostDesktopFilePath || !hostExecutablePath || !hostAppName) {
+                return;
+            }
+
+            qint64 currentPid = process.pid;
+            for (int depth = 0; currentPid > 1 && depth < 12; ++depth) {
+                const QString executablePath = executablePathForPid(static_cast<uint>(currentPid));
+                const QString executableName = QFileInfo(executablePath).fileName();
+                const QString commName = readTrimmedTextFile(QStringLiteral("/proc/%1/comm").arg(currentPid));
+                const QStringList arguments = readProcCommandLine(QStringLiteral("/proc/%1/cmdline").arg(currentPid));
+
+                if (isShellOrWrapperExecutable(executableName)
+                    || isShellOrWrapperExecutable(commName)
+                    || !detectAiCliToolId(executableName, commName, arguments).isEmpty()) {
+                    currentPid = parentPidForProcess(currentPid);
+                    continue;
+                }
+
+                const QString desktopFilePath = FashionLeftPluginProvider::locateDesktopFileByExecutable(executablePath);
+                const QString appName = !desktopFilePath.isEmpty()
+                    ? FashionLeftPluginProvider::localizedDesktopEntryValue(desktopFilePath, QStringLiteral("Name"))
+                    : QString();
+                const bool hasWindow = !bestWindowIdForPid(currentPid, false).isEmpty()
+                    || !bestWindowIdForPid(currentPid).isEmpty();
+                if (!hasWindow && desktopFilePath.isEmpty()) {
+                    currentPid = parentPidForProcess(currentPid);
+                    continue;
+                }
+
+                *hostPid = currentPid;
+                *hostDesktopFilePath = desktopFilePath;
+                *hostExecutablePath = executablePath;
+                *hostAppName = !appName.isEmpty() ? appName
+                    : (!commName.trimmed().isEmpty() ? commName.trimmed() : executableName);
+                return;
+            }
+        };
+        if (primaryProcess) {
+            resolveAiHostApplication(*primaryProcess,
+                                     &nextAiPrimaryHostPid,
+                                     &nextAiPrimaryHostDesktopFilePath,
+                                     &nextAiPrimaryHostExecutablePath,
+                                     &nextAiPrimaryHostAppName);
         }
 
-        qint64 currentPid = process.pid;
-        for (int depth = 0; currentPid > 1 && depth < 12; ++depth) {
-            const QString executablePath = executablePathForPid(static_cast<uint>(currentPid));
-            const QString executableName = QFileInfo(executablePath).fileName();
-            const QString commName = readTrimmedTextFile(QStringLiteral("/proc/%1/comm").arg(currentPid));
-            const QStringList arguments = readProcCommandLine(QStringLiteral("/proc/%1/cmdline").arg(currentPid));
+        QStringList candidateToolIds = currentRunningCounts.keys();
+        for (auto it = currentCompletedCounts.cbegin(); it != currentCompletedCounts.cend(); ++it) {
+            if ((it.value() > 0 || currentRunningCounts.value(it.key()) > 0) && !candidateToolIds.contains(it.key())) {
+                candidateToolIds << it.key();
+            }
+        }
+        if (!nextPrimaryToolId.isEmpty() && !candidateToolIds.contains(nextPrimaryToolId)) {
+            candidateToolIds.prepend(nextPrimaryToolId);
+        }
 
-            if (isShellOrWrapperExecutable(executableName)
-                || isShellOrWrapperExecutable(commName)
-                || !detectAiCliToolId(executableName, commName, arguments).isEmpty()) {
-                currentPid = parentPidForProcess(currentPid);
+        std::sort(candidateToolIds.begin(), candidateToolIds.end(), [&currentRunningCounts, &currentActivityMsByTool, &nextLastSeenPidByTool, &nextPrimaryToolId](const QString &left, const QString &right) {
+            if (left == right) {
+                return false;
+            }
+            if (left == nextPrimaryToolId) {
+                return true;
+            }
+            if (right == nextPrimaryToolId) {
+                return false;
+            }
+
+            const bool leftRunning = currentRunningCounts.value(left) > 0;
+            const bool rightRunning = currentRunningCounts.value(right) > 0;
+            if (leftRunning != rightRunning) {
+                return leftRunning;
+            }
+
+            const qint64 leftActivityMs = currentActivityMsByTool.value(left);
+            const qint64 rightActivityMs = currentActivityMsByTool.value(right);
+            if (leftActivityMs != rightActivityMs) {
+                return leftActivityMs > rightActivityMs;
+            }
+
+            const qint64 leftPid = nextLastSeenPidByTool.value(left);
+            const qint64 rightPid = nextLastSeenPidByTool.value(right);
+            if (leftPid != rightPid) {
+                return leftPid > rightPid;
+            }
+
+            return left < right;
+        });
+
+        QVariantList nextToolEntries;
+        for (const QString &toolId : candidateToolIds) {
+            if (nextToolEntries.size() >= 2) {
+                break;
+            }
+
+            const int runningCount = currentRunningCounts.value(toolId);
+            const int completedCount = currentCompletedCounts.value(toolId);
+            const int totalCount = runningCount + completedCount;
+            if (runningCount <= 0 && totalCount <= 0) {
                 continue;
             }
 
-            const QString desktopFilePath = locateDesktopFileByExecutable(executablePath);
-            const QString appName = !desktopFilePath.isEmpty()
-                ? localizedDesktopEntryValue(desktopFilePath, QStringLiteral("Name"))
-                : QString();
-            const bool hasWindow = !bestWindowIdForPid(currentPid, false).isEmpty()
-                || !bestWindowIdForPid(currentPid).isEmpty();
-            if (!hasWindow && desktopFilePath.isEmpty()) {
-                currentPid = parentPidForProcess(currentPid);
-                continue;
+            QVariantMap entry;
+            entry.insert(QStringLiteral("toolId"), toolId);
+            entry.insert(QStringLiteral("displayName"), aiToolDisplayName(toolId));
+            entry.insert(QStringLiteral("processLabel"), aiToolProcessLabel(toolId));
+            entry.insert(QStringLiteral("runningCount"), runningCount);
+            entry.insert(QStringLiteral("completedCount"), completedCount);
+            entry.insert(QStringLiteral("totalCount"), totalCount);
+            entry.insert(QStringLiteral("progressText"),
+                         QStringLiteral("%1/%2").arg(completedCount).arg(totalCount));
+            nextToolEntries << entry;
+        }
+
+        if (nextToolEntries.isEmpty()) {
+            QVariantMap idleEntry;
+            idleEntry.insert(QStringLiteral("toolId"), nextPrimaryToolId);
+            idleEntry.insert(QStringLiteral("displayName"), nextPrimaryToolId.isEmpty() ? QStringLiteral("AI") : aiToolDisplayName(nextPrimaryToolId));
+            idleEntry.insert(QStringLiteral("processLabel"), nextPrimaryToolId.isEmpty() ? QStringLiteral("ai cli") : aiToolProcessLabel(nextPrimaryToolId));
+            idleEntry.insert(QStringLiteral("runningCount"), 0);
+            idleEntry.insert(QStringLiteral("completedCount"), 0);
+            idleEntry.insert(QStringLiteral("totalCount"), 0);
+            idleEntry.insert(QStringLiteral("progressText"), QStringLiteral("0/0"));
+            nextToolEntries << idleEntry;
+        }
+
+        int nextRunningCount = 0;
+        for (auto it = currentRunningCounts.cbegin(); it != currentRunningCounts.cend(); ++it) {
+            nextRunningCount += it.value();
+        }
+
+        QString nextHeadlineText;
+        QString nextSummaryText;
+        if (nextToolEntries.size() == 1) {
+            const QVariantMap entry = nextToolEntries.constFirst().toMap();
+            nextHeadlineText = entry.value(QStringLiteral("progressText")).toString() + QStringLiteral(" 条任务");
+            nextSummaryText = entry.value(QStringLiteral("processLabel")).toString();
+        } else {
+            QStringList parts;
+            for (const QVariant &entryValue : nextToolEntries) {
+                const QVariantMap entry = entryValue.toMap();
+                parts << QStringLiteral("%1 %2")
+                             .arg(entry.value(QStringLiteral("displayName")).toString())
+                             .arg(entry.value(QStringLiteral("progressText")).toString());
             }
-
-            *hostPid = currentPid;
-            *hostDesktopFilePath = desktopFilePath;
-            *hostExecutablePath = executablePath;
-            *hostAppName = !appName.isEmpty() ? appName
-                : (!commName.trimmed().isEmpty() ? commName.trimmed() : executableName);
-            return;
-        }
-    };
-    if (primaryProcess) {
-        resolveAiHostApplication(*primaryProcess,
-                                 &nextAiPrimaryHostPid,
-                                 &nextAiPrimaryHostDesktopFilePath,
-                                 &nextAiPrimaryHostExecutablePath,
-                                 &nextAiPrimaryHostAppName);
-    }
-
-    QStringList candidateToolIds = currentRunningCounts.keys();
-    for (auto it = currentCompletedCounts.cbegin(); it != currentCompletedCounts.cend(); ++it) {
-        if ((it.value() > 0 || currentRunningCounts.value(it.key()) > 0) && !candidateToolIds.contains(it.key())) {
-            candidateToolIds << it.key();
-        }
-    }
-    if (!nextPrimaryToolId.isEmpty() && !candidateToolIds.contains(nextPrimaryToolId)) {
-        candidateToolIds.prepend(nextPrimaryToolId);
-    }
-
-    std::sort(candidateToolIds.begin(), candidateToolIds.end(), [this, &currentRunningCounts, &currentActivityMsByTool, &nextPrimaryToolId](const QString &left, const QString &right) {
-        if (left == right) {
-            return false;
-        }
-        if (left == nextPrimaryToolId) {
-            return true;
-        }
-        if (right == nextPrimaryToolId) {
-            return false;
+            nextHeadlineText = QStringLiteral("%1 个 CLI").arg(nextToolEntries.size());
+            nextSummaryText = parts.join(QStringLiteral(" · "));
         }
 
-        const bool leftRunning = currentRunningCounts.value(left) > 0;
-        const bool rightRunning = currentRunningCounts.value(right) > 0;
-        if (leftRunning != rightRunning) {
-            return leftRunning;
-        }
+        QVariantMap result;
+        result.insert(QStringLiteral("runningCount"), nextRunningCount);
+        result.insert(QStringLiteral("headlineText"), nextHeadlineText);
+        result.insert(QStringLiteral("summaryText"), nextSummaryText);
+        result.insert(QStringLiteral("toolEntries"), nextToolEntries);
+        result.insert(QStringLiteral("primaryToolId"), nextPrimaryToolId);
+        result.insert(QStringLiteral("lastPrimaryToolId"), nextLastPrimaryToolId);
+        result.insert(QStringLiteral("primaryHostPid"), static_cast<qlonglong>(nextAiPrimaryHostPid));
+        result.insert(QStringLiteral("primaryHostDesktopFilePath"), nextAiPrimaryHostDesktopFilePath);
+        result.insert(QStringLiteral("primaryHostExecutablePath"), nextAiPrimaryHostExecutablePath);
+        result.insert(QStringLiteral("primaryHostAppName"), nextAiPrimaryHostAppName);
+        result.insert(QStringLiteral("observedSessionStates"), variantMapFromStringHash(currentSessionStates));
+        result.insert(QStringLiteral("lastSeenPidByTool"), variantMapFromLongLongHash(nextLastSeenPidByTool));
+        result.insert(QStringLiteral("runningCounts"), variantMapFromIntHash(currentRunningCounts));
+        result.insert(QStringLiteral("completedCounts"), variantMapFromIntHash(currentCompletedCounts));
+        result.insert(QStringLiteral("completedSessions"), completedSessions);
+        return result;
+    }));
+}
 
-        const qint64 leftActivityMs = currentActivityMsByTool.value(left);
-        const qint64 rightActivityMs = currentActivityMsByTool.value(right);
-        if (leftActivityMs != rightActivityMs) {
-            return leftActivityMs > rightActivityMs;
-        }
+void FashionLeftPluginProvider::applyAiRefreshResult(const QVariantMap &result)
+{
+    const int nextRunningCount = result.value(QStringLiteral("runningCount")).toInt();
+    const QString nextHeadlineText = result.value(QStringLiteral("headlineText")).toString();
+    const QString nextSummaryText = result.value(QStringLiteral("summaryText")).toString();
+    const QVariantList nextToolEntries = result.value(QStringLiteral("toolEntries")).toList();
+    const QString nextPrimaryToolId = result.value(QStringLiteral("primaryToolId")).toString();
+    const QString nextLastPrimaryToolId = result.value(QStringLiteral("lastPrimaryToolId")).toString();
+    const qint64 nextAiPrimaryHostPid = result.value(QStringLiteral("primaryHostPid")).toLongLong();
+    const QString nextAiPrimaryHostDesktopFilePath = result.value(QStringLiteral("primaryHostDesktopFilePath")).toString();
+    const QString nextAiPrimaryHostExecutablePath = result.value(QStringLiteral("primaryHostExecutablePath")).toString();
+    const QString nextAiPrimaryHostAppName = result.value(QStringLiteral("primaryHostAppName")).toString();
+    const QHash<QString, QString> currentSessionStates = stringHashFromVariantMap(result.value(QStringLiteral("observedSessionStates")).toMap());
+    const QHash<QString, qint64> nextLastSeenPidByTool = longLongHashFromVariantMap(result.value(QStringLiteral("lastSeenPidByTool")).toMap());
+    const QHash<QString, int> currentRunningCounts = intHashFromVariantMap(result.value(QStringLiteral("runningCounts")).toMap());
+    const QHash<QString, int> currentCompletedCounts = intHashFromVariantMap(result.value(QStringLiteral("completedCounts")).toMap());
+    const QVariantList completedSessions = result.value(QStringLiteral("completedSessions")).toList();
 
-        const qint64 leftPid = m_aiLastSeenPidByTool.value(left);
-        const qint64 rightPid = m_aiLastSeenPidByTool.value(right);
-        if (leftPid != rightPid) {
-            return leftPid > rightPid;
-        }
-
-        return left < right;
-    });
-
-    QVariantList nextToolEntries;
-    for (const QString &toolId : candidateToolIds) {
-        if (nextToolEntries.size() >= 2) {
-            break;
-        }
-
-        const int runningCount = currentRunningCounts.value(toolId);
-        const int completedCount = currentCompletedCounts.value(toolId);
-        const int totalCount = runningCount + completedCount;
-        if (runningCount <= 0 && totalCount <= 0) {
-            continue;
-        }
-
-        QVariantMap entry;
-        entry.insert(QStringLiteral("toolId"), toolId);
-        entry.insert(QStringLiteral("displayName"), aiToolDisplayName(toolId));
-        entry.insert(QStringLiteral("processLabel"), aiToolProcessLabel(toolId));
-        entry.insert(QStringLiteral("runningCount"), runningCount);
-        entry.insert(QStringLiteral("completedCount"), completedCount);
-        entry.insert(QStringLiteral("totalCount"), totalCount);
-        entry.insert(QStringLiteral("progressText"),
-                     QStringLiteral("%1/%2").arg(completedCount).arg(totalCount));
-        nextToolEntries << entry;
-    }
-
-    if (nextToolEntries.isEmpty()) {
-        QVariantMap idleEntry;
-        idleEntry.insert(QStringLiteral("toolId"), nextPrimaryToolId);
-        idleEntry.insert(QStringLiteral("displayName"), nextPrimaryToolId.isEmpty() ? QStringLiteral("AI") : aiToolDisplayName(nextPrimaryToolId));
-        idleEntry.insert(QStringLiteral("processLabel"), nextPrimaryToolId.isEmpty() ? QStringLiteral("ai cli") : aiToolProcessLabel(nextPrimaryToolId));
-        idleEntry.insert(QStringLiteral("runningCount"), 0);
-        idleEntry.insert(QStringLiteral("completedCount"), 0);
-        idleEntry.insert(QStringLiteral("totalCount"), 0);
-        idleEntry.insert(QStringLiteral("progressText"), QStringLiteral("0/0"));
-        nextToolEntries << idleEntry;
-    }
-
-    int nextRunningCount = 0;
-    for (auto it = currentRunningCounts.cbegin(); it != currentRunningCounts.cend(); ++it) {
-        nextRunningCount += it.value();
-    }
-    QString nextHeadlineText;
-    QString nextSummaryText;
-    if (nextToolEntries.size() == 1) {
-        const QVariantMap entry = nextToolEntries.constFirst().toMap();
-        nextHeadlineText = entry.value(QStringLiteral("progressText")).toString() + QStringLiteral(" 条任务");
-        nextSummaryText = entry.value(QStringLiteral("processLabel")).toString();
-    } else {
-        QStringList parts;
-        for (const QVariant &entryValue : nextToolEntries) {
-            const QVariantMap entry = entryValue.toMap();
-            parts << QStringLiteral("%1 %2")
-                         .arg(entry.value(QStringLiteral("displayName")).toString())
-                         .arg(entry.value(QStringLiteral("progressText")).toString());
-        }
-        nextHeadlineText = QStringLiteral("%1 个 CLI").arg(nextToolEntries.size());
-        nextSummaryText = parts.join(QStringLiteral(" · "));
-    }
-
-    for (const ObservedAiSession &session : std::as_const(observedSessions)) {
-        if (!session.counted || session.taskState != AiCliTaskState::Completed) {
-            continue;
-        }
-
-        const QString previousState = m_aiObservedSessionStates.value(session.key);
+    for (const QVariant &sessionValue : completedSessions) {
+        const QVariantMap session = sessionValue.toMap();
+        const QString sessionKey = session.value(QStringLiteral("key")).toString();
+        const QString toolId = session.value(QStringLiteral("toolId")).toString();
+        const QString previousState = m_aiObservedSessionStates.value(sessionKey);
         if (m_aiStateInitialized && previousState != aiCliTaskStateKey(AiCliTaskState::Completed)) {
-            const int completedCount = currentCompletedCounts.value(session.toolId);
-            const int totalCount = completedCount + currentRunningCounts.value(session.toolId);
-            sendDesktopNotification(QStringLiteral("%1 已结束").arg(aiToolDisplayName(session.toolId)),
+            const int completedCount = currentCompletedCounts.value(toolId);
+            const int totalCount = completedCount + currentRunningCounts.value(toolId);
+            sendDesktopNotification(QStringLiteral("%1 已结束").arg(aiToolDisplayName(toolId)),
                                     QStringLiteral("%1/%2 条任务 · %3")
                                         .arg(completedCount)
                                         .arg(totalCount)
-                                        .arg(aiToolProcessLabel(session.toolId)),
+                                        .arg(aiToolProcessLabel(toolId)),
                                     QStringLiteral("computer"));
         }
     }
@@ -3321,6 +3507,8 @@ void FashionLeftPluginProvider::refreshAiState()
         || m_aiPrimaryToolId != nextPrimaryToolId
         || m_aiToolEntries != nextToolEntries;
 
+    m_aiLastSeenPidByTool = nextLastSeenPidByTool;
+    m_aiLastPrimaryToolId = nextLastPrimaryToolId;
     m_aiPrimaryHostPid = nextAiPrimaryHostPid;
     m_aiPrimaryHostDesktopFilePath = nextAiPrimaryHostDesktopFilePath;
     m_aiPrimaryHostExecutablePath = nextAiPrimaryHostExecutablePath;
@@ -3580,6 +3768,16 @@ QString FashionLeftPluginProvider::locateDesktopFileByExecutable(const QString &
         return {};
     }
 
+    {
+        QMutexLocker locker(&desktopFileByExecutableCacheMutex());
+        const auto cachedResult = desktopFileByExecutableCache().constFind(normalizedExecutablePath);
+        if (cachedResult != desktopFileByExecutableCache().cend()) {
+            return cachedResult.value();
+        }
+    }
+
+    QString matchedDesktopFilePath;
+
     for (const QString &directory : desktopSearchDirectories()) {
         QDirIterator iterator(directory,
                               {QStringLiteral("*.desktop")},
@@ -3599,12 +3797,21 @@ QString FashionLeftPluginProvider::locateDesktopFileByExecutable(const QString &
                 : canonicalDesktopExecutable;
             if ((!normalizedDesktopExecutable.isEmpty() && normalizedDesktopExecutable == normalizedExecutablePath)
                 || desktopExecutableInfo.fileName() == executableName) {
-                return desktopFilePath;
+                matchedDesktopFilePath = desktopFilePath;
+                break;
             }
+        }
+
+        if (!matchedDesktopFilePath.isEmpty()) {
+            break;
         }
     }
 
-    return {};
+    {
+        QMutexLocker locker(&desktopFileByExecutableCacheMutex());
+        desktopFileByExecutableCache().insert(normalizedExecutablePath, matchedDesktopFilePath);
+    }
+    return matchedDesktopFilePath;
 }
 
 bool FashionLeftPluginProvider::launchDesktopEntry(const QString &desktopFilePath)

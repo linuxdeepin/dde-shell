@@ -986,6 +986,7 @@ FocusScope {
                             readonly property bool keyboardSelected: root.keyboardSelectionActive && index === root.keyboardCurrentIndex
                             readonly property bool hoverActive: itemHoverHandler.hovered || down
                             property string dragImageSource: ""
+                            property string dragImagePath: ""
                             property bool suppressClick: false
                             readonly property color dragTitleBackgroundColor: root.colorTheme === Dock.Dark ?
                                                                                  Qt.rgba(0, 0, 0, 0.58) :
@@ -1024,6 +1025,15 @@ FocusScope {
                             DQuickDrag.hotSpotScale: Qt.size(0.5, dragOverlayHotSpotScaleY)
                             DQuickDrag.active: Drag.active && Qt.platform.pluginName === "xcb"
                             DQuickDrag.overlay: dragOverlayWindow
+
+                            function releaseDragImage() {
+                                if (dragImagePath !== "" && root.applet && root.applet.releaseManagedTempFile) {
+                                    root.applet.releaseManagedTempFile(dragImagePath)
+                                }
+                                dragImagePath = ""
+                                dragImageSource = ""
+                                Drag.imageSource = ""
+                            }
 
                             background: Item {}
 
@@ -1303,27 +1313,34 @@ FocusScope {
                                     if (active) {
                                         gridButton.suppressClick = true
                                         Panel.contextDragging = true
-                                        gridButton.dragImageSource = ""
-                                        gridButton.Drag.imageSource = ""
+                                        gridButton.releaseDragImage()
                                         if (Qt.platform.pluginName !== "xcb") {
                                             gridButton.grabToImage(function(result) {
                                                 if (!fileDragHandler.active) {
                                                     return
                                                 }
 
-                                                const dragImagePath = "/tmp/dde-shell-dock-popup-drag-" +
-                                                                      Date.now() + "-" +
-                                                                      Math.random().toString(36).slice(2) + ".png"
-                                                result.saveToFile(dragImagePath)
+                                                const dragImagePath = root.applet && root.applet.createManagedTempFilePath
+                                                                      ? root.applet.createManagedTempFilePath("dock-popup-drag-", ".png")
+                                                                      : ""
+                                                if (dragImagePath === "") {
+                                                    return
+                                                }
+                                                if (!result.saveToFile(dragImagePath)) {
+                                                    if (root.applet && root.applet.releaseManagedTempFile) {
+                                                        root.applet.releaseManagedTempFile(dragImagePath)
+                                                    }
+                                                    return
+                                                }
                                                 const dragImageUrl = "file://" + dragImagePath
+                                                gridButton.dragImagePath = dragImagePath
                                                 gridButton.dragImageSource = dragImageUrl
                                                 gridButton.Drag.imageSource = dragImageUrl
                                             })
                                         }
                                     } else {
                                         Panel.contextDragging = false
-                                        gridButton.dragImageSource = ""
-                                        gridButton.Drag.imageSource = ""
+                                        gridButton.releaseDragImage()
                                         suppressClickTimer.restart()
                                     }
 
@@ -1335,6 +1352,7 @@ FocusScope {
                                     })
                                 }
                             }
+                            Component.onDestruction: releaseDragImage()
 
                             onClicked: {
                                 if (gridButton.suppressClick || fileDragHandler.active || gridButton.Drag.active) {
