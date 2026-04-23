@@ -1,4 +1,5 @@
 usr/bin/*
+usr/lib/*/dde-shell/libtray_loader_font_sync.so
 usr/lib/*/dde-shell/org.deepin.ds.dde-am*
 usr/lib/*/dde-shell/org.deepin.ds.dde-appearance*
 usr/lib/*/dde-shell/org.deepin.ds.dde-apps*
