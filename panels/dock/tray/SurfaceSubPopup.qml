@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -24,7 +24,9 @@ Item {
             objectName: "subMenu"
             mainMenuWindow: Panel.menuWindow
             updateGeometryer : function () {
-                if (menuWindow.width <= 10 || menuWindow.height <= 10) {
+                if (menuWindow.requestedWidth <= 10 || menuWindow.requestedHeight <= 10) {
+                    menuWindow.width = menuWindow.requestedWidth
+                    menuWindow.height = menuWindow.requestedHeight
                     return
                 }
 
@@ -34,8 +36,9 @@ Item {
                 let bounding = Qt.rect(menuWindow.screen.virtualX + margins, menuWindow.screen.virtualY + margins,
                                        menuWindow.screen.width - margins * 2, menuWindow.screen.height - margins * 2)
                 let pos = Qt.point(xOffset, yOffset)
-                x = selectValue(pos.x, bounding.left, bounding.right - menuWindow.width)
-                y = selectValue(pos.y, bounding.top, bounding.bottom - menuWindow.height)
+                let newX = selectValue(pos.x, bounding.left, bounding.right - menuWindow.requestedWidth)
+                let newY = selectValue(pos.y, bounding.top, bounding.bottom - menuWindow.requestedHeight)
+                menuWindow.setWindowGeometry(newX, newY, menuWindow.requestedWidth, menuWindow.requestedHeight)
             }
             onUpdateGeometryFinished: function () {
                 if (!popup.shellSurface)
