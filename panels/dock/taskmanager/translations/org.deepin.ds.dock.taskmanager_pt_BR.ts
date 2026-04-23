@@ -3,7 +3,7 @@
     <name>AppItem</name>
     <message>
         <source>Move to Trash</source>
-        <translation type="unfinished"/>
+        <translation>Mover para a lixeira</translation>
     </message>
 </context>
 <context>
@@ -53,14 +53,14 @@
     </message>
     <message>
         <source>Close this window</source>
-        <translation type="unfinished"/>
+        <translation>Fechar esta janela</translation>
     </message>
 </context>
 <context>
     <name>dock::TaskManager</name>
     <message>
         <source>%1 files</source>
-        <translation type="unfinished"/>
+        <translation>%1 arquivos</translation>
     </message>
 </context>
 </TS>
