@@ -30,7 +30,7 @@
 #include <QInputMethod>
 #include <QClipboard>
 #include <QMimeData>
-
+#include <QTimer>
 #include <QJsonObject>
 #include <QJsonParseError>
 
@@ -345,12 +345,20 @@ PluginPopup::PluginPopup(PluginManager *manager,
     , m_popupType(popupType)
     , m_height(1)
     , m_width(1)
+    , m_sizeChangeTimer(new QTimer(this))
+    , m_hasPendingChanged(false)
+    , m_pendingHeight(1)
+    , m_pendingWidth(1)
 {
     Q_UNUSED(x)
     Q_UNUSED(y)
     init(resource.resource());
     setExtensionContainer(surface);
     QWaylandCompositorExtension::initialize();
+
+    m_sizeChangeTimer->setInterval(50);
+    m_sizeChangeTimer->setSingleShot(true);
+    connect(m_sizeChangeTimer, &QTimer::timeout, this, &PluginPopup::onProcessPendingSizeChanges);
 }
 
 QWaylandSurface* PluginPopup::surface() const
@@ -446,14 +454,11 @@ void PluginPopup::plugin_popup_source_size(Resource *resource, int32_t width, in
     if (width == 0 || height == 0)
         return;
 
-    if (height != m_height) {
-        m_height = height;
-        Q_EMIT heightChanged();
-    }
-
-    if (width != m_width) {
-        m_width = width;
-        Q_EMIT widthChanged();
+    m_pendingWidth = width;
+    m_pendingHeight = height;
+    m_hasPendingChanged = true;
+    if (!m_sizeChangeTimer->isActive()) {
+        m_sizeChangeTimer->start();
     }
 }
 
@@ -461,6 +466,22 @@ void PluginPopup::plugin_popup_set_cursor(Resource *resource, int32_t cursor_sha
 {
     Q_UNUSED(resource);
     Q_EMIT cursorShapeRequested(cursor_shape);
+}
+
+void PluginPopup::onProcessPendingSizeChanges()
+{
+    if (!m_hasPendingChanged)
+        return;
+
+    if (m_pendingHeight != m_height) {
+        m_height = m_pendingHeight;
+        Q_EMIT heightChanged();
+    }
+    if (m_pendingWidth != m_width) {
+        m_width = m_pendingWidth;
+        Q_EMIT widthChanged();
+    }
+    m_hasPendingChanged = false;
 }
 
 PluginManager::PluginManager(QWaylandCompositor *compositor)
