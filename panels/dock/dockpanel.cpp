@@ -25,8 +25,13 @@
 #include <QDBusReply>
 #include <QDBusVariant>
 #include <QIcon>
+#include <QtGui/qguiapplication_platform.h>
 #include <DGuiApplicationHelper>
 #include <DPlatformTheme>
+
+#if defined(BUILD_WITH_X11)
+#include <xcb/xcb.h>
+#endif
 
 #define SETTINGS DockSettings::instance()
 
@@ -120,6 +125,56 @@ QString readAppearanceStringProperty(const QString &propertyName)
     return reply.isValid() ? reply.value().variant().toString() : QString();
 }
 
+#if defined(BUILD_WITH_X11)
+xcb_window_t nativeTopLevelWindow(xcb_connection_t *connection, xcb_window_t window)
+{
+    xcb_window_t current = window;
+
+    while (current != XCB_WINDOW_NONE) {
+        xcb_query_tree_reply_t *reply = xcb_query_tree_reply(connection, xcb_query_tree(connection, current), nullptr);
+        if (!reply) {
+            return current;
+        }
+
+        const bool isTopLevel = reply->parent == reply->root || reply->parent == XCB_WINDOW_NONE;
+        const xcb_window_t parent = reply->parent;
+        free(reply);
+
+        if (isTopLevel) {
+            return current;
+        }
+
+        current = parent;
+    }
+
+    return window;
+}
+
+bool raiseX11Window(QWindow *window)
+{
+    if (!window) {
+        return false;
+    }
+
+    window->create();
+    const auto windowId = static_cast<xcb_window_t>(window->winId());
+    if (windowId == XCB_WINDOW_NONE) {
+        return false;
+    }
+
+    auto *x11App = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
+    if (!x11App || !x11App->connection()) {
+        return false;
+    }
+
+    const auto nativeWindowId = nativeTopLevelWindow(x11App->connection(), windowId);
+    const uint32_t values[] = { XCB_STACK_MODE_ABOVE };
+    xcb_configure_window(x11App->connection(), nativeWindowId, XCB_CONFIG_WINDOW_STACK_MODE, values);
+    xcb_flush(x11App->connection());
+    return true;
+}
+#endif
+
 void syncApplicationTheme(Dtk::Gui::DGuiApplicationHelper *helper,
                           const QString &globalThemeName,
                           const QString &gtkThemeName,
@@ -169,6 +224,8 @@ DockPanel::DockPanel(QObject *parent)
     , m_compositorReady(false)
     , m_launcherShown(false)
     , m_themeSyncTimer(new QTimer(this))
+    , m_launcherRaiseTimer(new QTimer(this))
+    , m_launcherRaisePasses(0)
     , m_contextDragging(false)
     , m_containsMouse(false)
     , m_reportedContainsMouse(false)
@@ -179,6 +236,26 @@ DockPanel::DockPanel(QObject *parent)
     m_themeSyncTimer->setSingleShot(true);
     m_themeSyncTimer->setInterval(80);
     connect(m_themeSyncTimer, &QTimer::timeout, this, &DockPanel::syncColorThemeWithSystem);
+
+    m_launcherRaiseTimer->setInterval(80);
+    connect(m_launcherRaiseTimer, &QTimer::timeout, this, [this] {
+        if (!m_launcherShown || m_launcherRaisePasses <= 0) {
+            m_launcherRaiseTimer->stop();
+            return;
+        }
+
+        if (window()) {
+            window()->raise();
+#if defined(BUILD_WITH_X11)
+            raiseX11Window(window());
+#endif
+        }
+
+        --m_launcherRaisePasses;
+        if (m_launcherRaisePasses <= 0) {
+            m_launcherRaiseTimer->stop();
+        }
+    });
 
     connect(this, &DockPanel::compositorReadyChanged, this, [this] {
         if (!m_compositorReady) return;
@@ -616,6 +693,14 @@ void DockPanel::launcherVisibleChanged(bool visible)
 
     if (newHideState != oldHideState) {
         Q_EMIT hideStateChanged(newHideState);
+    }
+
+    if (m_launcherShown) {
+        m_launcherRaisePasses = 10;
+        m_launcherRaiseTimer->start();
+    } else {
+        m_launcherRaisePasses = 0;
+        m_launcherRaiseTimer->stop();
     }
 }
 

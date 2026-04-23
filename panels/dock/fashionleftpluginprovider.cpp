@@ -33,6 +33,7 @@
 #include <QSettings>
 #include <QTimer>
 
+#include <algorithm>
 #include <limits>
 #include <utility>
 
@@ -87,6 +88,7 @@ struct MusicSnapshot
 {
     QString service;
     QString desktopEntry;
+    QString executablePath;
     QString appName;
     QString title = QStringLiteral("未检测到音乐");
     QString subtitle = QStringLiteral("打开播放器开始播放");
@@ -107,6 +109,404 @@ struct MprisMetadataFallback
     QString artUrl;
 };
 
+struct AiCliProcessInfo
+{
+    qint64 pid = 0;
+    qint64 parentPid = 0;
+    QString toolId;
+    QString toolName;
+    QString workingDirectory;
+    QStringList arguments;
+    QString sessionLogPath;
+};
+
+enum class AiCliTaskState
+{
+    Unknown,
+    Running,
+    Completed,
+};
+
+struct AiCliSessionLogSnapshot
+{
+    AiCliTaskState taskState = AiCliTaskState::Unknown;
+    QString eventType;
+    QDateTime eventTimeUtc;
+};
+
+struct AiCliSessionLogCacheEntry
+{
+    qint64 fileSize = -1;
+    qint64 lastModifiedMs = -1;
+    AiCliSessionLogSnapshot snapshot;
+};
+
+struct MusicDesktopCandidate
+{
+    QString desktopFilePath;
+    QString desktopId;
+    QString executablePath;
+    QString executableBaseName;
+    QString appName;
+};
+
+constexpr qint64 AiCliRecentCompletedWindowMs = 30LL * 60LL * 1000LL;
+
+QString aiCliSessionRootPath()
+{
+    return QDir::cleanPath(QDir::homePath() + QStringLiteral("/.codex/sessions"));
+}
+
+QString canonicalExecutablePath(const QString &path);
+QString desktopEntryText(const QString &desktopFilePath, const QString &key);
+QString localizedDesktopEntryText(const QString &desktopFilePath, const QString &key);
+QString desktopEntryExecutable(const QString &desktopFilePath);
+bool isBrowserDesktopId(const QString &desktopId);
+
+QHash<QString, AiCliSessionLogCacheEntry> &aiCliSessionLogCache()
+{
+    static QHash<QString, AiCliSessionLogCacheEntry> cache;
+    return cache;
+}
+
+QString aiCliTaskStateKey(AiCliTaskState state)
+{
+    switch (state) {
+    case AiCliTaskState::Running:
+        return QStringLiteral("running");
+    case AiCliTaskState::Completed:
+        return QStringLiteral("completed");
+    default:
+        return QStringLiteral("unknown");
+    }
+}
+
+QStringList localDesktopSearchDirectories()
+{
+    QStringList directories = QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation);
+    directories << QStringLiteral("/var/lib/linglong/entries/share/applications")
+                << QStringLiteral("/usr/local/share/applications")
+                << QStringLiteral("/usr/share/applications")
+                << QDir::home().filePath(QStringLiteral(".local/share/applications"));
+
+    QStringList uniqueDirectories;
+    for (const QString &directory : directories) {
+        const QString cleanPath = QDir::cleanPath(directory);
+        if (!QFileInfo(cleanPath).isDir() || uniqueDirectories.contains(cleanPath)) {
+            continue;
+        }
+
+        uniqueDirectories << cleanPath;
+    }
+
+    return uniqueDirectories;
+}
+
+bool desktopEntryBoolValue(const QString &desktopFilePath, const QString &key)
+{
+    if (desktopFilePath.isEmpty() || key.isEmpty()) {
+        return false;
+    }
+
+    QSettings settings(desktopFilePath, QSettings::IniFormat);
+    settings.beginGroup(QStringLiteral("Desktop Entry"));
+    return settings.value(key).toBool();
+}
+
+bool containsKeyword(const QString &text, const QStringList &keywords)
+{
+    const QString normalizedText = text.trimmed().toLower();
+    if (normalizedText.isEmpty()) {
+        return false;
+    }
+
+    for (const QString &keyword : keywords) {
+        if (normalizedText.contains(keyword)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool desktopEntryLooksLikeMusicPlayer(const QString &desktopFilePath)
+{
+    if (desktopFilePath.isEmpty()
+        || desktopEntryBoolValue(desktopFilePath, QStringLiteral("Hidden"))
+        || desktopEntryBoolValue(desktopFilePath, QStringLiteral("NoDisplay"))) {
+        return false;
+    }
+
+    const QString desktopId = QFileInfo(desktopFilePath).fileName();
+    if (isBrowserDesktopId(desktopId)) {
+        return false;
+    }
+
+    const QString executablePath = desktopEntryExecutable(desktopFilePath);
+    if (executablePath.isEmpty()) {
+        return false;
+    }
+
+    const QString categories = desktopEntryText(desktopFilePath, QStringLiteral("Categories")).toLower();
+    const QString name = localizedDesktopEntryText(desktopFilePath, QStringLiteral("Name")).toLower();
+    const QString genericName = localizedDesktopEntryText(desktopFilePath, QStringLiteral("GenericName")).toLower();
+    const QString combinedText = name + QLatin1Char(' ') + genericName + QLatin1Char(' ') + categories;
+
+    if (containsKeyword(combinedText, {
+            QStringLiteral("record"),
+            QStringLiteral("recorder"),
+            QStringLiteral("capture"),
+            QStringLiteral("mixer"),
+            QStringLiteral("volume"),
+            QStringLiteral("converter"),
+            QStringLiteral("editor"),
+            QStringLiteral("剪辑"),
+            QStringLiteral("录音"),
+            QStringLiteral("混音"),
+        })) {
+        return false;
+    }
+
+    return containsKeyword(combinedText, {
+        QStringLiteral("music"),
+        QStringLiteral("audio"),
+        QStringLiteral("spotify"),
+        QStringLiteral("netease"),
+        QStringLiteral("cloudmusic"),
+        QStringLiteral("rhythmbox"),
+        QStringLiteral("audacious"),
+        QStringLiteral("feeluown"),
+        QStringLiteral("listen1"),
+        QStringLiteral("qqmusic"),
+        QStringLiteral("kugou"),
+        QStringLiteral("musicplayer"),
+        QStringLiteral("音乐"),
+        QStringLiteral("云音乐"),
+        QStringLiteral("网易"),
+        QStringLiteral("酷狗"),
+        QStringLiteral("播放器"),
+    });
+}
+
+const QHash<QString, QList<MusicDesktopCandidate>> &musicDesktopCandidatesByExecutableBaseName()
+{
+    static QHash<QString, QList<MusicDesktopCandidate>> candidateIndex;
+    static bool initialized = false;
+    if (initialized) {
+        return candidateIndex;
+    }
+
+    initialized = true;
+    for (const QString &directory : localDesktopSearchDirectories()) {
+        QDirIterator iterator(directory,
+                              {QStringLiteral("*.desktop")},
+                              QDir::Files | QDir::Readable,
+                              QDirIterator::Subdirectories);
+        while (iterator.hasNext()) {
+            const QString desktopFilePath = iterator.next();
+            if (!desktopEntryLooksLikeMusicPlayer(desktopFilePath)) {
+                continue;
+            }
+
+            const QString executablePath = canonicalExecutablePath(desktopEntryExecutable(desktopFilePath));
+            const QString executableBaseName = QFileInfo(executablePath).fileName().trimmed().toLower();
+            if (executableBaseName.isEmpty()) {
+                continue;
+            }
+
+            MusicDesktopCandidate candidate;
+            candidate.desktopFilePath = desktopFilePath;
+            candidate.desktopId = QFileInfo(desktopFilePath).fileName();
+            candidate.executablePath = executablePath;
+            candidate.executableBaseName = executableBaseName;
+            candidate.appName = localizedDesktopEntryText(desktopFilePath, QStringLiteral("Name"));
+            if (candidate.appName.isEmpty()) {
+                candidate.appName = QFileInfo(desktopFilePath).completeBaseName();
+            }
+
+            candidateIndex[candidate.executableBaseName].append(candidate);
+        }
+    }
+
+    return candidateIndex;
+}
+
+QStringList sessionLogPathsForProcess(qint64 pid)
+{
+    if (pid <= 0) {
+        return {};
+    }
+
+    const QString sessionsRootPath = aiCliSessionRootPath();
+    QDir fdDirectory(QStringLiteral("/proc/%1/fd").arg(pid));
+    const QStringList fdEntries = fdDirectory.entryList(QDir::AllEntries | QDir::NoDotAndDotDot,
+                                                        QDir::Name);
+    QStringList sessionLogPaths;
+    for (const QString &fdEntry : fdEntries) {
+        const QString targetPath = QFile::symLinkTarget(fdDirectory.filePath(fdEntry));
+        if (targetPath.isEmpty()) {
+            continue;
+        }
+
+        const QString cleanTargetPath = QDir::cleanPath(targetPath);
+        if (!cleanTargetPath.startsWith(sessionsRootPath + QLatin1Char('/'))
+            || !cleanTargetPath.endsWith(QStringLiteral(".jsonl"))) {
+            continue;
+        }
+
+        if (!sessionLogPaths.contains(cleanTargetPath)) {
+            sessionLogPaths << cleanTargetPath;
+        }
+    }
+
+    return sessionLogPaths;
+}
+
+QString primarySessionLogPath(const QStringList &sessionLogPaths)
+{
+    QString selectedPath;
+    qint64 bestModifiedMs = std::numeric_limits<qint64>::min();
+    qint64 bestFileSize = std::numeric_limits<qint64>::min();
+    for (const QString &sessionLogPath : sessionLogPaths) {
+        const QFileInfo fileInfo(sessionLogPath);
+        if (!fileInfo.isFile()) {
+            continue;
+        }
+
+        const qint64 modifiedMs = fileInfo.lastModified().toMSecsSinceEpoch();
+        const qint64 fileSize = fileInfo.size();
+        if (selectedPath.isEmpty()
+            || modifiedMs > bestModifiedMs
+            || (modifiedMs == bestModifiedMs && fileSize > bestFileSize)
+            || (modifiedMs == bestModifiedMs && fileSize == bestFileSize && sessionLogPath > selectedPath)) {
+            selectedPath = sessionLogPath;
+            bestModifiedMs = modifiedMs;
+            bestFileSize = fileSize;
+        }
+    }
+
+    return selectedPath;
+}
+
+QByteArray readTailOfFile(const QString &filePath, qint64 maxBytes)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+
+    const qint64 fileSize = file.size();
+    const qint64 offset = qMax<qint64>(0, fileSize - maxBytes);
+    if (!file.seek(offset)) {
+        return {};
+    }
+
+    QByteArray data = file.readAll();
+    if (offset > 0) {
+        const int firstNewlineIndex = data.indexOf('\n');
+        if (firstNewlineIndex >= 0) {
+            data.remove(0, firstNewlineIndex + 1);
+        }
+    }
+
+    return data;
+}
+
+AiCliSessionLogSnapshot parseAiCliSessionLogSnapshot(const QByteArray &tailData)
+{
+    const QList<QByteArray> lines = tailData.split('\n');
+    for (int index = lines.size() - 1; index >= 0; --index) {
+        const QByteArray line = lines.at(index).trimmed();
+        if (line.isEmpty()) {
+            continue;
+        }
+
+        const QJsonDocument document = QJsonDocument::fromJson(line);
+        if (!document.isObject()) {
+            continue;
+        }
+
+        const QJsonObject object = document.object();
+        if (object.value(QStringLiteral("type")).toString() != QStringLiteral("event_msg")) {
+            continue;
+        }
+
+        const QJsonObject payload = object.value(QStringLiteral("payload")).toObject();
+        const QString eventType = payload.value(QStringLiteral("type")).toString().trimmed();
+        if (eventType.isEmpty()) {
+            continue;
+        }
+
+        AiCliSessionLogSnapshot snapshot;
+        snapshot.eventType = eventType;
+        snapshot.taskState = eventType == QStringLiteral("task_complete")
+            ? AiCliTaskState::Completed
+            : AiCliTaskState::Running;
+
+        const QString timestampText = object.value(QStringLiteral("timestamp")).toString().trimmed();
+        snapshot.eventTimeUtc = QDateTime::fromString(timestampText, Qt::ISODateWithMs);
+        if (!snapshot.eventTimeUtc.isValid()) {
+            snapshot.eventTimeUtc = QDateTime::fromString(timestampText, Qt::ISODate);
+        }
+        if (snapshot.eventTimeUtc.isValid()) {
+            snapshot.eventTimeUtc = snapshot.eventTimeUtc.toUTC();
+        }
+
+        return snapshot;
+    }
+
+    return {};
+}
+
+AiCliSessionLogSnapshot sessionLogSnapshot(const QString &sessionLogPath)
+{
+    const QFileInfo fileInfo(sessionLogPath);
+    if (!fileInfo.isFile()) {
+        return {};
+    }
+
+    const qint64 fileSize = fileInfo.size();
+    const qint64 lastModifiedMs = fileInfo.lastModified().toMSecsSinceEpoch();
+
+    auto &cache = aiCliSessionLogCache();
+    const auto cachedEntry = cache.constFind(sessionLogPath);
+    if (cachedEntry != cache.cend()
+        && cachedEntry->fileSize == fileSize
+        && cachedEntry->lastModifiedMs == lastModifiedMs) {
+        return cachedEntry->snapshot;
+    }
+
+    AiCliSessionLogSnapshot snapshot;
+    const QList<qint64> probeSizes = {
+        64 * 1024,
+        256 * 1024,
+        1024 * 1024,
+    };
+    for (qint64 probeSize : probeSizes) {
+        snapshot = parseAiCliSessionLogSnapshot(readTailOfFile(sessionLogPath, probeSize));
+        if (snapshot.taskState != AiCliTaskState::Unknown || fileSize <= probeSize) {
+            break;
+        }
+    }
+
+    AiCliSessionLogCacheEntry cacheEntry;
+    cacheEntry.fileSize = fileSize;
+    cacheEntry.lastModifiedMs = lastModifiedMs;
+    cacheEntry.snapshot = snapshot;
+    cache.insert(sessionLogPath, cacheEntry);
+    return snapshot;
+}
+
+bool shouldCountCompletedSession(const AiCliSessionLogSnapshot &snapshot, const QDateTime &nowUtc)
+{
+    if (snapshot.taskState != AiCliTaskState::Completed || !snapshot.eventTimeUtc.isValid()) {
+        return false;
+    }
+
+    const qint64 ageMs = snapshot.eventTimeUtc.msecsTo(nowUtc);
+    return ageMs >= 0 && ageMs <= AiCliRecentCompletedWindowMs;
+}
+
 QString firstExistingPath(const QStringList &paths)
 {
     for (const QString &path : paths) {
@@ -116,6 +516,431 @@ QString firstExistingPath(const QStringList &paths)
     }
 
     return {};
+}
+
+QString readTrimmedTextFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return {};
+    }
+
+    return QString::fromLocal8Bit(file.readAll()).trimmed();
+}
+
+QStringList readProcCommandLine(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+
+    const QList<QByteArray> rawArguments = file.readAll().split('\0');
+    QStringList arguments;
+    for (const QByteArray &rawArgument : rawArguments) {
+        if (rawArgument.isEmpty()) {
+            continue;
+        }
+
+        arguments << QString::fromLocal8Bit(rawArgument);
+    }
+
+    return arguments;
+}
+
+QString aiToolDisplayName(const QString &toolId)
+{
+    if (toolId == QStringLiteral("codex")) {
+        return QStringLiteral("Codex");
+    }
+    if (toolId == QStringLiteral("claude")) {
+        return QStringLiteral("Claude Code");
+    }
+
+    return {};
+}
+
+QString detectAiCliToolId(const QString &candidate)
+{
+    const QString normalized = candidate.trimmed().toLower();
+    if (normalized.isEmpty()) {
+        return {};
+    }
+
+    if (normalized == QStringLiteral("codex")
+        || normalized.startsWith(QStringLiteral("codex-"))
+        || normalized.startsWith(QStringLiteral("codex."))) {
+        return QStringLiteral("codex");
+    }
+
+    if (normalized == QStringLiteral("claude")
+        || normalized == QStringLiteral("claude-code")
+        || normalized == QStringLiteral("claude_code")
+        || normalized.startsWith(QStringLiteral("claude-"))
+        || normalized.startsWith(QStringLiteral("claude."))) {
+        return QStringLiteral("claude");
+    }
+
+    return {};
+}
+
+QString detectAiCliToolId(const QString &executableName,
+                          const QString &commName,
+                          const QStringList &arguments)
+{
+    const QStringList candidates = [&arguments, &executableName, &commName] {
+        QStringList values;
+        values << executableName << commName;
+        for (const QString &argument : arguments) {
+            values << QFileInfo(argument).fileName();
+        }
+        return values;
+    }();
+
+    for (const QString &candidate : candidates) {
+        const QString toolId = detectAiCliToolId(candidate);
+        if (!toolId.isEmpty()) {
+            return toolId;
+        }
+    }
+
+    return {};
+}
+
+QString shortenSingleLineText(const QString &text, int maxLength = 32)
+{
+    QString singleLine = text;
+    singleLine.replace(QRegularExpression(QStringLiteral("\\s+")), QStringLiteral(" "));
+    singleLine = singleLine.trimmed();
+
+    if (singleLine.size() <= maxLength) {
+        return singleLine;
+    }
+
+    return singleLine.left(qMax(0, maxLength - 1)).trimmed() + QChar(0x2026);
+}
+
+QString promptSummaryFromAiArguments(const QStringList &arguments)
+{
+    if (arguments.size() < 2) {
+        return {};
+    }
+
+    for (int index = 1; index + 1 < arguments.size(); ++index) {
+        const QString argument = arguments.at(index);
+        if (argument == QStringLiteral("-p")
+            || argument == QStringLiteral("--prompt")
+            || argument == QStringLiteral("--message")
+            || argument == QStringLiteral("--task")) {
+            return shortenSingleLineText(arguments.at(index + 1));
+        }
+    }
+
+    for (int index = 1; index + 1 < arguments.size(); ++index) {
+        const QString argument = arguments.at(index);
+        if ((argument == QStringLiteral("exec")
+             || argument == QStringLiteral("run")
+             || argument == QStringLiteral("ask"))
+            && !arguments.at(index + 1).startsWith(QLatin1Char('-'))) {
+            return shortenSingleLineText(arguments.at(index + 1));
+        }
+    }
+
+    return {};
+}
+
+QString homeRelativePath(const QString &path)
+{
+    const QString cleanPath = QDir::cleanPath(path);
+    const QString homePath = QDir::cleanPath(QDir::homePath());
+    if (cleanPath == homePath) {
+        return QStringLiteral("~");
+    }
+    if (cleanPath.startsWith(homePath + QLatin1Char('/'))) {
+        return QStringLiteral("~") + cleanPath.mid(homePath.size());
+    }
+
+    return cleanPath;
+}
+
+QString workingDirectoryLabel(const QString &workingDirectory)
+{
+    const QString normalizedPath = homeRelativePath(workingDirectory);
+    if (normalizedPath.isEmpty()) {
+        return {};
+    }
+
+    QFileInfo fileInfo(normalizedPath);
+    if (!fileInfo.fileName().isEmpty()) {
+        return fileInfo.fileName();
+    }
+
+    return normalizedPath;
+}
+
+qint64 parentPidForProcess(qint64 pid)
+{
+    if (pid <= 0) {
+        return 0;
+    }
+
+    QFile statFile(QStringLiteral("/proc/%1/stat").arg(pid));
+    if (!statFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return 0;
+    }
+
+    const QString statText = QString::fromLocal8Bit(statFile.readAll()).trimmed();
+    const int closingParenIndex = statText.lastIndexOf(QLatin1Char(')'));
+    if (closingParenIndex < 0 || closingParenIndex + 2 >= statText.size()) {
+        return 0;
+    }
+
+    const QString trailingFields = statText.mid(closingParenIndex + 2);
+    const QStringList fields = trailingFields.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    if (fields.size() < 3) {
+        return 0;
+    }
+
+    bool ppidOk = false;
+    const qint64 ppid = fields.at(1).toLongLong(&ppidOk);
+    return ppidOk ? ppid : 0;
+}
+
+bool processHasAncestor(qint64 pid, qint64 ancestorPid)
+{
+    if (pid <= 0 || ancestorPid <= 0) {
+        return false;
+    }
+
+    qint64 currentPid = pid;
+    int guard = 0;
+    while (currentPid > 1 && guard < 64) {
+        if (currentPid == ancestorPid) {
+            return true;
+        }
+
+        currentPid = parentPidForProcess(currentPid);
+        ++guard;
+    }
+
+    return currentPid == ancestorPid;
+}
+
+qint64 activeWindowPidForX11()
+{
+    if (QGuiApplication::platformName() != QLatin1String("xcb")) {
+        return 0;
+    }
+
+    auto runCommand = [](const QString &program, const QStringList &arguments) {
+        QProcess process;
+        process.start(program, arguments);
+        if (!process.waitForStarted(500) || !process.waitForFinished(500)) {
+            return QString();
+        }
+
+        return QString::fromLocal8Bit(process.readAllStandardOutput()).trimmed();
+    };
+
+    const QString activeWindowOutput = runCommand(QStringLiteral("xprop"),
+                                                  {QStringLiteral("-root"),
+                                                   QStringLiteral("_NET_ACTIVE_WINDOW")});
+    const QRegularExpression activeWindowPattern(QStringLiteral("0x[0-9a-fA-F]+"));
+    const QRegularExpressionMatch activeWindowMatch = activeWindowPattern.match(activeWindowOutput);
+    if (!activeWindowMatch.hasMatch()) {
+        return 0;
+    }
+
+    const QString windowId = activeWindowMatch.captured(0);
+    const QString windowPidOutput = runCommand(QStringLiteral("xprop"),
+                                               {QStringLiteral("-id"),
+                                                windowId,
+                                                QStringLiteral("_NET_WM_PID")});
+    const QRegularExpression pidPattern(QStringLiteral("(\\d+)"));
+    const QRegularExpressionMatch pidMatch = pidPattern.match(windowPidOutput);
+    if (!pidMatch.hasMatch()) {
+        return 0;
+    }
+
+    bool pidOk = false;
+    const qint64 pid = pidMatch.captured(1).toLongLong(&pidOk);
+    return pidOk ? pid : 0;
+}
+
+QList<AiCliProcessInfo> currentAiCliProcesses()
+{
+    QList<AiCliProcessInfo> detectedProcesses;
+
+    const QDir procDirectory(QStringLiteral("/proc"));
+    const QStringList pidEntries = procDirectory.entryList({QStringLiteral("[0-9]*")},
+                                                           QDir::Dirs | QDir::NoDotAndDotDot,
+                                                           QDir::Name);
+    for (const QString &pidEntry : pidEntries) {
+        bool pidOk = false;
+        const qint64 pid = pidEntry.toLongLong(&pidOk);
+        if (!pidOk || pid <= 0) {
+            continue;
+        }
+
+        const QString procBasePath = procDirectory.filePath(pidEntry);
+        const QStringList arguments = readProcCommandLine(procBasePath + QStringLiteral("/cmdline"));
+        const QString executableName = QFileInfo(QFile::symLinkTarget(procBasePath + QStringLiteral("/exe"))).fileName();
+        const QString commName = readTrimmedTextFile(procBasePath + QStringLiteral("/comm"));
+        const QString toolId = detectAiCliToolId(executableName, commName, arguments);
+        if (toolId.isEmpty()) {
+            continue;
+        }
+
+        AiCliProcessInfo processInfo;
+        processInfo.pid = pid;
+        processInfo.parentPid = parentPidForProcess(pid);
+        processInfo.toolId = toolId;
+        processInfo.toolName = aiToolDisplayName(toolId);
+        processInfo.workingDirectory = QFile::symLinkTarget(procBasePath + QStringLiteral("/cwd"));
+        processInfo.arguments = arguments;
+        processInfo.sessionLogPath = primarySessionLogPath(sessionLogPathsForProcess(pid));
+        detectedProcesses << processInfo;
+    }
+
+    QList<AiCliProcessInfo> processes;
+    for (const AiCliProcessInfo &process : std::as_const(detectedProcesses)) {
+        bool hasSameToolDescendant = false;
+        for (const AiCliProcessInfo &candidate : std::as_const(detectedProcesses)) {
+            if (candidate.pid == process.pid || candidate.toolId != process.toolId) {
+                continue;
+            }
+
+            if (processHasAncestor(candidate.pid, process.pid)) {
+                hasSameToolDescendant = true;
+                break;
+            }
+        }
+
+        if (!hasSameToolDescendant) {
+            processes << process;
+        }
+    }
+
+    std::sort(processes.begin(), processes.end(), [](const AiCliProcessInfo &left, const AiCliProcessInfo &right) {
+        return left.pid > right.pid;
+    });
+    return processes;
+}
+
+MusicSnapshot runningMusicPlayerSnapshot(const QString &previousDesktopEntry)
+{
+    MusicSnapshot bestSnapshot;
+    qint64 bestPid = 0;
+    QString previousDesktopId = previousDesktopEntry.trimmed();
+    if (previousDesktopId.endsWith(QStringLiteral(".desktop"))) {
+        previousDesktopId.chop(QStringLiteral(".desktop").size());
+    }
+
+    const auto &candidateIndex = musicDesktopCandidatesByExecutableBaseName();
+    if (candidateIndex.isEmpty()) {
+        return bestSnapshot;
+    }
+
+    const QDir procDirectory(QStringLiteral("/proc"));
+    const QStringList pidEntries = procDirectory.entryList({QStringLiteral("[0-9]*")},
+                                                           QDir::Dirs | QDir::NoDotAndDotDot,
+                                                           QDir::Name);
+    for (const QString &pidEntry : pidEntries) {
+        bool pidOk = false;
+        const qint64 pid = pidEntry.toLongLong(&pidOk);
+        if (!pidOk || pid <= 0) {
+            continue;
+        }
+
+        const QString executablePath = canonicalExecutablePath(QFile::symLinkTarget(procDirectory.filePath(pidEntry + QStringLiteral("/exe"))));
+        const QString executableBaseName = QFileInfo(executablePath).fileName().trimmed().toLower();
+        if (executableBaseName.isEmpty()) {
+            continue;
+        }
+
+        const QList<MusicDesktopCandidate> candidates = candidateIndex.value(executableBaseName);
+        for (const MusicDesktopCandidate &candidate : candidates) {
+            int score = !candidate.executablePath.isEmpty() && candidate.executablePath == executablePath ? 300 : 220;
+            QString candidateDesktopId = candidate.desktopId;
+            if (candidateDesktopId.endsWith(QStringLiteral(".desktop"))) {
+                candidateDesktopId.chop(QStringLiteral(".desktop").size());
+            }
+            if (!previousDesktopId.isEmpty() && candidateDesktopId == previousDesktopId) {
+                score += 80;
+            }
+
+            if (!bestSnapshot.available || score > bestSnapshot.score || (score == bestSnapshot.score && pid > bestPid)) {
+                bestSnapshot.available = true;
+                bestSnapshot.desktopEntry = candidate.desktopId;
+                bestSnapshot.executablePath = executablePath;
+                bestSnapshot.appName = candidate.appName;
+                bestSnapshot.score = score;
+                bestPid = pid;
+            }
+        }
+    }
+
+    return bestSnapshot;
+}
+
+QString aiToolProcessLabel(const QString &toolId)
+{
+    if (toolId == QStringLiteral("codex")) {
+        return QStringLiteral("codex");
+    }
+    if (toolId == QStringLiteral("claude")) {
+        return QStringLiteral("claude code");
+    }
+
+    return QStringLiteral("ai");
+}
+
+bool isShellOrWrapperExecutable(const QString &name)
+{
+    const QString normalizedName = name.trimmed().toLower();
+    return normalizedName == QStringLiteral("bash")
+        || normalizedName == QStringLiteral("sh")
+        || normalizedName == QStringLiteral("dash")
+        || normalizedName == QStringLiteral("zsh")
+        || normalizedName == QStringLiteral("fish")
+        || normalizedName == QStringLiteral("ksh")
+        || normalizedName == QStringLiteral("nu")
+        || normalizedName == QStringLiteral("tmux")
+        || normalizedName == QStringLiteral("screen")
+        || normalizedName == QStringLiteral("sudo")
+        || normalizedName == QStringLiteral("doas")
+        || normalizedName == QStringLiteral("su")
+        || normalizedName == QStringLiteral("env")
+        || normalizedName == QStringLiteral("flatpak-spawn")
+        || normalizedName == QStringLiteral("systemd")
+        || normalizedName == QStringLiteral("login");
+}
+
+void sendDesktopNotification(const QString &summary,
+                             const QString &body,
+                             const QString &appIcon = QStringLiteral("computer"))
+{
+    if (summary.trimmed().isEmpty()) {
+        return;
+    }
+
+    QDBusInterface notificationInterface(QStringLiteral("org.freedesktop.Notifications"),
+                                         QStringLiteral("/org/freedesktop/Notifications"),
+                                         QStringLiteral("org.freedesktop.Notifications"),
+                                         QDBusConnection::sessionBus());
+    if (!notificationInterface.isValid()) {
+        return;
+    }
+
+    notificationInterface.call(QStringLiteral("Notify"),
+                               QStringLiteral("dde-shell"),
+                               0U,
+                               appIcon,
+                               summary,
+                               body,
+                               QStringList(),
+                               QVariantMap(),
+                               4000);
 }
 
 QStringList uniqueExistingDirectories(const QStringList &paths)
@@ -828,6 +1653,33 @@ bool activateWindowForServiceOrDesktop(const QString &serviceName,
     return activateWindow(windowId);
 }
 
+QString bestWindowIdForPid(qint64 pid, bool onlyVisible = true)
+{
+    if (pid <= 0) {
+        return {};
+    }
+
+    return bestWindowIdForSearches({QStringList{QStringLiteral("--pid"), QString::number(pid)}}, onlyVisible);
+}
+
+bool activateWindowForPidOrDesktop(qint64 pid,
+                                   const QString &desktopFilePath,
+                                   const QString &fallbackAppName,
+                                   const QString &fallbackExecutablePath)
+{
+    QString windowId = bestWindowIdForPid(pid, false);
+    if (activateWindow(windowId)) {
+        return true;
+    }
+
+    windowId = bestWindowIdForPid(pid);
+    if (activateWindow(windowId)) {
+        return true;
+    }
+
+    return activateWindowForServiceOrDesktop(QString(), desktopFilePath, fallbackAppName, fallbackExecutablePath);
+}
+
 bool moveWeatherWindowToRequestedPosition(int taskbarLeft,
                                           int taskbarTop,
                                           const QString &preferredExecutablePath = {})
@@ -1170,6 +2022,7 @@ MusicSnapshot currentMusicSnapshot(const QString &previousService)
         MusicSnapshot snapshot;
         snapshot.service = serviceName;
         snapshot.desktopEntry = stringFromDBusValue(rootProperties.value(QStringLiteral("DesktopEntry")));
+        snapshot.executablePath = executablePathForPid(serviceProcessId(serviceName));
         if (snapshot.desktopEntry.isEmpty()) {
             snapshot.desktopEntry = desktopEntryFromMprisService(serviceName);
         }
@@ -1421,6 +2274,11 @@ FashionLeftPluginProvider::FashionLeftPluginProvider(QObject *parent)
     connect(statsTimer, &QTimer::timeout, this, &FashionLeftPluginProvider::refreshSystemStats);
     statsTimer->start();
 
+    auto aiTimer = new QTimer(this);
+    aiTimer->setInterval(2000);
+    connect(aiTimer, &QTimer::timeout, this, &FashionLeftPluginProvider::refreshAiState);
+    aiTimer->start();
+
     auto weatherTimer = new QTimer(this);
     weatherTimer->setInterval(300000);
     connect(weatherTimer, &QTimer::timeout, this, &FashionLeftPluginProvider::refreshWeather);
@@ -1447,6 +2305,7 @@ FashionLeftPluginProvider::FashionLeftPluginProvider(QObject *parent)
     refreshMailState();
     refreshMusicState();
     refreshSystemStats();
+    refreshAiState();
     refreshWeather();
 }
 
@@ -1576,6 +2435,40 @@ QString FashionLeftPluginProvider::downloadSpeedText() const
 QString FashionLeftPluginProvider::uploadSpeedText() const
 {
     return m_uploadSpeedText;
+}
+
+int FashionLeftPluginProvider::aiRunningCount() const
+{
+    return m_aiRunningCount;
+}
+
+QString FashionLeftPluginProvider::aiRunningCountText() const
+{
+    if (m_aiRunningCount > 99) {
+        return QStringLiteral("99+");
+    }
+
+    return QString::number(m_aiRunningCount);
+}
+
+QString FashionLeftPluginProvider::aiHeadlineText() const
+{
+    return m_aiHeadlineText;
+}
+
+QString FashionLeftPluginProvider::aiSummaryText() const
+{
+    return m_aiSummaryText;
+}
+
+QVariantList FashionLeftPluginProvider::aiToolEntries() const
+{
+    return m_aiToolEntries;
+}
+
+QString FashionLeftPluginProvider::aiPrimaryToolId() const
+{
+    return m_aiPrimaryToolId;
 }
 
 QString FashionLeftPluginProvider::weatherCityText() const
@@ -1731,7 +2624,9 @@ void FashionLeftPluginProvider::openNotificationPage()
 
 void FashionLeftPluginProvider::openMusicPlayer()
 {
-    if (m_musicService.isEmpty()) {
+    if (m_musicService.isEmpty()
+        && m_musicDesktopEntry.trimmed().isEmpty()
+        && m_musicExecutablePath.trimmed().isEmpty()) {
         return;
     }
 
@@ -1740,7 +2635,10 @@ void FashionLeftPluginProvider::openMusicPlayer()
         desktopId += QStringLiteral(".desktop");
     }
 
-    const QString executablePath = executablePathForService(m_musicService);
+    QString executablePath = m_musicExecutablePath;
+    if (executablePath.isEmpty() && !m_musicService.isEmpty()) {
+        executablePath = executablePathForService(m_musicService);
+    }
     QString desktopFilePath;
     if (!desktopId.isEmpty()) {
         desktopFilePath = locateDesktopFile(desktopId);
@@ -1748,29 +2646,39 @@ void FashionLeftPluginProvider::openMusicPlayer()
     if (desktopFilePath.isEmpty()) {
         desktopFilePath = locateDesktopFileByExecutable(executablePath);
     }
+    if (executablePath.isEmpty()) {
+        executablePath = desktopCommandExecutable(desktopFilePath);
+    }
 
     const auto scheduleMusicWindowActivation = [this, desktopFilePath, executablePath] {
         QTimer::singleShot(120, this, [this, desktopFilePath, executablePath] {
-            activateWindowForServiceOrDesktop(m_musicService, desktopFilePath, m_musicAppName, executablePath);
+            if (!activateWindowForServiceOrDesktop(m_musicService, desktopFilePath, m_musicAppName, executablePath)) {
+                activateWindowForPidOrDesktop(0, desktopFilePath, m_musicAppName, executablePath);
+            }
         });
         QTimer::singleShot(420, this, [this, desktopFilePath, executablePath] {
-            activateWindowForServiceOrDesktop(m_musicService, desktopFilePath, m_musicAppName, executablePath);
+            if (!activateWindowForServiceOrDesktop(m_musicService, desktopFilePath, m_musicAppName, executablePath)) {
+                activateWindowForPidOrDesktop(0, desktopFilePath, m_musicAppName, executablePath);
+            }
         });
     };
 
-    if (activateWindowForServiceOrDesktop(m_musicService, desktopFilePath, m_musicAppName, executablePath)) {
+    if (activateWindowForServiceOrDesktop(m_musicService, desktopFilePath, m_musicAppName, executablePath)
+        || activateWindowForPidOrDesktop(0, desktopFilePath, m_musicAppName, executablePath)) {
         return;
     }
 
-    QDBusInterface rootInterface(m_musicService,
-                                 MprisPath,
-                                 MprisRootInterface,
-                                 QDBusConnection::sessionBus());
-    if (rootInterface.isValid()) {
-        const QDBusMessage raiseReply = rootInterface.call(QStringLiteral("Raise"));
-        if (raiseReply.type() != QDBusMessage::ErrorMessage) {
-            scheduleMusicWindowActivation();
-            return;
+    if (!m_musicService.isEmpty()) {
+        QDBusInterface rootInterface(m_musicService,
+                                     MprisPath,
+                                     MprisRootInterface,
+                                     QDBusConnection::sessionBus());
+        if (rootInterface.isValid()) {
+            const QDBusMessage raiseReply = rootInterface.call(QStringLiteral("Raise"));
+            if (raiseReply.type() != QDBusMessage::ErrorMessage) {
+                scheduleMusicWindowActivation();
+                return;
+            }
         }
     }
 
@@ -1835,6 +2743,26 @@ void FashionLeftPluginProvider::playNextTrack()
                                    QDBusConnection::sessionBus());
     playerInterface.call(QStringLiteral("Next"));
     refreshMusicState();
+}
+
+void FashionLeftPluginProvider::openAiClientHost()
+{
+    if (activateWindowForPidOrDesktop(m_aiPrimaryHostPid,
+                                      m_aiPrimaryHostDesktopFilePath,
+                                      m_aiPrimaryHostAppName,
+                                      m_aiPrimaryHostExecutablePath)) {
+        return;
+    }
+
+    if (!m_aiPrimaryHostDesktopFilePath.isEmpty() && launchDesktopEntry(m_aiPrimaryHostDesktopFilePath)) {
+        return;
+    }
+
+    if (!m_aiPrimaryHostExecutablePath.isEmpty() && launchCommand(m_aiPrimaryHostExecutablePath)) {
+        return;
+    }
+
+    openSystemMonitorPage();
 }
 
 void FashionLeftPluginProvider::openSystemMonitorPage()
@@ -1938,7 +2866,6 @@ void FashionLeftPluginProvider::refreshMailState()
 
     int nextMailUnreadCount = 0;
     QString nextMailSummaryText = QStringLiteral("邮箱信息不可用");
-    bool hasUnreadData = false;
 
     if (mailInterface.isValid()) {
         const QDBusReply<QString> accountsReply = mailInterface.call(QStringLiteral("GetAccounts"));
@@ -1949,6 +2876,10 @@ void FashionLeftPluginProvider::refreshMailState()
         if (accountIds.isEmpty()) {
             nextMailSummaryText = QStringLiteral("未配置邮箱账户");
         } else {
+            nextMailSummaryText = accountIds.size() == 1
+                ? accountIds.constFirst()
+                : QStringLiteral("%1个邮箱").arg(accountIds.size());
+
             for (const QString &accountId : accountIds) {
                 const QDBusReply<QString> unreadReply = mailInterface.call(QStringLiteral("GetUnread"), accountId);
                 if (!unreadReply.isValid()) {
@@ -1962,13 +2893,6 @@ void FashionLeftPluginProvider::refreshMailState()
                 }
 
                 nextMailUnreadCount += unreadCount;
-                hasUnreadData = true;
-            }
-
-            if (hasUnreadData) {
-                nextMailSummaryText = nextMailUnreadCount > 0
-                    ? QStringLiteral("收件箱有 %1 封未读邮件").arg(nextMailUnreadCount)
-                    : QStringLiteral("暂时没有未读邮件");
             }
         }
     }
@@ -1984,7 +2908,10 @@ void FashionLeftPluginProvider::refreshMailState()
 
 void FashionLeftPluginProvider::refreshMusicState()
 {
-    const MusicSnapshot snapshot = currentMusicSnapshot(m_musicService);
+    MusicSnapshot snapshot = currentMusicSnapshot(m_musicService);
+    if (!snapshot.available) {
+        snapshot = runningMusicPlayerSnapshot(m_musicDesktopEntry);
+    }
 
     QString nextDesktopEntry = snapshot.desktopEntry.trimmed();
     if (!nextDesktopEntry.isEmpty() && !nextDesktopEntry.endsWith(QStringLiteral(".desktop"))) {
@@ -1996,6 +2923,10 @@ void FashionLeftPluginProvider::refreshMusicState()
     if (nextMusicAppName.isEmpty()) {
         nextMusicAppName = localizedDesktopEntryValue(nextDesktopFilePath, QStringLiteral("Name"));
     }
+    QString nextMusicExecutablePath = snapshot.executablePath;
+    if (nextMusicExecutablePath.isEmpty()) {
+        nextMusicExecutablePath = desktopCommandExecutable(nextDesktopFilePath);
+    }
     const QString nextMusicPlayerIconName = musicPlayerIconNameForDesktopEntry(nextDesktopEntry,
                                                                                nextMusicAppName,
                                                                                snapshot.service);
@@ -2003,6 +2934,7 @@ void FashionLeftPluginProvider::refreshMusicState()
 
     if (m_musicService == snapshot.service
         && m_musicDesktopEntry == nextDesktopEntry
+        && m_musicExecutablePath == nextMusicExecutablePath
         && m_musicTitleText == snapshot.title
         && m_musicSubtitleText == snapshot.subtitle
         && m_musicAppName == nextMusicAppName
@@ -2020,6 +2952,7 @@ void FashionLeftPluginProvider::refreshMusicState()
 
     m_musicService = snapshot.service;
     m_musicDesktopEntry = nextDesktopEntry;
+    m_musicExecutablePath = nextMusicExecutablePath;
     m_musicTitleText = snapshot.title;
     m_musicSubtitleText = snapshot.subtitle;
     m_musicAppName = nextMusicAppName;
@@ -2112,6 +3045,301 @@ void FashionLeftPluginProvider::refreshSystemStats()
     m_downloadSpeedText = nextDownloadSpeed;
     m_uploadSpeedText = nextUploadSpeed;
     emit systemStatsChanged();
+}
+
+void FashionLeftPluginProvider::refreshAiState()
+{
+    const QList<AiCliProcessInfo> processes = currentAiCliProcesses();
+    QHash<QString, int> currentRunningCounts;
+    QHash<QString, int> currentCompletedCounts;
+    QHash<QString, qint64> currentActivityMsByTool;
+    QHash<QString, QString> currentSessionStates;
+    struct ObservedAiSession
+    {
+        QString key;
+        QString toolId;
+        AiCliTaskState taskState = AiCliTaskState::Unknown;
+        bool counted = false;
+    };
+    QList<ObservedAiSession> observedSessions;
+    const QDateTime nowUtc = QDateTime::currentDateTimeUtc();
+    const qint64 nowMs = nowUtc.toMSecsSinceEpoch();
+
+    for (const AiCliProcessInfo &process : processes) {
+        m_aiLastSeenPidByTool[process.toolId] = qMax(m_aiLastSeenPidByTool.value(process.toolId), process.pid);
+
+        AiCliTaskState taskState = AiCliTaskState::Running;
+        AiCliSessionLogSnapshot snapshot;
+        bool hasSessionSnapshot = false;
+        if (process.toolId == QStringLiteral("codex") && !process.sessionLogPath.isEmpty()) {
+            snapshot = sessionLogSnapshot(process.sessionLogPath);
+            if (snapshot.taskState != AiCliTaskState::Unknown) {
+                taskState = snapshot.taskState;
+                hasSessionSnapshot = true;
+            }
+        }
+
+        const bool counted = !hasSessionSnapshot
+            || taskState == AiCliTaskState::Running
+            || shouldCountCompletedSession(snapshot, nowUtc);
+        if (counted) {
+            if (taskState == AiCliTaskState::Completed) {
+                currentCompletedCounts[process.toolId] = currentCompletedCounts.value(process.toolId) + 1;
+            } else {
+                currentRunningCounts[process.toolId] = currentRunningCounts.value(process.toolId) + 1;
+            }
+
+            const qint64 activityMs = snapshot.eventTimeUtc.isValid()
+                ? snapshot.eventTimeUtc.toMSecsSinceEpoch()
+                : nowMs;
+            currentActivityMsByTool[process.toolId] = qMax(currentActivityMsByTool.value(process.toolId), activityMs);
+        }
+
+        const QString sessionKey = !process.sessionLogPath.isEmpty()
+            ? process.sessionLogPath
+            : QStringLiteral("%1:%2").arg(process.toolId).arg(process.pid);
+        currentSessionStates.insert(sessionKey, aiCliTaskStateKey(taskState));
+
+        ObservedAiSession observedSession;
+        observedSession.key = sessionKey;
+        observedSession.toolId = process.toolId;
+        observedSession.taskState = taskState;
+        observedSession.counted = counted;
+        observedSessions << observedSession;
+    }
+
+    const qint64 activeWindowPid = activeWindowPidForX11();
+    QString currentPrimaryToolId;
+    const AiCliProcessInfo *primaryProcess = nullptr;
+    if (activeWindowPid > 0) {
+        for (const AiCliProcessInfo &process : processes) {
+            if (processHasAncestor(process.pid, activeWindowPid)) {
+                currentPrimaryToolId = process.toolId;
+                primaryProcess = &process;
+                break;
+            }
+        }
+    }
+    if (currentPrimaryToolId.isEmpty() && !processes.isEmpty()) {
+        currentPrimaryToolId = processes.constFirst().toolId;
+        primaryProcess = &processes.constFirst();
+    }
+
+    QString nextPrimaryToolId = currentPrimaryToolId;
+    if (nextPrimaryToolId.isEmpty()) {
+        nextPrimaryToolId = m_aiLastPrimaryToolId;
+    }
+    if (!currentPrimaryToolId.isEmpty()) {
+        m_aiLastPrimaryToolId = currentPrimaryToolId;
+    }
+
+    if (!primaryProcess && !nextPrimaryToolId.isEmpty()) {
+        for (const AiCliProcessInfo &process : processes) {
+            if (process.toolId == nextPrimaryToolId) {
+                primaryProcess = &process;
+                break;
+            }
+        }
+    }
+
+    qint64 nextAiPrimaryHostPid = 0;
+    QString nextAiPrimaryHostDesktopFilePath;
+    QString nextAiPrimaryHostExecutablePath;
+    QString nextAiPrimaryHostAppName;
+    const auto resolveAiHostApplication = [this](const AiCliProcessInfo &process,
+                                                 qint64 *hostPid,
+                                                 QString *hostDesktopFilePath,
+                                                 QString *hostExecutablePath,
+                                                 QString *hostAppName) {
+        if (!hostPid || !hostDesktopFilePath || !hostExecutablePath || !hostAppName) {
+            return;
+        }
+
+        qint64 currentPid = process.pid;
+        for (int depth = 0; currentPid > 1 && depth < 12; ++depth) {
+            const QString executablePath = executablePathForPid(static_cast<uint>(currentPid));
+            const QString executableName = QFileInfo(executablePath).fileName();
+            const QString commName = readTrimmedTextFile(QStringLiteral("/proc/%1/comm").arg(currentPid));
+            const QStringList arguments = readProcCommandLine(QStringLiteral("/proc/%1/cmdline").arg(currentPid));
+
+            if (isShellOrWrapperExecutable(executableName)
+                || isShellOrWrapperExecutable(commName)
+                || !detectAiCliToolId(executableName, commName, arguments).isEmpty()) {
+                currentPid = parentPidForProcess(currentPid);
+                continue;
+            }
+
+            const QString desktopFilePath = locateDesktopFileByExecutable(executablePath);
+            const QString appName = !desktopFilePath.isEmpty()
+                ? localizedDesktopEntryValue(desktopFilePath, QStringLiteral("Name"))
+                : QString();
+            const bool hasWindow = !bestWindowIdForPid(currentPid, false).isEmpty()
+                || !bestWindowIdForPid(currentPid).isEmpty();
+            if (!hasWindow && desktopFilePath.isEmpty()) {
+                currentPid = parentPidForProcess(currentPid);
+                continue;
+            }
+
+            *hostPid = currentPid;
+            *hostDesktopFilePath = desktopFilePath;
+            *hostExecutablePath = executablePath;
+            *hostAppName = !appName.isEmpty() ? appName
+                : (!commName.trimmed().isEmpty() ? commName.trimmed() : executableName);
+            return;
+        }
+    };
+    if (primaryProcess) {
+        resolveAiHostApplication(*primaryProcess,
+                                 &nextAiPrimaryHostPid,
+                                 &nextAiPrimaryHostDesktopFilePath,
+                                 &nextAiPrimaryHostExecutablePath,
+                                 &nextAiPrimaryHostAppName);
+    }
+
+    QStringList candidateToolIds = currentRunningCounts.keys();
+    for (auto it = currentCompletedCounts.cbegin(); it != currentCompletedCounts.cend(); ++it) {
+        if ((it.value() > 0 || currentRunningCounts.value(it.key()) > 0) && !candidateToolIds.contains(it.key())) {
+            candidateToolIds << it.key();
+        }
+    }
+    if (!nextPrimaryToolId.isEmpty() && !candidateToolIds.contains(nextPrimaryToolId)) {
+        candidateToolIds.prepend(nextPrimaryToolId);
+    }
+
+    std::sort(candidateToolIds.begin(), candidateToolIds.end(), [this, &currentRunningCounts, &currentActivityMsByTool, &nextPrimaryToolId](const QString &left, const QString &right) {
+        if (left == right) {
+            return false;
+        }
+        if (left == nextPrimaryToolId) {
+            return true;
+        }
+        if (right == nextPrimaryToolId) {
+            return false;
+        }
+
+        const bool leftRunning = currentRunningCounts.value(left) > 0;
+        const bool rightRunning = currentRunningCounts.value(right) > 0;
+        if (leftRunning != rightRunning) {
+            return leftRunning;
+        }
+
+        const qint64 leftActivityMs = currentActivityMsByTool.value(left);
+        const qint64 rightActivityMs = currentActivityMsByTool.value(right);
+        if (leftActivityMs != rightActivityMs) {
+            return leftActivityMs > rightActivityMs;
+        }
+
+        const qint64 leftPid = m_aiLastSeenPidByTool.value(left);
+        const qint64 rightPid = m_aiLastSeenPidByTool.value(right);
+        if (leftPid != rightPid) {
+            return leftPid > rightPid;
+        }
+
+        return left < right;
+    });
+
+    QVariantList nextToolEntries;
+    for (const QString &toolId : candidateToolIds) {
+        if (nextToolEntries.size() >= 2) {
+            break;
+        }
+
+        const int runningCount = currentRunningCounts.value(toolId);
+        const int completedCount = currentCompletedCounts.value(toolId);
+        const int totalCount = runningCount + completedCount;
+        if (runningCount <= 0 && totalCount <= 0) {
+            continue;
+        }
+
+        QVariantMap entry;
+        entry.insert(QStringLiteral("toolId"), toolId);
+        entry.insert(QStringLiteral("displayName"), aiToolDisplayName(toolId));
+        entry.insert(QStringLiteral("processLabel"), aiToolProcessLabel(toolId));
+        entry.insert(QStringLiteral("runningCount"), runningCount);
+        entry.insert(QStringLiteral("completedCount"), completedCount);
+        entry.insert(QStringLiteral("totalCount"), totalCount);
+        entry.insert(QStringLiteral("progressText"),
+                     QStringLiteral("%1/%2").arg(completedCount).arg(totalCount));
+        nextToolEntries << entry;
+    }
+
+    if (nextToolEntries.isEmpty()) {
+        QVariantMap idleEntry;
+        idleEntry.insert(QStringLiteral("toolId"), nextPrimaryToolId);
+        idleEntry.insert(QStringLiteral("displayName"), nextPrimaryToolId.isEmpty() ? QStringLiteral("AI") : aiToolDisplayName(nextPrimaryToolId));
+        idleEntry.insert(QStringLiteral("processLabel"), nextPrimaryToolId.isEmpty() ? QStringLiteral("ai cli") : aiToolProcessLabel(nextPrimaryToolId));
+        idleEntry.insert(QStringLiteral("runningCount"), 0);
+        idleEntry.insert(QStringLiteral("completedCount"), 0);
+        idleEntry.insert(QStringLiteral("totalCount"), 0);
+        idleEntry.insert(QStringLiteral("progressText"), QStringLiteral("0/0"));
+        nextToolEntries << idleEntry;
+    }
+
+    int nextRunningCount = 0;
+    for (auto it = currentRunningCounts.cbegin(); it != currentRunningCounts.cend(); ++it) {
+        nextRunningCount += it.value();
+    }
+    QString nextHeadlineText;
+    QString nextSummaryText;
+    if (nextToolEntries.size() == 1) {
+        const QVariantMap entry = nextToolEntries.constFirst().toMap();
+        nextHeadlineText = entry.value(QStringLiteral("progressText")).toString() + QStringLiteral(" 条任务");
+        nextSummaryText = entry.value(QStringLiteral("processLabel")).toString();
+    } else {
+        QStringList parts;
+        for (const QVariant &entryValue : nextToolEntries) {
+            const QVariantMap entry = entryValue.toMap();
+            parts << QStringLiteral("%1 %2")
+                         .arg(entry.value(QStringLiteral("displayName")).toString())
+                         .arg(entry.value(QStringLiteral("progressText")).toString());
+        }
+        nextHeadlineText = QStringLiteral("%1 个 CLI").arg(nextToolEntries.size());
+        nextSummaryText = parts.join(QStringLiteral(" · "));
+    }
+
+    for (const ObservedAiSession &session : std::as_const(observedSessions)) {
+        if (!session.counted || session.taskState != AiCliTaskState::Completed) {
+            continue;
+        }
+
+        const QString previousState = m_aiObservedSessionStates.value(session.key);
+        if (m_aiStateInitialized && previousState != aiCliTaskStateKey(AiCliTaskState::Completed)) {
+            const int completedCount = currentCompletedCounts.value(session.toolId);
+            const int totalCount = completedCount + currentRunningCounts.value(session.toolId);
+            sendDesktopNotification(QStringLiteral("%1 已结束").arg(aiToolDisplayName(session.toolId)),
+                                    QStringLiteral("%1/%2 条任务 · %3")
+                                        .arg(completedCount)
+                                        .arg(totalCount)
+                                        .arg(aiToolProcessLabel(session.toolId)),
+                                    QStringLiteral("computer"));
+        }
+    }
+
+    const bool stateChanged = m_aiRunningCount != nextRunningCount
+        || m_aiHeadlineText != nextHeadlineText
+        || m_aiSummaryText != nextSummaryText
+        || m_aiPrimaryToolId != nextPrimaryToolId
+        || m_aiToolEntries != nextToolEntries;
+
+    m_aiPrimaryHostPid = nextAiPrimaryHostPid;
+    m_aiPrimaryHostDesktopFilePath = nextAiPrimaryHostDesktopFilePath;
+    m_aiPrimaryHostExecutablePath = nextAiPrimaryHostExecutablePath;
+    m_aiPrimaryHostAppName = nextAiPrimaryHostAppName;
+    m_aiObservedSessionStates = currentSessionStates;
+    if (!m_aiStateInitialized) {
+        m_aiStateInitialized = true;
+    }
+
+    if (!stateChanged) {
+        return;
+    }
+
+    m_aiRunningCount = nextRunningCount;
+    m_aiHeadlineText = nextHeadlineText;
+    m_aiSummaryText = nextSummaryText;
+    m_aiPrimaryToolId = nextPrimaryToolId;
+    m_aiToolEntries = nextToolEntries;
+    emit aiStateChanged();
 }
 
 void FashionLeftPluginProvider::refreshWeather()

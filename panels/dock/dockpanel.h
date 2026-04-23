@@ -164,6 +164,8 @@ private:
     bool m_compositorReady;
     bool m_launcherShown;
     QTimer *m_themeSyncTimer;
+    QTimer *m_launcherRaiseTimer;
+    int m_launcherRaisePasses;
     bool m_contextDragging;
     bool m_containsMouse;
     bool m_reportedContainsMouse;

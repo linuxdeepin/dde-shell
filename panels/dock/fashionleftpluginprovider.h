@@ -7,7 +7,9 @@
 #include <QFileSystemWatcher>
 #include <QObject>
 #include <QElapsedTimer>
+#include <QHash>
 #include <QUrl>
+#include <QVariantList>
 #include <QtQml/qqml.h>
 
 namespace dock {
@@ -40,6 +42,12 @@ class FashionLeftPluginProvider : public QObject
     Q_PROPERTY(int memoryUsage READ memoryUsage NOTIFY systemStatsChanged FINAL)
     Q_PROPERTY(QString downloadSpeedText READ downloadSpeedText NOTIFY systemStatsChanged FINAL)
     Q_PROPERTY(QString uploadSpeedText READ uploadSpeedText NOTIFY systemStatsChanged FINAL)
+    Q_PROPERTY(int aiRunningCount READ aiRunningCount NOTIFY aiStateChanged FINAL)
+    Q_PROPERTY(QString aiRunningCountText READ aiRunningCountText NOTIFY aiStateChanged FINAL)
+    Q_PROPERTY(QString aiHeadlineText READ aiHeadlineText NOTIFY aiStateChanged FINAL)
+    Q_PROPERTY(QString aiSummaryText READ aiSummaryText NOTIFY aiStateChanged FINAL)
+    Q_PROPERTY(QVariantList aiToolEntries READ aiToolEntries NOTIFY aiStateChanged FINAL)
+    Q_PROPERTY(QString aiPrimaryToolId READ aiPrimaryToolId NOTIFY aiStateChanged FINAL)
     Q_PROPERTY(QString weatherCityText READ weatherCityText NOTIFY weatherChanged FINAL)
     Q_PROPERTY(QString weatherTemperatureText READ weatherTemperatureText NOTIFY weatherChanged FINAL)
     Q_PROPERTY(QString weatherSummaryText READ weatherSummaryText NOTIFY weatherChanged FINAL)
@@ -77,6 +85,12 @@ public:
     int memoryUsage() const;
     QString downloadSpeedText() const;
     QString uploadSpeedText() const;
+    int aiRunningCount() const;
+    QString aiRunningCountText() const;
+    QString aiHeadlineText() const;
+    QString aiSummaryText() const;
+    QVariantList aiToolEntries() const;
+    QString aiPrimaryToolId() const;
 
     QString weatherCityText() const;
     QString weatherTemperatureText() const;
@@ -91,6 +105,7 @@ public:
     Q_INVOKABLE void playPreviousTrack();
     Q_INVOKABLE void toggleMusicPlayback();
     Q_INVOKABLE void playNextTrack();
+    Q_INVOKABLE void openAiClientHost();
     Q_INVOKABLE void openNotificationPage();
     Q_INVOKABLE void openSystemMonitorPage();
 
@@ -101,6 +116,7 @@ signals:
     void mailClientChanged();
     void musicStateChanged();
     void systemStatsChanged();
+    void aiStateChanged();
     void weatherChanged();
 
 private slots:
@@ -109,6 +125,7 @@ private slots:
     void refreshMailState();
     void refreshMusicState();
     void refreshSystemStats();
+    void refreshAiState();
     void refreshWeather();
     void onNotificationCountChanged(uint count);
 
@@ -144,13 +161,14 @@ private:
     QString m_dateText;
     int m_notificationCount = 0;
     int m_mailUnreadCount = 0;
-    QString m_mailSummaryText = QStringLiteral("暂时没有未读邮件");
+    QString m_mailSummaryText = QStringLiteral("邮箱信息不可用");
     QString m_mailDesktopId;
     QString m_mailDesktopFilePath;
     QString m_mailIconName = QStringLiteral("deepin-mail");
     QString m_mailClientName = QStringLiteral("邮箱");
     QString m_musicService;
     QString m_musicDesktopEntry;
+    QString m_musicExecutablePath;
     QString m_musicTitleText = QStringLiteral("未检测到音乐");
     QString m_musicSubtitleText = QStringLiteral("打开播放器开始播放");
     QString m_musicAppName = QStringLiteral("音乐");
@@ -167,6 +185,19 @@ private:
     int m_memoryUsage = 0;
     QString m_downloadSpeedText = QStringLiteral("0kb/s");
     QString m_uploadSpeedText = QStringLiteral("0kb/s");
+    int m_aiRunningCount = 0;
+    QString m_aiHeadlineText = QStringLiteral("AI 后台任务");
+    QString m_aiSummaryText = QStringLiteral("当前空闲");
+    QVariantList m_aiToolEntries;
+    QString m_aiPrimaryToolId;
+    QString m_aiLastPrimaryToolId;
+    qint64 m_aiPrimaryHostPid = 0;
+    QString m_aiPrimaryHostDesktopFilePath;
+    QString m_aiPrimaryHostExecutablePath;
+    QString m_aiPrimaryHostAppName;
+    QHash<QString, QString> m_aiObservedSessionStates;
+    QHash<QString, qint64> m_aiLastSeenPidByTool;
+    bool m_aiStateInitialized = false;
     QString m_weatherCityText;
     QString m_weatherTemperatureText = QStringLiteral("--°");
     QString m_weatherSummaryText = QStringLiteral("天气信息不可用");

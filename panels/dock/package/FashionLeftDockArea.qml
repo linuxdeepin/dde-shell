@@ -35,12 +35,15 @@ Control {
     readonly property int pageSpacing: Math.max(8, Math.round(dockSize * 0.14))
     readonly property int tightSpacing: Math.max(1, Math.round(dockSize * 0.04))
     readonly property int mediumIconSize: Math.max(18, Math.round(pageContentHeight * 0.62))
-    readonly property int musicArtSize: Math.max(20, Math.round(dockSize * 0.5))
+    readonly property int pluginRowLeftMargin: root.leftContentPadding + root.foregroundContentOffset
+    readonly property int pluginLeadingIconSize: root.mediumIconSize
+    readonly property int pluginLeadingSlotSize: Math.max(32, root.pluginLeadingIconSize)
+    readonly property int musicArtSize: root.pluginLeadingIconSize
     readonly property real musicArtRadius: 4
     readonly property int musicControlIconSize: 16
     readonly property int musicControlButtonSize: 30
     readonly property real musicControlButtonRadius: 15
-    readonly property int musicControlSpacing: Math.max(4, Math.round(pageContentHeight * 0.08))
+    readonly property int musicControlSpacing: Math.max(3, Math.round(pageContentHeight * 0.07))
     readonly property int musicTitleButtonSpacing: Math.max(2, root.tightSpacing - 1)
     readonly property int musicTextSpacing: 1
     readonly property int musicRowSpacing: 10
@@ -50,8 +53,6 @@ Control {
     readonly property int weatherInfoVerticalOffset: root.showSecondaryLine ? -root.weatherTextVerticalLift : 0
     readonly property int musicControlsWidth: root.musicControlButtonSize * 3 + root.musicControlSpacing * 2
     readonly property real musicArtworkDevicePixelRatio: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
-    readonly property int musicLeadingBias: Math.max(4, Math.round(dockSize * 0.12))
-    readonly property int musicPageExtraLeadingWidth: root.foregroundContentOffset + root.musicLeadingBias
     readonly property int timeFontSize: Math.max(14, Math.round(pageContentHeight * 0.47))
     readonly property int temperatureUnitFontSize: timeFontSize - 2
     readonly property int headlineFontSize: Math.max(13, Math.round(pageContentHeight * 0.4))
@@ -60,10 +61,17 @@ Control {
     readonly property int captionFontSize: Math.max(9, Math.round(pageContentHeight * 0.2))
     readonly property int weatherSecondaryFontSize: secondaryFontSize + 2
     readonly property int monitorDetailFontSize: captionFontSize + 2
+    readonly property int aiProcessFontSize: captionFontSize + 2
+    readonly property int aiPrimaryCountFontSize: root.metricFontSize + 1
+    readonly property int aiSecondaryCountFontSize: root.captionFontSize + 2
+    readonly property int aiStatusBarHeight: 2
+    readonly property int aiStatusBarAnimationDuration: 1150
+    readonly property bool aiShowSecondaryLine: root.pageContentHeight > 34
+    readonly property int aiTextVerticalOffset: root.aiShowSecondaryLine ? -root.textVerticalLift : 0
     readonly property int weatherTextSpacing: root.tightSpacing - 2
     readonly property bool musicPageVisible: provider.musicAvailable
     readonly property var pageIds: {
-        const ids = ["weather"]
+        const ids = ["weather", "ai"]
         if (musicPageVisible) {
             ids.push("music")
         }
@@ -106,8 +114,27 @@ Control {
     readonly property string tooltipPageId: transitionToPageId.length > 0
         ? root.normalizedPageId(root.transitionToPageId)
         : root.normalizedPageId(root.currentPageId)
+    readonly property var aiEntries: {
+        const entries = provider.aiToolEntries || []
+        if (entries.length > 0) {
+            return entries
+        }
+
+        return [{
+            toolId: provider.aiPrimaryToolId,
+            progressText: "0/0",
+            processLabel: "ai"
+        }]
+    }
+    readonly property int aiEntryCount: Math.min(2, aiEntries.length)
+    readonly property bool aiDualColumnMode: aiEntryCount > 1
+    readonly property string aiPrimaryDisplayToolId: provider.aiPrimaryToolId && provider.aiPrimaryToolId.length > 0
+        ? provider.aiPrimaryToolId
+        : ((aiEntries.length > 0 && aiEntries[0].toolId) ? String(aiEntries[0].toolId) : "")
     readonly property string currentTooltipText: {
         switch (root.tooltipPageId) {
+        case "ai":
+            return root.aiTooltipText()
         case "music":
             return root.musicTooltipText()
         case "mail":
@@ -240,6 +267,8 @@ Control {
 
     function pageItemForId(pageId) {
         switch (pageId) {
+        case "ai":
+            return aiPage
         case "music":
             return musicPage
         case "mail":
@@ -270,7 +299,7 @@ Control {
         const visibleIds = root.visiblePageIds()
         const inTransition = pageTransitionAnimation.running || root.transitionToPageId.length > 0
         const activePageId = root.normalizedPageId(root.currentPageId)
-        const items = [weatherPage, musicPage, mailPage, systemPage]
+        const items = [weatherPage, aiPage, musicPage, mailPage, systemPage]
         for (let index = 0; index < items.length; ++index) {
             const item = items[index]
             const available = visibleIds.indexOf(item.pageId) >= 0
@@ -419,6 +448,32 @@ Control {
         }
 
         return titleText.length > 0 ? titleText : appText
+    }
+
+    function aiIconSource(toolId) {
+        switch (toolId) {
+        case "codex":
+            return Qt.resolvedUrl("icons/codex.svg")
+        case "claude":
+            return "file:///usr/share/icons/Win11/apps/scalable/claude.svg"
+        default:
+            return ""
+        }
+    }
+
+    function aiTooltipText() {
+        if (root.aiEntries.length <= 0) {
+            return qsTr("AI")
+        }
+
+        let parts = []
+        for (let index = 0; index < Math.min(2, root.aiEntries.length); ++index) {
+            const entry = root.aiEntries[index]
+            const progressText = entry && entry.progressText ? String(entry.progressText) : "0/0"
+            const processLabel = entry && entry.processLabel ? String(entry.processLabel) : "ai"
+            parts.push(progressText + qsTr(" 条任务") + " · " + processLabel)
+        }
+        return parts.join(" · ")
     }
 
     function mailTooltipText() {
@@ -587,6 +642,17 @@ Control {
             if (rootHoverHandler.hovered && root.currentPageId === "system") {
                 if (pageToolTip.toolTipVisible) {
                     root.showToolTip()
+                }
+            }
+        }
+
+        function onAiStateChanged() {
+            if (rootHoverHandler.hovered && root.currentPageId === "ai") {
+                if (pageToolTip.toolTipVisible) {
+                    root.showToolTip()
+                } else {
+                    toolTipShowTimer.stop()
+                    toolTipShowTimer.start()
                 }
             }
         }
@@ -884,20 +950,24 @@ Control {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: root.leftContentPadding + root.foregroundContentOffset
+                anchors.leftMargin: root.pluginRowLeftMargin
                 anchors.rightMargin: root.rightContentPadding
                 height: root.pageContentHeight
                 spacing: root.pageSpacing
 
                 Item {
-                    implicitWidth: root.mediumIconSize
+                    implicitWidth: root.pluginLeadingSlotSize
                     implicitHeight: implicitWidth
                     Layout.alignment: Qt.AlignVCenter
 
                     Image {
-                        anchors.fill: parent
+                        anchors.centerIn: parent
+                        width: root.pluginLeadingIconSize
+                        height: root.pluginLeadingIconSize
                         source: provider.weatherIconSource
+                        sourceSize: Qt.size(width, height)
                         fillMode: Image.PreserveAspectFit
+                        smooth: true
                         asynchronous: true
                     }
                 }
@@ -959,27 +1029,294 @@ Control {
         }
 
         PageShell {
+            id: aiPage
+            pageId: "ai"
+
+            implicitWidth: aiRow.implicitWidth
+            onClicked: provider.openAiClientHost()
+
+            RowLayout {
+                id: aiRow
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: root.pluginRowLeftMargin
+                anchors.rightMargin: root.rightContentPadding
+                height: root.pageContentHeight
+                spacing: root.aiDualColumnMode ? 0 : root.pageSpacing
+
+                Item {
+                    implicitWidth: root.aiDualColumnMode ? 0 : root.pluginLeadingSlotSize
+                    implicitHeight: implicitWidth
+                    Layout.alignment: Qt.AlignVCenter
+                    visible: !root.aiDualColumnMode
+
+                    Image {
+                        id: aiPrimaryIcon
+                        anchors.centerIn: parent
+                        width: root.pluginLeadingIconSize
+                        height: root.pluginLeadingIconSize
+                        source: root.aiIconSource(root.aiPrimaryDisplayToolId)
+                        sourceSize: Qt.size(width, height)
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        asynchronous: true
+                        visible: source !== ""
+                    }
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: root.pluginLeadingIconSize
+                        height: root.pluginLeadingIconSize
+                        radius: width / 3
+                        color: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0, 0, 0, 0.06)
+                        border.width: 1
+                        border.color: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.08)
+                        visible: !aiPrimaryIcon.visible
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "AI"
+                        color: root.primaryTextColor
+                        font.pixelSize: root.captionFontSize + 1
+                        font.weight: Font.DemiBold
+                        renderType: Text.NativeRendering
+                        visible: !aiPrimaryIcon.visible
+                    }
+                }
+
+                Item {
+                    implicitWidth: aiMetricsRow.implicitWidth
+                    implicitHeight: aiMetricsRow.implicitHeight
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.fillWidth: true
+                    Layout.maximumHeight: root.pageContentHeight
+
+                    RowLayout {
+                        id: aiMetricsRow
+                        property real dualSharedStatusBarWidth: 24
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: root.aiDualColumnMode ? 8 : 0
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenterOffset: root.aiTextVerticalOffset
+                        spacing: root.aiEntryCount > 1 ? 10 : root.pageSpacing
+
+                        function updateDualSharedStatusBarWidth() {
+                            if (!root.aiDualColumnMode) {
+                                dualSharedStatusBarWidth = 24
+                                return
+                            }
+
+                            let maxWidth = 24
+                            for (let index = 0; index < aiMetricsRepeater.count; ++index) {
+                                const item = aiMetricsRepeater.itemAt(index)
+                                if (item && item.headlineWidth !== undefined) {
+                                    maxWidth = Math.max(maxWidth, item.headlineWidth)
+                                }
+                            }
+
+                            dualSharedStatusBarWidth = maxWidth
+                        }
+
+                        Repeater {
+                            id: aiMetricsRepeater
+                            model: root.aiEntries
+
+                            delegate: Item {
+                                id: aiMetricDelegate
+                                required property var modelData
+
+                                readonly property string processLabel: modelData && modelData.processLabel ? String(modelData.processLabel) : "ai"
+                                readonly property int runningCount: modelData && modelData.runningCount !== undefined ? Number(modelData.runningCount) : 0
+                                readonly property int completedCount: modelData && modelData.completedCount !== undefined ? Number(modelData.completedCount) : 0
+                                readonly property int totalCount: modelData && modelData.totalCount !== undefined ? Number(modelData.totalCount) : 0
+                                readonly property bool running: runningCount > 0
+                                readonly property bool completed: !running && totalCount > 0 && completedCount >= totalCount
+                                readonly property string completedText: String(completedCount)
+                                readonly property string totalText: String(totalCount)
+                                readonly property int headlineSpacing: Math.max(2, Math.round(root.pageContentHeight * 0.06))
+                                readonly property real headlineWidth: aiMetricHeadlineRow.implicitWidth
+
+                                implicitWidth: aiMetricColumn.implicitWidth
+                                implicitHeight: aiMetricColumn.implicitHeight
+                                Layout.fillWidth: false
+                                Layout.preferredWidth: implicitWidth
+                                Layout.minimumWidth: 0
+
+                                Component.onCompleted: aiMetricsRow.updateDualSharedStatusBarWidth()
+                                onHeadlineWidthChanged: aiMetricsRow.updateDualSharedStatusBarWidth()
+
+                                ColumnLayout {
+                                    id: aiMetricColumn
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: root.tightSpacing
+
+                                    Item {
+                                        id: aiMetricHeadlineRow
+                                        implicitWidth: taskCountLabel.visible
+                                            ? taskCountLabel.x + taskCountLabel.implicitWidth
+                                            : totalTextItem.x + totalTextItem.implicitWidth
+                                        implicitHeight: Math.max(completedTextItem.implicitHeight,
+                                                                 taskCountLabel.visible ? taskCountLabel.implicitHeight : 0)
+
+                                        Text {
+                                            id: completedTextItem
+                                            anchors.left: parent.left
+                                            anchors.bottom: parent.bottom
+                                            text: aiMetricDelegate.completedText
+                                            color: root.primaryTextColor
+                                            font.family: root.dataFontFamily
+                                            font.pixelSize: root.aiPrimaryCountFontSize
+                                            font.weight: Font.DemiBold
+                                            renderType: Text.NativeRendering
+                                        }
+
+                                        Text {
+                                            id: slashTextItem
+                                            anchors.left: completedTextItem.right
+                                            anchors.leftMargin: aiMetricDelegate.headlineSpacing
+                                            anchors.bottom: completedTextItem.bottom
+                                            text: "/"
+                                            color: root.primaryTextColor
+                                            font.family: root.dataFontFamily
+                                            font.pixelSize: root.aiPrimaryCountFontSize
+                                            font.weight: Font.DemiBold
+                                            renderType: Text.NativeRendering
+                                        }
+
+                                        Text {
+                                            id: totalTextItem
+                                            anchors.left: slashTextItem.right
+                                            anchors.leftMargin: aiMetricDelegate.headlineSpacing
+                                            anchors.bottom: completedTextItem.bottom
+                                            text: aiMetricDelegate.totalText
+                                            color: root.primaryTextColor
+                                            font.family: root.dataFontFamily
+                                            font.pixelSize: root.aiSecondaryCountFontSize
+                                            font.weight: Font.DemiBold
+                                            renderType: Text.NativeRendering
+                                        }
+
+                                        Text {
+                                            id: taskCountLabel
+                                            anchors.left: totalTextItem.right
+                                            anchors.leftMargin: aiMetricDelegate.headlineSpacing
+                                            anchors.bottom: completedTextItem.bottom
+                                            text: qsTr("条任务")
+                                            color: root.secondaryTextColor
+                                            font.pixelSize: root.captionFontSize
+                                            font.weight: Font.Medium
+                                            renderType: Text.NativeRendering
+                                            visible: root.aiEntryCount === 1
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        id: aiStatusTrack
+                                        implicitWidth: root.aiDualColumnMode
+                                            ? aiMetricsRow.dualSharedStatusBarWidth
+                                            : aiMetricHeadlineRow.implicitWidth
+                                        implicitHeight: root.aiStatusBarHeight
+                                        radius: 0.1
+                                        color: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(0, 0, 0, 0.12)
+                                        Layout.topMargin: 1
+
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: parent.radius
+                                            color: Qt.rgba(0.37, 0.83, 0.42, 0.95)
+                                            visible: aiMetricDelegate.completed
+                                        }
+
+                                        Item {
+                                            id: aiRunningViewport
+                                            anchors.fill: parent
+                                            clip: true
+                                            visible: aiMetricDelegate.running
+
+                                            Item {
+                                                id: aiRunningMarquee
+                                                width: aiStatusTrack.width * 2
+                                                height: aiStatusTrack.height
+                                                y: 0
+                                                x: -aiStatusTrack.width
+
+                                                Repeater {
+                                                    model: 2
+
+                                                    delegate: Rectangle {
+                                                        x: index * aiStatusTrack.width
+                                                        width: aiStatusTrack.width
+                                                        height: aiStatusTrack.height
+                                                        radius: 0.1
+                                                        gradient: Gradient {
+                                                            orientation: Gradient.Horizontal
+                                                            GradientStop { position: 0.0; color: "#ff5f6d" }
+                                                            GradientStop { position: 0.18; color: "#ff9966" }
+                                                            GradientStop { position: 0.36; color: "#ffd84d" }
+                                                            GradientStop { position: 0.54; color: "#59f2c1" }
+                                                            GradientStop { position: 0.74; color: "#52a8ff" }
+                                                            GradientStop { position: 1.0; color: "#d16cff" }
+                                                        }
+                                                    }
+                                                }
+
+                                                NumberAnimation on x {
+                                                    running: aiMetricDelegate.running
+                                                    loops: Animation.Infinite
+                                                    from: -aiStatusTrack.width
+                                                    to: 0
+                                                    duration: root.aiStatusBarAnimationDuration
+                                                    easing.type: Easing.Linear
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Text {
+                                        text: aiMetricDelegate.processLabel
+                                        color: root.secondaryTextColor
+                                        font.pixelSize: root.aiProcessFontSize
+                                        renderType: Text.NativeRendering
+                                        Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
+                                        elide: Text.ElideRight
+                                        visible: root.aiShowSecondaryLine
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        PageShell {
             id: musicPage
             pageId: "music"
 
-            implicitWidth: root.musicPageVisible
-                ? root.musicArtSize + root.musicRowSpacing + musicInfoArea.implicitWidth + root.musicPageExtraLeadingWidth
-                : 0
+            implicitWidth: root.musicPageVisible ? musicRow.implicitWidth : 0
             implicitHeight: root.musicPageVisible ? root.dockSize : 0
             onClicked: provider.openMusicPlayer()
 
-            Row {
+            RowLayout {
                 id: musicRow
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.leftMargin: root.leftContentPadding + root.musicPageExtraLeadingWidth
+                anchors.leftMargin: root.pluginRowLeftMargin
                 anchors.rightMargin: root.rightContentPadding
                 anchors.verticalCenter: parent.verticalCenter
+                height: root.pageContentHeight
                 spacing: root.musicRowSpacing
 
                 Item {
-                    implicitWidth: root.musicArtSize
-                    implicitHeight: Math.max(root.musicArtSize, musicInfoColumn.implicitHeight, musicControlsRow.implicitHeight)
+                    implicitWidth: root.pluginLeadingSlotSize
+                    implicitHeight: root.pluginLeadingSlotSize
+                    Layout.alignment: Qt.AlignVCenter
 
                     Rectangle {
                         id: musicArtworkBackground
@@ -1042,12 +1379,12 @@ Control {
 
                 Item {
                     id: musicInfoArea
-                    anchors.verticalCenter: parent.verticalCenter
                     property int summaryWidth: Math.max(root.musicControlsWidth, Math.min(root.maxMusicTitleWidth, Math.ceil(Math.max(musicTitleItem.implicitWidth, (root.showSecondaryLine && musicSubtitleWrapper.visible) ? musicSubtitleItem.implicitWidth : 0))))
                     clip: true
                     implicitWidth: Math.ceil(summaryWidth + (root.musicControlsWidth - summaryWidth) * root.musicHoverProgress)
                     width: implicitWidth
                     implicitHeight: Math.max(musicInfoColumn.implicitHeight, musicControlsRow.implicitHeight)
+                    Layout.alignment: Qt.AlignVCenter
 
                     Column {
                         id: musicInfoColumn
@@ -1153,21 +1490,21 @@ Control {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: root.leftContentPadding + root.foregroundContentOffset
+                anchors.leftMargin: root.pluginRowLeftMargin
                 anchors.rightMargin: root.rightContentPadding
                 height: root.pageContentHeight
                 spacing: root.pageSpacing
 
                 Item {
-                    implicitWidth: root.mediumIconSize
+                    implicitWidth: root.pluginLeadingSlotSize
                     implicitHeight: implicitWidth
                     Layout.alignment: Qt.AlignVCenter
 
                     D.DciIcon {
                         anchors.centerIn: parent
                         name: provider.mailIconName
-                        width: parent.width
-                        height: parent.height
+                        width: root.pluginLeadingIconSize
+                        height: root.pluginLeadingIconSize
                         sourceSize: Qt.size(width, height)
                         smooth: false
                     }
