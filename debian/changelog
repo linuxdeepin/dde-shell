@@ -1,3 +1,23 @@
+dde-shell (2.0.38) unstable; urgency=medium
+
+  * fix: resolve tray submenu display position issue at screen top-left
+  * refactor(notification): move bubble overlay logic to QML delegate
+  * fix: remove unnecessary platform check in AppItem tooltip
+  * fix: improve dock center space calculation and taskmanager layout
+  * fix: avoid quick panel placeholder not aligned to center on startup
+  * fix: filter unsupported dock applets in DBus proxy
+  * feat: add dock library and refactor dock plugin management
+  * fix: filter clipboard data for plugin Wayland clients
+  * fix: centralize relative time formatting logic
+  * feat: add attention animation toggle for taskmanager
+  * Revert "refactor: move dockiteminfo to shared frame library"
+  * fix: separate touchscreen and mouse context menu triggers in
+    notification center
+  * fix: reset icon scale when attention animation ends
+  * refactor: move dockiteminfo to shared frame library
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 23 Apr 2026 21:46:08 +0800
+
 dde-shell (2.0.37) unstable; urgency=medium
 
   * fix: update tooltip window property bindings and hover behavior
