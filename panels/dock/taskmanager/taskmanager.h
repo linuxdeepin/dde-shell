@@ -104,6 +104,7 @@ public:
 
     Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId) const;
     Q_INVOKABLE QString dockElementFromLauncherId(const QString &launcherId) const;
+    Q_INVOKABLE QString displayNameForDockElement(const QString &dockElement) const;
     Q_INVOKABLE QString folderUrlToElementId(const QString &folderUrl) const;
     Q_INVOKABLE bool requestDockByDesktopId(const QString& desktopID);
     Q_INVOKABLE bool requestUndockByDesktopId(const QString& desktopID);

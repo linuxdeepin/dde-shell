@@ -15,6 +15,7 @@
 #include <QPointer>
 #include <QPropertyAnimation>
 #include <QRect>
+#include <QSize>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QWindow>
@@ -92,7 +93,7 @@ private:
     inline void initUI();
     inline void updateSize(int windowCount = -1);
     void updatePreviewIconFromString(const QString &stringData);
-    QRect previewGeometry() const;
+    QRect previewGeometry(const QSize &size = QSize()) const;
 
 public Q_SLOTS:
     void dismissPreview();
@@ -123,6 +124,7 @@ private:
     uint32_t m_direction;
     bool m_positionInitialized;
     double m_previewOpacity;
+    QSize m_targetPreviewSize;
 
     QPointer<QWindow> m_baseWindow;
 

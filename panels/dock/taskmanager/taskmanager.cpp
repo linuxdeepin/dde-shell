@@ -32,6 +32,7 @@
 #include <QMetaObject>
 #include <QMimeDatabase>
 #include <QProcess>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QStringLiteral>
 #include <QUrl>
@@ -39,6 +40,8 @@
 #include <QtQml/QtQml>
 
 #include <DThumbnailProvider>
+
+#include <libintl.h>
 
 #include <appletbridge.h>
 #include <DSGApplication>
@@ -270,9 +273,101 @@ static bool isWithinBasePath(const QString &basePath, const QString &candidatePa
     return candidatePath.startsWith(prefix);
 }
 
+static QString localizedDesktopEntryText(QSettings &settings, const QString &key);
+
 static QString displayNameForPath(const QString &path)
 {
+    const auto localizedStandardLocationName = [](QStandardPaths::StandardLocation location) {
+        const auto englishDefaultName = [](QStandardPaths::StandardLocation standardLocation) -> QString {
+            switch (standardLocation) {
+            case QStandardPaths::HomeLocation:
+                return QStringLiteral("Home");
+            case QStandardPaths::DesktopLocation:
+                return QStringLiteral("Desktop");
+            case QStandardPaths::DocumentsLocation:
+                return QStringLiteral("Documents");
+            case QStandardPaths::DownloadLocation:
+                return QStringLiteral("Download");
+            case QStandardPaths::MoviesLocation:
+                return QStringLiteral("Movies");
+            case QStandardPaths::MusicLocation:
+                return QStringLiteral("Music");
+            case QStandardPaths::PicturesLocation:
+                return QStringLiteral("Pictures");
+            case QStandardPaths::TemplatesLocation:
+                return QStringLiteral("Templates");
+            case QStandardPaths::PublicShareLocation:
+                return QStringLiteral("Public");
+            case QStandardPaths::ApplicationsLocation:
+                return QStringLiteral("Applications");
+            default:
+                return {};
+            }
+        };
+
+        const QString localizedName = QStandardPaths::displayName(location);
+        const QString englishName = englishDefaultName(location);
+        if (!localizedName.isEmpty()
+            && (englishName.isEmpty() || localizedName.compare(englishName, Qt::CaseInsensitive) != 0)) {
+            return localizedName;
+        }
+
+        if (!englishName.isEmpty()) {
+            const QByteArray englishNameUtf8 = englishName.toUtf8();
+            const QString translatedName = QString::fromLocal8Bit(dgettext("xdg-user-dirs", englishNameUtf8.constData())).trimmed();
+            if (!translatedName.isEmpty() && translatedName.compare(englishName, Qt::CaseInsensitive) != 0) {
+                return translatedName;
+            }
+        }
+
+        return QString();
+    };
+
     QFileInfo fileInfo(path);
+    const QString normalizedPath = QDir::cleanPath(fileInfo.absoluteFilePath().isEmpty() ? path : fileInfo.absoluteFilePath());
+    const QString directoryEntryPath = QDir(normalizedPath).filePath(QStringLiteral(".directory"));
+    if (QFileInfo::exists(directoryEntryPath)) {
+        QSettings settings(directoryEntryPath, QSettings::IniFormat);
+        settings.beginGroup(QStringLiteral("Desktop Entry"));
+        const QString localizedDirectoryName = localizedDesktopEntryText(settings, QStringLiteral("Name"));
+        if (!localizedDirectoryName.isEmpty()) {
+            return localizedDirectoryName;
+        }
+    }
+
+    if (normalizedPath == QStringLiteral("/usr/share/applications")) {
+        if (QLocale().language() == QLocale::Chinese) {
+            return QStringLiteral("应用程序");
+        }
+
+        const QString applicationsName = QStandardPaths::displayName(QStandardPaths::ApplicationsLocation);
+        if (!applicationsName.isEmpty()) {
+            return applicationsName;
+        }
+    }
+
+    const QList<QStandardPaths::StandardLocation> standardLocations = {
+        QStandardPaths::HomeLocation,
+        QStandardPaths::DesktopLocation,
+        QStandardPaths::DocumentsLocation,
+        QStandardPaths::DownloadLocation,
+        QStandardPaths::MoviesLocation,
+        QStandardPaths::MusicLocation,
+        QStandardPaths::PicturesLocation,
+        QStandardPaths::TemplatesLocation,
+        QStandardPaths::PublicShareLocation,
+    };
+    for (const QStandardPaths::StandardLocation location : standardLocations) {
+        const QString locationPath = QDir::cleanPath(QStandardPaths::writableLocation(location));
+        if (!locationPath.isEmpty() && locationPath == normalizedPath) {
+            const QString localizedName = localizedStandardLocationName(location);
+            if (!localizedName.isEmpty()) {
+                return localizedName;
+            }
+            break;
+        }
+    }
+
     QString name = fileInfo.fileName();
     if (name.isEmpty()) {
         name = fileInfo.absoluteFilePath();
@@ -283,7 +378,84 @@ static QString displayNameForPath(const QString &path)
     return name;
 }
 
-static QString fileIconName(const QFileInfo &fileInfo)
+struct DesktopEntryMetadata
+{
+    QString displayName;
+    QString iconName;
+    bool hidden = false;
+};
+
+struct FilePresentationInfo
+{
+    QString displayName;
+    QString iconName;
+    bool hidden = false;
+};
+
+static bool isDesktopEntryFile(const QFileInfo &fileInfo)
+{
+    return fileInfo.isFile()
+            && fileInfo.suffix().compare(QStringLiteral("desktop"), Qt::CaseInsensitive) == 0;
+}
+
+static QString localizedDesktopEntryText(QSettings &settings, const QString &key)
+{
+    if (key.isEmpty()) {
+        return {};
+    }
+
+    QStringList localizedKeys;
+    const QStringList uiLanguages = QLocale::system().uiLanguages();
+    for (const QString &uiLanguage : uiLanguages) {
+        QString normalizedLanguage = uiLanguage.trimmed();
+        if (normalizedLanguage.isEmpty()) {
+            continue;
+        }
+
+        normalizedLanguage.replace(QLatin1Char('-'), QLatin1Char('_'));
+
+        const QString fullKey = QStringLiteral("%1[%2]").arg(key, normalizedLanguage);
+        if (!localizedKeys.contains(fullKey)) {
+            localizedKeys.append(fullKey);
+        }
+
+        const int separatorIndex = normalizedLanguage.indexOf(QLatin1Char('_'));
+        if (separatorIndex > 0) {
+            const QString baseLanguageKey = QStringLiteral("%1[%2]").arg(key, normalizedLanguage.left(separatorIndex));
+            if (!localizedKeys.contains(baseLanguageKey)) {
+                localizedKeys.append(baseLanguageKey);
+            }
+        }
+    }
+
+    for (const QString &localizedKey : localizedKeys) {
+        const QString localizedValue = settings.value(localizedKey).toString().trimmed();
+        if (!localizedValue.isEmpty()) {
+            return localizedValue;
+        }
+    }
+
+    return settings.value(key).toString().trimmed();
+}
+
+static DesktopEntryMetadata desktopEntryMetadataForFile(const QFileInfo &fileInfo)
+{
+    if (!isDesktopEntryFile(fileInfo)) {
+        return {};
+    }
+
+    QSettings settings(fileInfo.absoluteFilePath(), QSettings::IniFormat);
+    settings.beginGroup(QStringLiteral("Desktop Entry"));
+
+    DesktopEntryMetadata metadata;
+    metadata.hidden = settings.value(QStringLiteral("Hidden")).toBool()
+                      || settings.value(QStringLiteral("NoDisplay")).toBool();
+    metadata.displayName = localizedDesktopEntryText(settings, QStringLiteral("Name"));
+    metadata.iconName = settings.value(QStringLiteral("Icon")).toString().trimmed();
+    return metadata;
+}
+
+static QString defaultFileIconName(const QFileInfo &fileInfo)
 {
     if (fileInfo.isDir()) {
         return QStringLiteral("folder");
@@ -301,9 +473,47 @@ static QString fileIconName(const QFileInfo &fileInfo)
     return QStringLiteral("text-x-generic");
 }
 
+static FilePresentationInfo filePresentationInfo(const QFileInfo &fileInfo)
+{
+    FilePresentationInfo info;
+    info.displayName = fileInfo.fileName();
+
+    if (info.displayName.isEmpty()) {
+        info.displayName = fileInfo.absoluteFilePath();
+    }
+    if (info.displayName.isEmpty()) {
+        info.displayName = fileInfo.filePath();
+    }
+
+    if (fileInfo.isDir()) {
+        info.iconName = QStringLiteral("folder");
+        return info;
+    }
+
+    const DesktopEntryMetadata desktopEntry = desktopEntryMetadataForFile(fileInfo);
+    info.hidden = desktopEntry.hidden;
+    if (!desktopEntry.displayName.isEmpty()) {
+        info.displayName = desktopEntry.displayName;
+    }
+    if (!desktopEntry.iconName.isEmpty()) {
+        info.iconName = desktopEntry.iconName;
+    }
+
+    if (info.iconName.isEmpty()) {
+        info.iconName = defaultFileIconName(fileInfo);
+    }
+
+    return info;
+}
+
+static QString fileIconName(const QFileInfo &fileInfo)
+{
+    return filePresentationInfo(fileInfo).iconName;
+}
+
 static QString thumbnailUrlForFile(const QFileInfo &fileInfo)
 {
-    if (fileInfo.isDir()) {
+    if (fileInfo.isDir() || isDesktopEntryFile(fileInfo)) {
         return {};
     }
 
@@ -392,14 +602,19 @@ static QVariantList directoryEntriesForPath(const QString &path, const PopupSort
                                                             QDir::NoSort);
     for (const QFileInfo &fileInfo : fileInfos) {
         const QString entryPath = fileInfo.absoluteFilePath();
+        const FilePresentationInfo presentation = filePresentationInfo(fileInfo);
+        if (presentation.hidden) {
+            continue;
+        }
+
         PopupSortableEntry entry;
         entry.entryData = popupEntry(entryPath,
-                                     fileInfo.fileName(),
-                                     fileIconName(fileInfo),
+                                     presentation.displayName,
+                                     presentation.iconName,
                                      fileInfo.isDir(),
                                      QUrl::fromLocalFile(entryPath).toString(),
                                      thumbnailUrlForFile(fileInfo));
-        entry.name = fileInfo.fileName();
+        entry.name = presentation.displayName;
         entry.typeText = fileTypeSortText(fileInfo);
         entry.modifiedTime = fileModifiedTimeForSort(fileInfo);
         entry.createdTime = fileCreatedTimeForSort(fileInfo);
@@ -426,7 +641,12 @@ static QStringList previewIconsForDirectory(const QString &path, int limit = 4)
     const QFileInfoList fileInfos = directory.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot,
                                                             QDir::DirsFirst | QDir::Name | QDir::IgnoreCase);
     for (const QFileInfo &fileInfo : fileInfos) {
-        iconNames.append(fileIconName(fileInfo));
+        const FilePresentationInfo presentation = filePresentationInfo(fileInfo);
+        if (presentation.hidden) {
+            continue;
+        }
+
+        iconNames.append(presentation.iconName);
         if (iconNames.size() >= limit) {
             break;
         }
@@ -992,6 +1212,39 @@ QString TaskManager::dockElementFromLauncherId(const QString &launcherId) const
     }
 
     return QStringLiteral("desktop/%1").arg(desktopIdToAppId(launcherId));
+}
+
+QString TaskManager::displayNameForDockElement(const QString &dockElement) const
+{
+    const auto [type, id] = splitDockElement(dockElement);
+    if (type.isEmpty() || id.isEmpty()) {
+        return {};
+    }
+
+    if (type == QStringLiteral("folder")) {
+        return displayNameForPath(id);
+    }
+
+    if (type == QStringLiteral("group")) {
+        QString groupName = invokeLauncherGroupDisplayName(m_launcherGroupModel, id);
+        if (groupName.isEmpty()) {
+            const QString resolvedGroupId = resolveLauncherGroupId(m_launcherGroupModel, id);
+            const QModelIndex groupIndex = findIndexByNamedRole(m_launcherGroupModel,
+                                                                MODEL_DESKTOPID,
+                                                                resolvedGroupId,
+                                                                DesktopIdRole);
+            if (groupIndex.isValid()) {
+                groupName = groupIndex.data(modelRole(m_launcherGroupModel, MODEL_NAME, NameRole)).toString();
+            }
+        }
+        const QString categoryName = translatedLauncherCategoryName(groupName);
+        if (!categoryName.isEmpty()) {
+            return categoryName;
+        }
+        return groupName;
+    }
+
+    return {};
 }
 
 QString TaskManager::folderUrlToElementId(const QString &folderUrl) const

@@ -43,11 +43,11 @@ Item {
         radius: Math.max(6, Math.round(root.iconSize / 4))
         color: root.colorTheme === Dock.Dark ?
                    Qt.rgba(1, 1, 1, 0.10) :
-                   Qt.rgba(0, 0, 0, 0.30)
+                   Qt.rgba(0, 0, 0, 0.10)
         border.width: 1
         border.color: root.colorTheme === Dock.Dark ?
                           Qt.rgba(1, 1, 1, 0.40) :
-                          Qt.rgba(0, 0, 0, 0.40)
+                          Qt.rgba(0, 0, 0, 0.20)
         visible: root.useCompositePreview
     }
 

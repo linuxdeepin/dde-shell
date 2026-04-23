@@ -32,6 +32,9 @@ Item {
 
     property real blendOpacity: 1.0
     property point lastSpotlightPoint: Qt.point(0, 0)
+    readonly property string toolTipText: root.itemId === "dde-trash"
+                                          ? root.name + "-" + taskmanager.Applet.getTrashTipText()
+                                          : root.name
 
     signal dropFilesOnItem(itemId: string, files: list<string>)
     signal dragFinished()
@@ -722,7 +725,6 @@ Item {
 
     function showToolTipNow() {
         var point = root.mapToItem(null, root.width / 2, root.height / 2)
-        toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
         toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
         toolTip.open()
     }
@@ -864,6 +866,7 @@ Item {
 
         PanelToolTip {
             id: toolTip
+            text: root.toolTipText
             toolTipX: DockPanelPositioner.x
             toolTipY: DockPanelPositioner.y
             closeGraceInterval: 90

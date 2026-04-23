@@ -54,15 +54,23 @@ Item {
             return
 
         closeTimer.stop()
+        timer.stop()
+
+        if (toolTipWindow.visible && toolTipWindow.currentItem && toolTipWindow.currentItem !== control) {
+            toolTipWindow.close()
+            toolTipWindow.currentItem = null
+        }
+
         readyBinding = Qt.binding(function () {
             return toolTipWindow && toolTipWindow.currentItem === control
         })
-
         toolTipWindow.currentItem = control
         if (toolTipWindow.visible) {
             toolTipWindow.title = windowTitle
             if ("showAnimated" in toolTipWindow) {
                 toolTipWindow.showAnimated()
+            } else {
+                toolTipWindow.show()
             }
             return
         }

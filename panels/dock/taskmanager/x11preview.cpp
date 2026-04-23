@@ -65,8 +65,8 @@ constexpr auto kAppearanceService = "org.deepin.dde.Appearance1";
 constexpr auto kAppearancePath = "/org/deepin/dde/Appearance1";
 constexpr auto kAppearanceInterface = "org.deepin.dde.Appearance1";
 constexpr auto kPropertiesInterface = "org.freedesktop.DBus.Properties";
-constexpr int kPreviewMotionBaseDuration = 88;
-constexpr int kPreviewMotionMaxDuration = 156;
+constexpr int kPreviewMotionBaseDuration = 96;
+constexpr int kPreviewMotionMaxDuration = 176;
 
 DGuiApplicationHelper::ColorType previewThemeType()
 {
@@ -425,7 +425,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
     , m_previewTitle(nullptr)
     , m_closeAllButton(nullptr)
     , m_hideTimer(nullptr)
-    , m_positionAnimation(new QPropertyAnimation(this, "pos"))
+    , m_positionAnimation(new QPropertyAnimation(this, "geometry"))
     , m_direction(0)
     , m_positionInitialized(false)
     , m_previewOpacity(0.4)
@@ -434,7 +434,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
     m_hideTimer->setSingleShot(true);
     m_hideTimer->setInterval(500);
     m_positionAnimation->setDuration(kPreviewMotionBaseDuration);
-    m_positionAnimation->setEasingCurve(QEasingCurve::OutQuad);
+    m_positionAnimation->setEasingCurve(QEasingCurve::OutCubic);
 
     setWindowFlags(Qt::ToolTip | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus | Qt::FramelessWindowHint);
     setMouseTracking(true);
@@ -624,6 +624,7 @@ void X11WindowPreviewContainer::hideEvent(QHideEvent*)
 {
     m_positionAnimation->stop();
     m_positionInitialized = false;
+    m_targetPreviewSize = QSize();
     // 只通知监视器清空预览状态，让 TaskManager 统一管理模型清理
     // 不要在这里断开模型连接，因为 clearPreviewState 信号会触发 TaskManager 的 clearFilter
     // QPointer 会自动处理对象销毁的情况
@@ -637,37 +638,44 @@ void X11WindowPreviewContainer::hideEvent(QHideEvent*)
 
 void X11WindowPreviewContainer::resizeEvent(QResizeEvent *event)
 {
-    Q_UNUSED(event)
-    updatePosition();
+    DBlurEffectWidget::resizeEvent(event);
+    const int contentWidth = std::max(1, width() - 2 * (PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER));
+    m_titleWidget->setFixedWidth(contentWidth);
+    if (m_positionAnimation->state() != QAbstractAnimation::Running) {
+        updatePosition();
+    }
 }
 
-QRect X11WindowPreviewContainer::previewGeometry() const
+QRect X11WindowPreviewContainer::previewGeometry(const QSize &size) const
 {
     if (!m_baseWindow || !m_baseWindow->screen()) {
         return geometry();
     }
 
+    const QSize effectiveSize = size.isValid()
+        ? size
+        : (m_targetPreviewSize.isValid() ? m_targetPreviewSize : this->size());
     auto screenRect = m_baseWindow->screen()->geometry();
     auto dockWindowPosition = m_baseWindow->position();
     int xPosition = dockWindowPosition.x() + m_previewXoffset;
     int yPosition = dockWindowPosition.y() + m_previewYoffset;
     switch(m_direction) {
         case 0: {
-            xPosition -= width() / 2;
+            xPosition -= effectiveSize.width() / 2;
             break;
         }
         case 1: {
-            xPosition -= width();
-            yPosition -= height() / 2;
+            xPosition -= effectiveSize.width();
+            yPosition -= effectiveSize.height() / 2;
             break;
         }
         case 2: {
-            xPosition -= width() / 2;
-            yPosition -= height();
+            xPosition -= effectiveSize.width() / 2;
+            yPosition -= effectiveSize.height();
             break;
         }
         case 3: {
-            yPosition -= height() / 2;
+            yPosition -= effectiveSize.height() / 2;
             break;
         }
         default: {
@@ -677,12 +685,12 @@ QRect X11WindowPreviewContainer::previewGeometry() const
     }
 
     xPosition = std::max(xPosition, screenRect.x() + 10);
-    xPosition = std::min(xPosition, screenRect.x() + screenRect.width() - width() - 10);
+    xPosition = std::min(xPosition, screenRect.x() + screenRect.width() - effectiveSize.width() - 10);
 
     yPosition = std::max(yPosition, screenRect.y() + 10);
-    yPosition = std::min(yPosition, screenRect.y() + screenRect.height() - height() - 10);
+    yPosition = std::min(yPosition, screenRect.y() + screenRect.height() - effectiveSize.height() - 10);
 
-    return QRect(xPosition, yPosition, width(), height());
+    return QRect(xPosition, yPosition, effectiveSize.width(), effectiveSize.height());
 }
 
 void X11WindowPreviewContainer::dismissPreview()
@@ -698,25 +706,28 @@ void X11WindowPreviewContainer::dismissPreview()
 
 void X11WindowPreviewContainer::updatePosition()
 {
-    const QPoint targetPosition = previewGeometry().topLeft();
+    const QRect targetGeometry = previewGeometry();
 
     if (!isVisible() || !m_positionInitialized) {
         m_positionAnimation->stop();
-        move(targetPosition);
+        setGeometry(targetGeometry);
         m_positionInitialized = true;
         return;
     }
 
-    if (pos() == targetPosition) {
+    if (geometry() == targetGeometry) {
         return;
     }
 
-    const int distance = (pos() - targetPosition).manhattanLength();
+    const QRect currentGeometry = geometry();
+    const int distance = (currentGeometry.topLeft() - targetGeometry.topLeft()).manhattanLength()
+        + std::abs(currentGeometry.width() - targetGeometry.width())
+        + std::abs(currentGeometry.height() - targetGeometry.height());
     m_positionAnimation->setDuration(std::min(kPreviewMotionMaxDuration,
                                               kPreviewMotionBaseDuration + distance / 5));
     m_positionAnimation->stop();
-    m_positionAnimation->setStartValue(pos());
-    m_positionAnimation->setEndValue(targetPosition);
+    m_positionAnimation->setStartValue(currentGeometry);
+    m_positionAnimation->setEndValue(targetGeometry);
     m_positionAnimation->start();
 }
 
@@ -887,11 +898,13 @@ void X11WindowPreviewContainer::updateSize(int windowCount)
 
     setMinimumSize(1, 1);
     setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    resize(targetSize);
-
-    m_titleWidget->setFixedWidth(m_view->width());
+    m_targetPreviewSize = targetSize;
     if (layout()) {
         layout()->activate();
+    }
+
+    if (isVisible()) {
+        updatePosition();
     }
 }
 

@@ -5,6 +5,8 @@
 #include "globals.h"
 #include "taskmanagersettings.h"
 
+#include <QDir>
+#include <QStandardPaths>
 #include <QJsonObject>
 #include <QJsonDocument>
 
@@ -13,6 +15,40 @@
 #include <yaml-cpp/yaml.h>
 
 namespace dock {
+namespace {
+static const QString DOWNLOADS_PLACEHOLDER = QStringLiteral("folder/$DOWNLOADS");
+
+static QString resolveDockedElement(const QString &element)
+{
+    if (element != DOWNLOADS_PLACEHOLDER) {
+        return element;
+    }
+
+    const QString downloadsPath = QDir::cleanPath(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+    if (downloadsPath.isEmpty()) {
+        return {};
+    }
+
+    return QStringLiteral("folder/%1").arg(downloadsPath);
+}
+
+static QStringList resolveDockedElements(const QStringList &elements)
+{
+    QStringList resolvedElements;
+
+    for (const QString &element : elements) {
+        const QString resolvedElement = resolveDockedElement(element);
+        if (resolvedElement.isEmpty() || resolvedElements.contains(resolvedElement)) {
+            continue;
+        }
+
+        resolvedElements.append(resolvedElement);
+    }
+
+    return resolvedElements;
+}
+}
+
 static inline QString bool2EnableStr(bool enable)
 {
     return enable ? QStringLiteral("enabled") : QStringLiteral("disabled");
@@ -47,7 +83,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
             m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
             Q_EMIT windowSplitChanged();
         } else if (TASKMANAGER_DOCKEDELEMENTS_KEY == key) {
-            m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
+            m_dockedElements = resolveDockedElements(m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList());
             Q_EMIT dockedElementsChanged();
         }
     });
@@ -56,7 +92,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     m_showAttentionAnimation = m_taskManagerDconfig->value(TASKMANAGER_SHOW_ATTENTION_ANIMATION_KEY, true).toBool();
     m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
     m_cgroupsBasedGrouping = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_KEY, true).toBool();
-    m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
+    m_dockedElements = resolveDockedElements(m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList());
     m_cgroupsBasedGroupingSkipAppIds = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_APPIDS, {"deepin-terminal"}).toStringList();
     m_cgroupsBasedGroupingSkipCategories = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_CATEGORIES, {"TerminalEmulator"}).toStringList();
     migrateFromDockedItems();
@@ -146,14 +182,19 @@ void TaskManagerSettings::migrateFromDockedItems()
         legacyDockedItems.append(dockedItem);
     }
 
+    QStringList migratedDockedElements;
     for (auto dockedDesktopFile : std::as_const(legacyDockedItems)) {
         if (!dockedDesktopFile.isObject()) {
             continue;
         }
         auto dockedDesktopFileObj = dockedDesktopFile.toObject();
         if (dockedDesktopFileObj.contains(QStringLiteral("id")) && dockedDesktopFileObj.contains(QStringLiteral("type"))) {
-            m_dockedElements.append(QStringLiteral("desktop/%1").arg(dockedDesktopFileObj[QStringLiteral("id")].toString()));
+            migratedDockedElements.append(QStringLiteral("desktop/%1").arg(dockedDesktopFileObj[QStringLiteral("id")].toString()));
         }
+    }
+
+    if (!migratedDockedElements.isEmpty()) {
+        m_dockedElements = resolveDockedElements(migratedDockedElements);
     }
 }
 

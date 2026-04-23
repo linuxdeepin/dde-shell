@@ -19,6 +19,11 @@
 #include <cstdint>
 
 namespace dock {
+namespace {
+constexpr int kPreviewMotionBaseDuration = 112;
+constexpr int kPreviewMotionMaxDuration = 208;
+}
+
 ForeignToplevelManager::ForeignToplevelManager(TreeLandWindowMonitor* monitor)
     : QWaylandClientExtensionTemplate<ForeignToplevelManager>(1)
     , m_monitor(monitor)
@@ -46,8 +51,8 @@ TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_pr
 
     m_hideTimer->setSingleShot(true);
     m_hideTimer->setInterval(800);
-    m_positionAnimation->setDuration(64);
-    m_positionAnimation->setEasingCurve(QEasingCurve::OutQuad);
+    m_positionAnimation->setDuration(kPreviewMotionBaseDuration);
+    m_positionAnimation->setEasingCurve(QEasingCurve::OutCubic);
     connect(m_positionAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant &value) {
         if (m_currentWindowsId.isEmpty()) {
             return;
@@ -77,9 +82,6 @@ TreeLandDockPreviewContext::~TreeLandDockPreviewContext()
 
 void TreeLandDockPreviewContext::showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
-    constexpr int kPreviewMotionBaseDuration = 88;
-    constexpr int kPreviewMotionMaxDuration = 156;
-
     m_isDockMouseAreaEnter = true;
     m_hideTimer->stop();
     m_currentWindowsId = windowsId;
@@ -103,7 +105,7 @@ void TreeLandDockPreviewContext::showWindowsPreview(QByteArray windowsId, int32_
 
     const int distance = (currentPosition - targetPosition).manhattanLength();
     m_positionAnimation->setDuration(std::min(kPreviewMotionMaxDuration,
-                                              kPreviewMotionBaseDuration + distance / 5));
+                                              kPreviewMotionBaseDuration + distance / 4));
     m_positionAnimation->stop();
     m_positionAnimation->setStartValue(currentPosition);
     m_positionAnimation->setEndValue(targetPosition);
