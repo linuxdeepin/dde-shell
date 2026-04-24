@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QDBusMessage>
 #include <QDBusConnection>
+#include <QTimer>
 
 #include <DConfig>
 
@@ -63,6 +64,18 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
         qDebug() << "actionsAlwaysVisibleChanged";
         updateVisualIndexes();
     });
+    
+    // Startup phase timer: end startup phase after 500ms of no new surfaces
+    m_startupTimer = new QTimer(this);
+    m_startupTimer->setSingleShot(true);
+    m_startupTimer->setInterval(500);
+    connect(m_startupTimer, &QTimer::timeout, this, [this](){
+        if (m_startupPhase) {
+            qDebug() << "Startup phase ended, showing all tray items";
+            setStartupPhase(false);
+        }
+    });
+    
     updateVisualIndexes();
 }
 
@@ -577,6 +590,24 @@ void TraySortOrderModel::onAvailableSurfacesChanged()
     updateVisualIndexes();
     // and also save the current sort order
     saveDataToDConfig();
+    
+    // During startup phase, reset timer on each new surface to batch updates
+    if (m_startupPhase && m_startupTimer) {
+        m_startupTimer->start();
+    }
+}
+
+bool TraySortOrderModel::startupPhase() const
+{
+    return m_startupPhase;
+}
+
+void TraySortOrderModel::setStartupPhase(bool phase)
+{
+    if (m_startupPhase == phase)
+        return;
+    m_startupPhase = phase;
+    emit startupPhaseChanged(phase);
 }
 
 void TraySortOrderModel::handlePluginVisibleChanged(const QString &surfaceId, bool visible)

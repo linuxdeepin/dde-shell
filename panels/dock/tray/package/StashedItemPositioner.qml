@@ -8,7 +8,13 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 
 Control {
     id: root
-    property bool itemVisible: !DDT.TraySortOrderModel.isUpdating
+    property bool itemVisible: {
+        // Startup phase: hide all items without triggering animations
+        if (DDT.TraySortOrderModel.startupPhase) {
+            return false
+        }
+        return !DDT.TraySortOrderModel.isUpdating
+    }
 
     spacing: 0
     padding: 0
@@ -22,6 +28,12 @@ Control {
     }
     states: [
         State {
+            name: "startup-hidden"
+            when: DDT.TraySortOrderModel.startupPhase
+            PropertyChanges { target: root; opacity: 0.0 }
+            PropertyChanges { target: root; visible: false }
+        },
+        State {
             when: root.itemVisible
             PropertyChanges { target: root; opacity: 1.0 }
             PropertyChanges { target: root; visible: true }
@@ -33,6 +45,14 @@ Control {
         }
     ]
     transitions: [
+        Transition {
+            from: "startup-hidden"
+            to: "*"
+            SequentialAnimation {
+                PropertyAction { target: root; property: "visible"; value: true }
+                NumberAnimation { property: "opacity"; duration: 300; easing.type: Easing.OutQuad }
+            }
+        },
         Transition {
             to: "item-invisible"
             SequentialAnimation {

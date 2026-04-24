@@ -7,6 +7,7 @@
 #include "constants.h"
 #include <QQmlEngine>
 #include <QStandardItemModel>
+#include <QTimer>
 
 namespace Dtk {
 namespace Core {
@@ -26,6 +27,7 @@ class TraySortOrderModel : public QStandardItemModel
     Q_PROPERTY(bool isCollapsing MEMBER m_isCollapsing NOTIFY isCollapsingChanged)
     Q_PROPERTY(bool actionsAlwaysVisible MEMBER m_actionsAlwaysVisible NOTIFY actionsAlwaysVisibleChanged)
     Q_PROPERTY(bool isUpdating MEMBER m_isUpdating NOTIFY isUpdatingChanged)
+    Q_PROPERTY(bool startupPhase READ startupPhase WRITE setStartupPhase NOTIFY startupPhaseChanged)
     Q_PROPERTY(QList<QVariantMap> availableSurfaces MEMBER m_availableSurfaces NOTIFY availableSurfacesChanged)
     Q_PROPERTY(QString stagedSurfaceId MEMBER m_stagedSurfaceId NOTIFY stagedDropChanged)
     Q_PROPERTY(int stagedVisualIndex MEMBER m_stagedVisualIndex NOTIFY stagedDropChanged)
@@ -74,12 +76,17 @@ public:
     Q_INVOKABLE void stageDropPosition(const QString &surfaceId, int visualIndex);
     Q_INVOKABLE void commitStagedDrop();
     Q_INVOKABLE void clearStagedDrop();
+    
+    // Startup phase control
+    bool startupPhase() const;
+    Q_INVOKABLE void setStartupPhase(bool phase);
 
 signals:
     void collapsedChanged(bool);
     void isCollapsingChanged(bool);
     void actionsAlwaysVisibleChanged(bool);
     void isUpdatingChanged(bool);
+    void startupPhaseChanged(bool);
     void visualItemCountChanged(int);
     void availableSurfacesChanged(const QList<QVariantMap> &);
     void stagedDropChanged();
@@ -90,7 +97,9 @@ private:
     bool m_isCollapsing = false;
     bool m_actionsAlwaysVisible = false;
     bool m_isUpdating = false;
+    bool m_startupPhase = true;
     std::unique_ptr<Dtk::Core::DConfig> m_dconfig;
+    QTimer *m_startupTimer = nullptr;
     // this is for the plugins that currently available.
     QList<QVariantMap> m_availableSurfaces;
     // these are the sort order data source, it might contain items that are no longer existed.
