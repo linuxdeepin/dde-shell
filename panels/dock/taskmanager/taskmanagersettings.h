@@ -42,6 +42,8 @@ public:
     QStringList dockedElements() const;
     bool isDocked(const QString &elementId) const;
 
+    void logMergeAppModel(bool mergeAppModelOn);
+
 private:
     explicit TaskManagerSettings(QObject *parent = nullptr);
     inline void migrateFromDockedItems();

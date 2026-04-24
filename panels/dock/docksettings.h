@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,6 +10,7 @@
 #include <QObject>
 #include <DConfig>
 #include <QScopedPointer>
+#include <optional>
 
 DCORE_USE_NAMESPACE
 
@@ -62,6 +63,7 @@ private:
     void init();
 
     void addWriteJob(WriteJob job);
+    void logDockConfig(std::optional<Position> pos, std::optional<ItemAlignment> align, const QString &reason) const;
     inline void checkWriteJob();
 
 Q_SIGNALS:

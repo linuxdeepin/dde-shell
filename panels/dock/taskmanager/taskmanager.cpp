@@ -22,6 +22,10 @@
 #include "textcalculator.h"
 #include "treelandwindowmonitor.h"
 
+#ifdef HAVE_DDE_API_EVENTLOGGER
+#include <dde-api/eventlogger.hpp>
+#endif
+
 #include <QGuiApplication>
 #include <QProcess>
 #include <QStandardPaths>
@@ -170,6 +174,8 @@ bool TaskManager::load()
 
 bool TaskManager::init()
 {
+    Settings->logMergeAppModel(!Settings->isWindowSplit());
+
     auto adaptor = new TaskManagerAdaptor(this);
     Q_UNUSED(adaptor)
     QDBusConnection::sessionBus().registerService("org.deepin.ds.Dock.TaskManager");

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -8,6 +8,14 @@
 
 #include <QTimer>
 #include <QLoggingCategory>
+
+#include <QJsonObject>
+#ifdef HAVE_DDE_API_EVENTLOGGER
+#include <dde-api/eventlogger.hpp>
+#endif
+
+// Event IDs for dock settings (10-digit numbers)
+constexpr qint64 EVENT_LOGGER_DOCK_CONFIG = 1000610006;
 
 Q_LOGGING_CATEGORY(dockSettingsLog, "org.deepin.dde.shell.dock.docksettings")
 
@@ -82,6 +90,21 @@ static QString itemAlignment2String(const ItemAlignment& alignment)
     return "center";
 }
 
+void DockSettings::logDockConfig(std::optional<Position> pos, std::optional<ItemAlignment> align, const QString &reason) const
+{
+    QJsonObject payload;
+    if (pos)
+        payload.insert(QStringLiteral("shell_pos"), position2String(*pos));
+    if (align)
+        payload.insert(QStringLiteral("shell_dock_mode"), itemAlignment2String(*align));
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    DDE_EventLogger::EventLogger::instance().writeEventLog(
+        DDE_EventLogger::EventLoggerData(EVENT_LOGGER_DOCK_CONFIG, QStringLiteral("dock_config"), payload));
+#endif
+    qCInfo(dockSettingsLog) << "EventLogger: dock config" << reason << payload;
+}
+
 static ItemAlignment string2ItenAlignment(const QString& alignmentStr)
 {
     if (alignmentStr == "left")
@@ -136,6 +159,7 @@ DockSettings::DockSettings(QObject* parent)
 {
     m_writeTimer->setSingleShot(true);
     m_writeTimer->setInterval(1000);
+    qCInfo(dockSettingsLog) << "EventLogger initialized";
     init();
 }
 
@@ -150,6 +174,9 @@ void DockSettings::init()
         m_pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
         m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
         m_locked = m_dockConfig->value(keyLocked).toBool();
+
+        // Log dock config on startup - merge shell_pos and shell_dock_mode into one log entry
+        logDockConfig(m_dockPosition, m_alignment, QStringLiteral("on startup"));
 
         connect(m_dockConfig.data(), &DConfig::valueChanged, this, [this](const QString& key){
             if (keyDockSize == key) {
@@ -237,6 +264,7 @@ void DockSettings::setPosition(const Position& position)
     m_dockPosition = position;
     Q_EMIT positionChanged(m_dockPosition);
     addWriteJob(positionJob);
+    logDockConfig(position, std::nullopt, QStringLiteral("position changed"));
 }
 
 ItemAlignment DockSettings::itemAlignment()
@@ -251,6 +279,7 @@ void DockSettings::setItemAlignment(const ItemAlignment& alignment)
     m_alignment = alignment;
     Q_EMIT itemAlignmentChanged(m_alignment);
     addWriteJob(itemAlignmentJob);
+    logDockConfig(std::nullopt, alignment, QStringLiteral("itemAlignment changed"));
 }
 
 IndicatorStyle DockSettings::indicatorStyle()

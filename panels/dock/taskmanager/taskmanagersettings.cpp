@@ -5,12 +5,20 @@
 #include "globals.h"
 #include "taskmanagersettings.h"
 
+#include <DConfig>
 #include <QJsonObject>
-#include <QJsonDocument>
 
 #include <string>
 
 #include <yaml-cpp/yaml.h>
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+#include <dde-api/eventlogger.hpp>
+#endif
+
+namespace {
+constexpr qint64 EVENT_LOGGER_MERGE_APP_MODEL = 1000610011;
+}
 
 namespace dock {
 static inline QString bool2EnableStr(bool enable)
@@ -46,6 +54,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
         } else if (TASKMANAGER_WINDOWSPLIT_KEY == key) {
             m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
             Q_EMIT windowSplitChanged();
+            logMergeAppModel(!m_windowSplit);
         } else if (TASKMANAGER_DOCKEDELEMENTS_KEY == key) {
             m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
             Q_EMIT dockedElementsChanged();
@@ -190,6 +199,17 @@ void TaskManagerSettings::removeDockedElement(const QString &element)
     m_dockedElements.removeAll(element);
     Q_EMIT dockedElementsChanged();
     saveDockedElements();
+}
+
+void TaskManagerSettings::logMergeAppModel(bool mergeAppModelOn)
+{
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    DDE_EventLogger::EventLogger::instance().writeEventLog(
+        DDE_EventLogger::EventLoggerData(EVENT_LOGGER_MERGE_APP_MODEL, QStringLiteral("taskmanager_config"), {
+            {QStringLiteral("merge_app_model_on"), mergeAppModelOn ? QStringLiteral("true") : QStringLiteral("false")}
+        }));
+#endif
+    qDebug() << "EventLogger: merge_app_model_on:" << mergeAppModelOn;
 }
 
 }
