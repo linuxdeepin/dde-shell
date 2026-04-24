@@ -15,8 +15,6 @@
 #include <QPointer>
 #include <QPropertyAnimation>
 #include <QRect>
-#include <QSet>
-#include <QSize>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QWindow>
@@ -79,7 +77,6 @@ public:
 
     void hidePreView();
     void setPreviewOpacity(double opacity);
-    QPixmap previewPixmap(uint32_t winId);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -95,7 +92,7 @@ private:
     inline void initUI();
     inline void updateSize(int windowCount = -1);
     void updatePreviewIconFromString(const QString &stringData);
-    QRect previewGeometry(const QSize &size = QSize()) const;
+    QRect previewGeometry() const;
 
 public Q_SLOTS:
     void dismissPreview();
@@ -106,7 +103,6 @@ private Q_SLOTS:
     void callHide();
 
 private:
-    void ensurePreviewFetch(uint32_t winId);
     bool m_isPreviewEntered;
     int32_t m_isDockPreviewCount;
 
@@ -127,8 +123,6 @@ private:
     uint32_t m_direction;
     bool m_positionInitialized;
     double m_previewOpacity;
-    QSize m_targetPreviewSize;
-    QSet<uint32_t> m_pendingPreviewFetches;
 
     QPointer<QWindow> m_baseWindow;
 

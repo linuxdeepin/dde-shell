@@ -29,7 +29,9 @@ Window {
     readonly property bool useTransformBasedHideAnimation: Qt.platform.pluginName === "xcb" && !useWindowMarginBasedHideAnimation
     readonly property var promotedCenterPluginIds: ["org.deepin.ds.dock.aibar", "org.deepin.ds.dock.searchitem"]
     readonly property int fashionDockSpacing: Math.round(dockItemIconSize * 0.75)
-    readonly property int fashionPartSpacing: fashionDockSpacing
+    readonly property real fashionPartSpacing: adaptiveFashionMode
+        ? dock.roundToPhysicalPixel(fashionDockSpacing)
+        : fashionDockSpacing
     readonly property int fashionFloatingMargin: adaptiveFashionMode ? 8 : 0
     readonly property int fashionHorizontalPadding: 0
     readonly property int fashionVerticalPadding: adaptiveFashionMode ? Math.max(6, Math.round(dockSize * 0.16)) : 0
@@ -121,7 +123,7 @@ Window {
     property int dockRemainingSpaceForCenter: adaptiveFashionMode ? 0 : (useColumnLayout ?
         (Screen.height / 1.8 - dockRightPart.implicitHeight)  :
         (Screen.width / 1.8 - dockRightPart.implicitWidth))
-    property int dockPartSpacing: adaptiveFashionMode ? fashionPartSpacing : gridLayout.columnSpacing
+    property real dockPartSpacing: adaptiveFashionMode ? fashionPartSpacing : gridLayout.columnSpacing
     // TODO
     signal dockCenterPartPosChanged()
     signal pressedAndDragging(bool isDragging)
@@ -204,13 +206,85 @@ Window {
         return mapped.x >= 0 && mapped.x < item.width && mapped.y >= 0 && mapped.y < item.height
     }
 
-    function isLeftAlignedBlankAreaPoint(x, y) {
-        if (dock.adaptiveFashionMode || dock.useColumnLayout || Panel.viewMode !== Dock.LeftAlignedMode) {
+    function isDockBlankAreaPoint(x, y) {
+        if (dock.adaptiveFashionMode || dock.useColumnLayout) {
             return false
         }
 
-        return dock.containsItemPoint(leftMarginArea, x, y)
-            || dock.containsItemPoint(dockTrailingBlankArea, x, y)
+        if (dock.containsItemPoint(dockTrailingBlankArea, x, y)) {
+            return true
+        }
+
+        return Panel.viewMode === Dock.LeftAlignedMode
+            && dock.containsItemPoint(leftMarginArea, x, y)
+    }
+
+    function hiddenTransformOffset() {
+        return (dock.positionForAnimation === Dock.Left || dock.positionForAnimation === Dock.Top)
+            ? -dock.windowThickness
+            : dock.windowThickness
+    }
+
+    function syncDockHiddenGeometryForCurrentMode() {
+        dock.positionForAnimation = Panel.position
+        hideShowAnimation.stop()
+        dockAnimation.stop()
+        changeDragAreaAnchor()
+
+        if (dock.useWindowMarginBasedHideAnimation) {
+            dockTransform.x = 0
+            dockTransform.y = 0
+            dock.animatedBottomMargin = dock.restingBottomMargin()
+            dock.visible = false
+            Panel.notifyDockPositionChanged(0, 0)
+            return
+        }
+
+        if (dock.useTransformBasedHideAnimation) {
+            if (dock.useColumnLayout) {
+                dockTransform.x = dock.hiddenTransformOffset()
+                dockTransform.y = 0
+            } else {
+                dockTransform.x = 0
+                dockTransform.y = dock.hiddenTransformOffset()
+            }
+
+            dock.visible = false
+            Panel.notifyDockPositionChanged(dockTransform.x, dockTransform.y)
+            return
+        }
+
+        dockTransform.x = 0
+        dockTransform.y = 0
+        dock.animatedBottomMargin = dock.restingBottomMargin()
+        dock.visible = false
+        Panel.notifyDockPositionChanged(0, 0)
+    }
+
+    function syncDockShownGeometryForCurrentMode() {
+        dock.positionForAnimation = Panel.position
+        hideShowAnimation.stop()
+        dockAnimation.stop()
+        changeDragAreaAnchor()
+
+        dockTransform.x = 0
+        dockTransform.y = 0
+        dock.animatedBottomMargin = dock.restingBottomMargin()
+        dock.visible = true
+        Panel.notifyDockPositionChanged(0, 0)
+        shownContentSyncTimer.restart()
+    }
+
+    function syncDockPresentationForCurrentMode() {
+        dock.scheduleAdaptiveFashionDockSizeSync()
+
+        if (Panel.hideState === Dock.Hide) {
+            dock.syncDockHiddenGeometryForCurrentMode()
+        } else {
+            dock.syncDockShownGeometryForCurrentMode()
+        }
+
+        dock.scheduleFrontendGeometrySync()
     }
 
     function clampSpotlightPosition(value, maximum) {
@@ -386,11 +460,7 @@ Window {
     }
 
     function refreshAdaptiveFashionGeometry() {
-        dockTransform.x = 0
-        dockTransform.y = 0
-        dock.animatedBottomMargin = dock.restingBottomMargin()
-        dock.scheduleAdaptiveFashionDockSizeSync()
-        dock.scheduleFrontendGeometrySync()
+        dock.syncDockPresentationForCurrentMode()
     }
 
     function setDockViewMode(mode) {
@@ -445,7 +515,7 @@ Window {
     DLayerShellWindow.rightMargin: dock.adaptiveFashionUsesDirectWindowGeometry
         ? 0
         : (adaptiveFashionMode ? dock.adaptiveHorizontalMarginForContentWidth(dock.adaptiveDockShellWidth) : 0)
-    DLayerShellWindow.bottomMargin: (dock.useWindowMarginBasedHideAnimation && hideShowAnimation.running)
+    DLayerShellWindow.bottomMargin: dock.useWindowMarginBasedHideAnimation
         ? dock.animatedBottomMargin
         : dock.restingBottomMargin()
     DLayerShellWindow.scope: "dde-shell/dock"
@@ -537,36 +607,90 @@ Window {
         restoreMode: Binding.RestoreNone
     }
 
-    PropertyAnimation {
+    QtObject {
         id: hideShowAnimation;
         // Currently, Wayland (Treeland) doesn't support StyledBehindWindowBlur inside the window, thus we keep using the window size approach on Wayland
-        property bool useWindowMarginBasedAnimation: dock.useWindowMarginBasedHideAnimation
-        property bool useTransformBasedAnimation: dock.useTransformBasedHideAnimation
-        target: useWindowMarginBasedAnimation ? dock : (useTransformBasedAnimation ? dockTransform : dock);
-        property: {
-            if (useWindowMarginBasedAnimation) return "animatedBottomMargin";
-            if (useTransformBasedAnimation) return dock.useColumnLayout ? "x" : "y";
-            return dock.useColumnLayout ? "width" : "height";
+        readonly property bool useWindowMarginBasedAnimation: dock.useWindowMarginBasedHideAnimation
+        readonly property bool useTransformBasedAnimation: dock.useTransformBasedHideAnimation
+        readonly property int showDuration: useWindowMarginBasedAnimation ? 120 : 160
+        readonly property int hideDuration: useWindowMarginBasedAnimation ? 180 : 220
+        readonly property bool running: hideShowMarginAnimation.running
+            || hideShowTransformAnimation.running
+            || hideShowSizeAnimation.running
+
+        function stop() {
+            hideShowMarginAnimation.stop()
+            hideShowTransformAnimation.stop()
+            hideShowSizeAnimation.stop()
         }
-        to: {
-            if (useWindowMarginBasedAnimation) return dock.restingBottomMargin();
-            if (useTransformBasedAnimation) return Panel.hideState !== Dock.Hide ? 0 : ((dock.positionForAnimation === Dock.Left || dock.positionForAnimation === Dock.Top) ? -dock.windowThickness : dock.windowThickness);
-            return Panel.hideState !== Dock.Hide ? dock.windowThickness : 1;
-        }
-        duration: 500
-        easing.type: Easing.OutCubic
-        onStarted: {
-            dock.visible = true
-        }
-        onStopped: {
-            if (useWindowMarginBasedAnimation) {
-                dock.visible = Panel.hideState !== Dock.Hide
-            } else if (useTransformBasedAnimation) {
-                dock.visible = ((dock.useColumnLayout ? dockTransform.x : dockTransform.y) === 0)
-            } else {
-                dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) !== 1)
+
+        function finalize() {
+            dock.visible = Panel.hideState !== Dock.Hide
+            if (dock.visible) {
+                shownContentSyncTimer.restart()
             }
         }
+
+        function start() {
+            dock.visible = true
+
+            if (useWindowMarginBasedAnimation) {
+                hideShowMarginAnimation.stop()
+                hideShowMarginAnimation.from = dock.animatedBottomMargin
+                hideShowMarginAnimation.to = dock.restingBottomMargin()
+                hideShowMarginAnimation.duration = Panel.hideState !== Dock.Hide ? showDuration : hideDuration
+                hideShowMarginAnimation.start()
+                return
+            }
+
+            if (useTransformBasedAnimation) {
+                const transformProperty = dock.useColumnLayout ? "x" : "y"
+                hideShowTransformAnimation.stop()
+                hideShowTransformAnimation.property = transformProperty
+                hideShowTransformAnimation.from = dock.useColumnLayout ? dockTransform.x : dockTransform.y
+                hideShowTransformAnimation.to = Panel.hideState !== Dock.Hide ? 0 : dock.hiddenTransformOffset()
+                hideShowTransformAnimation.duration = Panel.hideState !== Dock.Hide ? showDuration : hideDuration
+                hideShowTransformAnimation.start()
+                return
+            }
+
+            const sizeProperty = dock.useColumnLayout ? "width" : "height"
+            hideShowSizeAnimation.stop()
+            hideShowSizeAnimation.property = sizeProperty
+            hideShowSizeAnimation.from = dock.useColumnLayout ? dock.width : dock.height
+            hideShowSizeAnimation.to = Panel.hideState !== Dock.Hide ? dock.windowThickness : 1
+            hideShowSizeAnimation.duration = Panel.hideState !== Dock.Hide ? showDuration : hideDuration
+            hideShowSizeAnimation.start()
+        }
+
+        function restart() {
+            stop()
+            start()
+        }
+    }
+
+    PropertyAnimation {
+        id: hideShowMarginAnimation
+        target: dock
+        property: "animatedBottomMargin"
+        easing.type: Easing.OutCubic
+        onStopped: hideShowAnimation.finalize()
+    }
+
+    PropertyAnimation {
+        id: hideShowTransformAnimation
+        target: dockTransform
+        property: "x"
+        easing.type: Easing.OutCubic
+        onStopped: hideShowAnimation.finalize()
+    }
+
+    PropertyAnimation {
+        id: hideShowSizeAnimation
+        target: dock
+        property: "height"
+        easing.type: Easing.OutCubic
+        onStopped: hideShowAnimation.finalize()
     }
 
     Connections {
@@ -622,6 +746,22 @@ Window {
         onTriggered: {
             if (!dock.isDragging && !MenuHelper.activeMenu)
                 hideShowAnimation.start()
+        }
+    }
+
+    Timer {
+        id: shownContentSyncTimer
+        interval: 0
+        running: false
+        repeat: false
+        onTriggered: {
+            if (!dock.visible || Panel.hideState === Dock.Hide) {
+                return
+            }
+
+            updateAppItems()
+            dock.scheduleAdaptiveFashionDockSizeSync()
+            dock.scheduleFrontendGeometrySync()
         }
     }
 
@@ -692,6 +832,10 @@ Window {
                 dock.visible = true;
             } else {
                 dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) !== 1);
+            }
+
+            if (dock.visible) {
+                shownContentSyncTimer.restart()
             }
 
             dock.positionForAnimation = Panel.position;
@@ -1283,19 +1427,18 @@ Window {
             z: dockRightPart.z + 2
             visible: !dock.adaptiveFashionMode
                 && !dock.useColumnLayout
-                && Panel.viewMode === Dock.LeftAlignedMode
             acceptedButtons: Qt.RightButton
             preventStealing: true
             propagateComposedEvents: true
 
             onPressed: function(mouse) {
-                if (!dock.isLeftAlignedBlankAreaPoint(mouse.x, mouse.y)) {
+                if (!dock.isDockBlankAreaPoint(mouse.x, mouse.y)) {
                     mouse.accepted = false
                 }
             }
 
             onClicked: function(mouse) {
-                if (!dock.isLeftAlignedBlankAreaPoint(mouse.x, mouse.y)) {
+                if (!dock.isDockBlankAreaPoint(mouse.x, mouse.y)) {
                     mouse.accepted = false
                     return
                 }
@@ -1341,7 +1484,7 @@ Window {
                 target: dockRightPart
                 property: "x"
                 when: dock.adaptiveFashionMode
-                value: dock.roundToPhysicalPixel(gridLayout.x + dock.adaptiveFashionGridDisplayedWidth + (dock.adaptiveFashionGridDisplayedWidth > 0 ? dock.fashionPartSpacing : 0))
+                value: dock.roundToPhysicalPixel(gridLayout.x + gridLayout.width + (gridLayout.width > 0 ? gridLayout.columnSpacing : 0))
             }
 
             Loader {
@@ -1533,7 +1676,7 @@ Window {
         }
         function onViewModeChanged() {
             updateAppItems()
-            dock.refreshAdaptiveFashionGeometry()
+            dock.syncDockPresentationForCurrentMode()
         }
         function onDockSizeChanged() {
             dock.preferredDockSize = Panel.dockSize
@@ -1632,8 +1775,6 @@ Window {
         })
 
         dock.itemIconSizeBase = dock.dockItemMaxSize
-        dock.animatedBottomMargin = dock.restingBottomMargin()
-        dock.visible = Panel.hideState !== Dock.Hide
-        changeDragAreaAnchor()
+        dock.syncDockPresentationForCurrentMode()
     }
 }

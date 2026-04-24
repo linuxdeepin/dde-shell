@@ -54,6 +54,8 @@ D.SortFilterModel {
             "org.deepin.ds.dock.multitaskview"
         ].indexOf(pluginId) >= 0
         readonly property int unifiedHoverBackgroundSize: Math.round((Panel.rootObject ? Panel.rootObject.dockItemMaxSize * 9 / 14 : 0) + 8)
+        implicitWidth: appletItem ? appletItem.implicitWidth : 0
+        implicitHeight: appletItem ? appletItem.implicitHeight : 0
 
         contentItem: appletItem
         background: AppletItemBackground {
@@ -77,6 +79,19 @@ D.SortFilterModel {
             enabled: delegateRoot.useUnifiedDockHoverBackground && delegateRoot.visible
         }
 
+        Timer {
+            id: syncAppletItemTimer
+            interval: 0
+            repeat: false
+            onTriggered: delegateRoot.syncAppletItem()
+        }
+
+        function scheduleSyncAppletItem() {
+            if (appletItem) {
+                syncAppletItemTimer.restart()
+            }
+        }
+
         function syncAppletItem() {
             if (attachedAppletItem && attachedAppletItem !== appletItem && attachedAppletItem.parent === delegateRoot) {
                 attachedAppletItem.parent = null
@@ -90,7 +105,13 @@ D.SortFilterModel {
             }
         }
 
-        onAppletItemChanged: syncAppletItem()
+        onAppletItemChanged: {
+            syncAppletItem()
+            scheduleSyncAppletItem()
+        }
+        onVisibleChanged: scheduleSyncAppletItem()
+        onWindowChanged: scheduleSyncAppletItem()
+        onParentChanged: scheduleSyncAppletItem()
 
         Component.onCompleted: syncAppletItem()
 
@@ -99,6 +120,16 @@ D.SortFilterModel {
                 attachedAppletItem.parent = null
             }
             attachedAppletItem = null
+        }
+
+        Connections {
+            target: Panel
+
+            function onHideStateChanged() {
+                if (Panel.hideState !== Dock.Hide) {
+                    delegateRoot.scheduleSyncAppletItem()
+                }
+            }
         }
     }
 }

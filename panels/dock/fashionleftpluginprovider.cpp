@@ -80,6 +80,7 @@ constexpr auto SystemMonitorMainInterface = "com.deepin.SystemMonitorMain";
 const QString WeatherAppIconPath = QStringLiteral("/usr/share/icons/hicolor/scalable/apps/org.deepin.weather.svg");
 const QString WeatherDockPluginPath = QStringLiteral("/usr/lib/dde-dock/plugins/system-trays/libdeepin-weather-dock-plugin.so");
 const QString MessageIconPath = QStringLiteral("/usr/share/icons/bloom/actions/24/mail-unread-new.svg");
+const QString DockPackageDataPath = QStringLiteral("/usr/share/dde-shell/org.deepin.ds.dock");
 const QString DefaultMailIconName = QStringLiteral("deepin-mail");
 const QString DefaultMusicIconName = QStringLiteral("audio-x-generic");
 constexpr int WeatherPopupTaskbarGap = 10;
@@ -2341,7 +2342,23 @@ WeatherCodeToIconNameFunction weatherCodeToIconNameFunction()
 
 QString weatherAssetPath(const QString &assetName)
 {
+    const auto packageAssetPath = [assetName]() {
+        if (assetName.isEmpty()) {
+            return QString();
+        }
+
+        return firstExistingPath({
+            QDir(QGuiApplication::applicationDirPath()).filePath(
+                QStringLiteral("../share/dde-shell/org.deepin.ds.dock/icons/%1.svg").arg(assetName)),
+            QStringLiteral("%1/icons/%2.svg").arg(DockPackageDataPath, assetName),
+        });
+    };
+
     return firstExistingPath({
+        // Keep the fashion weather iconography stable across machines.
+        // Some systems only provide symbolic status weather icons, which look
+        // like enlarged tray icons when rendered in the left fashion panel.
+        packageAssetPath(),
         QStringLiteral("/usr/share/icons/Win11/status/32/%1.svg").arg(assetName),
         QStringLiteral("/usr/share/icons/Win11/status/16/%1.svg").arg(assetName),
         QStringLiteral("/usr/share/icons/Adwaita/symbolic/status/%1-symbolic.svg").arg(assetName),

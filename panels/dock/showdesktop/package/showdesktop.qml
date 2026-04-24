@@ -17,8 +17,9 @@ AppletItem {
     property int dockSize: Panel.rootObject.dockItemMaxSize
     property int dockOrder: 30
     property bool shouldVisible: Applet.visible && !adaptiveFashionMode
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : showDesktopWidth
-    implicitHeight: useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize
+    visible: shouldVisible
+    implicitWidth: shouldVisible ? (useColumnLayout ? Panel.rootObject.dockSize : showDesktopWidth) : 0
+    implicitHeight: shouldVisible ? (useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize) : 0
 
     PanelToolTip {
         id: toolTip
@@ -35,6 +36,7 @@ AppletItem {
             property D.Palette lineColor: DockPalette.showDesktopLineColor
             // Use device pixel ratio to ensure the line is always 1 physical pixel regardless of system scaling
             property real devicePixelRatio: Screen.devicePixelRatio
+            anchors.centerIn: parent
             implicitWidth: useColumnLayout ? showdesktop.implicitWidth : (1 / devicePixelRatio)
             implicitHeight: useColumnLayout ? (1 / devicePixelRatio) : showdesktop.implicitHeight
 

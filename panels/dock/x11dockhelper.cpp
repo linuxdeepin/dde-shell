@@ -63,6 +63,20 @@ QRect anchoredDockGeometry(DockPanel *panel)
     return rect;
 }
 
+QRect frontendDockGeometry(DockPanel *panel)
+{
+    if (!panel) {
+        return {};
+    }
+
+    const QRect rect = panel->frontendWindowRect();
+    if (!rect.isValid() || rect.isEmpty()) {
+        return {};
+    }
+
+    return rect;
+}
+
 // TODO: use taskmanager window data
 struct WindowData
 {
@@ -371,8 +385,14 @@ X11DockHelper::X11DockHelper(DockPanel *panel)
     connect(panel, &DockPanel::positionChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(panel, &DockPanel::dockSizeChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(panel, &DockPanel::geometryChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(panel, &DockPanel::frontendWindowRectChanged, this, [this](const QRect &) {
+        m_updateDockAreaTimer->start();
+    });
     connect(panel, &DockPanel::showInPrimaryChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(panel, &DockPanel::dockScreenChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(panel, &DockPanel::viewModeChanged, this, [this](ViewMode) {
+        m_updateDockAreaTimer->start();
+    });
 
     qGuiApp->installNativeEventFilter(m_xcbHelper);
     setupKWinDBusConnection();
@@ -517,8 +537,24 @@ void X11DockHelper::updateWindowHideState(xcb_window_t window)
 
 void X11DockHelper::updateDockArea()
 {
-    QRect rect = anchoredDockGeometry(parent());
-    uint size = parent()->dockSize();
+    const bool forceAnchoredDockArea = parent()->hideMode() == SmartHide;
+    QRect rect;
+    bool usingFrontendRect = false;
+
+    if (!forceAnchoredDockArea) {
+        rect = frontendDockGeometry(parent());
+        usingFrontendRect = rect.isValid() && !rect.isEmpty();
+    }
+
+    if (!usingFrontendRect) {
+        rect = anchoredDockGeometry(parent());
+    }
+
+    int size = static_cast<int>(parent()->dockSize());
+    if (usingFrontendRect) {
+        size = qMax(1, qRound(size * parent()->devicePixelRatio()));
+    }
+
     switch (parent()->position()) {
     case Top:
         rect.setHeight(size);
@@ -542,15 +578,17 @@ void X11DockHelper::updateDockArea()
         break;
     }
 
-    // Since the position of other windows are obtained through the xcb interface without scaling
-    // the rect of the dock needs to be changed to the original size of the original xcb.
-    QScreen *screen = parent()->dockScreen();
-    if (screen != nullptr) {
-        auto screenRect = screen->geometry();
-        rect.setSize(rect.size() * parent()->devicePixelRatio());
-        auto x = (rect.x() - screenRect.x()) * parent()->devicePixelRatio() + screenRect.x();
-        auto y = (rect.y() - screenRect.y()) * parent()->devicePixelRatio() + screenRect.y();
-        rect.moveTo(x, y);
+    if (!usingFrontendRect) {
+        // Since the position of other windows are obtained through the xcb interface without scaling
+        // the rect of the dock needs to be changed to the original size of the original xcb.
+        QScreen *screen = parent()->dockScreen();
+        if (screen != nullptr) {
+            auto screenRect = screen->geometry();
+            rect.setSize(rect.size() * parent()->devicePixelRatio());
+            auto x = (rect.x() - screenRect.x()) * parent()->devicePixelRatio() + screenRect.x();
+            auto y = (rect.y() - screenRect.y()) * parent()->devicePixelRatio() + screenRect.y();
+            rect.moveTo(x, y);
+        }
     }
 
     if (m_dockArea != rect) {

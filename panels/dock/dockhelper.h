@@ -8,6 +8,9 @@
 #include "dockpanel.h"
 
 #include <QObject>
+#include <QPointer>
+
+class QTimer;
 
 namespace dock {
 class DockWakeUpArea;
@@ -55,6 +58,9 @@ private:
     QTimer *m_hideTimer;
     QTimer *m_showTimer;
     QTimer *m_cursorMonitorTimer;
+    QTimer *m_edgeWakeHoldTimer;
+    bool m_edgeWakeLatched = false;
+    QPointer<QScreen> m_edgeWakeScreen;
 };
 
 class DockWakeUpArea
@@ -75,4 +81,3 @@ protected:
     DockHelper *m_helper;
 };
 }
-

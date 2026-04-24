@@ -326,7 +326,13 @@ bool DockPanel::init()
     connect(this, &DockPanel::frontendWindowRectChanged, dockDaemonAdaptor, &DockDaemonAdaptor::FrontendWindowRectChanged);
     connect(SETTINGS, &DockSettings::dockSizeChanged, this, &DockPanel::dockSizeChanged);
     connect(SETTINGS, &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
-    connect(SETTINGS, &DockSettings::viewModeChanged, this, &DockPanel::viewModeChanged);
+    connect(SETTINGS, &DockSettings::viewModeChanged, this, [this](ViewMode mode) {
+        Q_EMIT viewModeChanged(mode);
+
+        if (window()) {
+            QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged, Qt::QueuedConnection);
+        }
+    });
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
     connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
     connect(SETTINGS, &DockSettings::lockedChanged, this, &DockPanel::lockedChanged);

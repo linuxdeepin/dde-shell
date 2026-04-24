@@ -45,6 +45,70 @@ QRect expandedGeometry(const QRect &geometry, int margin)
     return geometry.adjusted(-margin, -margin, margin, margin);
 }
 
+QRect dockMouseTrackingGeometry(const QRect &geometry, const QRect &screenGeometry, Position position, int margin)
+{
+    QRect trackingGeometry = expandedGeometry(geometry, margin);
+
+    const int leftGap = qMax(0, geometry.left() - screenGeometry.left());
+    const int topGap = qMax(0, geometry.top() - screenGeometry.top());
+    const int rightGap = qMax(0, screenGeometry.right() - geometry.right());
+    const int bottomGap = qMax(0, screenGeometry.bottom() - geometry.bottom());
+
+    switch (position) {
+    case Bottom:
+        trackingGeometry.adjust(0, 0, 0, qMax(0, bottomGap - margin));
+        break;
+    case Top:
+        trackingGeometry.adjust(0, -qMax(0, topGap - margin), 0, 0);
+        break;
+    case Left:
+        trackingGeometry.adjust(-qMax(0, leftGap - margin), 0, 0, 0);
+        break;
+    case Right:
+        trackingGeometry.adjust(0, 0, qMax(0, rightGap - margin), 0);
+        break;
+    }
+
+    return trackingGeometry;
+}
+
+bool isCursorOnDockWakeEdge(const QPoint &globalCursorPos, const QRect &screenGeometry, Position position)
+{
+    if (!screenGeometry.isValid()) {
+        return false;
+    }
+
+    constexpr int edgeThreshold = 2;
+    if (!screenGeometry.adjusted(-edgeThreshold, -edgeThreshold, edgeThreshold, edgeThreshold).contains(globalCursorPos)) {
+        return false;
+    }
+
+    switch (position) {
+    case Bottom:
+        return globalCursorPos.y() >= screenGeometry.bottom() - edgeThreshold;
+    case Top:
+        return globalCursorPos.y() <= screenGeometry.top() + edgeThreshold;
+    case Left:
+        return globalCursorPos.x() <= screenGeometry.left() + edgeThreshold;
+    case Right:
+        return globalCursorPos.x() >= screenGeometry.right() - edgeThreshold;
+    }
+
+    return false;
+}
+
+bool shouldUseCursorEdgeWakeFallback(DockPanel *panel)
+{
+    if (!panel) {
+        return false;
+    }
+
+    // Fashion mode uses its own wake-up surface. Keeping the generic edge fallback
+    // enabled there causes premature wake-ups and repeated hide/show loops while
+    // the cursor is still parked near the screen edge.
+    return panel->viewMode() != FashionMode;
+}
+
 }
 
 DockHelper::DockHelper(DockPanel *parent)
@@ -52,12 +116,15 @@ DockHelper::DockHelper(DockPanel *parent)
     , m_hideTimer(new QTimer(this))
     , m_showTimer(new QTimer(this))
     , m_cursorMonitorTimer(new QTimer(this))
+    , m_edgeWakeHoldTimer(new QTimer(this))
 {
     m_hideTimer->setInterval(400);
-    m_showTimer->setInterval(400);
+    m_showTimer->setInterval(120);
     m_cursorMonitorTimer->setInterval(16);
+    m_edgeWakeHoldTimer->setInterval(420);
     m_hideTimer->setSingleShot(true);
     m_showTimer->setSingleShot(true);
+    m_edgeWakeHoldTimer->setSingleShot(true);
 
     qApp->installEventFilter(this);
     QMetaObject::invokeMethod(this, &DockHelper::initAreas, Qt::QueuedConnection);
@@ -66,6 +133,10 @@ DockHelper::DockHelper(DockPanel *parent)
     connect(parent, &DockPanel::rootObjectChanged, this, &DockHelper::initAreas);
     connect(parent, &DockPanel::showInPrimaryChanged, this, &DockHelper::updateAllDockWakeArea);
     connect(parent, &DockPanel::hideStateChanged, this, &DockHelper::updateAllDockWakeArea);
+    connect(parent, &DockPanel::viewModeChanged, this, [this]() {
+        updateAllDockWakeArea();
+        updatePanelMouseState();
+    });
     connect(parent, &DockPanel::hideModeChanged, m_hideTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(parent, &DockPanel::hideModeChanged, m_showTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(parent, &DockPanel::positionChanged, this, [this](Position pos) {
@@ -79,6 +150,7 @@ DockHelper::DockHelper(DockPanel *parent)
     connect(m_hideTimer, &QTimer::timeout, this, &DockHelper::checkNeedHideOrNot);
     connect(m_showTimer, &QTimer::timeout, this, &DockHelper::checkNeedShowOrNot);
     connect(m_cursorMonitorTimer, &QTimer::timeout, this, &DockHelper::updatePanelMouseState);
+    connect(m_edgeWakeHoldTimer, &QTimer::timeout, this, &DockHelper::checkNeedHideOrNot);
     m_cursorMonitorTimer->start();
 
     connect(this, &DockHelper::isWindowOverlapChanged, this, [this](bool overlap) {
@@ -141,6 +213,9 @@ bool DockHelper::eventFilter(QObject *watched, QEvent *event)
     case QEvent::Enter: {
         m_enters.insert(window, true);
         updateCursorPosition(event);
+        if (m_edgeWakeHoldTimer->isActive()) {
+            m_edgeWakeHoldTimer->stop();
+        }
         if (m_hideTimer->isActive()) {
             m_hideTimer->stop();
         }
@@ -205,6 +280,17 @@ bool DockHelper::wakeUpAreaNeedShowOnThisScreen(QScreen *screen)
 
 void DockHelper::enterScreen(QScreen *screen)
 {
+    if (!screen) {
+        return;
+    }
+
+    if (m_edgeWakeLatched && m_edgeWakeScreen == screen) {
+        return;
+    }
+
+    m_edgeWakeLatched = true;
+    m_edgeWakeScreen = screen;
+
     if (m_hideTimer->isActive()) {
         m_hideTimer->stop();
     }
@@ -215,6 +301,7 @@ void DockHelper::enterScreen(QScreen *screen)
     auto nowScreen = parent()->dockScreen();
 
     if (nowScreen == screen) {
+        m_edgeWakeHoldTimer->start();
         parent()->setHideState(Show);
         return;
     }
@@ -222,12 +309,18 @@ void DockHelper::enterScreen(QScreen *screen)
     // Do not switch screen if any popup/transient child window is showing
     for (auto show : m_transientChildShows) {
         if (show) {
+            m_edgeWakeHoldTimer->start();
             parent()->setHideState(Show);
             return;
         }
     }
 
     QTimer::singleShot(200, [this, screen]() {
+        if (!screen) {
+            return;
+        }
+
+        m_edgeWakeHoldTimer->start();
         parent()->setDockScreen(screen);
         parent()->setHideState(Show);
         updateAllDockWakeArea();
@@ -236,6 +329,9 @@ void DockHelper::enterScreen(QScreen *screen)
 
 void DockHelper::leaveScreen()
 {
+    if (m_edgeWakeHoldTimer->isActive()) {
+        m_edgeWakeHoldTimer->stop();
+    }
     m_hideTimer->start();
 }
 
@@ -258,14 +354,39 @@ void DockHelper::updateAllDockWakeArea()
 void DockHelper::updatePanelMouseState()
 {
     auto *window = parent()->window();
+    const QPoint globalCursorPos = QCursor::pos();
+    QScreen *cursorScreen = QGuiApplication::screenAt(globalCursorPos);
+    if (!cursorScreen && window) {
+        cursorScreen = window->screen();
+    }
+
+    const bool cursorOnWakeEdge = cursorScreen
+        && isCursorOnDockWakeEdge(globalCursorPos, cursorScreen->geometry(), parent()->position());
+
+    if (!cursorScreen
+        || cursorScreen != m_edgeWakeScreen
+        || !cursorOnWakeEdge) {
+        m_edgeWakeLatched = false;
+        m_edgeWakeScreen.clear();
+    }
+
+    if (shouldUseCursorEdgeWakeFallback(parent())
+        && parent()->hideState() == Hide
+        && cursorScreen
+        && (!parent()->showInPrimary() || cursorScreen == qApp->primaryScreen())
+        && cursorOnWakeEdge) {
+        enterScreen(cursorScreen);
+    }
+
     if (!window || !window->isVisible()) {
         parent()->setContainsMouse(false);
         return;
     }
 
-    const QPoint globalCursorPos = QCursor::pos();
     const int geometryMargin = qMax(6, qRound(parent()->dockSize() * 0.14));
-    bool containsMouse = expandedGeometry(window->geometry(), geometryMargin).contains(globalCursorPos);
+    const QRect screenGeometry = window->screen() ? window->screen()->geometry() : QRect();
+    const Position panelPosition = parent()->position();
+    bool containsMouse = dockMouseTrackingGeometry(window->geometry(), screenGeometry, panelPosition, geometryMargin).contains(globalCursorPos);
 
     if (!containsMouse) {
         const auto topLevelWindows = QGuiApplication::topLevelWindows();
@@ -274,7 +395,8 @@ void DockHelper::updatePanelMouseState()
                 continue;
             }
 
-            if (expandedGeometry(candidateWindow->geometry(), geometryMargin).contains(globalCursorPos)) {
+            const QRect candidateScreenGeometry = candidateWindow->screen() ? candidateWindow->screen()->geometry() : screenGeometry;
+            if (dockMouseTrackingGeometry(candidateWindow->geometry(), candidateScreenGeometry, panelPosition, geometryMargin).contains(globalCursorPos)) {
                 containsMouse = true;
                 break;
             }
@@ -283,6 +405,11 @@ void DockHelper::updatePanelMouseState()
 
     parent()->setContainsMouse(containsMouse);
     if (containsMouse) {
+        m_edgeWakeLatched = false;
+        m_edgeWakeScreen.clear();
+        if (m_edgeWakeHoldTimer->isActive()) {
+            m_edgeWakeHoldTimer->stop();
+        }
         parent()->setCursorPosition(globalCursorPos - window->position());
     }
 }
@@ -327,6 +454,10 @@ void DockHelper::updateCursorPosition(QEvent *event)
 
 void DockHelper::checkNeedHideOrNot()
 {
+    if (m_edgeWakeHoldTimer->isActive()) {
+        return;
+    }
+
     bool needHide;
     switch (parent()->hideMode()) {
     case KeepShowing: {

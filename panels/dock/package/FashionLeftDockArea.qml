@@ -37,20 +37,29 @@ Control {
     readonly property int mediumIconSize: Math.max(18, Math.round(pageContentHeight * 0.62))
     readonly property int pluginRowLeftMargin: root.leftContentPadding + root.foregroundContentOffset
     readonly property int pluginLeadingIconSize: root.mediumIconSize
-    readonly property int pluginLeadingSlotSize: Math.max(32, root.pluginLeadingIconSize)
+    readonly property int compactPluginLeadingSlotSize: Math.max(root.pluginLeadingIconSize, root.pageContentHeight + 2)
+    readonly property int pluginLeadingSlotSize: root.singleLineCompactMode
+        ? root.compactPluginLeadingSlotSize
+        : Math.max(32, root.pluginLeadingIconSize)
     readonly property int musicArtSize: root.pluginLeadingIconSize
     readonly property real musicArtRadius: 4
     readonly property int musicControlIconSize: 16
-    readonly property int musicControlButtonSize: 30
-    readonly property real musicControlButtonRadius: 15
+    readonly property int musicControlButtonSize: root.singleLineCompactMode ? 26 : 30
+    readonly property real musicControlButtonRadius: musicControlButtonSize / 2
     readonly property int musicControlSpacing: Math.max(3, Math.round(pageContentHeight * 0.07))
     readonly property int musicTitleButtonSpacing: Math.max(2, root.tightSpacing - 1)
     readonly property int musicTextSpacing: 1
-    readonly property int musicRowSpacing: 10
+    readonly property int musicRowSpacing: root.singleLineCompactMode ? Math.max(8, root.pageSpacing - 1) : 10
     readonly property bool singleLineCompactMode: root.pageContentHeight <= 28
     readonly property bool showSecondaryLine: !root.singleLineCompactMode
+    readonly property int sharedPageVerticalOffset: 0
+    readonly property int weatherPageVerticalOffset: 0
+    readonly property int aiPageVerticalOffset: 0
+    readonly property int musicPageVerticalOffset: 0
     readonly property int sharedTextVerticalOffset: root.showSecondaryLine ? -root.textVerticalLift : 0
-    readonly property int weatherInfoVerticalOffset: root.showSecondaryLine ? -root.weatherTextVerticalLift : 0
+    readonly property int weatherInfoVerticalOffset: root.showSecondaryLine
+        ? -root.weatherTextVerticalLift
+        : 0
     readonly property int musicControlsWidth: root.musicControlButtonSize * 3 + root.musicControlSpacing * 2
     readonly property real musicArtworkDevicePixelRatio: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1.0
     readonly property int timeFontSize: Math.max(14, Math.round(pageContentHeight * 0.47))
@@ -65,9 +74,11 @@ Control {
     readonly property int aiPrimaryCountFontSize: root.metricFontSize + 1
     readonly property int aiSecondaryCountFontSize: root.captionFontSize + 2
     readonly property int aiStatusBarHeight: 2
+    readonly property int aiStatusBarTopMargin: root.aiShowSecondaryLine ? 1 : 0
     readonly property int aiStatusBarAnimationDuration: 1150
     readonly property bool aiShowSecondaryLine: root.pageContentHeight > 34
     readonly property int aiTextVerticalOffset: root.aiShowSecondaryLine ? -root.textVerticalLift : 0
+    readonly property int aiMetricColumnSpacing: root.aiShowSecondaryLine ? root.tightSpacing : 0
     readonly property color aiIconTintColor: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.92) : Qt.rgba(0, 0, 0, 0.86)
     readonly property int weatherTextSpacing: root.tightSpacing - 2
     readonly property bool musicPageVisible: provider.musicAvailable
@@ -958,6 +969,7 @@ Control {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: root.weatherPageVerticalOffset
                 anchors.leftMargin: root.pluginRowLeftMargin
                 anchors.rightMargin: root.rightContentPadding
                 height: root.pageContentHeight
@@ -972,7 +984,9 @@ Control {
                         anchors.centerIn: parent
                         width: root.pluginLeadingIconSize
                         height: root.pluginLeadingIconSize
-                        source: provider.weatherIconSource
+                        source: provider.weatherIconSource && provider.weatherIconSource.toString().length > 0
+                            ? provider.weatherIconSource
+                            : Qt.resolvedUrl("icons/weather-none-available.svg")
                         sourceSize: Qt.size(width, height)
                         fillMode: Image.PreserveAspectFit
                         smooth: true
@@ -1048,6 +1062,7 @@ Control {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: root.aiPageVerticalOffset
                 anchors.leftMargin: root.pluginRowLeftMargin
                 anchors.rightMargin: root.rightContentPadding
                 height: root.pageContentHeight
@@ -1168,7 +1183,7 @@ Control {
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
-                                    spacing: root.tightSpacing
+                                    spacing: root.aiMetricColumnSpacing
 
                                     Item {
                                         id: aiMetricHeadlineRow
@@ -1238,7 +1253,7 @@ Control {
                                         implicitHeight: root.aiStatusBarHeight
                                         radius: 0.1
                                         color: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(0, 0, 0, 0.12)
-                                        Layout.topMargin: 1
+                                        Layout.topMargin: root.aiStatusBarTopMargin
 
                                         Rectangle {
                                             anchors.fill: parent
@@ -1325,6 +1340,7 @@ Control {
                 anchors.leftMargin: root.pluginRowLeftMargin
                 anchors.rightMargin: root.rightContentPadding
                 anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: root.musicPageVerticalOffset
                 height: root.pageContentHeight
                 spacing: root.musicRowSpacing
 
@@ -1505,6 +1521,7 @@ Control {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: root.sharedPageVerticalOffset
                 anchors.leftMargin: root.pluginRowLeftMargin
                 anchors.rightMargin: root.rightContentPadding
                 height: root.pageContentHeight
@@ -1558,7 +1575,7 @@ Control {
                                 font.pixelSize: root.secondaryFontSize
                                 font.weight: Font.Medium
                                 renderType: Text.NativeRendering
-                                Layout.alignment: Qt.AlignBottom
+                                Layout.alignment: root.showSecondaryLine ? Qt.AlignBottom : Qt.AlignVCenter
                             }
                         }
 
@@ -1588,7 +1605,7 @@ Control {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.verticalCenterOffset: root.sharedTextVerticalOffset
+                anchors.verticalCenterOffset: root.sharedPageVerticalOffset + root.sharedTextVerticalOffset
                 anchors.leftMargin: root.leftContentPadding + root.foregroundContentOffset + root.systemForegroundContentOffset
                 anchors.rightMargin: root.rightContentPadding
                 height: root.pageContentHeight
@@ -1627,7 +1644,7 @@ Control {
                                 font.pixelSize: root.captionFontSize
                                 font.weight: Font.Medium
                                 renderType: Text.NativeRendering
-                                Layout.alignment: Qt.AlignBottom
+                                Layout.alignment: root.showSecondaryLine ? Qt.AlignBottom : Qt.AlignVCenter
                             }
                         }
                     }
@@ -1660,7 +1677,7 @@ Control {
                                 font.pixelSize: root.captionFontSize
                                 font.weight: Font.Medium
                                 renderType: Text.NativeRendering
-                                Layout.alignment: Qt.AlignBottom
+                                Layout.alignment: root.showSecondaryLine ? Qt.AlignBottom : Qt.AlignVCenter
                             }
                         }
                     }
