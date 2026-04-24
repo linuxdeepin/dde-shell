@@ -193,8 +193,17 @@ void TaskManagerSettings::migrateFromDockedItems()
         }
     }
 
-    if (!migratedDockedElements.isEmpty()) {
-        m_dockedElements = resolveDockedElements(migratedDockedElements);
+    QStringList mergedDockedElements = m_dockedElements;
+    for (const QString &element : std::as_const(migratedDockedElements)) {
+        if (!mergedDockedElements.contains(element)) {
+            mergedDockedElements.append(element);
+        }
+    }
+
+    mergedDockedElements = resolveDockedElements(mergedDockedElements);
+    if (mergedDockedElements != m_dockedElements) {
+        m_dockedElements = mergedDockedElements;
+        saveDockedElements();
     }
 }
 

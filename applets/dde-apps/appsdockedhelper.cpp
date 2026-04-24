@@ -11,6 +11,18 @@
 #include <yaml-cpp/yaml.h>
 
 namespace apps {
+namespace {
+QString desktopIdFromDockedElement(const QString &element)
+{
+    static const QString prefix = QStringLiteral("desktop/");
+    if (!element.startsWith(prefix)) {
+        return {};
+    }
+
+    return element.mid(prefix.size()).trimmed();
+}
+}
+
 AppsDockedHelper* AppsDockedHelper::instance()
 {
     static AppsDockedHelper* _instance = nullptr;
@@ -29,6 +41,18 @@ AppsDockedHelper::AppsDockedHelper(QObject *parent)
     // TODO: remove yaml and rewrite this
     auto updateDockedDesktopfiles = [this](){
         m_dockedDesktopIDs.clear();
+        const QStringList dockedElements = m_config->value(QStringLiteral("dockedElements")).toStringList();
+        for (const QString &element : dockedElements) {
+            const QString desktopId = desktopIdFromDockedElement(element);
+            if (!desktopId.isEmpty()) {
+                m_dockedDesktopIDs.insert(desktopId);
+            }
+        }
+
+        if (!m_dockedDesktopIDs.isEmpty() || !m_config->isDefaultValue(QStringLiteral("dockedElements"))) {
+            return;
+        }
+
         auto dcokedDesktopFilesStrList = m_config->value("Docked_Items").toStringList();
         foreach(auto dcokedDesktopFilesStr, dcokedDesktopFilesStrList) {
             YAML::Node node;
@@ -52,7 +76,7 @@ AppsDockedHelper::AppsDockedHelper(QObject *parent)
     };
 
     connect(m_config, &DConfig::valueChanged, this, [this, updateDockedDesktopfiles](const QString &key){
-        if (key != "Docked_Items") return;
+        if (key != "Docked_Items" && key != "dockedElements") return;
         updateDockedDesktopfiles();
     });
 
@@ -71,4 +95,3 @@ void AppsDockedHelper::setDocked(const QString &appId, bool docked)
     // TODO
 }
 }
-

@@ -14,6 +14,8 @@ macro(ds_build_package)
     )
     set(package_dirs ${PROJECT_BINARY_DIR}/packages/${_config_PACKAGE}/)
     add_custom_command(TARGET ${_config_PACKAGE}_package POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${package_dirs}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${package_dirs}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${package_root_dir} ${package_dirs}
     )
 

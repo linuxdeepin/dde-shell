@@ -103,6 +103,7 @@ public:
     Q_INVOKABLE void openWeatherPopup(int taskbarLeft, int taskbarTop, int activationX, int activationY);
     Q_INVOKABLE void openMailClient();
     Q_INVOKABLE void openMusicPlayer();
+    Q_INVOKABLE QString musicControlThemeIconSource(const QString &iconName, bool darkTheme) const;
     Q_INVOKABLE void playPreviousTrack();
     Q_INVOKABLE void toggleMusicPlayback();
     Q_INVOKABLE void playNextTrack();

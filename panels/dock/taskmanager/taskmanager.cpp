@@ -532,6 +532,21 @@ static QString thumbnailUrlForFile(const QFileInfo &fileInfo)
     return {};
 }
 
+static bool launchDesktopEntryFile(const QFileInfo &fileInfo)
+{
+    if (!isDesktopEntryFile(fileInfo)) {
+        return false;
+    }
+
+    const QString desktopFilePath = fileInfo.absoluteFilePath();
+    if (desktopFilePath.isEmpty()) {
+        return false;
+    }
+
+    return QProcess::startDetached(QStringLiteral("gio"),
+                                   {QStringLiteral("launch"), desktopFilePath});
+}
+
 static QVariantMap popupEntry(const QString &entryId,
                               const QString &name,
                               const QString &iconName,
@@ -1546,6 +1561,11 @@ void TaskManager::activatePopupEntry(const QString &dockElement, const QString &
     }
 
     if (type == QStringLiteral("folder")) {
+        const QFileInfo fileInfo(entryId);
+        if (launchDesktopEntryFile(fileInfo)) {
+            return;
+        }
+
         QDesktopServices::openUrl(QUrl::fromLocalFile(entryId));
     }
 }

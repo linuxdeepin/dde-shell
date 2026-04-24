@@ -814,11 +814,40 @@ Item {
         MenuHelper.openMenu(contextMenuLoader.item)
     }
 
+    function openAppItemMenu() {
+        toolTip.close()
+        closeItemPreview()
+        requestAppItemMenu()
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.NoButton
+        acceptedDevices: PointerDevice.TouchScreen
+        onLongPressed: root.openAppItemMenu()
+    }
+
+    MouseArea {
+        id: contextMenuMouseArea
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        hoverEnabled: false
+        preventStealing: true
+
+        onPressed: function(mouse) {
+            toolTip.close()
+            closeItemPreview()
+        }
+
+        onClicked: function(mouse) {
+            root.openAppItemMenu()
+        }
+    }
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: false
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        acceptedButtons: Qt.LeftButton
         drag.target: root
         drag.onActiveChanged: {
             if (!drag.active) {
@@ -839,29 +868,19 @@ Item {
             toolTip.close()
             closeItemPreview()
         }
-        // touchscreen long press.
-        onPressAndHold: function (mouse) {
-            if (mouse.button === Qt.NoButton) {
-                requestAppItemMenu()
-            }
-        }
         onClicked: function (mouse) {
             let index = root.modelIndex;
-            if (mouse.button === Qt.RightButton) {
-                requestAppItemMenu()
-            } else {
-                if (root.popupItem) {
-                    togglePinnedPopup()
-                    return
-                }
-
-                if (root.windows.length === 0) {
-                    launchAnimation.start();
-                    TaskManager.requestNewInstance(index, "");
-                    return;
-                }
-                TaskManager.requestActivate(index);
+            if (root.popupItem) {
+                togglePinnedPopup()
+                return
             }
+
+            if (root.windows.length === 0) {
+                launchAnimation.start();
+                TaskManager.requestNewInstance(index, "");
+                return;
+            }
+            TaskManager.requestActivate(index);
         }
 
         PanelToolTip {

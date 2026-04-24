@@ -53,17 +53,37 @@ DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
 
     connect(&dbusWatcher, &QDBusServiceWatcher::serviceRegistered, this, [this](){
         m_amIsAvaliable = true;
+        m_name.clear();
+        m_icon.clear();
+        m_genericName.clear();
+        m_xDeepinVendor.clear();
+        m_actions.clear();
+        m_isValid = !m_id.isEmpty() && m_applicationInterface && (m_applicationInterface->iD() == m_id);
+        Q_EMIT nameChanged();
+        Q_EMIT genericNameChanged();
+        Q_EMIT xDeepinVendorChanged();
+        Q_EMIT actionsChanged();
         Q_EMIT iconChanged();
     });
 
     connect(&dbusWatcher, &QDBusServiceWatcher::serviceUnregistered, this, [this](){
         m_amIsAvaliable = false;
+        m_name.clear();
+        m_icon.clear();
+        m_genericName.clear();
+        m_xDeepinVendor.clear();
+        m_actions.clear();
+        Q_EMIT nameChanged();
+        Q_EMIT genericNameChanged();
+        Q_EMIT xDeepinVendorChanged();
+        Q_EMIT actionsChanged();
         Q_EMIT iconChanged();
     });
 
     qCDebug(amdesktopfileLog()) << "create a am desktopfile object: " << m_id;
     m_applicationInterface.reset(new Application(AM_DBUS_PATH, id2dbusPath(id), QDBusConnection::sessionBus(), this));
     m_isValid = !m_id.isEmpty() && (m_applicationInterface->iD() == m_id);
+    connectToAmDBusSignal(QStringLiteral("PropertiesChanged"), SLOT(onPropertyChanged(QDBusMessage)));
 }
 
 DesktopFileAMParser::~DesktopFileAMParser()
@@ -302,16 +322,20 @@ void DesktopFileAMParser::onPropertyChanged(const QDBusMessage &msg)
     if (changedProps.contains("Name")) {
         updateLocalName();
         Q_EMIT nameChanged();
-    } else if (changedProps.contains("Actions")) {
+    }
+    if (changedProps.contains("Actions")) {
         updateActions();
         Q_EMIT actionsChanged();
-    } else if (changedProps.contains("GenericName")) {
+    }
+    if (changedProps.contains("GenericName")) {
         updateLocalGenericName();
         Q_EMIT genericNameChanged();
-    } else if (changedProps.contains("Name")) {
-        updateLocalName();
-        Q_EMIT nameChanged();
-    } else if (changedProps.contains("X_Deepin_Vendor")) {
+    }
+    if (changedProps.contains("Icons")) {
+        updateDesktopIcon();
+        Q_EMIT iconChanged();
+    }
+    if (changedProps.contains("X_Deepin_Vendor")) {
         m_xDeepinVendor = m_applicationInterface->x_Deepin_Vendor();
         Q_EMIT xDeepinVendorChanged();
     }

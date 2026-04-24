@@ -178,6 +178,7 @@ QString desktopEntryText(const QString &desktopFilePath, const QString &key);
 QString localizedDesktopEntryText(const QString &desktopFilePath, const QString &key);
 QString desktopEntryExecutable(const QString &desktopFilePath);
 bool isBrowserDesktopId(const QString &desktopId);
+QString bestWindowIdForPid(qint64 pid, bool onlyVisible = true);
 
 QHash<QString, AiCliSessionLogCacheEntry> &aiCliSessionLogCache()
 {
@@ -364,18 +365,26 @@ bool desktopEntryLooksLikeMusicPlayer(const QString &desktopFilePath)
             QStringLiteral("capture"),
             QStringLiteral("mixer"),
             QStringLiteral("volume"),
+            QStringLiteral("effect"),
+            QStringLiteral("effects"),
+            QStringLiteral("equalizer"),
+            QStringLiteral("enhancer"),
+            QStringLiteral("processor"),
+            QStringLiteral("filter"),
             QStringLiteral("converter"),
             QStringLiteral("editor"),
+            QStringLiteral("podcast"),
             QStringLiteral("剪辑"),
             QStringLiteral("录音"),
             QStringLiteral("混音"),
+            QStringLiteral("音效"),
+            QStringLiteral("均衡器"),
         })) {
         return false;
     }
 
     return containsKeyword(combinedText, {
         QStringLiteral("music"),
-        QStringLiteral("audio"),
         QStringLiteral("spotify"),
         QStringLiteral("netease"),
         QStringLiteral("cloudmusic"),
@@ -435,6 +444,42 @@ const QHash<QString, QList<MusicDesktopCandidate>> &musicDesktopCandidatesByExec
     }
 
     return candidateIndex;
+}
+
+bool isRecognizedMusicDesktopId(const QString &desktopId)
+{
+    QString normalizedDesktopId = desktopId.trimmed();
+    if (normalizedDesktopId.endsWith(QStringLiteral(".desktop"))) {
+        normalizedDesktopId.chop(QStringLiteral(".desktop").size());
+    }
+    if (normalizedDesktopId.isEmpty()) {
+        return false;
+    }
+
+    const auto &candidateIndex = musicDesktopCandidatesByExecutableBaseName();
+    for (auto it = candidateIndex.cbegin(); it != candidateIndex.cend(); ++it) {
+        for (const MusicDesktopCandidate &candidate : it.value()) {
+            QString candidateDesktopId = candidate.desktopId.trimmed();
+            if (candidateDesktopId.endsWith(QStringLiteral(".desktop"))) {
+                candidateDesktopId.chop(QStringLiteral(".desktop").size());
+            }
+            if (candidateDesktopId == normalizedDesktopId) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool isRecognizedMusicExecutable(const QString &executablePath)
+{
+    const QString executableBaseName = QFileInfo(executablePath).fileName().trimmed().toLower();
+    if (executableBaseName.isEmpty()) {
+        return false;
+    }
+
+    return musicDesktopCandidatesByExecutableBaseName().contains(executableBaseName);
 }
 
 QStringList sessionLogPathsForProcess(qint64 pid)
@@ -980,6 +1025,10 @@ MusicSnapshot runningMusicPlayerSnapshot(const QString &previousDesktopEntry)
 
         const QList<MusicDesktopCandidate> candidates = candidateIndex.value(executableBaseName);
         for (const MusicDesktopCandidate &candidate : candidates) {
+            if (bestWindowIdForPid(pid).isEmpty()) {
+                continue;
+            }
+
             int score = !candidate.executablePath.isEmpty() && candidate.executablePath == executablePath ? 300 : 220;
             QString candidateDesktopId = candidate.desktopId;
             if (candidateDesktopId.endsWith(QStringLiteral(".desktop"))) {
@@ -994,6 +1043,7 @@ MusicSnapshot runningMusicPlayerSnapshot(const QString &previousDesktopEntry)
                 bestSnapshot.desktopEntry = candidate.desktopId;
                 bestSnapshot.executablePath = executablePath;
                 bestSnapshot.appName = candidate.appName;
+                bestSnapshot.canRaise = true;
                 bestSnapshot.score = score;
                 bestPid = pid;
             }
@@ -1759,7 +1809,7 @@ bool activateWindowForServiceOrDesktop(const QString &serviceName,
     return activateWindow(windowId);
 }
 
-QString bestWindowIdForPid(qint64 pid, bool onlyVisible = true)
+QString bestWindowIdForPid(qint64 pid, bool onlyVisible)
 {
     if (pid <= 0) {
         return {};
@@ -2158,6 +2208,11 @@ MusicSnapshot currentMusicSnapshot(const QString &previousService)
         }
 
         const QVariantMap rootProperties = dbusProperties(serviceName, QLatin1String(MprisRootInterface));
+        const uint servicePid = serviceProcessId(serviceName);
+        if (servicePid == 0) {
+            continue;
+        }
+
         const QString identity = stringFromDBusValue(rootProperties.value(QStringLiteral("Identity")));
         const QString playbackStatus = stringFromDBusValue(playerProperties.value(QStringLiteral("PlaybackStatus")));
         const QVariantMap metadata = mapFromDBusValue(playerProperties.value(QStringLiteral("Metadata")));
@@ -2165,10 +2220,17 @@ MusicSnapshot currentMusicSnapshot(const QString &previousService)
         MusicSnapshot snapshot;
         snapshot.service = serviceName;
         snapshot.desktopEntry = stringFromDBusValue(rootProperties.value(QStringLiteral("DesktopEntry")));
-        snapshot.executablePath = executablePathForPid(serviceProcessId(serviceName));
+        snapshot.executablePath = executablePathForPid(servicePid);
         if (snapshot.desktopEntry.isEmpty()) {
             snapshot.desktopEntry = desktopEntryFromMprisService(serviceName);
         }
+
+        const bool recognizedMusicService = isRecognizedMusicDesktopId(snapshot.desktopEntry)
+            || isRecognizedMusicExecutable(snapshot.executablePath);
+        if (!recognizedMusicService) {
+            continue;
+        }
+
         snapshot.appName = identity;
         snapshot.available = true;
         snapshot.playing = playbackStatus == QStringLiteral("Playing");
@@ -2199,6 +2261,11 @@ MusicSnapshot currentMusicSnapshot(const QString &previousService)
 
         if (!artUrl.isEmpty()) {
             snapshot.artSource = stableMusicArtSource(artUrl);
+        }
+
+        const bool hasWindow = !bestWindowIdForPid(servicePid).isEmpty();
+        if (!hasWindow && !snapshot.playing) {
+            continue;
         }
 
         snapshot.score = 0;
@@ -2845,6 +2912,33 @@ void FashionLeftPluginProvider::openMusicPlayer()
     }
 }
 
+QString FashionLeftPluginProvider::musicControlThemeIconSource(const QString &iconName, bool darkTheme) const
+{
+    const QString normalizedIconName = iconName.trimmed();
+    if (normalizedIconName.isEmpty()) {
+        return {};
+    }
+
+    const QString preferredTheme = darkTheme ? QStringLiteral("Win11-dark") : QStringLiteral("Win11");
+    const QString fallbackTheme = darkTheme ? QStringLiteral("Win11") : QStringLiteral("Win11-dark");
+    const QString iconPath = firstExistingPath({
+        QStringLiteral("/usr/share/icons/%1/actions/16/%2.svg").arg(preferredTheme, normalizedIconName),
+        QStringLiteral("/usr/share/icons/%1/actions/22/%2.svg").arg(preferredTheme, normalizedIconName),
+        QStringLiteral("/usr/share/icons/%1/actions/24/%2.svg").arg(preferredTheme, normalizedIconName),
+        QStringLiteral("/usr/share/icons/%1/actions/16/%2.svg").arg(fallbackTheme, normalizedIconName),
+        QStringLiteral("/usr/share/icons/%1/actions/22/%2.svg").arg(fallbackTheme, normalizedIconName),
+        QStringLiteral("/usr/share/icons/%1/actions/24/%2.svg").arg(fallbackTheme, normalizedIconName),
+        QStringLiteral("/usr/share/icons/bloom/actions/24/%1.svg").arg(normalizedIconName),
+        QStringLiteral("/usr/share/icons/bloom/actions/22/%1.svg").arg(normalizedIconName),
+        QStringLiteral("/usr/share/icons/Adwaita/symbolic/actions/%1-symbolic.svg").arg(normalizedIconName),
+    });
+    if (iconPath.isEmpty()) {
+        return {};
+    }
+
+    return QUrl::fromLocalFile(iconPath).toString();
+}
+
 void FashionLeftPluginProvider::playPreviousTrack()
 {
     if (m_musicService.isEmpty() || !m_musicCanGoPrevious) {
@@ -3073,7 +3167,6 @@ void FashionLeftPluginProvider::refreshMusicState()
                                                                                nextMusicAppName,
                                                                                snapshot.service);
     const QUrl nextMusicPlayerIconSource = iconSourceForName(nextMusicPlayerIconName);
-
     if (m_musicService == snapshot.service
         && m_musicDesktopEntry == nextDesktopEntry
         && m_musicExecutablePath == nextMusicExecutablePath
@@ -3411,18 +3504,6 @@ void FashionLeftPluginProvider::refreshAiState()
             nextToolEntries << entry;
         }
 
-        if (nextToolEntries.isEmpty()) {
-            QVariantMap idleEntry;
-            idleEntry.insert(QStringLiteral("toolId"), nextPrimaryToolId);
-            idleEntry.insert(QStringLiteral("displayName"), nextPrimaryToolId.isEmpty() ? QStringLiteral("AI") : aiToolDisplayName(nextPrimaryToolId));
-            idleEntry.insert(QStringLiteral("processLabel"), nextPrimaryToolId.isEmpty() ? QStringLiteral("ai cli") : aiToolProcessLabel(nextPrimaryToolId));
-            idleEntry.insert(QStringLiteral("runningCount"), 0);
-            idleEntry.insert(QStringLiteral("completedCount"), 0);
-            idleEntry.insert(QStringLiteral("totalCount"), 0);
-            idleEntry.insert(QStringLiteral("progressText"), QStringLiteral("0/0"));
-            nextToolEntries << idleEntry;
-        }
-
         int nextRunningCount = 0;
         for (auto it = currentRunningCounts.cbegin(); it != currentRunningCounts.cend(); ++it) {
             nextRunningCount += it.value();
@@ -3430,7 +3511,10 @@ void FashionLeftPluginProvider::refreshAiState()
 
         QString nextHeadlineText;
         QString nextSummaryText;
-        if (nextToolEntries.size() == 1) {
+        if (nextToolEntries.isEmpty()) {
+            nextHeadlineText = QStringLiteral("0 条任务");
+            nextSummaryText = QStringLiteral("ai cli");
+        } else if (nextToolEntries.size() == 1) {
             const QVariantMap entry = nextToolEntries.constFirst().toMap();
             nextHeadlineText = entry.value(QStringLiteral("progressText")).toString() + QStringLiteral(" 条任务");
             nextSummaryText = entry.value(QStringLiteral("processLabel")).toString();

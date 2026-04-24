@@ -68,10 +68,15 @@ Control {
     readonly property int aiStatusBarAnimationDuration: 1150
     readonly property bool aiShowSecondaryLine: root.pageContentHeight > 34
     readonly property int aiTextVerticalOffset: root.aiShowSecondaryLine ? -root.textVerticalLift : 0
+    readonly property color aiIconTintColor: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.92) : Qt.rgba(0, 0, 0, 0.86)
     readonly property int weatherTextSpacing: root.tightSpacing - 2
     readonly property bool musicPageVisible: provider.musicAvailable
+    readonly property bool aiPageVisible: provider.aiRunningCount > 0 && aiEntries.length > 0
     readonly property var pageIds: {
-        const ids = ["weather", "ai"]
+        const ids = ["weather"]
+        if (aiPageVisible) {
+            ids.push("ai")
+        }
         if (musicPageVisible) {
             ids.push("music")
         }
@@ -114,18 +119,7 @@ Control {
     readonly property string tooltipPageId: transitionToPageId.length > 0
         ? root.normalizedPageId(root.transitionToPageId)
         : root.normalizedPageId(root.currentPageId)
-    readonly property var aiEntries: {
-        const entries = provider.aiToolEntries || []
-        if (entries.length > 0) {
-            return entries
-        }
-
-        return [{
-            toolId: provider.aiPrimaryToolId,
-            progressText: "0/0",
-            processLabel: "ai"
-        }]
-    }
+    readonly property var aiEntries: provider.aiToolEntries || []
     readonly property int aiEntryCount: Math.min(2, aiEntries.length)
     readonly property bool aiDualColumnMode: aiEntryCount > 1
     readonly property string aiPrimaryDisplayToolId: provider.aiPrimaryToolId && provider.aiPrimaryToolId.length > 0
@@ -428,8 +422,10 @@ Control {
     }
 
     function musicControlIconSource(iconName) {
-        const themeBase = Panel.colorTheme === Dock.Dark ? "/usr/share/icons/Win11-dark/actions/16/" : "/usr/share/icons/Win11/actions/16/"
-        return "file://" + themeBase + iconName + ".svg"
+        const themeIconSource = provider.musicControlThemeIconSource(iconName, Panel.colorTheme === Dock.Dark)
+        return themeIconSource && themeIconSource.length > 0
+            ? themeIconSource
+            : Qt.resolvedUrl("icons/" + iconName + ".svg")
     }
 
     function weatherTooltipText() {
@@ -451,13 +447,25 @@ Control {
     }
 
     function aiIconSource(toolId) {
-        switch (toolId) {
+        const normalizedToolId = toolId ? String(toolId).toLowerCase() : ""
+        switch (normalizedToolId) {
         case "codex":
-            return Qt.resolvedUrl("icons/codex.svg")
+        case "openai":
+            return Qt.resolvedUrl("icons/openai.svg")
         case "claude":
-            return "file:///usr/share/icons/Win11/apps/scalable/claude.svg"
+        case "claude-code":
+            return Qt.resolvedUrl("icons/claude.svg")
+        case "doubao":
+            return Qt.resolvedUrl("icons/doubao.svg")
+        case "gemini":
+            return Qt.resolvedUrl("icons/gemini.svg")
+        case "qwen":
+            return Qt.resolvedUrl("icons/qwen.svg")
+        case "aistudio":
+        case "google-ai-studio":
+            return Qt.resolvedUrl("icons/aistudio.svg")
         default:
-            return ""
+            return Qt.resolvedUrl("icons/ai.svg")
         }
     }
 
@@ -1061,7 +1069,14 @@ Control {
                         fillMode: Image.PreserveAspectFit
                         smooth: true
                         asynchronous: true
-                        visible: source !== ""
+                        visible: false
+                    }
+
+                    ColorOverlay {
+                        anchors.fill: aiPrimaryIcon
+                        source: aiPrimaryIcon
+                        color: root.aiIconTintColor
+                        visible: aiPrimaryIcon.source !== ""
                     }
 
                     Rectangle {
@@ -1072,7 +1087,7 @@ Control {
                         color: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0, 0, 0, 0.06)
                         border.width: 1
                         border.color: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.08)
-                        visible: !aiPrimaryIcon.visible
+                        visible: aiPrimaryIcon.source === ""
                     }
 
                     Text {
@@ -1082,7 +1097,7 @@ Control {
                         font.pixelSize: root.captionFontSize + 1
                         font.weight: Font.DemiBold
                         renderType: Text.NativeRendering
-                        visible: !aiPrimaryIcon.visible
+                        visible: aiPrimaryIcon.source === ""
                     }
                 }
 
