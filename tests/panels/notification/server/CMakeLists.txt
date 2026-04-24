@@ -59,13 +59,9 @@ target_link_libraries(notifyserverapplet_tests PRIVATE
     ds-notification-shared
 )
 
-# fix gtest not found runpath
-target_link_options(notifyserverapplet_tests PRIVATE
-    "-Wl,-rpath,${CMAKE_BINARY_DIR}/frame"
-    "-Wl,-rpath,${CMAKE_BINARY_DIR}/panels/notification"
-)
-
-gtest_discover_tests(
-    notifyserverapplet_tests
-    DISCOVERY_MODE PRE_TEST
+add_test(
+    NAME notifyserverapplet_tests
+    COMMAND ${CMAKE_COMMAND} -E env
+        LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/frame:${CMAKE_BINARY_DIR}/panels/notification
+        $<TARGET_FILE:notifyserverapplet_tests>
 )
