@@ -6,9 +6,10 @@
 #include "taskmanagersettings.h"
 
 #include <QDir>
-#include <QStandardPaths>
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QSet>
+#include <QStandardPaths>
 
 #include <string>
 
@@ -17,6 +18,24 @@
 namespace dock {
 namespace {
 static const QString DOWNLOADS_PLACEHOLDER = QStringLiteral("folder/$DOWNLOADS");
+static const QString APPLICATIONS_FOLDER_DOCK_ELEMENT = QStringLiteral("folder//usr/share/applications");
+static constexpr int DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION = 1;
+
+static QStringList stockDesktopDockedElements()
+{
+    return {
+        QStringLiteral("desktop/dde-file-manager"),
+        QStringLiteral("desktop/deepin-app-store"),
+        QStringLiteral("desktop/org.deepin.browser"),
+        QStringLiteral("desktop/deepin-mail"),
+        QStringLiteral("desktop/deepin-terminal"),
+        QStringLiteral("desktop/dde-calendar"),
+        QStringLiteral("desktop/deepin-music"),
+        QStringLiteral("desktop/deepin-editor"),
+        QStringLiteral("desktop/deepin-calculator"),
+        QStringLiteral("desktop/org.deepin.dde.control-center"),
+    };
+}
 
 static QString resolveDockedElement(const QString &element)
 {
@@ -46,6 +65,76 @@ static QStringList resolveDockedElements(const QStringList &elements)
     }
 
     return resolvedElements;
+}
+
+static QSet<QString> asSet(const QStringList &elements)
+{
+    QSet<QString> elementSet;
+    for (const QString &element : elements) {
+        elementSet.insert(element);
+    }
+
+    return elementSet;
+}
+
+static QStringList defaultFolderDockedElements()
+{
+    return resolveDockedElements({DOWNLOADS_PLACEHOLDER, APPLICATIONS_FOLDER_DOCK_ELEMENT});
+}
+
+static bool matchesLegacyDefaultDockedLayout(const QStringList &elements)
+{
+    const QSet<QString> expectedDesktopElements = asSet(stockDesktopDockedElements());
+    const QSet<QString> expectedFolderElements = asSet(defaultFolderDockedElements());
+
+    QSet<QString> desktopElements;
+    QSet<QString> folderElements;
+    for (const QString &element : elements) {
+        if (element.startsWith(QStringLiteral("desktop/"))) {
+            desktopElements.insert(element);
+            continue;
+        }
+
+        if (element.startsWith(QStringLiteral("folder/"))) {
+            folderElements.insert(element);
+            continue;
+        }
+
+        return false;
+    }
+
+    if (desktopElements != expectedDesktopElements) {
+        return false;
+    }
+
+    for (const QString &folderElement : folderElements) {
+        if (!expectedFolderElements.contains(folderElement)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static QStringList mergedWithDefaultDockFolders(const QStringList &elements)
+{
+    QStringList mergedElements = elements;
+    int insertIndex = mergedElements.indexOf(QStringLiteral("desktop/dde-file-manager"));
+    if (insertIndex < 0) {
+        insertIndex = -1;
+    }
+
+    for (const QString &folderElement : defaultFolderDockedElements()) {
+        const int existingIndex = mergedElements.indexOf(folderElement);
+        if (existingIndex >= 0) {
+            insertIndex = existingIndex;
+            continue;
+        }
+
+        mergedElements.insert(++insertIndex, folderElement);
+    }
+
+    return resolveDockedElements(mergedElements);
 }
 }
 
@@ -96,6 +185,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     m_cgroupsBasedGroupingSkipAppIds = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_APPIDS, {"deepin-terminal"}).toStringList();
     m_cgroupsBasedGroupingSkipCategories = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_CATEGORIES, {"TerminalEmulator"}).toStringList();
     migrateFromDockedItems();
+    migrateDefaultDockFolders();
 }
 
 bool TaskManagerSettings::isAllowedForceQuit()
@@ -205,6 +295,28 @@ void TaskManagerSettings::migrateFromDockedItems()
         m_dockedElements = mergedDockedElements;
         saveDockedElements();
     }
+}
+
+void TaskManagerSettings::migrateDefaultDockFolders()
+{
+    const int migrationVersion = m_taskManagerDconfig->value(TASKMANAGER_DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION_KEY, 0).toInt();
+    if (migrationVersion >= DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION) {
+        return;
+    }
+
+    QStringList migratedDockedElements = m_dockedElements;
+    if (matchesLegacyDefaultDockedLayout(migratedDockedElements)) {
+        migratedDockedElements = mergedWithDefaultDockFolders(migratedDockedElements);
+    }
+
+    const bool dockedElementsChanged = migratedDockedElements != m_dockedElements;
+    if (dockedElementsChanged) {
+        m_dockedElements = migratedDockedElements;
+        saveDockedElements();
+    }
+
+    m_taskManagerDconfig->setValue(TASKMANAGER_DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION_KEY,
+                                   DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION);
 }
 
 void TaskManagerSettings::saveDockedElements()

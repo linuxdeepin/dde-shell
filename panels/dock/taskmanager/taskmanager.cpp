@@ -63,6 +63,48 @@ Q_LOGGING_CATEGORY(taskManagerLog, "org.deepin.dde.shell.dock.taskmanager", QtDe
 
 namespace dock {
 
+static QStringList mergedDockedElementsOrder(const QStringList &currentDockedElements, const QStringList &orderedDockElements)
+{
+    QStringList mergedDockedElements;
+    for (const QString &dockElement : orderedDockElements) {
+        if (currentDockedElements.contains(dockElement) && !mergedDockedElements.contains(dockElement)) {
+            mergedDockedElements.append(dockElement);
+        }
+    }
+
+    for (int i = 0; i < currentDockedElements.size(); ++i) {
+        const QString &dockElement = currentDockedElements.at(i);
+        if (mergedDockedElements.contains(dockElement)) {
+            continue;
+        }
+
+        int insertIndex = mergedDockedElements.size();
+        for (int j = i - 1; j >= 0; --j) {
+            const QString &previousElement = currentDockedElements.at(j);
+            const int previousIndex = mergedDockedElements.indexOf(previousElement);
+            if (previousIndex >= 0) {
+                insertIndex = previousIndex + 1;
+                break;
+            }
+        }
+
+        if (insertIndex == mergedDockedElements.size()) {
+            for (int j = i + 1; j < currentDockedElements.size(); ++j) {
+                const QString &nextElement = currentDockedElements.at(j);
+                const int nextIndex = mergedDockedElements.indexOf(nextElement);
+                if (nextIndex >= 0) {
+                    insertIndex = nextIndex;
+                    break;
+                }
+            }
+        }
+
+        mergedDockedElements.insert(insertIndex, dockElement);
+    }
+
+    return mergedDockedElements;
+}
+
 // 通过AM(Application Manager)匹配应用程序的辅助函数
 static QString getDesktopIdByPid(const QStringList &identifies)
 {
@@ -1643,12 +1685,7 @@ void TaskManager::activateWindow(uint32_t windowID)
 void TaskManager::saveDockElementsOrder(const QStringList &dockElements)
 {
     const QStringList &dockedElements = TaskManagerSettings::instance()->dockedElements();
-    QStringList newDockedElements;
-    for (const auto &dockElement : dockElements) {
-        if (dockedElements.contains(dockElement) && !newDockedElements.contains(dockElement)) {
-            newDockedElements.append(dockElement);
-        }
-    }
+    const QStringList newDockedElements = mergedDockedElementsOrder(dockedElements, dockElements);
     TaskManagerSettings::instance()->setDockedElements(newDockedElements);
 }
 

@@ -27,6 +27,7 @@ static inline const QString TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_APPIDS = "cg
 static inline const QString TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_CATEGORIES = "cgroupsBasedGroupingSkipCategories";
 static inline const QString TASKMANAGER_DOCKEDITEMS_KEY = "Docked_Items";
 constexpr auto TASKMANAGER_DOCKEDELEMENTS_KEY = "dockedElements";
+constexpr auto TASKMANAGER_DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION_KEY = "defaultDockFoldersMigrationVersion";
 
 // model roleNames
 constexpr auto MODEL_WINID = "winId";

@@ -96,6 +96,16 @@
 			"description": "The items which is docked when dock is started.",
 			"permissions": "readwrite",
 			"visibility": "private"
+		},
+		"defaultDockFoldersMigrationVersion": {
+			"value": 0,
+			"serial": 0,
+			"flags": [],
+			"name": "defaultDockFoldersMigrationVersion",
+			"name[zh_CN]": "默认驻留文件夹迁移版本",
+			"description": "Internal version used to migrate the default dock folders once.",
+			"permissions": "readwrite",
+			"visibility": "private"
 		}
 	}
 }
