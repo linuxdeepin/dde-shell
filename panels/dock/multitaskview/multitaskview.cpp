@@ -7,14 +7,25 @@
 #include "../constants.h"
 
 #include <QBuffer>
+#include <QProcess>
 
 #include <DDciIcon>
 #include <DDBusSender>
 #include <DWindowManagerHelper>
 #include <DGuiApplicationHelper>
 
+#ifdef HAVE_DDE_API_EVENTLOGGER
+#include <dde-api/eventlogger.hpp>
+#endif
+
 DGUI_USE_NAMESPACE
 DCORE_USE_NAMESPACE
+
+namespace {
+constexpr qint64 EVENT_LOGGER_KWIN_MULTITASK_VIEW = 1000300000;
+constexpr int EventLaunchTypeDockIcon = 2;
+
+}
 
 namespace dock {
 
@@ -50,12 +61,32 @@ MultiTaskView::MultiTaskView(QObject *parent)
 bool MultiTaskView::init()
 {
     setSupported(m_kWinEffect && DWindowManagerHelper::instance()->hasComposite());
+    queryKwinVersion();
     DAppletDock::init();
     return true;
 }
 
+void MultiTaskView::queryKwinVersion()
+{
+    auto *process = new QProcess(this);
+    process->start(QStringLiteral("dpkg-query"), { QStringLiteral("-W"), QStringLiteral("-f=${Version}"), QStringLiteral("kwin-x11") });
+    connect(process, &QProcess::finished, this, [this, process](int exitCode, QProcess::ExitStatus status) {
+        if (status == QProcess::NormalExit && exitCode == 0) {
+            m_kwinVersion = QString::fromLocal8Bit(process->readAllStandardOutput()).trimmed();
+        }
+        process->deleteLater();
+    });
+}
+
 void MultiTaskView::openWorkspace()
 {
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    DDE_EventLogger::EventLogger::instance().writeEventLog(
+        DDE_EventLogger::EventLoggerData(EVENT_LOGGER_KWIN_MULTITASK_VIEW, QStringLiteral("kwin_multitask_view"), {
+            {QStringLiteral("launch_type"), EventLaunchTypeDockIcon},
+            {QStringLiteral("kwin_version"), m_kwinVersion}
+        }));
+#endif
     if (m_multitaskview) {
         m_multitaskview->toggle();
         return;

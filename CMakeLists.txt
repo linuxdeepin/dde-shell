@@ -61,6 +61,15 @@ find_package(ICU 74.2 REQUIRED COMPONENTS uc i18n io)
 find_package(WaylandProtocols REQUIRED)
 find_package(PkgConfig REQUIRED)
 
+# Check if dde-api provides EventLogger (header-only)
+find_package(DDEAPI QUIET)
+if(DDEAPI_FOUND)
+    set(HAVE_DDE_API_EVENTLOGGER ON)
+    message(STATUS "Found DDEAPI: EventLogger available")
+else()
+    message(STATUS "DDEAPI not found, event logging will be disabled")
+endif()
+
 qt_policy(SET QTP0001 NEW)
 
 try_compile(COMPILE_RESULT

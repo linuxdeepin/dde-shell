@@ -34,7 +34,9 @@ Q_SIGNALS:
     void iconNameChanged();
 
 private:
+    void queryKwinVersion();
     bool m_kWinEffect = true;
+    QString m_kwinVersion;
     QString m_iconName;
     QScopedPointer<TreeLandMultitaskview> m_multitaskview;
     Dtk::Core::DConfig *m_kWinCompositingConfig = nullptr;

@@ -15,6 +15,7 @@
 #include <QObject>
 #include <QDBusContext>
 #include <QDBusArgument>
+#include <QTimer>
 
 /** this class used for old dock api compatible
   * it will forward old dbus call to new implementation
@@ -88,9 +89,10 @@ private:
     DockPanel* parent() const;
     QString getAppID(const QString &desktopfile);
     void updateDockPluginsVisible(const QVariantMap &pluginsVisible);
+    void logInitialPluginState();
+    void logCurrentVisiblePluginList(const QString &changedItemKey = QString(), bool changedVisible = true);
 
     DS_NAMESPACE::DAppletProxy *m_oldDockApplet;
     DS_NAMESPACE::DAppletProxy *m_trayApplet;
 };
 }
-
