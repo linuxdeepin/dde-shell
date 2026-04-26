@@ -75,6 +75,10 @@ target_link_libraries(dockpanel PRIVATE
     dde-shell-dock
 )
 
+if (HAVE_DDE_API_EVENTLOGGER)
+    target_compile_definitions(dockpanel PRIVATE HAVE_DDE_API_EVENTLOGGER)
+endif()
+
 if (BUILD_WITH_X11)
     target_compile_definitions(dockpanel PRIVATE BUILD_WITH_X11=)
     pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb xcb-aux xcb-res xcb-ewmh)

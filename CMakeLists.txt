@@ -61,6 +61,17 @@ find_package(ICU 74.2 REQUIRED COMPONENTS uc i18n io)
 find_package(WaylandProtocols REQUIRED)
 find_package(PkgConfig REQUIRED)
 
+# Check if dde-api eventlogger.hpp exists
+# Unset cache to force re-detection every time
+unset(DDE_API_EVENTLOGGER_INCLUDE_DIR CACHE)
+find_path(DDE_API_EVENTLOGGER_INCLUDE_DIR NAMES dde-api/eventlogger.hpp PATHS /usr/include)
+if(DDE_API_EVENTLOGGER_INCLUDE_DIR)
+    set(HAVE_DDE_API_EVENTLOGGER ON)
+    message(STATUS "Found dde-api eventlogger.hpp: ${DDE_API_EVENTLOGGER_INCLUDE_DIR}")
+else()
+    message(STATUS "dde-api eventlogger.hpp not found, event logging will be disabled")
+endif()
+
 qt_policy(SET QTP0001 NEW)
 
 try_compile(COMPILE_RESULT

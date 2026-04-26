@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -101,6 +101,10 @@ target_link_libraries(dock-taskmanager PRIVATE
     yaml-cpp
     PkgConfig::WaylandClient
 )
+
+if (HAVE_DDE_API_EVENTLOGGER)
+    target_compile_definitions(dock-taskmanager PRIVATE HAVE_DDE_API_EVENTLOGGER)
+endif()
 
 if (BUILD_WITH_X11)
     target_compile_definitions(dock-taskmanager PRIVATE BUILD_WITH_X11=)

@@ -15,6 +15,7 @@
 #include <QObject>
 #include <QDBusContext>
 #include <QDBusArgument>
+#include <QTimer>
 
 /** this class used for old dock api compatible
   * it will forward old dbus call to new implementation
@@ -88,9 +89,17 @@ private:
     DockPanel* parent() const;
     QString getAppID(const QString &desktopfile);
     void updateDockPluginsVisible(const QVariantMap &pluginsVisible);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    void logTrayPluginList();
+    void logTrayPluginListChange(const QString &changedItemKey, bool visible);
+#endif
 
     DS_NAMESPACE::DAppletProxy *m_oldDockApplet;
     DS_NAMESPACE::DAppletProxy *m_trayApplet;
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    QTimer m_trayPluginListLogTimer;
+    int m_visiblePluginCount = -1;
+#endif
 };
 }
 

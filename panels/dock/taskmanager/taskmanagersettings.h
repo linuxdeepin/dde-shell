@@ -46,6 +46,9 @@ private:
     explicit TaskManagerSettings(QObject *parent = nullptr);
     inline void migrateFromDockedItems();
     inline void saveDockedElements();
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    void logMergeAppModel(bool mergeAppModelOn);
+#endif
 
 Q_SIGNALS:
     void allowedForceQuitChanged();
