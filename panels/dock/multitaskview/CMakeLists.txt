@@ -32,6 +32,10 @@ target_link_libraries(dock-multitaskview PRIVATE
     dde-shell-dock
 )
 
+if (HAVE_DDE_API_EVENTLOGGER)
+    target_compile_definitions(dock-multitaskview PRIVATE HAVE_DDE_API_EVENTLOGGER)
+endif()
+
 ds_install_package(PACKAGE org.deepin.ds.dock.multitaskview TARGET dock-multitaskview)
 ds_handle_package_translation(PACKAGE org.deepin.ds.dock.multitaskview)
 

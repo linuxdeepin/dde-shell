@@ -5,12 +5,20 @@
 #include "globals.h"
 #include "taskmanagersettings.h"
 
+#include <DConfig>
 #include <QJsonObject>
-#include <QJsonDocument>
 
 #include <string>
 
 #include <yaml-cpp/yaml.h>
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+#include <dde-api/eventlogger.hpp>
+
+namespace {
+constexpr qint64 EVENT_LOGGER_MERGE_APP_MODEL = 1000610011;
+}
+#endif
 
 namespace dock {
 static inline QString bool2EnableStr(bool enable)
@@ -36,6 +44,10 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     : QObject(parent)
     , m_taskManagerDconfig(DConfig::create(QStringLiteral("org.deepin.dde.shell"), QStringLiteral("org.deepin.ds.dock.taskmanager"), QString(), this))
 {
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    DDE_EventLogger::EventLogger::instance().init("org.deepin.dde.shell", false);
+#endif
+
     connect(m_taskManagerDconfig, &DConfig::valueChanged, this, [this](const QString &key){
         if (TASKMANAGER_ALLOWFOCEQUIT_KEY == key) {
             m_allowForceQuit = enableStr2Bool(m_taskManagerDconfig->value(TASKMANAGER_ALLOWFOCEQUIT_KEY).toString());
@@ -46,6 +58,9 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
         } else if (TASKMANAGER_WINDOWSPLIT_KEY == key) {
             m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
             Q_EMIT windowSplitChanged();
+#ifdef HAVE_DDE_API_EVENTLOGGER
+            logMergeAppModel(!m_windowSplit);
+#endif
         } else if (TASKMANAGER_DOCKEDELEMENTS_KEY == key) {
             m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
             Q_EMIT dockedElementsChanged();
@@ -60,6 +75,9 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     m_cgroupsBasedGroupingSkipAppIds = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_APPIDS, {"deepin-terminal"}).toStringList();
     m_cgroupsBasedGroupingSkipCategories = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_CATEGORIES, {"TerminalEmulator"}).toStringList();
     migrateFromDockedItems();
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    logMergeAppModel(!m_windowSplit);
+#endif
 }
 
 bool TaskManagerSettings::isAllowedForceQuit()
@@ -191,5 +209,16 @@ void TaskManagerSettings::removeDockedElement(const QString &element)
     Q_EMIT dockedElementsChanged();
     saveDockedElements();
 }
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+void TaskManagerSettings::logMergeAppModel(bool mergeAppModelOn)
+{
+    DDE_EventLogger::EventLogger::instance().writeEventLog(
+        DDE_EventLogger::EventLoggerData(EVENT_LOGGER_MERGE_APP_MODEL, QStringLiteral("taskmanager_config"), {
+            {QStringLiteral("merge_app_model_on"), mergeAppModelOn ? QStringLiteral("true") : QStringLiteral("false")}
+        }));
+    qDebug() << "EventLogger: merge_app_model_on:" << mergeAppModelOn;
+}
+#endif
 
 }

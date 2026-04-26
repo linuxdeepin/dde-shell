@@ -9,6 +9,11 @@
 #include "dockdbusproxy.h"
 
 #include <QObject>
+#include <QJsonObject>
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+#include <dde-api/eventlogger.hpp>
+#endif
 
 #include <DWindowManagerHelper>
 #include <appletbridge.h>
@@ -17,6 +22,9 @@ DGUI_USE_NAMESPACE
 DS_USE_NAMESPACE
 namespace {
 constexpr auto DockVersionV1 = "1.0";
+#ifdef HAVE_DDE_API_EVENTLOGGER
+constexpr qint64 EVENT_LOGGER_TRAY_PLUGIN_LIST = 1000610007;
+#endif
 
 QList<DS_NAMESPACE::DAppletDock *> dockApplets(dock::DockPanel *panel)
 {
@@ -32,6 +40,31 @@ QList<DS_NAMESPACE::DAppletDock *> dockApplets(dock::DockPanel *panel)
     }
     return list;
 }
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+QString visiblePluginList(const DockItemInfos &itemInfos)
+{
+    QStringList pluginNames;
+    for (const DockItemInfo &itemInfo : itemInfos) {
+        if (itemInfo.visible && !itemInfo.name.isEmpty()) {
+            pluginNames.append(itemInfo.name);
+        }
+    }
+    pluginNames.removeDuplicates();
+    return pluginNames.join(QStringLiteral(","));
+}
+
+int visiblePluginCount(const DockItemInfos &itemInfos)
+{
+    int count = 0;
+    for (const DockItemInfo &itemInfo : itemInfos) {
+        if (itemInfo.visible) {
+            count++;
+        }
+    }
+    return count;
+}
+#endif
 }
 namespace dock {
 DockDBusProxy::DockDBusProxy(DockPanel* parent)
@@ -40,6 +73,15 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
     , m_trayApplet(nullptr)
 {
     registerPluginInfoMetaType();
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    DDE_EventLogger::EventLogger::instance().init("org.deepin.dde.shell", false);
+    m_trayPluginListLogTimer.setSingleShot(true);
+    m_trayPluginListLogTimer.setInterval(1000);
+    connect(&m_trayPluginListLogTimer, &QTimer::timeout, this, [this] {
+        logTrayPluginList();
+        connect(this, &DockDBusProxy::pluginsChanged, this, &DockDBusProxy::logTrayPluginList, Qt::UniqueConnection);
+    });
+#endif
 
     connect(DockSettings::instance(), &DockSettings::pluginsVisibleChanged, this, [this] (const QVariantMap &pluginsVisible) {
         updateDockPluginsVisible(pluginsVisible);
@@ -75,6 +117,9 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
             timer->stop();
             timer->deleteLater();
             connect(m_trayApplet, SIGNAL(pluginsChanged()), this, SIGNAL(pluginsChanged()));
+#ifdef HAVE_DDE_API_EVENTLOGGER
+            m_trayPluginListLogTimer.start();
+#endif
         }
     });
     timer->start();
@@ -255,6 +300,49 @@ DockItemInfos DockDBusProxy::plugins()
     return iteminfos;
 }
 
+#ifdef HAVE_DDE_API_EVENTLOGGER
+void DockDBusProxy::logTrayPluginList()
+{
+    const DockItemInfos itemInfos = plugins();
+    const int count = visiblePluginCount(itemInfos);
+    if (count == m_visiblePluginCount) {
+        return;
+    }
+    m_visiblePluginCount = count;
+
+    const QString trayPluginList = visiblePluginList(itemInfos);
+    DDE_EventLogger::EventLogger::instance().writeEventLog(
+        DDE_EventLogger::EventLoggerData(EVENT_LOGGER_TRAY_PLUGIN_LIST, QStringLiteral("taskmanager_config"), {
+            {QStringLiteral("tray_plugin_list"), trayPluginList}
+        }));
+    qDebug() << "EventLogger: tray_plugin_list:" << trayPluginList;
+}
+
+void DockDBusProxy::logTrayPluginListChange(const QString &changedItemKey, bool visible)
+{
+    DockItemInfos itemInfos = plugins();
+    for (DockItemInfo &itemInfo : itemInfos) {
+        if (itemInfo.itemKey == changedItemKey) {
+            itemInfo.visible = visible;
+            break;
+        }
+    }
+
+    const int count = visiblePluginCount(itemInfos);
+    if (count == m_visiblePluginCount) {
+        return;
+    }
+    m_visiblePluginCount = count;
+
+    const QString trayPluginList = visiblePluginList(itemInfos);
+    DDE_EventLogger::EventLogger::instance().writeEventLog(
+        DDE_EventLogger::EventLoggerData(EVENT_LOGGER_TRAY_PLUGIN_LIST, QStringLiteral("taskmanager_config"), {
+            {QStringLiteral("tray_plugin_list"), trayPluginList}
+        }));
+    qDebug() << "EventLogger: tray_plugin_list:" << trayPluginList;
+}
+#endif
+
 void DockDBusProxy::ReloadPlugins()
 {
     parent()->ReloadPlugins();
@@ -274,6 +362,9 @@ void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &item
             pluginsVisible[itemKey] = visible;
             DockSettings::instance()->setPluginsVisible(pluginsVisible);
             Q_EMIT pluginVisibleChanged(itemKey, visible);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+            logTrayPluginListChange(itemKey, visible);
+#endif
             return;
         }
     }
@@ -281,6 +372,9 @@ void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &item
     if (m_trayApplet) {
         Q_EMIT pluginVisibleChanged(itemKey, visible);
         QMetaObject::invokeMethod(m_trayApplet, "setItemOnDock", Qt::QueuedConnection, settingKey, itemKey, visible);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+        logTrayPluginListChange(itemKey, visible);
+#endif
     }
 }
 
@@ -340,4 +434,3 @@ void DockDBusProxy::setLocked(bool newLocked)
 }
 
 }
-

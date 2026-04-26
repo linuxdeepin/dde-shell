@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -8,6 +8,15 @@
 
 #include <QTimer>
 #include <QLoggingCategory>
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+#include <dde-api/eventlogger.hpp>
+
+// Event IDs for dock settings (10-digit numbers)
+// 1000600010: shell_pos + shell_dock_mode (merged output)
+// 1000600011: merge_app_model_on + tray_plugin_list (used in taskmanagersettings) + icon_theme (used in dde-appearance)
+constexpr qint64 EVENT_LOGGER_DOCK_CONFIG = 1000610006;
+#endif
 
 Q_LOGGING_CATEGORY(dockSettingsLog, "org.deepin.dde.shell.dock.docksettings")
 
@@ -136,6 +145,12 @@ DockSettings::DockSettings(QObject* parent)
 {
     m_writeTimer->setSingleShot(true);
     m_writeTimer->setInterval(1000);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    DDE_EventLogger::EventLogger::instance().init("org.deepin.dde.shell", false);
+    qCInfo(dockSettingsLog) << "EventLogger initialized";
+#else
+    qCInfo(dockSettingsLog) << "EventLogger not available (dde-api eventlogger.hpp not found)";
+#endif
     init();
 }
 
@@ -150,6 +165,16 @@ void DockSettings::init()
         m_pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
         m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
         m_locked = m_dockConfig->value(keyLocked).toBool();
+
+        // Log dock config on startup - merge shell_pos and shell_dock_mode into one log entry
+#ifdef HAVE_DDE_API_EVENTLOGGER
+        DDE_EventLogger::EventLogger::instance().writeEventLog(
+            DDE_EventLogger::EventLoggerData(EVENT_LOGGER_DOCK_CONFIG, "dock_config", {
+                {"shell_pos", position2String(m_dockPosition)},
+                {"shell_dock_mode", itemAlignment2String(m_alignment)}
+            }));
+        qCInfo(dockSettingsLog) << "EventLogger: dock config on startup - position:" << position2String(m_dockPosition) << "mode:" << itemAlignment2String(m_alignment);
+#endif
 
         connect(m_dockConfig.data(), &DConfig::valueChanged, this, [this](const QString& key){
             if (keyDockSize == key) {
@@ -237,6 +262,15 @@ void DockSettings::setPosition(const Position& position)
     m_dockPosition = position;
     Q_EMIT positionChanged(m_dockPosition);
     addWriteJob(positionJob);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    DDE_EventLogger::EventLogger::instance().writeEventLog(
+        DDE_EventLogger::EventLoggerData(EVENT_LOGGER_DOCK_CONFIG, "dock_config", {
+            {"shell_pos", position2String(position)},
+        }));
+    qCInfo(dockSettingsLog) << "EventLogger: position changed to" << position2String(position);
+#else
+    qCInfo(dockSettingsLog) << "EventLogger not available: position changed to" << position2String(position);
+#endif
 }
 
 ItemAlignment DockSettings::itemAlignment()
@@ -251,6 +285,15 @@ void DockSettings::setItemAlignment(const ItemAlignment& alignment)
     m_alignment = alignment;
     Q_EMIT itemAlignmentChanged(m_alignment);
     addWriteJob(itemAlignmentJob);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    DDE_EventLogger::EventLogger::instance().writeEventLog(
+        DDE_EventLogger::EventLoggerData(EVENT_LOGGER_DOCK_CONFIG, "dock_config", {
+            {"shell_dock_mode", itemAlignment2String(alignment)}
+        }));
+    qCInfo(dockSettingsLog) << "EventLogger: itemAlignment changed to" << itemAlignment2String(alignment);
+#else
+    qCInfo(dockSettingsLog) << "EventLogger not available: itemAlignment changed to" << itemAlignment2String(alignment);
+#endif
 }
 
 IndicatorStyle DockSettings::indicatorStyle()
