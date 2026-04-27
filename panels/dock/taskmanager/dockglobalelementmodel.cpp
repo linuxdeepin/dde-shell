@@ -385,6 +385,14 @@ QVariant DockGlobalElementModel::data(const QModelIndex &index, int role) const
         QModelIndex groupIndex = model->index(row, 0);
         return groupIndex.data(TaskManager::WindowsRole).toStringList();
     }
+    case TaskManager::ActiveRole:
+    case TaskManager::AttentionRole: {
+        if (model == m_activeAppModel) {
+            return model->index(row, 0).data(role);
+        }
+        return false;
+    }
+
     case TaskManager::MenusRole: {
         return getMenus(index);
     }
