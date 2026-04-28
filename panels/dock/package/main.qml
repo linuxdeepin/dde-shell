@@ -75,6 +75,12 @@ Window {
     readonly property real adaptiveFashionGridDisplayedWidth: adaptiveFashionMode
         ? dock.ceilToPhysicalPixel(gridLayout.implicitWidth)
         : 0
+    readonly property real adaptiveFashionGridTargetWidth: adaptiveFashionMode
+        ? dock.ceilToPhysicalPixel(Math.max(0,
+                                            gridLayout.implicitWidth
+                                            - dockCenterPart.implicitWidth
+                                            + dockCenterPart.targetImplicitWidth))
+        : 0
     readonly property real adaptiveFashionGridDisplayedHeight: adaptiveFashionMode
         ? dock.ceilToPhysicalPixel(gridLayout.implicitHeight)
         : 0
@@ -116,7 +122,7 @@ Window {
             return 0
         }
 
-        let width = adaptiveFashionGridDisplayedWidth
+        let width = adaptiveFashionGridTargetWidth
         if (dockRightPart.visible) {
             const rightWidth = dockRightPart.targetImplicitWidth
             if (rightWidth > 0) {
@@ -1407,10 +1413,13 @@ Window {
                 readonly property real taskmanagerImplicitHeight: taskmanagerRootObject ? taskmanagerRootObject.implicitHeight : 0
                 readonly property real taskmanagerAppContainerWidth: taskmanagerRootObject ? taskmanagerRootObject.appContainerWidth : 0
                 readonly property real taskmanagerAppContainerHeight: taskmanagerRootObject ? taskmanagerRootObject.appContainerHeight : 0
-                
-                readonly property real targetImplicitWidth: implicitWidth
+                readonly property real taskmanagerAppContainerTargetWidth: taskmanagerRootObject ? taskmanagerRootObject.appContainerTargetWidth : 0
+                readonly property real taskmanagerAppContainerTargetHeight: taskmanagerRootObject ? taskmanagerRootObject.appContainerTargetHeight : 0
+
+                readonly property real targetImplicitWidth: centerLoader.targetImplicitWidth - taskmanagerImplicitWidth + taskmanagerAppContainerTargetWidth
                 readonly property real displayedImplicitWidth: implicitWidth
                 implicitWidth: centerLoader.implicitWidth - taskmanagerImplicitWidth + taskmanagerAppContainerWidth
+                readonly property real targetImplicitHeight: centerLoader.targetImplicitHeight - taskmanagerImplicitHeight + taskmanagerAppContainerTargetHeight
                 implicitHeight: centerLoader.implicitHeight - taskmanagerImplicitHeight + taskmanagerAppContainerHeight
                 onXChanged: dockCenterPartPosChanged()
                 onYChanged: dockCenterPartPosChanged()
@@ -1488,7 +1497,10 @@ Window {
         Item {
             id: dockRightPart
             visible: dockRightPartModel.count > 0
-            readonly property int trailingInset: dock.adaptiveFashionMode ? DDT.TrayItemPositionManager.itemPadding + 16 : 0
+            // Align the right edge gap with the fashion mode's vertical inset.
+            // Keep it within the requested range of [vertical, vertical + 2]
+            // by using a centered +1px bias.
+            readonly property int trailingInset: dock.adaptiveFashionMode ? (dock.fashionVerticalPadding + 1) : 0
             readonly property real rightContentTargetWidth: rightLoader.item
                 ? (rightLoader.item.targetImplicitWidth !== undefined
                     ? rightLoader.item.targetImplicitWidth

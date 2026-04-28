@@ -63,6 +63,7 @@ Item {
     property int appTitleSpacing: 0
     property bool popupItem: root.itemKind === "group" || root.itemKind === "folder"
     readonly property bool resizeOptimizationActive: Panel.isResizing || (Panel.rootObject && Panel.rootObject.isDragging)
+    readonly property bool dockPopupContext: Window.window && Panel.popupWindow && Window.window === Panel.popupWindow
     property bool deferredWindowIconGeometryUpdate: false
     property bool deferredPhysicalPixelFix: false
     property var iconGlobalPoint: {
@@ -79,9 +80,53 @@ Item {
 
     implicitWidth: appItem.implicitWidth
 
+    function dockWindowGlobalPoint() {
+        if (!Panel.rootObject) {
+            return Qt.point(0, 0)
+        }
+
+        return Qt.point(Panel.rootObject.x, Panel.rootObject.y)
+    }
+
+    function mapPointToDockWindow(targetItem, localPoint) {
+        const item = targetItem || appItem
+        const point = localPoint || Qt.point(item.width / 2, item.height / 2)
+
+        if (!item) {
+            return Qt.point(0, 0)
+        }
+
+        if (!dockPopupContext) {
+            return item.mapToItem(null, point.x, point.y)
+        }
+
+        const globalPoint = item.mapToGlobal(point.x, point.y)
+        const dockGlobalPoint = dockWindowGlobalPoint()
+        return Qt.point(globalPoint.x - dockGlobalPoint.x, globalPoint.y - dockGlobalPoint.y)
+    }
+
+    function dockRelativeRect(targetItem) {
+        const item = targetItem || root
+        const topLeft = mapPointToDockWindow(item, Qt.point(0, 0))
+        return Qt.rect(topLeft.x, topLeft.y, item.width, item.height)
+    }
+
+    function dockPopupRect() {
+        if (!dockPopupContext || !Window.window || !Window.window.contentItem) {
+            return dockRelativeRect(root)
+        }
+
+        const popupTopLeftGlobal = Window.window.contentItem.mapToGlobal(0, 0)
+        const dockGlobalPoint = dockWindowGlobalPoint()
+        return Qt.rect(popupTopLeftGlobal.x - dockGlobalPoint.x,
+                       popupTopLeftGlobal.y - dockGlobalPoint.y,
+                       Window.window.contentItem.width,
+                       Window.window.contentItem.height)
+    }
+
     function mapSpotlightPoint(localPoint) {
         const point = localPoint || Qt.point(appItem.width / 2, appItem.height / 2)
-        return appItem.mapToItem(null, point.x, point.y)
+        return mapPointToDockWindow(appItem, point)
     }
 
     function updateSpotlight(localPoint) {
@@ -108,7 +153,7 @@ Item {
         }
 
         deferredWindowIconGeometryUpdate = false
-        var pos = icon.mapToItem(null, 0, 0)
+        var pos = mapPointToDockWindow(icon, Qt.point(0, 0))
         taskmanager.Applet.requestUpdateWindowIconGeometry(root.modelIndex,
                                                            Qt.rect(pos.x, pos.y, icon.width, icon.height),
                                                            Panel.rootObject)
@@ -785,7 +830,7 @@ Item {
     }
 
     function showToolTipNow() {
-        var point = root.mapToItem(null, root.width / 2, root.height / 2)
+        var point = mapPointToDockWindow(root, Qt.point(root.width / 2, root.height / 2))
         toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
         toolTip.open()
     }
@@ -795,7 +840,9 @@ Item {
                                           Panel.rootObject,
                                           xOffset,
                                           yOffset,
-                                          Panel.position)
+                                          dockPopupContext
+                                              ? (Panel.position === Dock.Top ? Dock.Top : Dock.Bottom)
+                                              : Panel.position)
     }
 
     function onEntered() {
@@ -817,14 +864,24 @@ Item {
             return
         }
 
-        var itemPos = root.mapToItem(null, 0, 0)
+        const itemRect = dockRelativeRect(root)
         let xOffset, yOffset, interval = 10
-        if (Panel.position % 2 === 0) {
-            xOffset = itemPos.x + (root.width / 2)
-            yOffset = (Panel.position == 2 ? -interval : interval + Panel.dockSize)
+        if (dockPopupContext) {
+            const popupRect = dockPopupRect()
+            xOffset = popupRect.x + popupRect.width / 2
+            yOffset = Panel.position === Dock.Top
+                ? popupRect.y + popupRect.height + interval
+                : popupRect.y - interval
+        } else if (Panel.position % 2 === 0) {
+            xOffset = itemRect.x + itemRect.width / 2
+            yOffset = Panel.position === Dock.Bottom
+                ? itemRect.y - interval
+                : itemRect.y + itemRect.height + interval
         } else {
-            xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
-            yOffset = itemPos.y + (root.height / 2)
+            xOffset = Panel.position === Dock.Left
+                ? itemRect.x + itemRect.width + interval
+                : itemRect.x - interval
+            yOffset = itemRect.y + itemRect.height / 2
         }
         if (root.windows.length > 0 && taskmanager.previewSwitchActive) {
             taskmanager.endPreviewSwitch()
@@ -985,7 +1042,7 @@ Item {
             if (root.itemId === "dde-trash") {
                 dragToolTipCloseTimer.stop()
                 if (!dragToolTip.toolTipVisible) {
-                    var point = root.mapToItem(null, root.width / 2, root.height / 2)
+                    var point = mapPointToDockWindow(root, Qt.point(root.width / 2, root.height / 2))
                     dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
                     dragToolTip.open()
                 }

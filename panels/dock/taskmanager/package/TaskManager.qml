@@ -37,11 +37,32 @@ ContainmentItem {
     }
 
     readonly property int appTitleSpacing: Math.max(10, Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14) / 3)
-    readonly property bool adaptiveFashionOverflowEnabled: Panel.rootObject.adaptiveFashionMode
+    readonly property bool adaptiveFashionMinimumReached: Panel.rootObject.adaptiveFashionMode
         && !useColumnLayout
-        && Panel.rootObject.dockSize <= Dock.MIN_DOCK_SIZE
+        && (Panel.rootObject.preferredDockSize <= Dock.MIN_DOCK_SIZE
+            || Panel.rootObject.dockSize <= Dock.MIN_DOCK_SIZE)
+    readonly property real adaptiveFashionOverflowHysteresis: 8
     readonly property real adaptiveFashionItemWidth: Math.max(1, Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14 + appTitleSpacing))
     readonly property real adaptiveFashionOverflowButtonWidth: adaptiveFashionItemWidth
+    readonly property real adaptiveFashionFullItemsWidth: {
+        const totalCount = visualModel.items.count
+        if (totalCount <= 0) {
+            return 0
+        }
+
+        let width = 0
+        for (let index = 0; index < totalCount; ++index) {
+            if (index > 0) {
+                width += appContainer.spacing
+            }
+            width += adaptiveFashionItemWidthForIndex(index)
+        }
+        return width
+    }
+    property bool adaptiveFashionOverflowLatched: false
+    readonly property bool adaptiveFashionOverflowEnabled: Panel.rootObject.adaptiveFashionMode
+        && !useColumnLayout
+        && adaptiveFashionOverflowLatched
     property int adaptiveFashionVisibleItemCount: 0
     property var adaptiveFashionOverflowItems: []
     property var adaptiveFashionMeasuredItemWidths: ({})
@@ -52,6 +73,8 @@ ContainmentItem {
     // 用于居中计算的实际应用区域尺寸
     property int appContainerWidth: useColumnLayout ? Panel.rootObject.dockSize : appContainer.implicitWidth
     property int appContainerHeight: useColumnLayout ? appContainer.implicitHeight : Panel.rootObject.dockSize
+    property int appContainerTargetWidth: useColumnLayout ? Panel.rootObject.dockSize : appContainer.targetImplicitWidth
+    property int appContainerTargetHeight: useColumnLayout ? appContainer.targetImplicitHeight : Panel.rootObject.dockSize
     
     implicitWidth: useColumnLayout
         ? Panel.rootObject.dockSize
@@ -193,9 +216,37 @@ ContainmentItem {
         return (Number.isFinite(measuredWidth) && measuredWidth > 0) ? measuredWidth : adaptiveFashionItemWidth
     }
 
+    function syncAdaptiveFashionOverflowEnabledState() {
+        if (!Panel.rootObject.adaptiveFashionMode || useColumnLayout) {
+            adaptiveFashionOverflowLatched = false
+            return false
+        }
+
+        const totalCount = visualModel.items.count
+        const availableWidth = Math.max(0, Panel.rootObject.adaptiveFashionAvailableTaskManagerWidth)
+        if (totalCount <= 0 || !Number.isFinite(availableWidth) || availableWidth <= 0) {
+            adaptiveFashionOverflowLatched = false
+            return false
+        }
+
+        const startThreshold = availableWidth + adaptiveFashionOverflowHysteresis
+        const stopThreshold = Math.max(0, availableWidth - adaptiveFashionOverflowHysteresis)
+        const totalItemsWidth = adaptiveFashionFullItemsWidth
+        const nextLatched = adaptiveFashionOverflowLatched
+            ? (totalItemsWidth > stopThreshold)
+            : (adaptiveFashionMinimumReached && totalItemsWidth > startThreshold)
+
+        if (adaptiveFashionOverflowLatched !== nextLatched) {
+            adaptiveFashionOverflowLatched = nextLatched
+        }
+
+        return nextLatched
+    }
+
     function syncAdaptiveFashionOverflow() {
         const totalCount = visualModel.items.count
-        if (!adaptiveFashionOverflowEnabled || totalCount <= 0) {
+        const overflowEnabled = syncAdaptiveFashionOverflowEnabledState()
+        if (!overflowEnabled || totalCount <= 0) {
             adaptiveFashionVisibleItemCount = totalCount
             adaptiveFashionOverflowItems = []
             return
@@ -277,6 +328,8 @@ ContainmentItem {
     }
 
     onAdaptiveFashionOverflowEnabledChanged: scheduleAdaptiveFashionOverflowSync()
+    onAdaptiveFashionMinimumReachedChanged: scheduleAdaptiveFashionOverflowSync()
+    onAdaptiveFashionFullItemsWidthChanged: scheduleAdaptiveFashionOverflowSync()
     onAdaptiveFashionItemWidthChanged: scheduleAdaptiveFashionOverflowSync()
     onUseColumnLayoutChanged: scheduleAdaptiveFashionOverflowSync()
 
@@ -318,6 +371,10 @@ ContainmentItem {
         function onDockItemMaxSizeChanged() {
             taskmanager.scheduleAdaptiveFashionOverflowSync()
         }
+
+        function onPreferredDockSizeChanged() {
+            taskmanager.scheduleAdaptiveFashionOverflowSync()
+        }
     }
 
     Connections {
@@ -355,14 +412,15 @@ ContainmentItem {
             id: overflowFooter
             readonly property int previewCount: Math.min(taskmanager.adaptiveFashionOverflowItems.length, 3)
             readonly property bool singleOverflowItem: taskmanager.adaptiveFashionOverflowCount === 1
+            readonly property int previewStartIndex: Math.max(0, taskmanager.adaptiveFashionOverflowItems.length - previewCount)
             readonly property var primaryOverflowItem: taskmanager.adaptiveFashionOverflowItems.length > 0
                 ? taskmanager.adaptiveFashionOverflowItems[0]
                 : null
             readonly property real stackedIconSize: Math.max(12, Math.round(Panel.rootObject.dockItemIconSize * 0.78))
             readonly property real stackXOffset: Math.max(2, Math.round(stackedIconSize * 0.24))
-            readonly property real stackYOffset: Math.max(1, Math.round(stackedIconSize * 0.12))
             readonly property real hoverHeight: Math.round(Panel.rootObject.dockItemIconSize + 8)
             readonly property int popupColumns: Math.min(6, Math.max(1, taskmanager.adaptiveFashionOverflowCount))
+            readonly property int popupInnerMargin: 10
             property point popupAnchorPoint: Qt.point(0, 0)
 
             implicitWidth: taskmanager.adaptiveFashionOverflowButtonWidth
@@ -431,8 +489,9 @@ ContainmentItem {
             Item {
                 anchors.centerIn: parent
                 visible: !overflowFooter.singleOverflowItem
-                width: overflowFooter.stackedIconSize + overflowFooter.stackXOffset * 2
-                height: overflowFooter.stackedIconSize + overflowFooter.stackYOffset * 2
+                width: overflowFooter.stackedIconSize
+                    + overflowFooter.stackXOffset * Math.max(0, overflowFooter.previewCount - 1)
+                height: overflowFooter.stackedIconSize
 
                 Repeater {
                     model: overflowFooter.previewCount
@@ -440,7 +499,7 @@ ContainmentItem {
                     D.DciIcon {
                         required property int index
 
-                        readonly property int previewIndex: overflowFooter.previewCount - index - 1
+                        readonly property int previewIndex: overflowFooter.previewStartIndex + index
                         readonly property var previewItem: taskmanager.adaptiveFashionOverflowItems[previewIndex]
 
                         name: previewItem && previewItem.iconName ? previewItem.iconName : ""
@@ -450,7 +509,7 @@ ContainmentItem {
                         smooth: false
                         retainWhileLoading: true
                         x: index * overflowFooter.stackXOffset
-                        y: previewIndex * overflowFooter.stackYOffset
+                        y: 0
                         opacity: 0.7 + index * 0.15
                     }
                 }
@@ -468,8 +527,32 @@ ContainmentItem {
                 id: overflowPopup
                 width: overflowPopupContent.width
                 height: overflowPopupContent.height
-                popupX: overflowFooter.popupAnchorPoint.x - overflowPopup.width / 2
-                popupY: -overflowPopup.height - 10
+                popupX: {
+                    switch (Panel.position) {
+                    case Dock.Top:
+                    case Dock.Bottom:
+                        return overflowFooter.popupAnchorPoint.x - overflowPopup.width / 2
+                    case Dock.Right:
+                        return -overflowPopup.width - overflowFooter.popupInnerMargin
+                    case Dock.Left:
+                        return Panel.rootObject.dockSize + overflowFooter.popupInnerMargin
+                    }
+
+                    return overflowFooter.popupAnchorPoint.x - overflowPopup.width / 2
+                }
+                popupY: {
+                    switch (Panel.position) {
+                    case Dock.Top:
+                        return Panel.rootObject.dockSize + overflowFooter.popupInnerMargin
+                    case Dock.Right:
+                    case Dock.Left:
+                        return overflowFooter.popupAnchorPoint.y - overflowPopup.height / 2
+                    case Dock.Bottom:
+                        return -overflowPopup.height - overflowFooter.popupInnerMargin
+                    }
+
+                    return -overflowPopup.height - overflowFooter.popupInnerMargin
+                }
 
                 Control {
                     id: overflowPopupContent
@@ -479,24 +562,7 @@ ContainmentItem {
                     width: implicitWidth
                     height: implicitHeight
 
-                    background: Rectangle {
-                        radius: D.DTK.platformTheme.windowRadius < 0 ? 18 : D.DTK.platformTheme.windowRadius
-                        color: Qt.rgba(1, 1, 1, 0.08)
-
-                        D.InsideBoxBorder {
-                            anchors.fill: parent
-                            radius: parent.radius
-                            color: Qt.rgba(1, 1, 1, 0.10)
-                            borderWidth: 1 / Screen.devicePixelRatio
-                        }
-
-                        D.OutsideBoxBorder {
-                            anchors.fill: parent
-                            radius: parent.radius
-                            color: Qt.rgba(0, 0, 0, 0.10)
-                            borderWidth: 1 / Screen.devicePixelRatio
-                        }
-                    }
+                    background: Item {}
 
                     contentItem: Grid {
                         id: overflowGrid
@@ -660,7 +726,7 @@ ContainmentItem {
                     // border.width: 1
                     id: appItemRect
                     color: "transparent"
-                    visible: !delegateRoot.overflowProxyItem
+                    visible: !delegateRoot.overflowProxyItem && !delegateRoot.hiddenByOverflow
                     parent: appContainer
                     x: delegateRoot.x
                     y: delegateRoot.y
