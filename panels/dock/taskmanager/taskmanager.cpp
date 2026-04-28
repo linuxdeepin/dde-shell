@@ -1007,6 +1007,7 @@ TaskManager::TaskManager(QObject *parent)
     qmlRegisterUncreatableType<TextCalculatorAttached>("org.deepin.ds.dock.taskmanager", 1, 0, "TextCalculatorAttached", "TextCalculator Attached");
 
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
+    connect(Settings, &TaskManagerSettings::showAttentionAnimationChanged, this, &TaskManager::showAttentionAnimationChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
 
     if (auto *thumbnailProvider = Dtk::Gui::DThumbnailProvider::instance()) {
@@ -1289,6 +1290,11 @@ void TaskManager::hideItemPreview()
 bool TaskManager::allowForceQuit()
 {
     return Settings->isAllowedForceQuit();
+}
+
+bool TaskManager::showAttentionAnimation()
+{
+    return Settings->showAttentionAnimation();
 }
 
 QString TaskManager::desktopIdToAppId(const QString& desktopId) const

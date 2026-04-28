@@ -17,6 +17,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xcb_icccm.h>
+#include <xcb/shape.h>
 
 DS_BEGIN_NAMESPACE
 
@@ -314,6 +315,38 @@ void LayerShellEmulation::onScopeChanged()
     xcb_icccm_set_wm_class(x11Application->connection(), m_window->winId(), wmClassData.length(), wmClassData.constData());
 
     qCDebug(layershell) << "Set WM_CLASS for window" << m_window->winId() << " wm_class:" << wmClassData;
+}
+
+void LayerShellEmulation::onInputRegionChanged()
+{
+    auto *x11Application = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
+    if (!x11Application || !m_window->winId() || !m_dlayerShellWindow) {
+        return;
+    }
+
+    if (m_dlayerShellWindow->inputRegion().isNull()) {
+        xcb_shape_mask(x11Application->connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT, m_window->winId(), 0, 0, XCB_NONE);
+        xcb_flush(x11Application->connection());
+        return;
+    }
+
+    QRegion region = m_dlayerShellWindow->inputRegion();
+    qreal scaleFactor = qGuiApp->devicePixelRatio();
+
+    QVector<xcb_rectangle_t> rects;
+    for (const QRect &r : region) {
+        xcb_rectangle_t rect;
+        rect.x = r.x() * scaleFactor;
+        rect.y = r.y() * scaleFactor;
+        rect.width = r.width() * scaleFactor;
+        rect.height = r.height() * scaleFactor;
+        rects.append(rect);
+    }
+
+    xcb_shape_rectangles(x11Application->connection(), XCB_SHAPE_SO_SET, XCB_SHAPE_SK_INPUT,
+                         XCB_CLIP_ORDERING_UNSORTED, m_window->winId(), 0, 0,
+                         rects.size(), rects.data());
+    xcb_flush(x11Application->connection());
 }
 
 // void X11Emulation::onKeyboardInteractivityChanged()
