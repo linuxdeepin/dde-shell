@@ -28,6 +28,14 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     if (auto applet = bridge.applet()) {
         connect(applet, SIGNAL(windowFullscreenChanged(bool)), this, SLOT(setCurrentActiveWindowFullscreened(bool)));
     }
+    
+    // Store dock window's wl_surface for XEmbed window positioning
+    if (m_panel->window()) {
+        auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(m_panel->window()->handle());
+        if (waylandWindow) {
+            m_dockWlSurface = waylandWindow->waylandSurface()->object();
+        }
+    }
 
     connect(m_panel, &DockPanel::rootObjectChanged, this, [this]() {
         m_wallpaperColorManager->watchScreen(dockScreenName());
@@ -144,6 +152,27 @@ void WaylandDockHelper::setDockColorTheme(const ColorTheme &theme)
     m_panel->setColorTheme(theme);
 }
 
+bool WaylandDockHelper::moveXEmbedWindow(uint32_t wid, double dx, double dy)
+{
+    // Update dock wl_surface if needed
+    if (!m_dockWlSurface && m_panel->window()) {
+        auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(m_panel->window()->handle());
+        if (waylandWindow && waylandWindow->waylandSurface()) {
+            m_dockWlSurface = waylandWindow->waylandSurface()->object();
+        }
+    }
+    
+    if (!m_ddeShellManager || !m_ddeShellManager->isActive() || !m_dockWlSurface) {
+        qWarning() << "WaylandDockHelper::moveXEmbedWindow: not ready, manager active:" 
+                   << (m_ddeShellManager && m_ddeShellManager->isActive())
+                   << "surface:" << (m_dockWlSurface != nullptr);
+        return false;
+    }
+    
+    m_ddeShellManager->setXWindowPositionRelative(wid, m_dockWlSurface, dx, dy);
+    return true;
+}
+
 WallpaperColorManager::WallpaperColorManager(WaylandDockHelper *helper)
     : QWaylandClientExtensionTemplate<WallpaperColorManager>(treeland_wallpaper_color_manager_v1_interface.version)
     , m_helper(helper)
@@ -167,6 +196,14 @@ void WallpaperColorManager::watchScreen(const QString &screeName)
 TreeLandDDEShellManager::TreeLandDDEShellManager()
     : QWaylandClientExtensionTemplate<TreeLandDDEShellManager>(treeland_dde_shell_manager_v1_interface.version)
 {
+}
+
+struct ::wl_callback *TreeLandDDEShellManager::setXWindowPositionRelative(uint32_t wid, struct ::wl_surface *anchor, double dx, double dy)
+{
+    if (!isActive()) {
+        return nullptr;
+    }
+    return QtWayland::treeland_dde_shell_manager_v1::set_xwindow_position_relative(wid, anchor, wl_fixed_from_double(dx), wl_fixed_from_double(dy));
 }
 
 TreeLandWindowOverlapChecker::TreeLandWindowOverlapChecker(WaylandDockHelper *helper, struct ::treeland_window_overlap_checker *checker)

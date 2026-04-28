@@ -65,6 +65,10 @@ public:
 
     Q_INVOKABLE void updateDockOverflowState(int state);
     Q_INVOKABLE void setPopupMinHeight(int height);
+    
+    // Called from QML when moveXEmbedWindowRequested is handled
+    // result: true = success, false = error
+    Q_INVOKABLE void notifyXEmbedWindowMoveResult(bool result);
 
     uint32_t dockPosition() const;
     void setDockPosition(uint32_t dockPosition);
@@ -92,6 +96,9 @@ Q_SIGNALS:
     void messageRequest(PluginSurface *, const QString &msg);
     void dockSizeChanged();
     void requestShutdown(const QString &type);
+    // Signal emitted when XEmbed window move is requested
+    // Parameters: wid (window ID), pluginId, itemKey, dx (relative x offset), dy (relative y offset)
+    void moveXEmbedWindowRequested(uint32_t wid, const QString &pluginId, const QString &itemKey, double dx, double dy);
 
 private Q_SLOTS:
     void onFontChanged();
@@ -103,6 +110,7 @@ protected:
     virtual void plugin_manager_v1_request_message(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &msg) override;
     virtual void plugin_manager_v1_create_popup_at(Resource *resource, const QString &plugin_id, const QString &item_key, int32_t type, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id) override;
     virtual void plugin_manager_v1_create_plugin(Resource *resource, const QString &plugin_id, const QString &item_key, const QString &display_name, int32_t plugin_flags, int32_t type, int32_t size_policy, struct ::wl_resource *surface, uint32_t id) override;
+    virtual void plugin_manager_v1_move_xembed_window(Resource *resource, uint32_t xembed_winid, const QString &plugin_id, const QString &item_key, uint32_t callback) override;
 
 private:
     static QJsonObject getRootObj(const QString &jsonStr);
@@ -113,6 +121,7 @@ private:
     QString popupMinHeightMsg() const;
     using PluginSurfaceCallback = std::function<void(Resource *)>;
     void foreachPluginSurface(PluginSurfaceCallback callback);
+    PluginSurface* findPluginSurface(const QString &pluginId, const QString &itemKey) const;
 
 private:
     QList<PluginSurface*> m_pluginSurfaces;
@@ -121,6 +130,10 @@ private:
     uint32_t m_dockColorTheme = 0;
     QSize m_dockSize;
     int m_popupMinHeight = 0;
+    
+    // For pending XEmbed callback response
+    uint32_t m_pendingXEmbedCallback = 0;
+    struct ::wl_client *m_pendingXEmbedClient = nullptr;
 };
 
 class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public QtWaylandServer::plugin
@@ -173,6 +186,9 @@ public:
     Q_INVOKABLE void updatePluginGeometry(const QRect &geometry);
     Q_INVOKABLE void setGlobalPos(const QPoint &pos);
 
+    // Position relative to the dock window, set from QML via updatePluginGeometry
+    QPoint itemPosition() const;
+
     int margins() const;
     void setMargins(int newMargins);
 
@@ -211,6 +227,7 @@ private:
     int m_margins = 0;
     int m_height;
     int m_width;
+    QPoint m_itemPosition; // Position relative to dock window, for XEmbed window positioning
 };
 
 class PluginPopup : public QWaylandShellSurfaceTemplate<PluginPopup>, public QtWaylandServer::plugin_popup

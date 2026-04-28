@@ -21,6 +21,9 @@ public:
 
     void enterScreen(QScreen *screen);
     void leaveScreen();
+    
+    // Move XEmbed window relative to dock surface (no-op on X11)
+    virtual bool moveXEmbedWindow(uint32_t wid, double dx, double dy) { return false; }
 
 Q_SIGNALS:
     void isWindowOverlapChanged(bool overlap);

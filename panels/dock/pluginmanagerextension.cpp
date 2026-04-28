@@ -10,6 +10,7 @@
 #include <DPlatformTheme>
 
 #include <cstdint>
+#include <wayland-server-core.h>
 
 #include <QtWaylandCompositor/QWaylandSurface>
 #include <QtWaylandCompositor/QWaylandResource>
@@ -254,7 +255,13 @@ bool PluginSurface::isItemActive() const
 
 void PluginSurface::updatePluginGeometry(const QRect &geometry)
 {
+    m_itemPosition = geometry.topLeft();
     send_geometry(geometry.x(), geometry.y(), geometry.width(), geometry.height());
+}
+
+QPoint PluginSurface::itemPosition() const
+{
+    return m_itemPosition;
 }
 
 void PluginSurface::plugin_mouse_event(QtWaylandServer::plugin::Resource *resource, int32_t type)
@@ -673,6 +680,43 @@ void PluginManager::plugin_manager_v1_create_popup_at(Resource *resource, const 
     Q_EMIT pluginPopupCreated(plugin);
 }
 
+void PluginManager::plugin_manager_v1_move_xembed_window(Resource *resource, uint32_t xembed_winid, const QString &plugin_id, const QString &item_key, uint32_t callback)
+{
+    Q_UNUSED(resource)
+    qInfo() << "server pluginManager receive move_xembed_window:" << xembed_winid << plugin_id << item_key;
+    
+    // Look up the plugin surface to get its position relative to the dock window
+    double dx = 0.0, dy = 0.0;
+    PluginSurface *pluginSurface = findPluginSurface(plugin_id, item_key);
+    if (pluginSurface) {
+        dx = pluginSurface->itemPosition().x();
+        dy = pluginSurface->itemPosition().y();
+    } else {
+        qWarning() << "move_xembed_window: plugin surface not found for" << plugin_id << item_key;
+    }
+    
+    // Store pending callback for later response
+    m_pendingXEmbedCallback = callback;
+    m_pendingXEmbedClient = resource->client();
+    
+    // Emit signal with position info for QML to handle
+    Q_EMIT moveXEmbedWindowRequested(xembed_winid, plugin_id, item_key, dx, dy);
+}
+
+void PluginManager::notifyXEmbedWindowMoveResult(bool success)
+{
+    if (m_pendingXEmbedCallback > 0 && m_pendingXEmbedClient) {
+        wl_resource *callbackResource = wl_resource_create(m_pendingXEmbedClient, &wl_callback_interface, 
+                                                           1, m_pendingXEmbedCallback);
+        if (callbackResource) {
+            wl_callback_send_done(callbackResource, success ? 0 : 1);
+            wl_resource_destroy(callbackResource);
+        }
+    }
+    m_pendingXEmbedCallback = 0;
+    m_pendingXEmbedClient = nullptr;
+}
+
 QJsonObject PluginManager::getRootObj(const QString &jsonStr) {
     QJsonParseError jsonParseError;
     const QJsonDocument &resultDoc = QJsonDocument::fromJson(jsonStr.toLocal8Bit(), &jsonParseError);
@@ -755,6 +799,16 @@ void PluginManager::onActiveColorChanged()
         auto theme = DGuiApplicationHelper::instance()->applicationTheme();
         send_active_color_changed(source->handle, theme->activeColor().name(), theme->darkActiveColor().name());
     });
+}
+
+PluginSurface* PluginManager::findPluginSurface(const QString &pluginId, const QString &itemKey) const
+{
+    for (PluginSurface *plugin : m_pluginSurfaces) {
+        if (plugin->pluginId() == pluginId && plugin->itemKey() == itemKey) {
+            return plugin;
+        }
+    }
+    return nullptr;
 }
 
 void PluginManager::onThemeChanged()
