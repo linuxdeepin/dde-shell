@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -19,6 +19,7 @@ public:
     ItemsPage * itemsPage();
 
     static bool idIsFolder(const QString & id);
+    static QString normalizeGroupId(const QString &id);
     static QString groupIdFromNumber(int groupId);
     static int parseGroupId(const QString & id);
 

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -55,6 +55,7 @@ public:
     explicit AppGroupManager(AMAppItemModel * referenceModel, QObject* parent = nullptr);
 
     QVariant data(const QModelIndex &index, int role = GroupIdRole) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE ItemPosition findItem(const QString &appId, int folderId = -1);
     Q_INVOKABLE void appendItemToGroup(const QString &appId, int groupId);
@@ -63,6 +64,8 @@ public:
     AppGroup * group(int groupId);
     AppGroup * group(QModelIndex idx);
     Q_INVOKABLE ItemsPage * groupPages(int groupId);
+    Q_INVOKABLE QStringList groupItems(const QString &groupId) const;
+    Q_INVOKABLE QString groupDisplayName(const QString &groupId) const;
     Q_INVOKABLE void bringToFromt(const QString & id);
     Q_INVOKABLE void commitRearrangeOperation(const QString & dragId, const QString & dropId, DndOperation operation, int pageHint = -1);
 

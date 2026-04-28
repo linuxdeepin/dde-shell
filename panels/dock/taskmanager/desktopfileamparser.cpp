@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,7 +13,10 @@
 
 #include <DDBusSender>
 #include <QDBusConnection>
+#include <QDBusMessage>
+#include <QDBusUnixFileDescriptor>
 #include <QLoggingCategory>
+#include <QProcess>
 
 Q_LOGGING_CATEGORY(amdesktopfileLog, "org.deepin.dde.shell.dock.amdesktopfile")
 
@@ -50,17 +53,37 @@ DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
 
     connect(&dbusWatcher, &QDBusServiceWatcher::serviceRegistered, this, [this](){
         m_amIsAvaliable = true;
+        m_name.clear();
+        m_icon.clear();
+        m_genericName.clear();
+        m_xDeepinVendor.clear();
+        m_actions.clear();
+        m_isValid = !m_id.isEmpty() && m_applicationInterface && (m_applicationInterface->iD() == m_id);
+        Q_EMIT nameChanged();
+        Q_EMIT genericNameChanged();
+        Q_EMIT xDeepinVendorChanged();
+        Q_EMIT actionsChanged();
         Q_EMIT iconChanged();
     });
 
     connect(&dbusWatcher, &QDBusServiceWatcher::serviceUnregistered, this, [this](){
         m_amIsAvaliable = false;
+        m_name.clear();
+        m_icon.clear();
+        m_genericName.clear();
+        m_xDeepinVendor.clear();
+        m_actions.clear();
+        Q_EMIT nameChanged();
+        Q_EMIT genericNameChanged();
+        Q_EMIT xDeepinVendorChanged();
+        Q_EMIT actionsChanged();
         Q_EMIT iconChanged();
     });
 
     qCDebug(amdesktopfileLog()) << "create a am desktopfile object: " << m_id;
     m_applicationInterface.reset(new Application(AM_DBUS_PATH, id2dbusPath(id), QDBusConnection::sessionBus(), this));
     m_isValid = !m_id.isEmpty() && (m_applicationInterface->iD() == m_id);
+    connectToAmDBusSignal(QStringLiteral("PropertiesChanged"), SLOT(onPropertyChanged(QDBusMessage)));
 }
 
 DesktopFileAMParser::~DesktopFileAMParser()
@@ -152,22 +175,24 @@ QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
 
     if (!m_amIsAvaliable) return QString();
 
-    auto pidfd = pidfd_open(window->pid(),0);
-    auto res = DDBusSender().service("org.desktopspec.ApplicationManager1")
-                                         .interface("org.desktopspec.ApplicationManager1")
-                                         .path("/org/desktopspec/ApplicationManager1")
-                                         .method("Identify")
-                                         .arg(QDBusUnixFileDescriptor(pidfd))
-                                         .call();
-    res.waitForFinished();
-    close(pidfd);
-    if (res.isValid()) {
-        auto reply = res.reply();
-        QList<QVariant> data = reply.arguments();
-        return data.first().toString();
+    const auto pidfd = pidfd_open(window->pid(), 0);
+    if (pidfd < 0) {
+        qCDebug(amdesktopfileLog) << "AM pidfd_open failed for pid:" << window->pid();
+        return QString();
     }
 
-    qCDebug(amdesktopfileLog()) << "AM failed to identify, reason is: " << res.error().message();
+    QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("org.desktopspec.ApplicationManager1"),
+                                                          QStringLiteral("/org/desktopspec/ApplicationManager1"),
+                                                          QStringLiteral("org.desktopspec.ApplicationManager1"),
+                                                          QStringLiteral("Identify"));
+    message << QVariant::fromValue(QDBusUnixFileDescriptor(pidfd));
+    const QDBusMessage reply = QDBusConnection::sessionBus().call(message, QDBus::BlockWithGui, 300);
+    close(pidfd);
+    if (reply.type() != QDBusMessage::ErrorMessage && !reply.arguments().isEmpty()) {
+        return reply.arguments().constFirst().toString();
+    }
+
+    qCDebug(amdesktopfileLog()) << "AM failed to identify, reason is: " << reply.errorMessage();
 
     return QString();
 }
@@ -219,17 +244,13 @@ void DesktopFileAMParser::connectToAmDBusSignal(const QString& signalName, const
 
 void DesktopFileAMParser::launchByAMTool(const QString &action)
 {
-    QProcess process;
     const auto path = m_applicationInterface->path();
-    process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start("dde-am", {"--by-user", path, action});
-    if (!process.waitForFinished()) {
-        qWarning() << "Failed to launch the path:" << path << process.errorString();
-        return;
-    } else if (process.exitCode() != 0) {
-        qWarning() << "Failed to launch the path:" << path << process.readAll();
+    const QStringList arguments = {QStringLiteral("--by-user"), path, action};
+    if (!QProcess::startDetached(QStringLiteral("dde-am"), arguments)) {
+        qWarning() << "Failed to launch the path:" << path;
         return;
     }
+
     qDebug() << "Launch the application path:" << path;
 }
 
@@ -301,16 +322,20 @@ void DesktopFileAMParser::onPropertyChanged(const QDBusMessage &msg)
     if (changedProps.contains("Name")) {
         updateLocalName();
         Q_EMIT nameChanged();
-    } else if (changedProps.contains("Actions")) {
+    }
+    if (changedProps.contains("Actions")) {
         updateActions();
         Q_EMIT actionsChanged();
-    } else if (changedProps.contains("GenericName")) {
+    }
+    if (changedProps.contains("GenericName")) {
         updateLocalGenericName();
         Q_EMIT genericNameChanged();
-    } else if (changedProps.contains("Name")) {
-        updateLocalName();
-        Q_EMIT nameChanged();
-    } else if (changedProps.contains("X_Deepin_Vendor")) {
+    }
+    if (changedProps.contains("Icons")) {
+        updateDesktopIcon();
+        Q_EMIT iconChanged();
+    }
+    if (changedProps.contains("X_Deepin_Vendor")) {
         m_xDeepinVendor = m_applicationInterface->x_Deepin_Vendor();
         Q_EMIT xDeepinVendorChanged();
     }

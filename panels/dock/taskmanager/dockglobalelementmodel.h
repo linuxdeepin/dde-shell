@@ -15,7 +15,10 @@ class DockGlobalElementModel : public QAbstractListModel, public AbstractTaskMan
 {
     Q_OBJECT
 public:
-    explicit DockGlobalElementModel(QAbstractItemModel *appsModel, DockCombineModel *activeAppModel, QObject *parent = nullptr);
+    explicit DockGlobalElementModel(QAbstractItemModel *appsModel,
+                                    DockCombineModel *activeAppModel,
+                                    QAbstractItemModel *groupModel,
+                                    QObject *parent = nullptr);
 
     QHash<int, QByteArray> roleNames() const override;
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -45,14 +48,19 @@ private:
     void loadDockedElements();
     QString getMenus(const QModelIndex &index) const;
     void groupItemsByApp();
+    QString dockElementForRow(int row) const;
+    QString displayNameFor(const QString &type, const QString &id) const;
+    QString iconNameFor(const QString &type, const QString &id) const;
+    QStringList previewIconsFor(const QString &type, const QString &id) const;
 
 private:
-    // id, model, and pos
-    QList<std::tuple<QString, QAbstractItemModel *, int>> m_data;
+    // type, id, model, and row
+    QList<std::tuple<QString, QString, QAbstractItemModel *, int>> m_data;
 
     // type, id
     QList<std::tuple<QString, QString>> m_dockedElements;
     QAbstractItemModel *m_appsModel;
     DockCombineModel *m_activeAppModel;
+    QAbstractItemModel *m_groupModel;
 };
 }

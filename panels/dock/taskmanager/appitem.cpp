@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -52,20 +52,21 @@ QString AppItem::type() const
 
 QString AppItem::icon() const
 {
-    if (m_currentActiveWindow.isNull() || m_currentActiveWindow->icon().isEmpty() || (m_desktopfileParser && m_desktopfileParser->isValied().first))
-        return m_desktopfileParser ? m_desktopfileParser->desktopIcon() : "application-default-icon";
-    else {
-        return m_currentActiveWindow->icon();
+    if (!m_currentActiveWindow.isNull()) {
+        const QString windowIcon = m_currentActiveWindow->icon().trimmed();
+        if (!windowIcon.isEmpty()) {
+            return windowIcon;
+        }
     }
 
-    // QString icon;
-    // if (m_currentActiveWindow) {
-    //     icon = m_currentActiveWindow->icon();
-    // }
-    // if (icon.isEmpty() && m_desktopfileParser && !m_desktopfileParser.isNull()) {
-    //     icon = m_desktopfileParser->desktopIcon();
-    // }
-    // return icon;
+    if (m_desktopfileParser && m_desktopfileParser->isValied().first) {
+        const QString desktopIcon = m_desktopfileParser->desktopIcon().trimmed();
+        if (!desktopIcon.isEmpty()) {
+            return desktopIcon;
+        }
+    }
+
+    return QStringLiteral("application-default-icon");
 }
 
 QString AppItem::name() const

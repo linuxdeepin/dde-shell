@@ -16,14 +16,20 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 AppletItem {
     id: tray
 
-    readonly property int nextAppletSpacing: 6
+    readonly property bool adaptiveFashionMode: Panel.rootObject
+        && Panel.rootObject.adaptiveFashionMode
+    readonly property int nextAppletSpacing: adaptiveFashionMode ? 0 : 6
+    readonly property int targetImplicitWidth: useColumnLayout ? Panel.rootObject.dockSize : trayContainter.targetContainerSize.width + nextAppletSpacing
+    readonly property int targetImplicitHeight: useColumnLayout ? trayContainter.targetContainerSize.height + nextAppletSpacing : Panel.rootObject.dockSize
+    readonly property bool targetCollapsed: DDT.TraySortOrderModel.collapsed
     property bool useColumnLayout: Panel.rootObject.positionForAnimation % 2
     property int dockOrder: 25
     readonly property string quickpanelTrayItemPluginId: "sound"
     readonly property var filterTrayPlugins: [quickpanelTrayItemPluginId]
 
     implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : trayContainter.implicitWidth + nextAppletSpacing
-    implicitHeight: useColumnLayout ? trayContainter.implicitHeight + nextAppletSpacing: Panel.rootObject.dockSize
+    implicitHeight: useColumnLayout ? trayContainter.implicitHeight + nextAppletSpacing : Panel.rootObject.dockSize
+
     Component.onCompleted: {
         Applet.trayPluginModel = Qt.binding(function () {
             return DockCompositor.trayPluginSurfaces
@@ -106,7 +112,8 @@ AppletItem {
         id: trayContainter
         isHorizontal: !tray.useColumnLayout
         model: DDT.TraySortOrderModel
-        collapsed: DDT.TraySortOrderModel.collapsed
+        collapsed: tray.targetCollapsed
+        targetCollapsed: tray.targetCollapsed
         trayHeight: Panel.rootObject.dockSize
         surfaceAcceptor: isTrayPluginPopup
         color: "transparent"

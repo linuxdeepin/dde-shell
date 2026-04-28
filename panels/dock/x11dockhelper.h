@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
@@ -113,6 +113,6 @@ private:
     xcb_window_t m_triggerWindow;
     xcb_window_t m_rootWindow;
     xcb_connection_t *m_connection;
+    bool m_isOpen = false;
 };
 }
-

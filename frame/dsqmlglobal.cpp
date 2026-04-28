@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,6 +10,7 @@
 
 #include <QLoggingCategory>
 #include <QCoreApplication>
+#include <QFontDatabase>
 #include <QQueue>
 #include <QWindow>
 #include <QGuiApplication>
@@ -26,6 +27,34 @@ DS_BEGIN_NAMESPACE
 DCORE_USE_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(dsLog)
+
+namespace {
+
+QString shellDataFontFamily()
+{
+    static QString dataFontFamily;
+    static bool initialized = false;
+
+    if (initialized) {
+        return dataFontFamily;
+    }
+
+    initialized = true;
+    const int fontId = QFontDatabase::addApplicationFont(QStringLiteral(":/shell/fonts/ElmsSans-Regular.ttf"));
+    if (fontId < 0) {
+        qCWarning(dsLog) << "Failed to load shell data font resource";
+        return dataFontFamily;
+    }
+
+    const QStringList families = QFontDatabase::applicationFontFamilies(fontId);
+    if (!families.isEmpty()) {
+        dataFontFamily = families.constFirst();
+    }
+
+    return dataFontFamily;
+}
+
+} // namespace
 
 class DQmlGlobalPrivate : public DObjectPrivate
 {
@@ -85,6 +114,11 @@ bool DQmlGlobal::grabMouse(QWindow *target, bool grab)
 DApplet *DQmlGlobal::rootApplet() const
 {
     return DPluginLoader::instance()->rootApplet();
+}
+
+QString DQmlGlobal::dataFontFamily() const
+{
+    return shellDataFontFamily();
 }
 
 void DQmlGlobal::singleShot(int msec, QJSValue callback)

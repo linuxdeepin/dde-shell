@@ -1,6 +1,6 @@
 // Copyright (C) 2011 ~ 2018 Deepin Technology Co., Ltd.
-// SPDX-FileCopyrightText: 2018 - 2023 UnionTech Software Technology Co., Ltd.
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2018 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-License-Identifier: LGPL-3.0-or-later
@@ -36,6 +36,12 @@ enum IndicatorStyle {
 enum ItemAlignment {
     CenterAlignment      = 0,
     LeftAlignment        = 1,
+};
+
+enum ViewMode {
+    CenteredMode         = 0,
+    LeftAlignedMode      = 1,
+    FashionMode          = 2,
 };
 
 enum ColorTheme {
@@ -148,6 +154,7 @@ const QString DCCIconPath = CMAKE_INSTALL_PREFIX + QString("/share/dde-dock/icon
 Q_ENUM_NS(SIZE)
 Q_ENUM_NS(IndicatorStyle)
 Q_ENUM_NS(ItemAlignment)
+Q_ENUM_NS(ViewMode)
 Q_ENUM_NS(ColorTheme)
 Q_ENUM_NS(HideMode)
 Q_ENUM_NS(Position)
@@ -162,6 +169,7 @@ Q_ENUM_NS(TrayPluginSizePolicy)
 Q_DECLARE_METATYPE(dock::SIZE)
 Q_DECLARE_METATYPE(dock::IndicatorStyle)
 Q_DECLARE_METATYPE(dock::ItemAlignment)
+Q_DECLARE_METATYPE(dock::ViewMode)
 Q_DECLARE_METATYPE(dock::ColorTheme)
 Q_DECLARE_METATYPE(dock::HideMode)
 Q_DECLARE_METATYPE(dock::HideState)

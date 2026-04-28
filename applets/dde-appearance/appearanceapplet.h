@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -24,8 +24,10 @@ signals:
     void opacityChanged();
 private:
     void initDBusProxy();
+    void refreshOpacity();
 private:
     QScopedPointer<org::deepin::dde::Appearance1> m_interface;
+    qreal m_opacity = -1;
 };
 
 }

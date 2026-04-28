@@ -3,16 +3,23 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "globals.h"
+#include "dockfoldermigrationutils.h"
 #include "taskmanagersettings.h"
 
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
 
 #include <string>
 
 #include <yaml-cpp/yaml.h>
 
 namespace dock {
+namespace {
+// Version 2 reruns the migration on upgraded systems where the stricter v1
+// check skipped layouts that still came from legacy desktop-only pins.
+static constexpr int DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION = 2;
+}
+
 static inline QString bool2EnableStr(bool enable)
 {
     return enable ? QStringLiteral("enabled") : QStringLiteral("disabled");
@@ -47,7 +54,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
             m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
             Q_EMIT windowSplitChanged();
         } else if (TASKMANAGER_DOCKEDELEMENTS_KEY == key) {
-            m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
+            m_dockedElements = resolveDockedElements(m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList());
             Q_EMIT dockedElementsChanged();
         }
     });
@@ -56,10 +63,11 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     m_showAttentionAnimation = m_taskManagerDconfig->value(TASKMANAGER_SHOW_ATTENTION_ANIMATION_KEY, true).toBool();
     m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
     m_cgroupsBasedGrouping = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_KEY, true).toBool();
-    m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
+    m_dockedElements = resolveDockedElements(m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList());
     m_cgroupsBasedGroupingSkipAppIds = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_APPIDS, {"deepin-terminal"}).toStringList();
     m_cgroupsBasedGroupingSkipCategories = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_CATEGORIES, {"TerminalEmulator"}).toStringList();
     migrateFromDockedItems();
+    migrateDefaultDockFolders();
 }
 
 bool TaskManagerSettings::isAllowedForceQuit()
@@ -146,15 +154,51 @@ void TaskManagerSettings::migrateFromDockedItems()
         legacyDockedItems.append(dockedItem);
     }
 
+    QStringList migratedDockedElements;
     for (auto dockedDesktopFile : std::as_const(legacyDockedItems)) {
         if (!dockedDesktopFile.isObject()) {
             continue;
         }
         auto dockedDesktopFileObj = dockedDesktopFile.toObject();
         if (dockedDesktopFileObj.contains(QStringLiteral("id")) && dockedDesktopFileObj.contains(QStringLiteral("type"))) {
-            m_dockedElements.append(QStringLiteral("desktop/%1").arg(dockedDesktopFileObj[QStringLiteral("id")].toString()));
+            migratedDockedElements.append(QStringLiteral("desktop/%1").arg(dockedDesktopFileObj[QStringLiteral("id")].toString()));
         }
     }
+
+    QStringList mergedDockedElements = m_dockedElements;
+    for (const QString &element : std::as_const(migratedDockedElements)) {
+        if (!mergedDockedElements.contains(element)) {
+            mergedDockedElements.append(element);
+        }
+    }
+
+    mergedDockedElements = resolveDockedElements(mergedDockedElements);
+    if (mergedDockedElements != m_dockedElements) {
+        m_dockedElements = mergedDockedElements;
+        saveDockedElements();
+    }
+}
+
+void TaskManagerSettings::migrateDefaultDockFolders()
+{
+    const int migrationVersion = m_taskManagerDconfig->value(TASKMANAGER_DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION_KEY, 0).toInt();
+    if (migrationVersion >= DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION) {
+        return;
+    }
+
+    QStringList migratedDockedElements = m_dockedElements;
+    if (shouldMigrateDefaultDockFolders(migratedDockedElements)) {
+        migratedDockedElements = mergedWithDefaultDockFolders(migratedDockedElements);
+    }
+
+    const bool dockedElementsChanged = migratedDockedElements != m_dockedElements;
+    if (dockedElementsChanged) {
+        m_dockedElements = migratedDockedElements;
+        saveDockedElements();
+    }
+
+    m_taskManagerDconfig->setValue(TASKMANAGER_DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION_KEY,
+                                   DEFAULT_DOCK_FOLDERS_MIGRATION_VERSION);
 }
 
 void TaskManagerSettings::saveDockedElements()
@@ -180,6 +224,10 @@ void TaskManagerSettings::toggleDockedElement(const QString &element)
 
 void TaskManagerSettings::appendDockedElement(const QString &element)
 {
+    if (m_dockedElements.contains(element)) {
+        return;
+    }
+
     m_dockedElements.append(element);
     Q_EMIT dockedElementsChanged();
     saveDockedElements();

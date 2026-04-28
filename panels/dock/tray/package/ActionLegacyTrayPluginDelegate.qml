@@ -32,6 +32,14 @@ AppletItemButton {
     visible: !Drag.active && itemVisible
     hoverEnabled: inputEventsEnabled
 
+    function reportSpotlight(point) {
+        root.updateSpotlight(point || Qt.point(width / 2, height / 2))
+    }
+
+    function scheduleSpotlightClear() {
+        spotlightClearTimer.restart()
+    }
+
     function updatePluginMargins()
     {
         pluginItem.plugin.margins = itemPadding
@@ -43,39 +51,58 @@ AppletItemButton {
         implicitHeight: plugin ? plugin.height : 0
         implicitWidth: plugin ? plugin.width : 0
 
-        property var itemGlobalPoint: {
-            var a = pluginItem
-            var x = 0, y = 0
-            while(a.parent) {
-                x += a.x
-                y += a.y
-                a = a.parent
+        function localItemPoint() {
+            let current = pluginItem
+            let x = 0
+            let y = 0
+            while (current.parent) {
+                x += current.x
+                y += current.y
+                current = current.parent
             }
 
             return Qt.point(x, y)
         }
-        
+
+        property var itemScenePoint: {
+            Panel.frontendWindowRect
+            pluginItem.localItemPoint()
+            return pluginItem.mapToItem(null, 0, 0)
+        }
+
         property var itemGlobalPos: {
-            var a = pluginItem
-            var x = 0, y = 0
-
-            if (a.Window.window && surfaceItem.visible) {
-                while (a.parent) {
-                    x += a.x
-                    y += a.y
-                    a = a.parent
-                }
-                x += pluginItem.Window.window.x
-                y += pluginItem.Window.window.y
-
+            if (!pluginItem.Window.window || !surfaceItem.visible) {
+                return Qt.point(0, 0)
             }
 
-            return Qt.point(x, y)
+            Panel.frontendWindowRect
+            pluginItem.localItemPoint()
+            return pluginItem.mapToGlobal(0, 0)
         }
 
         HoverHandler {
             id: hoverHandler
             parent: surfaceItem.shellSurfaceItem
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
+
+            onPointChanged: {
+                if (hovered) {
+                    spotlightClearTimer.stop()
+                    root.reportSpotlight(hoverHandler.point.position)
+                }
+            }
+
+            onHoveredChanged: {
+                if (hovered) {
+                    spotlightClearTimer.stop()
+                    root.reportSpotlight()
+                    return
+                }
+
+                if (!root.hovered) {
+                    root.scheduleSpotlightClear()
+                }
+            }
         }
         TapHandler {
             id: tapHandler
@@ -86,14 +113,21 @@ AppletItemButton {
             id: surfaceItem
             anchors.fill: parent
             shellSurface: pluginItem.plugin
+
+            onWidthChanged: updatePluginItemGeometryTimer.start()
+            onHeightChanged: updatePluginItemGeometryTimer.start()
         }
 
         Component.onCompleted: {
             if (!pluginItem.plugin || !itemVisible)
                 return
             updatePluginMargins()
-            pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
-            pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
+            pluginItem.plugin.updatePluginGeometry(Qt.rect(Math.round(pluginItem.itemScenePoint.x),
+                                                           Math.round(pluginItem.itemScenePoint.y),
+                                                           Math.round(surfaceItem.width),
+                                                           Math.round(surfaceItem.height)))
+            pluginItem.plugin.setGlobalPos(Qt.point(Math.round(pluginItem.itemGlobalPos.x),
+                                                    Math.round(pluginItem.itemGlobalPos.y)))
         }
 
         Timer {
@@ -105,8 +139,11 @@ AppletItemButton {
                 if (!pluginItem.plugin || !itemVisible)
                     return
                 updatePluginMargins()
-                if (pluginItem.itemGlobalPoint.x >= 0 && pluginItem.itemGlobalPoint.y >= 0) {
-                    pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
+                if (pluginItem.itemScenePoint.x >= 0 && pluginItem.itemScenePoint.y >= 0) {
+                    pluginItem.plugin.updatePluginGeometry(Qt.rect(Math.round(pluginItem.itemScenePoint.x),
+                                                                   Math.round(pluginItem.itemScenePoint.y),
+                                                                   Math.round(surfaceItem.width),
+                                                                   Math.round(surfaceItem.height)))
                 }
             }
         }
@@ -119,11 +156,12 @@ AppletItemButton {
             onTriggered: {
                 if (!pluginItem.plugin || !itemVisible)
                     return
-                pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
+                pluginItem.plugin.setGlobalPos(Qt.point(Math.round(pluginItem.itemGlobalPos.x),
+                                                        Math.round(pluginItem.itemGlobalPos.y)))
             }
         }
 
-        onItemGlobalPointChanged: {
+        onItemScenePointChanged: {
             updatePluginItemGeometryTimer.start()
         }
 
@@ -136,11 +174,12 @@ AppletItemButton {
             if (!pluginItem.plugin || !itemVisible)
                 return
             updatePluginMargins()
-            pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
+            pluginItem.plugin.setGlobalPos(Qt.point(Math.round(pluginItem.itemGlobalPos.x),
+                                                    Math.round(pluginItem.itemGlobalPos.y)))
         }
     }
 
-    D.ColorSelector.hovered: root.inputEventsEnabled && (pluginItem.plugin && pluginItem.plugin.isItemActive || hoverHandler.hovered)
+    D.ColorSelector.hovered: root.inputEventsEnabled && (pluginItem.plugin && pluginItem.plugin.isItemActive || hoverHandler.hovered || root.hovered)
     D.ColorSelector.pressed: tapHandler.pressed
 
     property Component overlayWindow: QuickDragWindow {
@@ -193,6 +232,29 @@ AppletItemButton {
             root.grabToImage(function(result) {
                 root.Drag.imageSource = result.url;
             })
+        }
+    }
+
+    onHoveredChanged: {
+        if (hovered) {
+            spotlightClearTimer.stop()
+            reportSpotlight(Qt.point(width / 2, height / 2))
+            return
+        }
+
+        if (!hoverHandler.hovered) {
+            scheduleSpotlightClear()
+        }
+    }
+
+    Timer {
+        id: spotlightClearTimer
+        interval: 70
+        repeat: false
+        onTriggered: {
+            if (!root.hovered && !hoverHandler.hovered && !surfaceItem.hovered) {
+                root.clearSpotlight()
+            }
         }
     }
 

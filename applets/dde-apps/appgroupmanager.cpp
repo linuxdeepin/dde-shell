@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -11,6 +11,22 @@
 #define TOPLEVEL_FOLDERID 0
 
 namespace apps {
+
+static QString normalizeResolvableGroupId(const QString &groupId)
+{
+    bool isNumericGroupId = false;
+    groupId.toInt(&isNumericGroupId);
+
+    if (AppGroup::idIsFolder(groupId)) {
+        return AppGroup::normalizeGroupId(groupId);
+    }
+
+    if (isNumericGroupId) {
+        return AppGroup::groupIdFromNumber(groupId.toInt());
+    }
+
+    return {};
+}
 
 AppGroupManager::AppGroupManager(AMAppItemModel * referenceModel, QObject *parent)
     : QStandardItemModel(parent)
@@ -43,11 +59,35 @@ QVariant AppGroupManager::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (role == GroupIdRole) {
-        return index.row();
-    }
-
     return QStandardItemModel::data(index, role);
+}
+
+QHash<int, QByteArray> AppGroupManager::roleNames() const
+{
+    return {
+        {GroupIdRole, QByteArrayLiteral("groupId")},
+        {GroupItemsPerPageRole, QByteArrayLiteral("groupItemsPerPage")},
+        {AppItemModel::DesktopIdRole, QByteArrayLiteral("desktopId")},
+        {AppItemModel::NameRole, QByteArrayLiteral("name")},
+        {AppItemModel::IconNameRole, QByteArrayLiteral("iconName")},
+        {AppItemModel::StartUpWMClassRole, QByteArrayLiteral("startupWMClass")},
+        {AppItemModel::NoDisplayRole, QByteArrayLiteral("noDisplay")},
+        {AppItemModel::ActionsRole, QByteArrayLiteral("actions")},
+        {AppItemModel::DDECategoryRole, QByteArrayLiteral("ddeCategory")},
+        {AppItemModel::CategoriesRole, QByteArrayLiteral("categories")},
+        {AppItemModel::InstalledTimeRole, QByteArrayLiteral("installedTime")},
+        {AppItemModel::LastLaunchedTimeRole, QByteArrayLiteral("lastLaunchedTime")},
+        {AppItemModel::LaunchedTimesRole, QByteArrayLiteral("launchedTimes")},
+        {AppItemModel::DockedRole, QByteArrayLiteral("docked")},
+        {AppItemModel::OnDesktopRole, QByteArrayLiteral("onDesktop")},
+        {AppItemModel::AutoStartRole, QByteArrayLiteral("autoStart")},
+        {AppItemModel::AppTypeRole, QByteArrayLiteral("appType")},
+        {AppItemModel::XLingLongRole, QByteArrayLiteral("isLingLong")},
+        {AppItemModel::IdRole, QByteArrayLiteral("id")},
+        {AppItemModel::XCreatedByRole, QByteArrayLiteral("xCreatedBy")},
+        {AppItemModel::ExecsRole, QByteArrayLiteral("execs")},
+        {AppItemModel::DesktopSourcePathRole, QByteArrayLiteral("desktopSourcePath")},
+    };
 }
 
 // Find the item's location. If folderId is -1, search all folders.
@@ -119,6 +159,44 @@ ItemsPage * AppGroupManager::groupPages(int groupId)
     AppGroup * folder = group(groupId);
     if (!folder) return nullptr;
     return folder->itemsPage();
+}
+
+QStringList AppGroupManager::groupItems(const QString &groupId) const
+{
+    const QString normalizedGroupId = normalizeResolvableGroupId(groupId);
+    if (normalizedGroupId.isEmpty()) {
+        return {};
+    }
+
+    for (int i = 0; i < rowCount(); ++i) {
+        auto folder = static_cast<AppGroup *>(item(i));
+        if (!folder || AppGroup::normalizeGroupId(folder->appId()) != normalizedGroupId) {
+            continue;
+        }
+
+        return folder->itemsPage()->allArrangedItems();
+    }
+
+    return {};
+}
+
+QString AppGroupManager::groupDisplayName(const QString &groupId) const
+{
+    const QString normalizedGroupId = normalizeResolvableGroupId(groupId);
+    if (normalizedGroupId.isEmpty()) {
+        return {};
+    }
+
+    for (int i = 0; i < rowCount(); ++i) {
+        auto folder = static_cast<AppGroup *>(item(i));
+        if (!folder || AppGroup::normalizeGroupId(folder->appId()) != normalizedGroupId) {
+            continue;
+        }
+
+        return folder->itemsPage() ? folder->itemsPage()->name() : folder->appName();
+    }
+
+    return {};
 }
 
 void AppGroupManager::bringToFromt(const QString & id)
@@ -342,6 +420,8 @@ void AppGroupManager::loadAppGroupInfo()
 
         if (groupId.isEmpty()) {
             groupId = assignGroupId();
+        } else {
+            groupId = AppGroup::normalizeGroupId(groupId);
         }
         appendGroup(groupId, name, items);
     }
@@ -359,7 +439,7 @@ void AppGroupManager::saveAppGroupInfo()
     for (int i = 0; i < rowCount(); i++) {
         auto folder = group(index(i, 0));
         QVariantMap valueMap;
-        valueMap.insert("name", folder->data(AppItemModel::NameRole));
+        valueMap.insert("name", folder->itemsPage() ? folder->itemsPage()->name() : folder->data(AppItemModel::NameRole));
         valueMap.insert("groupId", folder->appId());
         valueMap.insert("appItems", fromListOfStringList(folder->pages()));
         list << valueMap;
@@ -373,15 +453,15 @@ QString AppGroupManager::assignGroupId() const
     QStringList knownGroupIds;
     for (int i = 0; i < rowCount(); i++) {
         auto group = index(i, 0);
-        knownGroupIds.append(group.data(AppItemModel::DesktopIdRole).toString());
+        knownGroupIds.append(AppGroup::normalizeGroupId(group.data(AppItemModel::DesktopIdRole).toString()));
     }
 
     int idNumber = 0;
-    while (knownGroupIds.contains(QString("internal/group/%1").arg(idNumber))) {
+    while (knownGroupIds.contains(AppGroup::groupIdFromNumber(idNumber))) {
         idNumber++;
     }
 
-    return QString("internal/group/%1").arg(idNumber);
+    return AppGroup::groupIdFromNumber(idNumber);
 }
 
 AppGroup * AppGroupManager::appendGroup(int groupId, QString groupName, const QList<QStringList> &appItemIDs)
@@ -392,7 +472,7 @@ AppGroup * AppGroupManager::appendGroup(int groupId, QString groupName, const QL
 
 AppGroup * AppGroupManager::appendGroup(QString groupId, QString groupName, const QList<QStringList> &appItemIDs)
 {
-    auto p = new AppGroup(groupId, groupName, appItemIDs);
+    auto p = new AppGroup(AppGroup::normalizeGroupId(groupId), groupName, appItemIDs);
     appendRow(p);
     return p;
 }

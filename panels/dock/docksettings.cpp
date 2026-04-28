@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,6 +6,8 @@
 #include "constants.h"
 #include "docksettings.h"
 
+#include <QDir>
+#include <QStandardPaths>
 #include <QTimer>
 #include <QLoggingCategory>
 
@@ -92,6 +94,50 @@ static ItemAlignment string2ItenAlignment(const QString& alignmentStr)
     return ItemAlignment::CenterAlignment;
 }
 
+static QString viewMode2String(const ViewMode& mode)
+{
+    switch (mode) {
+    case ViewMode::LeftAlignedMode:
+        return "left";
+    case ViewMode::FashionMode:
+        return "fashion";
+    case ViewMode::CenteredMode:
+    default:
+        return "center";
+    }
+}
+
+static ViewMode inferViewMode(const Position &position, const IndicatorStyle &style, const ItemAlignment &alignment)
+{
+    if (position == Position::Bottom && style == IndicatorStyle::Fashion && alignment == ItemAlignment::LeftAlignment)
+        return ViewMode::FashionMode;
+
+    return alignment == ItemAlignment::LeftAlignment ? ViewMode::LeftAlignedMode : ViewMode::CenteredMode;
+}
+
+static ViewMode string2ViewMode(const QString &modeStr, const Position &position, const IndicatorStyle &style, const ItemAlignment &alignment)
+{
+    if (modeStr == "left")
+        return ViewMode::LeftAlignedMode;
+    if (modeStr == "fashion")
+        return ViewMode::FashionMode;
+    if (modeStr == "center")
+        return ViewMode::CenteredMode;
+
+    return inferViewMode(position, style, alignment);
+}
+
+static QString localViewModeSettingsPath()
+{
+    QString configRoot = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+    if (configRoot.isEmpty())
+        configRoot = QDir::homePath() + QStringLiteral("/.config");
+
+    QDir configDir(configRoot);
+    configDir.mkpath(QStringLiteral("dde-shell"));
+    return configDir.filePath(QStringLiteral("dde-shell/dock-view-mode.ini"));
+}
+
 static QString indicatorStyle2String(IndicatorStyle mode)
 {
     switch (mode) {
@@ -126,10 +172,12 @@ DockSettings* DockSettings::instance()
 DockSettings::DockSettings(QObject* parent)
     : QObject(parent)
     , m_dockConfig(DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dock", QString(), this))
+    , m_viewModeSettings(new QSettings(localViewModeSettingsPath(), QSettings::IniFormat))
     , m_writeTimer(new QTimer(this))
     , m_dockSize(dock::DEFAULT_DOCK_SIZE)
     , m_hideMode(dock::KeepShowing)
     , m_dockPosition(dock::Bottom)
+    , m_viewMode(dock::CenteredMode)
     , m_alignment(dock::CenterAlignment)
     , m_style(dock::Fashion)
     , m_locked(false)
@@ -147,6 +195,8 @@ void DockSettings::init()
         m_dockPosition = string2Position(m_dockConfig->value(keyPosition).toString());
         m_alignment = string2ItenAlignment(m_dockConfig->value(keyItemAlignment).toString());
         m_style = string2IndicatorStyle(m_dockConfig->value(keyIndicatorStyle).toString());
+        const QString persistedViewMode = m_viewModeSettings ? m_viewModeSettings->value(QStringLiteral("ViewMode")).toString() : QString();
+        m_viewMode = string2ViewMode(persistedViewMode, m_dockPosition, m_style, m_alignment);
         m_pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
         m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
         m_locked = m_dockConfig->value(keyLocked).toBool();
@@ -230,6 +280,11 @@ Position DockSettings::position()
     return m_dockPosition;
 }
 
+ViewMode DockSettings::viewMode()
+{
+    return m_viewMode;
+}
+
 void DockSettings::setPosition(const Position& position)
 {
     if (position == m_dockPosition) return;
@@ -237,6 +292,15 @@ void DockSettings::setPosition(const Position& position)
     m_dockPosition = position;
     Q_EMIT positionChanged(m_dockPosition);
     addWriteJob(positionJob);
+}
+
+void DockSettings::setViewMode(const ViewMode &mode)
+{
+    if (mode == m_viewMode) return;
+
+    m_viewMode = mode;
+    Q_EMIT viewModeChanged(m_viewMode);
+    addWriteJob(viewModeJob);
 }
 
 ItemAlignment DockSettings::itemAlignment()
@@ -346,6 +410,16 @@ void DockSettings::checkWriteJob()
     case positionJob: {
         connect(m_writeTimer, &QTimer::timeout, this, [this](){
             m_dockConfig->setValue(keyPosition, position2String(m_dockPosition));
+            checkWriteJob();
+        });
+        break;
+    }
+    case viewModeJob: {
+        connect(m_writeTimer, &QTimer::timeout, this, [this](){
+            if (m_viewModeSettings) {
+                m_viewModeSettings->setValue(QStringLiteral("ViewMode"), viewMode2String(m_viewMode));
+                m_viewModeSettings->sync();
+            }
             checkWriteJob();
         });
         break;

@@ -2,23 +2,28 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+pragma ComponentBehavior: Bound
+
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import Qt.labs.platform 1.1 as LP
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0 as D
-import Qt.labs.platform 1.1 as LP
 
 Item {
     id: root
     required property int displayMode
     required property int colorTheme
-    required property bool active
+    required property bool itemActive
     required property bool attention
     required property string itemId
+    required property string dockElement
+    required property string itemKind
     required property string name
     required property string iconName
+    required property var previewIcons
     required property string menus
     required property list<string> windows
     required property int visualIndex
@@ -26,6 +31,10 @@ Item {
     required property string title
 
     property real blendOpacity: 1.0
+    property point lastSpotlightPoint: Qt.point(0, 0)
+    readonly property string toolTipText: root.itemId === "dde-trash"
+                                          ? root.name + "-" + taskmanager.Applet.trashTipText
+                                          : root.name
 
     signal dropFilesOnItem(itemId: string, files: list<string>)
     signal dragFinished()
@@ -35,12 +44,28 @@ Item {
     Drag.hotSpot.x: icon.width / 2
     Drag.hotSpot.y: icon.height / 2
     Drag.dragType: Drag.Automatic
-    Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
+    Drag.mimeData: {
+        "text/x-dde-dock-dnd-appid": itemId,
+        "text/x-dde-dock-dnd-element": dockElement,
+        "text/x-dde-dock-dnd-itemkind": itemKind,
+        "text/x-dde-dock-dnd-source": "taskbar",
+        "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""
+    }
     
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
+    property bool compactFashionIndicator: root.displayMode === Dock.Fashion
+        && (Panel.position === Dock.Bottom || Panel.position === Dock.Top)
+    property int statusIndicatorSize: useColumnLayout ? root.width * 0.72 : root.height * 0.72
     property int iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
+    property int popupIconSize: Math.max(1, Math.round(iconSize * 0.92))
     property bool enableTitle: false
     property bool titleActive: enableTitle && titleLoader.active
+    property int appTitleSpacing: 0
+    property bool popupItem: root.itemKind === "group" || root.itemKind === "folder"
+    readonly property bool resizeOptimizationActive: Panel.isResizing || (Panel.rootObject && Panel.rootObject.isDragging)
+    readonly property bool dockPopupContext: Window.window && Panel.popupWindow && Window.window === Panel.popupWindow
+    property bool deferredWindowIconGeometryUpdate: false
+    property bool deferredPhysicalPixelFix: false
     property var iconGlobalPoint: {
         var a = icon
         var x = 0, y = 0
@@ -55,14 +80,119 @@ Item {
 
     implicitWidth: appItem.implicitWidth
 
+    function dockWindowGlobalPoint() {
+        if (!Panel.rootObject) {
+            return Qt.point(0, 0)
+        }
+
+        return Qt.point(Panel.rootObject.x, Panel.rootObject.y)
+    }
+
+    function mapPointToDockWindow(targetItem, localPoint) {
+        const item = targetItem || appItem
+        const point = localPoint || Qt.point(item.width / 2, item.height / 2)
+
+        if (!item) {
+            return Qt.point(0, 0)
+        }
+
+        if (!dockPopupContext) {
+            return item.mapToItem(null, point.x, point.y)
+        }
+
+        const globalPoint = item.mapToGlobal(point.x, point.y)
+        const dockGlobalPoint = dockWindowGlobalPoint()
+        return Qt.point(globalPoint.x - dockGlobalPoint.x, globalPoint.y - dockGlobalPoint.y)
+    }
+
+    function dockRelativeRect(targetItem) {
+        const item = targetItem || root
+        const topLeft = mapPointToDockWindow(item, Qt.point(0, 0))
+        return Qt.rect(topLeft.x, topLeft.y, item.width, item.height)
+    }
+
+    function dockPopupRect() {
+        if (!dockPopupContext || !Window.window || !Window.window.contentItem) {
+            return dockRelativeRect(root)
+        }
+
+        const popupTopLeftGlobal = Window.window.contentItem.mapToGlobal(0, 0)
+        const dockGlobalPoint = dockWindowGlobalPoint()
+        return Qt.rect(popupTopLeftGlobal.x - dockGlobalPoint.x,
+                       popupTopLeftGlobal.y - dockGlobalPoint.y,
+                       Window.window.contentItem.width,
+                       Window.window.contentItem.height)
+    }
+
+    function mapSpotlightPoint(localPoint) {
+        const point = localPoint || Qt.point(appItem.width / 2, appItem.height / 2)
+        return mapPointToDockWindow(appItem, point)
+    }
+
+    function updateSpotlight(localPoint) {
+        lastSpotlightPoint = mapSpotlightPoint(localPoint)
+        Panel.reportMousePresence(true, lastSpotlightPoint)
+    }
+
+    function clearSpotlight() {
+        Panel.reportMousePresence(false, lastSpotlightPoint)
+    }
+
+    function scheduleWindowIconGeometryUpdate() {
+        deferredWindowIconGeometryUpdate = true
+        if (resizeOptimizationActive) {
+            return
+        }
+
+        updateWindowIconGeometryTimer.restart()
+    }
+
+    function flushWindowIconGeometryUpdate() {
+        if (!deferredWindowIconGeometryUpdate) {
+            return
+        }
+
+        deferredWindowIconGeometryUpdate = false
+        var pos = mapPointToDockWindow(icon, Qt.point(0, 0))
+        taskmanager.Applet.requestUpdateWindowIconGeometry(root.modelIndex,
+                                                           Qt.rect(pos.x, pos.y, icon.width, icon.height),
+                                                           Panel.rootObject)
+    }
+
+    function schedulePhysicalPixelFix() {
+        deferredPhysicalPixelFix = true
+        if (resizeOptimizationActive) {
+            icon.anchors.centerIn = icon.parent
+            return
+        }
+
+        fixPositionTimer.restart()
+    }
+
+    onResizeOptimizationActiveChanged: {
+        if (resizeOptimizationActive) {
+            fixPositionTimer.stop()
+            updateWindowIconGeometryTimer.stop()
+            icon.anchors.centerIn = icon.parent
+            return
+        }
+
+        deferredPhysicalPixelFix = true
+        deferredWindowIconGeometryUpdate = true
+        fixPositionTimer.restart()
+        updateWindowIconGeometryTimer.restart()
+    }
+
     // Monitor Panel position changes to update icon geometry
     Connections {
         target: Panel.rootObject
         function onXChanged() {
-            updateWindowIconGeometryTimer.start()
+            root.scheduleWindowIconGeometryUpdate()
+            root.schedulePhysicalPixelFix()
         }
         function onYChanged() {
-            updateWindowIconGeometryTimer.start()
+            root.scheduleWindowIconGeometryUpdate()
+            root.schedulePhysicalPixelFix()
         }
     }
 
@@ -70,22 +200,26 @@ Item {
         id: itemPalette
         displayMode: root.displayMode
         colorTheme: root.colorTheme
-        active: root.active
+        itemActive: root.itemActive
         backgroundColor: D.DTK.palette.highlight
     }
 
     Control {
         anchors.fill: parent
         id: appItem
-        implicitWidth: root.titleActive ? (root.iconSize + hoverBackground.horizontalSpacing + titleLoader.width) : iconContainer.width
+        implicitWidth: root.titleActive ? (iconContainer.width + 4 + titleLoader.width + root.appTitleSpacing) : iconContainer.width + root.appTitleSpacing
         visible: !root.Drag.active // When in dragging, hide app item
-        background: AppItemBackground {
+        background: AppletItemBackground {
             id: hoverBackground
 
-            readonly property int verticalSpacing: Math.round(root.iconSize / 8) + 1
-            readonly property int horizontalSpacing: Math.round(root.iconSize / 8)
+            readonly property int hoverInset: 4
+            readonly property int verticalSpacing: hoverInset
+            readonly property int horizontalSpacing: hoverInset
             readonly property int nonSplitHeight: root.iconSize + verticalSpacing * 2
-            readonly property int splitWidth: Math.round(root.iconSize + titleLoader.width + horizontalSpacing * 3)
+            readonly property int splitWidth: Math.round(icon.width
+                                                         + titleLoader.anchors.leftMargin
+                                                         + titleLoader.width
+                                                         + horizontalSpacing * 2)
             readonly property int nonSplitWidth: Math.round(root.iconSize + horizontalSpacing * 2)
 
             enabled: false
@@ -94,9 +228,12 @@ Item {
             height: nonSplitHeight
             radius: height / 5
             anchors.centerIn: parent
-            isActive: root.active
-            windowCount: root.windows.length
-            displayMode: root.displayMode
+            isActive: root.itemActive
+            opacity: (hoverHandler.hovered || (root.itemActive && root.windows.length > 0)) ? 1.0 : 0.0
+            D.ColorSelector.hovered: hoverHandler.hovered
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
         }
         Item {
             id: iconContainer
@@ -113,6 +250,10 @@ Item {
                         anchors.left: parent.left
                         anchors.horizontalCenter: undefined
                     }
+                    PropertyChanges {
+                        target: iconContainer
+                        anchors.leftMargin: hoverBackground.horizontalSpacing
+                    }
                 },
                 State {
                     name: "nonTitleActive"
@@ -125,18 +266,20 @@ Item {
                     }
                 }
             ]
-
-            Connections {
-                function onDisplayModeChanged() {
-                    windowIndicator.updateIndicatorAnchors()
-                }
-                target: root
+            StatusIndicator {
+                id: statusIndicator
+                palette: itemPalette
+                width: root.statusIndicatorSize
+                height: root.statusIndicatorSize
+                anchors.centerIn: iconContainer
+                visible: root.displayMode === Dock.Efficient && root.windows.length > 0
             }
 
             Connections {
                 function onPositionChanged() {
                     windowIndicator.updateIndicatorAnchors()
-                    updateWindowIconGeometryTimer.start()
+                    root.scheduleWindowIconGeometryUpdate()
+                    root.schedulePhysicalPixelFix()
                 }
                 target: Panel
             }
@@ -150,6 +293,7 @@ Item {
                 anchors.centerIn: parent
                 retainWhileLoading: true
                 smooth: false
+                visible: !root.popupItem
 
                 function mapToScene(px, py) {
                     return parent.mapToItem(Window.window.contentItem, Qt.point(px, py))
@@ -163,6 +307,12 @@ Item {
                     if (root.Drag.active || !parent || launchAnimation.running) {
                         return
                     }
+
+                    if (root.resizeOptimizationActive) {
+                        anchors.centerIn = parent
+                        return
+                    }
+
                     anchors.centerIn = undefined
                     var targetX = (parent.width - width) / 2
                     var targetY = (parent.height - height) / 2
@@ -173,17 +323,22 @@ Item {
                     var physicalY = Math.round(scenePos.y * Panel.devicePixelRatio)
 
                     var localPos = mapFromScene(physicalX / Panel.devicePixelRatio, physicalY / Panel.devicePixelRatio)
-                    
+
+                    if (Math.abs(x - localPos.x) < 0.01 && Math.abs(y - localPos.y) < 0.01) {
+                        return
+                    }
+
                     x = localPos.x
                     y = localPos.y
                 }
 
                 Timer {
                     id: fixPositionTimer
-                    interval: 100
+                    interval: 16
                     repeat: false
                     running: false
                     onTriggered: {
+                        root.deferredPhysicalPixelFix = false
                         icon.fixPosition()
                     }
                 }
@@ -191,7 +346,7 @@ Item {
                 Connections {
                     target: root
                     function onIconGlobalPointChanged() {
-                        fixPositionTimer.start()
+                        root.schedulePhysicalPixelFix()
                     }
                 }
                 LaunchAnimation {
@@ -224,15 +379,29 @@ Item {
                     running: false
                 }
             }
+
+            PinnedItemIcon {
+                anchors.centerIn: parent
+                width: root.popupIconSize
+                height: root.popupIconSize
+                iconName: root.iconName
+                previewIcons: root.previewIcons
+                iconSize: root.popupIconSize
+                colorTheme: root.colorTheme
+                visible: root.popupItem
+            }
         }
 
         WindowIndicator {
             id: windowIndicator
-            dotWidth: root.useColumnLayout  ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2)
-            dotHeight: root.useColumnLayout ? Math.max(iconSize / 3, 2) : Math.max(iconSize / 16, 2)
+            dotWidth: root.compactFashionIndicator ? 4 : (root.useColumnLayout ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2))
+            dotHeight: root.compactFashionIndicator ? 3 : (root.useColumnLayout ? Math.max(iconSize / 3, 2) : Math.max(iconSize / 16, 2))
+            multiDotWidth: root.compactFashionIndicator ? 3 : (root.useColumnLayout ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2))
+            multiDotHeight: root.compactFashionIndicator ? 3 : (root.useColumnLayout ? Math.max(iconSize / 3, 2) : Math.max(iconSize / 16, 2))
             windows: root.windows
             displayMode: root.displayMode
             useColumnLayout: root.useColumnLayout
+            compactFashionIndicator: root.compactFashionIndicator
             palette: itemPalette
             visible: (root.displayMode === Dock.Efficient && root.windows.length > 1) || (root.displayMode === Dock.Fashion && root.windows.length > 0)
 
@@ -248,30 +417,28 @@ Item {
                 windowIndicator.anchors.horizontalCenter = undefined
                 windowIndicator.anchors.verticalCenter = undefined
 
-                const anchorTarget = root.displayMode === Dock.Efficient ? appItem : hoverBackground
-
                 switch(Panel.position) {
                 case Dock.Top: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.top = anchorTarget.top
+                    windowIndicator.anchors.top = root.compactFashionIndicator ? appItem.top : hoverBackground.top
                     windowIndicator.anchors.topMargin = 1
                     return
                 }
                 case Dock.Bottom: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.bottom = anchorTarget.bottom
+                    windowIndicator.anchors.bottom = root.compactFashionIndicator ? appItem.bottom : hoverBackground.bottom
                     windowIndicator.anchors.bottomMargin = 1
                     return
                 }
                 case Dock.Left: {
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
-                    windowIndicator.anchors.left = anchorTarget.left
+                    windowIndicator.anchors.left = hoverBackground.left
                     windowIndicator.anchors.leftMargin = 1
                     return
                 }
                 case Dock.Right:{
                     windowIndicator.anchors.verticalCenter = parent.verticalCenter
-                    windowIndicator.anchors.right = anchorTarget.right
+                    windowIndicator.anchors.right = hoverBackground.right
                     windowIndicator.anchors.rightMargin = 1
                     return
                 }
@@ -281,33 +448,31 @@ Item {
             Component.onCompleted: {
                 windowIndicator.updateIndicatorAnchors()
             }
+
+            Connections {
+                target: root
+                function onCompactFashionIndicatorChanged() {
+                    windowIndicator.updateIndicatorAnchors()
+                }
+            }
         }
 
         AppItemTitle {
             id: titleLoader
             anchors.left: iconContainer.right
-            anchors.leftMargin: Math.round(root.iconSize / 8)
+            anchors.leftMargin: 4
             anchors.verticalCenter: parent.verticalCenter
             enabled: root.enableTitle && root.windows.length > 0
             text: root.title
-            textColor: {
-                if (root.displayMode === Dock.Efficient && root.active) {
-                    return "#000000"
-                }
-                return D.DTK.themeType === D.ApplicationHelper.DarkType ? "#FFFFFF" : "#000000"
-            }
+            colorTheme: root.colorTheme
         }
 
+        // TODO: value can set during debugPanel
         Loader {
             id: animationRoot
             anchors.fill: parent
             z: -1
-            active: root.attention && !Panel.rootObject.isDragging && TaskManager.showAttentionAnimation 
-            onActiveChanged: {
-                if (!active) {
-                    icon.scale = 1.0
-                }
-            }
+            active: root.attention && !Panel.rootObject.isDragging
             sourceComponent: Repeater {
                 model: 5
                 Rectangle {
@@ -366,12 +531,35 @@ Item {
 
         HoverHandler {
             id: hoverHandler
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
+
+            onPointChanged: {
+                if (hovered) {
+                    appItemSpotlightClearTimer.stop()
+                    root.updateSpotlight(hoverHandler.point.position)
+                }
+            }
+
             onHoveredChanged: function () {
                 if (hovered) {
+                    appItemSpotlightClearTimer.stop()
+                    root.updateSpotlight()
                     root.onEntered()
                 } else {
+                    appItemSpotlightClearTimer.restart()
                     root.onExited()
                 }
+            }
+        }
+    }
+
+    Timer {
+        id: appItemSpotlightClearTimer
+        interval: 70
+        repeat: false
+        onTriggered: {
+            if (!hoverHandler.hovered) {
+                root.clearSpotlight()
             }
         }
     }
@@ -382,21 +570,216 @@ Item {
         property bool trashEmpty: true
         sourceComponent: LP.Menu {
             id: contextMenu
+            property var menuItems: {
+                try {
+                    return JSON.parse(root.menus || "[]")
+                } catch (error) {
+                    console.warn("failed to parse taskmanager menu", error, root.menus)
+                    return []
+                }
+            }
+            property var popupSortInfo: ({})
+            readonly property bool preferChineseText: {
+                const localeName = String(Qt.locale().name || "").toLowerCase()
+                const uiLanguage = String(Qt.uiLanguage || "").toLowerCase()
+                return localeName.indexOf("zh") === 0 || uiLanguage.indexOf("zh") === 0
+            }
+
+            function localizedMenuText(text) {
+                const sourceText = String(text || "")
+                if (!preferChineseText || !sourceText.length) {
+                    return sourceText
+                }
+
+                const textMap = {
+                    "Open": "打开",
+                    "Undock": "移除驻留",
+                    "Dock": "驻留",
+                    "Force Quit": "强制退出",
+                    "Close All": "关闭所有",
+                    "Close this window": "关闭当前窗口",
+                    "Open in File Manager": "在文件管理器中打开",
+                    "Move to Trash": "移动到回收站",
+                    "Sort": "排序方式",
+                    "Ascending": "升序",
+                    "Descending": "降序",
+                    "Name": "名称",
+                    "Modified Time": "修改时间",
+                    "Created Time": "创建时间",
+                    "Size": "大小",
+                    "Type": "类型",
+                    "Sort by Name": "按名称排序",
+                    "Sort by Modified Time": "按修改时间排序",
+                    "Sort by Created Time": "按创建时间排序",
+                    "Sort by Size": "按大小排序",
+                    "Sort by Type": "按类型排序"
+                }
+
+                return textMap[sourceText] !== undefined ? textMap[sourceText] : sourceText
+            }
+
+            function refreshPopupSortInfo() {
+                popupSortInfo = root.popupItem ? TaskManager.popupSortState(root.dockElement) : ({})
+            }
+
+            function isCurrentPopupSort(fieldName) {
+                return popupSortInfo && popupSortInfo.sortField === fieldName
+            }
+
+            function popupSortText(baseText, fieldName) {
+                if (!isCurrentPopupSort(fieldName)) {
+                    return localizedMenuText(baseText)
+                }
+
+                const localizedBaseText = localizedMenuText(baseText)
+                return localizedBaseText + (popupSortInfo.sortDescending ?
+                                                " (" + localizedMenuText(qsTr("Descending")) + ")" :
+                                                " (" + localizedMenuText(qsTr("Ascending")) + ")")
+            }
+
+            function applyPopupSort(fieldName) {
+                TaskManager.cyclePopupSort(root.dockElement, fieldName)
+                refreshPopupSortInfo()
+                if (pinnedPopup.popupVisible) {
+                    pinnedPopupContent.refresh(pinnedPopupContent.currentLocation(), false)
+                }
+            }
+
+            Component.onCompleted: refreshPopupSortInfo()
+            onAboutToShow: refreshPopupSortInfo()
             Instantiator {
                 id: menuItemInstantiator
-                model: JSON.parse(menus)
+                model: contextMenu.menuItems
                 delegate: LP.MenuItem {
-                    text: modelData.name
-                    enabled: (root.itemId === "dde-trash" && modelData.id === "clean-trash")
+                    required property var modelData
+
+                    readonly property string menuId: modelData && modelData.id !== undefined ? String(modelData.id) : ""
+                    readonly property string menuText: modelData && modelData.name !== undefined ? String(modelData.name) : ""
+
+                    text: contextMenu.localizedMenuText(menuText)
+                    enabled: (root.itemId === "dde-trash" && menuId === "clean-trash")
                             ? !contextMenuLoader.trashEmpty
                             : true
                     onTriggered: {
-                        TaskManager.requestNewInstance(root.modelIndex, modelData.id);
+                        TaskManager.requestNewInstance(root.modelIndex, menuId);
                     }
                 }
                 onObjectAdded: (index, object) => contextMenu.insertItem(index, object)
                 onObjectRemoved: (index, object) => contextMenu.removeItem(object)
             }
+            Instantiator {
+                id: popupSortMenuInstantiator
+                model: root.popupItem ? 1 : 0
+                delegate: LP.Menu {
+                    title: contextMenu.localizedMenuText(qsTr("Sort"))
+
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Name"), "name")
+                        checked: contextMenu.isCurrentPopupSort("name")
+                        onTriggered: contextMenu.applyPopupSort("name")
+                    }
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Modified Time"), "modified")
+                        checked: contextMenu.isCurrentPopupSort("modified")
+                        onTriggered: contextMenu.applyPopupSort("modified")
+                    }
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Created Time"), "created")
+                        checked: contextMenu.isCurrentPopupSort("created")
+                        onTriggered: contextMenu.applyPopupSort("created")
+                    }
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Size"), "size")
+                        checked: contextMenu.isCurrentPopupSort("size")
+                        onTriggered: contextMenu.applyPopupSort("size")
+                    }
+                    LP.MenuItem {
+                        checkable: true
+                        text: contextMenu.popupSortText(qsTr("Type"), "type")
+                        checked: contextMenu.isCurrentPopupSort("type")
+                        onTriggered: contextMenu.applyPopupSort("type")
+                    }
+                }
+                onObjectAdded: (index, object) => contextMenu.insertMenu(contextMenu.items.length, object)
+                onObjectRemoved: (index, object) => contextMenu.removeMenu(object)
+            }
+        }
+    }
+
+    PanelPopup {
+        id: pinnedPopup
+        property point popupAnchorPoint: Qt.point(0, 0)
+        width: pinnedPopupContent.width
+        height: pinnedPopupContent.height
+        popupX: {
+            switch (Panel.position) {
+            case Dock.Top:
+            case Dock.Bottom:
+                return popupAnchorPoint.x - pinnedPopup.width / 2
+            case Dock.Right:
+                return -pinnedPopup.width - 10
+            case Dock.Left:
+                return Panel.rootObject.dockSize + 10
+            }
+            return popupAnchorPoint.x - pinnedPopup.width / 2
+        }
+        popupY: {
+            switch (Panel.position) {
+            case Dock.Top:
+                return Panel.rootObject.dockSize + 10
+            case Dock.Right:
+            case Dock.Left:
+                return popupAnchorPoint.y - pinnedPopup.height / 2
+            case Dock.Bottom:
+                return -pinnedPopup.height - 10
+            }
+            return -pinnedPopup.height - 10
+        }
+
+        DockPinnedPopup {
+            id: pinnedPopupContent
+            applet: taskmanager.Applet
+            dockElement: root.dockElement
+            colorTheme: root.colorTheme
+            popupWindow: pinnedPopup.popupWindow
+            onCloseRequested: pinnedPopup.close()
+        }
+
+        Component.onCompleted: {
+            if ("keyEventTarget" in pinnedPopup) {
+                pinnedPopup.keyEventTarget = pinnedPopupContent
+            }
+        }
+    }
+
+    Connections {
+        target: pinnedPopup.popupWindow
+
+        function onVisibleChanged() {
+            if (!pinnedPopup.popupWindow || pinnedPopup.popupWindow.visible) {
+                return
+            }
+
+            DS.grabKeyboard(pinnedPopup.popupWindow, false)
+        }
+    }
+
+    Timer {
+        id: pinnedPopupKeyboardGrabTimer
+        interval: 1
+        repeat: false
+        onTriggered: {
+            if (!pinnedPopup.popupWindow || !pinnedPopup.popupWindow.visible) {
+                return
+            }
+
+            pinnedPopup.popupWindow.requestActivate()
+            DS.grabKeyboard(pinnedPopup.popupWindow)
+            pinnedPopupContent.forceActiveFocus(Qt.OtherFocusReason)
         }
     }
 
@@ -406,42 +789,104 @@ Item {
         running: false
         repeat: false
         onTriggered: {
-            var pos = icon.mapToItem(null, 0, 0)
-            taskmanager.Applet.requestUpdateWindowIconGeometry(root.modelIndex, Qt.rect(pos.x, pos.y,
-                icon.width, icon.height), Panel.rootObject)
+            root.flushWindowIconGeometryUpdate()
         }
     }
 
     Timer {
         id: previewTimer
-        interval: 500
+        interval: 220
         running: false
         repeat: false
         property int xOffset: 0
         property int yOffset: 0
         onTriggered: {
+            if (root.popupItem) {
+                return
+            }
+
             if (root.windows.length != 0 || Qt.platform.pluginName === "wayland") {
                 // 使用基于 modelIndex 的预览API，确保精确匹配
-                taskmanager.Applet.requestPreview(root.modelIndex, Panel.rootObject, xOffset, yOffset, Panel.position);
+                root.requestPreviewNow(xOffset, yOffset)
             }
         }
     }
 
-
-    function onEntered() {
-        if (windows.length === 0) {
-            toolTipShowTimer.start()
+    function togglePinnedPopup() {
+        if (pinnedPopup.popupVisible) {
+            pinnedPopup.close()
             return
         }
 
-        var itemPos = root.mapToItem(null, 0, 0)
+        Panel.requestClosePopup()
+        pinnedPopupContent.beginPopupSession()
+        pinnedPopupContent.refresh("", false)
+        if ("keyEventTarget" in pinnedPopup) {
+            pinnedPopup.keyEventTarget = pinnedPopupContent
+        }
+        pinnedPopup.popupAnchorPoint = root.mapToItem(null, root.width / 2, root.height / 2)
+        pinnedPopup.open()
+        pinnedPopupKeyboardGrabTimer.restart()
+    }
+
+    function showToolTipNow() {
+        var point = mapPointToDockWindow(root, Qt.point(root.width / 2, root.height / 2))
+        toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+        toolTip.open()
+    }
+
+    function requestPreviewNow(xOffset, yOffset) {
+        taskmanager.Applet.requestPreview(root.modelIndex,
+                                          Panel.rootObject,
+                                          xOffset,
+                                          yOffset,
+                                          dockPopupContext
+                                              ? (Panel.position === Dock.Top ? Dock.Top : Dock.Bottom)
+                                              : Panel.position)
+    }
+
+    function onEntered() {
+        if (root.popupItem) {
+            if (toolTip.toolTipWindow && toolTip.toolTipWindow.visible) {
+                showToolTipNow()
+            } else {
+                toolTipShowTimer.start()
+            }
+            return
+        }
+
+        if (Qt.platform.pluginName === "xcb" && windows.length === 0) {
+            if (toolTip.toolTipWindow && toolTip.toolTipWindow.visible) {
+                showToolTipNow()
+            } else {
+                toolTipShowTimer.start()
+            }
+            return
+        }
+
+        const itemRect = dockRelativeRect(root)
         let xOffset, yOffset, interval = 10
-        if (Panel.position % 2 === 0) {
-            xOffset = itemPos.x + (root.width / 2)
-            yOffset = (Panel.position == 2 ? -interval : interval + Panel.dockSize)
+        if (dockPopupContext) {
+            const popupRect = dockPopupRect()
+            xOffset = popupRect.x + popupRect.width / 2
+            yOffset = Panel.position === Dock.Top
+                ? popupRect.y + popupRect.height + interval
+                : popupRect.y - interval
+        } else if (Panel.position % 2 === 0) {
+            xOffset = itemRect.x + itemRect.width / 2
+            yOffset = Panel.position === Dock.Bottom
+                ? itemRect.y - interval
+                : itemRect.y + itemRect.height + interval
         } else {
-            xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
-            yOffset = itemPos.y + (root.height / 2)
+            xOffset = Panel.position === Dock.Left
+                ? itemRect.x + itemRect.width + interval
+                : itemRect.x - interval
+            yOffset = itemRect.y + itemRect.height / 2
+        }
+        if (root.windows.length > 0 && taskmanager.previewSwitchActive) {
+            taskmanager.endPreviewSwitch()
+            requestPreviewNow(xOffset, yOffset)
+            return
         }
         previewTimer.xOffset = xOffset
         previewTimer.yOffset = yOffset
@@ -449,22 +894,30 @@ Item {
     }
 
     function onExited() {
+        var hadPendingPreview = previewTimer.running
         if (toolTipShowTimer.running) {
             toolTipShowTimer.stop()
         }
 
-        if (previewTimer.running) {
+        if (hadPendingPreview) {
             previewTimer.stop()
         }
 
-        if (windows.length === 0) {
+        if (root.popupItem || (Qt.platform.pluginName === "xcb" && windows.length === 0)) {
             toolTip.close()
             return
+        }
+        if (root.windows.length > 0 && !hadPendingPreview) {
+            taskmanager.beginPreviewSwitch()
         }
         closeItemPreview()
     }
 
     function closeItemPreview() {
+        if (root.popupItem) {
+            return
+        }
+
         if (previewTimer.running) {
             previewTimer.stop()
         } else {
@@ -474,16 +927,45 @@ Item {
 
     function requestAppItemMenu() {
         Panel.requestClosePopup()
-        contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
+        contextMenuLoader.trashEmpty = taskmanager.Applet.trashEmpty
         contextMenuLoader.active = true
         MenuHelper.openMenu(contextMenuLoader.item)
+    }
+
+    function openAppItemMenu() {
+        toolTip.close()
+        closeItemPreview()
+        requestAppItemMenu()
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.NoButton
+        acceptedDevices: PointerDevice.TouchScreen
+        onLongPressed: root.openAppItemMenu()
+    }
+
+    MouseArea {
+        id: contextMenuMouseArea
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        hoverEnabled: false
+        preventStealing: true
+
+        onPressed: function(mouse) {
+            toolTip.close()
+            closeItemPreview()
+        }
+
+        onClicked: function(mouse) {
+            root.openAppItemMenu()
+        }
     }
 
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: false
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        acceptedButtons: Qt.LeftButton
         drag.target: root
         drag.onActiveChanged: {
             if (!drag.active) {
@@ -499,34 +981,32 @@ Item {
                 appItem.grabToImage(function(result) {
                     root.Drag.imageSource = result.url;
                 })
+                appItemSpotlightClearTimer.stop()
             }
             toolTip.close()
             closeItemPreview()
         }
-        // touchscreen long press.
-        onPressAndHold: function (mouse) {
-            if (mouse.button === Qt.NoButton) {
-                requestAppItemMenu()
-            }
-        }
         onClicked: function (mouse) {
             let index = root.modelIndex;
-            if (mouse.button === Qt.RightButton) {
-                requestAppItemMenu()
-            } else {
-                if (root.windows.length === 0) {
-                    launchAnimation.start();
-                    TaskManager.requestNewInstance(index, "");
-                    return;
-                }
-                TaskManager.requestActivate(index);
+            if (root.popupItem) {
+                togglePinnedPopup()
+                return
             }
+
+            if (root.windows.length === 0) {
+                launchAnimation.start();
+                TaskManager.requestNewInstance(index, "");
+                return;
+            }
+            TaskManager.requestActivate(index);
         }
 
         PanelToolTip {
             id: toolTip
+            text: root.toolTipText
             toolTipX: DockPanelPositioner.x
             toolTipY: DockPanelPositioner.y
+            closeGraceInterval: 90
         }
 
         PanelToolTip {
@@ -541,10 +1021,7 @@ Item {
             id: toolTipShowTimer
             interval: 50
             onTriggered: {
-                var point = root.mapToItem(null, root.width / 2, root.height / 2)
-                toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
-                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-                toolTip.open()
+                root.showToolTipNow()
             }
         }
     }
@@ -565,7 +1042,7 @@ Item {
             if (root.itemId === "dde-trash") {
                 dragToolTipCloseTimer.stop()
                 if (!dragToolTip.toolTipVisible) {
-                    var point = root.mapToItem(null, root.width / 2, root.height / 2)
+                    var point = mapPointToDockWindow(root, Qt.point(root.width / 2, root.height / 2))
                     dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
                     dragToolTip.open()
                 }
@@ -579,6 +1056,9 @@ Item {
         }
 
         onDropped: function (drop){
+            if (root.popupItem) {
+                return
+            }
             dragToolTipCloseTimer.stop()
             dragToolTip.close()
             root.dropFilesOnItem(root.itemId, drop.urls)
@@ -586,7 +1066,7 @@ Item {
     }
 
     onWindowsChanged: {
-        updateWindowIconGeometryTimer.start()
+        root.scheduleWindowIconGeometryUpdate()
         // Close tooltip when window appears
         if (windows.length > 0 && toolTip.toolTipVisible) {
             toolTip.close()
@@ -594,6 +1074,7 @@ Item {
     }
 
     onIconGlobalPointChanged: {
-        updateWindowIconGeometryTimer.start()
+        root.scheduleWindowIconGeometryUpdate()
     }
+
 }

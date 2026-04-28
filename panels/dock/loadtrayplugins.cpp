@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,10 +10,32 @@
 #include <DConfig>
 
 #include <QDir>
+#include <QFileInfo>
 #include <QTimer>
 #include <QGuiApplication>
 
 namespace dock {
+
+namespace {
+
+QString trayLoaderFontSyncPath()
+{
+    const QStringList candidates = {
+        qEnvironmentVariable("TRAY_LOADER_FONT_SYNC_PATH"),
+        QString::fromLatin1(TRAY_LOADER_FONT_SYNC_BUILD_PATH),
+        QString::fromLatin1(TRAY_LOADER_FONT_SYNC_INSTALL_PATH)
+    };
+
+    for (const QString &candidate : candidates) {
+        if (!candidate.isEmpty() && QFileInfo::exists(candidate)) {
+            return candidate;
+        }
+    }
+
+    return QString();
+}
+
+} // namespace
 
 LoadTrayPlugins::LoadTrayPlugins(QObject *parent)
     : QObject(parent)
@@ -98,6 +120,15 @@ void LoadTrayPlugins::setProcessEnv(QProcess *process)
     // TODO: use protocols to determine the environment instead of environment variables
     env.remove("DDE_CURRENT_COMPOSITOR");
 
+    const QString fontSyncPath = trayLoaderFontSyncPath();
+    if (!fontSyncPath.isEmpty()) {
+        QStringList preloadEntries = env.value(QStringLiteral("LD_PRELOAD")).split(QLatin1Char(':'), Qt::SkipEmptyParts);
+        if (!preloadEntries.contains(fontSyncPath)) {
+            preloadEntries.prepend(fontSyncPath);
+        }
+        env.insert(QStringLiteral("LD_PRELOAD"), preloadEntries.join(QLatin1Char(':')));
+    }
+
     process->setProcessEnvironment(env);
 }
 
@@ -105,7 +136,8 @@ QString LoadTrayPlugins::loaderPath() const
 {
     QStringList execPaths;
     execPaths << qEnvironmentVariable("TRAY_LOADER_EXECUTE_PATH")
-              << QString("%1/trayplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR);
+              << QString("%1/trayplugin-loader").arg(CMAKE_INSTALL_FULL_LIBEXECDIR)
+              << QStringLiteral("/usr/libexec/trayplugin-loader");
 
     QString validExePath;
     for (const QString &execPath : execPaths) {

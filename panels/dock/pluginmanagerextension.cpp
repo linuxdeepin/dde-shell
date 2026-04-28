@@ -467,12 +467,12 @@ PluginManager::PluginManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
 {
     auto theme = DGuiApplicationHelper::instance()->applicationTheme();
-    QObject::connect(theme, &DPlatformTheme::fontNameChanged, this, &PluginManager::onFontChanged);
-    QObject::connect(theme, &DPlatformTheme::fontPointSizeChanged, this, &PluginManager::onFontChanged);
-    QObject::connect(theme, &DPlatformTheme::activeColorChanged, this, &PluginManager::onActiveColorChanged);
-    QObject::connect(theme, &DPlatformTheme::darkActiveColorChanged, this, &PluginManager::onActiveColorChanged);
-    QObject::connect(theme, &DPlatformTheme::themeNameChanged, this, &PluginManager::onThemeChanged);
-    QObject::connect(theme, &DPlatformTheme::iconThemeNameChanged, this, &PluginManager::onThemeChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::fontNameChanged, this, &PluginManager::onFontChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::fontPointSizeChanged, this, &PluginManager::onFontChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::activeColorChanged, this, &PluginManager::onActiveColorChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::darkActiveColorChanged, this, &PluginManager::onActiveColorChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::themeNameChanged, this, &PluginManager::onThemeChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::iconThemeNameChanged, this, &PluginManager::onThemeChanged);
 }
 
 void PluginManager::initialize()

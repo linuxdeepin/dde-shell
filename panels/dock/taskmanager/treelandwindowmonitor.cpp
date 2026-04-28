@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -9,6 +9,7 @@
 #include "taskmanager.h"
 #include "treelandwindow.h"
 
+#include <algorithm>
 #include <QPointer>
 #include <QIODevice>
 #include <QVarLengthArray>
@@ -18,6 +19,11 @@
 #include <cstdint>
 
 namespace dock {
+namespace {
+constexpr int kPreviewMotionBaseDuration = 112;
+constexpr int kPreviewMotionMaxDuration = 208;
+}
+
 ForeignToplevelManager::ForeignToplevelManager(TreeLandWindowMonitor* monitor)
     : QWaylandClientExtensionTemplate<ForeignToplevelManager>(1)
     , m_monitor(monitor)
@@ -35,14 +41,34 @@ TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_pr
     , m_isPreviewEntered(false)
     , m_isDockMouseAreaEnter(false)
     , m_hideTimer(new QTimer(this))
+    , m_positionAnimation(new QVariantAnimation(this))
+    , m_currentPreviewXoffset(0)
+    , m_currentPreviewYoffset(0)
+    , m_currentDirection(0)
+    , m_positionInitialized(false)
 {
     init(context);
 
     m_hideTimer->setSingleShot(true);
     m_hideTimer->setInterval(800);
+    m_positionAnimation->setDuration(kPreviewMotionBaseDuration);
+    m_positionAnimation->setEasingCurve(QEasingCurve::OutCubic);
+    connect(m_positionAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant &value) {
+        if (m_currentWindowsId.isEmpty()) {
+            return;
+        }
+
+        const QPoint point = value.toPoint();
+        m_currentPreviewXoffset = point.x();
+        m_currentPreviewYoffset = point.y();
+        show(m_currentWindowsId, point.x(), point.y(), m_currentDirection);
+    });
 
     connect(m_hideTimer, &QTimer::timeout, this, [this](){
         if (!m_isDockMouseAreaEnter && !m_isPreviewEntered) {
+            m_positionAnimation->stop();
+            m_positionInitialized = false;
+            m_currentWindowsId.clear();
             emit closed();
             close();
         }
@@ -57,7 +83,33 @@ TreeLandDockPreviewContext::~TreeLandDockPreviewContext()
 void TreeLandDockPreviewContext::showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
 {
     m_isDockMouseAreaEnter = true;
-    show(windowsId, previewXoffset, previewYoffset, direction);
+    m_hideTimer->stop();
+    m_currentWindowsId = windowsId;
+    m_currentDirection = direction;
+
+    const QPoint targetPosition(previewXoffset, previewYoffset);
+    if (!m_positionInitialized) {
+        m_positionAnimation->stop();
+        m_currentPreviewXoffset = previewXoffset;
+        m_currentPreviewYoffset = previewYoffset;
+        m_positionInitialized = true;
+        show(m_currentWindowsId, previewXoffset, previewYoffset, direction);
+        return;
+    }
+
+    const QPoint currentPosition(m_currentPreviewXoffset, m_currentPreviewYoffset);
+    if (currentPosition == targetPosition) {
+        show(m_currentWindowsId, previewXoffset, previewYoffset, direction);
+        return;
+    }
+
+    const int distance = (currentPosition - targetPosition).manhattanLength();
+    m_positionAnimation->setDuration(std::min(kPreviewMotionMaxDuration,
+                                              kPreviewMotionBaseDuration + distance / 4));
+    m_positionAnimation->stop();
+    m_positionAnimation->setStartValue(currentPosition);
+    m_positionAnimation->setEndValue(targetPosition);
+    m_positionAnimation->start();
 }
 
 void TreeLandDockPreviewContext::hideWindowsPreview()
@@ -239,4 +291,3 @@ void TreeLandWindowMonitor::handleForeignToplevelHandleRemoved()
     }
 }
 }
-

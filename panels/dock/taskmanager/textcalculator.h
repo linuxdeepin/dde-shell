@@ -6,6 +6,7 @@
 
 #include <QAbstractItemModel>
 #include <QFont>
+#include <QTimer>
 #include <QtQml/QtQml>
 
 namespace dock
@@ -160,6 +161,7 @@ Q_SIGNALS:
 private slots:
     void onDataModelChanged();
     void calculateOptimalTextWidth();
+    void performScheduledCalculation();
 
 private:
     void connectDataModelSignals();
@@ -181,6 +183,8 @@ private:
     QAbstractItemModel *m_dataModel;
     qreal m_remainingSpace;
     bool m_enabled;
+    bool m_calculationPending;
+    QTimer m_calculationTimer;
 
     QHash<int, qreal> m_baselineWidthCache; // Cache for baseline widths of different character counts
 };

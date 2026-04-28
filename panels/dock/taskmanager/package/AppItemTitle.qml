@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 
+import org.deepin.ds.dock 1.0
 import org.deepin.ds.dock.taskmanager 1.0
 import org.deepin.dtk 1.0 as D
 
@@ -14,7 +15,7 @@ Item {
 
     property bool active: titleLoader.active
     property string text: ""
-    property color textColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? "#FFFFFF" : "#000000"
+    property int colorTheme: Dock.Dark
 
     implicitWidth: titleLoader.width
     implicitHeight: titleLoader.height
@@ -29,7 +30,7 @@ Item {
 
             text: root.TextCalculator.elidedText
             
-            color: root.textColor            
+            color: root.colorTheme === Dock.Dark ? "#FFFFFF" : "#000000"
             font: root.TextCalculator.calculator.font
             verticalAlignment: Text.AlignVCenter
                     

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,11 +13,13 @@ AppletItem {
     id: showdesktop
     readonly property int showDesktopWidth: 10
     property bool useColumnLayout: Panel.position % 2
+    readonly property bool adaptiveFashionMode: Panel.rootObject && Panel.rootObject.adaptiveFashionMode
     property int dockSize: Panel.rootObject.dockItemMaxSize
     property int dockOrder: 30
-    property bool shouldVisible: Applet.visible
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : showDesktopWidth
-    implicitHeight: useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize
+    property bool shouldVisible: Applet.visible && !adaptiveFashionMode
+    visible: shouldVisible
+    implicitWidth: shouldVisible ? (useColumnLayout ? Panel.rootObject.dockSize : showDesktopWidth) : 0
+    implicitHeight: shouldVisible ? (useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize) : 0
 
     PanelToolTip {
         id: toolTip
@@ -32,10 +34,22 @@ AppletItem {
 
         Rectangle {
             property D.Palette lineColor: DockPalette.showDesktopLineColor
-            // Use device pixel ratio to ensure the line is always 1 physical pixel regardless of system scaling
-            property real devicePixelRatio: Screen.devicePixelRatio
+            // Keep both thickness and position aligned to physical pixels so
+            // fractional scales such as 1.75 do not introduce a visible seam.
+            property real devicePixelRatio: Panel.devicePixelRatio > 0 ? Panel.devicePixelRatio : Screen.devicePixelRatio
+            function snapToPhysicalPixel(value) {
+                if (!Number.isFinite(value) || devicePixelRatio <= 0) {
+                    return value
+                }
+
+                return Math.round(value * devicePixelRatio) / devicePixelRatio
+            }
             implicitWidth: useColumnLayout ? showdesktop.implicitWidth : (1 / devicePixelRatio)
             implicitHeight: useColumnLayout ? (1 / devicePixelRatio) : showdesktop.implicitHeight
+            width: implicitWidth
+            height: implicitHeight
+            x: useColumnLayout ? 0 : snapToPhysicalPixel((parent.width - width) / 2)
+            y: useColumnLayout ? snapToPhysicalPixel((parent.height - height) / 2) : 0
 
             color: D.ColorSelector.lineColor
         }

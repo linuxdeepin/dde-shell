@@ -4,6 +4,8 @@
 
 #include "combinemodelb.h"
 
+#include <algorithm>
+
 DataB::DataB(int id, TestModelB* parent)
     : m_id(id)
 {
@@ -80,6 +82,14 @@ void TestModelB::addData(DataB *data)
 {
     beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
     m_list.append(data);
+    endInsertRows();
+}
+
+void TestModelB::insertData(int row, DataB *data)
+{
+    const int boundedRow = std::clamp(row, 0, static_cast<int>(m_list.size()));
+    beginInsertRows(QModelIndex(), boundedRow, boundedRow);
+    m_list.insert(boundedRow, data);
     endInsertRows();
 }
 

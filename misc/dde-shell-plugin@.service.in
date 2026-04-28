@@ -1,8 +1,27 @@
 [Unit]
 Description=Manage a plugin for dde-shell.
+RefuseManualStart=no
+RefuseManualStop=no
+StartLimitBurst=3
+StartLimitIntervalSec=0
+CollectMode=inactive-or-failed
+
+Requisite=dde-session-pre.target
+After=dde-session-pre.target
+
+PartOf=dde-session-core.target
+Before=dde-session-core.target
+
+Requires=dbus.socket
+After=dbus.socket
 
 [Service]
+Type=simple
 ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/dde-shell -p %I
+TimeoutStartSec=infinity
+Slice=session.slice
+Restart=always
+RestartSec=1s
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

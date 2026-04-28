@@ -45,6 +45,7 @@ public:
 private:
     explicit TaskManagerSettings(QObject *parent = nullptr);
     inline void migrateFromDockedItems();
+    inline void migrateDefaultDockFolders();
     inline void saveDockedElements();
 
 Q_SIGNALS:

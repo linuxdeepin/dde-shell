@@ -11,8 +11,15 @@
 #include "dockglobalelementmodel.h"
 #include "dockitemmodel.h"
 #include "hoverpreviewproxymodel.h"
+#include "popupsortutils.h"
 
+#include <QAbstractItemModel>
+#include <QElapsedTimer>
+#include <QHash>
 #include <QPointer>
+#include <QProcess>
+#include <QSet>
+#include <QVariantMap>
 
 namespace dock {
 class AppItem;
@@ -26,6 +33,8 @@ class TaskManager : public DS_NAMESPACE::DContainment, public AbstractTaskManage
     Q_PROPERTY(bool windowFullscreen READ windowFullscreen NOTIFY windowFullscreenChanged)
     Q_PROPERTY(bool allowForceQuit READ allowForceQuit NOTIFY allowedForceQuitChanged)
     Q_PROPERTY(bool showAttentionAnimation READ showAttentionAnimation NOTIFY showAttentionAnimationChanged)
+    Q_PROPERTY(QString trashTipText READ getTrashTipText NOTIFY trashStateChanged)
+    Q_PROPERTY(bool trashEmpty READ isTrashEmpty NOTIFY trashStateChanged)
 
 public:
     enum Roles {
@@ -43,6 +52,9 @@ public:
         ItemIdRole,
         MenusRole,
         WindowsRole,
+        DockElementRole,
+        ItemKindRole,
+        PreviewIconsRole,
 
         // from dde-apps
         DesktopIdRole = 0x1000,
@@ -88,12 +100,25 @@ public:
     Q_INVOKABLE void requestClose(const QModelIndex &index, bool force = false) const override;
     Q_INVOKABLE void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
     Q_INVOKABLE void
-    requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    requestPreview(const QModelIndex &index,
+                   QObject *relativePositionItem,
+                   int32_t previewXoffset,
+                   int32_t previewYoffset,
+                   uint32_t direction);
     Q_INVOKABLE void requestWindowsView(const QModelIndexList &indexes) const override;
 
-    Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId);
+    Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId) const;
+    Q_INVOKABLE QString dockElementFromLauncherId(const QString &launcherId) const;
+    Q_INVOKABLE QString displayNameForDockElement(const QString &dockElement) const;
+    Q_INVOKABLE QString folderUrlToElementId(const QString &folderUrl) const;
     Q_INVOKABLE bool requestDockByDesktopId(const QString& desktopID);
     Q_INVOKABLE bool requestUndockByDesktopId(const QString& desktopID);
+    Q_INVOKABLE bool requestDockByFolderUrl(const QString &folderUrl);
+    Q_INVOKABLE bool requestUndockByFolderUrl(const QString &folderUrl);
+    Q_INVOKABLE QVariantMap popupDescriptor(const QString &dockElement, const QString &location = QString()) const;
+    Q_INVOKABLE QVariantMap popupSortState(const QString &dockElement) const;
+    Q_INVOKABLE QVariantMap cyclePopupSort(const QString &dockElement, const QString &fieldName);
+    Q_INVOKABLE void activatePopupEntry(const QString &dockElement, const QString &entryId) const;
     Q_INVOKABLE bool RequestDock(QString appID);
     Q_INVOKABLE bool IsDocked(QString appID);
     Q_INVOKABLE bool RequestUndock(QString appID);
@@ -107,26 +132,44 @@ public:
     Q_INVOKABLE QString getTrashTipText();
 
     Q_INVOKABLE bool isTrashEmpty() const;
+    Q_INVOKABLE QString createManagedTempFilePath(const QString &prefix = QString(),
+                                                  const QString &suffix = QString()) const;
+    Q_INVOKABLE void releaseManagedTempFile(const QString &pathOrUrl) const;
 Q_SIGNALS:
     void dataModelChanged();
     void windowSplitChanged();
     void windowFullscreenChanged(bool);
     void allowedForceQuitChanged();
     void showAttentionAnimationChanged();
+    void popupEntryThumbnailChanged(const QString &entryPath);
+    void trashStateChanged();
 
 private Q_SLOTS:
     void handleWindowAdded(QPointer<AbstractWindow> window);
     void modifyOpacityChanged();
 
 private:
+    void refreshTrashCount(bool force = false) const;
+    static int trashCountFromOutput(const QByteArray &output);
+    static QString managedTempDirectoryPath();
+    static QString normalizedManagedTempFilePath(const QString &pathOrUrl);
+    void pruneManagedTempFiles() const;
+
     QScopedPointer<AbstractWindowMonitor> m_windowMonitor;
     bool m_windowFullscreen;
     DockCombineModel *m_activeAppModel = nullptr;
     DockGlobalElementModel *m_dockGlobalElementModel = nullptr;
     DockItemModel *m_itemModel = nullptr;
     HoverPreviewProxyModel *m_hoverPreviewModel = nullptr;
-    int queryTrashCount() const;
+    QAbstractItemModel *m_launcherAppModel = nullptr;
+    QAbstractItemModel *m_launcherGroupModel = nullptr;
+    QHash<QString, PopupSortState> m_popupSortStates;
+    mutable QProcess *m_trashCountProcess = nullptr;
+    mutable int m_cachedTrashCount = 0;
+    mutable bool m_trashStateInitialized = false;
+    mutable QElapsedTimer m_trashCountRefreshTimer;
+    mutable QSet<QString> m_managedTempFiles;
+    mutable qint64 m_lastManagedTempPruneMs = 0;
 };
 
 }
-

@@ -19,6 +19,8 @@ Item {
     property alias addDisplaced: listView.addDisplaced
     property alias removeDisplaced: listView.removeDisplaced
     property alias moveDisplaced: listView.moveDisplaced
+    property alias footer: listView.footer
+    property alias footerPositioning: listView.footerPositioning
     ListView {
         id: listView
         anchors.fill: parent
@@ -54,6 +56,30 @@ Item {
         return listView.indexAt(x, y)
     }
 
+    function childTargetImplicitWidth(child) {
+        if (!child) {
+            return 0
+        }
+
+        if (child.targetImplicitWidth !== undefined) {
+            return child.targetImplicitWidth
+        }
+
+        return child.implicitWidth
+    }
+
+    function childTargetImplicitHeight(child) {
+        if (!child) {
+            return 0
+        }
+
+        if (child.targetImplicitHeight !== undefined) {
+            return child.targetImplicitHeight
+        }
+
+        return child.implicitHeight
+    }
+
     implicitWidth: {
         let width = 0
         for (let child of listView.contentItem.visibleChildren) {
@@ -67,6 +93,22 @@ Item {
         let height = 0
         for (let child of listView.contentItem.visibleChildren) {
             height = calculateImplicitHeight(height, child.implicitHeight)
+        }
+        return Math.max(height, 1)
+    }
+
+    readonly property real targetImplicitWidth: {
+        let width = 0
+        for (let child of listView.contentItem.visibleChildren) {
+            width = calculateImplicitWidth(width, childTargetImplicitWidth(child))
+        }
+        return Math.max(width, 1)
+    }
+
+    readonly property real targetImplicitHeight: {
+        let height = 0
+        for (let child of listView.contentItem.visibleChildren) {
+            height = calculateImplicitHeight(height, childTargetImplicitHeight(child))
         }
         return Math.max(height, 1)
     }

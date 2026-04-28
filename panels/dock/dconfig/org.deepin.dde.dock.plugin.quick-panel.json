@@ -1,0 +1,20 @@
+{
+    "magic": "dsg.config.meta",
+    "version": "1.0",
+    "contents": {
+        "Dock_Quick_Plugins": {
+            "value": [
+                "network-item-key",
+                "bluetooth-item-key"
+            ],
+            "serial": 0,
+            "flags": [],
+            "name": "Dock_Quick_Plugins",
+            "name[zh_CN]": "停靠在任务栏上的快捷面板插件",
+            "description": "Quick panel plugin item keys that should also stay visible on the dock by default.",
+            "description[zh_CN]": "默认同时显示在任务栏上的快捷面板插件 item key 列表。",
+            "permissions": "readwrite",
+            "visibility": "private"
+        }
+    }
+}

@@ -57,7 +57,52 @@ if(Qt${QT_VERSION_MAJOR}_VERSION VERSION_GREATER_EQUAL 6.10)
   find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WaylandClientPrivate WaylandCompositorPrivate REQUIRED)
 endif()
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui)
+set(ICU_USE_STATIC_LIBS OFF)
 find_package(ICU 74.2 REQUIRED COMPONENTS uc i18n io)
+
+get_filename_component(DS_ICU_PREFIX "${ICU_INCLUDE_DIR}" DIRECTORY)
+function(ds_resolve_icu_shared_library output_var library_basename)
+    set(search_roots
+        "${DS_ICU_PREFIX}/lib"
+        "${DS_ICU_PREFIX}/lib/*"
+        "/usr/local/lib"
+        "/usr/local/lib/*"
+        "/usr/lib"
+        "/usr/lib/*"
+        "/lib"
+        "/lib/*"
+    )
+
+    foreach(search_root IN LISTS search_roots)
+        file(GLOB versioned_candidates LIST_DIRECTORIES false "${search_root}/${library_basename}.so.*")
+        list(SORT versioned_candidates)
+        list(REVERSE versioned_candidates)
+
+        foreach(candidate IN LISTS versioned_candidates)
+            get_filename_component(resolved_library "${candidate}" REALPATH)
+            if (EXISTS "${resolved_library}")
+                set(${output_var} "${resolved_library}" PARENT_SCOPE)
+                return()
+            endif()
+        endforeach()
+
+        file(GLOB soname_candidates LIST_DIRECTORIES false "${search_root}/${library_basename}.so")
+        foreach(candidate IN LISTS soname_candidates)
+            get_filename_component(resolved_library "${candidate}" REALPATH)
+            if (EXISTS "${resolved_library}")
+                set(${output_var} "${resolved_library}" PARENT_SCOPE)
+                return()
+            endif()
+        endforeach()
+    endforeach()
+
+    message(FATAL_ERROR "Could not resolve an existing ICU shared library for ${library_basename}")
+endfunction()
+
+ds_resolve_icu_shared_library(DS_ICU_UC_LIBRARY libicuuc)
+ds_resolve_icu_shared_library(DS_ICU_I18N_LIBRARY libicui18n)
+ds_resolve_icu_shared_library(DS_ICU_IO_LIBRARY libicuio)
+
 find_package(WaylandProtocols REQUIRED)
 find_package(PkgConfig REQUIRED)
 

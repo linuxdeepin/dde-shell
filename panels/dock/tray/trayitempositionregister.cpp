@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -12,6 +12,11 @@ TrayItemPositionRegisterAttachedType::TrayItemPositionRegisterAttachedType(QObje
     : QObject(parent)
 {
     // register / update visual position
+    connect(this, &TrayItemPositionRegisterAttachedType::surfaceIdChanged,
+            this, [this](){
+                registerVisualSize();
+                emit visualPositionChanged();
+            });
     connect(this, &TrayItemPositionRegisterAttachedType::visualIndexChanged,
             this, [this](){
                 registerVisualSize();
@@ -35,6 +40,10 @@ TrayItemPositionRegisterAttachedType::TrayItemPositionRegisterAttachedType(QObje
 
 QPoint TrayItemPositionRegisterAttachedType::visualPosition() const
 {
+    if (m_visualIndex < 0 || m_visualSize.isEmpty()) {
+        return QPoint();
+    }
+
     TrayItemPositionManager & pm = TrayItemPositionManager::instance();
     if (pm.orientation() == Qt::Horizontal) {
         int width = m_visualIndex == 0 ? 0 : pm.visualSize(m_visualIndex - 1).width();
@@ -47,8 +56,21 @@ QPoint TrayItemPositionRegisterAttachedType::visualPosition() const
 
 void TrayItemPositionRegisterAttachedType::registerVisualSize()
 {
-    if (m_visualIndex == -1 || m_visualSize.isEmpty()) return;
-    TrayItemPositionManager::instance().registerVisualItemSize(m_visualIndex, m_visualSize);
+    if (m_surfaceId.isEmpty()) {
+        return;
+    }
+
+    auto &positionManager = TrayItemPositionManager::instance();
+    if (!m_visualSize.isEmpty()) {
+        positionManager.registerSurfaceSize(m_surfaceId, m_visualSize);
+    }
+
+    if (m_visualIndex < 0 || m_visualSize.isEmpty()) {
+        positionManager.unregisterVisualItem(m_surfaceId);
+        return;
+    }
+
+    positionManager.registerVisualItem(m_surfaceId, m_visualIndex);
 }
 
 }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -14,12 +14,15 @@ Q_LOGGING_CATEGORY(appGroupLog, "org.deepin.dde.shell.dde-apps.appgroup")
 
 namespace apps {
 AppGroup::AppGroup(const QString &groupId, const QString &name, const QList<QStringList> &appIDs)
-    : AppItem(groupId, AppItemModel::FolderItemType)
-    , m_itemsPage(new ItemsPage(name, groupId == QStringLiteral("internal/folder/0") ? (4 * 8) : (3 * 4)))
+    : AppItem(normalizeGroupId(groupId), AppItemModel::FolderItemType)
+    , m_itemsPage(new ItemsPage(name, parseGroupId(groupId) == 0 ? (4 * 8) : (3 * 4)))
 {
     setItemsPerPage(m_itemsPage->maxItemCountPerPage());
     setAppName(m_itemsPage->name());
-    // folder id is a part of its groupId: "internal/folder/{folderId}"
+    QObject::connect(m_itemsPage, &ItemsPage::nameChanged, m_itemsPage, [this]() {
+        setAppName(m_itemsPage->name());
+    });
+    // folder id is the numeric suffix of the normalized launcher group id.
     setFolderId(parseGroupId(groupId));
 
     for (const QStringList &items : appIDs) {
@@ -49,19 +52,38 @@ ItemsPage *AppGroup::itemsPage()
 
 bool AppGroup::idIsFolder(const QString & id)
 {
-    return id.startsWith(QStringLiteral("internal/folder/"));
+    bool isNumericId = false;
+    id.toInt(&isNumericId);
+
+    return isNumericId ||
+           id.startsWith(QStringLiteral("internal/folder/")) ||
+           id.startsWith(QStringLiteral("internal/folders/")) ||
+           id.startsWith(QStringLiteral("internal/group/"));
+}
+
+QString AppGroup::normalizeGroupId(const QString &id)
+{
+    bool isNumericId = false;
+    const int numericId = id.toInt(&isNumericId);
+    if (isNumericId) {
+        return groupIdFromNumber(numericId);
+    }
+
+    if (!idIsFolder(id)) {
+        return id;
+    }
+
+    return QStringLiteral("internal/folders/%1").arg(parseGroupId(id));
 }
 
 QString AppGroup::groupIdFromNumber(int groupId)
 {
-    return QStringLiteral("internal/folder/%1").arg(groupId);
+    return QStringLiteral("internal/folders/%1").arg(groupId);
 }
 
 int AppGroup::parseGroupId(const QString & id)
 {
-    using namespace std::string_view_literals;
-    constexpr size_t len = "internal/folder/"sv.size();
-    return QStringView{id}.mid(len + 1).toInt();
+    return id.section(QLatin1Char('/'), -1).toInt();
 }
 
 void AppGroup::setItemsPerPage(int number)
@@ -75,4 +97,3 @@ void AppGroup::setFolderId(int folderId)
 }
 
 }
-

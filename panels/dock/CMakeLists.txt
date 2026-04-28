@@ -7,7 +7,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 configure_file(environments.h.in environments.h @ONLY)
 
 find_package(PkgConfig REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS Core DBus Gui Qml WaylandCompositor Widgets WaylandClient)
+find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS Core DBus Gui Network Qml WaylandCompositor Widgets WaylandClient)
 find_package(DdeTrayLoader REQUIRED)
 find_package(TreelandProtocols REQUIRED)
 pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
@@ -59,6 +59,25 @@ add_library(dockpanel SHARED
     ${dock_panel_sources}
 )
 
+add_dependencies(dockpanel tray_loader_font_sync)
+
+add_library(tray_loader_font_sync SHARED
+    tray_loader_font_sync.cpp
+    tray_loader_font_sync.qrc
+)
+
+set_target_properties(tray_loader_font_sync PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+)
+
+target_link_libraries(tray_loader_font_sync PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+)
+
+install(TARGETS tray_loader_font_sync DESTINATION "${CMAKE_INSTALL_LIBDIR}/dde-shell")
+
 qt_generate_wayland_protocol_client_sources(dockpanel
     NO_INCLUDE_CORE_ONLY
     FILES
@@ -106,6 +125,8 @@ file(
     constants.h
     # dockfilterproxymodel.cpp
     # dockfilterproxymodel.h
+    fashionleftpluginprovider.h
+    fashionleftpluginprovider.cpp
     pluginmanagerextension_p.h
     pluginmanagerextension.cpp
     pluginmanagerintegration_p.h
@@ -147,7 +168,10 @@ qt_generate_wayland_protocol_server_sources(dock-plugin
 
 target_link_libraries(dock-plugin PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Concurrent
+    Qt${QT_VERSION_MAJOR}::DBus
     Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Qml
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::WaylandCompositor
@@ -171,3 +195,7 @@ dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.d
 dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.tray.json) # compat
 dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES dconfig/org.deepin.ds.dock.json)
 dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES dconfig/org.deepin.ds.dock.tray.json)
+dtk_add_config_meta_files(APPID org.deepin.dde.dock FILES dconfig/org.deepin.dde.dock.json)
+dtk_add_config_meta_files(APPID org.deepin.dde.dock FILES dconfig/org.deepin.dde.dock.plugin.quick-panel.json)
+dtk_add_config_meta_files(APPID org.deepin.dde.tray-loader FILES dconfig/org.deepin.dde.dock.json)
+dtk_add_config_meta_files(APPID org.deepin.dde.tray-loader FILES dconfig/org.deepin.dde.dock.plugin.quick-panel.json)

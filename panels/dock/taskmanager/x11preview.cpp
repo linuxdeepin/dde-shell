@@ -9,6 +9,7 @@
 #include "x11utils.h"
 #include "x11windowmonitor.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <unistd.h>
 #include <fcntl.h>
@@ -59,6 +60,48 @@ Q_LOGGING_CATEGORY(x11WindowPreview, "org.deepin.dde.shell.dock.taskmanager.x11W
 DGUI_USE_NAMESPACE
 
 namespace dock {
+namespace {
+constexpr auto kAppearanceService = "org.deepin.dde.Appearance1";
+constexpr auto kAppearancePath = "/org/deepin/dde/Appearance1";
+constexpr auto kAppearanceInterface = "org.deepin.dde.Appearance1";
+constexpr auto kPropertiesInterface = "org.freedesktop.DBus.Properties";
+constexpr int kPreviewMotionBaseDuration = 88;
+constexpr int kPreviewMotionMaxDuration = 156;
+
+DGuiApplicationHelper::ColorType previewThemeType()
+{
+    const auto fallbackTheme = DGuiApplicationHelper::instance()->themeType();
+    QDBusInterface appearanceProperties(QString::fromLatin1(kAppearanceService),
+                                        QString::fromLatin1(kAppearancePath),
+                                        QString::fromLatin1(kPropertiesInterface),
+                                        QDBusConnection::sessionBus());
+    if (!appearanceProperties.isValid()) {
+        return fallbackTheme;
+    }
+
+    const QDBusReply<QDBusVariant> reply = appearanceProperties.call(QStringLiteral("Get"),
+                                                                     QString::fromLatin1(kAppearanceInterface),
+                                                                     QStringLiteral("GlobalTheme"));
+    if (!reply.isValid()) {
+        return fallbackTheme;
+    }
+
+    const QString themeName = reply.value().variant().toString();
+    if (themeName.endsWith(QStringLiteral(".dark"), Qt::CaseInsensitive)) {
+        return DGuiApplicationHelper::DarkType;
+    }
+    if (themeName.endsWith(QStringLiteral(".light"), Qt::CaseInsensitive)) {
+        return DGuiApplicationHelper::LightType;
+    }
+
+    return fallbackTheme;
+}
+
+QColor previewTextColor(const DGuiApplicationHelper::ColorType themeType)
+{
+    return themeType == DGuiApplicationHelper::DarkType ? QColor(Qt::white) : QColor(Qt::black);
+}
+}
 
 static QHash<uint32_t, QPixmap> s_windowPreviewCache;
 
@@ -224,7 +267,7 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        auto themeType = DGuiApplicationHelper::instance()->themeType();
+        auto themeType = previewThemeType();
 
         QRect hoverRect = option.rect;
 
@@ -346,7 +389,7 @@ public:
             // 给一点时间让窗口关闭事件传播
             QTimer::singleShot(100, this, [this]() {
                 if (m_listView->model()->rowCount() == 0) {
-                    m_parent->hide();
+                    m_parent->dismissPreview();
                 }
                 // 大小更新现在由模型变化信号自动处理
             });
@@ -378,11 +421,20 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
     , m_monitor(monitor)
     , m_sourceModel(nullptr)
     , m_titleWidget(new QWidget())
+    , m_previewIcon(nullptr)
+    , m_previewTitle(nullptr)
+    , m_closeAllButton(nullptr)
+    , m_hideTimer(nullptr)
+    , m_positionAnimation(new QPropertyAnimation(this, "pos"))
     , m_direction(0)
+    , m_positionInitialized(false)
+    , m_previewOpacity(0.4)
 {
     m_hideTimer = new QTimer(this);
     m_hideTimer->setSingleShot(true);
     m_hideTimer->setInterval(500);
+    m_positionAnimation->setDuration(kPreviewMotionBaseDuration);
+    m_positionAnimation->setEasingCurve(QEasingCurve::OutQuad);
 
     setWindowFlags(Qt::ToolTip | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus | Qt::FramelessWindowHint);
     setMouseTracking(true);
@@ -410,7 +462,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
             X11Utils::instance()->closeWindow(windowId);
         }
 
-        hide();
+        dismissPreview();
     });
 
     connect(m_view, &QListView::entered, this, [this](const QModelIndex &enter) {
@@ -427,6 +479,12 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
         updatePreviewIconFromString(iconData.toString());
         updatePreviewTitle(enter.data(TaskManager::WinTitleRole).toString());
     });
+}
+
+void X11WindowPreviewContainer::setPreviewOpacity(double opacity)
+{
+    m_previewOpacity = opacity;
+    applyTheme();
 }
 
 void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceModel,
@@ -469,7 +527,7 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
                             updateSize(m_sourceModel->rowCount());
                         } else {
                             // 如果没有窗口了，隐藏预览容器
-                            hide();
+                            dismissPreview();
                         }
                     }
                 });
@@ -498,14 +556,20 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
         }
         updatePreviewIconFromString(iconData.toString());
         updatePreviewTitle(firstIndex.data(TaskManager::WinTitleRole).toString());
-        updateSize(sourceModel->rowCount());
+        updateOrientation();
     } else {
         updateSize(0);
     }
 
     if (isHidden()) {
-        show();
+        m_positionAnimation->stop();
+        setGeometry(previewGeometry());
+        m_positionInitialized = true;
+        DBlurEffectWidget::show();
+        return;
     }
+
+    updatePosition();
 }
 
 void X11WindowPreviewContainer::updateOrientation()
@@ -525,7 +589,7 @@ void X11WindowPreviewContainer::callHide()
     if (m_isPreviewEntered) return;
     if (m_isDockPreviewCount > 0) return;
 
-    hide();
+    dismissPreview();
     s_windowPreviewCache.clear();
 }
 
@@ -552,17 +616,21 @@ void X11WindowPreviewContainer::leaveEvent(QEvent* event)
 
 void X11WindowPreviewContainer::showEvent(QShowEvent *event)
 {
-    updateOrientation();
     m_closeAllButton->setVisible(false);
     return DBlurEffectWidget::showEvent(event);
 }
 
 void X11WindowPreviewContainer::hideEvent(QHideEvent*)
 {
+    m_positionAnimation->stop();
+    m_positionInitialized = false;
     // 只通知监视器清空预览状态，让 TaskManager 统一管理模型清理
     // 不要在这里断开模型连接，因为 clearPreviewState 信号会触发 TaskManager 的 clearFilter
     // QPointer 会自动处理对象销毁的情况
     if (m_monitor) {
+        if (WM_HELPER->hasComposite()) {
+            m_monitor->cancelPreviewWindow();
+        }
         m_monitor->clearPreviewState();
     }
 }
@@ -573,8 +641,12 @@ void X11WindowPreviewContainer::resizeEvent(QResizeEvent *event)
     updatePosition();
 }
 
-void X11WindowPreviewContainer::updatePosition()
+QRect X11WindowPreviewContainer::previewGeometry() const
 {
+    if (!m_baseWindow || !m_baseWindow->screen()) {
+        return geometry();
+    }
+
     auto screenRect = m_baseWindow->screen()->geometry();
     auto dockWindowPosition = m_baseWindow->position();
     int xPosition = dockWindowPosition.x() + m_previewXoffset;
@@ -610,13 +682,76 @@ void X11WindowPreviewContainer::updatePosition()
     yPosition = std::max(yPosition, screenRect.y() + 10);
     yPosition = std::min(yPosition, screenRect.y() + screenRect.height() - height() - 10);
 
-    move(xPosition, yPosition);
+    return QRect(xPosition, yPosition, width(), height());
+}
+
+void X11WindowPreviewContainer::dismissPreview()
+{
+    if (isHidden()) {
+        return;
+    }
+
+    m_hideTimer->stop();
+    m_positionAnimation->stop();
+    DBlurEffectWidget::hide();
+}
+
+void X11WindowPreviewContainer::updatePosition()
+{
+    const QPoint targetPosition = previewGeometry().topLeft();
+
+    if (!isVisible() || !m_positionInitialized) {
+        m_positionAnimation->stop();
+        move(targetPosition);
+        m_positionInitialized = true;
+        return;
+    }
+
+    if (pos() == targetPosition) {
+        return;
+    }
+
+    const int distance = (pos() - targetPosition).manhattanLength();
+    m_positionAnimation->setDuration(std::min(kPreviewMotionMaxDuration,
+                                              kPreviewMotionBaseDuration + distance / 5));
+    m_positionAnimation->stop();
+    m_positionAnimation->setStartValue(pos());
+    m_positionAnimation->setEndValue(targetPosition);
+    m_positionAnimation->start();
 }
 
 void X11WindowPreviewContainer::updatePreviewTitle(const QString& title)
 {
     m_previewTitleStr = title;
     m_previewTitle->setText(m_previewTitleStr);
+}
+
+void X11WindowPreviewContainer::applyTheme()
+{
+    const auto themeType = previewThemeType();
+    const QColor textColor = previewTextColor(themeType);
+    QPalette titlePalette = m_previewTitle->palette();
+    titlePalette.setColor(QPalette::WindowText, textColor);
+    titlePalette.setColor(QPalette::Text, textColor);
+    titlePalette.setColor(QPalette::ButtonText, textColor);
+    m_previewTitle->setPalette(titlePalette);
+
+    QPalette viewPalette = m_view->palette();
+    viewPalette.setColor(QPalette::Base, Qt::transparent);
+    m_view->setPalette(viewPalette);
+
+    QPalette blurPalette = DGuiApplicationHelper::instance()->applicationPalette(themeType);
+    QColor blurColor = blurPalette.color(QPalette::Window);
+    if (!blurColor.isValid()) {
+        blurColor = themeType == DGuiApplicationHelper::DarkType
+            ? QColor(32, 32, 32)
+            : QColor(248, 248, 248);
+    }
+    setMaskColor(blurColor);
+    setMaskAlpha(qBound(0, qRound(m_previewOpacity * 255.0), 255));
+
+    update();
+    m_view->viewport()->update();
 }
 
 void X11WindowPreviewContainer::initUI()
@@ -646,17 +781,10 @@ void X11WindowPreviewContainer::initUI()
     m_previewIcon->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_previewTitle->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_previewTitle->setElideMode(Qt::ElideRight);
-
-    auto updateWindowTitleColorType = [this](){
-        QPalette pa = palette();
-        auto type = DGuiApplicationHelper::instance()->themeType();
-        pa.setColor(QPalette::WindowText, type == DGuiApplicationHelper::ColorType::LightType ? Qt::black : Qt::white);
-        m_previewTitle->setPalette(pa);
-    };
-
-    updateWindowTitleColorType();
-
-    connect(DGuiApplicationHelper::instance(), & DGuiApplicationHelper::themeTypeChanged, this , updateWindowTitleColorType);
+    connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged,
+            this, &X11WindowPreviewContainer::applyTheme);
+    connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::applicationPaletteChanged,
+            this, &X11WindowPreviewContainer::applyTheme);
 
     titleLayout->addWidget(m_previewIcon);
     titleLayout->setSpacing(0);
@@ -702,13 +830,15 @@ void X11WindowPreviewContainer::initUI()
     handler.setShadowRadius(12 * qApp->devicePixelRatio());
     handler.setShadowColor(QColor(0, 0, 0, 0.6 * 255));
     handler.setShadowOffset(QPoint(0, 4 * qApp->devicePixelRatio()));
+
+    applyTheme();
 }
 
 void X11WindowPreviewContainer::updateSize(int windowCount)
 {
     if (windowCount != -1) {
         if (windowCount == 0) {
-            DBlurEffectWidget::hide();
+            dismissPreview();
             return;
         }
     }
@@ -750,14 +880,19 @@ void X11WindowPreviewContainer::updateSize(int windowCount)
         return resWidth;
     };
 
-    setFixedSize(calFixWidth(), calFixHeight());
-
+    QSize targetSize(calFixWidth(), calFixHeight());
     if (m_view->width() + this->contentsMargins().left() * 2 <= PREVIEW_MINI_WIDTH) {
-        setMaximumWidth(PREVIEW_MINI_WIDTH);
+        targetSize.setWidth(std::max(targetSize.width(), PREVIEW_MINI_WIDTH));
     }
 
+    setMinimumSize(1, 1);
+    setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+    resize(targetSize);
+
     m_titleWidget->setFixedWidth(m_view->width());
-    QTimer::singleShot(0, this, &X11WindowPreviewContainer::adjustSize);
+    if (layout()) {
+        layout()->activate();
+    }
 }
 
 bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
@@ -788,7 +923,7 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
         if (index.isValid()) {
             X11Utils::instance()->setActiveWindow(index.data(TaskManager::WinIdRole).toUInt());
         }
-        DBlurEffectWidget::hide();
+        dismissPreview();
         break;
     }
     default: {}

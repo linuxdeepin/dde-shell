@@ -18,6 +18,8 @@ Item {
     property int toolTipX: 0
     property int toolTipY: 0
     property bool readyBinding: false
+    property int closeGraceInterval: 90
+    readonly property int toolTipTopFrameInset: 1
     // WM_NAME, used for kwin.
     property string windowTitle: "dde-shell/paneltooltip"
     width: toolTip.width
@@ -25,13 +27,13 @@ Item {
 
     Binding {
         when: readyBinding
-        target: toolTipWindow; property: "requestedWidth"
+        target: toolTipWindow; property: "width"
         value: toolTip.width + toolTip.leftPadding + toolTip.rightPadding
     }
     Binding {
         when: readyBinding
-        target: toolTipWindow; property: "requestedHeight"
-        value: toolTip.height
+        target: toolTipWindow; property: "height"
+        value: toolTip.height + toolTipTopFrameInset
     }
     Binding {
         when: readyBinding
@@ -43,7 +45,7 @@ Item {
         when: readyBinding
         delayed: true
         target: toolTipWindow; property: "yOffset"
-        value: control.toolTipY
+        value: control.toolTipY - toolTipTopFrameInset
     }
 
     function open()
@@ -51,11 +53,27 @@ Item {
         if (!toolTipWindow)
             return
 
+        closeTimer.stop()
+        timer.stop()
+
+        if (toolTipWindow.visible && toolTipWindow.currentItem && toolTipWindow.currentItem !== control) {
+            toolTipWindow.close()
+            toolTipWindow.currentItem = null
+        }
+
         readyBinding = Qt.binding(function () {
             return toolTipWindow && toolTipWindow.currentItem === control
         })
-
         toolTipWindow.currentItem = control
+        if (toolTipWindow.visible) {
+            toolTipWindow.title = windowTitle
+            if ("showAnimated" in toolTipWindow) {
+                toolTipWindow.showAnimated()
+            } else {
+                toolTipWindow.show()
+            }
+            return
+        }
         timer.start()
     }
 
@@ -70,7 +88,11 @@ Item {
                 return
 
             toolTipWindow.title = windowTitle
-            toolTipWindow.show()
+            if ("showAnimated" in toolTipWindow) {
+                toolTipWindow.showAnimated()
+            } else {
+                toolTipWindow.show()
+            }
         }
     }
     
@@ -82,12 +104,43 @@ Item {
         if (!readyBinding)
             return
 
-        toolTipWindow.close()
-        toolTipWindow.currentItem = null
+        if (closeGraceInterval > 0 && toolTipWindow.visible) {
+            closeTimer.restart()
+            return
+        }
+
+        if (toolTipWindow.currentItem !== control) {
+            return
+        }
+
+        if ("closeAnimated" in toolTipWindow) {
+            toolTipWindow.closeAnimated()
+        } else {
+            toolTipWindow.close()
+            toolTipWindow.currentItem = null
+        }
     }
     function hide()
     {
         close()
+    }
+
+    Timer {
+        id: closeTimer
+        interval: control.closeGraceInterval
+        repeat: false
+        onTriggered: {
+            if (!toolTipWindow || toolTipWindow.currentItem !== control) {
+                return
+            }
+
+            if ("closeAnimated" in toolTipWindow) {
+                toolTipWindow.closeAnimated()
+            } else {
+                toolTipWindow.close()
+                toolTipWindow.currentItem = null
+            }
+        }
     }
 
     Control {

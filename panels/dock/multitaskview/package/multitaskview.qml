@@ -20,6 +20,12 @@ AppletDockItem {
         toolTipY: DockPanelPositioner.y
     }
 
+    function showToolTipNow() {
+        var point = toggleworkspace.mapToItem(null, toggleworkspace.width / 2, toggleworkspace.height / 2)
+        toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+        toolTip.open()
+    }
+
     D.DciIcon {
         id: icon
         anchors.centerIn: parent
@@ -32,11 +38,7 @@ AppletDockItem {
     Timer {
         id: toolTipShowTimer
         interval: 50
-        onTriggered: {
-            var point = toggleworkspace.mapToItem(null, toggleworkspace.width / 2, toggleworkspace.height / 2)
-            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-            toolTip.open()
-        }
+        onTriggered: toggleworkspace.showToolTipNow()
     }
 
     MouseArea {
@@ -52,7 +54,11 @@ AppletDockItem {
     HoverHandler {
         onHoveredChanged: {
             if (hovered) {
-                toolTipShowTimer.start()
+                if (toolTip.toolTipWindow && toolTip.toolTipWindow.visible) {
+                    toggleworkspace.showToolTipNow()
+                } else {
+                    toolTipShowTimer.start()
+                }
             } else {
                 if (toolTipShowTimer.running) {
                     toolTipShowTimer.stop()

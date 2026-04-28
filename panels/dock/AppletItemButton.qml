@@ -12,7 +12,9 @@ IconButton {
     id: control
     property bool isActive
     property real radius: 4
+    property point lastSpotlightPoint: Qt.point(0, 0)
     property bool autoClosePopup: false
+    readonly property bool drivesDockSpotlight: Window.window === Panel.rootObject
 
     padding: 4
     topPadding: undefined
@@ -25,6 +27,35 @@ IconButton {
 
     icon.width: 16
     icon.height: 16
+
+    function mapSpotlightPoint(localPoint) {
+        if (!drivesDockSpotlight) {
+            return Qt.point(0, 0)
+        }
+
+        const point = localPoint || Qt.point(width / 2, height / 2)
+        return mapToItem(null, point.x, point.y)
+    }
+
+    function updateSpotlight(localPoint) {
+        if (!drivesDockSpotlight) {
+            lastSpotlightPoint = Qt.point(0, 0)
+            Panel.reportMousePresence(false)
+            return
+        }
+
+        lastSpotlightPoint = mapSpotlightPoint(localPoint)
+        Panel.reportMousePresence(true, lastSpotlightPoint)
+    }
+
+    function clearSpotlight() {
+        if (!drivesDockSpotlight) {
+            Panel.reportMousePresence(false)
+            return
+        }
+
+        Panel.reportMousePresence(false, lastSpotlightPoint)
+    }
 
     Connections {
         target: control
@@ -41,5 +72,39 @@ IconButton {
 
     Component.onCompleted: {
         contentItem.smooth = false
+    }
+
+    HoverHandler {
+        id: spotlightHoverHandler
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
+        enabled: control.enabled && control.visible && control.hoverEnabled
+
+        onPointChanged: {
+            if (hovered) {
+                spotlightClearTimer.stop()
+                control.updateSpotlight(spotlightHoverHandler.point.position)
+            }
+        }
+
+        onHoveredChanged: {
+            if (hovered) {
+                spotlightClearTimer.stop()
+                control.updateSpotlight()
+                return
+            }
+
+            spotlightClearTimer.restart()
+        }
+    }
+
+    Timer {
+        id: spotlightClearTimer
+        interval: 70
+        repeat: false
+        onTriggered: {
+            if (!spotlightHoverHandler.hovered) {
+                control.clearSpotlight()
+            }
+        }
     }
 }

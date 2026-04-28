@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -16,19 +16,204 @@
 #include "dockfrontadaptor.h"
 #include "dockdaemonadaptor.h"
 #include "loadtrayplugins.h"
-
 #include <DDBusSender>
 #include <QQuickWindow>
 #include <QLoggingCategory>
 #include <QGuiApplication>
 #include <QQuickItem>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDBusVariant>
+#include <QIcon>
+#include <QtGui/qguiapplication_platform.h>
 #include <DGuiApplicationHelper>
+#include <DPlatformTheme>
+
+#if defined(BUILD_WITH_X11)
+#include <xcb/xcb.h>
+#endif
 
 #define SETTINGS DockSettings::instance()
 
 Q_LOGGING_CATEGORY(dockLog, "org.deepin.dde.shell.dock")
 
 namespace dock {
+
+namespace {
+constexpr auto kAppearanceService = "org.deepin.dde.Appearance1";
+constexpr auto kAppearancePath = "/org/deepin/dde/Appearance1";
+constexpr auto kAppearanceInterface = "org.deepin.dde.Appearance1";
+constexpr auto kPropertiesInterface = "org.freedesktop.DBus.Properties";
+
+Dtk::Gui::DGuiApplicationHelper::ColorType explicitThemeTypeFromName(const QString &themeName)
+{
+    const QString normalizedThemeName = themeName.trimmed().toLower();
+    if (normalizedThemeName.isEmpty())
+        return Dtk::Gui::DGuiApplicationHelper::UnknownType;
+
+    if (normalizedThemeName == QStringLiteral("dark")
+        || normalizedThemeName.endsWith(QStringLiteral(".dark"))
+        || normalizedThemeName.endsWith(QStringLiteral("-dark"))
+        || normalizedThemeName.endsWith(QStringLiteral("_dark"))) {
+        return Dtk::Gui::DGuiApplicationHelper::DarkType;
+    }
+
+    if (normalizedThemeName == QStringLiteral("light")
+        || normalizedThemeName.endsWith(QStringLiteral(".light"))
+        || normalizedThemeName.endsWith(QStringLiteral("-light"))
+        || normalizedThemeName.endsWith(QStringLiteral("_light"))) {
+        return Dtk::Gui::DGuiApplicationHelper::LightType;
+    }
+
+    return Dtk::Gui::DGuiApplicationHelper::UnknownType;
+}
+
+Dtk::Gui::DGuiApplicationHelper::ColorType currentEffectiveThemeType(Dtk::Gui::DGuiApplicationHelper *helper)
+{
+    if (!helper)
+        return Dtk::Gui::DGuiApplicationHelper::LightType;
+
+    const auto currentThemeType = helper->themeType();
+    if (currentThemeType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return currentThemeType;
+
+    const auto currentPaletteType = helper->paletteType();
+    if (currentPaletteType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return currentPaletteType;
+
+    return Dtk::Gui::DGuiApplicationHelper::LightType;
+}
+
+Dtk::Gui::DGuiApplicationHelper::ColorType effectiveThemeTypeFromAppearance(
+    const QString &globalThemeName,
+    const QString &gtkThemeName,
+    const QString &iconThemeName,
+    Dtk::Gui::DGuiApplicationHelper *helper)
+{
+    const auto globalThemeType = explicitThemeTypeFromName(globalThemeName);
+    if (globalThemeType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return globalThemeType;
+
+    const auto gtkThemeType = explicitThemeTypeFromName(gtkThemeName);
+    if (gtkThemeType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return gtkThemeType;
+
+    const auto iconThemeType = explicitThemeTypeFromName(iconThemeName);
+    if (iconThemeType != Dtk::Gui::DGuiApplicationHelper::UnknownType)
+        return iconThemeType;
+
+    return currentEffectiveThemeType(helper);
+}
+
+ColorTheme colorThemeFromHelperThemeType(Dtk::Gui::DGuiApplicationHelper::ColorType themeType)
+{
+    return themeType == Dtk::Gui::DGuiApplicationHelper::DarkType ? Dark : Light;
+}
+
+QString readAppearanceStringProperty(const QString &propertyName)
+{
+    QDBusInterface appearanceProperties(kAppearanceService,
+                                        kAppearancePath,
+                                        kPropertiesInterface,
+                                        QDBusConnection::sessionBus());
+    if (!appearanceProperties.isValid())
+        return QString();
+
+    const QDBusReply<QDBusVariant> reply = appearanceProperties.call(QStringLiteral("Get"),
+                                                                     QString::fromLatin1(kAppearanceInterface),
+                                                                     propertyName);
+    return reply.isValid() ? reply.value().variant().toString() : QString();
+}
+
+#if defined(BUILD_WITH_X11)
+xcb_window_t nativeTopLevelWindow(xcb_connection_t *connection, xcb_window_t window)
+{
+    xcb_window_t current = window;
+
+    while (current != XCB_WINDOW_NONE) {
+        xcb_query_tree_reply_t *reply = xcb_query_tree_reply(connection, xcb_query_tree(connection, current), nullptr);
+        if (!reply) {
+            return current;
+        }
+
+        const bool isTopLevel = reply->parent == reply->root || reply->parent == XCB_WINDOW_NONE;
+        const xcb_window_t parent = reply->parent;
+        free(reply);
+
+        if (isTopLevel) {
+            return current;
+        }
+
+        current = parent;
+    }
+
+    return window;
+}
+
+bool raiseX11Window(QWindow *window)
+{
+    if (!window) {
+        return false;
+    }
+
+    window->create();
+    const auto windowId = static_cast<xcb_window_t>(window->winId());
+    if (windowId == XCB_WINDOW_NONE) {
+        return false;
+    }
+
+    auto *x11App = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
+    if (!x11App || !x11App->connection()) {
+        return false;
+    }
+
+    const auto nativeWindowId = nativeTopLevelWindow(x11App->connection(), windowId);
+    const uint32_t values[] = { XCB_STACK_MODE_ABOVE };
+    xcb_configure_window(x11App->connection(), nativeWindowId, XCB_CONFIG_WINDOW_STACK_MODE, values);
+    xcb_flush(x11App->connection());
+    return true;
+}
+#endif
+
+void syncApplicationTheme(Dtk::Gui::DGuiApplicationHelper *helper,
+                          const QString &globalThemeName,
+                          const QString &gtkThemeName,
+                          const QString &iconThemeName)
+{
+    if (!helper)
+        return;
+
+    const auto explicitThemeType = explicitThemeTypeFromName(globalThemeName);
+    const bool followSystemTheme = explicitThemeType == Dtk::Gui::DGuiApplicationHelper::UnknownType;
+    const auto targetPaletteType = followSystemTheme ? Dtk::Gui::DGuiApplicationHelper::UnknownType : explicitThemeType;
+
+    if (auto *applicationTheme = helper->applicationTheme()) {
+        const QByteArray gtkThemeNameBytes = gtkThemeName.toUtf8();
+        if (!gtkThemeNameBytes.isEmpty() && applicationTheme->themeName() != gtkThemeNameBytes) {
+            applicationTheme->setThemeName(gtkThemeNameBytes);
+        }
+
+        const QByteArray iconThemeNameBytes = iconThemeName.toUtf8();
+        if (!iconThemeNameBytes.isEmpty() && applicationTheme->iconThemeName() != iconThemeNameBytes) {
+            applicationTheme->setIconThemeName(iconThemeNameBytes);
+        }
+    }
+
+    if (helper->paletteType() != targetPaletteType) {
+        helper->setPaletteType(targetPaletteType);
+    }
+
+    const auto targetThemeType = effectiveThemeTypeFromAppearance(globalThemeName, gtkThemeName, iconThemeName, helper);
+    const QPalette targetPalette = helper->applicationPalette(targetThemeType);
+    if (helper->applicationPalette() != targetPalette) {
+        helper->setApplicationPalette(targetPalette);
+    }
+
+    if (!iconThemeName.isEmpty() && QIcon::themeName() != iconThemeName) {
+        QIcon::setThemeName(iconThemeName);
+    }
+}
+}
 
 DockPanel::DockPanel(QObject *parent)
     : DPanel(parent)
@@ -38,9 +223,40 @@ DockPanel::DockPanel(QObject *parent)
     , m_loadTrayPlugins(new LoadTrayPlugins(this))
     , m_compositorReady(false)
     , m_launcherShown(false)
+    , m_themeSyncTimer(new QTimer(this))
+    , m_launcherRaiseTimer(new QTimer(this))
+    , m_launcherRaisePasses(0)
     , m_contextDragging(false)
+    , m_containsMouse(false)
+    , m_reportedContainsMouse(false)
     , m_isResizing(false)
+    , m_cursorPosition(0, 0)
+    , m_reportedCursorPosition(0, 0)
 {
+    m_themeSyncTimer->setSingleShot(true);
+    m_themeSyncTimer->setInterval(80);
+    connect(m_themeSyncTimer, &QTimer::timeout, this, &DockPanel::syncColorThemeWithSystem);
+
+    m_launcherRaiseTimer->setInterval(80);
+    connect(m_launcherRaiseTimer, &QTimer::timeout, this, [this] {
+        if (!m_launcherShown || m_launcherRaisePasses <= 0) {
+            m_launcherRaiseTimer->stop();
+            return;
+        }
+
+        if (window()) {
+            window()->raise();
+#if defined(BUILD_WITH_X11)
+            raiseX11Window(window());
+#endif
+        }
+
+        --m_launcherRaisePasses;
+        if (m_launcherRaisePasses <= 0) {
+            m_launcherRaiseTimer->stop();
+        }
+    });
+
     connect(this, &DockPanel::compositorReadyChanged, this, [this] {
         if (!m_compositorReady) return;
         m_loadTrayPlugins->loadDockPlugins();
@@ -110,6 +326,13 @@ bool DockPanel::init()
     connect(this, &DockPanel::frontendWindowRectChanged, dockDaemonAdaptor, &DockDaemonAdaptor::FrontendWindowRectChanged);
     connect(SETTINGS, &DockSettings::dockSizeChanged, this, &DockPanel::dockSizeChanged);
     connect(SETTINGS, &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
+    connect(SETTINGS, &DockSettings::viewModeChanged, this, [this](ViewMode mode) {
+        Q_EMIT viewModeChanged(mode);
+
+        if (window()) {
+            QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged, Qt::QueuedConnection);
+        }
+    });
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
     connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
     connect(SETTINGS, &DockSettings::lockedChanged, this, &DockPanel::lockedChanged);
@@ -134,9 +357,10 @@ bool DockPanel::init()
     QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
         if (rootObject()) {
             // those connections need connect after DPanel::init() which create QQuickWindow
-            // xChanged yChanged not worked on wayland, so use above positionChanged instead
-            // connect(window(), &QQuickWindow::xChanged, this, &DockPanel::onWindowGeometryChanged);
-            // connect(window(), &QQuickWindow::yChanged, this, &DockPanel::onWindowGeometryChanged);
+            if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
+                connect(window(), &QQuickWindow::xChanged, this, &DockPanel::onWindowGeometryChanged);
+                connect(window(), &QQuickWindow::yChanged, this, &DockPanel::onWindowGeometryChanged);
+            }
             connect(window(), &QQuickWindow::widthChanged, this, &DockPanel::onWindowGeometryChanged);
             connect(window(), &QQuickWindow::heightChanged, this, &DockPanel::onWindowGeometryChanged);
             QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
@@ -150,16 +374,23 @@ bool DockPanel::init()
         }
     });
 
-    m_theme = static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType());
+    auto *guiHelper = Dtk::Gui::DGuiApplicationHelper::instance();
+    QObject::connect(guiHelper, &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
+                     this, &DockPanel::syncColorThemeWithSystem);
+    if (auto *platformTheme = guiHelper->applicationTheme()) {
+        QObject::connect(platformTheme, &Dtk::Gui::DPlatformTheme::themeNameChanged,
+                         this, &DockPanel::syncColorThemeWithSystem);
+    }
+    QDBusConnection::sessionBus().connect(kAppearanceService, kAppearancePath, kAppearanceInterface,
+                                          "Changed", this, SLOT(onAppearanceChanged(QString,QString)));
+    QDBusConnection::sessionBus().connect(kAppearanceService, kAppearancePath, kAppearanceInterface,
+                                          "Refreshed", this, SLOT(onAppearanceRefreshed(QString)));
+    syncColorThemeWithSystem();
+
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
-        // TODO: support get color type from wayland
         m_helper = new WaylandDockHelper(this);
     } else if (QStringLiteral("xcb") == platformName) {
-        QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
-                            this, [this](){
-            setColorTheme(static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType()));
-        });
         m_helper = new X11DockHelper(this);
     }
 
@@ -193,28 +424,13 @@ void DockPanel::setFrontendWindowRect(int transformOffsetX, int transformOffsetY
     auto ratio = window()->devicePixelRatio();
     auto screenGeometry = window()->screen()->geometry();
     auto geometry = window()->geometry();
-    auto xOffset = 0, yOffset = 0;
+    const int xOffset = geometry.x() - screenGeometry.x() + transformOffsetX;
+    const int yOffset = geometry.y() - screenGeometry.y() + transformOffsetY;
 
-    switch (position()) {
-        case Top:
-            xOffset = (screenGeometry.width() - geometry.width()) / 2;
-            yOffset = transformOffsetY;
-            break;
-        case Bottom:
-            xOffset = (screenGeometry.width() - geometry.width()) / 2;
-            yOffset = screenGeometry.height() - geometry.height() + transformOffsetY;
-            break;
-        case Right:
-            xOffset = screenGeometry.width() - geometry.width() + transformOffsetX;
-            yOffset = (screenGeometry.height() - geometry.height()) / 2;
-            break;
-        case Left:
-            xOffset = transformOffsetX;
-            yOffset = (screenGeometry.height() - geometry.height()) / 2;
-            break;
-    }
-
-    m_frontendWindowRect = QRect(screenGeometry.x() + xOffset * ratio, screenGeometry.y() + yOffset * ratio, geometry.width() * ratio, geometry.height() * ratio);
+    m_frontendWindowRect = QRect(screenGeometry.x() + xOffset * ratio,
+                                 screenGeometry.y() + yOffset * ratio,
+                                 geometry.width() * ratio,
+                                 geometry.height() * ratio);
 }
 
 ColorTheme DockPanel::colorTheme()
@@ -228,6 +444,63 @@ void DockPanel::setColorTheme(const ColorTheme& theme)
         return;
     m_theme = theme;
     Q_EMIT this->colorThemeChanged(theme);
+}
+
+void DockPanel::onAppearanceChanged(const QString &type, const QString &value)
+{
+    Q_UNUSED(value)
+    static const QStringList kTrackedAppearanceKeys{
+        QStringLiteral("GlobalTheme"),
+        QStringLiteral("GtkTheme"),
+        QStringLiteral("IconTheme"),
+        QStringLiteral("QtActiveColor")
+    };
+
+    if (!kTrackedAppearanceKeys.contains(type, Qt::CaseInsensitive))
+        return;
+
+    m_themeSyncTimer->start();
+}
+
+void DockPanel::onAppearanceRefreshed(const QString &type)
+{
+    static const QStringList kTrackedAppearanceKeys{
+        QStringLiteral("GlobalTheme"),
+        QStringLiteral("GtkTheme"),
+        QStringLiteral("IconTheme"),
+        QStringLiteral("QtActiveColor")
+    };
+
+    if (!type.isEmpty() && !kTrackedAppearanceKeys.contains(type, Qt::CaseInsensitive))
+        return;
+
+    m_themeSyncTimer->start();
+}
+
+void DockPanel::syncColorThemeWithSystem()
+{
+    auto *guiHelper = Dtk::Gui::DGuiApplicationHelper::instance();
+    QDBusInterface appearanceProperties(kAppearanceService,
+                                        kAppearancePath,
+                                        kPropertiesInterface,
+                                        QDBusConnection::sessionBus());
+    if (appearanceProperties.isValid()) {
+        const QDBusReply<QDBusVariant> reply = appearanceProperties.call(QStringLiteral("Get"),
+                                                                         QString::fromLatin1(kAppearanceInterface),
+                                                                         QStringLiteral("GlobalTheme"));
+        if (reply.isValid()) {
+            const QString globalThemeName = reply.value().variant().toString();
+            const QString gtkThemeName = readAppearanceStringProperty(QStringLiteral("GtkTheme"));
+            const QString iconThemeName = readAppearanceStringProperty(QStringLiteral("IconTheme"));
+            syncApplicationTheme(guiHelper, globalThemeName, gtkThemeName, iconThemeName);
+            setColorTheme(colorThemeFromHelperThemeType(
+                effectiveThemeTypeFromAppearance(globalThemeName, gtkThemeName, iconThemeName, guiHelper)));
+            return;
+        }
+    }
+
+    syncApplicationTheme(guiHelper, QString(), QString(), QString());
+    setColorTheme(colorThemeFromHelperThemeType(currentEffectiveThemeType(guiHelper)));
 }
 
 uint DockPanel::dockSize()
@@ -260,6 +533,11 @@ Position DockPanel::position()
     return SETTINGS->position();
 }
 
+ViewMode DockPanel::viewMode()
+{
+    return SETTINGS->viewMode();
+}
+
 void DockPanel::setPosition(const Position& position)
 {
     if (position == SETTINGS->position()) return;
@@ -269,6 +547,35 @@ void DockPanel::setPosition(const Position& position)
 
     // Directly commit the position change
     SETTINGS->setPosition(position);
+
+    if (SETTINGS->viewMode() == ViewMode::FashionMode) {
+        SETTINGS->setItemAlignment(position == Position::Bottom
+                                       ? ItemAlignment::LeftAlignment
+                                       : ItemAlignment::CenterAlignment);
+    }
+}
+
+void DockPanel::setViewMode(const ViewMode &mode)
+{
+    if (SETTINGS->viewMode() == mode)
+        return;
+
+    SETTINGS->setViewMode(mode);
+
+    switch (mode) {
+    case ViewMode::CenteredMode:
+        SETTINGS->setItemAlignment(ItemAlignment::CenterAlignment);
+        break;
+    case ViewMode::LeftAlignedMode:
+        SETTINGS->setItemAlignment(ItemAlignment::LeftAlignment);
+        break;
+    case ViewMode::FashionMode:
+        SETTINGS->setItemAlignment(SETTINGS->position() == Position::Bottom
+                                       ? ItemAlignment::LeftAlignment
+                                       : ItemAlignment::CenterAlignment);
+        SETTINGS->setIndicatorStyle(IndicatorStyle::Fashion);
+        break;
+    }
 }
 
 ItemAlignment DockPanel::itemAlignment()
@@ -278,6 +585,9 @@ ItemAlignment DockPanel::itemAlignment()
 
 void DockPanel::setItemAlignment(const ItemAlignment& alignment)
 {
+    if (SETTINGS->viewMode() != ViewMode::FashionMode) {
+        SETTINGS->setViewMode(alignment == ItemAlignment::CenterAlignment ? ViewMode::CenteredMode : ViewMode::LeftAlignedMode);
+    }
     SETTINGS->setItemAlignment(alignment);
 }
 
@@ -358,6 +668,35 @@ void DockPanel::notifyDockPositionChanged(int offsetX, int offsetY)
     Q_EMIT frontendWindowRectChanged(m_frontendWindowRect);
 }
 
+void DockPanel::reportMousePresence(bool containsMouse, const QPointF &cursorPosition)
+{
+    const bool previousContainsMouse = this->containsMouse();
+    const QPointF previousCursorPosition = this->cursorPosition();
+
+    const auto isSameReportedPosition = [](const QPointF &lhs, const QPointF &rhs) {
+        constexpr qreal epsilon = 0.5;
+        return qAbs(lhs.x() - rhs.x()) <= epsilon && qAbs(lhs.y() - rhs.y()) <= epsilon;
+    };
+
+    // Ignore delayed clear requests from a previously hovered delegate once a new
+    // delegate has already taken over spotlight reporting.
+    if (!containsMouse && m_reportedContainsMouse && cursorPosition != QPointF() && !isSameReportedPosition(m_reportedCursorPosition, cursorPosition)) {
+        return;
+    }
+
+    m_reportedContainsMouse = containsMouse;
+    if (containsMouse) {
+        m_reportedCursorPosition = cursorPosition;
+    }
+
+    if (previousContainsMouse != this->containsMouse()) {
+        emit containsMouseChanged(this->containsMouse());
+    }
+    if (previousCursorPosition != this->cursorPosition()) {
+        emit cursorPositionChanged(this->cursorPosition());
+    }
+}
+
 void DockPanel::launcherVisibleChanged(bool visible)
 {
     if (visible == m_launcherShown) return;
@@ -368,6 +707,14 @@ void DockPanel::launcherVisibleChanged(bool visible)
 
     if (newHideState != oldHideState) {
         Q_EMIT hideStateChanged(newHideState);
+    }
+
+    if (m_launcherShown) {
+        m_launcherRaisePasses = 10;
+        m_launcherRaiseTimer->start();
+    } else {
+        m_launcherRaisePasses = 0;
+        m_launcherRaiseTimer->stop();
     }
 }
 
@@ -466,6 +813,44 @@ void DockPanel::setContextDragging(bool newContextDragging)
     if (!m_contextDragging)
         m_helper->checkNeedHideOrNot();
     emit contextDraggingChanged();
+}
+
+bool DockPanel::containsMouse() const
+{
+    return m_containsMouse || m_reportedContainsMouse;
+}
+
+QPointF DockPanel::cursorPosition() const
+{
+    return m_reportedContainsMouse ? m_reportedCursorPosition : m_cursorPosition;
+}
+
+void DockPanel::setContainsMouse(bool containsMouse)
+{
+    const bool previousContainsMouse = this->containsMouse();
+    const QPointF previousCursorPosition = this->cursorPosition();
+    if (m_containsMouse == containsMouse)
+        return;
+
+    m_containsMouse = containsMouse;
+    if (previousContainsMouse != this->containsMouse()) {
+        emit containsMouseChanged(this->containsMouse());
+    }
+    if (previousCursorPosition != this->cursorPosition()) {
+        emit cursorPositionChanged(this->cursorPosition());
+    }
+}
+
+void DockPanel::setCursorPosition(const QPointF &cursorPosition)
+{
+    const QPointF previousCursorPosition = this->cursorPosition();
+    if (m_cursorPosition == cursorPosition)
+        return;
+
+    m_cursorPosition = cursorPosition;
+    if (previousCursorPosition != this->cursorPosition()) {
+        emit cursorPositionChanged(this->cursorPosition());
+    }
 }
 
 bool DockPanel::isResizing() const

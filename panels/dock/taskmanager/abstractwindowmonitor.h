@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -42,7 +42,11 @@ public:
     void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
 
     virtual void
-    requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) = 0;
+    requestPreview(QAbstractItemModel *sourceModel,
+                   QWindow *relativePositionItem,
+                   int32_t previewXoffset,
+                   int32_t previewYoffset,
+                   uint32_t direction) = 0;
 
     void requestWindowsView(const QModelIndexList &indexes) const override;
 

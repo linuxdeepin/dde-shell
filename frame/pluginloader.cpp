@@ -130,33 +130,67 @@ public:
 
         result <<  DDE_SHELL_PLUGIN_INSTALL_DIR;
 
+        QStringList librarySubdirs {QStringLiteral("lib/dde-shell")};
+        const QString installPluginDir = QString::fromLocal8Bit(DDE_SHELL_PLUGIN_INSTALL_DIR);
+        const int installLibIndex = installPluginDir.lastIndexOf(QStringLiteral("/lib"));
+        if (installLibIndex >= 0) {
+            const QString libSubdir = installPluginDir.mid(installLibIndex + 1, installPluginDir.size() - installLibIndex - 1 - QStringLiteral("/dde-shell").size());
+            if (!libSubdir.isEmpty()) {
+                const QString resolvedSubdir = libSubdir + QStringLiteral("/dde-shell");
+                if (!librarySubdirs.contains(resolvedSubdir)) {
+                    librarySubdirs.prepend(resolvedSubdir);
+                }
+            }
+        }
+
+        for (const auto &dataDir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+            if (!dataDir.endsWith(QStringLiteral("/share"))) {
+                continue;
+            }
+
+            const QString prefix = dataDir.left(dataDir.size() - QStringLiteral("/share").size());
+            for (const auto &librarySubdir : librarySubdirs) {
+                const QString pluginDir = QDir(prefix).absoluteFilePath(librarySubdir);
+                if (QDir(pluginDir).exists() && !result.contains(pluginDir)) {
+                    result << pluginDir;
+                }
+            }
+        }
+
         qCDebug(dsLog()) << "Builtin plugin paths" << result;
         return result;
     }
 
-    bool existPlugin(const DPluginMetaData &data) const
+    QString pluginFilePath(const DPluginMetaData &data) const
     {
         const QString fileName = data.pluginId();
         D_QC(DPluginLoader);
         for (const auto &item : q->pluginDirs()) {
             const QDir dir(item);
-            if (dir.exists(fileName + PluginSuffix))
-                return true;
+            const QString absoluteFilePath = dir.absoluteFilePath(fileName + PluginSuffix);
+            if (QFileInfo::exists(absoluteFilePath))
+                return absoluteFilePath;
         }
-        return false;
+        return {};
+    }
+
+    bool existPlugin(const DPluginMetaData &data) const
+    {
+        return !pluginFilePath(data).isEmpty();
     }
 
     DAppletFactory *appletFactory(const DPluginMetaData &data)
     {
-        if (!existPlugin(data))
+        const QString pluginPath = pluginFilePath(data);
+        if (pluginPath.isEmpty()) {
             return nullptr;
+        }
 
         DAppletFactory *factory = nullptr;
-        const QString fileName = data.pluginId();
-        QPluginLoader loader(fileName);
+        QPluginLoader loader(pluginPath);
         loader.load();
         if (!loader.isLoaded()) {
-            qCWarning(dsLog) << "Load the plugin failed." << loader.errorString();
+            qCWarning(dsLog) << "Load the plugin failed." << pluginPath << loader.errorString();
             return factory;
         }
 
@@ -171,12 +205,12 @@ public:
                 break;
 
             if (!loader.instance()) {
-                qWarning(dsLog) << "Load the plugin failed." << loader.errorString();
+                qWarning(dsLog) << "Load the plugin failed." << pluginPath << loader.errorString();
                 break;
             }
             factory = qobject_cast<DAppletFactory *>(loader.instance());
             if (!factory) {
-                qWarning(dsLog) << "The plugin isn't a DAppletFactory." << fileName;
+                qWarning(dsLog) << "The plugin isn't a DAppletFactory." << pluginPath;
                 break;
             }
         } while (false);

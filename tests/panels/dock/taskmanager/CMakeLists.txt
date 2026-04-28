@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -49,3 +49,40 @@ target_include_directories(rolegroupmodel_tests PRIVATE
 )
 
 gtest_discover_tests(rolegroupmodel_tests)
+
+add_executable(popupsortutils_tests
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/popupsortutils.h
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/popupsortutils.cpp
+    popupsortutilstests.cpp
+)
+
+target_link_libraries(popupsortutils_tests
+    GTest::GTest
+    GTest::Main
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Test
+)
+target_include_directories(popupsortutils_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/
+)
+
+gtest_discover_tests(popupsortutils_tests)
+
+add_executable(dockfoldermigrationutils_tests
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/dockfoldermigrationutils.h
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/dockfoldermigrationutils.cpp
+    dockfoldermigrationutilstests.cpp
+)
+
+target_link_libraries(dockfoldermigrationutils_tests
+    GTest::GTest
+    GTest::Main
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Test
+)
+target_include_directories(dockfoldermigrationutils_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/
+)
+
+gtest_discover_tests(dockfoldermigrationutils_tests)
