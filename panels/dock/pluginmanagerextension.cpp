@@ -10,6 +10,7 @@
 #include <DPlatformTheme>
 
 #include <cstdint>
+#include <wayland-server-core.h>
 
 #include <QtWaylandCompositor/QWaylandSurface>
 #include <QtWaylandCompositor/QWaylandResource>
@@ -254,7 +255,13 @@ bool PluginSurface::isItemActive() const
 
 void PluginSurface::updatePluginGeometry(const QRect &geometry)
 {
+    m_itemPosition = geometry.topLeft();
     send_geometry(geometry.x(), geometry.y(), geometry.width(), geometry.height());
+}
+
+QPoint PluginSurface::itemPosition() const
+{
+    return m_itemPosition;
 }
 
 void PluginSurface::plugin_mouse_event(QtWaylandServer::plugin::Resource *resource, int32_t type)
@@ -673,6 +680,62 @@ void PluginManager::plugin_manager_v1_create_popup_at(Resource *resource, const 
     Q_EMIT pluginPopupCreated(plugin);
 }
 
+void PluginManager::plugin_manager_v1_move_xembed_window(Resource *resource, uint32_t xembed_winid, const QString &plugin_id, const QString &item_key, uint32_t callback)
+{
+    qInfo() << "server pluginManager receive move_xembed_window:" << xembed_winid << plugin_id << item_key;
+    
+    // Look up the plugin surface to get its position relative to the dock window
+    PluginSurface *pluginSurface = findPluginSurface(plugin_id, item_key);
+    if (!pluginSurface) {
+        qWarning() << "move_xembed_window: plugin surface not found for" << plugin_id << item_key;
+        // Send error response immediately if surface not found
+        wl_resource *callbackResource = wl_resource_create(resource->client(), &wl_callback_interface, 
+                                                           1, callback);
+        if (callbackResource) {
+            wl_callback_send_done(callbackResource, 1); // 1 = error
+            wl_resource_destroy(callbackResource);
+        } else {
+            qWarning() << "move_xembed_window: failed to create callback resource";
+        }
+        return;
+    }
+    
+    double dx = pluginSurface->itemPosition().x();
+    double dy = pluginSurface->itemPosition().y();
+    
+    // Store pending callback for later response (supports concurrent requests)
+    m_pendingXEmbedCallbacks[xembed_winid] = {callback, resource->handle};
+    
+    // Emit signal with position info for QML to handle
+    Q_EMIT moveXEmbedWindowRequested(xembed_winid, plugin_id, item_key, dx, dy);
+}
+
+void PluginManager::notifyXEmbedWindowMoveResult(uint32_t wid, bool success)
+{
+    if (!m_pendingXEmbedCallbacks.contains(wid)) {
+        qWarning() << "notifyXEmbedWindowMoveResult: no pending callback for wid" << wid;
+        return;
+    }
+    
+    PendingXEmbedCallback pending = m_pendingXEmbedCallbacks.take(wid);
+    
+    // Get client from stored resource (safe during request handling)
+    struct ::wl_client *client = wl_resource_get_client(pending.resource);
+    if (!client) {
+        qWarning() << "notifyXEmbedWindowMoveResult: client no longer exists for wid" << wid;
+        return;
+    }
+    
+    wl_resource *callbackResource = wl_resource_create(client, &wl_callback_interface, 
+                                                       1, pending.callback);
+    if (callbackResource) {
+        wl_callback_send_done(callbackResource, success ? 0 : 1);
+        wl_resource_destroy(callbackResource);
+    } else {
+        qWarning() << "notifyXEmbedWindowMoveResult: failed to create callback resource for wid" << wid;
+    }
+}
+
 QJsonObject PluginManager::getRootObj(const QString &jsonStr) {
     QJsonParseError jsonParseError;
     const QJsonDocument &resultDoc = QJsonDocument::fromJson(jsonStr.toLocal8Bit(), &jsonParseError);
@@ -755,6 +818,16 @@ void PluginManager::onActiveColorChanged()
         auto theme = DGuiApplicationHelper::instance()->applicationTheme();
         send_active_color_changed(source->handle, theme->activeColor().name(), theme->darkActiveColor().name());
     });
+}
+
+PluginSurface* PluginManager::findPluginSurface(const QString &pluginId, const QString &itemKey) const
+{
+    for (PluginSurface *plugin : m_pluginSurfaces) {
+        if (plugin->pluginId() == pluginId && plugin->itemKey() == itemKey) {
+            return plugin;
+        }
+    }
+    return nullptr;
 }
 
 void PluginManager::onThemeChanged()

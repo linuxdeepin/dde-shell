@@ -83,6 +83,9 @@ public:
     Q_INVOKABLE void openDockSettings() const;
 
     Q_INVOKABLE void notifyDockPositionChanged(int offsetX, int offsetY);
+    
+    // Move XEmbed window relative to dock surface (Wayland only)
+    Q_INVOKABLE bool moveXEmbedWindow(uint32_t wid, double dx, double dy);
 
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);
