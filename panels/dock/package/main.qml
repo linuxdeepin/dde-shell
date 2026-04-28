@@ -422,6 +422,7 @@ Window {
             }
         }
 
+        property bool isLongPressing: false
         TapHandler {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             gesturePolicy: TapHandler.WithinBounds
@@ -436,6 +437,22 @@ Window {
                     // try to close popup when clicked empty, because dock does not have focus.
                     Panel.requestClosePopup()
                     viewDeactivated()
+                }
+            }
+            onLongPressed: {
+                console.debug("[Mouse Long Press] longPressed")
+                dockContainer.isLongPressing = true
+            }
+            onPressedChanged: {
+                console.debug("[Mouse Long Press] pressedChanged, pressed:", pressed, "isLongPressing:", dockContainer.isLongPressing)
+                if (!pressed && dockContainer.isLongPressing) {
+                    dockContainer.isLongPressing = false
+                    let lastActive = MenuHelper.activeMenu
+                    MenuHelper.closeCurrent()
+                    dockMenuLoader.active = true
+                    if (lastActive !== dockMenuLoader.item) {
+                        requestShowDockMenu()
+                    }
                 }
             }
         }
@@ -453,11 +470,19 @@ Window {
                 viewDeactivated()
             }
             onLongPressed: {
-                let lastActive = MenuHelper.activeMenu
-                MenuHelper.closeCurrent()
-                dockMenuLoader.active = true
-                if (lastActive !== dockMenuLoader.item) {
-                    requestShowDockMenu()
+                console.debug("[Touch Long Press] longPressed")
+                dockContainer.isLongPressing = true
+            }
+            onPressedChanged: {
+                console.debug("[Touch Long Press] pressedChanged, pressed:", pressed, "isLongPressing:", dockContainer.isLongPressing)
+                if (!pressed && dockContainer.isLongPressing) {
+                    dockContainer.isLongPressing = false
+                    let lastActive = MenuHelper.activeMenu
+                    MenuHelper.closeCurrent()
+                    dockMenuLoader.active = true
+                    if (lastActive !== dockMenuLoader.item) {
+                        requestShowDockMenu()
+                    }
                 }
             }
         }
