@@ -16,3 +16,4 @@ panels/dock/tray/plugins/power/dbusinterface/generation_dbus_interface/
 obj-x86_64-linux-gnu/
 *.autosave
 */utils/dbus/xml2cpp/*_interface.*
+.qmlls.ini

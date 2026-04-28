@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -18,6 +18,7 @@ Item {
     property alias dockPosition: pluginManager.dockPosition
     property alias dockColorTheme: pluginManager.dockColorTheme
     property alias dockSize: pluginManager.dockSize
+    property var moveXEmbedWindowHandler: null
 
     property ListModel trayPluginSurfaces: ListModel {}
     property ListModel quickPluginSurfaces: ListModel {}
@@ -112,6 +113,17 @@ Item {
             onPluginCloseQuickPanelPopup: {
                 console.log("quick panel closed")
                 dockCompositor.popupClosed()
+            }
+            
+            onMoveXEmbedWindowRequested: (wid, pluginId, itemKey, dx, dy) => {
+                console.log("move xembed window requested:", wid, pluginId, itemKey, dx, dy)
+                if (typeof dockCompositor.moveXEmbedWindowHandler === 'function') {
+                    var success = dockCompositor.moveXEmbedWindowHandler(wid, dx, dy)
+                    pluginManager.notifyXEmbedWindowMoveResult(wid, success)
+                } else {
+                    console.warn("moveXEmbedWindowHandler not available")
+                    pluginManager.notifyXEmbedWindowMoveResult(wid, false)
+                }
             }
         }
 

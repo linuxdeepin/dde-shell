@@ -855,6 +855,10 @@ Window {
             return Panel.devicePixelRatio
         })
 
+        DockCompositor.moveXEmbedWindowHandler = function(wid, dx, dy) {
+            return Panel.moveXEmbedWindow(wid, dx, dy)
+        }
+
         dock.itemIconSizeBase = dock.dockItemMaxSize
         dock.visible = Panel.hideState !== Dock.Hide
         changeDragAreaAnchor()
