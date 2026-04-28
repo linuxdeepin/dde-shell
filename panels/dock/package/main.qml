@@ -23,7 +23,11 @@ Window {
     readonly property int adaptiveFashionMaximumWidth: Math.max(0, Screen.width - resizeScreenEdgeMargin * 2)
     property int positionForAnimation: Panel.position
     property bool useColumnLayout: positionForAnimation % 2
-    readonly property bool adaptiveFashionMode: positionForAnimation === Dock.Bottom && Panel.viewMode === Dock.FashionMode
+    readonly property bool adaptiveFashionMode: !useColumnLayout
+        && Panel.viewMode === Dock.FashionMode
+        && (positionForAnimation === Dock.Bottom || positionForAnimation === Dock.Top)
+    readonly property bool adaptiveFashionTopMode: adaptiveFashionMode && positionForAnimation === Dock.Top
+    readonly property bool adaptiveFashionBottomMode: adaptiveFashionMode && positionForAnimation === Dock.Bottom
     readonly property bool adaptiveFashionUsesDirectWindowGeometry: adaptiveFashionMode && Qt.platform.pluginName === "xcb"
     readonly property bool useWindowMarginBasedHideAnimation: adaptiveFashionMode
     readonly property bool useTransformBasedHideAnimation: Qt.platform.pluginName === "xcb" && !useWindowMarginBasedHideAnimation
@@ -39,7 +43,7 @@ Window {
     readonly property int fashionShadowRadius: adaptiveFashionMode ? Math.max(52, Math.round(dockSurfaceThickness * 0.8)) : 40
     readonly property int fashionShadowVerticalOffset: adaptiveFashionMode ? Math.max(6, Math.round(fashionBackgroundRadius * 0.35)) : 0
     readonly property bool useExternalFashionAutoHideSurface: adaptiveFashionMode && useTransformBasedHideAnimation
-    property real animatedBottomMargin: adaptiveFashionMode ? fashionFloatingMargin : 0
+    property real animatedDockWindowMargin: adaptiveFashionMode ? fashionFloatingMargin : 0
     readonly property real panelDevicePixelRatio: Panel.devicePixelRatio > 0 ? Panel.devicePixelRatio : Screen.devicePixelRatio
     readonly property bool darkTheme: Panel.colorTheme === Dock.Dark
     readonly property var appearanceApplet: DS.applet("org.deepin.ds.dde-appearance")
@@ -73,6 +77,25 @@ Window {
         : 0
     readonly property real adaptiveFashionGridDisplayedHeight: adaptiveFashionMode
         ? dock.ceilToPhysicalPixel(gridLayout.implicitHeight)
+        : 0
+    readonly property real adaptiveFashionLeftPartWidth: adaptiveFashionMode && dockLeftPart.visible
+        ? dock.ceilToPhysicalPixel(dockLeftPart.implicitWidth)
+        : 0
+    readonly property real adaptiveFashionRightPartWidth: adaptiveFashionMode && dockRightPart.visible
+        ? dock.ceilToPhysicalPixel(dockRightPart.targetImplicitWidth > 0 ? dockRightPart.targetImplicitWidth : dockRightPart.implicitWidth)
+        : 0
+    readonly property real adaptiveFashionAvailableCenterWidth: adaptiveFashionMode
+        ? Math.max(0,
+                   adaptiveFashionMaximumWidth
+                   - adaptiveFashionLeftPartWidth
+                   - adaptiveFashionRightPartWidth
+                   - (adaptiveFashionLeftPartWidth > 0 ? fashionPartSpacing : 0)
+                   - (adaptiveFashionRightPartWidth > 0 ? fashionPartSpacing : 0))
+        : 0
+    readonly property real adaptiveFashionAvailableTaskManagerWidth: adaptiveFashionMode
+        ? Math.max(0,
+                   adaptiveFashionAvailableCenterWidth
+                   - Math.max(0, dockCenterPart.implicitWidth - dockCenterPart.taskmanagerAppContainerWidth))
         : 0
     readonly property real adaptiveDockContentWidth: {
         if (!adaptiveFashionMode) {
@@ -207,7 +230,7 @@ Window {
     }
 
     function isDockBlankAreaPoint(x, y) {
-        if (dock.adaptiveFashionMode || dock.useColumnLayout) {
+        if (dock.adaptiveFashionMode) {
             return false
         }
 
@@ -234,7 +257,7 @@ Window {
         if (dock.useWindowMarginBasedHideAnimation) {
             dockTransform.x = 0
             dockTransform.y = 0
-            dock.animatedBottomMargin = dock.restingBottomMargin()
+            dock.animatedDockWindowMargin = dock.restingWindowMargin()
             dock.visible = false
             Panel.notifyDockPositionChanged(0, 0)
             return
@@ -256,7 +279,7 @@ Window {
 
         dockTransform.x = 0
         dockTransform.y = 0
-        dock.animatedBottomMargin = dock.restingBottomMargin()
+        dock.animatedDockWindowMargin = dock.restingWindowMargin()
         dock.visible = false
         Panel.notifyDockPositionChanged(0, 0)
     }
@@ -269,7 +292,7 @@ Window {
 
         dockTransform.x = 0
         dockTransform.y = 0
-        dock.animatedBottomMargin = dock.restingBottomMargin()
+        dock.animatedDockWindowMargin = dock.restingWindowMargin()
         dock.visible = true
         Panel.notifyDockPositionChanged(0, 0)
         shownContentSyncTimer.restart()
@@ -291,7 +314,7 @@ Window {
         return Math.max(0, Math.min(maximum, value))
     }
 
-    function hiddenBottomMargin() {
+    function hiddenWindowMargin() {
         return dock.fashionFloatingMargin
             - dock.windowThickness
             - dock.fashionShadowRadius
@@ -299,12 +322,12 @@ Window {
             - 4
     }
 
-    function restingBottomMargin() {
+    function restingWindowMargin() {
         if (!dock.adaptiveFashionMode) {
             return 0
         }
 
-        return Panel.hideState !== Dock.Hide ? dock.fashionFloatingMargin : dock.hiddenBottomMargin()
+        return Panel.hideState !== Dock.Hide ? dock.fashionFloatingMargin : dock.hiddenWindowMargin()
     }
 
     function adaptiveHorizontalMarginForContentWidth(contentWidth) {
@@ -357,6 +380,13 @@ Window {
     function acceptAdaptiveCenterDockApplet(item) {
         const appletItem = item.data
         return dockAppletVisible(appletItem) && (dockOrderInRange(appletItem, 10, 20) || isPromotedCenterApplet(appletItem))
+    }
+
+    function acceptAdaptiveRightDockApplet(item) {
+        const appletItem = item.data
+        return dockAppletVisible(appletItem)
+            && dockOrderInRange(appletItem, 20, 30)
+            && appletPluginId(appletItem) !== "org.deepin.ds.dock.showdesktop"
     }
 
     function adaptiveCenterSortOrder(item) {
@@ -505,7 +535,7 @@ Window {
     }
 
     DLayerShellWindow.anchors: dock.adaptiveFashionUsesDirectWindowGeometry
-        ? DLayerShellWindow.AnchorBottom
+        ? (dock.adaptiveFashionTopMode ? DLayerShellWindow.AnchorTop : DLayerShellWindow.AnchorBottom)
         : position2Anchors(positionForAnimation)
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing ? dock.exclusionZoneThickness : 0
@@ -515,9 +545,16 @@ Window {
     DLayerShellWindow.rightMargin: dock.adaptiveFashionUsesDirectWindowGeometry
         ? 0
         : (adaptiveFashionMode ? dock.adaptiveHorizontalMarginForContentWidth(dock.adaptiveDockShellWidth) : 0)
-    DLayerShellWindow.bottomMargin: dock.useWindowMarginBasedHideAnimation
-        ? dock.animatedBottomMargin
-        : dock.restingBottomMargin()
+    DLayerShellWindow.topMargin: dock.adaptiveFashionTopMode
+        ? (dock.useWindowMarginBasedHideAnimation
+            ? dock.animatedDockWindowMargin
+            : dock.restingWindowMargin())
+        : 0
+    DLayerShellWindow.bottomMargin: dock.adaptiveFashionBottomMode
+        ? (dock.useWindowMarginBasedHideAnimation
+            ? dock.animatedDockWindowMargin
+            : dock.restingWindowMargin())
+        : 0
     DLayerShellWindow.scope: "dde-shell/dock"
     DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
 
@@ -636,8 +673,8 @@ Window {
 
             if (useWindowMarginBasedAnimation) {
                 hideShowMarginAnimation.stop()
-                hideShowMarginAnimation.from = dock.animatedBottomMargin
-                hideShowMarginAnimation.to = dock.restingBottomMargin()
+                hideShowMarginAnimation.from = dock.animatedDockWindowMargin
+                hideShowMarginAnimation.to = dock.restingWindowMargin()
                 hideShowMarginAnimation.duration = Panel.hideState !== Dock.Hide ? showDuration : hideDuration
                 hideShowMarginAnimation.start()
                 return
@@ -672,7 +709,7 @@ Window {
     PropertyAnimation {
         id: hideShowMarginAnimation
         target: dock
-        property: "animatedBottomMargin"
+        property: "animatedDockWindowMargin"
         easing.type: Easing.OutCubic
         onStopped: hideShowAnimation.finalize()
     }
@@ -1086,6 +1123,7 @@ Window {
         Item {
             id: spotlightLayer
             anchors.fill: parent
+            clip: true
             visible: dock.spotlightActive || opacity > 0.01
             opacity: dock.spotlightActive ? 1 : 0
             enabled: false
@@ -1256,6 +1294,7 @@ Window {
             id: dockRightPartModel
             leftDockOrder: 20
             rightDockOrder: 30
+            acceptItem: dock.adaptiveFashionMode ? dock.acceptAdaptiveRightDockApplet : null
         }
 
         Component {
@@ -1426,7 +1465,6 @@ Window {
             anchors.fill: parent
             z: dockRightPart.z + 2
             visible: !dock.adaptiveFashionMode
-                && !dock.useColumnLayout
             acceptedButtons: Qt.RightButton
             preventStealing: true
             propagateComposedEvents: true
@@ -1484,7 +1522,7 @@ Window {
                 target: dockRightPart
                 property: "x"
                 when: dock.adaptiveFashionMode
-                value: dock.roundToPhysicalPixel(gridLayout.x + gridLayout.width + (gridLayout.width > 0 ? gridLayout.columnSpacing : 0))
+                value: dock.roundToPhysicalPixel(gridLayout.x + dock.adaptiveFashionGridDisplayedWidth + (dock.adaptiveFashionGridDisplayedWidth > 0 ? dock.fashionPartSpacing : 0))
             }
 
             Loader {
@@ -1522,6 +1560,7 @@ Window {
         onPressed: function(mouse) {
             if (Panel.locked) return
             dock.isDragging = true
+            Panel.isResizing = true
             oldMousePos = mapToGlobal(mouse.x, mouse.y)
             oldDockSize = dock.preferredDockSize
             recentDeltas = []
@@ -1580,6 +1619,14 @@ Window {
             dock.isDragging = false
             Applet.dockSize = dock.preferredDockSize
             itemIconSizeBase = dockItemMaxSize
+            Panel.isResizing = false
+            pressedAndDragging(false)
+            DS.grabMouse(Panel.rootObject, false)
+        }
+
+        onCanceled: {
+            dock.isDragging = false
+            Panel.isResizing = false
             pressedAndDragging(false)
             DS.grabMouse(Panel.rootObject, false)
         }

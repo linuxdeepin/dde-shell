@@ -82,6 +82,7 @@ Control {
     readonly property color aiIconTintColor: Panel.colorTheme === Dock.Dark ? Qt.rgba(1, 1, 1, 0.92) : Qt.rgba(0, 0, 0, 0.86)
     readonly property int weatherTextSpacing: root.tightSpacing - 2
     readonly property bool musicPageVisible: provider.musicAvailable
+    readonly property bool mailPageVisible: provider.mailConfigured
     readonly property bool aiPageVisible: provider.aiRunningCount > 0 && aiEntries.length > 0
     readonly property var pageIds: {
         const ids = ["weather"]
@@ -91,7 +92,9 @@ Control {
         if (musicPageVisible) {
             ids.push("music")
         }
-        ids.push("mail")
+        if (mailPageVisible) {
+            ids.push("mail")
+        }
         ids.push("system")
         return ids
     }
@@ -563,6 +566,11 @@ Control {
     }
 
     function handleMailUnreadCountChange() {
+        if (!provider.mailConfigured) {
+            root.previousMailUnreadCount = provider.mailUnreadCount
+            return
+        }
+
         const unreadIncreased = provider.mailUnreadCount > root.previousMailUnreadCount
         if (unreadIncreased && root.currentPageId !== "mail") {
             root.mailReturnPageId = root.normalizedPageId(root.currentPageId)
@@ -570,6 +578,26 @@ Control {
             root.showPage("mail")
         }
 
+        root.previousMailUnreadCount = provider.mailUnreadCount
+    }
+
+    function handleMailVisibilityChange() {
+        if (provider.mailConfigured) {
+            return
+        }
+
+        const fallbackPageId = root.normalizedPageId(root.mailAutoActive ? root.mailReturnPageId : root.manualPageId)
+        if (root.currentPageId === "mail"
+                || root.transitionFromPageId === "mail"
+                || root.transitionToPageId === "mail") {
+            root.showPage(fallbackPageId, false)
+        }
+
+        if (root.manualPageId === "mail") {
+            root.manualPageId = "weather"
+        }
+
+        root.mailAutoActive = false
         root.previousMailUnreadCount = provider.mailUnreadCount
     }
 
@@ -635,6 +663,7 @@ Control {
         }
 
         function onMailStateChanged() {
+            root.handleMailVisibilityChange()
             root.handleMailUnreadCountChange()
             if (rootHoverHandler.hovered && root.currentPageId === "mail") {
                 if (pageToolTip.toolTipVisible) {

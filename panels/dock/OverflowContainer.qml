@@ -19,6 +19,8 @@ Item {
     property alias addDisplaced: listView.addDisplaced
     property alias removeDisplaced: listView.removeDisplaced
     property alias moveDisplaced: listView.moveDisplaced
+    property alias footer: listView.footer
+    property alias footerPositioning: listView.footerPositioning
     ListView {
         id: listView
         anchors.fill: parent

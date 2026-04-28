@@ -547,6 +547,12 @@ void DockPanel::setPosition(const Position& position)
 
     // Directly commit the position change
     SETTINGS->setPosition(position);
+
+    if (SETTINGS->viewMode() == ViewMode::FashionMode) {
+        SETTINGS->setItemAlignment(position == Position::Bottom
+                                       ? ItemAlignment::LeftAlignment
+                                       : ItemAlignment::CenterAlignment);
+    }
 }
 
 void DockPanel::setViewMode(const ViewMode &mode)
@@ -564,7 +570,9 @@ void DockPanel::setViewMode(const ViewMode &mode)
         SETTINGS->setItemAlignment(ItemAlignment::LeftAlignment);
         break;
     case ViewMode::FashionMode:
-        SETTINGS->setItemAlignment(ItemAlignment::LeftAlignment);
+        SETTINGS->setItemAlignment(SETTINGS->position() == Position::Bottom
+                                       ? ItemAlignment::LeftAlignment
+                                       : ItemAlignment::CenterAlignment);
         SETTINGS->setIndicatorStyle(IndicatorStyle::Fashion);
         break;
     }

@@ -25,6 +25,7 @@ class FashionLeftPluginProvider : public QObject
     Q_PROPERTY(int mailUnreadCount READ mailUnreadCount NOTIFY mailStateChanged FINAL)
     Q_PROPERTY(QString mailUnreadCountText READ mailUnreadCountText NOTIFY mailStateChanged FINAL)
     Q_PROPERTY(QString mailSummaryText READ mailSummaryText NOTIFY mailStateChanged FINAL)
+    Q_PROPERTY(bool mailConfigured READ mailConfigured NOTIFY mailStateChanged FINAL)
     Q_PROPERTY(QString mailIconName READ mailIconName NOTIFY mailClientChanged FINAL)
     Q_PROPERTY(QString mailClientName READ mailClientName NOTIFY mailClientChanged FINAL)
     Q_PROPERTY(bool musicAvailable READ musicAvailable NOTIFY musicStateChanged FINAL)
@@ -67,6 +68,7 @@ public:
     int mailUnreadCount() const;
     QString mailUnreadCountText() const;
     QString mailSummaryText() const;
+    bool mailConfigured() const;
     QString mailIconName() const;
     QString mailClientName() const;
     bool musicAvailable() const;
@@ -165,6 +167,7 @@ private:
     int m_notificationCount = 0;
     int m_mailUnreadCount = 0;
     QString m_mailSummaryText = QStringLiteral("邮箱信息不可用");
+    bool m_mailConfigured = false;
     QString m_mailDesktopId;
     QString m_mailDesktopFilePath;
     QString m_mailIconName = QStringLiteral("deepin-mail");

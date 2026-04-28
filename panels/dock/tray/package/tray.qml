@@ -17,8 +17,7 @@ AppletItem {
     id: tray
 
     readonly property bool adaptiveFashionMode: Panel.rootObject
-        && Panel.rootObject.positionForAnimation === Dock.Bottom
-        && Panel.viewMode === Dock.FashionMode
+        && Panel.rootObject.adaptiveFashionMode
     readonly property int nextAppletSpacing: adaptiveFashionMode ? 0 : 6
     readonly property int targetImplicitWidth: useColumnLayout ? Panel.rootObject.dockSize : trayContainter.targetContainerSize.width + nextAppletSpacing
     readonly property int targetImplicitHeight: useColumnLayout ? trayContainter.targetContainerSize.height + nextAppletSpacing : Panel.rootObject.dockSize

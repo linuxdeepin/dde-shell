@@ -2573,6 +2573,11 @@ QString FashionLeftPluginProvider::mailSummaryText() const
     return m_mailSummaryText;
 }
 
+bool FashionLeftPluginProvider::mailConfigured() const
+{
+    return m_mailConfigured;
+}
+
 QString FashionLeftPluginProvider::mailIconName() const
 {
     return m_mailIconName;
@@ -2817,6 +2822,11 @@ void FashionLeftPluginProvider::openWeatherPopup(int taskbarLeft, int taskbarTop
 
 void FashionLeftPluginProvider::openMailClient()
 {
+    refreshMailState();
+    if (!m_mailConfigured) {
+        return;
+    }
+
     refreshMailClient();
 
     if (!m_mailDesktopFilePath.isEmpty()
@@ -3119,6 +3129,7 @@ void FashionLeftPluginProvider::refreshMailState()
 
     int nextMailUnreadCount = 0;
     QString nextMailSummaryText = QStringLiteral("邮箱信息不可用");
+    bool nextMailConfigured = false;
 
     if (mailInterface.isValid()) {
         const QDBusReply<QString> accountsReply = mailInterface.call(QStringLiteral("GetAccounts"));
@@ -3129,6 +3140,7 @@ void FashionLeftPluginProvider::refreshMailState()
         if (accountIds.isEmpty()) {
             nextMailSummaryText = QStringLiteral("未配置邮箱账户");
         } else {
+            nextMailConfigured = true;
             nextMailSummaryText = accountIds.size() == 1
                 ? accountIds.constFirst()
                 : QStringLiteral("%1个邮箱").arg(accountIds.size());
@@ -3150,10 +3162,13 @@ void FashionLeftPluginProvider::refreshMailState()
         }
     }
 
-    if (m_mailUnreadCount == nextMailUnreadCount && m_mailSummaryText == nextMailSummaryText) {
+    if (m_mailConfigured == nextMailConfigured
+        && m_mailUnreadCount == nextMailUnreadCount
+        && m_mailSummaryText == nextMailSummaryText) {
         return;
     }
 
+    m_mailConfigured = nextMailConfigured;
     m_mailUnreadCount = nextMailUnreadCount;
     m_mailSummaryText = nextMailSummaryText;
     emit mailStateChanged();

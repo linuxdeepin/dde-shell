@@ -68,3 +68,21 @@ target_include_directories(popupsortutils_tests PRIVATE
 )
 
 gtest_discover_tests(popupsortutils_tests)
+
+add_executable(dockfoldermigrationutils_tests
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/dockfoldermigrationutils.h
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/dockfoldermigrationutils.cpp
+    dockfoldermigrationutilstests.cpp
+)
+
+target_link_libraries(dockfoldermigrationutils_tests
+    GTest::GTest
+    GTest::Main
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Test
+)
+target_include_directories(dockfoldermigrationutils_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/
+)
+
+gtest_discover_tests(dockfoldermigrationutils_tests)

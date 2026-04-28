@@ -53,7 +53,8 @@ Item {
     }
     
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
-    property bool compactFashionIndicator: root.displayMode === Dock.Fashion && Panel.position === Dock.Bottom
+    property bool compactFashionIndicator: root.displayMode === Dock.Fashion
+        && (Panel.position === Dock.Bottom || Panel.position === Dock.Top)
     property int statusIndicatorSize: useColumnLayout ? root.width * 0.72 : root.height * 0.72
     property int iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
     property int popupIconSize: Math.max(1, Math.round(iconSize * 0.92))
@@ -61,6 +62,9 @@ Item {
     property bool titleActive: enableTitle && titleLoader.active
     property int appTitleSpacing: 0
     property bool popupItem: root.itemKind === "group" || root.itemKind === "folder"
+    readonly property bool resizeOptimizationActive: Panel.isResizing || (Panel.rootObject && Panel.rootObject.isDragging)
+    property bool deferredWindowIconGeometryUpdate: false
+    property bool deferredPhysicalPixelFix: false
     property var iconGlobalPoint: {
         var a = icon
         var x = 0, y = 0
@@ -89,14 +93,61 @@ Item {
         Panel.reportMousePresence(false, lastSpotlightPoint)
     }
 
+    function scheduleWindowIconGeometryUpdate() {
+        deferredWindowIconGeometryUpdate = true
+        if (resizeOptimizationActive) {
+            return
+        }
+
+        updateWindowIconGeometryTimer.restart()
+    }
+
+    function flushWindowIconGeometryUpdate() {
+        if (!deferredWindowIconGeometryUpdate) {
+            return
+        }
+
+        deferredWindowIconGeometryUpdate = false
+        var pos = icon.mapToItem(null, 0, 0)
+        taskmanager.Applet.requestUpdateWindowIconGeometry(root.modelIndex,
+                                                           Qt.rect(pos.x, pos.y, icon.width, icon.height),
+                                                           Panel.rootObject)
+    }
+
+    function schedulePhysicalPixelFix() {
+        deferredPhysicalPixelFix = true
+        if (resizeOptimizationActive) {
+            icon.anchors.centerIn = icon.parent
+            return
+        }
+
+        fixPositionTimer.restart()
+    }
+
+    onResizeOptimizationActiveChanged: {
+        if (resizeOptimizationActive) {
+            fixPositionTimer.stop()
+            updateWindowIconGeometryTimer.stop()
+            icon.anchors.centerIn = icon.parent
+            return
+        }
+
+        deferredPhysicalPixelFix = true
+        deferredWindowIconGeometryUpdate = true
+        fixPositionTimer.restart()
+        updateWindowIconGeometryTimer.restart()
+    }
+
     // Monitor Panel position changes to update icon geometry
     Connections {
         target: Panel.rootObject
         function onXChanged() {
-            updateWindowIconGeometryTimer.start()
+            root.scheduleWindowIconGeometryUpdate()
+            root.schedulePhysicalPixelFix()
         }
         function onYChanged() {
-            updateWindowIconGeometryTimer.start()
+            root.scheduleWindowIconGeometryUpdate()
+            root.schedulePhysicalPixelFix()
         }
     }
 
@@ -182,7 +233,8 @@ Item {
             Connections {
                 function onPositionChanged() {
                     windowIndicator.updateIndicatorAnchors()
-                    updateWindowIconGeometryTimer.start()
+                    root.scheduleWindowIconGeometryUpdate()
+                    root.schedulePhysicalPixelFix()
                 }
                 target: Panel
             }
@@ -210,6 +262,12 @@ Item {
                     if (root.Drag.active || !parent || launchAnimation.running) {
                         return
                     }
+
+                    if (root.resizeOptimizationActive) {
+                        anchors.centerIn = parent
+                        return
+                    }
+
                     anchors.centerIn = undefined
                     var targetX = (parent.width - width) / 2
                     var targetY = (parent.height - height) / 2
@@ -220,17 +278,22 @@ Item {
                     var physicalY = Math.round(scenePos.y * Panel.devicePixelRatio)
 
                     var localPos = mapFromScene(physicalX / Panel.devicePixelRatio, physicalY / Panel.devicePixelRatio)
-                    
+
+                    if (Math.abs(x - localPos.x) < 0.01 && Math.abs(y - localPos.y) < 0.01) {
+                        return
+                    }
+
                     x = localPos.x
                     y = localPos.y
                 }
 
                 Timer {
                     id: fixPositionTimer
-                    interval: 100
+                    interval: 16
                     repeat: false
                     running: false
                     onTriggered: {
+                        root.deferredPhysicalPixelFix = false
                         icon.fixPosition()
                     }
                 }
@@ -238,7 +301,7 @@ Item {
                 Connections {
                     target: root
                     function onIconGlobalPointChanged() {
-                        fixPositionTimer.start()
+                        root.schedulePhysicalPixelFix()
                     }
                 }
                 LaunchAnimation {
@@ -312,7 +375,7 @@ Item {
                 switch(Panel.position) {
                 case Dock.Top: {
                     windowIndicator.anchors.horizontalCenter = iconContainer.horizontalCenter
-                    windowIndicator.anchors.top = hoverBackground.top
+                    windowIndicator.anchors.top = root.compactFashionIndicator ? appItem.top : hoverBackground.top
                     windowIndicator.anchors.topMargin = 1
                     return
                 }
@@ -681,9 +744,7 @@ Item {
         running: false
         repeat: false
         onTriggered: {
-            var pos = icon.mapToItem(null, 0, 0)
-            taskmanager.Applet.requestUpdateWindowIconGeometry(root.modelIndex, Qt.rect(pos.x, pos.y,
-                icon.width, icon.height), Panel.rootObject)
+            root.flushWindowIconGeometryUpdate()
         }
     }
 
@@ -948,7 +1009,7 @@ Item {
     }
 
     onWindowsChanged: {
-        updateWindowIconGeometryTimer.start()
+        root.scheduleWindowIconGeometryUpdate()
         // Close tooltip when window appears
         if (windows.length > 0 && toolTip.toolTipVisible) {
             toolTip.close()
@@ -956,7 +1017,7 @@ Item {
     }
 
     onIconGlobalPointChanged: {
-        updateWindowIconGeometryTimer.start()
+        root.scheduleWindowIconGeometryUpdate()
     }
 
 }

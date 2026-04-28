@@ -553,8 +553,8 @@ FocusScope {
     }
 
     onActiveFocusChanged: {
-        if (root.popupOwnerActive && !root.activeFocus && root.popupWindow && root.popupWindow.visible) {
-            root.ensureKeyboardFocus()
+        if (root.popupOwnerActive && !root.activeFocus && root.popupWindow && root.popupWindow.visible && !root.popupWindow.active) {
+            root.closeRequested()
         }
     }
 
@@ -593,8 +593,14 @@ FocusScope {
         }
 
         function onActiveChanged() {
-            if (root.popupWindow && root.popupWindow.active) {
+            if (!root.popupWindow) {
+                return
+            }
+
+            if (root.popupWindow.active) {
                 root.ensureKeyboardFocus()
+            } else if (root.popupWindow.visible) {
+                root.closeRequested()
             }
         }
     }
@@ -765,6 +771,48 @@ FocusScope {
             property Item hoverTargetButton: null
             property Item selectionTargetButton: null
             property bool hoverSyncPending: false
+            property real hoverBackgroundTargetX: 0
+            property real hoverBackgroundTargetY: 0
+            property bool hoverBackgroundPositionAnimationEnabled: false
+
+            function hoverBackgroundXFor(button) {
+                if (!button) {
+                    return hoverBackgroundTargetX
+                }
+
+                return contentGrid.x + button.x + Math.round((button.width - button.hoverWidth) / 2)
+            }
+
+            function hoverBackgroundYFor(button) {
+                if (!button) {
+                    return hoverBackgroundTargetY
+                }
+
+                return contentGrid.y + button.y
+            }
+
+            function setHoverTarget(nextTarget, animatePosition) {
+                const nextTargetX = nextTarget ? hoverBackgroundXFor(nextTarget) : hoverBackgroundTargetX
+                const nextTargetY = nextTarget ? hoverBackgroundYFor(nextTarget) : hoverBackgroundTargetY
+                const targetChanged = hoverTargetButton !== nextTarget
+                const positionChanged = !nextTarget
+                    ? false
+                    : (Math.abs(hoverBackgroundTargetX - nextTargetX) > 0.5
+                       || Math.abs(hoverBackgroundTargetY - nextTargetY) > 0.5)
+
+                if (!targetChanged && !positionChanged) {
+                    return
+                }
+
+                const hadTarget = hoverTargetButton !== null
+                hoverBackgroundPositionAnimationEnabled = !!animatePosition && hadTarget && nextTarget !== null && (targetChanged || positionChanged)
+                if (nextTarget) {
+                    hoverBackgroundTargetX = nextTargetX
+                    hoverBackgroundTargetY = nextTargetY
+                }
+
+                hoverTargetButton = nextTarget
+            }
 
             function scheduleHoverSync() {
                 if (hoverSyncPending) {
@@ -787,7 +835,8 @@ FocusScope {
                         break
                     }
                 }
-                hoverTargetButton = nextTarget
+
+                setHoverTarget(nextTarget, true)
             }
 
             function syncSelectionTarget() {
@@ -914,13 +963,8 @@ FocusScope {
 
                     Item {
                         id: hoverBackground
-                        x: gridContentRoot.hoverTargetButton ?
-                               contentGrid.x + gridContentRoot.hoverTargetButton.x +
-                               Math.round((gridContentRoot.hoverTargetButton.width - width) / 2) :
-                               0
-                        y: gridContentRoot.hoverTargetButton ?
-                               contentGrid.y + gridContentRoot.hoverTargetButton.y :
-                               0
+                        x: gridContentRoot.hoverBackgroundTargetX
+                        y: gridContentRoot.hoverBackgroundTargetY
                         width: gridContentRoot.hoverTargetButton ? gridContentRoot.hoverTargetButton.hoverWidth : 0
                         height: gridContentRoot.hoverTargetButton ? gridContentRoot.hoverTargetButton.hoverHeight : 0
                         opacity: gridContentRoot.hoverTargetButton && gridContentRoot.hoverTargetButton !== gridContentRoot.selectionTargetButton ? 1.0 : 0.0
@@ -946,9 +990,11 @@ FocusScope {
                         }
 
                         Behavior on x {
+                            enabled: gridContentRoot.hoverBackgroundPositionAnimationEnabled
                             NumberAnimation { duration: 72; easing.type: Easing.OutQuad }
                         }
                         Behavior on y {
+                            enabled: gridContentRoot.hoverBackgroundPositionAnimationEnabled
                             NumberAnimation { duration: 72; easing.type: Easing.OutQuad }
                         }
                         Behavior on opacity {
@@ -1042,7 +1088,7 @@ FocusScope {
                                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad | PointerDevice.Stylus
                                 onHoveredChanged: {
                                     if (hovered || gridButton.down) {
-                                        gridContentRoot.hoverTargetButton = gridButton
+                                        gridContentRoot.setHoverTarget(gridButton, true)
                                     } else if (gridContentRoot.hoverTargetButton === gridButton) {
                                         gridContentRoot.scheduleHoverSync()
                                     }
@@ -1373,7 +1419,7 @@ FocusScope {
 
                             onDownChanged: {
                                 if (down) {
-                                    gridContentRoot.hoverTargetButton = gridButton
+                                    gridContentRoot.setHoverTarget(gridButton, true)
                                 } else if (!itemHoverHandler.hovered && gridContentRoot.hoverTargetButton === gridButton) {
                                     gridContentRoot.scheduleHoverSync()
                                 }

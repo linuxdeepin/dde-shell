@@ -87,7 +87,7 @@ void TestModelB::addData(DataB *data)
 
 void TestModelB::insertData(int row, DataB *data)
 {
-    const int boundedRow = std::max(0, std::min(row, m_list.size()));
+    const int boundedRow = std::clamp(row, 0, static_cast<int>(m_list.size()));
     beginInsertRows(QModelIndex(), boundedRow, boundedRow);
     m_list.insert(boundedRow, data);
     endInsertRows();

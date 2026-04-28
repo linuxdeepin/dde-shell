@@ -25,7 +25,11 @@ TextCalculator::TextCalculator(QObject *parent)
     , m_dataModel(nullptr)
     , m_remainingSpace(0)
     , m_enabled(false)
+    , m_calculationPending(false)
 {
+    m_calculationTimer.setSingleShot(true);
+    m_calculationTimer.setInterval(16);
+    connect(&m_calculationTimer, &QTimer::timeout, this, &TextCalculator::performScheduledCalculation);
 }
 
 TextCalculator::~TextCalculator()
@@ -113,6 +117,8 @@ void TextCalculator::setEnabled(bool enabled)
     if (m_enabled) {
         scheduleCalculation();
     } else {
+        m_calculationTimer.stop();
+        m_calculationPending = false;
         m_optimalSingleTextWidth = 0.0;
         m_totalWidth = 0;
         emit optimalSingleTextWidthChanged();
@@ -165,6 +171,20 @@ void TextCalculator::scheduleCalculation()
     if (!m_enabled || !m_dataModel) {
         return;
     }
+
+    m_calculationPending = true;
+    if (!m_calculationTimer.isActive()) {
+        m_calculationTimer.start();
+    }
+}
+
+void TextCalculator::performScheduledCalculation()
+{
+    if (!m_calculationPending || !m_enabled || !m_dataModel) {
+        return;
+    }
+
+    m_calculationPending = false;
     calculateOptimalTextWidth();
 }
 

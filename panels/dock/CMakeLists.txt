@@ -195,3 +195,7 @@ dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.d
 dtk_add_config_meta_files(APPID org.deepin.ds.dock FILES dconfig/org.deepin.ds.dock.tray.json) # compat
 dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES dconfig/org.deepin.ds.dock.json)
 dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES dconfig/org.deepin.ds.dock.tray.json)
+dtk_add_config_meta_files(APPID org.deepin.dde.dock FILES dconfig/org.deepin.dde.dock.json)
+dtk_add_config_meta_files(APPID org.deepin.dde.dock FILES dconfig/org.deepin.dde.dock.plugin.quick-panel.json)
+dtk_add_config_meta_files(APPID org.deepin.dde.tray-loader FILES dconfig/org.deepin.dde.dock.json)
+dtk_add_config_meta_files(APPID org.deepin.dde.tray-loader FILES dconfig/org.deepin.dde.dock.plugin.quick-panel.json)
