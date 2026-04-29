@@ -15,6 +15,7 @@ Item {
     property int popupX: 0
     property int popupY: 0
     property bool readyBinding: false
+    property bool openPending: false
     property bool grabInactivePending: false
     property int grabInactiveTimeout: 200
     // WM_NAME, used for kwin.
@@ -34,13 +35,11 @@ Item {
     }
     Binding {
         when: readyBinding
-        delayed: true
         target: popupWindow; property: "xOffset"
         value: control.popupX
     }
     Binding {
         when: readyBinding
-        delayed: true
         target: popupWindow; property: "yOffset"
         value: control.popupY
     }
@@ -61,6 +60,12 @@ Item {
         if (popupWindow.visible) {
             popupWindow.close()
             popupWindow.currentItem = null
+            Qt.callLater(function () {
+                if (!popup.visible) {
+                    control.open()
+                }
+            })
+            return
         }
 
         readyBinding = Qt.binding(function () {
@@ -68,24 +73,41 @@ Item {
         })
 
         popupWindow.currentItem = control
-        timer.start()
+        openPending = true
+        Qt.callLater(function () {
+            if (!popupWindow || !openPending || !readyBinding || popupWindow.currentItem !== control)
+                return
+            popupWindow.requestUpdateGeometry()
+        })
     }
 
-    Timer {
-        id: timer
-        interval: 10
-        onTriggered: {
-            if (!popupWindow)
-                return
+    function close()
+    {
+        openPending = false
+        grabInactivePending = false
+        grabInactiveTimer.stop()
+        if (!popupWindow)
+            return
 
-            if (!readyBinding)
-                return
+        // avoid to closing window by other PanelPopup.
+        if (!readyBinding)
+            return
 
-            popupWindow.title = windowTitle
-            popupWindow.show()
-            popupWindow.requestActivate()
-        }
+        popupWindow.close()
+        popupWindow.currentItem = null
     }
+
+    function finalizeOpen()
+    {
+        if (!popupWindow || !openPending || !readyBinding || popupWindow.currentItem !== control)
+            return
+
+        openPending = false
+        popupWindow.title = windowTitle
+        popupWindow.show()
+        popupWindow.requestActivate()
+    }
+
     Timer {
         id: grabInactiveTimer
         interval: control.grabInactiveTimeout
@@ -99,20 +121,6 @@ Item {
                 control.close()
             }
         }
-    }
-    function close()
-    {
-        grabInactivePending = false
-        grabInactiveTimer.stop()
-        if (!popupWindow)
-            return
-
-        // avoid to closing window by other PanelPopup.
-        if (!readyBinding)
-            return
-
-        popupWindow.close()
-        popupWindow.currentItem = null
     }
 
     Connections {
@@ -138,6 +146,11 @@ Item {
             if (!popupWindow.active) {
                 control.close()
             }
+        }
+
+        function onUpdateGeometryFinished()
+        {
+            control.finalizeOpen()
         }
 
         function onX11FocusOutByGrab()

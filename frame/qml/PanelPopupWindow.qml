@@ -17,6 +17,7 @@ PopupWindow {
     property Item currentItem
     property int requestedWidth: 10
     property int requestedHeight: 10
+    property bool geometryUpdatePending: false
     signal requestUpdateGeometry()
     signal updateGeometryFinished()
 
@@ -135,12 +136,15 @@ PopupWindow {
     onYOffsetChanged: requestUpdateGeometry()
 
     onRequestUpdateGeometry: {
-        if (updateGeometryer) {
-            Qt.callLater(function () {
-                updateGeometryer()
-                updateGeometryFinished()
-            })
-        }
+        if (!updateGeometryer || geometryUpdatePending)
+            return
+
+        geometryUpdatePending = true
+        Qt.callLater(function () {
+            geometryUpdatePending = false
+            updateGeometryer()
+            updateGeometryFinished()
+        })
     }
 
     D.StyledBehindWindowBlur {

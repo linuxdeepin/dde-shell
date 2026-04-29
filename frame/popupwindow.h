@@ -34,8 +34,8 @@ signals:
 
 private:
     void setX11GrabFocusTransition(bool transition);
-    bool m_dragging;
-    bool m_pressing;
+    bool m_dragging = false;
+    bool m_pressing = false;
     bool m_x11GrabFocusTransition = false;
 };
 DS_END_NAMESPACE
