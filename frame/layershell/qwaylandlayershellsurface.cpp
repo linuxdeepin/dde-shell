@@ -24,63 +24,35 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
     , QtWayland::zwlr_layer_surface_v1()
     , m_dlayerShellWindow(DLayerShellWindow::get(window->window()))
 {
-
     wl_output *output = nullptr;
     if (m_dlayerShellWindow->screenConfiguration() == DLayerShellWindow::ScreenFromQWindow) {
-        auto waylandScreen = dynamic_cast<QtWaylandClient::QWaylandScreen*>(window->window()->screen()->handle());
-        connect(window->window(), &QWindow::screenChanged, this, [window](){
-            window->reset();
-            // make sure window has been cleaned completed
-            QMetaObject::invokeMethod(
-                window,
-                [window]() {
-                    window->reinit();
-                },
-                Qt::QueuedConnection);
-        });
-        if (!waylandScreen) {
+        output = currentOutput();
+        connect(window->window(), &QWindow::screenChanged, this, &QWaylandLayerShellSurface::scheduleRecreate);
+        if (!output) {
             qCWarning(layershellsurface) << "failed to get screen for wayland";
-        } else {
-            output = waylandScreen->output();
         }
     }
 
     init(shell->get_layer_surface(window->waylandSurface()->object(), output, m_dlayerShellWindow->layer(), m_dlayerShellWindow->scope()));
+    m_output = output;
 
-    set_layer(m_dlayerShellWindow->layer());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, [this, window](){
-        set_layer(m_dlayerShellWindow->layer());
-        window->waylandSurface()->commit();
-    });
+    applyLayer();
+    connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, &QWaylandLayerShellSurface::applyLayer);
 
     set_anchor(m_dlayerShellWindow->anchors());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::anchorsChanged, this,[this, window](){
-        trySetAnchorsAndSize();
-    });
+    connect(m_dlayerShellWindow, &DLayerShellWindow::anchorsChanged, this, &QWaylandLayerShellSurface::trySetAnchorsAndSize);
 
-    set_exclusive_zone(m_dlayerShellWindow->exclusionZone());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::exclusionZoneChanged, this,[this, window](){
-        set_exclusive_zone(m_dlayerShellWindow->exclusionZone());
-        window->waylandSurface()->commit();
-    });
+    applyExclusiveZone();
+    connect(m_dlayerShellWindow, &DLayerShellWindow::exclusionZoneChanged, this, &QWaylandLayerShellSurface::applyExclusiveZone);
 
-    set_margin(m_dlayerShellWindow->topMargin(), m_dlayerShellWindow->rightMargin(), m_dlayerShellWindow->bottomMargin(), m_dlayerShellWindow->leftMargin());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::marginsChanged, this, [this](){
-        set_margin(m_dlayerShellWindow->topMargin(), m_dlayerShellWindow->rightMargin(), m_dlayerShellWindow->bottomMargin(), m_dlayerShellWindow->leftMargin());
-    });
+    applyMargins();
+    connect(m_dlayerShellWindow, &DLayerShellWindow::marginsChanged, this, &QWaylandLayerShellSurface::applyMargins);
 
-    set_keyboard_interactivity(m_dlayerShellWindow->keyboardInteractivity());
-    connect(m_dlayerShellWindow, &DLayerShellWindow::keyboardInteractivityChanged, this, [this, window](){
-        set_keyboard_interactivity(m_dlayerShellWindow->keyboardInteractivity());
-        window->waylandSurface()->commit();
-    });
+    applyKeyboardInteractivity();
+    connect(m_dlayerShellWindow, &DLayerShellWindow::keyboardInteractivityChanged, this, &QWaylandLayerShellSurface::applyKeyboardInteractivity);
 
-    auto applyInputRegion = [this, window]() {
-        window->window()->setMask(m_dlayerShellWindow->inputRegion());
-        window->waylandSurface()->commit();
-    };
-
-    connect(m_dlayerShellWindow, &DLayerShellWindow::inputRegionChanged, this, applyInputRegion);
+    applyInputRegion();
+    connect(m_dlayerShellWindow, &DLayerShellWindow::inputRegionChanged, this, &QWaylandLayerShellSurface::applyInputRegion);
 
     calcAndSetRequestSize(window->surfaceSize());
 
@@ -99,6 +71,33 @@ void QWaylandLayerShellSurface::zwlr_layer_surface_v1_closed()
     if (m_dlayerShellWindow->closeOnDismissed()) {
         window()->window()->close();
     }
+}
+
+QtWaylandClient::QWaylandWindow *QWaylandLayerShellSurface::waylandWindow()
+{
+    return window();
+}
+
+QWindow *QWaylandLayerShellSurface::windowHandle()
+{
+    auto currentWindow = waylandWindow();
+    return currentWindow ? currentWindow->window() : nullptr;
+}
+
+QtWaylandClient::QWaylandScreen *QWaylandLayerShellSurface::waylandScreen()
+{
+    auto currentWindowHandle = windowHandle();
+    if (!currentWindowHandle || !currentWindowHandle->screen()) {
+        return nullptr;
+    }
+
+    return dynamic_cast<QtWaylandClient::QWaylandScreen *>(currentWindowHandle->screen()->handle());
+}
+
+wl_output *QWaylandLayerShellSurface::currentOutput()
+{
+    auto currentWaylandScreen = waylandScreen();
+    return currentWaylandScreen ? currentWaylandScreen->output() : nullptr;
 }
 
 void QWaylandLayerShellSurface::calcAndSetRequestSize(QSize requestSize)
@@ -128,8 +127,43 @@ void QWaylandLayerShellSurface::trySetAnchorsAndSize()
     if (!anchorsSizeConflict()) {
         set_anchor(m_dlayerShellWindow->anchors());
         set_size(m_requestSize.width(), m_requestSize.height());
-        window()->waylandSurface()->commit();
+        scheduleCommit();
     }
+}
+
+void QWaylandLayerShellSurface::applyLayer()
+{
+    set_layer(m_dlayerShellWindow->layer());
+    scheduleCommit();
+}
+
+void QWaylandLayerShellSurface::applyExclusiveZone()
+{
+    set_exclusive_zone(m_dlayerShellWindow->exclusionZone());
+    scheduleCommit();
+}
+
+void QWaylandLayerShellSurface::applyMargins()
+{
+    set_margin(m_dlayerShellWindow->topMargin(), m_dlayerShellWindow->rightMargin(), m_dlayerShellWindow->bottomMargin(), m_dlayerShellWindow->leftMargin());
+    scheduleCommit();
+}
+
+void QWaylandLayerShellSurface::applyKeyboardInteractivity()
+{
+    set_keyboard_interactivity(m_dlayerShellWindow->keyboardInteractivity());
+    scheduleCommit();
+}
+
+void QWaylandLayerShellSurface::applyInputRegion()
+{
+    auto currentWindowHandle = windowHandle();
+    if (!currentWindowHandle) {
+        return;
+    }
+
+    currentWindowHandle->setMask(m_dlayerShellWindow->inputRegion());
+    scheduleCommit();
 }
 
 void QWaylandLayerShellSurface::zwlr_layer_surface_v1_configure(uint32_t serial, uint32_t width, uint32_t height)
@@ -162,6 +196,71 @@ void QWaylandLayerShellSurface::setWindowGeometry(const QRect &geometry)
 {
     calcAndSetRequestSize(geometry.size());
     trySetAnchorsAndSize();
+}
+
+void QWaylandLayerShellSurface::commitWindowState()
+{
+    auto currentWaylandWindow = waylandWindow();
+    if (!currentWaylandWindow || !currentWaylandWindow->waylandSurface()) {
+        return;
+    }
+
+    currentWaylandWindow->waylandSurface()->commit();
+}
+
+void QWaylandLayerShellSurface::flushCommit()
+{
+    m_commitScheduled = false;
+    commitWindowState();
+}
+
+void QWaylandLayerShellSurface::scheduleCommit()
+{
+    if (m_commitScheduled) {
+        return;
+    }
+
+    m_commitScheduled = true;
+    QMetaObject::invokeMethod(this, &QWaylandLayerShellSurface::flushCommit, Qt::QueuedConnection);
+}
+
+void QWaylandLayerShellSurface::recreateWindow()
+{
+    auto currentWaylandWindow = waylandWindow();
+    if (!currentWaylandWindow) {
+        return;
+    }
+
+    currentWaylandWindow->reset();
+    QMetaObject::invokeMethod(currentWaylandWindow, &QtWaylandClient::QWaylandWindow::reinit, Qt::QueuedConnection);
+}
+
+void QWaylandLayerShellSurface::flushRecreate()
+{
+    m_recreateScheduled = false;
+    recreateWindow();
+}
+
+void QWaylandLayerShellSurface::scheduleRecreate()
+{
+    auto currentWindowHandle = windowHandle();
+    if (!currentWindowHandle) {
+        return;
+    }
+
+    const auto output = currentOutput();
+    if (!output) {
+        qCWarning(layershellsurface) << "failed to get screen for wayland";
+        return;
+    }
+
+    if (output == m_output || m_recreateScheduled) {
+        return;
+    }
+
+    m_output = output;
+    m_recreateScheduled = true;
+    QMetaObject::invokeMethod(this, &QWaylandLayerShellSurface::flushRecreate, Qt::QueuedConnection);
 }
 
 void QWaylandLayerShellSurface::attachPopup(QtWaylandClient::QWaylandShellSurface *popup)

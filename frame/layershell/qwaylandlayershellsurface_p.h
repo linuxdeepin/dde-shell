@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -33,14 +33,32 @@ private:
     void zwlr_layer_surface_v1_configure(uint32_t serial, uint32_t width, uint32_t height) override;
     void zwlr_layer_surface_v1_closed() override;
 
+    QtWaylandClient::QWaylandWindow *waylandWindow();
+    QWindow *windowHandle();
+    QtWaylandClient::QWaylandScreen *waylandScreen();
+    wl_output *currentOutput();
     void calcAndSetRequestSize(QSize requestSize);
     bool anchorsSizeConflict() const;
     void trySetAnchorsAndSize();
+    void applyLayer();
+    void applyExclusiveZone();
+    void applyMargins();
+    void applyKeyboardInteractivity();
+    void applyInputRegion();
+    void commitWindowState();
+    void flushCommit();
+    void scheduleCommit();
+    void recreateWindow();
+    void flushRecreate();
+    void scheduleRecreate();
 
     DLayerShellWindow* m_dlayerShellWindow;
     QSize m_pendingSize;
     QSize m_requestSize;
+    wl_output *m_output = nullptr;
     bool m_configured = false;
+    bool m_commitScheduled = false;
+    bool m_recreateScheduled = false;
 };
 
 DS_END_NAMESPACE
