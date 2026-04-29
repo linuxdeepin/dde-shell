@@ -15,6 +15,7 @@ Item {
     property int menuX: 0
     property int menuY: 0
     property bool readyBinding: false
+    property bool openPending: false
     // WM_NAME, used for kwin.
     property string windowTitle: "dde-shell/panelmenu"
     width: menu.childrenRect.width
@@ -32,13 +33,11 @@ Item {
     }
     Binding {
         when: readyBinding
-        delayed: true
         target: menuWindow; property: "xOffset"
         value: control.menuX
     }
     Binding {
         when: readyBinding
-        delayed: true
         target: menuWindow; property: "yOffset"
         value: control.menuY
     }
@@ -53,30 +52,54 @@ Item {
         if (!menuWindow)
             return
 
+        if (menuWindow.visible) {
+            menuWindow.close()
+            menuWindow.currentItem = null
+            Qt.callLater(function () {
+                if (!menu.visible) {
+                    control.open()
+                }
+            })
+            return
+        }
+
         readyBinding = Qt.binding(function () {
             return menuWindow && menuWindow.currentItem === control
         })
 
         menuWindow.currentItem = control
         Qt.callLater(function () {
-            menuWindow.title = windowTitle
-            menuWindow.show()
-            DS.grabMouse(menuWindow)
-            DS.grabKeyboard(menuWindow)
+            if (!menuWindow || menuWindow.currentItem !== control)
+                return
+            openPending = true
+            menuWindow.requestUpdateGeometry()
         })
     }
 
     function close()
     {
+        openPending = false
         if (!menuWindow)
             return
 
         if (!readyBinding)
             return
-        
+
         menuWindow.close()
         menuWindow.currentItem = null
         DS.grabKeyboard(menuWindow, false)
+    }
+
+    function finalizeOpen()
+    {
+        if (!menuWindow || !openPending || !readyBinding || menuWindow.currentItem !== control)
+            return
+
+        openPending = false
+        menuWindow.title = windowTitle
+        menuWindow.show()
+        DS.grabMouse(menuWindow)
+        DS.grabKeyboard(menuWindow)
     }
 
     Connections {
@@ -89,6 +112,11 @@ Item {
             if (menuWindow && !menuWindow.active) {
                 control.close()
             }
+        }
+
+        function onUpdateGeometryFinished()
+        {
+            control.finalizeOpen()
         }
     }
 
