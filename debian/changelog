@@ -1,3 +1,24 @@
+dde-shell (2.0.40) unstable; urgency=medium
+
+  * fix: correct SPDX comment syntax in DDEShellDockConfig.cmake.in
+  * chore: update copyright years and fix tooltip behavior
+  * fix: correct ActiveRole and AttentionRole data retrieval for active
+    app model
+  * fix: prevent use-after-free in DataAccessorProxy::setSource
+  * fix: modernize CMake configuration for notification server tests
+  * chore: update copyright year ranges in source headers
+  * build(debian): add libgmock-dev to build dependencies
+  * fix(dock): fix memory leak in RoleGroupModel and add comprehensive
+    tests
+  * Revert "feat(build): add ENABLE_SANITIZER option for debugging"
+  * chore(tests): update license and copyright headers
+  * feat(build): add ENABLE_SANITIZER option for debugging
+  * chore(build): remove sanitizer flags from CMakeLists
+  * fix(test): fix memory leaks in test code
+  * fix:add test notification server applet case by gtest
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 29 Apr 2026 16:13:29 +0800
+
 dde-shell (2.0.38) unstable; urgency=medium
 
   * fix: resolve tray submenu display position issue at screen top-left
