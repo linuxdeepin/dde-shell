@@ -268,6 +268,9 @@ Q_SIGNALS:
     void widthChanged();
     void cursorShapeRequested(int cursorShape);
 
+private slots:
+    void onProcessPendingSizeChanges();
+
 private:
     PluginManager* m_manager;
     QPointer<QWaylandSurface> m_surface;
@@ -280,6 +283,10 @@ private:
     int32_t m_y;
     int m_height;
     int m_width;
+    QTimer* m_sizeChangeTimer;
+    bool m_hasPendingChanged;
+    int m_pendingHeight;
+    int m_pendingWidth;
 };
 
 Q_COMPOSITOR_DECLARE_QUICK_EXTENSION_CLASS(PluginManager)
