@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -76,10 +76,15 @@ void AbstractWindowMonitor::requestWindowsView(const QModelIndexList &indexes) c
 
 QVariant AbstractWindowMonitor::data(const QModelIndex &index, int role) const
 {
-    auto pos = index.row();
-    if (pos >= m_trackedWindows.size())
+    if (!index.isValid())
         return QVariant();
-    auto window = m_trackedWindows[pos];
+
+    auto pos = index.row();
+    if (pos < 0 || pos >= m_trackedWindows.size())
+        return QVariant();
+    auto window = m_trackedWindows.value(pos, nullptr);
+    if (!window)
+        return QVariant();
 
     switch (role) {
     case TaskManager::WinIdRole:

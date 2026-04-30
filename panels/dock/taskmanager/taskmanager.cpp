@@ -327,8 +327,11 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
 
     // TODO: remove below code and use use model replaced.
     QModelIndexList res;
-    if (m_activeAppModel) {
-        res = m_activeAppModel->match(m_activeAppModel->index(0, 0), TaskManager::WinIdRole, window->id());
+    if (m_activeAppModel && m_activeAppModel->rowCount() > 0) {
+        auto startIndex = m_activeAppModel->index(0, 0);
+        if (startIndex.isValid()) {
+            res = m_activeAppModel->match(startIndex, TaskManager::WinIdRole, window->id());
+        }
     }
 
     QSharedPointer<DesktopfileAbstractParser> desktopfile = nullptr;
