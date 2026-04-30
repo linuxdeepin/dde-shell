@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025-2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -30,9 +30,7 @@ TextCalculator::TextCalculator(QObject *parent)
 
 TextCalculator::~TextCalculator()
 {
-    if (m_dataModel) {
-        disconnectDataModelSignals();
-    }
+    disconnectDataModelSignals();
 }
 
 void TextCalculator::setFont(const QFont &font)
@@ -113,10 +111,7 @@ void TextCalculator::setEnabled(bool enabled)
     if (m_enabled) {
         scheduleCalculation();
     } else {
-        m_optimalSingleTextWidth = 0.0;
-        m_totalWidth = 0;
-        emit optimalSingleTextWidthChanged();
-        emit totalWidthChanged();
+        resetCalculatedWidths();
     }
     emit enabledChanged();
 }
@@ -137,11 +132,12 @@ void TextCalculator::connectDataModelSignals()
                 this,
                 [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
                     const auto titleRole = m_dataModel->roleNames().key("title");
-                    if (roles.contains(titleRole) || roles.isEmpty()) {
-                        scheduleCalculation();
-                    }
-                });
+                     if (roles.contains(titleRole) || roles.isEmpty()) {
+                         scheduleCalculation();
+                     }
+                 });
         connect(m_dataModel, &QAbstractItemModel::modelReset, this, &TextCalculator::onDataModelChanged);
+        connect(m_dataModel, &QObject::destroyed, this, &TextCalculator::onDataModelDestroyed);
     }
 }
 
@@ -157,15 +153,39 @@ void TextCalculator::onDataModelChanged()
     scheduleCalculation();
 }
 
+void TextCalculator::onDataModelDestroyed()
+{
+    m_dataModel = nullptr;
+    emit dataModelChanged();
+    resetCalculatedWidths();
+}
+
 void TextCalculator::scheduleCalculation()
 {
     if (!complete)
         return;
 
     if (!m_enabled || !m_dataModel) {
+        resetCalculatedWidths();
         return;
     }
     calculateOptimalTextWidth();
+}
+
+void TextCalculator::resetCalculatedWidths()
+{
+    const bool optimalWidthWasSet = !qFuzzyIsNull(m_optimalSingleTextWidth);
+    const bool totalWidthWasSet = !qFuzzyIsNull(m_totalWidth);
+
+    m_optimalSingleTextWidth = 0.0;
+    m_totalWidth = 0.0;
+
+    if (optimalWidthWasSet) {
+        emit optimalSingleTextWidthChanged();
+    }
+    if (totalWidthWasSet) {
+        emit totalWidthChanged();
+    }
 }
 
 qreal TextCalculator::calculateBaselineWidth(int charCount) const
@@ -372,11 +392,22 @@ QString TextCalculatorAttached::elidedText() const
 
 void TextCalculatorAttached::setCalculator(TextCalculator *calculator)
 {
-    if (calculator) {
-        m_calculator = calculator;
-        connect(calculator, &TextCalculator::optimalSingleTextWidthChanged, this, &TextCalculatorAttached::updateElidedText);
-        updateElidedText();
+    if (m_calculator == calculator) {
+        return;
     }
+
+    if (m_calculator) {
+        disconnect(m_calculator, nullptr, this, nullptr);
+    }
+
+    m_calculator = calculator;
+    emit calculatorChanged();
+
+    if (m_calculator) {
+        connect(m_calculator, &TextCalculator::optimalSingleTextWidthChanged, this, &TextCalculatorAttached::updateElidedText);
+    }
+
+    updateElidedText();
 }
 
 TextCalculator *TextCalculatorAttached::calculator()
@@ -422,7 +453,7 @@ void TextCalculatorAttached::updateElidedText()
     if (visibleText.isEmpty()) {
         visibleText = {};
     }
-    
+
     if (visibleText != m_text) {
         m_ellipsisWidth = fontMetrics.horizontalAdvance(QString::fromUtf8("…"));
         emit ellipsisWidthChanged();

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025-2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,6 +6,7 @@
 
 #include <QAbstractItemModel>
 #include <QFont>
+#include <QPointer>
 #include <QtQml/QtQml>
 
 namespace dock
@@ -55,7 +56,7 @@ private:
     QString m_text;
     QString m_elidedText;
     qreal m_ellipsisWidth = 0.0;
-    TextCalculator *m_calculator;
+    QPointer<TextCalculator> m_calculator;
     bool m_initialized = false;
 };
 
@@ -159,12 +160,14 @@ Q_SIGNALS:
 
 private slots:
     void onDataModelChanged();
+    void onDataModelDestroyed();
     void calculateOptimalTextWidth();
 
 private:
     void connectDataModelSignals();
     void disconnectDataModelSignals();
     void scheduleCalculation();
+    void resetCalculatedWidths();
 
     qreal calculateBaselineWidth(int charCount) const;
     qreal calculateElidedTextWidth(const QString &text, qreal maxWidth) const;
@@ -178,7 +181,7 @@ private:
     qreal m_cellSize;
     int m_spacing;
     int m_itemPadding;
-    QAbstractItemModel *m_dataModel;
+    QPointer<QAbstractItemModel> m_dataModel;
     qreal m_remainingSpace;
     bool m_enabled;
 
