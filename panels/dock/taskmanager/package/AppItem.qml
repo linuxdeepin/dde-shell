@@ -148,7 +148,7 @@ Item {
                 width: iconSize
                 sourceSize: Qt.size(iconSize, iconSize)
                 anchors.centerIn: parent
-                retainWhileLoading: true
+                retainWhileLoading: !root.titleActive
                 smooth: false
 
                 function mapToScene(px, py) {
