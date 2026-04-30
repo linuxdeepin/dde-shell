@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -104,6 +104,7 @@ void TreeLandWindowMonitor::clear()
 {
     m_windows.clear();
     m_dockPreview.reset(nullptr);
+    updateFullscreenState();
 }
 
 QPointer<AbstractWindow> TreeLandWindowMonitor::getWindowByWindowId(ulong windowId)
@@ -201,19 +202,7 @@ void TreeLandWindowMonitor::handleForeignToplevelHandleAdded()
         m_windows.insert(id, window);
     }
 
-    connect(window.data(), &AbstractWindow::stateChanged, this, [=] {
-        for (auto w: m_windows) {
-            if (w->isFullscreen() && !m_fullscreenState) {
-                m_fullscreenState = true;
-                emit windowFullscreenChanged(true);
-                return;
-            }
-        }
-        if (m_fullscreenState) {
-            m_fullscreenState = false;
-            emit windowFullscreenChanged(false);
-        }
-    });
+    connect(window.data(), &AbstractWindow::stateChanged, this, &TreeLandWindowMonitor::updateFullscreenState, Qt::UniqueConnection);
 
     window->setForeignToplevelHandle(handle);
 
@@ -236,7 +225,25 @@ void TreeLandWindowMonitor::handleForeignToplevelHandleRemoved()
     if (window) {
         destroyWindow(window.get());
         m_windows.remove(id);
+        updateFullscreenState();
+    }
+}
+
+void TreeLandWindowMonitor::updateFullscreenState()
+{
+    for (auto window : std::as_const(m_windows)) {
+        if (window && window->isFullscreen()) {
+            if (!m_fullscreenState) {
+                m_fullscreenState = true;
+                emit windowFullscreenChanged(true);
+            }
+            return;
+        }
+    }
+
+    if (m_fullscreenState) {
+        m_fullscreenState = false;
+        emit windowFullscreenChanged(false);
     }
 }
 }
-

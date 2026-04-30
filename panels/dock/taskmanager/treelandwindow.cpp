@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -120,7 +120,6 @@ TreeLandWindow::TreeLandWindow(uint32_t id, QObject *parent)
 TreeLandWindow::~TreeLandWindow()
 {
     qCDebug(waylandwindowLog()) << "wayland window destoryed";
-    emit stateChanged();
 }
 
 uint32_t TreeLandWindow::id()
