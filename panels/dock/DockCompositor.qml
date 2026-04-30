@@ -113,6 +113,18 @@ Item {
                 console.log("quick panel closed")
                 dockCompositor.popupClosed()
             }
+            
+            onMoveXEmbedWindowRequested: (wid, pluginId, itemKey, dx, dy) => {
+                console.log("move xembed window requested:", wid, pluginId, itemKey, dx, dy)
+                // Delegate to Panel which has access to WaylandDockHelper
+                if (Panel && typeof Panel.moveXEmbedWindow === 'function') {
+                    var success = Panel.moveXEmbedWindow(wid, dx, dy)
+                    pluginManager.notifyXEmbedWindowMoveResult(success)
+                } else {
+                    console.warn("Panel.moveXEmbedWindow not available")
+                    pluginManager.notifyXEmbedWindowMoveResult(false)
+                }
+            }
         }
 
         PluginScaleManager{

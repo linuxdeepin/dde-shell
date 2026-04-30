@@ -485,6 +485,14 @@ void DockPanel::setIsResizing(bool resizing)
     m_isResizing = resizing;
     emit isResizingChanged(m_isResizing);
 }
+
+bool DockPanel::moveXEmbedWindow(uint32_t wid, double dx, double dy)
+{
+    if (m_helper) {
+        return m_helper->moveXEmbedWindow(wid, dx, dy);
+    }
+    return false;
+}
 }
 
 #include "dockpanel.moc"
