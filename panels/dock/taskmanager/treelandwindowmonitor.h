@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -82,6 +82,7 @@ private Q_SLOTS:
 
     void handleForeignToplevelHandleAdded();
     void handleForeignToplevelHandleRemoved();
+    void updateFullscreenState();
 
 private:
     QHash<ulong, QSharedPointer<TreeLandWindow>> m_windows;
