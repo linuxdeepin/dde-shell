@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -342,6 +342,10 @@ int RoleCombineModel::columnCount(const QModelIndex &parent) const
 
 QVariant RoleCombineModel::data(const QModelIndex &index, int role) const
 {
+    if (!index.isValid() || !sourceModel()) {
+        return QVariant();
+    }
+
     if (m_minorRolesMap.contains(role)) {
         auto majorKey = qMakePair(index.row(), index.column());
         auto mapping = m_indexMap.value(majorKey, qMakePair(-1, -1));
@@ -355,7 +359,12 @@ QVariant RoleCombineModel::data(const QModelIndex &index, int role) const
 
         return m_minor->data(m_minor->index(row, column), m_minorRolesMap[role]);
     } else {
-        return sourceModel()->data(sourceModel()->index(index.row(), index.column()), role);
+        auto sourceIndex = sourceModel()->index(index.row(), index.column());
+        if (!sourceIndex.isValid()) {
+            return QVariant();
+        }
+
+        return sourceModel()->data(sourceIndex, role);
     }
 }
 
