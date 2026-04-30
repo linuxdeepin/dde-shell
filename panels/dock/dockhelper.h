@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -8,6 +8,9 @@
 #include "dockpanel.h"
 
 #include <QObject>
+#include <QPointer>
+
+class QTimer;
 
 namespace dock {
 class DockWakeUpArea;
@@ -38,6 +41,8 @@ private:
     bool wakeUpAreaNeedShowOnThisScreen(QScreen *screen);
 
     void updateAllDockWakeArea();
+    void updatePanelMouseState();
+    void updateCursorPosition(QEvent *event);
 
 public Q_SLOTS:
     void checkNeedHideOrNot();
@@ -52,6 +57,10 @@ private:
     QHash<QWindow *, bool> m_transientChildShows;
     QTimer *m_hideTimer;
     QTimer *m_showTimer;
+    QTimer *m_cursorMonitorTimer;
+    QTimer *m_edgeWakeHoldTimer;
+    bool m_edgeWakeLatched = false;
+    QPointer<QScreen> m_edgeWakeScreen;
 };
 
 class DockWakeUpArea
@@ -72,4 +81,3 @@ protected:
     DockHelper *m_helper;
 };
 }
-

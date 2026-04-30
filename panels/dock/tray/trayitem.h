@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,7 +6,7 @@
 
 #include "applet.h"
 #include "dsglobal.h"
-#include "../frame/dockiteminfo.h"
+#include "dockiteminfo.h"
 
 #include <QAbstractItemModel>
 

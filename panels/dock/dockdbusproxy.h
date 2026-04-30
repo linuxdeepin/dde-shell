@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -7,8 +7,7 @@
 #include "dsglobal.h"
 #include "dockpanel.h"
 #include "constants.h"
-#include "frame/dockiteminfo.h"
-#include "frame/dappletdock.h"
+#include "dockiteminfo.h"
 
 #include <appletproxy.h>
 
@@ -87,10 +86,10 @@ Q_SIGNALS:
 private:
     DockPanel* parent() const;
     QString getAppID(const QString &desktopfile);
-    void updateDockPluginsVisible(const QVariantMap &pluginsVisible);
+    void setPluginVisible(const QString &pluginId, const QVariantMap &pluginsVisible);
 
     DS_NAMESPACE::DAppletProxy *m_oldDockApplet;
+    DS_NAMESPACE::DAppletProxy *m_multitaskviewApplet;
     DS_NAMESPACE::DAppletProxy *m_trayApplet;
 };
 }
-

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -11,10 +11,11 @@
 #include "qwayland-treeland-dde-shell-v1.h"
 #include "wayland-treeland-dde-shell-v1-client-protocol.h"
 
+#include <DGuiApplicationHelper>
+
 #include <QtWaylandClient/private/qwaylandscreen_p.h>
 #include <QtWaylandClient/private/qwaylandsurface_p.h>
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
-
 namespace dock {
 WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     : DockHelper(panel)
@@ -141,7 +142,8 @@ bool WaylandDockHelper::isWindowOverlap()
 
 void WaylandDockHelper::setDockColorTheme(const ColorTheme &theme)
 {
-    m_panel->setColorTheme(theme);
+    Q_UNUSED(theme)
+    m_panel->setColorTheme(static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType()));
 }
 
 WallpaperColorManager::WallpaperColorManager(WaylandDockHelper *helper)

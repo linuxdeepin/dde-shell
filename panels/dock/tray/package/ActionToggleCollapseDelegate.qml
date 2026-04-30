@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -55,20 +55,26 @@ AppletItemButton {
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
     }
+
+    function showToolTipNow() {
+        var point = root.mapToItem(null, root.width / 2, root.height / 2)
+        toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+        toolTip.open()
+    }
     Timer {
         id: toolTipShowTimer
         interval: 200
-        onTriggered: {
-            var point = root.mapToItem(null, root.width / 2, root.height / 2)
-            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-            toolTip.open()
-        }
+        onTriggered: root.showToolTipNow()
     }
 
 
     onHoveredChanged: {
         if (hovered) {
-            toolTipShowTimer.start()
+            if (toolTip.toolTipWindow && toolTip.toolTipWindow.visible) {
+                root.showToolTipNow()
+            } else {
+                toolTipShowTimer.start()
+            }
         } else {
             if (toolTipShowTimer.running) {
                 toolTipShowTimer.stop()

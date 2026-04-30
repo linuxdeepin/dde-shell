@@ -4,9 +4,11 @@
 
 #pragma once
 
+#include <QHash>
 #include <QPoint>
 #include <QQmlEngine>
 #include <QSize>
+#include <QStringList>
 
 namespace docktray {
 
@@ -51,6 +53,11 @@ public:
         return &instance();
     }
 
+    void beginLayoutSync();
+    void endLayoutSync();
+    void registerSurfaceSize(const QString &surfaceId, const QSize &size);
+    void registerVisualItem(const QString &surfaceId, int index);
+    void unregisterVisualItem(const QString &surfaceId);
     void registerVisualItemSize(int index, const QSize & size);
     QSize visualItemSize(int index) const;
     QSize visualSize(int index, bool includeLastSpacing = true) const;
@@ -70,6 +77,8 @@ signals:
 private:
     explicit TrayItemPositionManager(QObject *parent = nullptr);
 
+    void ensureRegisteredItemCapacity(int count);
+    void notifyVisualItemSizeChanged();
     void updateVisualSize();
 
     Qt::Orientation m_orientation;
@@ -77,9 +86,13 @@ private:
     int m_dockHeight;
     int m_visualItemCount;
     QList<QSize> m_registeredItemsSize;
+    QStringList m_registeredItemSurfaceIds;
+    QHash<QString, QSize> m_registeredSurfaceSizes;
     QSize m_itemVisualSize;
     int m_itemSpacing;
     int m_itemPadding;
+    bool m_layoutSyncActive = false;
+    bool m_visualItemSizeChangedPending = false;
 };
 
 }

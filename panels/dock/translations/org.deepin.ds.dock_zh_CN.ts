@@ -14,8 +14,8 @@
         <translation>高效模式</translation>
     </message>
     <message>
-        <source>Classic Mode</source>
-        <translation>经典模式</translation>
+        <source>Left-aligned Mode</source>
+        <translation>左对齐模式</translation>
     </message>
     <message>
         <source>Centered Mode</source>

@@ -25,12 +25,6 @@ Control {
     property Palette textColor: DockPalette.iconTextPalette
     palette.windowText: ColorSelector.textColor
 
-    onIsOpenedChanged: {
-        if (root.isOpened) {
-            toolTip.close()
-        }
-    }
-
     PanelToolTip {
         id: toolTip
         text: qsTr("Quick actions")
@@ -38,14 +32,19 @@ Control {
         toolTipY: DockPanelPositioner.y
     }
 
-    contentItem: GridLayout {
-        flow: root.useColumnLayout ? GridLayout.TopToBottom : GridLayout.LeftToRight
-        rowSpacing: 0
-        columnSpacing: 0
+    function showToolTipNow() {
+        var point = quickpanelPlaceholder.mapToItem(null, quickpanelPlaceholder.width / 2, quickpanelPlaceholder.height / 2)
+        toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+        toolTip.open()
+    }
+
+    contentItem: Grid {
+        rows: root.useColumnLayout ? 2 : 1
+        spacing: 0
+        padding: 0
 
         Loader {
             id: placeholder
-            Layout.alignment: Qt.AlignCenter
             active: root.shellSurface
             visible: active
             sourceComponent: TrayItemSurface {
@@ -57,8 +56,8 @@ Control {
         }
         Control {
             id: quickpanelPlaceholder
-            Layout.alignment: Qt.AlignCenter
-            padding: itemMargins
+            width: placeholder.active ? placeholder.width : 16 + itemMargins
+            height: placeholder.active ? placeholder.height : 16 + itemMargins
             contentItem: DciIcon {
                 sourceSize: Qt.size(16, 16)
                 name: "dock-control-panel"
@@ -67,12 +66,11 @@ Control {
                 smooth: false
             }
             HoverHandler {
+                enabled: !root.isOpened
                 onHoveredChanged: function () {
                     root.contentHovered = hovered
                     if (hovered && !root.isOpened) {
-                        var point = quickpanelPlaceholder.mapToItem(null, quickpanelPlaceholder.width / 2, quickpanelPlaceholder.height / 2)
-                        toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-                        toolTip.open()
+                        root.showToolTipNow()
                     } else {
                         toolTip.close()
                     }
@@ -92,23 +90,52 @@ Control {
 
         ShellSurfaceItemProxy {
             id: surfaceLayer
-            property var itemGlobalPoint: {
-                var a = surfaceLayer
-                var x = 0, y = 0
-                while(a.parent) {
-                    x += a.x
-                    y += a.y
-                    a = a.parent
+            onWidthChanged: {
+                if (!shellSurface || !(shellSurface.updatePluginGeometry))
+                    return
+                shellSurface.margins = root.itemMargins
+                shellSurface.updatePluginGeometry(Qt.rect(Math.round(itemScenePoint.x),
+                                                          Math.round(itemScenePoint.y),
+                                                          Math.round(width),
+                                                          Math.round(height)))
+            }
+            onHeightChanged: {
+                if (!shellSurface || !(shellSurface.updatePluginGeometry))
+                    return
+                shellSurface.margins = root.itemMargins
+                shellSurface.updatePluginGeometry(Qt.rect(Math.round(itemScenePoint.x),
+                                                          Math.round(itemScenePoint.y),
+                                                          Math.round(width),
+                                                          Math.round(height)))
+            }
+
+            function localItemPoint() {
+                let current = surfaceLayer
+                let x = 0
+                let y = 0
+                while (current.parent) {
+                    x += current.x
+                    y += current.y
+                    current = current.parent
                 }
 
                 return Qt.point(x, y)
             }
 
-            onItemGlobalPointChanged: {
+            property var itemScenePoint: {
+                Panel.frontendWindowRect
+                surfaceLayer.localItemPoint()
+                return surfaceLayer.mapToItem(null, 0, 0)
+            }
+
+            onItemScenePointChanged: {
                 if (!shellSurface || !(shellSurface.updatePluginGeometry))
                     return
                 shellSurface.margins = root.itemMargins
-                shellSurface.updatePluginGeometry(Qt.rect(itemGlobalPoint.x, itemGlobalPoint.y, 0, 0))
+                shellSurface.updatePluginGeometry(Qt.rect(Math.round(itemScenePoint.x),
+                                                          Math.round(itemScenePoint.y),
+                                                          Math.round(width),
+                                                          Math.round(height)))
             }
         }
     }

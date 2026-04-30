@@ -1,7 +1,8 @@
-// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#include "applet.h"
 #include "multitaskview.h"
 #include "pluginfactory.h"
 #include "../constants.h"
@@ -22,12 +23,10 @@ constexpr int KWinOptimalPerformance = 4;
 const QString windowEffectTypeKey = QStringLiteral("user_type");
 
 MultiTaskView::MultiTaskView(QObject *parent)
-    : DAppletDock(parent)
+    : DApplet(parent)
     , m_iconName("deepin-multitasking-view")
 {
-    connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, [this]() {
-        setSupported(m_kWinEffect && DWindowManagerHelper::instance()->hasComposite());
-    });
+    connect(DWindowManagerHelper::instance(), &DWindowManagerHelper::hasCompositeChanged, this, &MultiTaskView::visibleChanged);
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
         m_multitaskview.reset(new TreeLandMultitaskview);
@@ -40,7 +39,7 @@ MultiTaskView::MultiTaskView(QObject *parent)
                 bool kWinEffect = m_kWinCompositingConfig->value(windowEffectTypeKey).toInt() != KWinOptimalPerformance;
                 if (kWinEffect != m_kWinEffect) {
                     m_kWinEffect = kWinEffect;
-                    setSupported(m_kWinEffect && DWindowManagerHelper::instance()->hasComposite());
+                    Q_EMIT visibleChanged();
                 }
             }
         });
@@ -49,8 +48,7 @@ MultiTaskView::MultiTaskView(QObject *parent)
 
 bool MultiTaskView::init()
 {
-    setSupported(m_kWinEffect && DWindowManagerHelper::instance()->hasComposite());
-    DAppletDock::init();
+    DApplet::init();
     return true;
 }
 
@@ -82,6 +80,11 @@ void MultiTaskView::setIconName(const QString& iconName)
     }
 }
 
+bool MultiTaskView::visible() const
+{
+    return m_kWinEffect && m_visible && DWindowManagerHelper::instance()->hasComposite();
+}
+
 DockItemInfo MultiTaskView::dockItemInfo()
 {
     DockItemInfo info;
@@ -92,6 +95,15 @@ DockItemInfo MultiTaskView::dockItemInfo()
     info.visible = visible();
     info.dccIcon = DCCIconPath + "multitasking-view.svg";
     return info;
+}
+
+void MultiTaskView::setVisible(bool visible)
+{
+    if (m_visible != visible) {
+        m_visible = visible;
+
+        Q_EMIT visibleChanged();
+    }
 }
 
 D_APPLET_CLASS(MultiTaskView)

@@ -80,7 +80,7 @@ struct WlQtTextInputMethodHelper : public QtWaylandServer::qt_text_input_method_
             base->send_enter(d->resource->handle, d->focusedSurface->resource());
             base->send_input_direction_changed(d->resource->handle, int(qApp->inputMethod()->inputDirection()));
             base->send_locale_changed(d->resource->handle, qApp->inputMethod()->locale().bcp47Name());
-
+            
             d->focusDestroyListener.listenForDestruction(surface->resource());
             if (d->inputPanelVisible && d->enabledSurfaces.values().contains(surface))
                 qApp->inputMethod()->show();
@@ -467,12 +467,12 @@ PluginManager::PluginManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
 {
     auto theme = DGuiApplicationHelper::instance()->applicationTheme();
-    QObject::connect(theme, &DPlatformTheme::fontNameChanged, this, &PluginManager::onFontChanged);
-    QObject::connect(theme, &DPlatformTheme::fontPointSizeChanged, this, &PluginManager::onFontChanged);
-    QObject::connect(theme, &DPlatformTheme::activeColorChanged, this, &PluginManager::onActiveColorChanged);
-    QObject::connect(theme, &DPlatformTheme::darkActiveColorChanged, this, &PluginManager::onActiveColorChanged);
-    QObject::connect(theme, &DPlatformTheme::themeNameChanged, this, &PluginManager::onThemeChanged);
-    QObject::connect(theme, &DPlatformTheme::iconThemeNameChanged, this, &PluginManager::onThemeChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::fontNameChanged, this, &PluginManager::onFontChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::fontPointSizeChanged, this, &PluginManager::onFontChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::activeColorChanged, this, &PluginManager::onActiveColorChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::darkActiveColorChanged, this, &PluginManager::onActiveColorChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::themeNameChanged, this, &PluginManager::onThemeChanged);
+    QObject::connect(theme, &Dtk::Gui::DPlatformTheme::iconThemeNameChanged, this, &PluginManager::onThemeChanged);
 }
 
 void PluginManager::initialize()
@@ -520,31 +520,16 @@ void PluginManager::initialize()
     // 启用剪贴板保留并在宿主系统剪贴板更新时同步给插件 Wayland 客户端，实现粘贴功能
     compositor->setRetainedSelectionEnabled(true);
     if (auto *clipboard = QGuiApplication::clipboard()) {
-        auto syncClipboardData = [compositor](const QMimeData *mimeData) {
-            if (!mimeData) return;
-            QMimeData lightweightData;
-            static QStringList allowedFormats = {"text/plain", "text/html"};
-            bool hasData = false;
-            
-            for (const QString &format : mimeData->formats()) {
-                if (allowedFormats.contains(format)) {
-                    lightweightData.setData(format, mimeData->data(format));
-                    hasData = true;
+        QObject::connect(clipboard, &QClipboard::changed, this, [compositor](QClipboard::Mode mode) {
+            if (mode == QClipboard::Clipboard) {
+                if (const QMimeData *mimeData = QGuiApplication::clipboard()->mimeData(mode)) {
+                    compositor->overrideSelection(mimeData);
                 }
             }
-
-            if (hasData) {
-                compositor->overrideSelection(&lightweightData);
-            }
-        };
-
-        QObject::connect(clipboard, &QClipboard::changed, this, [clipboard, syncClipboardData](QClipboard::Mode mode) {
-            if (mode == QClipboard::Clipboard) {
-                syncClipboardData(clipboard->mimeData(mode));
-            }
         });
-
-        syncClipboardData(clipboard->mimeData(QClipboard::Clipboard));
+        if (const QMimeData *mimeData = clipboard->mimeData(QClipboard::Clipboard)) {
+            compositor->overrideSelection(mimeData);
+        }
     }
 }
 

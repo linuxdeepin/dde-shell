@@ -34,6 +34,12 @@ SPDX-FileCopyrightText = "UnionTech Software Technology Co., Ltd."
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
 [[annotations]]
+path = ["panels/dock/package/SpotlightGradient.png", "panels/dock/package/SpotlightGradient.svg"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "UnionTech Software Technology Co., Ltd."
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
 path = ["**.qrc", "**/qmldir"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "None"

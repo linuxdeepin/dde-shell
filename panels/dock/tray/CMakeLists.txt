@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -42,6 +42,8 @@ add_library(trayitem SHARED
     trayitem.h
     traysettings.cpp
     traysettings.h
+    ../dockiteminfo.cpp
+    ../dockiteminfo.h
     ../constants.h
 )
 
@@ -52,7 +54,6 @@ target_include_directories(trayitem PUBLIC
 
 target_link_libraries(trayitem PRIVATE
     dde-shell-frame
-    dde-shell-dock
 )
 
 install(TARGETS dock-tray DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/tray/")

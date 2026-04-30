@@ -15,17 +15,115 @@ static const int itemPadding = 4;
 static const int itemSpacing = 2;
 static const QSize itemVisualSize = QSize(itemSize + itemPadding * 2, itemSize + itemPadding * 2);
 
+void TrayItemPositionManager::beginLayoutSync()
+{
+    m_layoutSyncActive = true;
+    m_visualItemSizeChangedPending = false;
+}
+
+void TrayItemPositionManager::endLayoutSync()
+{
+    m_layoutSyncActive = false;
+    if (m_visualItemSizeChangedPending) {
+        m_visualItemSizeChangedPending = false;
+        emit visualItemSizeChanged();
+    }
+}
+
+void TrayItemPositionManager::registerSurfaceSize(const QString &surfaceId, const QSize &size)
+{
+    if (surfaceId.isEmpty() || size.isEmpty()) {
+        return;
+    }
+
+    const QSize normalizedSize = size.isValid() ? size : itemVisualSize;
+    bool changed = m_registeredSurfaceSizes.value(surfaceId) != normalizedSize;
+    m_registeredSurfaceSizes.insert(surfaceId, normalizedSize);
+
+    for (int index = 0; index < m_registeredItemSurfaceIds.count(); ++index) {
+        if (m_registeredItemSurfaceIds.at(index) != surfaceId) {
+            continue;
+        }
+
+        if (m_registeredItemsSize.at(index) == normalizedSize) {
+            continue;
+        }
+
+        m_registeredItemsSize[index] = normalizedSize;
+        changed = true;
+    }
+
+    if (changed) {
+        notifyVisualItemSizeChanged();
+    }
+}
+
+void TrayItemPositionManager::registerVisualItem(const QString &surfaceId, int index)
+{
+    if (surfaceId.isEmpty() || index < 0) {
+        return;
+    }
+
+    ensureRegisteredItemCapacity(index + 1);
+
+    bool changed = false;
+    for (int currentIndex = 0; currentIndex < m_registeredItemSurfaceIds.count(); ++currentIndex) {
+        if (currentIndex == index || m_registeredItemSurfaceIds.at(currentIndex) != surfaceId) {
+            continue;
+        }
+
+        m_registeredItemSurfaceIds[currentIndex].clear();
+        if (m_registeredItemsSize.at(currentIndex) != itemVisualSize) {
+            m_registeredItemsSize[currentIndex] = itemVisualSize;
+            changed = true;
+        }
+    }
+
+    const QSize size = m_registeredSurfaceSizes.value(surfaceId, itemVisualSize);
+    if (m_registeredItemSurfaceIds.at(index) != surfaceId || m_registeredItemsSize.at(index) != size) {
+        m_registeredItemSurfaceIds[index] = surfaceId;
+        m_registeredItemsSize[index] = size;
+        changed = true;
+    }
+
+    if (changed) {
+        notifyVisualItemSizeChanged();
+    }
+}
+
+void TrayItemPositionManager::unregisterVisualItem(const QString &surfaceId)
+{
+    if (surfaceId.isEmpty()) {
+        return;
+    }
+
+    bool changed = false;
+    for (int index = 0; index < m_registeredItemSurfaceIds.count(); ++index) {
+        if (m_registeredItemSurfaceIds.at(index) != surfaceId) {
+            continue;
+        }
+
+        m_registeredItemSurfaceIds[index].clear();
+        if (m_registeredItemsSize.at(index) != itemVisualSize) {
+            m_registeredItemsSize[index] = itemVisualSize;
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        notifyVisualItemSizeChanged();
+    }
+}
+
 void TrayItemPositionManager::registerVisualItemSize(int index, const QSize &size)
 {
-    while (m_registeredItemsSize.count() < (index + 1)) {
-        m_registeredItemsSize.append(itemVisualSize);
-    }
+    ensureRegisteredItemCapacity(index + 1);
     QSize oldSize = m_registeredItemsSize[index];
     m_registeredItemsSize[index] = size;
 
     // The registered itemsize may change, and the layout needs to be updated when it does.
     if (oldSize != size) {
-        emit visualItemSizeChanged();
+        notifyVisualItemSizeChanged();
     }
 }
 
@@ -121,13 +219,15 @@ void TrayItemPositionManager::layoutHealthCheck(int delayMs)
 
 void TrayItemPositionManager::clearRegisteredSizes()
 {
-    // Avoid emitting signal if there's nothing to clear
-    if (m_registeredItemsSize.isEmpty()) {
+    // Clear visual-index mapping only. Keep surface size cache so a layout rebuild
+    // can reuse the last known size immediately instead of falling back to defaults.
+    if (m_registeredItemsSize.isEmpty() && m_registeredItemSurfaceIds.isEmpty()) {
         return;
     }
-    
+
     m_registeredItemsSize.clear();
-    emit visualItemSizeChanged();
+    m_registeredItemSurfaceIds.clear();
+    notifyVisualItemSizeChanged();
 }
 
 TrayItemPositionManager::TrayItemPositionManager(QObject *parent)
@@ -153,6 +253,24 @@ void TrayItemPositionManager::updateVisualSize()
     QSize result(visualSize(m_visualItemCount - 1, false));
     qDebug() << "updateVisualSize()" << m_dockHeight << result;
     setProperty("visualSize", result);
+}
+
+void TrayItemPositionManager::ensureRegisteredItemCapacity(int count)
+{
+    while (m_registeredItemsSize.count() < count) {
+        m_registeredItemsSize.append(itemVisualSize);
+        m_registeredItemSurfaceIds.append(QString());
+    }
+}
+
+void TrayItemPositionManager::notifyVisualItemSizeChanged()
+{
+    if (m_layoutSyncActive) {
+        m_visualItemSizeChangedPending = true;
+        return;
+    }
+
+    emit visualItemSizeChanged();
 }
 
 }

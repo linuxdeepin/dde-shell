@@ -19,8 +19,8 @@ Item {
     property int cursorShape: Qt.ArrowCursor
     property alias shellSurfaceItem: impl
     
-    implicitWidth: shellSurface ? shellSurface.width : 16
-    implicitHeight: shellSurface ? shellSurface.height : 16
+    implicitWidth: shellSurface ? shellSurface.width : 10
+    implicitHeight: shellSurface ? shellSurface.height : 10
 
     function takeFocus() {
         impl.takeFocus()
@@ -87,9 +87,13 @@ Item {
 
         function fixPosition() {
             // See QTBUG: https://bugreports.qt.io/browse/QTBUG-135833
-            // TODO: should get the devicePixelRatio from the Window
-            x = mapFromScene(Math.ceil(mapToScene(0, 0).x * Panel.devicePixelRatio) / Panel.devicePixelRatio, 0).x
-            y = mapFromScene(0, Math.ceil(mapToScene(0, 0).y * Panel.devicePixelRatio) / Panel.devicePixelRatio).y
+            // Snap to the nearest physical pixel to avoid one-pixel seams between
+            // QML-painted items and shell-surface items in the dock.
+            const scenePoint = mapToScene(0, 0)
+            const snappedX = Math.round(scenePoint.x * Panel.devicePixelRatio) / Panel.devicePixelRatio
+            const snappedY = Math.round(scenePoint.y * Panel.devicePixelRatio) / Panel.devicePixelRatio
+            x = mapFromScene(snappedX, scenePoint.y).x
+            y = mapFromScene(scenePoint.x, snappedY).y
         }
 
         Timer {

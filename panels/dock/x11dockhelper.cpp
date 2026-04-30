@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -24,6 +24,58 @@ Q_LOGGING_CATEGORY(dockX11Log, "org.deepin.dde.shell.dock.x11")
 
 const uint16_t monitorSize = 15;
 const uint32_t allWorkspace = 0xffffffff;
+
+QRect anchoredDockGeometry(DockPanel *panel)
+{
+    if (!panel) {
+        return {};
+    }
+
+    QRect rect = panel->geometry();
+    QScreen *screen = panel->dockScreen();
+    if (!screen && panel->window()) {
+        screen = panel->window()->screen();
+    }
+    if (!screen) {
+        return rect;
+    }
+
+    const QRect screenRect = screen->geometry();
+    switch (panel->position()) {
+    case Top:
+        rect.moveLeft(screenRect.left() + (screenRect.width() - rect.width()) / 2);
+        rect.moveTop(screenRect.top());
+        break;
+    case Bottom:
+        rect.moveLeft(screenRect.left() + (screenRect.width() - rect.width()) / 2);
+        rect.moveTop(screenRect.top() + screenRect.height() - rect.height());
+        break;
+    case Left:
+        rect.moveLeft(screenRect.left());
+        rect.moveTop(screenRect.top() + (screenRect.height() - rect.height()) / 2);
+        break;
+    case Right:
+        rect.moveLeft(screenRect.left() + screenRect.width() - rect.width());
+        rect.moveTop(screenRect.top() + (screenRect.height() - rect.height()) / 2);
+        break;
+    }
+
+    return rect;
+}
+
+QRect frontendDockGeometry(DockPanel *panel)
+{
+    if (!panel) {
+        return {};
+    }
+
+    const QRect rect = panel->frontendWindowRect();
+    if (!rect.isValid() || rect.isEmpty()) {
+        return {};
+    }
+
+    return rect;
+}
 
 // TODO: use taskmanager window data
 struct WindowData
@@ -333,8 +385,14 @@ X11DockHelper::X11DockHelper(DockPanel *panel)
     connect(panel, &DockPanel::positionChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(panel, &DockPanel::dockSizeChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(panel, &DockPanel::geometryChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(panel, &DockPanel::frontendWindowRectChanged, this, [this](const QRect &) {
+        m_updateDockAreaTimer->start();
+    });
     connect(panel, &DockPanel::showInPrimaryChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     connect(panel, &DockPanel::dockScreenChanged, m_updateDockAreaTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(panel, &DockPanel::viewModeChanged, this, [this](ViewMode) {
+        m_updateDockAreaTimer->start();
+    });
 
     qGuiApp->installNativeEventFilter(m_xcbHelper);
     setupKWinDBusConnection();
@@ -479,8 +537,24 @@ void X11DockHelper::updateWindowHideState(xcb_window_t window)
 
 void X11DockHelper::updateDockArea()
 {
-    QRect rect = parent()->geometry();
-    uint size = parent()->dockSize();
+    const bool forceAnchoredDockArea = parent()->hideMode() == SmartHide;
+    QRect rect;
+    bool usingFrontendRect = false;
+
+    if (!forceAnchoredDockArea) {
+        rect = frontendDockGeometry(parent());
+        usingFrontendRect = rect.isValid() && !rect.isEmpty();
+    }
+
+    if (!usingFrontendRect) {
+        rect = anchoredDockGeometry(parent());
+    }
+
+    int size = static_cast<int>(parent()->dockSize());
+    if (usingFrontendRect) {
+        size = qMax(1, qRound(size * parent()->devicePixelRatio()));
+    }
+
     switch (parent()->position()) {
     case Top:
         rect.setHeight(size);
@@ -504,15 +578,17 @@ void X11DockHelper::updateDockArea()
         break;
     }
 
-    // Since the position of other windows are obtained through the xcb interface without scaling
-    // the rect of the dock needs to be changed to the original size of the original xcb.
-    QScreen *screen = parent()->dockScreen();
-    if (screen != nullptr) {
-        auto screenRect = screen->geometry();
-        rect.setSize(rect.size() * parent()->devicePixelRatio());
-        auto x = (rect.x() - screenRect.x()) * parent()->devicePixelRatio() + screenRect.x();
-        auto y = (rect.y() - screenRect.y()) * parent()->devicePixelRatio() + screenRect.y();
-        rect.moveTo(x, y);
+    if (!usingFrontendRect) {
+        // Since the position of other windows are obtained through the xcb interface without scaling
+        // the rect of the dock needs to be changed to the original size of the original xcb.
+        QScreen *screen = parent()->dockScreen();
+        if (screen != nullptr) {
+            auto screenRect = screen->geometry();
+            rect.setSize(rect.size() * parent()->devicePixelRatio());
+            auto x = (rect.x() - screenRect.x()) * parent()->devicePixelRatio() + screenRect.x();
+            auto y = (rect.y() - screenRect.y()) * parent()->devicePixelRatio() + screenRect.y();
+            rect.moveTo(x, y);
+        }
     }
 
     if (m_dockArea != rect) {
@@ -560,6 +636,10 @@ X11DockWakeUpArea::~X11DockWakeUpArea()
 
 void X11DockWakeUpArea::open()
 {
+    if (m_isOpen) {
+        return;
+    }
+
     uint32_t values_list[] = {1};
     xcb_create_window(m_connection,
                       XCB_COPY_FROM_PARENT,
@@ -577,15 +657,27 @@ void X11DockWakeUpArea::open()
     uint32_t values[] = {XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW};
     xcb_change_window_attributes(m_connection, m_triggerWindow, XCB_CW_EVENT_MASK, values);
     xcb_map_window(m_connection, m_triggerWindow);
+    xcb_flush(m_connection);
+    m_isOpen = true;
 }
 
 void X11DockWakeUpArea::close()
 {
+    if (!m_isOpen) {
+        return;
+    }
+
     xcb_destroy_window(m_connection, m_triggerWindow);
+    xcb_flush(m_connection);
+    m_isOpen = false;
 }
 
 void X11DockWakeUpArea::updateDockWakeArea(Position pos)
 {
+    if (!m_isOpen) {
+        return;
+    }
+
     QRect triggerArea;
     auto rect = screen()->geometry();
 
