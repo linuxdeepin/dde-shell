@@ -494,7 +494,19 @@ Item {
             Panel.contextDragging = true
         }
 
+        // 记录是否是触摸长按导致的，防止在 onClicked 中重复处理
+        property bool isTouchLongPressed: false
+
+        TapHandler {
+            acceptedDevices: PointerDevice.TouchScreen
+            gesturePolicy: TapHandler.DragThreshold
+            onLongPressed: {
+                mouseArea.isTouchLongPressed = true
+                requestAppItemMenu()
+            }
+        }
         onPressed: function (mouse) {
+            isTouchLongPressed = false
             if (mouse.button === Qt.LeftButton) {
                 appItem.grabToImage(function(result) {
                     root.Drag.imageSource = result.url;
@@ -503,13 +515,13 @@ Item {
             toolTip.close()
             closeItemPreview()
         }
-        // touchscreen long press.
-        onPressAndHold: function (mouse) {
-            if (mouse.button === Qt.NoButton) {
-                requestAppItemMenu()
-            }
-        }
+
         onClicked: function (mouse) {
+            if (isTouchLongPressed) {
+                isTouchLongPressed = false
+                return
+            }
+
             let index = root.modelIndex;
             if (mouse.button === Qt.RightButton) {
                 requestAppItemMenu()
