@@ -48,17 +48,9 @@ void DockItemModel::setSourceModel(QAbstractItemModel *model)
         sourceModel()->disconnect(this);
     }
 
-    auto currentCount = this->rowCount();
-    auto newCount = model->rowCount();
+    beginResetModel();
     QAbstractProxyModel::setSourceModel(model);
-
-    if (newCount > currentCount) {
-        beginInsertRows(QModelIndex(), currentCount, newCount - 1);
-        endInsertRows();
-    } else if (newCount < currentCount) {
-        beginRemoveRows(QModelIndex(), newCount, currentCount);
-        endRemoveRows();
-    }
+    endResetModel();
 
     connect(sourceModel(), &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int first, int last) {
         if (parent.isValid() || m_isUpdating)
@@ -87,8 +79,6 @@ void DockItemModel::setSourceModel(QAbstractItemModel *model)
         endMoveRows();
     });
 
-    auto bottomRight = this->index(std::min(currentCount, newCount), 0);
-    Q_EMIT dataChanged(index(0, 0), bottomRight);
     m_isUpdating = false;
 }
 

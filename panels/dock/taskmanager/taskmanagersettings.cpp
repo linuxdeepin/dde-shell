@@ -68,6 +68,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
     m_cgroupsBasedGroupingSkipAppIds = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_APPIDS, {"deepin-terminal"}).toStringList();
     m_cgroupsBasedGroupingSkipCategories = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_CATEGORIES, {"TerminalEmulator"}).toStringList();
+    m_windowIconWhitelist = m_taskManagerDconfig->value(TASKMANAGER_WINDOW_ICON_WHITELIST_KEY, {"com.tencent.wechat"}).toStringList();
     migrateFromDockedItems();
 }
 
@@ -111,6 +112,11 @@ QStringList TaskManagerSettings::cgroupsBasedGroupingSkipIds() const
 QStringList TaskManagerSettings::cgroupsBasedGroupingSkipCategories() const
 {
     return m_cgroupsBasedGroupingSkipCategories;
+}
+
+QStringList TaskManagerSettings::windowIconWhitelist() const
+{
+    return m_windowIconWhitelist;
 }
 
 QStringList TaskManagerSettings::dockedElements() const

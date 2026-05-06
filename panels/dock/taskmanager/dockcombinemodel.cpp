@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -7,7 +7,7 @@
 #include "globals.h"
 #include "rolecombinemodel.h"
 #include "taskmanager.h"
-
+#include "taskmanagersettings.h"
 namespace dock
 {
 DockCombineModel::DockCombineModel(QAbstractItemModel *major, QAbstractItemModel *minor, int majorRoles, CombineFunc func, QObject *parent)
@@ -55,7 +55,16 @@ QVariant DockCombineModel::data(const QModelIndex &index, int role) const
         return res;
     }
     case TaskManager::IconNameRole: {
-        QString winTitle = RoleCombineModel::data(index, m_roleMaps.value(TaskManager::WinIconRole)).toString();
+        if (TaskManagerSettings::instance()->isWindowSplit()) {
+            auto desktopId = data(index, TaskManager::DesktopIdRole).toString();
+            auto whitelist = TaskManagerSettings::instance()->windowIconWhitelist();
+            if (whitelist.contains(desktopId)) {
+                auto winIcon = RoleCombineModel::data(index, m_roleMaps.value(TaskManager::WinIconRole)).toString();
+                if (!winIcon.isEmpty()) {
+                    return winIcon;
+                }
+            }
+        }
         auto icon = RoleCombineModel::data(index, m_roleMaps.value(TaskManager::IconNameRole)).toString();
         if (icon.isEmpty()) {
             icon = RoleCombineModel::data(index, m_roleMaps.value(TaskManager::WinIconRole)).toString();

@@ -96,6 +96,17 @@
 			"description": "The items which is docked when dock is started.",
 			"permissions": "readwrite",
 			"visibility": "private"
+		},
+		"windowIconWhitelist": {
+			"value": ["com.tencent.wechat"],
+			"serial": 0,
+			"flags": [],
+			"name": "windowIconWhitelist",
+			"name[zh_CN]": "窗口图标白名单",
+			"description": "List of app id that should prefer window icon when window split is disabled",
+			"permissions": "readwrite",
+			"visibility": "private"
 		}
+		
 	}
 }

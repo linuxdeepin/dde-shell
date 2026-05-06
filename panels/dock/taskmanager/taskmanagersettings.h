@@ -35,6 +35,8 @@ public:
     QStringList cgroupsBasedGroupingSkipIds() const;
     QStringList cgroupsBasedGroupingSkipCategories() const;
 
+    QStringList windowIconWhitelist() const;
+
     void setDockedElements(const QStringList &elements);
     void toggleDockedElement(const QString &element);
     void appendDockedElement(const QString &element);
@@ -64,6 +66,7 @@ private:
     bool m_windowSplit;
     bool m_cgroupsBasedGrouping;
     QStringList m_dockedElements;
+    QStringList m_windowIconWhitelist;
     QStringList m_cgroupsBasedGroupingSkipAppIds;
     QStringList m_cgroupsBasedGroupingSkipCategories;
 };
