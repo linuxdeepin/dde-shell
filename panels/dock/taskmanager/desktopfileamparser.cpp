@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -194,7 +194,7 @@ void DesktopFileAMParser::launchWithAction(const QString& action)
 
 void DesktopFileAMParser::launchWithUrls(const QStringList & urls)
 {
-    m_applicationInterface->Launch(QString(), urls, QVariantMap());
+    m_applicationInterface->Launch(QString(), urls, QVariantMap{{QStringLiteral("_launch_type"), QStringLiteral("dde-shell")}});
 }
 
 void DesktopFileAMParser::requestQuit()
@@ -222,7 +222,11 @@ void DesktopFileAMParser::launchByAMTool(const QString &action)
     QProcess process;
     const auto path = m_applicationInterface->path();
     process.setProcessChannelMode(QProcess::MergedChannels);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+    process.start("dde-am", {"--by-user", "--launch-type", "dde-shell", path, action});
+#else
     process.start("dde-am", {"--by-user", path, action});
+#endif
     if (!process.waitForFinished()) {
         qWarning() << "Failed to launch the path:" << path << process.errorString();
         return;

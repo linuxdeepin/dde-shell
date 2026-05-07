@@ -5,7 +5,7 @@ Maintainer: Deepin Packages Builder <packages@deepin.com>
 Build-Depends:
  debhelper-compat (= 13),
  cmake,
- dde-application-manager-api (>= 1.2.48),
+ dde-application-manager-api (>> 1.2.51),
  dde-api-dev (>> 6.0.39),
  dde-tray-loader-dev (> 2.0.24),
  extra-cmake-modules,

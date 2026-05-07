@@ -443,7 +443,11 @@ void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const 
     } else {
         QProcess process;
         process.setProcessChannelMode(QProcess::MergedChannels);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+        process.start("dde-am", {"--by-user", "--launch-type", "dde-shell", id, action});
+#else
         process.start("dde-am", {"--by-user", id, action});
+#endif
         process.waitForFinished();
     }
 }
@@ -463,7 +467,7 @@ void DockGlobalElementModel::requestOpenUrls(const QModelIndex &index, const QLi
     Application appInterface(QStringLiteral("org.desktopspec.ApplicationManager1"), dbusPath, QDBusConnection::sessionBus());
 
     if (appInterface.isValid()) {
-        appInterface.Launch(QString(), urlStrings, QVariantMap());
+        appInterface.Launch(QString(), urlStrings, QVariantMap{{QStringLiteral("_launch_type"), QStringLiteral("dde-shell")}});
     }
 }
 

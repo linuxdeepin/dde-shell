@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -206,7 +206,11 @@ void DockGroupModel::requestNewInstance(const QModelIndex &index, const QString 
         auto desktopId = index.data(TaskManager::DesktopIdRole).toString();
         QProcess process;
         process.setProcessChannelMode(QProcess::MergedChannels);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+        process.start("dde-am", {"--by-user", "--launch-type", "dde-shell", desktopId, action});
+#else
         process.start("dde-am", {"--by-user", desktopId, action});
+#endif
         process.waitForFinished();
         return;
     }

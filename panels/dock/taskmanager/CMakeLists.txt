@@ -107,6 +107,7 @@ if (HAVE_DDE_API_EVENTLOGGER)
     target_link_libraries(dock-taskmanager PRIVATE DDEAPI::EventLogger)
 endif()
 
+
 if (BUILD_WITH_X11)
     target_compile_definitions(dock-taskmanager PRIVATE BUILD_WITH_X11=)
     pkg_check_modules(TaskmanagerXcb REQUIRED IMPORTED_TARGET xcb xcb-res xcb-ewmh xcb-icccm)
