@@ -7,6 +7,7 @@
 #include "dockpanel.h"
 
 #include <QGuiApplication>
+#include <QDBusConnection>
 
 namespace dock
 {
@@ -39,6 +40,13 @@ DockHelper::DockHelper(DockPanel *parent)
 
     connect(m_hideTimer, &QTimer::timeout, this, &DockHelper::checkNeedHideOrNot);
     connect(m_showTimer, &QTimer::timeout, this, &DockHelper::checkNeedShowOrNot);
+
+    QDBusConnection::sessionBus().connect(QString(),
+                                          QStringLiteral("/KWin"),
+                                          QStringLiteral("org.kde.KWin"),
+                                          QStringLiteral("MultitaskStateChanged"),
+                                          this,
+                                          SLOT(onMultitaskStateChanged(bool)));
 
     connect(this, &DockHelper::isWindowOverlapChanged, this, [this](bool overlap) {
         if (overlap) {
@@ -220,6 +228,10 @@ void DockHelper::checkNeedHideOrNot()
         needHide &= !show;
     }    
 
+    if (m_inMultitaskView) {
+        needHide = false;
+    }
+
     if (needHide)
         parent()->setHideState(Hide);
 }
@@ -249,8 +261,24 @@ void DockHelper::checkNeedShowOrNot()
         needShow |= enter;
     }
 
+    if (m_inMultitaskView) {
+        needShow = true;
+    }
+
     if (needShow)
         parent()->setHideState(Show);
+}
+
+void DockHelper::onMultitaskStateChanged(bool inMultitask)
+{
+    if (m_inMultitaskView != inMultitask) {
+        m_inMultitaskView = inMultitask;
+        if (m_inMultitaskView) {
+            checkNeedShowOrNot();
+        } else {
+            checkNeedHideOrNot();
+        }
+    }
 }
 
 DockPanel* DockHelper::parent()

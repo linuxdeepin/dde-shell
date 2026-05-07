@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -42,11 +42,13 @@ private:
 public Q_SLOTS:
     void checkNeedHideOrNot();
     void checkNeedShowOrNot();
+    void onMultitaskStateChanged(bool inMultitask);
 
 private:
     void initAreas();
 
 private:
+    bool m_inMultitaskView = false;
     QHash<QScreen *, DockWakeUpArea *> m_areas;
     QHash<QWindow *, bool> m_enters;
     QHash<QWindow *, bool> m_transientChildShows;
