@@ -54,11 +54,25 @@ Multi-Arch: same
 Description: DDE Shell library
  DDE Shell is a plugin system that integrates plugins developed based on this plugin system into DDE.
 
+Package: libdde-shell-dock
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Breaks:
+ libdde-shell-dock-dev (<< 2.0.39),
+Replaces:
+ libdde-shell-dock-dev (<< 2.0.39),
+Multi-Arch: same
+Description: DDE Shell dock library
+ DDE Shell Dock is a library for dock item info.
+
 Package: dde-shell
 Architecture: any
 Depends:
  dde-tray-loader (>= 1.99.8),
  libdde-shell (= ${binary:Version}),
+ libdde-shell-dock (= ${binary:Version}),
  libdtk6declarative,
  libqt6sql6-sqlite,
  libqt6svg6,
@@ -102,6 +116,7 @@ Description: DDE Shell devel library
 Package: libdde-shell-dock-dev
 Architecture: any
 Depends:
+ libdde-shell-dock (= ${binary:Version}),
  libdde-shell-dev (= ${binary:Version}),
  qt6-base-dev,
  qt6-declarative-dev,
