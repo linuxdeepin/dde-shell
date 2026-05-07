@@ -305,7 +305,9 @@ Item {
             active: root.attention && !Panel.rootObject.isDragging && TaskManager.showAttentionAnimation 
             onActiveChanged: {
                 if (!active) {
-                    icon.scale = 1.0
+                    Qt.callLater(function() {
+                        icon.scale = 1.0
+                    })
                 }
             }
             sourceComponent: Repeater {
