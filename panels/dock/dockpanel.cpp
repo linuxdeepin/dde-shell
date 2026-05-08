@@ -149,6 +149,10 @@ bool DockPanel::init()
             else {
                 m_dockScreen = window()->screen();
             }
+            // 监听屏幕几何信息变化，当主屏位置变化时重新计算 frontendWindowRect
+            if (auto screen = window()->screen()) {
+                connect(screen, &QScreen::geometryChanged, this, &DockPanel::onWindowGeometryChanged);
+            }
             rootObject()->installEventFilter(this);
             Q_EMIT devicePixelRatioChanged(window()->devicePixelRatio());
         }
