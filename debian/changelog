@@ -1,3 +1,32 @@
+dde-shell (2.0.40) unstable; urgency=medium
+
+  * feat(dock): pass launch_type when launching apps from taskbar
+  * fix: use dummy drag target on Wayland to prevent layout breakage
+  * feat: add window icon whitelist for dock task manager
+  * fix: replace touch long press handling with TapHandler for better
+    reliability
+  * feat: recalculate dock window rect on screen geometry change
+  * feat: use multi-field event logger with cmake find_package
+    使用多字段事件日志记录器并迁移到 cmake find_package
+  * fix: keep dock visible during multitask view
+  * refactor: optimize dock spacing calculation for FullscreenFrame
+  * fix: prevent duplicate menu trigger on touchscreen long press
+  * i18n: Updates for project Deepin Desktop Environment (#743)
+  * fix: fix icon scale reset during attention animation
+  * feat: add libdde-shell-dock package (#1587)
+  * fix: resolve null pointer crash when TextCalculator exits
+  * fix: prevent crash from invalid indexes in window monitoring
+  * fix: resolve occasional crash in TreeLandWindow destructor under
+    treeland
+  * fix: fix occasional crash in treeland under layer shell surface
+  * feat(dock): integrate event logging with cmake find_package support
+    集成事件日志记录并使用 cmake find_package 管理
+  * chore: add Breaks relation with older dde-shell versions
+  * fix: resolve flickering and position shift when switching panel
+    popups
+
+ -- zhangkun <zhangkun2@uniontech.com>  Sat, 09 May 2026 09:31:25 +0800
+
 dde-shell (2.0.39) unstable; urgency=medium
 
   * fix: correct SPDX comment syntax in DDEShellDockConfig.cmake.in
