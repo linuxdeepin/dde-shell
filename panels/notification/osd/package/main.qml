@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -40,8 +40,8 @@ Window {
         root.screen = Qt.binding(function () { return Qt.application.screens[0]})
     }
 
-    width: osdView ? osdView.width : 100
-    height: osdView ? osdView.height : 100
+    width: Math.max(osdView?.width ?? 0, 60)
+    height: Math.max(osdView?.height ?? 0, 60)
 
     property Item osdView
     property bool isSingleView: false
@@ -97,3 +97,4 @@ Window {
         }
     }
 }
+
