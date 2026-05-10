@@ -3,7 +3,7 @@
     <name>GroupNotify</name>
     <message>
         <source>Fold</source>
-        <translation>Plegar</translation>
+        <translation>Contraer</translation>
     </message>
     <message>
         <source>More</source>
