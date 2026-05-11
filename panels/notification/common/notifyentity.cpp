@@ -405,7 +405,7 @@ QString NotifyEntity::formatRelativeTime(qint64 ctimeMs)
             return toQString(result);
         }
     } else if (elapsedDay >= 1 && elapsedDay < 2) {
-        formatter->format(1, UDAT_DIRECTION_LAST, UDAT_RELATIVE_DAYS, result, status);
+        formatter->format(UDAT_DIRECTION_LAST, UDAT_ABSOLUTE_DAY, result, status);
         UnicodeString combinedString;
         UErrorCode timeStatus = U_ZERO_ERROR;
         SimpleDateFormat timeFormatter("HH:mm", icu::Locale::getDefault(), timeStatus);
