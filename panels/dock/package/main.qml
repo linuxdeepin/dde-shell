@@ -27,7 +27,7 @@ Window {
             
         let otherOccupied = 0;
         if (otherCount > 0) {
-            otherOccupied = otherCount * dockItemMaxSize + otherCount * spacing;
+            otherOccupied = otherCount * dockItemIconSize + otherCount * spacing;
         }
 
         if (useColumnLayout) {

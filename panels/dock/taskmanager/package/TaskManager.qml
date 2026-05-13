@@ -62,8 +62,8 @@ ContainmentItem {
         dataModel: taskmanager.Applet.dataModel
         iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
         spacing: appContainer.spacing
-        cellSize: visualModel.cellWidth
-        itemPadding: taskmanager.appTitleSpacing
+        cellSize: textCalculator.iconSize
+        itemPadding: Math.round(textCalculator.iconSize / 8)
         remainingSpace: taskmanager.remainingSpacesForTaskManager
         font.family: D.DTK.fontManager.t6.family
         font.pixelSize: Math.max(10, Math.min(20, Math.round(textCalculator.iconSize * 0.35)))
@@ -132,24 +132,8 @@ ContainmentItem {
                 Behavior on opacity { NumberAnimation { duration: 200 } }
                 Behavior on scale { NumberAnimation { duration: 200 } }
 
-                implicitWidth: {
-                    let targetW = useColumnLayout ? taskmanager.implicitWidth : appItem.implicitWidth;
-                    if (useColumnLayout || visualModel.count <= 0) return targetW;
-                    
-                    let totalSpacing = Math.max(0, visualModel.count - 1) * taskmanager.appTitleSpacing;
-                    let availableW = taskmanager.remainingSpacesForTaskManager - totalSpacing;
-                    let maxW = availableW / visualModel.count;
-                    return Math.min(targetW, Math.max(1, maxW));
-                }
-                implicitHeight: {
-                    let targetH = useColumnLayout ? visualModel.cellWidth : taskmanager.implicitHeight;
-                    if (!useColumnLayout || visualModel.count <= 0) return targetH;
-                    
-                    let totalSpacing = Math.max(0, visualModel.count - 1) * taskmanager.appTitleSpacing;
-                    let availableH = taskmanager.remainingSpacesForTaskManager - totalSpacing;
-                    let maxH = availableH / visualModel.count;
-                    return Math.min(targetH, Math.max(1, maxH));
-                }
+                implicitWidth: useColumnLayout ? taskmanager.implicitWidth : appItem.implicitWidth
+                implicitHeight: useColumnLayout ? visualModel.cellWidth : taskmanager.implicitHeight
 
                 property int visualIndex: DelegateModel.itemsIndex
                 property var modelIndex: visualModel.modelIndex(index)
