@@ -1,3 +1,9 @@
+dde-shell (2.0.41) unstable; urgency=medium
+
+  * fix(dock): fix premature icon label compression in taskbar
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 14 May 2026 20:03:22 +0800
+
 dde-shell (2.0.40) unstable; urgency=medium
 
   * feat(dock): pass launch_type when launching apps from taskbar
