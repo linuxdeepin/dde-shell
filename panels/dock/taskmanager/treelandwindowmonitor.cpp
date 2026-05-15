@@ -19,7 +19,7 @@
 
 namespace dock {
 ForeignToplevelManager::ForeignToplevelManager(TreeLandWindowMonitor* monitor)
-    : QWaylandClientExtensionTemplate<ForeignToplevelManager>(1)
+    : QWaylandClientExtensionTemplate<ForeignToplevelManager>(2)
     , m_monitor(monitor)
 {
 }
