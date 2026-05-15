@@ -13,6 +13,7 @@ usr/lib/*/qt6/qml/org/deepin/ds/notification/*
 usr/lib/*/qt6/qml/org/deepin/ds/notificationcenter/*
 usr/lib/systemd/*/dde-shell*.service
 usr/lib/systemd/*/dde-shell-plugin*.service
+usr/share/applications/*
 usr/share/dde-dock/icons/dcc-setting/*.dci
 usr/share/dde-shell/*/translations
 usr/share/dde-shell/org.deepin.ds.dde-am*/

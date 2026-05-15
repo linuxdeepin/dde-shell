@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
     QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
     a.setOrganizationName("deepin");
     a.setApplicationName("org.deepin.dde-shell");
+    a.setDesktopFileName(QStringLiteral("org.deepin.dde-shell"));
     a.setApplicationVersion(QT_STRINGIFY(DS_VERSION));
 
     QCommandLineParser parser;
