@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -67,7 +67,8 @@ class TreeLandWindow : public AbstractWindow
         Active      = QtWayland::treeland_foreign_toplevel_handle_v1::state_activated,
         Maximized   = QtWayland::treeland_foreign_toplevel_handle_v1::state_maximized,
         Minimized   = QtWayland::treeland_foreign_toplevel_handle_v1::state_minimized,
-        Fullscreen  = QtWayland::treeland_foreign_toplevel_handle_v1::state_fullscreen
+        Fullscreen  = QtWayland::treeland_foreign_toplevel_handle_v1::state_fullscreen,
+        Attention   = QtWayland::treeland_foreign_toplevel_handle_v1::state_attention
     };
 
 public:

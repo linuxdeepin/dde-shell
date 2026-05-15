@@ -17,7 +17,7 @@ Q_LOGGING_CATEGORY(waylandwindowLog, "org.deepin.dde.shell.dock.taskmanager.tree
 
 namespace dock {
 ForeignToplevelHandle::ForeignToplevelHandle(struct ::treeland_foreign_toplevel_handle_v1 *object)
-    : QWaylandClientExtensionTemplate<ForeignToplevelHandle>(1)
+    : QWaylandClientExtensionTemplate<ForeignToplevelHandle>(2)
     , QtWayland::treeland_foreign_toplevel_handle_v1(object)
     , m_pid(0)
     , m_isReady(false)
@@ -174,7 +174,7 @@ bool TreeLandWindow::allowClose()
 
 bool TreeLandWindow::isAttention()
 {
-    return false;
+    return m_foreignToplevelHandle->state().contains(Attention);
 }
 
 void TreeLandWindow::close()
