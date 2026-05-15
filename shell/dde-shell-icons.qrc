@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/dsg/built-in-icons">
+        <file alias="dde-shell.dci">icons/dde-shell.dci</file>
+    </qresource>
+</RCC>

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -23,6 +23,7 @@ add_executable(dde-shell
     treelandoutputwatcher.cpp
     dde-shell.qrc
     override_dtkdeclarative_qml.qrc
+    dde-shell-icons.qrc
 )
 
 qt_generate_wayland_protocol_client_sources(dde-shell
@@ -59,6 +60,8 @@ install(FILES ${CMAKE_SOURCE_DIR}/misc/deepin-debug-config/org.deepin.dde.shell.
     DESTINATION ${CMAKE_INSTALL_DATADIR}/deepin-debug-config/deepin-debug-config.d)
 install(FILES ${CMAKE_SOURCE_DIR}/misc/deepin-log-config/org.deepin.dde.shell.json
     DESTINATION ${CMAKE_INSTALL_DATADIR}/deepin-log-viewer/deepin-log.conf.d)
+install(FILES ${CMAKE_SOURCE_DIR}/misc/org.deepin.dde-shell.desktop
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
 
 install(TARGETS dde-shell DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
