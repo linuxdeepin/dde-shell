@@ -98,7 +98,7 @@
 			"visibility": "private"
 		},
 		"windowIconWhitelist": {
-			"value": ["com.tencent.wechat"],
+			"value": ["com.tencent.wechat", "com.qq.weixin.work.deepin"],
 			"serial": 0,
 			"flags": [],
 			"name": "windowIconWhitelist",
