@@ -81,7 +81,8 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
             timer->stop();
             timer->deleteLater();
             connect(m_trayApplet, SIGNAL(pluginsChanged()), this, SIGNAL(pluginsChanged()));
-            QTimer::singleShot(3000, this, [this]() {
+            // Log the initial plugin list after 30s delay to ensure the list has fully loaded
+            QTimer::singleShot(30000, this, [this]() {
                 logInitialPluginState();
             });
         }
