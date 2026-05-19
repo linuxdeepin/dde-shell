@@ -31,7 +31,7 @@ Window {
     readonly property bool adaptiveFashionUsesDirectWindowGeometry: adaptiveFashionMode && Qt.platform.pluginName === "xcb"
     readonly property bool useWindowMarginBasedHideAnimation: adaptiveFashionMode
     readonly property bool useTransformBasedHideAnimation: Qt.platform.pluginName === "xcb" && !useWindowMarginBasedHideAnimation
-    readonly property var promotedCenterPluginIds: ["org.deepin.ds.dock.aibar", "org.deepin.ds.dock.searchitem"]
+    readonly property var promotedCenterPluginIds: ["org.deepin.ds.dock.searchitem"]
     readonly property int fashionDockSpacing: Math.round(dockItemIconSize * 0.75)
     readonly property real fashionPartSpacing: adaptiveFashionMode
         ? dock.roundToPhysicalPixel(fashionDockSpacing)
@@ -401,8 +401,6 @@ Window {
         switch (pluginId) {
         case "org.deepin.ds.dock.launcherapplet":
             return 1200
-        case "org.deepin.ds.dock.aibar":
-            return 1300
         case "org.deepin.ds.dock.searchitem":
             return 1400
         default: {
