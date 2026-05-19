@@ -39,14 +39,25 @@ AppletDockItem {
         }
     }
 
-    MouseArea {
-        id: mouseHandler
-        anchors.fill: parent
-        onClicked: function (mouse) {
-            if (mouse.button === Qt.LeftButton) {
+    TapHandler {
+        id: tapHandler
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        gesturePolicy: TapHandler.WithinBounds
+        onTapped: function (eventPoint, buttons) {
+            if (buttons === Qt.LeftButton) {
                 Applet.openWorkspace()
                 toolTip.close()
             }
+        }
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.NoButton
+        acceptedDevices: PointerDevice.TouchScreen
+        gesturePolicy: TapHandler.WithinBounds
+        onTapped: function (eventPoint, buttons) {
+            Applet.openWorkspace()
+            toolTip.close()
         }
     }
     HoverHandler {
