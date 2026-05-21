@@ -47,6 +47,7 @@ protected Q_SLOTS:
 
 private:
     void updateOverlapCheckerPos();
+    void initWallpaperColorManager();
 
 private:
     friend class TreeLandWindowOverlapChecker;

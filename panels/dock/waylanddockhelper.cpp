@@ -22,7 +22,6 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     , m_isCurrentActiveWindowFullscreened(false)
     , m_panel(panel)
 {
-    m_wallpaperColorManager.reset(new WallpaperColorManager(this));
     m_ddeShellManager.reset(new TreeLandDDEShellManager());
     DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
     if (auto applet = bridge.applet()) {
@@ -37,19 +36,6 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
         }
     }
 
-    connect(m_panel, &DockPanel::rootObjectChanged, this, [this]() {
-        m_wallpaperColorManager->watchScreen(dockScreenName());
-    });
-
-    connect(m_wallpaperColorManager.get(), &WallpaperColorManager::activeChanged, this, [this]() {
-        if (m_panel->rootObject() != nullptr) {
-            m_wallpaperColorManager->watchScreen(dockScreenName());
-        }
-    });
-
-    connect(m_panel, &DockPanel::dockScreenChanged, this, [this]() {
-        m_wallpaperColorManager->watchScreen(dockScreenName());
-    });
 
     connect(m_panel, &DockPanel::positionChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
     connect(m_panel, &DockPanel::dockSizeChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
@@ -73,9 +59,6 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
         }
     });
 
-    if (m_panel->rootObject() != nullptr) {
-        m_wallpaperColorManager->watchScreen(dockScreenName());
-    }
 }
 
 void WaylandDockHelper::updateOverlapCheckerPos()
@@ -145,6 +128,29 @@ void WaylandDockHelper::setCurrentActiveWindowFullscreened(bool isFullscreen)
 bool WaylandDockHelper::isWindowOverlap()
 {
     return m_isWindowOverlap;
+}
+
+void WaylandDockHelper::initWallpaperColorManager()
+{
+    m_wallpaperColorManager.reset(new WallpaperColorManager(this));
+
+    connect(m_panel, &DockPanel::rootObjectChanged, this, [this]() {
+        m_wallpaperColorManager->watchScreen(dockScreenName());
+    });
+
+    connect(m_wallpaperColorManager.get(), &WallpaperColorManager::activeChanged, this, [this]() {
+        if (m_panel->rootObject() != nullptr) {
+            m_wallpaperColorManager->watchScreen(dockScreenName());
+        }
+    });
+
+    connect(m_panel, &DockPanel::dockScreenChanged, this, [this]() {
+        m_wallpaperColorManager->watchScreen(dockScreenName());
+    });
+
+    if (m_panel->rootObject() != nullptr) {
+        m_wallpaperColorManager->watchScreen(dockScreenName());
+    }
 }
 
 void WaylandDockHelper::setDockColorTheme(const ColorTheme &theme)
