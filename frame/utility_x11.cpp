@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,6 +6,7 @@
 
 #include <QLoggingCategory>
 #include <QMouseEvent>
+#include <QTouchEvent>
 
 #include <xcb/xcb.h>
 #include <X11/Xlib.h>
@@ -119,13 +120,28 @@ bool MouseGrabEventFilter::eventFilter(QObject *watched, QEvent *event)
         if (isMainWindow()) {
             trySelectGrabWindow(static_cast<QMouseEvent *>(event));
         }
+    } else if (event->type() == QEvent::TouchBegin) {
+        // Handle touch events - close popup when touching outside
+        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+        if (!touchEvent->points().isEmpty()) {
+            QEventPoint pt = touchEvent->points().first();
+            // Use frameGeometry() to get global coordinates for comparison
+            const auto bounding = m_target->frameGeometry();
+            const auto pos = pt.globalPosition();
+            if (!bounding.contains(pos.toPoint())) {
+                qCDebug(dsLog) << "touch outside menu window:" << m_target->winId();
+                emit outsideMousePressed();
+                return true;
+            }
+        }
     }
     return false;
 }
 
 void MouseGrabEventFilter::mousePressEvent(QMouseEvent *e)
 {
-    const auto bounding = m_target->geometry();
+    // Use frameGeometry() to get global coordinates for comparison with globalPosition()
+    const auto bounding = m_target->frameGeometry();
     const auto pos = e->globalPosition();
     if ((e->position().toPoint().isNull() && !pos.isNull()) ||
         !bounding.contains(pos.toPoint())) {
@@ -137,14 +153,16 @@ void MouseGrabEventFilter::mousePressEvent(QMouseEvent *e)
 
 bool MouseGrabEventFilter::trySelectGrabWindow(QMouseEvent *e)
 {
-    const auto bounding = m_target->geometry();
+    // Use frameGeometry() to get global coordinates for comparison with globalPosition()
+    const auto bounding = m_target->frameGeometry();
     auto pos = QPointF(e->globalPosition());
     if ((e->position().toPoint().isNull() && !pos.isNull()) ||
         !bounding.contains(pos.toPoint())) {
         for (auto item : Utility::instance()->allChildrenWindows(m_target)) {
             if (!item->isVisible() || isMainWindow(item))
                 continue;
-            if (item->geometry().contains(pos.toPoint())) {
+            // Use frameGeometry() for child windows too
+            if (item->frameGeometry().contains(pos.toPoint())) {
                 qCDebug(dsLog) << "grab mouse for the window:" << item->winId();
                 m_target->setMouseGrabEnabled(false);
                 item->setMouseGrabEnabled(true);
