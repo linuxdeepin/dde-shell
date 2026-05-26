@@ -8,6 +8,7 @@
 #include "dockpanel.h"
 
 #include <QObject>
+#include <QQuickWindow>
 
 namespace dock {
 class DockWakeUpArea;
@@ -22,8 +23,8 @@ public:
     void enterScreen(QScreen *screen);
     void leaveScreen();
     
-    // Move XEmbed window relative to dock surface (no-op on X11)
-    virtual bool moveXEmbedWindow(uint32_t wid, double dx, double dy) { return false; }
+    // Move XEmbed window relative to anchor window's surface (no-op on X11)
+    virtual bool moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindow *anchorWindow = nullptr) { return false; }
 
 Q_SIGNALS:
     void isWindowOverlapChanged(bool overlap);

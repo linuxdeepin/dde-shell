@@ -163,6 +163,8 @@ bool DockPanel::init()
     if (QStringLiteral("wayland") == platformName) {
         // TODO: support get color type from wayland
         m_helper = new WaylandDockHelper(this);
+        connect(static_cast<WaylandDockHelper *>(m_helper), &WaylandDockHelper::xembedWindowMoveResult,
+                this, &DockPanel::xembedWindowMoveResult);
     } else if (QStringLiteral("xcb") == platformName) {
         QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
                             this, [this](){
@@ -490,10 +492,10 @@ void DockPanel::setIsResizing(bool resizing)
     emit isResizingChanged(m_isResizing);
 }
 
-bool DockPanel::moveXEmbedWindow(uint32_t wid, double dx, double dy)
+bool DockPanel::moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindow *anchorWindow)
 {
     if (m_helper) {
-        return m_helper->moveXEmbedWindow(wid, dx, dy);
+        return m_helper->moveXEmbedWindow(wid, dx, dy, anchorWindow);
     }
     return false;
 }

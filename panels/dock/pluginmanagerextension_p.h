@@ -6,6 +6,7 @@
 
 #include <QMap>
 #include <QPointer>
+#include <QQuickWindow>
 #include <QtWaylandCompositor/QWaylandCompositor>
 #include <QtWaylandCompositor/QWaylandQuickExtension>
 #include <QtWaylandCompositor/QWaylandResource>
@@ -99,8 +100,8 @@ Q_SIGNALS:
     void dockSizeChanged();
     void requestShutdown(const QString &type);
     // Signal emitted when XEmbed window move is requested
-    // Parameters: wid (window ID), pluginId, itemKey, dx (relative x offset), dy (relative y offset)
-    void moveXEmbedWindowRequested(uint32_t wid, const QString &pluginId, const QString &itemKey, double dx, double dy);
+    // Parameters: wid (window ID), pluginId, itemKey, dx, dy, anchorWindow (the window containing the plugin item)
+    void moveXEmbedWindowRequested(uint32_t wid, const QString &pluginId, const QString &itemKey, double dx, double dy, QQuickWindow *anchorWindow);
 
 private Q_SLOTS:
     void onFontChanged();
@@ -192,9 +193,12 @@ public:
 
     Q_INVOKABLE void updatePluginGeometry(const QRect &geometry);
     Q_INVOKABLE void setGlobalPos(const QPoint &pos);
+    Q_INVOKABLE void setAnchorWindow(QQuickWindow *window);
 
-    // Position relative to the dock window, set from QML via updatePluginGeometry
+    // Position relative to the containing window, set from QML via updatePluginGeometry
     QPoint itemPosition() const;
+
+    QQuickWindow *anchorWindow() const;
 
     int margins() const;
     void setMargins(int newMargins);
@@ -234,7 +238,8 @@ private:
     int m_margins = 0;
     int m_height;
     int m_width;
-    QPoint m_itemPosition; // Position relative to dock window, for XEmbed window positioning
+    QPoint m_itemPosition;
+    QPointer<QQuickWindow> m_anchorWindow;
 };
 
 class PluginPopup : public QWaylandShellSurfaceTemplate<PluginPopup>, public QtWaylandServer::plugin_popup

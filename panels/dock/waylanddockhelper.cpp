@@ -152,7 +152,7 @@ void WaylandDockHelper::setDockColorTheme(const ColorTheme &theme)
     m_panel->setColorTheme(theme);
 }
 
-bool WaylandDockHelper::moveXEmbedWindow(uint32_t wid, double dx, double dy)
+bool WaylandDockHelper::moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindow *anchorWindow)
 {
     // Update dock wl_surface if needed
     if (!m_dockWlSurface && m_panel->window()) {
@@ -162,14 +162,43 @@ bool WaylandDockHelper::moveXEmbedWindow(uint32_t wid, double dx, double dy)
         }
     }
     
-    if (!m_ddeShellManager || !m_ddeShellManager->isActive() || !m_dockWlSurface) {
+    struct ::wl_surface *anchorSurface = m_dockWlSurface;
+
+    if (anchorWindow) {
+        auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(anchorWindow->handle());
+        if (waylandWindow && waylandWindow->waylandSurface()) {
+            anchorSurface = waylandWindow->waylandSurface()->object();
+        }
+    }
+
+    if (!m_ddeShellManager || !m_ddeShellManager->isActive() || !anchorSurface) {
         qWarning() << "WaylandDockHelper::moveXEmbedWindow: not ready, manager active:" 
                    << (m_ddeShellManager && m_ddeShellManager->isActive())
-                   << "surface:" << (m_dockWlSurface != nullptr);
+                   << "surface:" << (anchorSurface != nullptr);
         return false;
     }
     
-    m_ddeShellManager->setXWindowPositionRelative(wid, m_dockWlSurface, dx, dy);
+    struct wl_callback *cb = m_ddeShellManager->setXWindowPositionRelative(wid, anchorSurface, dx, dy);
+
+    // Register wl_callback listener — result arrives asynchronously
+    if (!cb) {
+        qWarning() << "WaylandDockHelper::moveXEmbedWindow: setXWindowPositionRelative returned null callback";
+        Q_EMIT xembedWindowMoveResult(wid, false);
+        return true;
+    }
+
+    struct CallbackData { uint32_t wid; WaylandDockHelper *helper; };
+    static struct wl_callback_listener s_callbackListener = {
+        .done = [](void *data, wl_callback *callback, uint32_t callback_data) {
+            auto *d = static_cast<CallbackData *>(data);
+            bool success = (callback_data == 0);
+            Q_EMIT d->helper->xembedWindowMoveResult(d->wid, success);
+            wl_callback_destroy(callback);
+            delete d;
+        }
+    };
+    wl_callback_add_listener(cb, &s_callbackListener, new CallbackData{wid, this});
+
     return true;
 }
 

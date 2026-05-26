@@ -31,10 +31,14 @@ public:
     void setDockColorTheme(const ColorTheme &theme);
     QString dockScreenName();
     
-    // Move XEmbed window relative to dock surface
-    // dx, dy: offset relative to dock surface top-left
-    // Returns true if the request was sent successfully
-    bool moveXEmbedWindow(uint32_t wid, double dx, double dy) override;
+    // Move XEmbed window relative to anchor window's surface
+    // anchorWindow: the window containing the plugin item; falls back to dock panel if null
+    // dx, dy: offset relative to anchor window top-left
+    // Returns true if the request was sent (does NOT guarantee completion)
+    bool moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindow *anchorWindow = nullptr) override;
+
+Q_SIGNALS:
+    void xembedWindowMoveResult(uint32_t wid, bool success);
 
 protected:
     bool currentActiveWindowFullscreened() override;
