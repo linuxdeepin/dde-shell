@@ -191,12 +191,12 @@ Item {
             
             // 根据 ActionShowStashDelegate 的显示状态动态改变条件
             let shouldAllowDrop = showStashActionVisible ? (dropHoverIndex !== 0) : (dropHoverIndex !== -1)
-            
-            // 使用暂存机制
-            if (isStash && shouldAllowDrop) {
-                // 调用 stageDropPosition 来预览拖放位置，预留空位
+
+            if (shouldAllowDrop && (isStash || source === "quickPanel")) {
+                // 收纳区或快捷面板拖拽：使用暂存机制
                 DDT.TraySortOrderModel.stageDropPosition(surfaceId, Math.floor(currentItemIndex))
-            } else if (!isStash && shouldAllowDrop) {
+            } else if (shouldAllowDrop) {
+                // 托盘内部拖拽：使用定时器机制
                 dropTrayTimer.handleDrop = function() {
                     if (isDropped || dragExited) return
                     DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
@@ -215,11 +215,12 @@ Item {
             let isBefore = dropIdx.isBefore
             let isStash = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType") === "stashed"
             console.log("dropped", currentItemIndex, isBefore, isStash)
-            
-            if (isStash) {
-                // 提交暂存的拖放位置
+
+            // 从收纳区或快捷中心拖拽的使用暂存机制
+            if (isStash || source === "quickPanel") {
                 DDT.TraySortOrderModel.commitStagedDrop()
             } else {
+                // 托盘内部拖拽直接提交
                 DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
             }
             DDT.TraySortOrderModel.actionsAlwaysVisible = false
@@ -228,11 +229,6 @@ Item {
         onExited: function () {
             dragExited = true
             DDT.TraySortOrderModel.clearStagedDrop()
-            // dragging from quickPanel, entered trayContainer, but not dropped in this area
-            if (source !== "" && !isDropped) {
-                dropTrayTimer.stop()
-                DDT.TraySortOrderModel.setSurfaceVisible(surfaceId, false)
-            }
             // Hide action icons when drag leaves tray without dropping
             if (!isDropped) {
                 DDT.TraySortOrderModel.actionsAlwaysVisible = false
