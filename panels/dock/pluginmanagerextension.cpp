@@ -264,6 +264,16 @@ QPoint PluginSurface::itemPosition() const
     return m_itemPosition;
 }
 
+void PluginSurface::setAnchorWindow(QQuickWindow *window)
+{
+    m_anchorWindow = window;
+}
+
+QQuickWindow *PluginSurface::anchorWindow() const
+{
+    return m_anchorWindow;
+}
+
 void PluginSurface::plugin_mouse_event(QtWaylandServer::plugin::Resource *resource, int32_t type)
 {
     Q_UNUSED(resource)
@@ -706,8 +716,8 @@ void PluginManager::plugin_manager_v1_move_xembed_window(Resource *resource, uin
     // Store pending callback for later response (supports concurrent requests)
     m_pendingXEmbedCallbacks[xembed_winid] = {callback, resource->handle};
     
-    // Emit signal with position info for QML to handle
-    Q_EMIT moveXEmbedWindowRequested(xembed_winid, plugin_id, item_key, dx, dy);
+    // Emit signal with position info and anchor window for QML to handle
+    Q_EMIT moveXEmbedWindowRequested(xembed_winid, plugin_id, item_key, dx, dy, pluginSurface->anchorWindow());
 }
 
 void PluginManager::notifyXEmbedWindowMoveResult(uint32_t wid, bool success)

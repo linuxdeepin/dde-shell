@@ -20,6 +20,10 @@ Item {
     property alias dockSize: pluginManager.dockSize
     property var moveXEmbedWindowHandler: null
 
+    function notifyXEmbedWindowMoveResult(wid, success) {
+        pluginManager.notifyXEmbedWindowMoveResult(wid, success)
+    }
+
     property ListModel trayPluginSurfaces: ListModel {}
     property ListModel quickPluginSurfaces: ListModel {}
     property ListModel fixedPluginSurfaces: ListModel {}
@@ -115,11 +119,15 @@ Item {
                 dockCompositor.popupClosed()
             }
             
-            onMoveXEmbedWindowRequested: (wid, pluginId, itemKey, dx, dy) => {
-                console.log("move xembed window requested:", wid, pluginId, itemKey, dx, dy)
+            onMoveXEmbedWindowRequested: (wid, pluginId, itemKey, dx, dy, anchorWindow) => {
+                console.log("move xembed window requested:", wid, pluginId, itemKey, dx, dy, "anchorWindow:", anchorWindow)
                 if (typeof dockCompositor.moveXEmbedWindowHandler === 'function') {
-                    var success = dockCompositor.moveXEmbedWindowHandler(wid, dx, dy)
-                    pluginManager.notifyXEmbedWindowMoveResult(wid, success)
+                    var sent = dockCompositor.moveXEmbedWindowHandler(wid, dx, dy, anchorWindow)
+                    if (!sent) {
+                        // Pre-check failed (e.g. manager not ready) — no wl_callback registered
+                        pluginManager.notifyXEmbedWindowMoveResult(wid, false)
+                    }
+                    // If sent, result arrives asynchronously via xembedWindowMoveResult signal
                 } else {
                     console.warn("moveXEmbedWindowHandler not available")
                     pluginManager.notifyXEmbedWindowMoveResult(wid, false)

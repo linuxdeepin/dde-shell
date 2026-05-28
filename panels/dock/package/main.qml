@@ -855,9 +855,15 @@ Window {
             return Panel.devicePixelRatio
         })
 
-        DockCompositor.moveXEmbedWindowHandler = function(wid, dx, dy) {
-            return Panel.moveXEmbedWindow(wid, dx, dy)
+        DockCompositor.moveXEmbedWindowHandler = function(wid, dx, dy, anchorWindow) {
+            return Panel.moveXEmbedWindow(wid, dx, dy, anchorWindow)
+            // If true: result arrives asynchronously via Panel.xembedWindowMoveResult signal
+            // If false: pre-check failed, caller should notify failure immediately
         }
+
+        Panel.xembedWindowMoveResult.connect(function(wid, success) {
+            DockCompositor.notifyXEmbedWindowMoveResult(wid, success)
+        })
 
         dock.itemIconSizeBase = dock.dockItemMaxSize
         dock.visible = Panel.hideState !== Dock.Hide

@@ -92,6 +92,7 @@ AppletItemButton {
             if (!pluginItem.plugin || !itemVisible)
                 return
             updatePluginMargins()
+            pluginItem.plugin.setAnchorWindow(pluginItem.Window.window)
             pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
             pluginItem.plugin.setGlobalPos(pluginItem.itemGlobalPos)
         }
@@ -105,6 +106,7 @@ AppletItemButton {
                 if (!pluginItem.plugin || !itemVisible)
                     return
                 updatePluginMargins()
+                pluginItem.plugin.setAnchorWindow(pluginItem.Window.window)
                 if (pluginItem.itemGlobalPoint.x >= 0 && pluginItem.itemGlobalPoint.y >= 0) {
                     pluginItem.plugin.updatePluginGeometry(Qt.rect(pluginItem.itemGlobalPoint.x, pluginItem.itemGlobalPoint.y, 0, 0))
                 }

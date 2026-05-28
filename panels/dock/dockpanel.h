@@ -84,8 +84,9 @@ public:
 
     Q_INVOKABLE void notifyDockPositionChanged(int offsetX, int offsetY);
     
-    // Move XEmbed window relative to dock surface (Wayland only)
-    Q_INVOKABLE bool moveXEmbedWindow(uint32_t wid, double dx, double dy);
+    // Move XEmbed window relative to anchor window's surface (Wayland only)
+    // anchorWindow: the window containing the plugin item (dock panel or popup window)
+    Q_INVOKABLE bool moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindow *anchorWindow = nullptr);
 
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);
@@ -137,6 +138,9 @@ Q_SIGNALS:
 
     void contextDraggingChanged();
     void isResizingChanged(bool isResizing);
+
+    // Emitted when async XEmbed window move completes
+    void xembedWindowMoveResult(uint32_t wid, bool success);
 
 private:
     ColorTheme m_theme;

@@ -162,6 +162,8 @@ bool DockPanel::init()
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
         m_helper = new WaylandDockHelper(this);
+        connect(static_cast<WaylandDockHelper *>(m_helper), &WaylandDockHelper::xembedWindowMoveResult,
+                this, &DockPanel::xembedWindowMoveResult);
         // Fallback to DGuiApplicationHelper for theme color when wayland wallpaper color is not available.
         // TODO: remove this when initWallpaperColorManager is re-enabled
         QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
@@ -495,10 +497,10 @@ void DockPanel::setIsResizing(bool resizing)
     emit isResizingChanged(m_isResizing);
 }
 
-bool DockPanel::moveXEmbedWindow(uint32_t wid, double dx, double dy)
+bool DockPanel::moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindow *anchorWindow)
 {
     if (m_helper) {
-        return m_helper->moveXEmbedWindow(wid, dx, dy);
+        return m_helper->moveXEmbedWindow(wid, dx, dy, anchorWindow);
     }
     return false;
 }
