@@ -202,6 +202,8 @@ NotifyItem {
                 id: appIcon
                 name: root.iconName !== "" ? root.iconName : "application-x-desktop"
                 sourceSize: Qt.size(24, 24)
+                implicitWidth: 24
+                implicitHeight: 24
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 Layout.topMargin: 8
                 Layout.leftMargin: 10
