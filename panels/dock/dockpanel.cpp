@@ -161,10 +161,15 @@ bool DockPanel::init()
     m_theme = static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType());
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
-        // TODO: support get color type from wayland
         m_helper = new WaylandDockHelper(this);
         connect(static_cast<WaylandDockHelper *>(m_helper), &WaylandDockHelper::xembedWindowMoveResult,
                 this, &DockPanel::xembedWindowMoveResult);
+        // Fallback to DGuiApplicationHelper for theme color when wayland wallpaper color is not available.
+        // TODO: remove this when initWallpaperColorManager is re-enabled
+        QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
+                         this, [this]() {
+            setColorTheme(static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType()));
+        });
     } else if (QStringLiteral("xcb") == platformName) {
         QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
                             this, [this](){
