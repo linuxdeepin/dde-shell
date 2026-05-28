@@ -15,6 +15,7 @@ set(PUBLIC_HEADERS
     appletbridge.h
     qmlengine.h
     layershell/dlayershellwindow.h
+    wayland/xdgactivation.h
     models/listtotableproxymodel.h
     dsutility.h
 )
@@ -29,6 +30,7 @@ set(PRIVATE_HEADERS
     private/dsqmlglobal_p.h
     layershell/qwaylandlayershellsurface_p.h
     layershell/qwaylandlayershellintegration_p.h
+    wayland/xdgactivation_p.h
     models/kextracolumnsproxymodel.h
     quick/dsquickdrag_p.h
 )
@@ -58,6 +60,7 @@ add_library(dde-shell-frame SHARED
     panel.cpp
     appletproxy.cpp
     appletbridge.cpp
+    wayland/xdgactivation.cpp
     appletitem.cpp
     containmentitem.cpp
     qmlengine.cpp
@@ -83,6 +86,7 @@ set_target_properties(dde-shell-frame PROPERTIES
 qt_generate_wayland_protocol_client_sources(dde-shell-frame FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/layershell/protocol/wlr-layer-shell-unstable-v1.xml
     ${WaylandProtocols_DATADIR}/stable/xdg-shell/xdg-shell.xml
+    ${WaylandProtocols_DATADIR}/staging/xdg-activation/xdg-activation-v1.xml
 )
 
 set_target_properties(dde-shell-frame PROPERTIES
