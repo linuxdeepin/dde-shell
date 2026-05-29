@@ -81,7 +81,8 @@ NotificationManager::NotificationManager(QObject *parent)
     if(!config->value("notificationCleanupDays").isNull()) {
         m_cleanupDays = config->value("notificationCleanupDays").toInt();
     } 
-    if (QStringLiteral("wayland") != QGuiApplication::platformName()) {
+    if (QStringLiteral("wayland") != QGuiApplication::platformName() 
+        && !QGuiApplication::platformName().isEmpty()) { // for unit test, Subsequent migration to the login1 interface
         initScreenLockedState();
     }
 }
