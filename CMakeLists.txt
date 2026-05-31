@@ -54,7 +54,7 @@ include(KDEGitCommitHooks)
 
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Gui Concurrent Quick QuickTemplates2 WaylandClient WaylandCompositor DBus LinguistTools Sql)
 if(Qt${QT_VERSION_MAJOR}_VERSION VERSION_GREATER_EQUAL 6.10)
-  find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WaylandClientPrivate WaylandCompositorPrivate REQUIRED)
+  find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WaylandClientPrivate WaylandCompositorPrivate QuickTemplates2Private REQUIRED)
 endif()
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui)
 find_package(ICU 74.2 REQUIRED COMPONENTS uc i18n io)
