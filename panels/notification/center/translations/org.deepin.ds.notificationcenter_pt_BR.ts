@@ -25,7 +25,7 @@
     <name>NotifyHeader</name>
     <message>
         <source>Notification Center</source>
-        <translation>Central de Notificações</translation>
+        <translation>Notificações</translation>
     </message>
     <message>
         <source>Fold</source>
