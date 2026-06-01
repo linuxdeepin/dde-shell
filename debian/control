@@ -40,7 +40,7 @@ Build-Depends:
  qt6-wayland-dev-tools,
  qt6-wayland-private-dev,
  systemd,
- treeland-protocols (>= 0.5.7),
+ treeland-protocols (>> 0.5.7),
  wayland-protocols,
 Standards-Version: 4.6.2
 Homepage: https://github.com/linuxdeepin/dde-shell
