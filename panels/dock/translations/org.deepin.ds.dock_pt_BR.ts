@@ -19,7 +19,7 @@
     </message>
     <message>
         <source>Centered Mode</source>
-        <translation>Centralizado</translation>
+        <translation>Moderno</translation>
     </message>
     <message>
         <source>Left</source>
