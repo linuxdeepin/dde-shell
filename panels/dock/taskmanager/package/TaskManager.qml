@@ -16,13 +16,29 @@ ContainmentItem {
     property int dockOrder: 16
     property real remainingSpacesForTaskManager: Panel.rootObject.dockRemainingSpaceForCenter 
     readonly property int appTitleSpacing: Math.max(10, Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14) / 3)
+    // Start padding for the app container so that the visual gap
+    // (multitask icon right edge → first app icon left edge) = appTitleSpacing.
+    // Compensates for the multitask view's box being wider than its icon.
+    // 4/5 = 0.8: multitask button width relative to dockItemMaxSize.
+    // Derived from the 1:4 spacing ratio (app icon : dock item height = 4:1, so content = 4/5 = 0.8).
+    // Matches AppletDockItem.qml implicitWidth/Height ratio.
+    readonly property real multitaskViewIconRatio: 0.8
+    // 9/14 ≈ 0.64: app icon size relative to dockItemMaxSize (iconSize:dockHeight = 9:14).
+    // Defined in main.qml as dockItemIconSize = dockItemMaxSize * 9 / 14.
+    // At default dock size (56), icon = 36px; at min (37), icon ≈ 24px; at max (100), icon ≈ 64px.
+    readonly property real iconWidthToMaxSizeRatio: 9 / 14
+    readonly property real startPadding: Math.max(0, appTitleSpacing - (Panel.rootObject.dockItemMaxSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2))
 
     implicitWidth: {
-        let maxW = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, appContainer.implicitWidth) : Math.min(remainingSpacesForTaskManager, appContainer.implicitWidth)
+        let extra = useColumnLayout ? 0 : startPadding
+        let w = appContainer.implicitWidth + extra
+        let maxW = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, w) : Math.min(remainingSpacesForTaskManager, w)
         return useColumnLayout ? Panel.rootObject.dockSize : maxW
     }
     implicitHeight: {
-        let maxH = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, appContainer.implicitHeight) : Math.min(remainingSpacesForTaskManager, appContainer.implicitHeight)
+        let extra = useColumnLayout ? startPadding : 0
+        let h = appContainer.implicitHeight + extra
+        let maxH = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, h) : Math.min(remainingSpacesForTaskManager, h)
         return useColumnLayout ? maxH : Panel.rootObject.dockSize
     }
     // Helper function to find the current index of an app by its appId in the visualModel
@@ -72,6 +88,8 @@ ContainmentItem {
     OverflowContainer {
         id: appContainer
         anchors.fill: parent
+        anchors.leftMargin: useColumnLayout ? 0 : taskmanager.startPadding
+        anchors.topMargin: useColumnLayout ? taskmanager.startPadding : 0
         useColumnLayout: taskmanager.useColumnLayout
         spacing: taskmanager.appTitleSpacing
         remove: Transition {
