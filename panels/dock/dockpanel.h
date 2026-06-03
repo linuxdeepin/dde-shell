@@ -80,7 +80,7 @@ public:
 
     bool debugMode() const;
 
-    Q_INVOKABLE void openDockSettings() const;
+    Q_INVOKABLE void openDockSettings();
 
     Q_INVOKABLE void notifyDockPositionChanged(int offsetX, int offsetY);
     
