@@ -17,12 +17,14 @@
 #include "dockdaemonadaptor.h"
 #include "loadtrayplugins.h"
 
-#include <DDBusSender>
-#include <QQuickWindow>
-#include <QLoggingCategory>
-#include <QGuiApplication>
-#include <QQuickItem>
 #include <DGuiApplicationHelper>
+#include <QGuiApplication>
+#include <QLoggingCategory>
+#include <QProcess>
+#include <QQuickItem>
+#include <QQuickWindow>
+
+#include <wayland/xdgactivation.h>
 
 #ifdef HAVE_DDE_API_EVENTLOGGER
 #include <dde-api/eventlogger.hpp>
@@ -356,15 +358,23 @@ bool DockPanel::debugMode() const
 #endif
 }
 
-void DockPanel::openDockSettings() const
+void DockPanel::openDockSettings()
 {
-    DDBusSender()
-        .service(QStringLiteral("org.deepin.dde.ControlCenter1"))
-        .path(QStringLiteral("/org/deepin/dde/ControlCenter1"))
-        .interface(QStringLiteral("org.deepin.dde.ControlCenter1"))
-        .method(QStringLiteral("ShowPage"))
-        .arg(QStringLiteral("personalization/dock"))
-        .call();
+    qCDebug(dockLog) << "openDockSettings";
+    auto *activation = new ds::XdgActivation(this);
+    connect(activation, &ds::XdgActivation::tokenReady, this, [activation](const QString &token) {
+        QStringList args = {"--by-user", "org.deepin.dde.control-center"};
+        if (!token.isEmpty()) {
+            qCDebug(dockLog) << "Passing XDG_ACTIVATION_TOKEN to dde-am";
+            args << "-e" << QStringLiteral("XDG_ACTIVATION_TOKEN=") + token;
+        }
+        args << "--"
+             << "-p"
+             << "personalization/dock";
+        QProcess::startDetached("dde-am", args);
+        activation->deleteLater();
+    });
+    activation->requestToken();
 }
 
 void DockPanel::notifyDockPositionChanged(int offsetX, int offsetY)

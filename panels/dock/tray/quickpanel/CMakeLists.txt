@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -24,6 +24,8 @@ qt_add_qml_module(tray-quickpanel
 
 target_link_libraries(tray-quickpanel PRIVATE
     Dtk${DTK_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    dde-shell-frame
 )
 
 install(TARGETS tray-quickpanel DESTINATION "${QML_INSTALL_DIR}/org/deepin/ds/dock/tray/quickpanel/")

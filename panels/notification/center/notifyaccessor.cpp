@@ -7,14 +7,12 @@
 #include <QQmlEngine>
 #include <QGuiApplication>
 #include <QLoggingCategory>
-#include <QDBusInterface>
-#include <QDBusPendingReply>
 #include <QProcess>
-#include <QDBusReply>
 
 #include <DConfig>
 
 #include "dataaccessor.h"
+#include <wayland/xdgactivation.h>
 
 DCORE_USE_NAMESPACE
 
@@ -210,21 +208,21 @@ bool NotifyAccessor::applicationPin(const QString &appId) const
 
 void NotifyAccessor::openNotificationSetting()
 {
-    qDebug(notifyLog) << "Open notification setting";
-    QDBusMessage msg = QDBusMessage::createMethodCall("org.deepin.dde.ControlCenter1",
-                                                       "/org/deepin/dde/ControlCenter1",
-                                                       "org.deepin.dde.ControlCenter1",
-                                                       "ShowPage");
-    msg << "notification";
-    QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(msg);
-    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(call, this);
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *self) {
-        QDBusReply<void> reply = *self;
-        if (!reply.isValid()) {
-            qWarning(notifyLog) << "Failed to open notification setting:" << reply.error().message();
+    qDebug(notifyLog) << "openNotificationSetting";
+    auto *activation = new ds::XdgActivation(this);
+    connect(activation, &ds::XdgActivation::tokenReady, this, [activation](const QString &token) {
+        QStringList args = {"--by-user", "org.deepin.dde.control-center"};
+        if (!token.isEmpty()) {
+            qDebug(notifyLog) << "Passing XDG_ACTIVATION_TOKEN to dde-am";
+            args << "-e" << QStringLiteral("XDG_ACTIVATION_TOKEN=") + token;
         }
-        self->deleteLater();
+        args << "--"
+             << "-p"
+             << "notification";
+        QProcess::startDetached("dde-am", args);
+        activation->deleteLater();
     });
+    activation->requestToken();
 }
 
 void NotifyAccessor::onNotificationStateChanged(qint64 id, int processedType)

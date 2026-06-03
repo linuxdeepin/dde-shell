@@ -1,13 +1,18 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "quickpanelproxymodel.h"
 
-#include <QDebug>
 #include <DConfig>
-#include <DDBusSender>
+#include <QDebug>
+#include <QLoggingCategory>
+#include <QProcess>
+
+#include <wayland/xdgactivation.h>
 DCORE_USE_NAMESPACE
+
+Q_LOGGING_CATEGORY(quickpanelLog, "org.deepin.dde.shell.dock.quickpanel")
 
 namespace dock {
 namespace {
@@ -46,12 +51,18 @@ bool QuickPanelProxyModel::isQuickPanelPopup(const QString &pluginId, const QStr
 
 void QuickPanelProxyModel::openSystemSettings()
 {
-    DDBusSender()
-        .service("org.deepin.dde.ControlCenter1")
-        .interface("org.deepin.dde.ControlCenter1")
-        .path("/org/deepin/dde/ControlCenter1")
-        .method(QString("Show"))
-        .call();
+    qCDebug(quickpanelLog) << "openSystemSettings";
+    auto *activation = new ds::XdgActivation(this);
+    connect(activation, &ds::XdgActivation::tokenReady, this, [activation](const QString &token) {
+        QStringList args = {"--by-user", "org.deepin.dde.control-center"};
+        if (!token.isEmpty()) {
+            qCDebug(quickpanelLog) << "Passing XDG_ACTIVATION_TOKEN to dde-am";
+            args << "-e" << QStringLiteral("XDG_ACTIVATION_TOKEN=") + token;
+        }
+        QProcess::startDetached("dde-am", args);
+        activation->deleteLater();
+    });
+    activation->requestToken();
 }
 
 QVariant QuickPanelProxyModel::data(const QModelIndex &index, int role) const
