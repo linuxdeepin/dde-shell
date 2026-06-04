@@ -90,8 +90,29 @@ Window {
     onDockAppletChanged: refreshDockMargins()
     Component.onCompleted: refreshDockMargins()
     onVisibleChanged: {
-        if (visible)
+        if (visible) {
             refreshDockMargins()
+            // The dock's frontendWindowRect is computed asynchronously via
+            // QMetaObject::invokeMethod, so it may not be ready when we first
+            // become visible. Poll until margins are non-zero or timeout.
+            if (dockMarginTop === 0 && dockMarginRight === 0 && dockMarginBottom === 0)
+                startupMarginTimer.start()
+        }
+    }
+
+    Timer {
+        id: startupMarginTimer
+        interval: 200
+        repeat: true
+        property int attempts: 0
+        onTriggered: {
+            root.refreshDockMargins()
+            attempts++
+            if ((root.dockMarginTop !== 0 || root.dockMarginRight !== 0 || root.dockMarginBottom !== 0) || attempts >= 15) {
+                stop()
+                attempts = 0
+            }
+        }
     }
 
     visible: Applet.visible
