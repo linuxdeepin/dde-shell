@@ -31,15 +31,13 @@ Window {
         if (dockPosition !== position)
             return 0
 
-        let dockSize = dockApplet.dockSize
-
-        // When frontendWindowRect is not yet computed (0,0,0,0), fall back to
-        // dockSize. The Connections block will refresh margins once the rect
-        // becomes available, giving the precise value.
         let frontendRect = dockApplet.frontendWindowRect
+        // frontendWindowRect is not yet computed, return 0 and wait for
+        // the Connections block to refresh once it becomes available.
         if (frontendRect.width === 0 && frontendRect.height === 0)
-            return dockSize
+            return 0
 
+        let dockSize = dockApplet.dockSize
         let dpr = root.screen.devicePixelRatio
         let dockGeometry = Qt.rect(
             frontendRect.x / dpr,

@@ -14,6 +14,7 @@ NotifyItemContent {
     property var bubble
 
     width: 360
+    height: implicitHeight
     appName: bubble.appName
     iconName: bubble.iconName
     date: bubble.timeTip
