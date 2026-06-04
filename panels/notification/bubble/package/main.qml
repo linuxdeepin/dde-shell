@@ -13,8 +13,12 @@ import org.deepin.dtk 1.0
 Window {
     id: root
 
+    property var dockApplet: DS.applet("org.deepin.ds.dock")
+    property int dockMarginTop: 0
+    property int dockMarginRight: 0
+    property int dockMarginBottom: 0
+
     function windowMargin(position) {
-        let dockApplet = DS.applet("org.deepin.ds.dock")
         if (!dockApplet)
             return 0
 
@@ -67,14 +71,36 @@ Window {
         }
     }
 
+    function refreshDockMargins() {
+        dockMarginTop = windowMargin(0)
+        dockMarginRight = windowMargin(1)
+        dockMarginBottom = windowMargin(2)
+    }
+
+    Connections {
+        target: dockApplet
+        enabled: dockApplet !== null
+        function onFrontendWindowRectChanged() { root.refreshDockMargins() }
+        function onDockSizeChanged() { root.refreshDockMargins() }
+        function onPositionChanged() { root.refreshDockMargins() }
+        function onScreenNameChanged() { root.refreshDockMargins() }
+    }
+
+    onDockAppletChanged: refreshDockMargins()
+    Component.onCompleted: refreshDockMargins()
+    onVisibleChanged: {
+        if (visible)
+            refreshDockMargins()
+    }
+
     visible: Applet.visible
     width: 390
     height: root.screen.height
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
-    DLayerShellWindow.topMargin: windowMargin(0)
-    DLayerShellWindow.rightMargin: windowMargin(1)
-    DLayerShellWindow.bottomMargin: windowMargin(2)
+    DLayerShellWindow.topMargin: dockMarginTop
+    DLayerShellWindow.rightMargin: dockMarginRight
+    DLayerShellWindow.bottomMargin: dockMarginBottom
     DLayerShellWindow.exclusionZone: -1
     palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
