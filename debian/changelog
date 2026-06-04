@@ -1,3 +1,10 @@
+dde-shell (2.0.44) unstable; urgency=medium
+
+  * fix(dock): align multitask view to first app gap with app icon
+    spacing
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 04 Jun 2026 19:32:58 +0800
+
 dde-shell (2.0.43) unstable; urgency=medium
 
   * fix: xembed tray popup window position correction for stashed
