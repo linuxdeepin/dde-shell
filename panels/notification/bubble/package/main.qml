@@ -84,6 +84,7 @@ Window {
         function onDockSizeChanged() { root.refreshDockMargins() }
         function onPositionChanged() { root.refreshDockMargins() }
         function onScreenNameChanged() { root.refreshDockMargins() }
+        function onCompositorReadyChanged() { root.refreshDockMargins() }
     }
 
     onDockAppletChanged: refreshDockMargins()
@@ -95,9 +96,8 @@ Window {
 
     visible: Applet.visible
     width: 390
-    height: root.screen.height
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
-    DLayerShellWindow.anchors: DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
+    DLayerShellWindow.anchors: DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom | DLayerShellWindow.AnchorRight
     DLayerShellWindow.topMargin: dockMarginTop
     DLayerShellWindow.rightMargin: dockMarginRight
     DLayerShellWindow.bottomMargin: dockMarginBottom
