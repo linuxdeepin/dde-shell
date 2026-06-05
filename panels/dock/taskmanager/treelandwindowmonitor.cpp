@@ -102,6 +102,7 @@ void TreeLandWindowMonitor::stop()
 
 void TreeLandWindowMonitor::clear()
 {
+    clearTrackedWindows();
     m_windows.clear();
     m_dockPreview.reset(nullptr);
     updateFullscreenState();
