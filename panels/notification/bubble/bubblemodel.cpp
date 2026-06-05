@@ -94,8 +94,16 @@ BubbleItem *BubbleModel::replaceBubble(BubbleItem *bubble)
     Q_ASSERT(isReplaceBubble(bubble));
     const auto replaceIndex = replaceBubbleIndex(bubble);
     const auto oldBubble = m_bubbles[replaceIndex];
-    m_bubbles.replace(replaceIndex, bubble);
-    Q_EMIT dataChanged(index(replaceIndex), index(replaceIndex));
+
+    // Use remove + insert instead of dataChanged to force the view
+    // to recreate the delegate, so ListView recalculates its height.
+    beginRemoveRows(QModelIndex(), replaceIndex, replaceIndex);
+    m_bubbles.removeAt(replaceIndex);
+    endRemoveRows();
+
+    beginInsertRows(QModelIndex(), replaceIndex, replaceIndex);
+    m_bubbles.insert(replaceIndex, bubble);
+    endInsertRows();
 
     return oldBubble;
 }
