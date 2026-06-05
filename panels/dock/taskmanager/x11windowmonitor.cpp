@@ -91,6 +91,7 @@ void X11WindowMonitor::stop()
 
 void X11WindowMonitor::clear()
 {
+    clearTrackedWindows();
     m_windows.clear();
     m_windowPreview.reset(nullptr);
 }

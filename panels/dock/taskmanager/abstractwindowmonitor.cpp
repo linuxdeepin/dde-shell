@@ -158,5 +158,13 @@ void AbstractWindowMonitor::destroyWindow(AbstractWindow * window)
     endRemoveRows();
 }
 
+void AbstractWindowMonitor::clearTrackedWindows()
+{
+    if (m_trackedWindows.isEmpty())
+        return;
 
+    beginResetModel();
+    m_trackedWindows.clear();
+    endResetModel();
+}
 }

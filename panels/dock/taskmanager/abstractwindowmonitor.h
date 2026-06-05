@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -26,6 +26,7 @@ public:
 
     void trackWindow(AbstractWindow* window);
     void destroyWindow(AbstractWindow * window);
+    void clearTrackedWindows();
 
     AbstractWindowMonitor(QObject* parent = nullptr);
     virtual void start() = 0;
