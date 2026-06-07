@@ -108,6 +108,7 @@ void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_done()
 }
 void ForeignToplevelHandle::treeland_foreign_toplevel_handle_v1_closed()
 {
+    destroy();
     Q_EMIT handlerIsDeleted();
 }
 
