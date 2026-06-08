@@ -139,5 +139,7 @@ Item {
             id: pluginScaleManager
             pluginScale: dockCompositor.panelScale * 120
         }
+
+        XdgActivationManager {}
     }
 }
