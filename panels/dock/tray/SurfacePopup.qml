@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,16 +17,12 @@ Item {
     property int toolTipVOffset: 0
     signal popupCreated(var surfaceId)
 
-    PanelToolTipWindow {
-        id: toolTipWindow
-        onVisibleChanged: function (arg) {
-            if (arg && menuWindow.visible)
-                menuWindow.close()
-        }
-    }
     PanelToolTip {
         id: toolTip
-        toolTipWindow: toolTipWindow
+        onToolTipVisibleChanged: function (visible) {
+            if (visible && menuWindow.visible)
+                menuWindow.close()
+        }
 
         property alias shellSurface: surfaceLayer.shellSurface
         ShellSurfaceItemProxy {
@@ -39,17 +35,11 @@ Item {
         }
     }
 
-    WaylandOutput {
-        compositor: DockCompositor.compositor
-        window: toolTip.toolTipWindow
-        sizeFollowsWindow: false
-    }
-
     PanelMenuWindow {
         id: menuWindow
         onVisibleChanged: function (arg) {
-            if (arg && toolTipWindow.visible)
-                toolTipWindow.close()
+            if (arg && toolTip.toolTipVisible)
+                toolTip.close()
         }
         onUpdateGeometryFinished: function () {
             if (!menu.shellSurface)
@@ -128,10 +118,10 @@ Item {
 
                 toolTip.shellSurface = popupSurface
                 toolTip.toolTipX = Qt.binding(function () {
-                    return toolTip.shellSurface.x - toolTip.width / 2
+                    return Panel.popupWindow.xOffset + toolTip.shellSurface.x - toolTip.width / 2
                 })
                 toolTip.toolTipY = Qt.binding(function () {
-                    return toolTip.shellSurface.y - toolTip.height - toolTipVOffset
+                    return Panel.popupWindow.yOffset + toolTip.shellSurface.y - toolTip.height - toolTipVOffset
                 })
                 toolTip.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
