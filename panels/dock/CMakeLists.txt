@@ -117,6 +117,8 @@ file(
     pluginmanagerintegration.cpp
     dockpositioner.h
     dockpositioner.cpp
+    xdgactivationmanager_p.h
+    xdgactivationmanager.cpp
 )
 
 set_source_files_properties(DockCompositor.qml PROPERTIES
@@ -148,6 +150,7 @@ qt_generate_wayland_protocol_server_sources(dock-plugin
     FILES
         ${DDE_TRAY_LOADER_PROTOCOL}
         ${WaylandProtocols_DATADIR}/staging/fractional-scale/fractional-scale-v1.xml
+        ${WaylandProtocols_DATADIR}/staging/xdg-activation/xdg-activation-v1.xml
 )
 
 target_link_libraries(dock-plugin PUBLIC
