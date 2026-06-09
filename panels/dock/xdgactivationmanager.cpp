@@ -121,7 +121,7 @@ void XdgActivationTokenV1::xdg_activation_token_v1_commit(Resource *resource)
 
     // Store this token as pending and request from the outer compositor
     m_manager->setPendingToken(this);
-    m_manager->requestOuterToken(m_appId);
+    m_manager->requestOuterToken({});
 }
 
 void XdgActivationTokenV1::xdg_activation_token_v1_destroy(Resource *resource)
