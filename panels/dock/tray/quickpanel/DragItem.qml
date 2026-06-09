@@ -28,11 +28,22 @@ Item {
         })
         dragItem.Drag.dragType = Drag.Automatic
         dragItem.Drag.supportedActions = Qt.CopyAction
+        if (Qt.platform.pluginName !== "xcb") {
+            dragItem.Drag.imageSource = Qt.binding(function () {
+                return root.draggingImage
+            })
+            dragItem.Drag.hotSpot.x = Qt.binding(function () {
+                return dragItem.width / 2
+            })
+            dragItem.Drag.hotSpot.y = Qt.binding(function () {
+                return dragItem.height / 2
+            })
+        }
         dragItem.DQuickDrag.hotSpotScale = Qt.binding(function () {
             return Qt.size(0.5, 0.5)
         })
         dragItem.DQuickDrag.active = Qt.binding(function () {
-            return dragItem.Drag.active
+            return dragItem.Drag.active && Qt.platform.pluginName === "xcb"
         })
         dragItem.DQuickDrag.overlay = Qt.binding(function () {
             return overlayWindow
