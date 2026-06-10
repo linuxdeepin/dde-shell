@@ -4,8 +4,9 @@
 
 #include "xdgactivation_p.h"
 
-#include <DSGApplication>
 #include <DGuiApplicationHelper>
+#include <DSGApplication>
+#include <QCursor>
 #include <QGuiApplication>
 #include <QLoggingCategory>
 #include <QMetaObject>
@@ -150,6 +151,11 @@ void XdgActivation::requestToken(QWindow *window, const QString &appId)
         qCWarning(dsXdgActivation) << "XDG activation request has empty app id";
 
     auto effectiveWindow = window ? window : QGuiApplication::focusWindow();
+    if (!effectiveWindow) {
+        // fallback to top-level window at cursor position if the focused window is not a Wayland window
+        qCDebug(dsXdgActivation) << "No focused window, falling back to top-level window at cursor position";
+        effectiveWindow = QGuiApplication::topLevelAt(QCursor::pos());
+    }
     if (!effectiveWindow) {
         qCWarning(dsXdgActivation) << "XDG activation request has no target window";
         Q_EMIT tokenReady({});
