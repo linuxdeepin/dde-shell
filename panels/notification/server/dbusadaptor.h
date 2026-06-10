@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -32,7 +32,7 @@ private:
 Q_SIGNALS:
     void ActionInvoked(uint id, const QString &actionKey);
     void NotificationClosed(uint id, uint reason);
-    // todo void ActivationToken(uint id, const QString &activationToken)
+    void ActivationToken(uint id, const QString &token);
 };
 
 class DDENotificationDbusAdaptor : public QDBusAbstractAdaptor
@@ -54,7 +54,7 @@ public Q_SLOTS: // methods
 Q_SIGNALS:
     void ActionInvoked(uint id, const QString &actionKey);
     void NotificationClosed(uint id, uint reason);
-    // todo void ActivationToken(uint id, const QString &activationToken)
+    void ActivationToken(uint id, const QString &token);
 
 public Q_SLOTS: // methods
     uint recordCount() const;
