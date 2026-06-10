@@ -82,7 +82,7 @@ Depends:
  qml6-module-qtquick-layouts,
  qml6-module-qtquick-window,
  qt6-wayland (>= 6.8),
- dde-application-manager (>> 1.2.54),
+ dde-application-manager (>> 1.2.55),
  ${misc:Depends},
  ${shlibs:Depends},
 Breaks:

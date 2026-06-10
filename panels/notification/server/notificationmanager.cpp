@@ -26,6 +26,7 @@
 
 #include <appletbridge.h>
 #include <pluginloader.h>
+#include <wayland/xdgactivation.h>
 
 DCORE_USE_NAMESPACE
 DS_USE_NAMESPACE
@@ -134,8 +135,30 @@ void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString 
     qInfo(notifyLog) << "Action invoked, bubbleId:" << bubbleId << ", id:" << id << ", actionKey" << actionKey;
     actionInvoked(id, actionKey);
 
-    Q_EMIT ActionInvoked(bubbleId, actionKey);
-    Q_EMIT NotificationClosed(bubbleId, NotifyEntity::Closed);
+    if (isExtendedAction(id, actionKey)) {
+        // Extended action (x-deepin-action-*) handles token request internally in doActionInvoked,
+        // so we skip the outer token request to avoid requesting twice.
+        Q_EMIT ActionInvoked(bubbleId, actionKey);
+        Q_EMIT NotificationClosed(bubbleId, NotifyEntity::Closed);
+    } else {
+        // For non-extended actions, emit ActivationToken first if available
+        auto *activation = new DS_NAMESPACE::XdgActivation(this);
+        connect(
+            activation,
+            &DS_NAMESPACE::XdgActivation::tokenReady,
+            this,
+            [this, bubbleId, actionKey, activation](const QString &token) {
+                if (!token.isEmpty()) {
+                    Q_EMIT ActivationToken(bubbleId, token);
+                    qDebug(notifyLog) << "Emitted ActivationToken for non-extended action:" << token;
+                }
+                Q_EMIT ActionInvoked(bubbleId, actionKey);
+                Q_EMIT NotificationClosed(bubbleId, NotifyEntity::Closed);
+                activation->deleteLater();
+            },
+            Qt::SingleShotConnection);
+        activation->requestToken();
+    }
 }
 
 void NotificationManager::notificationClosed(qint64 id, uint bubbleId, uint reason)
@@ -542,6 +565,16 @@ QString NotificationManager::appIdByAppName(const QString &appName) const
     return QString();
 }
 
+bool NotificationManager::isExtendedAction(qint64 id, const QString &actionId) const
+{
+    auto entity = m_persistence->fetchEntity(id);
+    if (!entity.isValid()) {
+        return false;
+    }
+    QMap<QString, QVariant> hints = entity.hints();
+    return hints.contains("x-deepin-action-" + actionId);
+}
+
 void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QString &actionId)
 {
     qDebug(notifyLog) << "Invoke the notification:" << entity.id() << entity.appName() << actionId;
@@ -566,13 +599,27 @@ void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QStr
                     amArgs << "--" << args;
                 }
 
-                QProcess pro;
-                pro.setProgram("dde-am");
-                pro.setArguments(amArgs);
-                QProcessEnvironment proEnv = QProcessEnvironment::systemEnvironment();
-                proEnv.remove("DSG_APP_ID");
-                pro.setProcessEnvironment(proEnv);
-                pro.startDetached();
+                // Get activation token, then start process
+                auto *activation = new DS_NAMESPACE::XdgActivation(this);
+                auto amArgsCopy = amArgs;
+                connect(activation, &DS_NAMESPACE::XdgActivation::tokenReady, this,
+                    [amArgsCopy, activation](const QString &token) {
+                        QProcess pro;
+                        pro.setProgram("dde-am");
+                        pro.setArguments(amArgsCopy);
+                        QProcessEnvironment proEnv = QProcessEnvironment::systemEnvironment();
+                        proEnv.remove("DSG_APP_ID");
+
+                        if (!token.isEmpty()) {
+                            proEnv.insert("XDG_ACTIVATION_TOKEN", token);
+                            qDebug(notifyLog) << "Set XDG_ACTIVATION_TOKEN for extended action:" << token;
+                        }
+
+                        pro.setProcessEnvironment(proEnv);
+                        pro.startDetached();
+                        activation->deleteLater();
+                    }, Qt::SingleShotConnection);
+                activation->requestToken();
             }
         } else if (i.key() == "deepin-dde-shell-action-" + actionId) {
             const QString data(i.value().toString());

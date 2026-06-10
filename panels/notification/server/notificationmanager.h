@@ -50,6 +50,9 @@ Q_SIGNALS:
 
     void NotificationStateChanged(qint64 id, int processedType);
 
+    // Activation token signal for Wayland
+    void ActivationToken(uint id, const QString &token);
+
 public Q_SLOTS:
     // Standard Notifications dbus implementation
     QStringList GetCapabilities();
@@ -78,6 +81,7 @@ private:
 
     QString appIdByAppName(const QString &appName) const;
     void doActionInvoked(const NotifyEntity &entity, const QString &actionId);
+    bool isExtendedAction(qint64 id, const QString &actionId) const;
     bool invokeShellAction(const QString &data);
     void initScreenLockedState();
 
