@@ -81,6 +81,13 @@ Window {
         }
     }
 
+    function layerShellMargin(position) {
+        if (Qt.platform.pluginName === "wayland")
+            return 0
+
+        return windowMargin(position)
+    }
+
     // visible: true
     visible: Panel.visible
     flags: Qt.Tool
@@ -90,10 +97,10 @@ Window {
     // height: 800
     DLayerShellWindow.layer: DLayerShellWindow.LayerOverlay
     DLayerShellWindow.anchors: DLayerShellWindow.AnchorRight | DLayerShellWindow.AnchorTop | DLayerShellWindow.AnchorBottom
-    DLayerShellWindow.topMargin: windowMargin(0) + contentPadding
-    DLayerShellWindow.rightMargin: windowMargin(1) + contentPadding
-    DLayerShellWindow.bottomMargin: windowMargin(2) + contentPadding
-    DLayerShellWindow.exclusionZone: -1
+    DLayerShellWindow.topMargin: layerShellMargin(0) + contentPadding
+    DLayerShellWindow.rightMargin: layerShellMargin(1) + contentPadding
+    DLayerShellWindow.bottomMargin: layerShellMargin(2) + contentPadding
+    DLayerShellWindow.exclusionZone: Qt.platform.pluginName === "wayland" ? 0 : -1
     DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
     palette: DTK.palette
     ColorSelector.family: Palette.CrystalColor
