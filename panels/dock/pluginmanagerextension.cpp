@@ -1008,3 +1008,17 @@ void PluginManager::onTextInputSurfaceEnabled(QWaylandSurface *surface)
         }
     }
 }
+
+void PluginManager::sendRightClickForSurface()
+{
+    QWaylandCompositor *compositor = qobject_cast<QWaylandCompositor *>(extensionContainer());
+    if (!compositor)
+        return;
+
+    QWaylandSeat *seat = compositor->defaultSeat();
+    if (!seat)
+        return;
+    
+    seat->sendMousePressEvent(Qt::RightButton);
+    seat->sendMouseReleaseEvent(Qt::RightButton);
+}
