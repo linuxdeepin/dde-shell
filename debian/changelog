@@ -1,3 +1,9 @@
+dde-shell (2.0.45) unstable; urgency=medium
+
+  * feat: add XdgActivation support for notifications
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 11 Jun 2026 19:45:36 +0800
+
 dde-shell (2.0.44) unstable; urgency=medium
 
   * fix(dock): align multitask view to first app gap with app icon
