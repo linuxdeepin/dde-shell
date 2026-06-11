@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <sys/types.h>
+#include <signal.h>
 
 #include <QLoggingCategory>
 
@@ -203,7 +204,12 @@ void TreeLandWindow::minimize()
 
 void TreeLandWindow::killClient()
 {
-    m_foreignToplevelHandle->close();
+    const auto pid = m_foreignToplevelHandle->pid();
+    if (pid <= 0) {
+        qCWarning(waylandwindowLog()) << "Cannot find pid of window" << m_foreignToplevelHandle->appid() << m_foreignToplevelHandle->id();
+        return;
+    }
+    ::kill(pid, SIGKILL);
 }
 
 void TreeLandWindow::setWindowIconGeometry(const QWindow* baseWindow, const QRect& gemeotry)
