@@ -123,6 +123,11 @@ private:
     QString registerSurfaceId(const QVariantMap &surfaceData);
     void loadDataFromDConfig();
     void saveDataToDConfig();
+    void saveSortOrderToDConfig();
+    void saveHiddenDataToDConfig();
+    void saveHiddenIdsToDConfig();
+    void saveDockHiddenIdsToDConfig();
+    void saveCollapsedToDConfig();
     void handlePluginVisibleChanged(const QString &surfaceId, bool visible);
 
 private slots:

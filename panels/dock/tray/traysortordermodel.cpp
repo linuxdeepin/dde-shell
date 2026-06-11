@@ -57,7 +57,7 @@ TraySortOrderModel::TraySortOrderModel(QObject *parent)
     connect(this, &TraySortOrderModel::collapsedChanged, this, [this](){
         qDebug() << "collapsedChanged";
         updateVisualIndexes();
-        saveDataToDConfig();
+        saveCollapsedToDConfig();
     });
     connect(this, &TraySortOrderModel::actionsAlwaysVisibleChanged, this, [this](){
         qDebug() << "actionsAlwaysVisibleChanged";
@@ -223,6 +223,7 @@ void TraySortOrderModel::setSurfaceVisible(const QString &surfaceId, bool visibl
     }
     handlePluginVisibleChanged(surfaceId, visible);
     updateVisualIndexes();
+    saveHiddenIdsToDConfig();
 }
 
 bool TraySortOrderModel::isDisplayedSurface(const QString &surfaceId) const
@@ -242,7 +243,7 @@ void TraySortOrderModel::setDockVisible(const QString &surfaceId, bool visible)
         }
     }
     updateVisualIndexes();
-    saveDataToDConfig();
+    saveDockHiddenIdsToDConfig();
 }
 
 bool TraySortOrderModel::isDockVisible(const QString &surfaceId) const
@@ -548,11 +549,36 @@ void TraySortOrderModel::loadDataFromDConfig()
 
 void TraySortOrderModel::saveDataToDConfig()
 {
+    saveSortOrderToDConfig();
+    saveHiddenDataToDConfig();
+    saveCollapsedToDConfig();
+}
+
+void TraySortOrderModel::saveSortOrderToDConfig()
+{
     m_dconfig->setValue("stashedSurfaceIds", m_stashedIds);
     m_dconfig->setValue("collapsableSurfaceIds", m_collapsableIds);
     m_dconfig->setValue("pinnedSurfaceIds", m_pinnedIds);
+}
+
+void TraySortOrderModel::saveHiddenDataToDConfig()
+{
+    saveHiddenIdsToDConfig();
+    saveDockHiddenIdsToDConfig();
+}
+
+void TraySortOrderModel::saveHiddenIdsToDConfig()
+{
     m_dconfig->setValue("hiddenSurfaceIds", m_hiddenIds);
+}
+
+void TraySortOrderModel::saveDockHiddenIdsToDConfig()
+{
     m_dconfig->setValue("dockHiddenSurfaceIds", m_dockHiddenIds);
+}
+
+void TraySortOrderModel::saveCollapsedToDConfig()
+{
     m_dconfig->setValue("isCollapsed", m_collapsed);
 }
 
@@ -575,8 +601,12 @@ void TraySortOrderModel::onAvailableSurfacesChanged()
     }
     // finally, update visual index
     updateVisualIndexes();
-    // and also save the current sort order
-    saveDataToDConfig();
+    // Save only the data that onAvailableSurfacesChanged may have modified:
+    // - section lists (via registerSurfaceId → findSection → registerToSection)
+    // - hiddenIds (via findSection's default-hide logic)
+    // Do NOT save dockHiddenSurfaceIds here to avoid race conditions with other processes.
+    saveSortOrderToDConfig();
+    saveHiddenIdsToDConfig();
 }
 
 void TraySortOrderModel::handlePluginVisibleChanged(const QString &surfaceId, bool visible)
