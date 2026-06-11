@@ -23,6 +23,9 @@ Item {
     function notifyXEmbedWindowMoveResult(wid, success) {
         pluginManager.notifyXEmbedWindowMoveResult(wid, success)
     }
+    function sendRightClickForSurface() {
+        pluginManager.sendRightClickForSurface()
+    }
 
     property ListModel trayPluginSurfaces: ListModel {}
     property ListModel quickPluginSurfaces: ListModel {}

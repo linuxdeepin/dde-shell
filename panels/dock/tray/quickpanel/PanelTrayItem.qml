@@ -116,6 +116,24 @@ Control {
     MouseArea {
         id: mouseHandler
         anchors.fill: parent
-        onClicked: root.clicked()
+        onPressed: function (mouse) {
+            longPressTriggered = false
+            isTouchSource = (mouse.source !== Qt.MouseEventNotSynthesized)
+        }
+        onPressAndHold: {
+            if (isTouchSource) {
+                longPressTriggered = true
+                DockCompositor.sendRightClickForSurface()
+            }
+        }
+        onClicked: {
+            if (!longPressTriggered) {
+                root.clicked()
+            }
+            longPressTriggered = false
+        }
+
+        property bool longPressTriggered: false
+        property bool isTouchSource: false
     }
 }

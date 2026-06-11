@@ -73,6 +73,10 @@ public:
     // result: true = success, false = error
     Q_INVOKABLE void notifyXEmbedWindowMoveResult(uint32_t wid, bool result);
 
+    // Called from QML to synthesize a right-click (mouse press + release)
+    // on the given Wayland surface, e.g. on long press from touch input
+    Q_INVOKABLE void sendRightClickForSurface();
+
     uint32_t dockPosition() const;
     void setDockPosition(uint32_t dockPosition);
 

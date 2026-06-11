@@ -52,6 +52,11 @@ Item {
         }
         TapHandler {
             id: tapHandler
+            onLongPressed: {
+                if (tapHandler.point.device.type === PointerDevice.TouchScreen) {
+                    DockCompositor.sendRightClickForSurface()
+                }
+            }
         }
 
         onVisibleChanged: function () {
