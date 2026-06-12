@@ -247,7 +247,7 @@ bool TaskManager::init()
         modifyOpacityChanged();
         connect(appearanceApplet, SIGNAL(opacityChanged()), this, SLOT(modifyOpacityChanged()));
     }
-    QTimer::singleShot(500, [this]() {
+    QTimer::singleShot(500, this, [this]() {
         if (m_windowMonitor)
             m_windowMonitor->start();
     });
