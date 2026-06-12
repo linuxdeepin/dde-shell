@@ -97,6 +97,8 @@ Item {
             isActive: root.active
             windowCount: root.windows.length
             displayMode: root.displayMode
+            D.ColorSelector.hovered: hoverHandler.hovered
+            D.ColorSelector.pressed: mouseArea.pressed
         }
         Item {
             id: iconContainer
