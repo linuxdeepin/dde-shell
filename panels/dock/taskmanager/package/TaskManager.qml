@@ -151,7 +151,7 @@ ContainmentItem {
                 Behavior on scale { NumberAnimation { duration: 200 } }
 
                 implicitWidth: useColumnLayout ? taskmanager.implicitWidth : appItem.implicitWidth
-                implicitHeight: useColumnLayout ? visualModel.cellWidth : taskmanager.implicitHeight
+                implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 9 / 14 : taskmanager.implicitHeight
 
                 property int visualIndex: DelegateModel.itemsIndex
                 property var modelIndex: visualModel.modelIndex(index)
