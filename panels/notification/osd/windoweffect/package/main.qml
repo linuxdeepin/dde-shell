@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -32,7 +32,14 @@ AppletItem {
         enabled: match(control.Panel.osdType)
         function onVisibleChanged() {
             if (!control.Panel.visible) {
+                // OSD hidden: write selected effect type back
                 Applet.effectType = effectModel.get(selectIndex).value
+            } else {
+                // OSD shown: re-establish selectIndex binding to track current effect type.
+                // This handles the case where the binding was broken by a cyclic switch.
+                control.selectIndex = Qt.binding(function() {
+                    return indexByValue(Applet.effectType)
+                })
             }
         }
     }
