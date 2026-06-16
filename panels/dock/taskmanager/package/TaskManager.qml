@@ -14,7 +14,11 @@ ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int dockOrder: 16
-    property real remainingSpacesForTaskManager: Panel.rootObject.dockRemainingSpaceForCenter 
+    readonly property real remainingSpacesForTaskManager: {
+        const otherCount = Panel.rootObject.dockCenterPartCount - 1;
+        const otherOccupied = otherCount > 0 ? otherCount * Panel.rootObject.dockItemMaxSize * 0.8 : 0;
+        return Panel.rootObject.dockRawCenterSpace - otherOccupied;
+    }
     readonly property int appTitleSpacing: Math.max(10, Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14) / 3)
     // Start padding for the app container so that the visual gap
     // (multitask icon right edge → first app icon left edge) = appTitleSpacing.
@@ -289,9 +293,53 @@ ContainmentItem {
         }
     }
 
+
+    // Solve for S (dockItemMaxSize). The forward layout equation is:
+    //   totalSpace = appCount×S×itemRatio + gaps×max(10, S×spacingRatio)
+    //              + max(0, spacing - S×k) + otherCount×S×multitaskViewIconRatio
+    //
+    // The max(10,…) makes this piecewise. Ignoring Math.round (continuous approx):
+    //
+    //   Regime 1 (S×spacingRatio ≥ 10): no clamp, every term ∝ S.
+    //     Factor out S → S = totalSpace / sum_of_coefficients.
+    //
+    //   Regime 2 (S×spacingRatio < 10): spacing clamped to 10 (constant).
+    //     startPad flips from S×(spacingRatio-k) to 10 - S×k.
+    //     Separate constants from S-terms → S = (total - constants) / S_coefficient.
+    function solveMaxSizeFull(totalSpace, appCount, otherCount) {
+        if (appCount <= 0) {
+            return totalSpace;
+        }
+
+        const spacingRatio = iconWidthToMaxSizeRatio / 3;                      // 9/14 / 3
+        const k = (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2;      // ≈ 0.0786
+        const gaps = Math.max(0, appCount - 1);
+        const otherRatio = otherCount > 0 ? otherCount * multitaskViewIconRatio : 0;
+
+        // Regime 1: continuous spacing model
+        const S = totalSpace / (appCount * iconWidthToMaxSizeRatio + gaps * spacingRatio + otherRatio + spacingRatio - k);
+
+        // Regime 2: spacing clamped to 10
+        if (S * spacingRatio < 10) {
+            return Math.max(0, (totalSpace - gaps * 10 - 10) / (appCount * iconWidthToMaxSizeRatio - k + otherRatio));
+        }
+        return Math.max(0, S);
+    }
+
     Component.onCompleted: {
         Panel.rootObject.dockItemMaxSize = Qt.binding(function(){
-            return Math.min(Panel.rootObject.dockSize, Panel.rootObject.dockRemainingSpaceForCenter * 1.2 / (Panel.rootObject.dockCenterPartCount - 1 + visualModel.count) - 2)
+            const dockSize = Panel.rootObject.dockSize;
+            const appCount = visualModel.count;
+
+            if (appCount <= 0 || dockSize <= 0)
+                return dockSize;
+
+            if (textCalculator.enabled && textCalculator.totalWidth > 0)
+                return dockSize;
+
+            const otherItems = Math.max(0, Panel.rootObject.dockCenterPartCount - 1);
+            const optimal = solveMaxSizeFull(Panel.rootObject.dockRawCenterSpace, appCount, otherItems);
+            return optimal >= dockSize ? dockSize : optimal;
         })
     }
 }

@@ -21,19 +21,11 @@ Window {
     property bool useColumnLayout: positionForAnimation % 2
     property int dockCenterPartCount: dockCenterPartModel.count
 
-    property int dockRemainingSpaceForCenter: {
-        const otherCount = dockCenterPartCount - 1; // not include taskmanager
-        const spacing = useColumnLayout ? gridLayout.rowSpacing : gridLayout.columnSpacing;
-            
-        let otherOccupied = 0;
-        if (otherCount > 0) {
-            otherOccupied = otherCount * dockItemIconSize + otherCount * spacing;
-        }
-
+    readonly property int dockRawCenterSpace: {
         if (useColumnLayout) {
-            return Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight - otherOccupied;
+            return Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight;
         } else {
-            return Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth - otherOccupied;
+            return Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth;
         }
     }
 
@@ -538,6 +530,8 @@ Window {
                 id: dockCenterPart
                 implicitWidth: centerLoader.implicitWidth
                 implicitHeight: centerLoader.implicitHeight
+                Layout.maximumWidth: useColumnLayout ? -1 : dockRawCenterSpace
+                Layout.maximumHeight: useColumnLayout ? dockRawCenterSpace : -1
                 onXChanged: dockCenterPartPosChanged()
                 onYChanged: dockCenterPartPosChanged()
                 Layout.leftMargin: !useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
