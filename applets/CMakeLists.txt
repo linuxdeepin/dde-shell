@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -7,3 +7,4 @@ add_subdirectory(dde-appearance)
 add_subdirectory(dde-apps)
 add_subdirectory(dde-key-notify)
 add_subdirectory(dde-shutdown)
+add_subdirectory(dde-weather)

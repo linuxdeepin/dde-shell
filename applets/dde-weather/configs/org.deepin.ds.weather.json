@@ -1,0 +1,42 @@
+{
+    "magic": "dsg.config.meta",
+    "version": "1.0",
+    "contents": {
+        "city": {
+            "value": "auto",
+            "serial": 0,
+            "flags": [],
+            "name": "city name or 'auto' for auto detection",
+            "name[zh_CN]": "城市名称或'auto'自动检测",
+            "permissions": "readwrite",
+            "visibility": "public"
+        },
+        "refreshInterval": {
+            "value": 30,
+            "serial": 0,
+            "flags": [],
+            "name": "weather refresh interval in minutes",
+            "name[zh_CN]": "天气刷新间隔（分钟）",
+            "permissions": "readwrite",
+            "visibility": "public"
+        },
+        "temperatureUnit": {
+            "value": "celsius",
+            "serial": 0,
+            "flags": [],
+            "name": "temperature unit: celsius or fahrenheit",
+            "name[zh_CN]": "温度单位：摄氏度或华氏度",
+            "permissions": "readwrite",
+            "visibility": "public"
+        },
+        "showInDock": {
+            "value": true,
+            "serial": 0,
+            "flags": [],
+            "name": "show weather widget in dock",
+            "name[zh_CN]": "在任务栏显示天气小组件",
+            "permissions": "readwrite",
+            "visibility": "public"
+        }
+    }
+}
