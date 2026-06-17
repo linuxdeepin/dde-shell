@@ -84,7 +84,7 @@ ContainmentItem {
         spacing: appContainer.spacing
         cellSize: textCalculator.iconSize
         itemPadding: Math.round(textCalculator.iconSize / 8)
-        remainingSpace: taskmanager.remainingSpacesForTaskManager
+        remainingSpace: taskmanager.remainingSpacesForTaskManager - taskmanager.startPadding
         font.family: D.DTK.fontManager.t6.family
         font.pixelSize: Math.max(10, Math.min(20, Math.round(textCalculator.iconSize * 0.35)))
     }
