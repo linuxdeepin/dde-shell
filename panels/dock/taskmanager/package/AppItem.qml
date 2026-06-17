@@ -3,12 +3,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick.Controls
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0 as D
-import Qt.labs.platform 1.1 as LP
 
 Item {
     id: root
@@ -384,12 +383,15 @@ Item {
         id: contextMenuLoader
         active: false
         property bool trashEmpty: true
-        sourceComponent: LP.Menu {
+        sourceComponent: D.Menu {
             id: contextMenu
+            popupType: Popup.Window
+            D.PopupHandle.enableBlurWindow: true
+
             Instantiator {
                 id: menuItemInstantiator
                 model: JSON.parse(menus)
-                delegate: LP.MenuItem {
+                delegate: D.MenuItem {
                     text: modelData.name
                     enabled: (root.itemId === "dde-trash" && modelData.id === "clean-trash")
                             ? !contextMenuLoader.trashEmpty
@@ -476,11 +478,20 @@ Item {
         }
     }
 
-    function requestAppItemMenu() {
+    function requestAppItemMenu(point) {
         Panel.requestClosePopup()
         contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
         contextMenuLoader.active = true
-        MenuHelper.openMenu(contextMenuLoader.item)
+
+        let localPoint = point ? Qt.point(point.x, point.y) : Qt.point(root.width / 2, root.height / 2)
+        Qt.callLater(function () {
+            let menu = contextMenuLoader.item
+            if (!menu)
+                return
+
+            let pos = MenuHelper.calculateMenuPosition(localPoint, menu, Panel.position)
+            MenuHelper.openMenu(menu, root, pos)
+        })
     }
 
     MouseArea {
@@ -502,11 +513,12 @@ Item {
         property bool isTouchLongPressed: false
 
         TapHandler {
+            id: touchMenuTapHandler
             acceptedDevices: PointerDevice.TouchScreen
             gesturePolicy: TapHandler.DragThreshold
             onLongPressed: {
                 mouseArea.isTouchLongPressed = true
-                requestAppItemMenu()
+                requestAppItemMenu(touchMenuTapHandler.point.position)
             }
         }
         onPressed: function (mouse) {
@@ -528,7 +540,7 @@ Item {
 
             let index = root.modelIndex;
             if (mouse.button === Qt.RightButton) {
-                requestAppItemMenu()
+                requestAppItemMenu(Qt.point(mouse.x, mouse.y))
             } else {
                 if (root.windows.length === 0) {
                     launchAnimation.start();
