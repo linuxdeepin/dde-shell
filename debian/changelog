@@ -1,3 +1,16 @@
+dde-shell (2.0.46) unstable; urgency=medium
+
+  * fix(dock): subtract startPadding from remainingSpacesForTaskManager
+  * fix(dock): Adjust the calculation logic of dockItemMaxSize
+  * fix(osd): re-establish selectIndex binding in onVisibleChanged for
+    reactive sync
+  * fix(dock): align delegate implicitHeight with icon ratio for
+    consistent spacing
+  * fix: bind hover and pressed states to background
+  * fix: bind taskmanager start timer to applet lifetime
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 17 Jun 2026 16:25:27 +0800
+
 dde-shell (2.0.45) unstable; urgency=medium
 
   * feat: add XdgActivation support for notifications
