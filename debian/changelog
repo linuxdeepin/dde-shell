@@ -1,3 +1,9 @@
+dde-shell (2.0.47) unstable; urgency=medium
+
+  * fix(debian): add Breaks and Replaces for libdde-shell-dev
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 18 Jun 2026 11:18:15 +0800
+
 dde-shell (2.0.46) unstable; urgency=medium
 
   * fix(dock): subtract startPadding from remainingSpacesForTaskManager
