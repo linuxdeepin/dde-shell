@@ -91,21 +91,24 @@ Window {
 
     ListView  {
         id: bubbleView
-        width: 360
+        // Close button overhang: half of 20px button height minus 2px visual offset
+        // (see NotifyItemContent.qml closePlaceHolder topMargin: -height / 2 + 2)
+        readonly property int closeButtonOverhang: 8
+        width: root.width
         height: contentHeight
         anchors {
             right: parent.right
             bottom: parent.bottom
-            rightMargin: 10
+            rightMargin: 0
             bottomMargin: 10
         }
 
         function updateInputRegion() {
             root.DLayerShellWindow.setInputRegionRect(
                 Math.ceil(bubbleView.x),
-                Math.ceil(bubbleView.y),
-                Math.ceil(bubbleView.width), 
-                Math.ceil(Math.max(10, bubbleView.contentHeight))
+                Math.ceil(bubbleView.y - bubbleView.closeButtonOverhang),
+                Math.ceil(root.width),
+                Math.ceil(Math.max(10, bubbleView.contentHeight) + bubbleView.closeButtonOverhang)
             )
         }
         onContentHeightChanged: updateInputRegion()
@@ -168,24 +171,6 @@ Window {
 
         delegate: BubbleDelegate {
             maxCount: model.bubbleCount
-        }
-
-        HoverHandler {
-            onPointChanged: {
-                const local = point.position
-                let hoveredItem = bubbleView.itemAt(local.x, local.y)
-                if (hoveredItem && hoveredItem.bubble) {
-                    Applet.setHoveredId(hoveredItem.bubble.id)
-                } else {
-                    Applet.setHoveredId(0)
-                }
-            }
-
-            onHoveredChanged: {
-                if (!hovered) {
-                    Applet.setHoveredId(0)
-                }
-            }
         }
     }
 }
