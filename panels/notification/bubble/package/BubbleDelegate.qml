@@ -5,9 +5,14 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
+import org.deepin.ds 1.0
+
 Item {
     id: delegateRoot
-    width: 360
+    width: ListView.view ? ListView.view.width : 360
+    // Close button overhang: half of 20px button height minus 2px visual offset
+    // (see NotifyItemContent.qml closePlaceHolder topMargin: -height / 2 + 2)
+    readonly property int closeButtonOverhang: 8
     property var bubble: model
     property int maxCount: 3
     // ListView 的 remove 动画执行的时候,remove Item的index会以负数的方式出现
@@ -15,10 +20,22 @@ Item {
     
     height: bubbleContent.height
     z: -realIndex
+
+    HoverHandler {
+        id: delegateHoverHandler
+        margin: delegateRoot.closeButtonOverhang
+        onHoveredChanged: {
+            Applet.setHoveredId(hovered && delegateRoot.bubble ? delegateRoot.bubble.id : 0)
+        }
+    }
+
     Bubble {
         id: bubbleContent
         width: 360
+        anchors.right: parent.right
+        anchors.rightMargin: 10
         bubble: delegateRoot.bubble
+        parentHovered: delegateHoverHandler.hovered
         
         transformOrigin: Item.Top
         
