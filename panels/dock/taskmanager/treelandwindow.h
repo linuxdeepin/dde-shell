@@ -20,6 +20,7 @@ class ForeignToplevelHandle : public QWaylandClientExtensionTemplate<ForeignTopl
 
 public:
     explicit ForeignToplevelHandle(struct ::treeland_foreign_toplevel_handle_v1 *object);
+    ~ForeignToplevelHandle();
     bool isReady() const;
     uint32_t id() const;
     pid_t pid() const;

@@ -22,8 +22,16 @@ ForeignToplevelHandle::ForeignToplevelHandle(struct ::treeland_foreign_toplevel_
     , QtWayland::treeland_foreign_toplevel_handle_v1(object)
     , m_pid(0)
     , m_isReady(false)
+    , m_identifier(0)
 {
     init(object);
+}
+
+ForeignToplevelHandle::~ForeignToplevelHandle()
+{
+    if (object()) {
+        destroy();
+    }
 }
 
 uint32_t ForeignToplevelHandle::id() const
