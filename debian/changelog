@@ -1,3 +1,14 @@
+dde-shell (2.0.48) unstable; urgency=medium
+
+  * fix: keep notification hover state on close button edge
+  * chore: Sync by
+    https://github.com/linuxdeepin/.github/commit/88706fa723e3771211cb07
+    81d3d97fd4a6cd2a68
+  * fix: destroy wayland proxy before cleanup to prevent use-after-free
+    crash
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 23 Jun 2026 11:16:53 +0800
+
 dde-shell (2.0.47) unstable; urgency=medium
 
   * fix(debian): add Breaks and Replaces for libdde-shell-dev
