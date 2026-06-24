@@ -1,3 +1,16 @@
+dde-shell (2.0.48) unstable; urgency=medium
+
+  * revert: "fix: correct dock context menu popup positioning"
+  * fix: prevent crash on toplevel destruction
+  * fix: destroy wayland proxy before cleanup to prevent use-after-free
+    crash
+  * chore: Sync by
+    https://github.com/linuxdeepin/.github/commit/88706fa723e3771211cb07
+    81d3d97fd4a6cd2a68
+  * fix: keep notification hover state on close button edge
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 24 Jun 2026 15:35:39 +0800
+
 dde-shell (2.0.47) unstable; urgency=medium
 
   * fix(debian): add Breaks and Replaces for libdde-shell-dev
