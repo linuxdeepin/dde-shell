@@ -16,6 +16,8 @@
 #include <csignal>
 #include <iostream>
 
+#include <X11/Xlib.h>
+
 #include "applet.h"
 #include "containment.h"
 #include "pluginloader.h"
@@ -44,6 +46,28 @@ void outputPluginTreeStruct(const DPluginMetaData &plugin, int level)
 static void disableLogOutput()
 {
     QLoggingCategory::setFilterRules("*.debug=false");
+}
+
+// Handle X server disconnection gracefully.
+// When X server is killed (e.g. init 3), libX11's _XDefaultIOError calls exit(),
+// bypassing Qt's normal shutdown. This causes plugins to be destroyed during global
+// destructors when objects are already partially destroyed, leading to SIGSEGV.
+//
+// By installing a custom X I/O error handler, we prevent exit() from being called
+// and instead trigger a clean Qt shutdown via quit(), which fires aboutToQuit
+// and allows plugins to be properly destroyed.
+static int xio_error_handler(Display * /*dpy*/)
+{
+    qCCritical(dsLog) << "X I/O error detected, shutting down gracefully.";
+    QCoreApplication::quit();
+    return 0;
+}
+
+static void sigpipe_handler(int /*sig*/)
+{
+    // 信号处理函数中禁止调用非异步信号安全函数（如 qCCritical），
+    // 否则在持有相关锁时触发信号会导致死锁。
+    QCoreApplication::quit();
 }
 
 class AppletManager
@@ -217,6 +241,20 @@ int main(int argc, char *argv[])
         DPluginLoader::instance()->destroy();
         manager.quit();
     });
+
+    // Install X11-specific error handlers to prevent exit() from being called
+    // when X server is killed (e.g. during init 3 → init 5 switch).
+    // On Wayland, these are not needed as the error path is different.
+    if (QGuiApplication::platformName().startsWith(QStringLiteral("xcb"))) {
+        XSetIOErrorHandler(xio_error_handler);
+
+        struct sigaction sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sa_handler = sigpipe_handler;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = 0;
+        sigaction(SIGPIPE, &sa, nullptr);
+    }
 
     return a.exec();
 }
