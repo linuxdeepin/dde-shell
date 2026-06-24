@@ -3,11 +3,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick 2.15
-import QtQuick.Controls
+import QtQuick.Controls 2.4
 import QtQuick.Layouts 2.15
 import QtQuick.Window 2.15
 
 import QtQml
+import Qt.labs.platform as LP
 
 import org.deepin.ds 1.0
 import org.deepin.ds.dock 1.0
@@ -56,21 +57,12 @@ Window {
         return appearance.opacity
     }
 
-    function requestShowDockMenu(point) {
+    function requestShowDockMenu() {
         // maybe has popup visible, close it.
         Panel.requestClosePopup()
         viewDeactivated()
         hideTimer.stop()
-
-        let localPoint = point ? Qt.point(point.x, point.y) : Qt.point(dockContainer.width / 2, dockContainer.height / 2)
-        Qt.callLater(function () {
-            let menu = dockMenuLoader.item
-            if (!menu)
-                return
-
-            let pos = MenuHelper.calculateMenuPosition(localPoint, menu, Panel.position)
-            MenuHelper.openMenu(menu, dockContainer, pos)
-        })
+        MenuHelper.openMenu(dockMenuLoader.item)
     }
 
     DLayerShellWindow.anchors: position2Anchors(positionForAnimation)
@@ -274,12 +266,11 @@ Window {
         }
     }
 
-    component EnumPropertyMenuItem: D.MenuItem {
+    component EnumPropertyMenuItem: LP.MenuItem {
         required property string name
         required property string prop
         required property int value
         text: name
-        checkable: true
 
         onTriggered: {
             Applet[prop] = value
@@ -289,9 +280,12 @@ Window {
         }
         checked: Applet[prop] === value
     }
-    component MutuallyExclusiveMenu: D.Menu {
-        popupType: Popup.Window
-        D.PopupHandle.enableBlurWindow: true
+    component MutuallyExclusiveMenu: LP.Menu {
+        id: menu
+        LP.MenuItemGroup {
+            id: group
+            items: menu.items
+        }
     }
 
     function updateAppItems()
@@ -304,11 +298,8 @@ Window {
     Loader {
         id: dockMenuLoader
         active: false
-        sourceComponent: D.Menu {
+        sourceComponent: LP.Menu {
             id: dockMenu
-            popupType: Popup.Window
-            D.PopupHandle.enableBlurWindow: true
-
             MutuallyExclusiveMenu {
                 visible: Panel.debugMode
                 title: qsTr("Indicator Style")
@@ -377,15 +368,14 @@ Window {
                     value: Dock.SmartHide
                 }
             }
-            D.MenuItem {
+            LP.MenuItem {
                 text: qsTr("Lock the Dock")
-                checkable: true
                 checked: Panel.locked
                 onTriggered: {
                     Panel.locked = !Panel.locked
                 }
             }
-            D.MenuItem {
+            LP.MenuItem {
                 text: qsTr("Dock Settings")
                 onTriggered: {
                     Panel.openDockSettings()
@@ -432,7 +422,7 @@ Window {
                 MenuHelper.closeCurrent()
                 dockMenuLoader.active = true
                 if (button === Qt.RightButton && lastActive !== dockMenuLoader.item) {
-                    requestShowDockMenu(eventPoint.position)
+                    requestShowDockMenu()
                 }
                 if (button === Qt.LeftButton) {
                     // try to close popup when clicked empty, because dock does not have focus.
@@ -444,7 +434,6 @@ Window {
 
         //Touch screen click
         TapHandler {
-            id: touchMenuTapHandler
             acceptedButtons: Qt.NoButton
             acceptedDevices: PointerDevice.TouchScreen
             onTapped: function(eventPoint, button) {
@@ -460,7 +449,7 @@ Window {
                 MenuHelper.closeCurrent()
                 dockMenuLoader.active = true
                 if (lastActive !== dockMenuLoader.item) {
-                    requestShowDockMenu(touchMenuTapHandler.point.position)
+                    requestShowDockMenu()
                 }
             }
         }
