@@ -73,7 +73,7 @@ Depends:
  dde-tray-loader (>= 1.99.8),
  libdde-shell (= ${binary:Version}),
  libdde-shell-dock (= ${binary:Version}),
- libdtk6declarative (>> 6.7.44),
+ libdtk6declarative,
  libqt6sql6-sqlite,
  libqt6svg6,
  qml6-module-qt-labs-platform,
