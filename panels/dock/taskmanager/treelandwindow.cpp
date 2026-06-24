@@ -144,7 +144,10 @@ pid_t TreeLandWindow::pid()
 
 QStringList TreeLandWindow::identity()
 {
-    return {m_foreignToplevelHandle ? m_foreignToplevelHandle->appid() : ""};
+    return QStringList{
+        (m_foreignToplevelHandle ? m_foreignToplevelHandle->appid() : ""),
+        QString::number(pid())
+    };
 }
 
 QString TreeLandWindow::icon()
