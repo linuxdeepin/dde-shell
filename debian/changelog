@@ -1,3 +1,9 @@
+dde-shell (2.0.49) unstable; urgency=medium
+
+  * feat: add pid and AM-based appid query fallback for wayland session
+
+ -- Kun Zhang <zhangkun2@uniontech.com>  Fri, 26 Jun 2026 21:25:59 +0800
+
 dde-shell (2.0.48) unstable; urgency=medium
 
   * revert: "fix: correct dock context menu popup positioning"
