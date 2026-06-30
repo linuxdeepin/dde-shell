@@ -388,6 +388,7 @@ Window {
         id: dockContainer
         width: dock.useColumnLayout ? dock.dockSize : parent.width
         height: dock.useColumnLayout ? parent.height : dock.dockSize
+        property bool touchLongPressed: false
         anchors {
             left: parent.left
             top: parent.top
@@ -437,6 +438,10 @@ Window {
             acceptedButtons: Qt.NoButton
             acceptedDevices: PointerDevice.TouchScreen
             onTapped: function(eventPoint, button) {
+                if (dockContainer.touchLongPressed) {
+                    dockContainer.touchLongPressed = false
+                    return
+                }
                 let lastActive = MenuHelper.activeMenu
                 MenuHelper.closeCurrent()
                 dockMenuLoader.active = true
@@ -445,12 +450,16 @@ Window {
                 viewDeactivated()
             }
             onLongPressed: {
+                dockContainer.touchLongPressed = true
                 let lastActive = MenuHelper.activeMenu
                 MenuHelper.closeCurrent()
                 dockMenuLoader.active = true
                 if (lastActive !== dockMenuLoader.item) {
                     requestShowDockMenu()
                 }
+            }
+            onCanceled: {
+                dockContainer.touchLongPressed = false
             }
         }
 
