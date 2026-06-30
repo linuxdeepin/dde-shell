@@ -195,11 +195,16 @@ QString BubbleItem::appName() const
 
 QString BubbleItem::appIcon() const
 {
+    // image-data / icon_data hints carry the notification-specific image
+    const QString iconFromHints = imagePathOfNotification(m_entity.hints(), m_entity.appIcon(), m_entity.appName());
+    if (!iconFromHints.isEmpty())
+        return iconFromHints;
+
     if (!m_entity.appIcon().isEmpty()) {
         return m_entity.appIcon();
     }
 
-    return imagePathOfNotification(m_entity.hints(), m_entity.appIcon(), m_entity.appName());
+    return {};
 }
 
 QString BubbleItem::summary() const
