@@ -14,11 +14,14 @@ ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int dockOrder: 16
-    readonly property real remainingSpacesForTaskManager: {
+
+    function calcRemainingSpace(baseSize) {
         const otherCount = Panel.rootObject.dockCenterPartCount - 1;
-        const otherOccupied = otherCount > 0 ? otherCount * Panel.rootObject.dockItemMaxSize * 0.8 : 0;
+        const otherOccupied = otherCount > 0 ? otherCount * baseSize * multitaskViewIconRatio : 0;
         return Panel.rootObject.dockRawCenterSpace - otherOccupied;
     }
+
+    readonly property real remainingSpacesForTaskManager: calcRemainingSpace(Panel.rootObject.dockItemMaxSize)
     readonly property int appTitleSpacing: Math.max(10, Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14) / 3)
     // Start padding for the app container so that the visual gap
     // (multitask icon right edge → first app icon left edge) = appTitleSpacing.
@@ -80,11 +83,15 @@ ContainmentItem {
         id: textCalculator
         enabled: taskmanager.Applet.windowSplit && (Panel.position == Dock.Bottom || Panel.position == Dock.Top)
         dataModel: taskmanager.Applet.dataModel
-        iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
-        spacing: appContainer.spacing
+        iconSize: Panel.rootObject.dockSize * 9 / 14
+        spacing: Math.max(10, Math.round(textCalculator.iconSize) / 3)
         cellSize: textCalculator.iconSize
         itemPadding: Math.round(textCalculator.iconSize / 8)
-        remainingSpace: taskmanager.remainingSpacesForTaskManager - taskmanager.startPadding
+        remainingSpace: {
+            const dockIconSize = Panel.rootObject.dockSize;
+            const startPadding = Math.max(0, textCalculator.spacing - (dockIconSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2));
+            return calcRemainingSpace(dockIconSize) - startPadding;
+        }
         font.family: D.DTK.fontManager.t6.family
         font.pixelSize: Math.max(10, Math.min(20, Math.round(textCalculator.iconSize * 0.35)))
     }
