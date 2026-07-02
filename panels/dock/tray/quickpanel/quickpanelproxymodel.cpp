@@ -118,10 +118,7 @@ bool QuickPanelProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
     const auto index = this->sourceModel()->index(sourceRow, 0, sourceParent);
     if (!index.isValid())
         return false;
-    if (m_quickPlugins.isEmpty())
-        return true;
-    const auto &id = surfacePluginId(index);
-    return m_quickPlugins.contains(id);
+    return true;
 }
 
 void QuickPanelProxyModel::updateQuickPlugins()
