@@ -80,6 +80,7 @@ enum TrayPluginType {
     Tray = 1,
     Fixed,
     Quick,
+    Card,
 };
 
 enum TrayPluginSizePolicy {

@@ -13,8 +13,7 @@ AppletItem {
     id: showdesktop
     readonly property int showDesktopWidth: 10
     property bool useColumnLayout: Panel.position % 2
-    readonly property bool fashionMode: Panel.rootObject && Panel.rootObject.fashionDock && Panel.rootObject.fashionDock.enabled
-    property int dockSize: Panel.rootObject.dockItemMaxSize
+    readonly property bool fashionMode: Panel.fashionMode
     property int dockOrder: 30
     property bool shouldVisible: Applet.visible && !fashionMode
     visible: shouldVisible
