@@ -19,23 +19,34 @@ Window {
     property int positionForAnimation: Panel.position
     property bool useColumnLayout: positionForAnimation % 2
 
-    FashionDockController {
-        id: fashionDockController
-        useColumnLayout: dock.useColumnLayout
-        itemAlignment: Panel.itemAlignment
-        position: dock.positionForAnimation
-        hideState: Panel.hideState
-        dockSize: dock.dockSize
-        dockItemIconSize: dock.dockItemIconSize
-        devicePixelRatio: Panel.devicePixelRatio > 0 ? Panel.devicePixelRatio : Screen.devicePixelRatio
-        screenWidth: Screen.width
-        colorTheme: Panel.colorTheme
-        dragging: dock.isDragging
-        gridLayout: gridLayout
-        rightPart: dockRightPart
-    }
+    property alias fashionDock: fashionDockState
 
-    property alias fashionDock: fashionDockController
+    QtObject {
+        id: fashionDockState
+
+        readonly property bool enabled: !dock.useColumnLayout
+            && Panel.itemAlignment === Dock.FashionAlignment
+            && (dock.positionForAnimation === Dock.Bottom || dock.positionForAnimation === Dock.Top)
+        readonly property int floatingMargin: 8
+        readonly property int backgroundRadius: {
+            const verticalPadding = Math.max(6, Math.round(dock.dockSize * 0.16))
+            return Math.round((dock.dockSize + verticalPadding * 2) / 4)
+        }
+        readonly property real contentWidth: {
+            if (!enabled) {
+                return 0
+            }
+
+            let width = gridLayout.implicitWidth
+            if (dockRightPart.visible) {
+                if (width > 0) {
+                    width += gridLayout.columnSpacing
+                }
+                width += dockRightPart.implicitWidth
+            }
+            return width
+        }
+    }
     property int dockCenterPartCount: dockCenterPartModel.count
 
     readonly property int dockRawCenterSpace: {
@@ -45,8 +56,8 @@ Window {
             let space = Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth;
             if (fashionDock.enabled && gridLayout) {
                 // 时尚模式下，dockRightPart 在 gridLayout 右侧，之间需要扣除 dockSpacing
-                // 这是为了确保 gridLayout 的宽度 + dockSpacing + rightPart 宽度 <= screenWidth
-                space -= Math.ceil(gridLayout.columnSpacing);
+                // 同时保留左右悬浮间距，避免窗口铺满屏幕后圆角边框被屏幕边缘裁剪。
+                space -= Math.ceil(gridLayout.columnSpacing) + fashionDock.floatingMargin * 2;
             }
             return Math.max(0, space);
         }
@@ -70,7 +81,8 @@ Window {
     // NOTE: -1 means not set its size, follow the platform size
     width: {
         if (fashionDock.enabled) {
-            return Math.max(1, fashionDock.effectiveShellWidth())
+            const maximumWidth = Math.max(1, Screen.width - fashionDock.floatingMargin * 2)
+            return Math.max(1, Math.min(fashionDock.contentWidth, maximumWidth))
         }
 
         return positionForAnimation === Dock.Top || positionForAnimation === Dock.Bottom ? -1 : dockSize
@@ -95,11 +107,15 @@ Window {
     }
 
     DLayerShellWindow.anchors: fashionDock.enabled
-        ? (fashionDock.topMode ? DLayerShellWindow.AnchorTop : DLayerShellWindow.AnchorBottom)
+        ? (positionForAnimation === Dock.Top ? DLayerShellWindow.AnchorTop : DLayerShellWindow.AnchorBottom)
         : position2Anchors(positionForAnimation)
-    DLayerShellWindow.topMargin: fashionDock.topMode ? fashionDock.floatingMargin : 0
+    DLayerShellWindow.topMargin: fashionDock.enabled && positionForAnimation === Dock.Top
+        ? fashionDock.floatingMargin
+        : 0
 
-    DLayerShellWindow.bottomMargin: fashionDock.bottomMode ? fashionDock.floatingMargin : 0
+    DLayerShellWindow.bottomMargin: fashionDock.enabled && positionForAnimation === Dock.Bottom
+        ? fashionDock.floatingMargin
+        : 0
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing
         ? Applet.dockSize + (fashionDock.enabled ? fashionDock.floatingMargin : 0)
@@ -134,7 +150,7 @@ Window {
         }
     }
     Behavior on width {
-        enabled: fashionDock.widthAnimationEnabled
+        enabled: fashionDock.enabled && !dock.isDragging
         NumberAnimation {
             duration: 200
             easing.type: Easing.OutQuad
@@ -150,7 +166,7 @@ Window {
     PropertyAnimation {
         id: hideShowAnimation;
         // Currently, Wayland (Treeland) doesn't support StyledBehindWindowBlur inside the window, thus we keep using the window size approach on Wayland
-        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
+        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb" && !fashionDock.enabled
         target: useTransformBasedAnimation ? dockTransform : dock;
         property: {
             if (useTransformBasedAnimation) return dock.useColumnLayout ? "x" : "y";
@@ -176,7 +192,7 @@ Window {
 
     Connections {
         target: dockTransform
-        enabled: Qt.platform.pluginName === "xcb" && hideShowAnimation.running
+        enabled: hideShowAnimation.useTransformBasedAnimation && hideShowAnimation.running
         
         function onXChanged() {
             if (dock.useColumnLayout) {
@@ -193,7 +209,7 @@ Window {
 
     Connections {
         target: dock
-        enabled: Qt.platform.pluginName !== "xcb" && hideShowAnimation.running
+        enabled: !hideShowAnimation.useTransformBasedAnimation && hideShowAnimation.running
         
         function onWidthChanged() {
             if (dock.useColumnLayout) {
@@ -221,7 +237,7 @@ Window {
 
     SequentialAnimation {
         id: dockAnimation
-        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
+        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb" && !fashionDock.enabled
         property bool isShowing: false
         property bool isPositionChanging: false
         property var target: useTransformBasedAnimation ? dockTransform : dock
@@ -554,7 +570,12 @@ Window {
         // TODO: remove GridLayout and use delegatechosser manager all items
         GridLayout {
             id: gridLayout
-            anchors.fill: parent
+            anchors {
+                fill: parent
+                rightMargin: fashionDock.enabled && dockRightPart.visible
+                    ? dockRightPart.implicitWidth + Math.ceil(gridLayout.columnSpacing)
+                    : 0
+            }
             columns: 1
             rows: 1
             flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
@@ -571,9 +592,10 @@ Window {
 
             Item {
                 id: dockLeftPart
-                visible: !fashionDock.enabled && dockLeftPartModel.count > 0
+                visible: dockLeftPartModel.count > 0
                 implicitWidth: leftLoader.implicitWidth
                 implicitHeight: leftLoader.implicitHeight
+
                 OverflowContainer {
                     id: leftLoader
                     anchors.fill: parent

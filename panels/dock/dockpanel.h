@@ -30,6 +30,7 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(HideMode hideMode READ hideMode WRITE setHideMode NOTIFY hideModeChanged FINAL)
     Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged FINAL)
     Q_PROPERTY(ItemAlignment itemAlignment READ itemAlignment WRITE setItemAlignment NOTIFY itemAlignmentChanged FINAL)
+    Q_PROPERTY(bool fashionMode READ fashionMode NOTIFY fashionModeChanged FINAL)
     Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
     Q_PROPERTY(QString screenName READ screenName NOTIFY screenNameChanged FINAL)
@@ -71,6 +72,8 @@ public:
 
     ItemAlignment itemAlignment();
     void setItemAlignment(const ItemAlignment& alignment);
+
+    bool fashionMode();
 
     IndicatorStyle indicatorStyle();
     void setIndicatorStyle(const IndicatorStyle& style);
@@ -127,6 +130,7 @@ Q_SIGNALS:
     void beforePositionChanged(Position beforePosition);
     void positionChanged(Position position);
     void itemAlignmentChanged(ItemAlignment alignment);
+    void fashionModeChanged();
     void indicatorStyleChanged(IndicatorStyle style);
     void showInPrimaryChanged(bool showInPrimary);
     void dockScreenChanged(QScreen *screen);

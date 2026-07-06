@@ -97,6 +97,7 @@ ds_install_package(PACKAGE org.deepin.ds.dock TARGET dockpanel)
 ds_handle_package_translation(PACKAGE org.deepin.ds.dock)
 
 # sub plugins
+add_subdirectory(cardleft)
 add_subdirectory(showdesktop)
 add_subdirectory(taskmanager)
 add_subdirectory(tray)
@@ -140,6 +141,7 @@ qt_add_qml_module(dock-plugin
     SHARED
     SOURCES ${plugin_sources}
     QML_FILES DockCompositor.qml OverflowContainer.qml MenuHelper.qml DockPalette.qml
+    ShellSurfaceItemProxy.qml
     AppletItemButton.qml
     AppletItemBackground.qml
     AppletDockItem.qml

@@ -30,6 +30,7 @@ Item {
     property ListModel trayPluginSurfaces: ListModel {}
     property ListModel quickPluginSurfaces: ListModel {}
     property ListModel fixedPluginSurfaces: ListModel {}
+    property ListModel cardPluginSurfaces: ListModel {}
 
     property var compositor: waylandCompositor
     property var panelScale: 1.0
@@ -62,6 +63,7 @@ Item {
         let ret = findSurfaceFromModel(trayPluginSurfaces, surfaceId)
         if (ret === null) ret = findSurfaceFromModel(quickPluginSurfaces, surfaceId)
         if (ret === null) ret = findSurfaceFromModel(fixedPluginSurfaces, surfaceId)
+        if (ret === null) ret = findSurfaceFromModel(cardPluginSurfaces, surfaceId)
         return ret
     }
 
@@ -92,6 +94,8 @@ Item {
                     quickPluginSurfaces.append({shellSurface: dockPluginSurface})
                 } else if (dockPluginSurface.pluginType === Dock.Fixed) {
                     fixedPluginSurfaces.append({shellSurface: dockPluginSurface})
+                } else if (dockPluginSurface.pluginType === Dock.Card) {
+                    cardPluginSurfaces.append({shellSurface: dockPluginSurface})
                 }
                 dockCompositor.pluginSurfacesUpdated()
             }
@@ -104,6 +108,8 @@ Item {
                     removeDockPluginSurface(quickPluginSurfaces, dockPluginSurface)
                 } else if (dockPluginSurface.pluginType === Dock.Fixed) {
                     removeDockPluginSurface(fixedPluginSurfaces, dockPluginSurface)
+                } else if (dockPluginSurface.pluginType === Dock.Card) {
+                    removeDockPluginSurface(cardPluginSurfaces, dockPluginSurface)
                 }
                 dockCompositor.pluginSurfacesUpdated()
             }

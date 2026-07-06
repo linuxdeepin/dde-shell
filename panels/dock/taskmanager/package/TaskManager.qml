@@ -14,8 +14,7 @@ ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int dockOrder: 16
-    readonly property bool fashionMode: Panel.rootObject && Panel.rootObject.fashionDock && Panel.rootObject.fashionDock.enabled
-    readonly property bool horizontalFashionMode: fashionMode && !useColumnLayout
+    readonly property bool fashionMode: Panel.fashionMode
 
     function calcRemainingSpace(baseSize) {
         const otherCount = Panel.rootObject.dockCenterPartCount - 1;
@@ -41,14 +40,14 @@ ContainmentItem {
     readonly property real startPadding: Math.max(0, appTitleSpacing - (Panel.rootObject.dockItemMaxSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2))
 
     implicitWidth: {
-        if (horizontalFashionMode) return appContainer.implicitWidth + (useColumnLayout ? 0 : startPadding)
+        if (fashionMode) return appContainer.implicitWidth + (useColumnLayout ? 0 : startPadding)
         let extra = useColumnLayout ? 0 : startPadding
         let w = appContainer.implicitWidth + extra
         let maxW = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, w) : Math.min(remainingSpacesForTaskManager, w)
         return useColumnLayout ? Panel.rootObject.dockSize : maxW
     }
     implicitHeight: {
-        if (fashionMode && useColumnLayout) return appContainer.implicitHeight + (useColumnLayout ? startPadding : 0)
+        if (fashionMode && useColumnLayout) return appContainer.implicitHeight + startPadding
         let extra = useColumnLayout ? startPadding : 0
         let h = appContainer.implicitHeight + extra
         let maxH = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, h) : Math.min(remainingSpacesForTaskManager, h)
