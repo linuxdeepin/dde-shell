@@ -133,17 +133,21 @@ void BubblePanel::addBubble(qint64 id)
         return;
     }
 
+    const auto replaceIndex = m_bubbles->replaceBubbleIndex(entity);
+    if (replaceIndex >= 0 
+        && entity.hints().value("x-deepin-SilentReplace").toBool()) {
+        m_bubbles->updateBubbleInPlace(replaceIndex, entity);
+        return;
+    }
+
     auto bubble = new BubbleItem(entity);
     const auto enabled = enablePreview(entity.appId());
     bubble->setEnablePreview(enabled);
-    if (m_bubbles->isReplaceBubble(bubble)) {
-        auto oldBubble = m_bubbles->replaceBubble(bubble);
-        if (oldBubble) {
-            oldBubble->deleteLater();
-        }
-    } else {
-        m_bubbles->push(bubble);
+    if (replaceIndex >= 0) {
+        m_bubbles->replaceBubble(replaceIndex, bubble);
+        return;
     }
+    m_bubbles->push(bubble);
 }
 
 void BubblePanel::closeBubble(qint64 id)

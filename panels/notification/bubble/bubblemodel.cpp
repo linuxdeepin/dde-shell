@@ -84,15 +84,51 @@ void BubbleModel::insertBubble(BubbleItem *bubble)
     endInsertRows();
 }
 
-bool BubbleModel::isReplaceBubble(const BubbleItem *bubble) const
+int BubbleModel::replaceBubbleIndex(const NotifyEntity &entity) const
 {
-    return replaceBubbleIndex(bubble) >= 0;
+    if (entity.isReplace()) {
+        for (int i = 0; i < m_bubbles.size(); i++) {
+            const auto item = m_bubbles[i];
+            if (!item)
+                continue;
+
+            if (item->appName() != entity.appName())
+                continue;
+
+            if (item->bubbleId() == entity.bubbleId()) {
+                return i;
+            }
+        }
+    }
+    return -1;
 }
 
-BubbleItem *BubbleModel::replaceBubble(BubbleItem *bubble)
+void BubbleModel::updateBubbleInPlace(int replaceIndex, const NotifyEntity &entity)
 {
-    Q_ASSERT(isReplaceBubble(bubble));
-    const auto replaceIndex = replaceBubbleIndex(bubble);
+    if (replaceIndex < 0 || replaceIndex >= m_bubbles.size() || !entity.isReplace())
+        return;
+
+    // dataChanged 通知视图刷新
+    // 前提：内容变更不会引起气泡高度变化，否则布局不刷新（应改用 replaceBubble）。
+    auto oldBubble = m_bubbles[replaceIndex];
+    if (oldBubble) {
+        oldBubble->setEntity(entity);
+        Q_EMIT dataChanged(index(replaceIndex), index(replaceIndex));
+    }
+}
+
+void BubbleModel::replaceBubble(int replaceIndex, BubbleItem *bubble)
+{
+    if (!bubble) {
+        return;
+    }
+
+    if (replaceIndex < 0 || replaceIndex >= m_bubbles.size()) {
+        qWarning() << "replaceBubble called with invalid index:" << replaceIndex;
+        bubble->deleteLater();
+        return;
+    }
+
     const auto oldBubble = m_bubbles[replaceIndex];
 
     // Use remove + insert instead of dataChanged to force the view
@@ -105,7 +141,9 @@ BubbleItem *BubbleModel::replaceBubble(BubbleItem *bubble)
     m_bubbles.insert(replaceIndex, bubble);
     endInsertRows();
 
-    return oldBubble;
+    if (oldBubble) {
+        oldBubble->deleteLater();
+    }
 }
 
 void BubbleModel::clear()
@@ -259,22 +297,6 @@ void BubbleModel::clearInvalidBubbles()
             remove(bubble);
         }
     }
-}
-
-int BubbleModel::replaceBubbleIndex(const BubbleItem *bubble) const
-{
-    if (bubble->isReplace()) {
-        for (int i = 0; i < m_bubbles.size(); i++) {
-            auto item = m_bubbles[i];
-            if (item->appName() != bubble->appName())
-                continue;
-
-            if (item->bubbleId() == bubble->bubbleId()) {
-                return i;
-            }
-        }
-    }
-    return -1;
 }
 
 void BubbleModel::updateBubbleTimeTip()

@@ -41,8 +41,9 @@ public:
 public:
     void push(BubbleItem *bubble);
 
-    BubbleItem *replaceBubble(BubbleItem *bubble);
-    bool isReplaceBubble(const BubbleItem *bubble) const;
+    int replaceBubbleIndex(const NotifyEntity &entity) const;
+    void updateBubbleInPlace(int replaceIndex, const NotifyEntity &entity);
+    void replaceBubble(int replaceIndex, BubbleItem *bubble);
 
     QList<BubbleItem *> items() const;
 
@@ -64,7 +65,6 @@ public:
 private:
     void insertBubble(BubbleItem *bubble);
     void updateBubbleCount(int count);
-    int replaceBubbleIndex(const BubbleItem *bubble) const;
     void updateBubbleTimeTip();
     void updateContentRowCount(int rowCount);
 
