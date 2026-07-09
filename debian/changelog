@@ -1,3 +1,10 @@
+dde-shell (2.0.50) unstable; urgency=medium
+
+  * fix: prioritize notification-specific image hints in appIcon
+  * fix(dock): prevent menu hide after touch long-press
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 09 Jul 2026 19:29:58 +0800
+
 dde-shell (2.0.49) unstable; urgency=medium
 
   * fix: correct task manager space calculation for window split mode
