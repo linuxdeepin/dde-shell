@@ -75,7 +75,7 @@ AppletItemBackground {
         }
         normalDark: normal
         hovered {
-            crystal: Qt.rgba(0, 0, 0, 0.05)
+            crystal: Qt.rgba(1.0, 1.0, 1.0, 0.1)
         }
         hoveredDark: hovered
         pressed: hovered
@@ -106,14 +106,14 @@ AppletItemBackground {
     }
     outsideBorderColor: Palette {
         normal {
-            crystal: if (displayMode === Dock.Efficient) {
+            crystal: if (displayMode === Dock.Efficient && control.windowCount > 0) {
                     return Qt.rgba(0, 0, 0, 0.1)
             } else {
                     return ("transparent")
             }
         }
         normalDark {
-            crystal: if (displayMode === Dock.Efficient) {
+            crystal: if (displayMode === Dock.Efficient && control.windowCount > 0) {
                     return Qt.rgba(0, 0, 0, 0.05)
             } else {
                     return ("transparent")
