@@ -103,6 +103,17 @@ Window {
             bottomMargin: 10
         }
 
+        // itemGeometryChanged() normally triggers forceLayoutPolish() to
+        // re-layout with updated height, but it exits early when a transition
+        // (add/remove/displaced) is running for the first visible item.
+        // Toggle displayMarginBeginning to force forceLayoutPolish() directly,
+        // bypassing the transition check.
+        function requestLayoutFix() {
+            var m = displayMarginBeginning
+            displayMarginBeginning = m + 1
+            displayMarginBeginning = m
+        }
+
         function updateInputRegion() {
             root.DLayerShellWindow.setInputRegionRect(
                 Math.ceil(bubbleView.x),
@@ -171,6 +182,14 @@ Window {
 
         delegate: BubbleDelegate {
             maxCount: model.bubbleCount
+
+            onHeightChanged: {
+                if (index < 0) {
+                    return
+                }
+
+                bubbleView.requestLayoutFix()
+            }
         }
     }
 }
