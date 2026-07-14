@@ -1,15 +1,20 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "brightnessapplet.h"
+#include "treelandbrightness.h"
 
 #include "pluginfactory.h"
 
 #include <QDBusConnection>
 #include <QDBusReply>
+#include <QGuiApplication>
 
 #include <DDBusSender>
+#include <DGuiApplicationHelper>
+
+DGUI_USE_NAMESPACE
 
 namespace osd {
 
@@ -26,6 +31,30 @@ BrightnessApplet::BrightnessApplet(QObject *parent)
 
 }
 
+bool BrightnessApplet::load()
+{
+    m_isWayland = DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsWaylandPlatform);
+    if (!m_isWayland) {
+        return DApplet::load();
+    }
+
+    // Display1 is unavailable on Wayland, so brightness is read from the
+    // Treeland output-manager protocol. The provider caches the value the
+    // compositor reports and updates it reactively; it never commits changes.
+    m_treelandBrightness = new TreelandBrightness(this);
+    connect(m_treelandBrightness, &TreelandBrightness::brightnessChanged, this, [this](double value) {
+        setBrightness(value / 100.0);
+        setIconName(fetchIconName());
+    });
+    connect(qApp, &QGuiApplication::primaryScreenChanged, m_treelandBrightness, [this]() {
+        if (m_treelandBrightness) {
+            m_treelandBrightness->refresh();
+        }
+    });
+    m_treelandBrightness->refresh();
+    return DApplet::load();
+}
+
 QString BrightnessApplet::iconName() const
 {
     return m_iconName;
@@ -33,11 +62,14 @@ QString BrightnessApplet::iconName() const
 
 void BrightnessApplet::sync()
 {
-    auto brightness = fetchBrightness();
-
-    setBrightness(brightness);
-    auto icon = fetchIconName();
-    setIconName(icon);
+    if (m_isWayland) {
+        if (m_treelandBrightness) {
+            setBrightness(m_treelandBrightness->brightness() / 100.0);
+        }
+    } else {
+        setBrightness(fetchBrightness());
+    }
+    setIconName(fetchIconName());
 }
 
 void BrightnessApplet::setIconName(const QString &newIconName)
