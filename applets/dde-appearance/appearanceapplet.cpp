@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -39,11 +39,7 @@ bool AppearanceApplet::load()
 
 qreal AppearanceApplet::opacity() const
 {
-    if (!m_interface)
-        return -1;
-
-    // The minimum opacity is 0.2
-    return std::max(0.2, m_interface->opacity());
+    return m_opacity;
 }
 
 void AppearanceApplet::initDBusProxy()
@@ -56,11 +52,25 @@ void AppearanceApplet::initDBusProxy()
     if (!m_interface->isValid()) {
         qWarning() << "Failed to proxy Appearance, error:" << m_interface->lastError();
         m_interface.reset();
+        updateOpacity(-1);
         return;
     }
 
-    m_interface->setSync(false);
-    QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::OpacityChanged, this, &AppearanceApplet::opacityChanged);
+    QObject::connect(m_interface.data(), &org::deepin::dde::Appearance1::OpacityChanged,
+                     this, &AppearanceApplet::updateOpacity);
+    updateOpacity(m_interface->opacity());
+}
+
+void AppearanceApplet::updateOpacity(qreal opacity)
+{
+    if (opacity >= 0) {
+        // The minimum opacity is 0.2
+        opacity = std::max(0.2, opacity);
+    }
+    if (qFuzzyCompare(m_opacity, opacity))
+        return;
+
+    m_opacity = opacity;
     Q_EMIT opacityChanged();
 }
 

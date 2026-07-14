@@ -538,8 +538,8 @@ void TaskManager::modifyOpacityChanged()
     DS_NAMESPACE::DAppletBridge appearanceBridge("org.deepin.ds.dde-appearance");
     auto appearanceApplet = appearanceBridge.applet();
     if (appearanceApplet) {
-        double opacity = appearanceApplet->property("opacity").toReal();
         if (auto x11Monitor = qobject_cast<X11WindowMonitor*>(m_windowMonitor.data())) {
+            double opacity = appearanceApplet->property("opacity").toReal();
             x11Monitor->setPreviewOpacity(opacity);
         }
     } else {
