@@ -89,7 +89,10 @@ Breaks:
  dde-clipboard (<< 1:6.0.14),
  libdde-shell-dev (<< 2.0.38)
 Replaces: libdde-shell-dev (<< 2.0.38)
-Description: An wrapper for developed based on dde-shell plugin system
+Description: desktop shell and plugin host for DDE
+ DDE Shell provides the desktop shell infrastructure used by the Deepin
+ Desktop Environment and hosts components implemented through its plugin
+ system, including panels and other desktop user-interface elements.
 
 Package: dde-shell-example
 Architecture: any
@@ -99,8 +102,9 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Multi-Arch: same
-Description: DDE Shell example
- This package contains some plugins based on dde-shell plugin system.
+Description: example plugins for the DDE desktop shell
+ This package contains example plugins that demonstrate how to develop and
+ integrate components with the DDE Shell plugin system.
 
 Package: libdde-shell-dev
 Architecture: any

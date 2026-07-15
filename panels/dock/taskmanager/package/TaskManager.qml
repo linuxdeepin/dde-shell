@@ -14,6 +14,7 @@ ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int dockOrder: 16
+    readonly property bool fashionMode: Panel.fashionMode
 
     function calcRemainingSpace(baseSize) {
         const otherCount = Panel.rootObject.dockCenterPartCount - 1;
@@ -21,7 +22,9 @@ ContainmentItem {
         return Panel.rootObject.dockRawCenterSpace - otherOccupied;
     }
 
-    readonly property real remainingSpacesForTaskManager: calcRemainingSpace(Panel.rootObject.dockItemMaxSize)
+    property real remainingSpacesForTaskManager: fashionMode
+        ? 0
+        : calcRemainingSpace(Panel.rootObject.dockItemMaxSize)
     readonly property int appTitleSpacing: Math.max(10, Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14) / 3)
     // Start padding for the app container so that the visual gap
     // (multitask icon right edge → first app icon left edge) = appTitleSpacing.
@@ -37,12 +40,14 @@ ContainmentItem {
     readonly property real startPadding: Math.max(0, appTitleSpacing - (Panel.rootObject.dockItemMaxSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2))
 
     implicitWidth: {
+        if (fashionMode) return appContainer.implicitWidth + (useColumnLayout ? 0 : startPadding)
         let extra = useColumnLayout ? 0 : startPadding
         let w = appContainer.implicitWidth + extra
         let maxW = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, w) : Math.min(remainingSpacesForTaskManager, w)
         return useColumnLayout ? Panel.rootObject.dockSize : maxW
     }
     implicitHeight: {
+        if (fashionMode && useColumnLayout) return appContainer.implicitHeight + startPadding
         let extra = useColumnLayout ? startPadding : 0
         let h = appContainer.implicitHeight + extra
         let maxH = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, h) : Math.min(remainingSpacesForTaskManager, h)
@@ -81,7 +86,7 @@ ContainmentItem {
 
     TextCalculator {
         id: textCalculator
-        enabled: taskmanager.Applet.windowSplit && (Panel.position == Dock.Bottom || Panel.position == Dock.Top)
+        enabled: !fashionMode && taskmanager.Applet.windowSplit && (Panel.position == Dock.Bottom || Panel.position == Dock.Top)
         dataModel: taskmanager.Applet.dataModel
         iconSize: Panel.rootObject.dockSize * 9 / 14
         spacing: Math.max(10, Math.round(textCalculator.iconSize) / 3)

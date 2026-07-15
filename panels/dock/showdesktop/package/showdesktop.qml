@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,11 +13,12 @@ AppletItem {
     id: showdesktop
     readonly property int showDesktopWidth: 10
     property bool useColumnLayout: Panel.position % 2
-    property int dockSize: Panel.rootObject.dockItemMaxSize
+    readonly property bool fashionMode: Panel.fashionMode
     property int dockOrder: 30
-    property bool shouldVisible: Applet.visible
-    implicitWidth: useColumnLayout ? Panel.rootObject.dockSize : showDesktopWidth
-    implicitHeight: useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize
+    property bool shouldVisible: Applet.visible && !fashionMode
+    visible: shouldVisible
+    implicitWidth: shouldVisible ? (useColumnLayout ? Panel.rootObject.dockSize : showDesktopWidth) : 0
+    implicitHeight: shouldVisible ? (useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize) : 0
 
     PanelToolTip {
         id: toolTip

@@ -18,7 +18,7 @@ Item {
     property bool pressed: tapHandler.pressed
     property int cursorShape: Qt.ArrowCursor
     property alias shellSurfaceItem: impl
-    
+
     implicitWidth: shellSurface ? shellSurface.width : 16
     implicitHeight: shellSurface ? shellSurface.height : 16
 
