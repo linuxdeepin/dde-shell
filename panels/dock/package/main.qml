@@ -106,6 +106,7 @@ Window {
         id: hideShowAnimation;
         // Currently, Wayland (Treeland) doesn't support StyledBehindWindowBlur inside the window, thus we keep using the window size approach on Wayland
         property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
+        property bool hiding: false
         target: useTransformBasedAnimation ? dockTransform : dock;
         property: {
             if (useTransformBasedAnimation) return dock.useColumnLayout ? "x" : "y";
@@ -118,6 +119,7 @@ Window {
         duration: 500
         easing.type: Easing.OutCubic
         onStarted: {
+            hiding = Panel.hideState === Dock.Hide
             dock.visible = true
         }
         onStopped: {
@@ -253,15 +255,10 @@ Window {
                 setTransformToHiddenPosition();
 
                 startAnimation(true);
-            } else if (isShowing) {
-                // After show animation completes, check if we need to auto-hide
-                // For KeepHidden and SmartHide modes, trigger hide check immediately
-                if (Panel.hideMode === Dock.KeepHidden || Panel.hideMode === Dock.SmartHide) {
-                    hideTimer.running = true;
-                } else if (Panel.hideState === Dock.Hide) {
-                    // For other cases, if hideState is already Hide, trigger hide animation
-                    hideTimer.running = true;
-                }
+            } else if (isShowing && Panel.hideState === Dock.Hide) {
+                // Restore the backend-requested hidden state after the
+                // position-change show animation has completed.
+                hideTimer.restart();
             }
         }
     }
@@ -735,6 +732,8 @@ Window {
 
     Connections {
         function onBeforePositionChanged(beforePosition) {
+            // Prevent the delayed hide animation from racing the position animation.
+            hideTimer.stop();
             // Stop any running animations first
             dockAnimation.stop();
             hideShowAnimation.stop();
@@ -776,12 +775,16 @@ Window {
 
         function onHideStateChanged() {
             if (Panel.hideState === Dock.Hide) {
-                hideTimer.running = true
-            } else {
-                // Only restart animation if not already running or if visible state doesn't match
-                if (!hideShowAnimation.running || !dock.visible) {
+                hideTimer.restart()
+            } else if (Panel.hideState === Dock.Show) {
+                hideTimer.stop()
+
+                // Reverse an in-flight hide animation, but do not restart an
+                // animation that is already moving towards the shown state.
+                if (!hideShowAnimation.running || hideShowAnimation.hiding || !dock.visible) {
                     hideShowAnimation.restart()
                 }
+                dock.visible = true
             }
         }
         function onRequestClosePopup() {
