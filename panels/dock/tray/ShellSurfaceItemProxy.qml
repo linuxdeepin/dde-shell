@@ -22,6 +22,8 @@ Item {
     implicitWidth: shellSurface ? shellSurface.width : 16
     implicitHeight: shellSurface ? shellSurface.height : 16
 
+    Accessible.name: shellSurface ? (shellSurface.displayName || "") : ""
+
     function takeFocus() {
         impl.takeFocus()
     }

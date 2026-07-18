@@ -15,6 +15,9 @@ ContainmentItem {
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int dockOrder: 16
 
+    Accessible.role: Accessible.Grouping
+    Accessible.name: qsTr("Task Manager")
+
     function calcRemainingSpace(baseSize) {
         const otherCount = Panel.rootObject.dockCenterPartCount - 1;
         const otherOccupied = otherCount > 0 ? otherCount * baseSize * multitaskViewIconRatio : 0;
