@@ -26,6 +26,7 @@ Item {
         layoutDirection: Qt.LeftToRight
         verticalLayoutDirection: ListView.TopToBottom
         interactive: false
+        Accessible.role: Accessible.List
     }
 
     function calculateImplicitWidth(prev, current) {

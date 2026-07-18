@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -16,6 +16,9 @@ AppletItemButton {
     property bool inputEventsEnabled: true
     hoverEnabled: inputEventsEnabled
     autoClosePopup: true
+
+    Accessible.role: Accessible.Button
+    Accessible.name: toolTip.text
 
     z: 5
 

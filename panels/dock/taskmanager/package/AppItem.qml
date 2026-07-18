@@ -36,6 +36,10 @@ Item {
     Drag.hotSpot.y: icon.height / 2
     Drag.dragType: Drag.Automatic
     Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
+
+    Accessible.role: Accessible.Button
+    Accessible.name: root.name
+    Accessible.description: root.attention ? qsTr("Demands attention") : (root.active ? qsTr("Active") : "")
     
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property real iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14

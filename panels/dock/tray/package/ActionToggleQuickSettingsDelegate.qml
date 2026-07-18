@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,4 +13,7 @@ QuickPanel {
     useColumnLayout: !isHorizontal
     trayItemPluginId: Applet.rootObject.quickpanelTrayItemPluginId
     trayItemMargins: itemPadding
+
+    Accessible.role: Accessible.Button
+    Accessible.name: qsTr("Quick actions")
 }

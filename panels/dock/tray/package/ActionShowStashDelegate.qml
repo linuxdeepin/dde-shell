@@ -25,6 +25,9 @@ AppletItemButton {
 
     padding: itemPadding
 
+    Accessible.role: Accessible.Button
+    Accessible.name: toolTip.text
+
     D.ColorSelector.hovered: (isDropHover && DDT.TraySortOrderModel.actionsAlwaysVisible) || hovered || stashedPopup.popupVisible
 
     property var itemGlobalPoint: {

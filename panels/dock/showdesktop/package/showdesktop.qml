@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -29,6 +29,9 @@ AppletItem {
     AppletItemButton {
         anchors.fill: parent
         radius: 0
+
+        Accessible.role: Accessible.Button
+        Accessible.name: toolTip.text
 
         Rectangle {
             property D.Palette lineColor: DockPalette.showDesktopLineColor

@@ -13,6 +13,9 @@ AppletDockItem {
     id: toggleworkspace
     dockOrder: 15
 
+    Accessible.role: Accessible.Button
+    Accessible.name: toolTip.text
+
     PanelToolTip {
         id: toolTip
         text: qsTr("Multitasking View")

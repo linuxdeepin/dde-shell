@@ -520,6 +520,8 @@ Window {
                 visible: dockLeftPartModel.count > 0
                 implicitWidth: leftLoader.implicitWidth
                 implicitHeight: leftLoader.implicitHeight
+                Accessible.role: Accessible.Grouping
+                Accessible.name: qsTr("Dock Left Area")
                 OverflowContainer {
                     id: leftLoader
                     anchors.fill: parent
@@ -536,6 +538,8 @@ Window {
                 id: dockCenterPart
                 implicitWidth: centerLoader.implicitWidth
                 implicitHeight: centerLoader.implicitHeight
+                Accessible.role: Accessible.Grouping
+                Accessible.name: qsTr("Dock Center Area")
                 Layout.maximumWidth: useColumnLayout ? -1 : dockRawCenterSpace
                 Layout.maximumHeight: useColumnLayout ? dockRawCenterSpace : -1
                 onXChanged: dockCenterPartPosChanged()
@@ -584,6 +588,8 @@ Window {
             id: dockRightPart
             implicitWidth: rightLoader.implicitWidth
             implicitHeight: rightLoader.implicitHeight
+            Accessible.role: Accessible.Grouping
+            Accessible.name: qsTr("Dock Right Area")
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             OverflowContainer {
