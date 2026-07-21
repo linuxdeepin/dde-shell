@@ -65,6 +65,34 @@ void DockPositioner::setBounding(const QRect &newBounding)
     emit boundingChanged();
 }
 
+bool DockPositioner::isCrossWindow() const
+{
+    const auto item = qobject_cast<QQuickItem *>(parent());
+    return item && item->window() && m_panel && m_panel->window()
+        && item->window() != m_panel->window();
+}
+
+QRect DockPositioner::effectiveBounding() const
+{
+    if (!isCrossWindow())
+        return m_bounding;
+
+    const auto item = qobject_cast<QQuickItem *>(parent());
+    const auto globalTopLeft = item->window()->mapToGlobal(m_bounding.topLeft());
+    return QRect(globalTopLeft - dockGeometry().topLeft(), m_bounding.size());
+}
+
+QRect DockPositioner::attachedItemRectInDock() const
+{
+    const auto item = qobject_cast<QQuickItem *>(parent());
+    if (!item)
+        return {};
+
+    const auto globalTopLeft = item->mapToGlobal(QPointF(0, 0));
+    const auto dockTopLeft = globalTopLeft.toPoint() - dockGeometry().topLeft();
+    return QRect(dockTopLeft, QSize(qRound(item->width()), qRound(item->height())));
+}
+
 int DockPositioner::x() const
 {
     return m_x;
@@ -108,27 +136,28 @@ void DockPositioner::update()
 
 void DockPositioner::updatePosition()
 {
+    const auto bounding = effectiveBounding();
     int xPosition = 0;
     int yPosition = 0;
     switch (dockPosition()) {
     case dock::Top: {
-        xPosition = m_bounding.x();
-        yPosition = m_bounding.y();
+        xPosition = bounding.x();
+        yPosition = bounding.y();
         break;
     }
     case dock::Right: {
-        xPosition = m_bounding.x() - m_bounding.width();
-        yPosition = m_bounding.y();
+        xPosition = bounding.x() - bounding.width();
+        yPosition = bounding.y();
         break;
     }
     case dock::Bottom: {
-        xPosition = m_bounding.x();
-        yPosition = m_bounding.y() - m_bounding.height();
+        xPosition = bounding.x();
+        yPosition = bounding.y() - bounding.height();
         break;
     }
     case dock::Left: {
-        xPosition = m_bounding.x();
-        yPosition = m_bounding.y();
+        xPosition = bounding.x();
+        yPosition = bounding.y();
         break;
     }
     default:
@@ -197,29 +226,39 @@ void DockPanelPositioner::resetVertialOffset()
 void DockPanelPositioner::updatePosition()
 {
     const auto dockWindowRect = dockGeometry();
+    const auto crossWindow = isCrossWindow();
+    const auto anchorRect = crossWindow ? attachedItemRectInDock() : QRect();
     int xPosition = 0;
     int yPosition = 0;
     int horizontalOffset = m_horizontalOffset == -1 ? m_bounding.width() / 2 : m_horizontalOffset;
     int vertialOffset = m_vertialOffset == -1 ? m_bounding.height() / 2 : m_vertialOffset;
     switch (dockPosition()) {
     case dock::Top: {
-        xPosition = m_bounding.x() - horizontalOffset;
-        yPosition = dockWindowRect.height() + 10;
+        xPosition = crossWindow ? anchorRect.center().x() - horizontalOffset
+                                : m_bounding.x() - horizontalOffset;
+        yPosition = crossWindow ? anchorRect.y() + anchorRect.height() + 10
+                                : dockWindowRect.height() + 10;
         break;
     }
     case dock::Right: {
-        xPosition = -m_bounding.width() - 10;
-        yPosition = m_bounding.y() - vertialOffset;
+        xPosition = crossWindow ? anchorRect.left() - m_bounding.width() - 10
+                                : -m_bounding.width() - 10;
+        yPosition = crossWindow ? anchorRect.center().y() - vertialOffset
+                                : m_bounding.y() - vertialOffset;
         break;
     }
     case dock::Bottom: {
-        xPosition = m_bounding.x() - horizontalOffset;
-        yPosition = -m_bounding.height() - 10;
+        xPosition = crossWindow ? anchorRect.center().x() - horizontalOffset
+                                : m_bounding.x() - horizontalOffset;
+        yPosition = crossWindow ? anchorRect.top() - m_bounding.height() - 10
+                                : -m_bounding.height() - 10;
         break;
     }
     case dock::Left: {
-        xPosition = dockWindowRect.width() + 10;
-        yPosition = m_bounding.y() - vertialOffset;
+        xPosition = crossWindow ? anchorRect.x() + anchorRect.width() + 10
+                                : dockWindowRect.width() + 10;
+        yPosition = crossWindow ? anchorRect.center().y() - vertialOffset
+                                : m_bounding.y() - vertialOffset;
         break;
     }
     default:

@@ -19,7 +19,7 @@ Item {
     implicitWidth: titleLoader.width
     implicitHeight: titleLoader.height
 
-    TextCalculator.text: root.text
+    TextCalculator.text: root.enabled ? root.text : ""
 
     Loader {
         id: titleLoader

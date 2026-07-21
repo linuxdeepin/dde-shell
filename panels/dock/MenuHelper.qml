@@ -21,8 +21,8 @@ Item {
         if (activeMenu) {
             activeMenu.close()
         }
-        menu.open()
         activeMenu = menu
+        menu.open()
     }
     function closeMenu(menu: Menu) {
         menu.close()

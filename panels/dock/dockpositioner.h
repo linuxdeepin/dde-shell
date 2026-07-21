@@ -51,6 +51,9 @@ signals:
     void yChanged();
 
 protected:
+    bool isCrossWindow() const;
+    QRect effectiveBounding() const;
+    QRect attachedItemRectInDock() const;
     QPointer<DS_NAMESPACE::DPanel> m_panel;
     QRect m_bounding {};
     int m_x = 0;

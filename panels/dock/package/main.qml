@@ -48,12 +48,13 @@ Window {
         }
     }
     property int dockCenterPartCount: dockCenterPartModel.count
+    readonly property int centerAlignmentEdgeSpacing: 14
 
     readonly property int dockRawCenterSpace: {
         if (useColumnLayout) {
             return Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight;
         } else {
-            let space = Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth;
+            let space = Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth - Math.ceil(gridLayout.columnSpacing);
             if (fashionDock.enabled && gridLayout) {
                 // 时尚模式下，dockRightPart 在 gridLayout 右侧，之间需要扣除 dockSpacing
                 // 同时保留左右悬浮间距，避免窗口铺满屏幕后圆角边框被屏幕边缘裁剪。
@@ -61,6 +62,17 @@ Window {
             }
             return Math.max(0, space);
         }
+    }
+    readonly property int dockEffectiveCenterSpace: {
+        if (Panel.itemAlignment !== Dock.CenterAlignment || fashionDock.enabled) {
+            return dockRawCenterSpace
+        }
+
+        const screenExtent = useColumnLayout ? Screen.height : Screen.width
+        const leftExtent = useColumnLayout ? dockLeftPart.implicitHeight : dockLeftPart.implicitWidth
+        const rightExtent = useColumnLayout ? dockRightPart.implicitHeight : dockRightPart.implicitWidth
+        return Math.max(0, screenExtent - leftExtent - rightExtent
+                        - centerAlignmentEdgeSpacing * 2)
     }
 
     property int dockPartSpacing: gridLayout.columnSpacing
@@ -633,9 +645,9 @@ Window {
                 onXChanged: dockCenterPartPosChanged()
                 onYChanged: dockCenterPartPosChanged()
                 Layout.leftMargin: !useColumnLayout && !fashionDock.enabled && Panel.itemAlignment === Dock.CenterAlignment ?
-                    Math.max(0, (dock.width - dockCenterPart.implicitWidth) / 2 - (dockLeftPart.implicitWidth + 20) + Math.min((dock.width - dockCenterPart.implicitWidth) / 2 - (dockRightPart.implicitWidth + 20), 0)) : 0
+                    Math.max(0, (dock.width - dockCenterPart.implicitWidth) / 2 - (dockLeftPart.implicitWidth + centerAlignmentEdgeSpacing) + Math.min((dock.width - dockCenterPart.implicitWidth) / 2 - (dockRightPart.implicitWidth + centerAlignmentEdgeSpacing), 0)) : 0
                 Layout.topMargin: useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
-                    Math.max(0, (dock.height - dockCenterPart.implicitHeight) / 2 - (dockLeftPart.implicitHeight + 20) + Math.min((dock.height - dockCenterPart.implicitHeight) / 2 - (dockRightPart.implicitHeight + 20), 0)) : 0
+                    Math.max(0, (dock.height - dockCenterPart.implicitHeight) / 2 - (dockLeftPart.implicitHeight + centerAlignmentEdgeSpacing) + Math.min((dock.height - dockCenterPart.implicitHeight) / 2 - (dockRightPart.implicitHeight + centerAlignmentEdgeSpacing), 0)) : 0
 
                 Behavior on Layout.leftMargin {
                     enabled: !dock.isDragging && !Applet.isResizing

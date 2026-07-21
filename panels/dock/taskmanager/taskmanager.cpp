@@ -18,6 +18,7 @@
 #include "pluginfactory.h"
 #include "taskmanager.h"
 #include "taskmanageradaptor.h"
+#include "taskoverflowcontroller.h"
 #include "taskmanagersettings.h"
 #include "textcalculator.h"
 #include "treelandwindowmonitor.h"
@@ -147,6 +148,7 @@ TaskManager::TaskManager(QObject *parent)
     , AbstractTaskManagerInterface(nullptr)
     , m_windowFullscreen(false)
 {
+    qmlRegisterType<TaskOverflowController>("org.deepin.ds.dock.taskmanager", 1, 0, "TaskOverflowController");
     qmlRegisterType<TextCalculator>("org.deepin.ds.dock.taskmanager", 1, 0, "TextCalculator");
     qmlRegisterUncreatableType<TextCalculatorAttached>("org.deepin.ds.dock.taskmanager", 1, 0, "TextCalculatorAttached", "TextCalculator Attached");
 
