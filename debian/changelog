@@ -1,3 +1,12 @@
+dde-shell (2.0.52) unstable; urgency=medium
+
+  * fix(CI): broken cppcheck
+  * feat(dock): add accessibility annotations to dock QML
+  * fix: resolve missing icon on first drag in treeland
+  * fix: move image decoding logic from bubble item to notify entity
+
+ -- Kun Zhang <zhangkun2@uniontech.com>  Thu, 23 Jul 2026 22:03:24 +0800
+
 dde-shell (2.0.51) unstable; urgency=medium
 
   * fix(dock): correct AppItemBackground hovered color and outer border
