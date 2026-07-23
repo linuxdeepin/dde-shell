@@ -129,6 +129,13 @@ Item {
     }
 
     Connections {
+        target: toolTip.shellSurface
+        function onAboutToDestroy() {
+            toolTip.close()
+        }
+    }
+
+    Connections {
         target: DockCompositor
         function onPopupCreated(popupSurface) {
             let surfaceId = `${popupSurface.pluginId}::${popupSurface.itemKey}`
