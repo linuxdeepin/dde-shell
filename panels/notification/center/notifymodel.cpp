@@ -702,7 +702,7 @@ QVariant NotifyModel::data(const QModelIndex &index, int role) const
     } else if (role == NotifyRole::NotifyAppName) {
         return notify->appName();
     } else if (role == NotifyRole::NotifyIconName) {
-        return notify->entity().appIcon();
+        return notify->entity().appIconResolved();
     } else if (role == NotifyRole::NotifyTitle) {
         return notify->entity().summary();
     } else if (role == NotifyRole::NotifyContent) {

@@ -33,6 +33,7 @@ target_include_directories(ds-notification-shared PUBLIC
 )
 target_link_libraries(ds-notification-shared PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Sql
     Dtk${DTK_VERSION_MAJOR}::Core
     ICU::uc

@@ -8,6 +8,10 @@
 #include <QLocale>
 #include <QStringList>
 #include <QLoggingCategory>
+#include <QImage>
+#include <QBuffer>
+#include <QDBusArgument>
+#include <QRegularExpression>
 
 #include <unicode/reldatefmt.h>
 #include <unicode/smpdtfmt.h>
@@ -290,6 +294,136 @@ QString NotifyEntity::bodyIcon() const
         return path;
     }
     return QString();
+}
+
+static inline void copyLineRGB32(QRgb *dst, const char *src, int width)
+{
+    const char *end = src + width * 3;
+    for (; src != end; ++dst, src += 3) {
+        *dst = qRgb(static_cast<uchar>(src[0]), static_cast<uchar>(src[1]), static_cast<uchar>(src[2]));
+    }
+}
+
+static inline void copyLineARGB32(QRgb *dst, const char *src, int width)
+{
+    const char *end = src + width * 4;
+    for (; src != end; ++dst, src += 4) {
+        *dst = qRgba(static_cast<uchar>(src[0]), static_cast<uchar>(src[1]), static_cast<uchar>(src[2]), static_cast<uchar>(src[3]));
+    }
+}
+
+static QImage decodeImageFromDBusArgument(const QDBusArgument &arg)
+{
+    int width, height, rowStride, hasAlpha, bitsPerSample, channels;
+    QByteArray pixels;
+    char *ptr;
+    char *end;
+
+    arg.beginStructure();
+    arg >> width >> height >> rowStride >> hasAlpha >> bitsPerSample >> channels >> pixels;
+    arg.endStructure();
+
+#define SANITY_CHECK(condition) \
+if (!(condition)) { \
+    qWarning(notifyLog) << "Sanity check failed on" << #condition; \
+    return QImage(); \
+}
+
+    SANITY_CHECK(width > 0);
+    SANITY_CHECK(width < 2048);
+    SANITY_CHECK(height > 0);
+    SANITY_CHECK(height < 2048);
+    SANITY_CHECK(rowStride > 0);
+
+#undef SANITY_CHECK
+
+    QImage::Format format = QImage::Format_Invalid;
+    void (*fcn)(QRgb *, const char *, int) = nullptr;
+    if (bitsPerSample == 8) {
+        if (channels == 4) {
+            format = QImage::Format_ARGB32;
+            fcn = copyLineARGB32;
+        } else if (channels == 3) {
+            format = QImage::Format_RGB32;
+            fcn = copyLineRGB32;
+        }
+    }
+    if (format == QImage::Format_Invalid) {
+        qWarning(notifyLog) << "Unsupported image format (hasAlpha:" << hasAlpha << "bitsPerSample:" << bitsPerSample << "channels:" << channels << ")";
+        return QImage();
+    }
+
+    QImage image(width, height, format);
+    ptr = pixels.data();
+    end = ptr + pixels.length();
+    for (int y = 0; y < height; ++y, ptr += rowStride) {
+        if (ptr + channels * width > end) {
+            qWarning(notifyLog) << "Image data is incomplete. y:" << y << "height:" << height;
+            break;
+        }
+        fcn(reinterpret_cast<QRgb *>(image.scanLine(y)), ptr, width);
+    }
+
+    return image;
+}
+
+static QString decodeImageToBase64(const QImage &image, const char *format = "PNG")
+{
+    QByteArray ba;
+    QBuffer buffer(&ba);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, format);
+
+    return QString("data:image/%1;base64,%2").arg(QString::fromLatin1(format).toLower()).arg(QString::fromLatin1(ba.toBase64()));
+}
+
+static QString imagePathOfNotification(const QVariantMap &hints, const QString &appIcon)
+{
+    static const QStringList HintsOrder {
+            "desktop-entry",
+            "image-data",
+            "icon_data"
+    };
+
+    QImage img;
+    QString imageData(appIcon);
+    for (const auto &hint : HintsOrder) {
+        const auto &source = hints[hint];
+        if (source.isNull())
+            continue;
+        if (source.canConvert<QDBusArgument>()) {
+            img = decodeImageFromDBusArgument(source.value<QDBusArgument>());
+            if (!img.isNull())
+                break;
+        }
+        imageData = source.toString();
+    }
+    if (img.isNull()) {
+        // check if imageData is a base64 image data.
+        QRegularExpression dataUriPattern("^data:image/[a-zA-Z0-9+\\-]+;base64,");
+        QRegularExpressionMatch match = dataUriPattern.match(imageData);
+        if (match.hasMatch()) {
+            return imageData;
+        }
+    } else {
+        return decodeImageToBase64(img);
+    }
+
+    // ui can fallback to application-x-desktop icon.
+    return {};
+}
+
+QString NotifyEntity::appIconResolved() const
+{
+    const QString iconFromHints = imagePathOfNotification(d->hints, d->appIcon);
+    if (!iconFromHints.isEmpty())
+        return iconFromHints;
+
+    if (!d->appIcon.isEmpty()) {
+        return d->appIcon;
+    }
+
+    return {};
 }
 
 QString NotifyEntity::convertHintsToString(const QVariantMap &map)

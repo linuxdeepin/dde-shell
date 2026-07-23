@@ -93,6 +93,10 @@ public:
 
     QString bodyIcon() const;
 
+    // Resolves the app icon considering image-data/icon_data hints from the notification spec.
+    // Returns a base64 data URI if image-data/icon_data hint is present, otherwise returns appIcon.
+    QString appIconResolved() const;
+
     // Formats a creation time (ms since epoch) as a locale-aware relative
     // time string. Returns empty string if less than 1 minute or invalid.
     static QString formatRelativeTime(qint64 ctimeMs);
