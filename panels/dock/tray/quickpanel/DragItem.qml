@@ -144,9 +144,11 @@ Item {
                     console.log("grab to image", result.url)
 
                     draggingImage = result.url
+                    Qt.callLater(function() { dragItem.Drag.active = true })
                 })
+            } else {
+                dragItem.Drag.active = false
             }
-            dragItem.Drag.active = active
         }
     }
 }
