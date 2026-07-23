@@ -3,14 +3,14 @@
     <name>dock::MultiTaskView</name>
     <message>
         <source>Multitasking View</source>
-        <translation>Multitarefas</translation>
+        <translation>Visão multitarefa</translation>
     </message>
 </context>
 <context>
     <name>multitaskview</name>
     <message>
         <source>Multitasking View</source>
-        <translation>Multitarefas</translation>
+        <translation>Visão multitarefa</translation>
     </message>
 </context>
 </TS>
