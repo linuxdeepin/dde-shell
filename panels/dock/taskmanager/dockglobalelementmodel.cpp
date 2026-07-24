@@ -22,15 +22,39 @@ Q_LOGGING_CATEGORY(dockGlobalElementModelLog, "org.deepin.dde.shell.dock.taskman
 
 namespace dock
 {
-DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, DockCombineModel *activeAppModel, QObject *parent)
+namespace {
+
+bool isGroupElement(const QString &id, const QAbstractItemModel *model)
+{
+    return model == nullptr && id.startsWith(QStringLiteral("internal/folders/"));
+}
+
+int modelRole(const QAbstractItemModel *model, const QByteArray &name, int fallback = -1)
+{
+    return model ? model->roleNames().key(name, fallback) : fallback;
+}
+
+}
+
+DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, QAbstractItemModel *groupModel, QObject *groupProvider,
+                                               DockCombineModel *activeAppModel, QObject *parent)
     : QAbstractListModel(parent)
     , AbstractTaskManagerInterface(nullptr)
     , m_appsModel(appsModel)
+    , m_groupModel(groupModel)
+    , m_groupProvider(groupProvider)
     , m_activeAppModel(activeAppModel)
 {
     connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedElementsChanged, this, &DockGlobalElementModel::loadDockedElements);
     connect(TaskManagerSettings::instance(), &TaskManagerSettings::windowSplitChanged, this, &DockGlobalElementModel::groupItemsByApp);
     connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedApplicationsEnabledChanged, this, &DockGlobalElementModel::loadDockedElements);
+
+    if (m_groupModel) {
+        connect(m_groupModel, &QAbstractItemModel::modelReset, this, &DockGlobalElementModel::refreshGroupElements, Qt::QueuedConnection);
+        connect(m_groupModel, &QAbstractItemModel::rowsInserted, this, &DockGlobalElementModel::refreshGroupElements, Qt::QueuedConnection);
+        connect(m_groupModel, &QAbstractItemModel::rowsRemoved, this, &DockGlobalElementModel::handleGroupRowsRemoved, Qt::QueuedConnection);
+        connect(m_groupModel, &QAbstractItemModel::dataChanged, this, &DockGlobalElementModel::notifyGroupElementsChanged, Qt::QueuedConnection);
+    }
 
     connect(
         m_appsModel,
@@ -229,6 +253,7 @@ QHash<int, QByteArray> DockGlobalElementModel::roleNames() const
         {TaskManager::WinTitleRole, MODEL_TITLE},
         {TaskManager::WinIconRole, MODEL_WINICON},
         {TaskManager::WinIdRole, MODEL_WINID},
+        {TaskManager::GroupItemsRole, MODEL_GROUPITEMS},
     };
 }
 
@@ -261,32 +286,45 @@ void DockGlobalElementModel::loadDockedElements()
     QList<std::tuple<QString, QString>> newDocked;
     if (TaskManagerSettings::instance()->dockedApplicationsEnabled()) {
         for (auto elementInfo : TaskManagerSettings::instance()->dockedElements()) {
-            auto pair = elementInfo.split('/');
-            if (pair.size() != 2)
-                continue;
+            QString type;
+            QString id;
+            if (elementInfo.startsWith(QStringLiteral("internal/folders/"))) {
+                type = QStringLiteral("group");
+                id = elementInfo;
+            } else {
+                const auto separator = elementInfo.indexOf('/');
+                if (separator <= 0 || separator == elementInfo.size() - 1)
+                    continue;
 
-            auto type = pair[0];
-            auto id = pair[1];
+                type = elementInfo.left(separator);
+                id = elementInfo.mid(separator + 1);
+                if (type != QStringLiteral("desktop"))
+                    continue;
+            }
 
             auto tmp = std::make_tuple(type, id);
 
             // check desktop is installed
             QAbstractItemModel *model = nullptr;
             int row = 0;
-            if (type == "desktop") {
+            if (type == QStringLiteral("desktop")) {
                 model = m_appsModel;
                 auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly).value(0);
                 if (!res.isValid())
                     continue;
                 row = res.row();
+            } else if (!groupIndex(id).isValid()) {
+                continue;
             }
 
             newDocked.append(tmp);
             if (m_dockedElements.contains(tmp))
                 continue;
 
-            auto isRunning = std::any_of(m_data.constBegin(), m_data.constEnd(), [&id](const auto &data) {
-                return std::get<0>(data) == id;
+            auto isRunning = std::any_of(m_data.constBegin(), m_data.constEnd(), [&type, &id](const auto &data) {
+                if (std::get<0>(data) != id)
+                    return false;
+                return isGroupElement(std::get<0>(data), std::get<1>(data)) == (type == QStringLiteral("group"));
             });
 
             if (!isRunning) {
@@ -301,8 +339,12 @@ void DockGlobalElementModel::loadDockedElements()
         if (newDocked.contains(*it))
             continue;
         auto type = std::get<0>(*it), id = std::get<1>(*it);
-        auto dataIt = std::find_if(m_data.begin(), m_data.end(), [this, &id](const auto &data) {
-            return std::get<0>(data) == id && std::get<1>(data) == m_appsModel;
+        auto dataIt = std::find_if(m_data.begin(), m_data.end(), [this, &type, &id](const auto &item) {
+            if (std::get<0>(item) != id)
+                return false;
+            if (type == QStringLiteral("group"))
+                return isGroupElement(std::get<0>(item), std::get<1>(item));
+            return std::get<1>(item) == m_appsModel;
         });
         if (dataIt != m_data.end()) {
             auto pos = (dataIt - m_data.begin());
@@ -328,6 +370,15 @@ QString DockGlobalElementModel::getMenus(const QModelIndex &index) const
     auto id = std::get<0>(data);
     auto model = std::get<1>(data);
     auto row = std::get<2>(data);
+
+    if (isGroupElement(id, model)) {
+        QJsonArray menusArray;
+        if (TaskManagerSettings::instance()->dockedApplicationsEnabled()) {
+            const bool isDocked = m_dockedElements.contains(std::make_tuple(QStringLiteral("group"), id));
+            menusArray.append(QJsonObject{{"id", DOCK_ACTION_DOCK}, {"name", isDocked ? tr("Undock") : tr("Dock")}});
+        }
+        return QJsonDocument(menusArray).toJson();
+    }
 
     QJsonArray menusArray;
     QString appNameInMenu = tr("Open");
@@ -379,9 +430,36 @@ QVariant DockGlobalElementModel::data(const QModelIndex &index, int role) const
     auto model = std::get<1>(data);
     auto row = std::get<2>(data);
 
+    if (isGroupElement(id, model)) {
+        switch (role) {
+        case TaskManager::ItemIdRole:
+        case TaskManager::DesktopIdRole:
+            return id;
+        case TaskManager::GroupItemsRole:
+            return groupApplications(id);
+        case TaskManager::NameRole:
+            return groupDisplayName(id);
+        case TaskManager::IconNameRole:
+            return QStringLiteral("folder");
+        case TaskManager::WindowsRole:
+            return QStringList{};
+        case TaskManager::ActiveRole:
+        case TaskManager::AttentionRole:
+            return false;
+        case TaskManager::DockedRole:
+            return m_dockedElements.contains(std::make_tuple(QStringLiteral("group"), id));
+        case TaskManager::MenusRole:
+            return getMenus(index);
+        default:
+            return {};
+        }
+    }
+
     switch (role) {
     case TaskManager::ItemIdRole:
         return id;
+    case TaskManager::GroupItemsRole:
+        return QVariantList{};
     case TaskManager::WindowsRole: {
         if (model == m_activeAppModel) {
             return QStringList{model->index(row, 0).data(TaskManager::WinIdRole).toString()};
@@ -421,6 +499,9 @@ void DockGlobalElementModel::requestActivate(const QModelIndex &index) const
     auto sourceModel = std::get<1>(data);
     auto sourceRow = std::get<2>(data);
 
+    if (isGroupElement(id, sourceModel))
+        return;
+
     if (sourceModel == m_activeAppModel) {
         auto sourceIndex = sourceModel->index(sourceRow, 0);
         m_activeAppModel->requestActivate(sourceIndex);
@@ -436,7 +517,14 @@ void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const 
 {
     auto data = m_data.value(index.row());
     auto id = std::get<0>(data);
+    auto model = std::get<1>(data);
     qDebug(dockGlobalElementModelLog) << "Requesting new instance for index:" << index << "with action:" << action << "id:" << id;
+
+    if (isGroupElement(id, model)) {
+        if (action == DOCK_ACTION_DOCK)
+            TaskManagerSettings::instance()->toggleDockedElement(id);
+        return;
+    }
 
     // Handle special actions first (for both active and docked apps)
     if (action == DOCK_ACTION_DOCK) {
@@ -464,6 +552,9 @@ void DockGlobalElementModel::requestOpenUrls(const QModelIndex &index, const QLi
 {
     auto data = m_data.value(index.row());
     auto id = std::get<0>(data);
+    auto model = std::get<1>(data);
+    if (isGroupElement(id, model))
+        return;
 
     QStringList urlStrings;
     for (const QUrl &url : urls) {
@@ -527,6 +618,134 @@ void DockGlobalElementModel::moveItem(int from, int to)
     endMoveRows();
 }
 
+QModelIndex DockGlobalElementModel::groupIndex(const QString &launcherFolderId) const
+{
+    if (!m_groupModel || m_groupModel->rowCount() == 0 || launcherFolderId == QStringLiteral("internal/folders/0"))
+        return {};
+
+    const int desktopIdRole = modelRole(m_groupModel, QByteArray(MODEL_DESKTOPID));
+    if (desktopIdRole < 0)
+        return {};
+
+    return m_groupModel->match(m_groupModel->index(0, 0), desktopIdRole,
+                               launcherFolderId, 1, Qt::MatchExactly).value(0);
+}
+
+QString DockGlobalElementModel::groupDisplayName(const QString &launcherFolderId) const
+{
+    QString displayName;
+    if (m_groupProvider) {
+        QMetaObject::invokeMethod(m_groupProvider, "groupDisplayName", Qt::DirectConnection,
+                                  Q_RETURN_ARG(QString, displayName), Q_ARG(QString, launcherFolderId));
+    }
+
+    if (!displayName.isEmpty())
+        return displayName;
+
+    const auto sourceIndex = groupIndex(launcherFolderId);
+    const int displayRole = modelRole(m_groupModel, QByteArrayLiteral("display"), Qt::DisplayRole);
+    const int nameRole = modelRole(m_groupModel, QByteArray(MODEL_NAME), displayRole);
+    return sourceIndex.data(nameRole).toString();
+}
+
+QVariantList DockGlobalElementModel::groupApplications(const QString &launcherFolderId) const
+{
+    QVariantList applications;
+    if (m_groupProvider) {
+        QMetaObject::invokeMethod(m_groupProvider, "groupItemDetails", Qt::DirectConnection,
+                                  Q_RETURN_ARG(QVariantList, applications), Q_ARG(QString, launcherFolderId));
+    }
+
+    const int desktopIdRole = modelRole(m_appsModel, QByteArray(MODEL_DESKTOPID));
+    const int nameRole = modelRole(m_appsModel, QByteArray(MODEL_NAME));
+    if (desktopIdRole < 0 || nameRole < 0)
+        return applications;
+
+    for (QVariant &application : applications) {
+        QVariantMap details = application.toMap();
+        const QString desktopId = details.value(QStringLiteral("desktopId")).toString();
+        if (desktopId.isEmpty())
+            continue;
+
+        QModelIndex appIndex = m_appsModel->match(m_appsModel->index(0, 0), desktopIdRole,
+                                                  desktopId, 1, Qt::MatchExactly).value(0);
+        if (!appIndex.isValid()) {
+            const QString alternateId = desktopId.endsWith(QStringLiteral(".desktop"))
+                ? desktopId.chopped(8)
+                : desktopId + QStringLiteral(".desktop");
+            appIndex = m_appsModel->match(m_appsModel->index(0, 0), desktopIdRole,
+                                          alternateId, 1, Qt::MatchExactly).value(0);
+        }
+
+        if (!appIndex.isValid())
+            continue;
+
+        const QString localizedName = appIndex.data(nameRole).toString();
+        if (!localizedName.isEmpty()) {
+            details.insert(QStringLiteral("name"), localizedName);
+            application = details;
+        }
+    }
+
+    return applications;
+}
+
+void DockGlobalElementModel::refreshGroupElements()
+{
+    loadDockedElements();
+    notifyGroupElementsChanged();
+}
+
+void DockGlobalElementModel::handleGroupRowsRemoved()
+{
+    auto *settings = TaskManagerSettings::instance();
+    QStringList dockedElements = settings->dockedElements();
+    bool dockedElementsChanged = false;
+
+    for (auto it = dockedElements.begin(); it != dockedElements.end();) {
+        if (!it->startsWith(QStringLiteral("internal/folders/"))) {
+            ++it;
+            continue;
+        }
+
+        if (groupIndex(*it).isValid()) {
+            ++it;
+            continue;
+        }
+
+        it = dockedElements.erase(it);
+        dockedElementsChanged = true;
+    }
+
+    if (dockedElementsChanged) {
+        settings->setDockedElements(dockedElements);
+    } else {
+        loadDockedElements();
+    }
+    notifyGroupElementsChanged();
+}
+
+void DockGlobalElementModel::notifyGroupElementsChanged()
+{
+    if (!m_data.isEmpty()) {
+        Q_EMIT dataChanged(index(0, 0), index(m_data.size() - 1, 0),
+                           {TaskManager::NameRole, TaskManager::GroupItemsRole});
+    }
+}
+
+bool DockGlobalElementModel::requestDockGroup(const QString &launcherFolderId)
+{
+    if (!groupIndex(launcherFolderId).isValid())
+        return false;
+
+    auto *settings = TaskManagerSettings::instance();
+    if (settings->isDocked(launcherFolderId))
+        return false;
+
+    settings->appendDockedElement(launcherFolderId);
+    return true;
+}
+
 void DockGlobalElementModel::groupItemsByApp()
 {
     if (m_data.isEmpty())
@@ -536,16 +755,20 @@ void DockGlobalElementModel::groupItemsByApp()
         return;
 
     for (int i = 0; i < m_data.size(); ++i) {
+        if (std::get<1>(m_data.at(i)) == nullptr)
+            continue;
         const QString currentId = std::get<0>(m_data.at(i));
 
         int insertPos = i + 1;
 
-        while (insertPos < m_data.size() && std::get<0>(m_data.at(insertPos)) == currentId) {
+        while (insertPos < m_data.size()
+               && std::get<1>(m_data.at(insertPos)) != nullptr
+               && std::get<0>(m_data.at(insertPos)) == currentId) {
             ++insertPos;
         }
 
         for (int j = insertPos; j < m_data.size(); ++j) {
-            if (std::get<0>(m_data.at(j)) != currentId)
+            if (std::get<1>(m_data.at(j)) == nullptr || std::get<0>(m_data.at(j)) != currentId)
                 continue;
 
             int destRow = insertPos < j ? insertPos : insertPos + 1;

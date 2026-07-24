@@ -195,6 +195,14 @@ void DockGroupModel::requestWindowsView(const QModelIndexList &indexes) const
 
 void DockGroupModel::requestNewInstance(const QModelIndex &index, const QString &action) const
 {
+    const auto itemId = index.data(TaskManager::ItemIdRole).toString();
+    const bool isGroup = itemId.startsWith(QStringLiteral("internal/folders/"));
+    if (isGroup) {
+        if (action == DOCK_ACTION_DOCK)
+            TaskManagerSettings::instance()->toggleDockedElement(itemId);
+        return;
+    }
+
     if (action == DOCK_ACTION_DOCK) {
         auto desktopId = index.data(TaskManager::DesktopIdRole).toString();
         TaskManagerSettings::instance()->toggleDockedElement(QStringLiteral("desktop/%1").arg(desktopId));

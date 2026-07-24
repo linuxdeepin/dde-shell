@@ -15,7 +15,8 @@ class DockGlobalElementModel : public QAbstractListModel, public AbstractTaskMan
 {
     Q_OBJECT
 public:
-    explicit DockGlobalElementModel(QAbstractItemModel *appsModel, DockCombineModel *activeAppModel, QObject *parent = nullptr);
+    explicit DockGlobalElementModel(QAbstractItemModel *appsModel, QAbstractItemModel *groupModel, QObject *groupProvider,
+                                    DockCombineModel *activeAppModel, QObject *parent = nullptr);
 
     QHash<int, QByteArray> roleNames() const override;
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
@@ -37,14 +38,21 @@ public:
     void requestWindowsView(const QModelIndexList &indexes) const override;
 
     void moveItem(int from, int to);
+    bool requestDockGroup(const QString &launcherFolderId);
 
 public slots:
     void initDockedElements(bool unused);
 
 private:
     void loadDockedElements();
+    void refreshGroupElements();
+    void handleGroupRowsRemoved();
+    void notifyGroupElementsChanged();
     QString getMenus(const QModelIndex &index) const;
     void groupItemsByApp();
+    QModelIndex groupIndex(const QString &launcherFolderId) const;
+    QString groupDisplayName(const QString &launcherFolderId) const;
+    QVariantList groupApplications(const QString &launcherFolderId) const;
 
 private:
     // id, model, and pos
@@ -53,6 +61,8 @@ private:
     // type, id
     QList<std::tuple<QString, QString>> m_dockedElements;
     QAbstractItemModel *m_appsModel;
+    QAbstractItemModel *m_groupModel;
+    QPointer<QObject> m_groupProvider;
     DockCombineModel *m_activeAppModel;
 };
 }

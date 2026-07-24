@@ -132,7 +132,7 @@ QStringList TaskManagerSettings::dockedElements() const
     return m_dockedElements;
 }
 
-// elementId is like "desktop/sample.app.id"
+// elementId is either "desktop/sample.app.id" or "internal/folders/1"
 bool TaskManagerSettings::isDocked(const QString &elementId) const
 {
     return m_dockedElements.contains(elementId);

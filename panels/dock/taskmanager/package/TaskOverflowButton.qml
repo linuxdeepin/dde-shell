@@ -203,6 +203,7 @@ Item {
                             iconName: modelData.iconName
                             menus: modelData.menus
                             windows: modelData.windows
+                            groupItems: modelData.groupItems
                             visualIndex: modelData.visualIndex
                             modelIndex: modelData.modelIndex
                             blendOpacity: root.taskManagerItem.blendOpacity
