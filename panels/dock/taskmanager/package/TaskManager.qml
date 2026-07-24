@@ -152,10 +152,11 @@ ContainmentItem {
                 required property string icon // winIconName
                 required property string menus
                 required property list<string> windows
+                required property var groupItems
                 z: attention ? -1 : 0
                 property bool visibility: {
-                    let draggedAppId = taskmanager.Applet.desktopIdToAppId(launcherDndDropArea.launcherDndDesktopId)
-                    if (itemId !== draggedAppId) {
+                    const draggedItemId = launcherDndDropArea.dockItemId(launcherDndDropArea.launcherDndDesktopId)
+                    if (itemId !== draggedItemId) {
                         return true 
                     }
                     return windows.length > 0 && launcherDndDropArea.launcherDndWinId !== windows[0]
@@ -273,6 +274,7 @@ ContainmentItem {
                         iconName: delegateRoot.iconName
                         menus: delegateRoot.menus
                         windows: delegateRoot.windows
+                        groupItems: delegateRoot.groupItems
                         visualIndex: delegateRoot.visualIndex
                         modelIndex: delegateRoot.modelIndex
                         blendOpacity: taskmanager.blendOpacity
@@ -300,7 +302,7 @@ ContainmentItem {
             id: launcherDndDropArea
             anchors.fill: parent
             z: 3
-            keys: ["text/x-dde-dock-dnd-appid"]
+            keys: ["text/x-dde-dock-dnd-appid", "text/x-dde-launcher-dnd-desktopId"]
             property string launcherDndDesktopId: ""
             property string launcherDndDragSource: ""
             property string launcherDndWinId: ""
@@ -340,6 +342,15 @@ ContainmentItem {
                     || launcherDndDragSource === "overflow-popup"
             }
 
+            function isLauncherFolderId(id) {
+                return typeof id === "string"
+                    && id.indexOf("internal/folders/") === 0
+            }
+
+            function dockItemId(id) {
+                return taskmanager.Applet.desktopIdToAppId(id)
+            }
+
             function requestDockIfNeeded() {
                 if (isInternalDrag() || launcherDndDocked) {
                     return true
@@ -356,15 +367,25 @@ ContainmentItem {
 
             onEntered: function(drag) {
                 let desktopId = drag.getDataAsString("text/x-dde-dock-dnd-appid")
+                if (!desktopId) {
+                    const launcherId = drag.getDataAsString("text/x-dde-launcher-dnd-desktopId")
+                    if (isLauncherFolderId(launcherId)) {
+                        desktopId = launcherId
+                    }
+                }
+                if (!desktopId) {
+                    resetDndState()
+                    return
+                }
                 launcherDndDragSource = drag.getDataAsString("text/x-dde-dock-dnd-source")
                 launcherDndWinId = drag.getDataAsString("text/x-dde-dock-dnd-winid")
                 launcherDndDesktopId = desktopId
-                if (launcherDndDragSource !== "taskbar" && taskmanager.Applet.requestDockByDesktopId(desktopId) === false) {
-                    drag.accepted = false
-                    resetDndState()
                 let targetIndex = targetIndexAt(drag.x, drag.y)
                 if (!isOverflowButtonIndex(targetIndex) && !requestDockIfNeeded()) {
                     return
+                }
+                if (!isOverflowButtonIndex(targetIndex)) {
+                    drag.acceptProposedAction()
                 }
             }
 
@@ -373,8 +394,9 @@ ContainmentItem {
                 if (launcherDndDragSource === "overflow-popup") return
                 let targetIndex = targetIndexAt(drag.x, drag.y)
                 if (isOverflowButtonIndex(targetIndex) || !requestDockIfNeeded()) return
-                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
+                drag.acceptProposedAction()
+                const itemId = dockItemId(launcherDndDesktopId)
+                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(itemId, launcherDndWinId) : taskmanager.findAppIndex(itemId)
                 if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
                     if (taskmanager.Applet.windowSplit) {
                         taskmanager.Applet.moveItem(currentIndex, targetIndex)
@@ -388,11 +410,10 @@ ContainmentItem {
             onDropped: function(drop) {
                 Panel.contextDragging = false
                 if (launcherDndDesktopId === "") return
-                const overflowPopupDrag = launcherDndDragSource === "overflow-popup"
                 let targetIndex = targetIndexAt(drop.x, drop.y)
                 if (!requestDockIfNeeded()) return
-                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
+                const itemId = dockItemId(launcherDndDesktopId)
+                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(itemId, launcherDndWinId) : taskmanager.findAppIndex(itemId)
                 if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
                     if (taskmanager.Applet.windowSplit) {
                         taskmanager.Applet.moveItem(currentIndex, targetIndex)
@@ -406,8 +427,10 @@ ContainmentItem {
                     appIds.push(visualModel.items.get(i).model.itemId)
                 }
                 taskmanager.Applet.saveDockElementsOrder(appIds)
-                if (overflowPopupDrag) {
+                if (isInternalDrag()) {
                     drop.accept(Qt.MoveAction)
+                } else {
+                    drop.acceptProposedAction()
                 }
                 resetDndState()
             }

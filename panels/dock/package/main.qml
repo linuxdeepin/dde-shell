@@ -495,13 +495,13 @@ Window {
             cornerRadius: fashionDock.enabled ? fashionDock.backgroundRadius : 0
             blendColor: {
                 if (valid) {
-                    return DStyle.Style.control.selectColor(undefined,
+                    return D.Style.control.selectColor(undefined,
                                                         Qt.rgba(235 / 255.0, 235 / 255.0, 235 / 255.0, dock.blendColorAlpha(0.6)),
                                                         Qt.rgba(10 / 255, 10 / 255, 10 /255, dock.blendColorAlpha(85 / 255)))
                 }
-                return DStyle.Style.control.selectColor(undefined,
-                                                    DStyle.Style.behindWindowBlur.lightNoBlurColor,
-                                                    DStyle.Style.behindWindowBlur.darkNoBlurColor)
+                return D.Style.control.selectColor(undefined,
+                                                    D.Style.behindWindowBlur.lightNoBlurColor,
+                                                    D.Style.behindWindowBlur.darkNoBlurColor)
             }
         }
 
@@ -622,6 +622,8 @@ Window {
                 visible: dockLeftPartModel.count > 0
                 implicitWidth: leftLoader.implicitWidth
                 implicitHeight: leftLoader.implicitHeight
+                Accessible.role: Accessible.Grouping
+                Accessible.name: qsTr("Dock Left Area")
                 OverflowContainer {
                     id: leftLoader
                     anchors.fill: parent
@@ -640,8 +642,8 @@ Window {
                 implicitHeight: centerLoader.implicitHeight
                 Accessible.role: Accessible.Grouping
                 Accessible.name: qsTr("Dock Center Area")
-                Layout.maximumWidth: useColumnLayout ? -1 : dockRawCenterSpace
-                Layout.maximumHeight: useColumnLayout ? dockRawCenterSpace : -1
+                Layout.maximumWidth: useColumnLayout ? -1 : dockEffectiveCenterSpace
+                Layout.maximumHeight: useColumnLayout ? dockEffectiveCenterSpace : -1
                 onXChanged: dockCenterPartPosChanged()
                 onYChanged: dockCenterPartPosChanged()
                 Layout.leftMargin: !useColumnLayout && !fashionDock.enabled && Panel.itemAlignment === Dock.CenterAlignment ?

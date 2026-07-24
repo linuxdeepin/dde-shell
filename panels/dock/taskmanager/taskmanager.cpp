@@ -53,6 +53,15 @@ Q_LOGGING_CATEGORY(taskManagerLog, "org.deepin.dde.shell.dock.taskmanager", QtDe
 
 namespace dock {
 
+static QString canonicalLauncherFolderId(const QString &id)
+{
+    static const QRegularExpression expression(QStringLiteral("^internal/folders/(\\d+)$"));
+    const auto match = expression.match(id.trimmed());
+    if (!match.hasMatch() || match.captured(1).toInt() <= 0)
+        return {};
+    return QStringLiteral("internal/folders/%1").arg(match.captured(1).toInt());
+}
+
 // 通过AM(Application Manager)匹配应用程序的辅助函数
 static QString getDesktopIdByPid(const QStringList &identifies)
 {
@@ -185,10 +194,22 @@ bool TaskManager::init()
 
     DApplet::init();
 
-    DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dde-apps");
+    DS_NAMESPACE::DAppletBridge appsBridge("org.deepin.ds.dde-apps");
     BoolFilterModel *leftModel = new BoolFilterModel(m_windowMonitor.data(), m_windowMonitor->roleNames().key("shouldSkip"), this);
-    if (auto applet = bridge.applet()) {
+    if (auto applet = appsBridge.applet()) {
+        m_appsApplet = applet;
         auto model = applet->property("appModel").value<QAbstractItemModel *>();
+
+        DS_NAMESPACE::DAppletBridge launcherBridge("org.deepin.ds.dock.launcherapplet");
+        auto launcherApplet = launcherBridge.applet();
+        auto groupModel = launcherApplet
+            ? launcherApplet->property("itemArrangementModel").value<QAbstractItemModel *>()
+            : nullptr;
+        if (groupModel)
+            qCInfo(taskManagerLog) << "Using live launchpad item arrangement model";
+        else
+            qCWarning(taskManagerLog) << "Launchpad item arrangement model is unavailable";
+
         Q_ASSERT(model);
         m_activeAppModel = new DockCombineModel(leftModel, model, TaskManager::IdentityRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
             auto roleNames = model->roleNames();
@@ -220,7 +241,7 @@ bool TaskManager::init()
             return res.value(0);
         });
 
-        m_dockGlobalElementModel = new DockGlobalElementModel(model, m_activeAppModel, this);
+        m_dockGlobalElementModel = new DockGlobalElementModel(model, groupModel, launcherApplet, m_activeAppModel, this);
         m_itemModel = new DockItemModel(m_dockGlobalElementModel, this);
 
         // 初始化预览代理模型，基于合并后的数据
@@ -403,8 +424,13 @@ QString TaskManager::desktopIdToAppId(const QString& desktopId)
 
 bool TaskManager::requestDockByDesktopId(const QString& desktopID)
 {
-    if (!Settings->dockedApplicationsEnabled()) return false;
-    if (desktopID.startsWith("internal/")) return false;
+    if (!Settings->dockedApplicationsEnabled())
+        return false;
+
+    const auto folderId = canonicalLauncherFolderId(desktopID);
+    if (!folderId.isEmpty())
+        return m_dockGlobalElementModel && m_dockGlobalElementModel->requestDockGroup(folderId);
+
     QString appId = desktopIdToAppId(desktopID);
     // 检查应用是否已经在任务栏中，如果是则返回 false
     if (IsDocked(appId))
@@ -415,9 +441,32 @@ bool TaskManager::requestDockByDesktopId(const QString& desktopID)
 
 bool TaskManager::requestUndockByDesktopId(const QString& desktopID)
 {
-    if (!Settings->dockedApplicationsEnabled()) return false;
-    if (desktopID.startsWith("internal/")) return false;
+    if (!Settings->dockedApplicationsEnabled())
+        return false;
+
+    const auto folderId = canonicalLauncherFolderId(desktopID);
+    if (!folderId.isEmpty())
+        return requestUndockElement(folderId);
+
     return RequestUndock(desktopIdToAppId(desktopID));
+}
+
+bool TaskManager::launchGroupApplication(const QString &desktopId)
+{
+    if (!m_appsApplet)
+        return false;
+    bool launched = false;
+    QMetaObject::invokeMethod(m_appsApplet, "launchApplication", Qt::DirectConnection,
+                              Q_RETURN_ARG(bool, launched), Q_ARG(QString, desktopId));
+    return launched;
+}
+
+bool TaskManager::requestUndockElement(const QString &elementKey)
+{
+    if (!TaskManagerSettings::instance()->isDocked(elementKey))
+        return false;
+    TaskManagerSettings::instance()->removeDockedElement(elementKey);
+    return true;
 }
 
 bool TaskManager::RequestDock(QString appID)
@@ -504,9 +553,14 @@ void TaskManager::saveDockElementsOrder(const QStringList &appIds)
     const QStringList &dockedElements = TaskManagerSettings::instance()->dockedElements();
     QStringList newDockedElements;
     for (const auto &appId : appIds) {
-        auto desktopElement = QString("desktop/%1").arg(appId);
-        if (dockedElements.contains(desktopElement) && !newDockedElements.contains(desktopElement)) {
-            newDockedElements.append(desktopElement);
+        if (appId == QStringLiteral("internal/folders/0"))
+            continue;
+        const auto folderId = canonicalLauncherFolderId(appId);
+        const auto element = folderId.isEmpty()
+            ? QStringLiteral("desktop/%1").arg(appId)
+            : folderId;
+        if (dockedElements.contains(element) && !newDockedElements.contains(element)) {
+            newDockedElements.append(element);
         }
     }
     TaskManagerSettings::instance()->setDockedElements(newDockedElements);

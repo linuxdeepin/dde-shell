@@ -229,6 +229,7 @@ QVariantMap TaskOverflowController::entryAt(int visualIndex) const
         { QStringLiteral("iconName"), iconName },
         { QStringLiteral("menus"), dataForRole(index, MODEL_MENUS).toString() },
         { QStringLiteral("windows"), dataForRole(index, MODEL_WINDOWS).toStringList() },
+        { QStringLiteral("groupItems"), dataForRole(index, MODEL_GROUPITEMS).toList() },
         { QStringLiteral("visualIndex"), visualIndex },
         { QStringLiteral("modelIndex"), QVariant::fromValue(index) },
     };
