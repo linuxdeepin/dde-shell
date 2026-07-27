@@ -133,6 +133,29 @@ Window {
         }
     }
 
+    // Keep the QML module's accessor state synchronized with the panel.
+    Binding {
+        target: NotifyAccessor
+        property: "enabled"
+        value: Panel.visible
+    }
+
+    Binding {
+        target: NotifyAccessor
+        property: "dataUpdater"
+        value: DS.applet("org.deepin.ds.notificationserver")
+    }
+
+    // Notification state belongs to the QML module.  Keeping this connection
+    // here avoids a binary dependency from the dde-shell applet to the QML
+    // plugin.
+    Connections {
+        target: DS.applet("org.deepin.ds.notificationserver")
+        function onNotificationStateChanged(id, processedType) {
+            NotifyAccessor.onNotificationStateChanged(id, processedType)
+        }
+    }
+
     // close Panel when click dock.
     Connections {
         target: DS.applet("org.deepin.ds.dock")

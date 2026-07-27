@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -26,11 +26,15 @@ class NotifyAccessor : public QObject
     QML_ELEMENT
     QML_SINGLETON
     Q_PROPERTY(bool debugging READ debugging NOTIFY debuggingChanged)
+    Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged FINAL)
+    Q_PROPERTY(QObject *dataUpdater READ dataUpdater WRITE setDataUpdater NOTIFY dataUpdaterChanged FINAL)
 public:
     static NotifyAccessor *instance();
     static NotifyAccessor *create(QQmlEngine *, QJSEngine *);
 
     void setDataAccessor(DataAccessor *accessor);
+
+    QObject *dataUpdater() const;
     void setDataUpdater(QObject *updater);
 
     bool enabled() const;
@@ -40,6 +44,7 @@ public:
     void pinApplication(const QString &appName, bool pin);
     bool applicationPin(const QString &appName) const;
     Q_INVOKABLE void openNotificationSetting();
+    Q_INVOKABLE void onNotificationStateChanged(qint64 id, int processedType);
 
     NotifyEntity fetchEntity(qint64 id) const;
     int fetchEntityCount(const QString &appName) const;
@@ -59,9 +64,10 @@ signals:
     void stagingEntityClosed(qint64 id);
 
     void debuggingChanged();
+    void enabledChanged();
+    void dataUpdaterChanged();
 
 private slots:
-    void onNotificationStateChanged(qint64 id, int processedType);
     void onReceivedRecord(const QString &id);
 
 private:
