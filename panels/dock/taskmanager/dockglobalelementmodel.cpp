@@ -30,6 +30,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
 {
     connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedElementsChanged, this, &DockGlobalElementModel::loadDockedElements);
     connect(TaskManagerSettings::instance(), &TaskManagerSettings::windowSplitChanged, this, &DockGlobalElementModel::groupItemsByApp);
+    connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedApplicationsEnabledChanged, this, &DockGlobalElementModel::loadDockedElements);
 
     connect(
         m_appsModel,
@@ -258,39 +259,41 @@ void DockGlobalElementModel::initDockedElements(bool unused)
 void DockGlobalElementModel::loadDockedElements()
 {
     QList<std::tuple<QString, QString>> newDocked;
-    for (auto elementInfo : TaskManagerSettings::instance()->dockedElements()) {
-        auto pair = elementInfo.split('/');
-        if (pair.size() != 2)
-            continue;
-
-        auto type = pair[0];
-        auto id = pair[1];
-
-        auto tmp = std::make_tuple(type, id);
-
-        // check desktop is installed
-        QAbstractItemModel *model = nullptr;
-        int row = 0;
-        if (type == "desktop") {
-            model = m_appsModel;
-            auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly).value(0);
-            if (!res.isValid())
+    if (TaskManagerSettings::instance()->dockedApplicationsEnabled()) {
+        for (auto elementInfo : TaskManagerSettings::instance()->dockedElements()) {
+            auto pair = elementInfo.split('/');
+            if (pair.size() != 2)
                 continue;
-            row = res.row();
-        }
 
-        newDocked.append(tmp);
-        if (m_dockedElements.contains(tmp))
-            continue;
+            auto type = pair[0];
+            auto id = pair[1];
 
-        auto isRunning = std::any_of(m_data.constBegin(), m_data.constEnd(), [this, &id](const auto &data) {
-            return std::get<0>(data) == id;
-        });
+            auto tmp = std::make_tuple(type, id);
 
-        if (!isRunning) {
-            beginInsertRows(QModelIndex(), m_data.size(), m_data.size());
-            m_data.append(std::make_tuple(id, model, row));
-            endInsertRows();
+            // check desktop is installed
+            QAbstractItemModel *model = nullptr;
+            int row = 0;
+            if (type == "desktop") {
+                model = m_appsModel;
+                auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly).value(0);
+                if (!res.isValid())
+                    continue;
+                row = res.row();
+            }
+
+            newDocked.append(tmp);
+            if (m_dockedElements.contains(tmp))
+                continue;
+
+            auto isRunning = std::any_of(m_data.constBegin(), m_data.constEnd(), [&id](const auto &data) {
+                return std::get<0>(data) == id;
+            });
+
+            if (!isRunning) {
+                beginInsertRows(QModelIndex(), m_data.size(), m_data.size());
+                m_data.append(std::make_tuple(id, model, row));
+                endInsertRows();
+            }
         }
     }
 
@@ -342,8 +345,10 @@ QString DockGlobalElementModel::getMenus(const QModelIndex &index) const
         menusArray.append(action);
     }
 
-    bool isDocked = (model == nullptr) || m_dockedElements.contains(std::make_tuple("desktop", id));
-    menusArray.append(QJsonObject{{"id", DOCK_ACTION_DOCK}, {"name", isDocked ? tr("Undock") : tr("Dock")}});
+    if (TaskManagerSettings::instance()->dockedApplicationsEnabled()) {
+        bool isDocked = (model == nullptr) || m_dockedElements.contains(std::make_tuple("desktop", id));
+        menusArray.append(QJsonObject{{"id", DOCK_ACTION_DOCK}, {"name", isDocked ? tr("Undock") : tr("Dock")}});
+    }
 
     if (model == m_activeAppModel) {
         if (TaskManagerSettings::instance()->isAllowedForceQuit()) {

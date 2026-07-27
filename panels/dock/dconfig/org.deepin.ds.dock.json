@@ -91,6 +91,17 @@
 			"description": "Enable or disable the show desktop area on the right side of the dock",
 			"permissions": "readwrite",
 			"visibility": "private"
+		},
+		"enableContextMenu": {
+			"value": true,
+			"serial": 0,
+			"flags": [],
+			"name": "Enable Dock Context Menu",
+			"name[zh_CN]": "启用任务栏右键菜单",
+			"description": "Enable or disable the context menu on the empty area of the dock.",
+			"description[zh_CN]": "启用或禁用任务栏空白区域的右键菜单和触摸长按菜单。",
+			"permissions": "readwrite",
+			"visibility": "private"
 		}
 	}
 }

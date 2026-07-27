@@ -27,6 +27,7 @@ const static QString keyIndicatorStyle          = "Indicator_Style";
 const static QString keyPluginsVisible           = "Plugins_Visible";
 const static QString keyShowInPrimary           = "Show_In_Primary";
 const static QString keyLocked                  = "Locked";
+const static QString keyEnableContextMenu       = "enableContextMenu";
 
 namespace dock {
 
@@ -156,6 +157,7 @@ DockSettings::DockSettings(QObject* parent)
     , m_alignment(dock::CenterAlignment)
     , m_style(dock::Fashion)
     , m_locked(false)
+    , m_contextMenuEnabled(true)
 {
     m_writeTimer->setSingleShot(true);
     m_writeTimer->setInterval(1000);
@@ -174,6 +176,7 @@ void DockSettings::init()
         m_pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
         m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
         m_locked = m_dockConfig->value(keyLocked).toBool();
+        m_contextMenuEnabled = m_dockConfig->value(keyEnableContextMenu, true).toBool();
 
         // Log dock config on startup - merge shell_pos and shell_dock_mode into one log entry
         logDockConfig(m_dockPosition, m_alignment, QStringLiteral("on startup"));
@@ -217,6 +220,11 @@ void DockSettings::init()
                 if (locked == m_locked) return;
                 m_locked = locked;
                 Q_EMIT lockedChanged(m_locked);
+            } else if (keyEnableContextMenu == key) {
+                const auto enabled = m_dockConfig->value(keyEnableContextMenu, true).toBool();
+                if (enabled == m_contextMenuEnabled) return;
+                m_contextMenuEnabled = enabled;
+                Q_EMIT contextMenuEnabledChanged(m_contextMenuEnabled);
             }
         });
     } else {
@@ -329,6 +337,11 @@ bool DockSettings::showInPrimary() const
 bool DockSettings::locked() const
 {
     return m_locked;
+}
+
+bool DockSettings::contextMenuEnabled() const
+{
+    return m_contextMenuEnabled;
 }
 
 void DockSettings::setLocked(bool newLocked)

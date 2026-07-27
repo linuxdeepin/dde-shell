@@ -35,6 +35,7 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(QString screenName READ screenName NOTIFY screenNameChanged FINAL)
     Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
     Q_PROPERTY(bool isResizing READ isResizing WRITE setIsResizing NOTIFY isResizingChanged FINAL)
+    Q_PROPERTY(bool contextMenuEnabled READ contextMenuEnabled NOTIFY contextMenuEnabledChanged FINAL)
 
     Q_PROPERTY(qreal devicePixelRatio READ devicePixelRatio NOTIFY devicePixelRatioChanged FINAL)
 
@@ -93,6 +94,7 @@ public:
 
     bool locked() const;
     void setLocked(bool newLocked);
+    bool contextMenuEnabled() const;
 
     void setHideState(HideState newHideState);
     QScreen* dockScreen();
@@ -135,6 +137,7 @@ Q_SIGNALS:
     void leftEdgeClicked(const QString &minOrder);
     void devicePixelRatioChanged(qreal ratio);
     void lockedChanged(bool locked);
+    void contextMenuEnabledChanged(bool enabled);
 
     void contextDraggingChanged();
     void isResizingChanged(bool isResizing);

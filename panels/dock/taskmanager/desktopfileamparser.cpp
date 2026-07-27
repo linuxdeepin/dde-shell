@@ -7,6 +7,7 @@
 #include "desktopfileamparser.h"
 #include "desktopfileabstractparser.h"
 #include "objectmanager1interface.h"
+#include "taskmanagersettings.h"
 
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -43,7 +44,8 @@ DesktopFileAMParser::DesktopFileAMParser(QString id, QObject* parent)
     connect(&desktopobjectManager, &ObjectManager::InterfacesRemoved, this, [this] (const QDBusObjectPath& path, const QStringList& interfaces) {
         Q_UNUSED(interfaces)
         if (m_applicationInterface->path() == path.path()) {
-            getAppItem()->setDocked(false);
+            TaskManagerSettings::instance()->removeDockedElement(QStringLiteral("desktop/%1").arg(this->id()));
+            Q_EMIT dockedChanged();
             return;
         }
     });

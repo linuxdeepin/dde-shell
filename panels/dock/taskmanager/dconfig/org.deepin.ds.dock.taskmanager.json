@@ -106,6 +106,17 @@
 			"description": "List of app id that should prefer window icon when window split is disabled",
 			"permissions": "readwrite",
 			"visibility": "private"
+		},
+		"enableDockedApplications": {
+			"value": true,
+			"serial": 0,
+			"flags": [],
+			"name": "Enable Docked Applications",
+			"name[zh_CN]": "启用驻留任务栏应用",
+			"description": "Enable or disable docked applications on the taskbar. When disabled, docked applications that are not running are hidden and docking changes are rejected, while the saved docked application list is preserved.",
+			"description[zh_CN]": "启用或禁用任务栏驻留应用；关闭时隐藏未运行的驻留应用并禁止更改驻留状态，但保留已保存的驻留应用列表。",
+			"permissions": "readwrite",
+			"visibility": "private"
 		}
 		
 	}

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -139,6 +139,11 @@ bool DesktopfileAbstractParser::isDocked()
 
 void DesktopfileAbstractParser::setDocked(bool docked)
 {
+    if (!TaskManagerSettings::instance()->dockedApplicationsEnabled()) {
+        qDebug() << "Docked application changes are disabled by DConfig";
+        return;
+    }
+
     if (!isValied().first && docked) {
         qDebug() << isValied().second;
         return;
