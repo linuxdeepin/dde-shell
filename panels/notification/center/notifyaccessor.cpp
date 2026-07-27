@@ -11,7 +11,8 @@
 
 #include <DConfig>
 
-#include "dataaccessor.h"
+#include "dataaccessorproxy.h"
+
 #include <wayland/xdgactivation.h>
 
 DCORE_USE_NAMESPACE
@@ -39,9 +40,9 @@ public:
 };
 
 NotifyAccessor::NotifyAccessor(QObject *parent)
-    : m_pinnedApps(InvalidPinnedApps)
+    : QObject(parent)
+    , m_pinnedApps(InvalidPinnedApps)
 {
-    Q_UNUSED(parent)
     if (!qEnvironmentVariableIsEmpty("DS_NOTIFICATION_DEBUG")) {
         const int value = qEnvironmentVariableIntValue("DS_NOTIFICATION_DEBUG");
         m_debugging = value;
@@ -57,7 +58,7 @@ NotifyAccessor *NotifyAccessor::instance()
 
     if (!instance) {
         instance = new NotifyAccessor(qGuiApp);
-        instance->setDataAccessor(new DataAccessor());
+        instance->setDataAccessor(notification::DataAccessorProxy::instance());
     }
     return instance;
 }
@@ -77,9 +78,18 @@ void NotifyAccessor::setDataAccessor(DataAccessor *accessor)
     m_accessor = accessor;
 }
 
+QObject *NotifyAccessor::dataUpdater() const
+{
+    return m_dataUpdater;
+}
+
 void NotifyAccessor::setDataUpdater(QObject *updater)
 {
+    if (m_dataUpdater == updater)
+        return;
+
     m_dataUpdater = updater;
+    emit dataUpdaterChanged();
 }
 
 bool NotifyAccessor::enabled() const
@@ -89,7 +99,11 @@ bool NotifyAccessor::enabled() const
 
 void NotifyAccessor::setEnabled(bool enabled)
 {
+    if (m_enabled == enabled)
+        return;
+
     m_enabled = enabled;
+    emit enabledChanged();
 }
 
 NotifyEntity NotifyAccessor::fetchEntity(qint64 id) const
@@ -229,6 +243,7 @@ void NotifyAccessor::onNotificationStateChanged(qint64 id, int processedType)
 {
     if (!enabled())
         return;
+
     if (processedType == NotifyEntity::Processed) {
         emit entityReceived(id);
         emit stagingEntityClosed(id);

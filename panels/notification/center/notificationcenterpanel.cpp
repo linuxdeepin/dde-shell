@@ -1,13 +1,11 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "notificationcenterpanel.h"
 
-#include "dataaccessorproxy.h"
 #include "notificationcenterdbusadaptor.h"
 #include "notificationcenterproxy.h"
-#include "notifyaccessor.h"
 
 #include <pluginfactory.h>
 #include <pluginloader.h>
@@ -70,25 +68,6 @@ bool NotificationCenterPanel::init()
 
     DPanel::init();
 
-    auto accessor = notification::DataAccessorProxy::instance();
-    notifycenter::NotifyAccessor::instance()->setDataAccessor(accessor);
-
-    bool valid = false;
-    DAppletBridge bridge("org.deepin.ds.notificationserver");
-    if (auto server = bridge.applet()) {
-        valid = QObject::connect(server,
-                                 SIGNAL(notificationStateChanged(qint64, int)),
-                                 notifycenter::NotifyAccessor::instance(),
-                                 SLOT(onNotificationStateChanged(qint64, int)),
-                                 Qt::QueuedConnection);
-        notifycenter::NotifyAccessor::instance()->setDataUpdater(server);
-        notifycenter::NotifyAccessor::instance()->setEnabled(visible());
-    }
-    if (!valid) {
-        qWarning(notifyLog) << "NotifyConnection is invalid, and can't receive RecordAdded signal.";
-        return false;
-    }
-
     return true;
 }
 
@@ -109,7 +88,6 @@ void NotificationCenterPanel::setVisible(bool newVisible)
             QMetaObject::invokeMethod(applet, "removeExpiredNotifications", Qt::DirectConnection);
         }
     }
-    notifycenter::NotifyAccessor::instance()->setEnabled(m_visible);
     setBubblePanelEnabled(!m_visible);
     emit visibleChanged();
 }
