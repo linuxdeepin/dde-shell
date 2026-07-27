@@ -52,7 +52,8 @@ Depends:
  ${shlibs:Depends},
 Multi-Arch: same
 Description: DDE Shell library
- DDE Shell is a plugin system that integrates plugins developed based on this plugin system into DDE.
+ DDE Shell is a plugin system that integrates plugins
+ developed based on this plugin system into DDE.
 
 Package: libdde-shell-dock
 Architecture: any
@@ -89,7 +90,10 @@ Breaks:
  dde-clipboard (<< 1:6.0.14),
  libdde-shell-dev (<< 2.0.38)
 Replaces: libdde-shell-dev (<< 2.0.38)
-Description: An wrapper for developed based on dde-shell plugin system
+Description: Wrapper for dde-shell plugin system
+ DDE Shell is a plugin-based desktop shell framework. This package
+ provides the runtime components including dock, notification, OSD,
+ and other shell applets.
 
 Package: dde-shell-example
 Architecture: any
@@ -99,8 +103,9 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Multi-Arch: same
-Description: DDE Shell example
- This package contains some plugins based on dde-shell plugin system.
+Description: Example plugins for dde-shell
+ This package contains example plugins demonstrating the
+ dde-shell plugin system.
 
 Package: libdde-shell-dev
 Architecture: any
@@ -111,8 +116,9 @@ Depends:
  qt6-declarative-dev,
  qt6-tools-dev,
  ${misc:Depends},
-Description: DDE Shell devel library
- DDE Shell is a plugin system that integrates plugins developed based on this plugin system into DDE.
+Description: DDE Shell development files
+ Development headers and CMake config files for building
+ plugins based on the dde-shell plugin system.
 
 Package: libdde-shell-dock-dev
 Architecture: any
