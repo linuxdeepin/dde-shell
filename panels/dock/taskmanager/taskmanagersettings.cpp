@@ -43,6 +43,7 @@ TaskManagerSettings* TaskManagerSettings::instance()
 TaskManagerSettings::TaskManagerSettings(QObject *parent)
     : QObject(parent)
     , m_taskManagerDconfig(DConfig::create(QStringLiteral("org.deepin.dde.shell"), QStringLiteral("org.deepin.ds.dock.taskmanager"), QString(), this))
+    , m_dockedApplicationsEnabled(true)
 {
     connect(m_taskManagerDconfig, &DConfig::valueChanged, this, [this](const QString &key){
         if (TASKMANAGER_ALLOWFOCEQUIT_KEY == key) {
@@ -58,6 +59,12 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
         } else if (TASKMANAGER_DOCKEDELEMENTS_KEY == key) {
             m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
             Q_EMIT dockedElementsChanged();
+        } else if (TASKMANAGER_ENABLE_DOCKED_APPLICATIONS_KEY == key) {
+            const bool enabled = m_taskManagerDconfig->value(TASKMANAGER_ENABLE_DOCKED_APPLICATIONS_KEY, true).toBool();
+            if (enabled == m_dockedApplicationsEnabled)
+                return;
+            m_dockedApplicationsEnabled = enabled;
+            Q_EMIT dockedApplicationsEnabledChanged(m_dockedApplicationsEnabled);
         }
     });
 
@@ -66,6 +73,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
     m_cgroupsBasedGrouping = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_KEY, true).toBool();
     m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
+    m_dockedApplicationsEnabled = m_taskManagerDconfig->value(TASKMANAGER_ENABLE_DOCKED_APPLICATIONS_KEY, true).toBool();
     m_cgroupsBasedGroupingSkipAppIds = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_APPIDS, {"deepin-terminal"}).toStringList();
     m_cgroupsBasedGroupingSkipCategories = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_CATEGORIES, {"TerminalEmulator"}).toStringList();
     m_windowIconWhitelist = m_taskManagerDconfig->value(TASKMANAGER_WINDOW_ICON_WHITELIST_KEY, {"com.tencent.wechat"}).toStringList();
@@ -130,6 +138,11 @@ bool TaskManagerSettings::isDocked(const QString &elementId) const
     return m_dockedElements.contains(elementId);
 }
 
+bool TaskManagerSettings::dockedApplicationsEnabled() const
+{
+    return m_dockedApplicationsEnabled;
+}
+
 void TaskManagerSettings::migrateFromDockedItems()
 {
     if (m_taskManagerDconfig->isDefaultValue(TASKMANAGER_DOCKEDITEMS_KEY)) {
@@ -186,6 +199,9 @@ void TaskManagerSettings::setDockedElements(const QStringList &elements)
 
 void TaskManagerSettings::toggleDockedElement(const QString &element)
 {
+    if (!m_dockedApplicationsEnabled)
+        return;
+
     if (isDocked(element)) {
         removeDockedElement(element);
     } else {

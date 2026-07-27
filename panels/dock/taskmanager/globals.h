@@ -27,6 +27,7 @@ static inline const QString TASKMANAGER_CGROUPS_BASED_GROUPING_SKIP_CATEGORIES =
 static inline const QString TASKMANAGER_DOCKEDITEMS_KEY = "Docked_Items";
 constexpr auto TASKMANAGER_DOCKEDELEMENTS_KEY = "dockedElements";
 constexpr auto TASKMANAGER_WINDOW_ICON_WHITELIST_KEY = "windowIconWhitelist";
+constexpr auto TASKMANAGER_ENABLE_DOCKED_APPLICATIONS_KEY = "enableDockedApplications";
 
 // model roleNames
 constexpr auto MODEL_WINID = "winId";

@@ -401,6 +401,7 @@ QString TaskManager::desktopIdToAppId(const QString& desktopId)
 
 bool TaskManager::requestDockByDesktopId(const QString& desktopID)
 {
+    if (!Settings->dockedApplicationsEnabled()) return false;
     if (desktopID.startsWith("internal/")) return false;
     QString appId = desktopIdToAppId(desktopID);
     // 检查应用是否已经在任务栏中，如果是则返回 false
@@ -412,12 +413,16 @@ bool TaskManager::requestDockByDesktopId(const QString& desktopID)
 
 bool TaskManager::requestUndockByDesktopId(const QString& desktopID)
 {
+    if (!Settings->dockedApplicationsEnabled()) return false;
     if (desktopID.startsWith("internal/")) return false;
     return RequestUndock(desktopIdToAppId(desktopID));
 }
 
 bool TaskManager::RequestDock(QString appID)
 {
+    if (!Settings->dockedApplicationsEnabled())
+        return false;
+
     auto desktopfileParser = DESKTOPFILEFACTORY::createById(appID, "amAPP");
 
     auto res = desktopfileParser->isValied();
@@ -451,6 +456,9 @@ bool TaskManager::IsDocked(QString appID)
 
 bool TaskManager::RequestUndock(QString appID)
 {
+    if (!Settings->dockedApplicationsEnabled())
+        return false;
+
     auto desktopfileParser = DESKTOPFILEFACTORY::createById(appID, "amAPP");
     auto res = desktopfileParser->isValied();
     if (!res.first) {
@@ -488,6 +496,9 @@ void TaskManager::activateWindow(uint32_t windowID)
 
 void TaskManager::saveDockElementsOrder(const QStringList &appIds)
 {
+    if (!Settings->dockedApplicationsEnabled())
+        return;
+
     const QStringList &dockedElements = TaskManagerSettings::instance()->dockedElements();
     QStringList newDockedElements;
     for (const auto &appId : appIds) {

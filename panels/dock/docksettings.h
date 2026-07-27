@@ -28,6 +28,7 @@ class DockSettings : public QObject
     Q_PROPERTY(QVariantMap pluginsVisible READ pluginsVisible WRITE setPluginsVisible NOTIFY pluginsVisibleChanged FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
     Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
+    Q_PROPERTY(bool contextMenuEnabled READ contextMenuEnabled NOTIFY contextMenuEnabledChanged FINAL)
 
 public:
     static DockSettings* instance();
@@ -40,6 +41,7 @@ public:
     QVariantMap pluginsVisible();
     bool showInPrimary() const;
     bool locked() const;
+    bool contextMenuEnabled() const;
 
     void setDockSize(const uint& size);
     void setHideMode(const HideMode& mode);
@@ -76,6 +78,7 @@ Q_SIGNALS:
 
     void showInPrimaryChanged(bool showInPrimary);
     void lockedChanged(bool locked);
+    void contextMenuEnabledChanged(bool enabled);
 
 private:
     QScopedPointer<DConfig> m_dockConfig;
@@ -90,5 +93,6 @@ private:
     QVariantMap m_pluginsVisible;
     bool m_showInPrimary;
     bool m_locked;
+    bool m_contextMenuEnabled;
 };
 }

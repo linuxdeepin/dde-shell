@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -27,6 +27,8 @@ AppItem::AppItem(QString id, QObject *parent)
     connect(this, &AbstractItem::dataChanged, this, &AppItem::checkAppItemNeedDeleteAndDelete);
 
     connect(this, &AppItem::currentActiveWindowChanged, this, &AbstractItem::iconChanged);
+    connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedApplicationsEnabledChanged,
+            this, [this] { Q_EMIT menusChanged(); });
 }
 
 AppItem::~AppItem()
@@ -105,10 +107,12 @@ QString AppItem::menus() const
     //     array.append(allWindowMenu);
     // }
 
-    QJsonObject dockMenu;
-    dockMenu["id"] = DOCK_ACTION_DOCK;
-    dockMenu["name"] = isDocked() ? tr("Undock") : tr("Dock");
-    array.append(dockMenu);
+    if (TaskManagerSettings::instance()->dockedApplicationsEnabled()) {
+        QJsonObject dockMenu;
+        dockMenu["id"] = DOCK_ACTION_DOCK;
+        dockMenu["name"] = isDocked() ? tr("Undock") : tr("Dock");
+        array.append(dockMenu);
+    }
 
     if (hasWindow()) {
         QJsonObject foreceQuit;

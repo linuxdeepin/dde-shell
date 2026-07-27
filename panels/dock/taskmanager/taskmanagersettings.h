@@ -43,6 +43,7 @@ public:
     void removeDockedElement(const QString &element);
     QStringList dockedElements() const;
     bool isDocked(const QString &elementId) const;
+    bool dockedApplicationsEnabled() const;
 
     void logMergeAppModel(bool mergeAppModelOn);
 
@@ -57,6 +58,7 @@ Q_SIGNALS:
     void windowSplitChanged();
     void dockedItemsChanged();
     void dockedElementsChanged();
+    void dockedApplicationsEnabledChanged(bool enabled);
 
 private:
     DConfig* m_taskManagerDconfig;
@@ -65,6 +67,7 @@ private:
     bool m_showAttentionAnimation;
     bool m_windowSplit;
     bool m_cgroupsBasedGrouping;
+    bool m_dockedApplicationsEnabled;
     QStringList m_dockedElements;
     QStringList m_windowIconWhitelist;
     QStringList m_cgroupsBasedGroupingSkipAppIds;

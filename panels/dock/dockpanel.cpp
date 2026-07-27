@@ -119,6 +119,7 @@ bool DockPanel::init()
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
     connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
     connect(SETTINGS, &DockSettings::lockedChanged, this, &DockPanel::lockedChanged);
+    connect(SETTINGS, &DockSettings::contextMenuEnabledChanged, this, &DockPanel::contextMenuEnabledChanged);
 
     connect(SETTINGS, &DockSettings::dockSizeChanged, this, [this, dockDaemonAdaptor](){
         Q_EMIT dockDaemonAdaptor->WindowSizeEfficientChanged(dockSize());
@@ -423,6 +424,11 @@ void DockPanel::setShowInPrimary(bool newShowInPrimary)
 bool DockPanel::locked() const
 {
     return SETTINGS->locked();
+}
+
+bool DockPanel::contextMenuEnabled() const
+{
+    return SETTINGS->contextMenuEnabled();
 }
 
 void DockPanel::setLocked(bool newLocked)
