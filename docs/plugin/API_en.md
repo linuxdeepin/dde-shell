@@ -257,6 +257,19 @@ class DS_SHARE DPluginMetaData : public QObject
 };
 ```
 
+### Applet Enable Configuration
+
+`AppletConfigManager` in the `dde-shell` process reads `org.deepin.dde.shell / org.deepin.dde.shell / enable`, uses the applet's `Plugin.Id` as the DConfig subpath, and passes the enabled state to `DAppletLoader`. This configuration applies only to child applets that declare `Plugin.Parent`; top-level panels such as the Dock are always created by the startup flow and are not controlled by DConfig. When the value is `false`, the corresponding child applet instance is not created. Runtime configuration changes unload or reload that child applet immediately. `dde-shell-frame` does not read or store this configuration state.
+
+The `-d` command-line option is handled by `DPluginLoader`, which filters the corresponding applet, including a top-level panel, while scanning metadata. It has higher priority than DConfig; an applet disabled with `-d` cannot be re-enabled through DConfig during the lifetime of the process.
+
+For example, to disable the launchpad applet:
+
+```bash
+dde-dconfig set -a org.deepin.dde.shell -r org.deepin.dde.shell \
+    -s /org.deepin.ds.dock.launcherapplet -k enable -v false
+```
+
 ### DAppletBridge API
 
 Bridge for communicating with applet from C++:

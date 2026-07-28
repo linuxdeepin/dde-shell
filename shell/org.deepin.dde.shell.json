@@ -11,6 +11,17 @@
 				"description": "DConfig that has completed migration",
 				"permissions": "readwrite",
 				"visibility": "private"
+		},
+		"enable": {
+				"value": true,
+				"serial": 0,
+				"flags": [],
+				"name": "Enable Applet",
+				"name[zh_CN]": "启用 Applet",
+				"description": "Enable or disable the dde-shell applet selected by the DConfig subpath.",
+				"description[zh_CN]": "启用或禁用由 DConfig subpath 指定的 dde-shell Applet。",
+				"permissions": "readwrite",
+				"visibility": "private"
 		}
 	}
 }
