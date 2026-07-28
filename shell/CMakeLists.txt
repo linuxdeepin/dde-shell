@@ -15,6 +15,8 @@ endif()
 
 add_executable(dde-shell
     main.cpp
+    appletconfigmanager.h
+    appletconfigmanager.cpp
     appletloader.h
     appletloader.cpp
     shell.h

@@ -257,6 +257,19 @@ class DS_SHARE DPluginMetaData : public QObject
 };
 ```
 
+### Applet 启用配置
+
+`dde-shell` 进程中的 `AppletConfigManager` 读取 `org.deepin.dde.shell / org.deepin.dde.shell / enable`，并使用 Applet 的 `Plugin.Id` 作为 DConfig subpath，再将启用状态交给 `DAppletLoader`。该配置只作用于包含 `Plugin.Parent` 的子 Applet；Dock 等顶层 Panel 始终由启动流程创建，不受 DConfig 控制。值为 `false` 时不会创建对应的子 Applet 实例；运行时修改配置会实时卸载或重新加载对应子 Applet。`dde-shell-frame` 本身不读取或保存此配置状态。
+
+命令行参数 `-d` 由 `DPluginLoader` 处理，会在扫描 metadata 时直接过滤对应 Applet，包括顶层 Panel。它的优先级高于 DConfig；在当前进程生命周期内，被 `-d` 禁用的 Applet 无法通过 DConfig 重新启用。
+
+例如禁用启动器 Applet：
+
+```bash
+dde-dconfig set -a org.deepin.dde.shell -r org.deepin.dde.shell \
+    -s /org.deepin.ds.dock.launcherapplet -k enable -v false
+```
+
 ### DAppletBridge API
 
 从 C++ 与小部件通信的桥接：

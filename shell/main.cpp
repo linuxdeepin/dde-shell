@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
+#include <QSet>
 #include <QStandardPaths>
 
 #include <DApplication>
@@ -19,6 +20,7 @@
 #include "applet.h"
 #include "containment.h"
 #include "pluginloader.h"
+#include "appletconfigmanager.h"
 #include "appletloader.h"
 #include "qmlengine.h"
 #include "shell.h"
@@ -49,9 +51,11 @@ static void disableLogOutput()
 class AppletManager
 {
 public:
-    explicit AppletManager(const QStringList &pluginIds)
+    explicit AppletManager(const QStringList &pluginIds, AppletConfigManager *configManager)
     {
         qCDebug(dsLog) << "Preloading plugins:" << pluginIds;
+        Q_ASSERT(configManager);
+
         auto rootApplet = qobject_cast<DContainment *>(DPluginLoader::instance()->rootApplet());
         Q_ASSERT(rootApplet);
 
@@ -62,9 +66,8 @@ public:
                 continue;
             }
 
-            auto loader = new DAppletLoader(applet);
+            auto loader = new DAppletLoader(applet, configManager);
             m_loaders << loader;
-
             QObject::connect(loader, &DAppletLoader::failed, qApp, [this, loader, pluginIds](const QString &pluginId) {
                 if (pluginIds.contains(pluginId)) {
                     m_loaders.removeOne(loader);
@@ -72,6 +75,24 @@ public:
                 }
             });
         }
+
+        QObject::connect(configManager,
+                         &AppletConfigManager::appletEnabledChanged,
+                         qApp,
+                         [this](const QString &pluginId, bool enabled) {
+                             auto loader = loaderForPlugin(pluginId);
+                             if (!loader) {
+                                 qCWarning(dsLog) << "Unable to find the loader for applet:" << pluginId;
+                                 return;
+                             }
+
+                             if (enabled) {
+                                 loader->setPluginId(pluginId);
+                                 loader->exec();
+                             } else {
+                                 loader->remove(pluginId);
+                             }
+                         });
     }
     void enableSceneview()
     {
@@ -90,6 +111,26 @@ public:
             item->deleteLater();
         }
     }
+
+    DAppletLoader *loaderForPlugin(const QString &pluginId) const
+    {
+        QString rootPluginId = pluginId;
+        QSet<QString> visitedPluginIds;
+        while (!visitedPluginIds.contains(rootPluginId)) {
+            visitedPluginIds.insert(rootPluginId);
+            const auto parent = DPluginLoader::instance()->parentPlugin(rootPluginId);
+            if (!parent.isValid())
+                break;
+            rootPluginId = parent.pluginId();
+        }
+
+        for (auto loader : m_loaders) {
+            if (loader->applet() && loader->applet()->pluginId() == rootPluginId)
+                return loader;
+        }
+        return nullptr;
+    }
+
     QList<DAppletLoader *> m_loaders;
 };
 
@@ -200,11 +241,13 @@ int main(int argc, char *argv[])
     }
 
     shell.dconfigsMigrate();
+    AppletConfigManager appletConfigManager;
+    appletConfigManager.ensureAppletConfigs();
     // TODO disable qml's cache avoid to parsing error for ExecutionEngine.
     shell.disableQmlCache();
     shell.setFlickableWheelDeceleration(6000);
 
-    AppletManager manager(pluginIds);
+    AppletManager manager(pluginIds, &appletConfigManager);
     if (parser.isSet(sceneviewOption))
         manager.enableSceneview();
 
