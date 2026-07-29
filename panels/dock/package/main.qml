@@ -69,7 +69,7 @@ Window {
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
     DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing ? Applet.dockSize : 0
     DLayerShellWindow.scope: "dde-shell/dock"
-    DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
+    DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityNone
 
     D.DWindow.enabled: true
     D.DWindow.windowRadius: 0
