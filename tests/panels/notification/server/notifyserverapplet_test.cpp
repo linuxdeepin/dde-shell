@@ -5,18 +5,39 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <atomic>
 #include <QCoreApplication>
+#include <QPointer>
+#include <QTest>
 #include <QThread>
 #include <QSignalSpy>
 #include <QVariant>
 
+#define private public
 #include "notifyserverapplet.h"
+#undef private
 #include "notificationmanager.h"
 
 using namespace notification;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::Invoke;
+
+class TrackableNotificationManager : public NotificationManager {
+    Q_OBJECT
+public:
+    explicit TrackableNotificationManager(QObject *parent = nullptr)
+        : NotificationManager(parent) {}
+
+    ~TrackableNotificationManager() override
+    {
+        ++destroyedCount;
+    }
+
+    static std::atomic_int destroyedCount;
+};
+
+std::atomic_int TrackableNotificationManager::destroyedCount = 0;
 
 // Mock class for NotificationManager
 class MockNotificationManager : public NotificationManager {
@@ -62,13 +83,202 @@ protected:
 // Test constructor
 TEST_F(NotifyServerAppletTest, ConstructorTest) {
     EXPECT_NE(applet, nullptr);
-    // Verify applet is created successfully
     EXPECT_TRUE(applet->inherits("ds::DApplet"));
 }
 
 // Test destructor (basic test - mainly checking no crash)
 TEST_F(NotifyServerAppletTest, DestructorTest) {
     auto *testApplet = new NotifyServerApplet();
+    EXPECT_NO_THROW(delete testApplet);
+}
+
+// Test QPointer members are null by default after construction
+TEST_F(NotifyServerAppletTest, QPointerNullByDefaultTest) {
+    auto *testApplet = new NotifyServerApplet();
+    EXPECT_TRUE(testApplet->m_manager.isNull());
+    EXPECT_TRUE(testApplet->m_worker.isNull());
+    delete testApplet;
+}
+
+// Test QPointer auto-null after explicit delete
+TEST_F(NotifyServerAppletTest, QPointerAutoNullAfterDeleteTest) {
+    auto *testApplet = new NotifyServerApplet();
+    auto *manager = new TrackableNotificationManager();
+
+    testApplet->m_manager = manager;
+    EXPECT_FALSE(testApplet->m_manager.isNull());
+
+    delete manager;
+    EXPECT_TRUE(testApplet->m_manager.isNull());
+
+    delete testApplet;
+}
+
+// Test QPointer auto-null after deleteLater + sendPostedEvents
+TEST_F(NotifyServerAppletTest, QPointerAutoNullAfterDeleteLaterTest) {
+    TrackableNotificationManager::destroyedCount = 0;
+
+    auto *testApplet = new NotifyServerApplet();
+    auto *manager = new TrackableNotificationManager();
+
+    testApplet->m_manager = manager;
+    EXPECT_FALSE(testApplet->m_manager.isNull());
+
+    manager->deleteLater();
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+    EXPECT_TRUE(testApplet->m_manager.isNull());
+    EXPECT_EQ(TrackableNotificationManager::destroyedCount.load(), 1);
+
+    delete testApplet;
+}
+
+// Test destructor when only manager exists (no worker thread)
+TEST_F(NotifyServerAppletTest, DestructorWithManagerOnlyTest) {
+    TrackableNotificationManager::destroyedCount = 0;
+
+    auto *testApplet = new NotifyServerApplet();
+    auto *manager = new TrackableNotificationManager();
+    QPointer<TrackableNotificationManager> managerGuard(manager);
+
+    testApplet->m_manager = manager;
+    // m_worker remains nullptr
+
+    delete testApplet;
+
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+    EXPECT_TRUE(managerGuard.isNull());
+    EXPECT_EQ(TrackableNotificationManager::destroyedCount.load(), 1);
+}
+
+// Test destructor when worker exists but manager is null
+TEST_F(NotifyServerAppletTest, DestructorWithWorkerOnlyTest) {
+    auto *testApplet = new NotifyServerApplet();
+    auto *worker = new QThread();
+    QPointer<QThread> workerGuard(worker);
+
+    testApplet->m_worker = worker;
+    testApplet->m_manager = nullptr;
+
+    QObject::connect(worker, &QThread::finished, worker, &QObject::deleteLater);
+
+    worker->start();
+    QTRY_VERIFY_WITH_TIMEOUT(worker->isRunning(), 1000);
+
+    EXPECT_NO_THROW(delete testApplet);
+
+    QTRY_VERIFY_WITH_TIMEOUT(workerGuard.isNull(), 3000);
+}
+
+// Test QPointer auto-null for m_worker after running worker quit
+TEST_F(NotifyServerAppletTest, QPointerWorkerAutoNullAfterQuitTest) {
+    auto *testApplet = new NotifyServerApplet();
+    auto *worker = new QThread();
+
+    testApplet->m_worker = worker;
+    worker->start();
+    QTRY_VERIFY_WITH_TIMEOUT(worker->isRunning(), 1000);
+
+    worker->quit();
+    worker->wait();
+    delete worker;
+
+    EXPECT_TRUE(testApplet->m_worker.isNull());
+
+    delete testApplet;
+}
+
+// Test destructor with stopped worker and manager (else branch in destructor)
+TEST_F(NotifyServerAppletTest, DestructorWithStoppedWorkerAndManagerTest) {
+    TrackableNotificationManager::destroyedCount = 0;
+
+    auto *testApplet = new NotifyServerApplet();
+    auto *worker = new QThread();
+    auto *manager = new TrackableNotificationManager();
+    QPointer<TrackableNotificationManager> managerGuard(manager);
+    QPointer<QThread> workerGuard(worker);
+
+    testApplet->m_manager = manager;
+    testApplet->m_worker = worker;
+    // worker is NOT started, so isRunning() returns false
+
+    delete testApplet;
+
+    QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+
+    EXPECT_TRUE(managerGuard.isNull());
+    EXPECT_TRUE(workerGuard.isNull());
+    EXPECT_EQ(TrackableNotificationManager::destroyedCount.load(), 1);
+}
+
+TEST_F(NotifyServerAppletTest, DestructorDeletesManagerAfterWorkerThreadExit) {
+    TrackableNotificationManager::destroyedCount = 0;
+
+    auto *testApplet = new NotifyServerApplet();
+    auto *worker = new QThread();
+    auto *manager = new TrackableNotificationManager();
+    QPointer<TrackableNotificationManager> managerGuard(manager);
+
+    testApplet->m_manager = manager;
+    testApplet->m_worker = worker;
+
+    QObject::connect(worker, &QThread::finished, manager, &QObject::deleteLater);
+    QObject::connect(worker, &QThread::finished, worker, &QObject::deleteLater);
+
+    manager->moveToThread(worker);
+    worker->start();
+
+    QTRY_VERIFY_WITH_TIMEOUT(worker->isRunning(), 1000);
+
+    delete testApplet;
+
+    QTRY_VERIFY_WITH_TIMEOUT(managerGuard.isNull(), 3000);
+
+    EXPECT_EQ(TrackableNotificationManager::destroyedCount.load(), 1);
+}
+
+// Test QPointer m_worker auto-null after worker thread finished
+TEST_F(NotifyServerAppletTest, QPointerWorkerAutoNullAfterThreadFinishedTest) {
+    TrackableNotificationManager::destroyedCount = 0;
+
+    auto *testApplet = new NotifyServerApplet();
+    auto *worker = new QThread();
+    auto *manager = new TrackableNotificationManager();
+    QPointer<QThread> workerGuard(worker);
+
+    testApplet->m_manager = manager;
+    testApplet->m_worker = worker;
+
+    QObject::connect(worker, &QThread::finished, manager, &QObject::deleteLater);
+    QObject::connect(worker, &QThread::finished, worker, &QObject::deleteLater);
+
+    manager->moveToThread(worker);
+    worker->start();
+    QTRY_VERIFY_WITH_TIMEOUT(worker->isRunning(), 1000);
+
+    worker->quit();
+    QTRY_VERIFY_WITH_TIMEOUT(workerGuard.isNull(), 3000);
+    QTRY_VERIFY_WITH_TIMEOUT(testApplet->m_manager.isNull(), 3000);
+
+    EXPECT_EQ(TrackableNotificationManager::destroyedCount.load(), 1);
+
+    delete testApplet;
+}
+
+// Test QPointer members non-null after init()
+TEST_F(NotifyServerAppletTest, QPointerNonNullAfterInitTest) {
+    auto *testApplet = new NotifyServerApplet();
+    bool initResult = testApplet->init();
+
+    if (initResult) {
+        EXPECT_FALSE(testApplet->m_manager.isNull());
+        EXPECT_FALSE(testApplet->m_worker.isNull());
+    } else {
+        EXPECT_TRUE(testApplet->m_manager.isNull());
+        EXPECT_TRUE(testApplet->m_worker.isNull());
+    }
+
     EXPECT_NO_THROW(delete testApplet);
 }
 
@@ -95,19 +305,13 @@ TEST_F(NotifyServerAppletTest, DestructorMemoryLeakTest) {
 
 // Test memory leak detection - multiple init calls
 TEST_F(NotifyServerAppletTest, MultipleInitMemoryLeakTest) {
-    // This test checks for memory leaks when init() is called multiple times
-    // Each init() creates new NotificationManager and QThread
-    // The old ones should be properly cleaned up or prevented
-    
     auto *testApplet = new NotifyServerApplet();
     
     // First init
     testApplet->init();
     
-    // Second init - this may create new objects without deleting old ones
-    // (Potential memory leak if not handled properly)
-    // fixme:(heysion) code dump because of this twice init
-    // testApplet->init();
+    // Second init - after adding reentrancy prevention, no more crashes or leaks will occur
+    EXPECT_NO_THROW(testApplet->init());
     
     EXPECT_NO_THROW({
         delete testApplet;
