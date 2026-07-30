@@ -440,6 +440,11 @@ QString NotifyEntity::convertHintsToString(const QVariantMap &map)
         if (it.value().typeId() == QMetaType::QStringList) {
             QStringList tmp = it.value().toStringList();
             value = tmp.join(LIST_VALUE_SEGMENT);
+        } else if (it.value().typeId() == qMetaTypeId<QDBusArgument>()) {
+            QImage img = decodeImageFromDBusArgument(it.value().value<QDBusArgument>());
+            if (!img.isNull()) {
+                value = decodeImageToBase64(img);
+            }
         } else {
             value = it.value().toString();
         }
