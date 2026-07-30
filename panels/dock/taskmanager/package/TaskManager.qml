@@ -255,6 +255,7 @@ ContainmentItem {
                 launcherDndWinId = drag.getDataAsString("text/x-dde-dock-dnd-winid")
                 launcherDndDesktopId = desktopId
                 if (launcherDndDragSource !== "taskbar" && taskmanager.Applet.requestDockByDesktopId(desktopId) === false) {
+                    drag.accepted = false
                     resetDndState()
                 }
             }
