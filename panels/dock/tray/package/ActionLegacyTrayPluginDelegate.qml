@@ -82,7 +82,7 @@ AppletItemButton {
             parent: surfaceItem.shellSurfaceItem
         }
 
-        DDT.ShellSurfaceItemProxy {
+        ShellSurfaceItemProxy {
             id: surfaceItem
             anchors.fill: parent
             shellSurface: pluginItem.plugin
