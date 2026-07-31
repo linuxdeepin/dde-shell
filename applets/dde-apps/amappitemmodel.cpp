@@ -1,15 +1,15 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "amappitemmodel.h"
 #include "amappitem.h"
-#include "appgroupmanager.h"
 #include "appitemmodel.h"
 #include "objectmanager1interface.h"
 
 #include <DUtil>
-#include <QtConcurrent>
+#include <QDBusPendingCallWatcher>
+#include <QDBusPendingReply>
 
 Q_LOGGING_CATEGORY(appsLog, "org.deepin.dde.shell.dde-apps.amappitemmodel")
 
@@ -17,7 +17,7 @@ namespace apps
 {
 AMAppItemModel::AMAppItemModel(QObject *parent)
     : AppItemModel(parent)
-    , m_manager(new ObjectManager("org.desktopspec.ApplicationManager1", "/org/desktopspec/ApplicationManager1", QDBusConnection::sessionBus()))
+    , m_manager(new ObjectManager("org.desktopspec.ApplicationManager1", "/org/desktopspec/ApplicationManager1", QDBusConnection::sessionBus(), this))
     , m_ready(false)
 {
     qRegisterMetaType<ObjectInterfaceMap>();
@@ -50,10 +50,17 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
         removeRow(res.first().row());
     });
 
-    // load static desktop info from am
-    auto future = QtConcurrent::run([this]() {
-        auto apps = m_manager->GetManagedObjects().value();
-
+    // load static desktop info from am asynchronously
+    auto reply = m_manager->GetManagedObjects();
+    auto *watcher = new QDBusPendingCallWatcher(reply, this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, watcher]() {
+        watcher->deleteLater();
+        QDBusPendingReply<ObjectMap> reply = *watcher;
+        if (reply.isError()) {
+            qCWarning(appsLog()) << "Failed to get managed objects:" << reply.error().message();
+            return;
+        }
+        auto apps = reply.value();
         for (auto app = apps.cbegin(); app != apps.cend(); app++) {
             auto path = app.key();
             if (!path.path().isEmpty()) {
@@ -61,7 +68,6 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
                 appendRow(c);
             }
         }
-
         setProperty("ready", true);
         qCDebug(appsLog) << "AMAppItemModel is now ready with apps counts:" << rowCount();
     });
