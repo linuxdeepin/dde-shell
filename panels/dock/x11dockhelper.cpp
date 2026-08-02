@@ -22,7 +22,7 @@
 namespace dock {
 Q_LOGGING_CATEGORY(dockX11Log, "org.deepin.dde.shell.dock.x11")
 
-const uint16_t monitorSize = 15;
+const uint16_t monitorSize = 1;
 const uint32_t allWorkspace = 0xffffffff;
 
 // TODO: use taskmanager window data
