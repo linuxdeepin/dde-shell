@@ -81,11 +81,15 @@ AppletItemButton {
 
     Timer {
         id: closeStashPopupTimer
-        running: !isDropHover && !stashedPopup.dropHover && !stashedPopup.stashItemDragging
+        running: !isDropHover && !stashedPopup.dropHover && !stashedPopup.stashItemDragging && !Panel.contextDragging
         interval: 300
         repeat: false
         onTriggered: {
-            stashedPopup.close()
+            // 只在“拖拽前面板未打开”且“拖拽未成功移入 stash”时才关闭
+            if (!stashedPopup.wasOpenBeforeDrag
+                    && !stashedPopup.stashDropSucceeded) {
+                stashedPopup.close()
+            }
         }
     }
 
@@ -101,6 +105,8 @@ AppletItemButton {
             stashedPopup.close()
         } else {
             stashedPopup.open()
+            // 用户主动点击打开：后续拖拽结束不应自动关闭面板
+            stashedPopup.wasOpenBeforeDrag = true
         }
         if (toolTipShowTimer.running) {
             toolTipShowTimer.stop()

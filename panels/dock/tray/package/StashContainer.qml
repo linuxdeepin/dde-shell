@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -33,6 +33,8 @@ Item {
     readonly property int rowCount: Math.round(Math.sqrt(model.count))
     property bool dropHover: false
     property bool stashItemDragging: false
+    // 拖拽成功移入 stash 时的回调，由 tray.qml 传入
+    property var onStashDropSucceeded: null
 
     function isStashPopup(surfaceId)
     {
@@ -94,6 +96,7 @@ Item {
         }
         onExited: function (dragEvent) {
             dropHover = false
+            stashItemDragging = false
         }
         onPositionChanged: function (dragEvent) {
             let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
@@ -101,7 +104,10 @@ Item {
         }
         onDropped: function (dropEvent) {
             let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
-            DDT.TraySortOrderModel.dropToStashTray(surfaceId, 0, false);
+            let success = DDT.TraySortOrderModel.dropToStashTray(surfaceId, 0, false);
+            if (success && onStashDropSucceeded) {
+                onStashDropSucceeded()
+            }
         }
     }
 

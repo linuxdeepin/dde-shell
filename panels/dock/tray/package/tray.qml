@@ -44,6 +44,10 @@ AppletItem {
         property alias dropHover: stashContainer.dropHover
         property alias stashItemDragging: stashContainer.stashItemDragging
 
+        property bool wasOpenBeforeDrag: false
+        // 拖拽成功标记（图标是否成功移入 stash），由放下的回调根据返回值设置
+        property bool stashDropSucceeded: false
+
         popupX: DockPanelPositioner.x
         popupY: DockPanelPositioner.y
 
@@ -72,6 +76,10 @@ AppletItem {
                         stashedPopup.close()
                     }
                 }
+                // 拖拽成功移入 stash 时由 StashContainer 回调
+                onStashDropSucceeded: function() {
+                    stashedPopup.stashDropSucceeded = true
+                }
             }
         }
 
@@ -96,11 +104,29 @@ AppletItem {
         interval: 10
         repeat: false
         onTriggered: {
-            if (!Panel.contextDragging && !stashedPopup.dropHover) {
+            // 拖拽仍在进行中时，绝不关闭（可能正要拖入面板）
+            if (Panel.contextDragging)
+                return
+            // 只在“拖拽前面板未打开”且“拖拽未成功移入 stash”时才关闭
+            if (!stashedPopup.dropHover
+                    && !stashedPopup.wasOpenBeforeDrag
+                    && !stashedPopup.stashDropSucceeded) {
                 stashedPopup.close()
             }
         }
     }
+
+    Connections {
+        target: Panel
+        function onContextDraggingChanged() {
+            // 拖拽开始时记录面板状态，拖拽结束后据此决定是否自动关闭
+            if (Panel.contextDragging) {
+                stashedPopup.wasOpenBeforeDrag = stashedPopup.popupVisible
+                stashedPopup.stashDropSucceeded = false
+            }
+        }
+    }
+
 
     TrayContainer {
         id: trayContainter
@@ -112,6 +138,10 @@ AppletItem {
         color: "transparent"
         Component.onCompleted: {
             DDT.TrayItemPositionManager.layoutHealthCheck(1500)
+        }
+        // 拖拽成功移入 stash 时由 TrayContainer 回调（命中 action-show-stash）
+        onStashDropSucceeded: function() {
+            stashedPopup.stashDropSucceeded = true
         }
     }
 
