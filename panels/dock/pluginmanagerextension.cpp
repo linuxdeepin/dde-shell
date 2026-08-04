@@ -667,6 +667,8 @@ void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QS
     send_position_changed(resource->handle, m_dockPosition);
     send_color_theme_changed(resource->handle, m_dockColorTheme);
     auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+    qInfo() << "[DDE-50] create_plugin push active=" << theme->activeColor().name()
+            << "darkActive=" << theme->darkActiveColor().name();
     send_active_color_changed(resource->handle, theme->activeColor().name(), theme->darkActiveColor().name());
     send_font_changed(resource->handle, theme->fontName(), theme->fontPointSize());
     send_theme_changed(resource->handle, theme->themeName(), theme->iconThemeName());
@@ -681,6 +683,8 @@ void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QS
 
 void PluginManager::plugin_manager_v1_create_popup_at(Resource *resource, const QString &pluginId, const QString &itemKey, int32_t type, int32_t x, int32_t y, struct ::wl_resource *surface, uint32_t id)
 {
+    qInfo() << "[DDE-50] create_popup_at pluginId=" << pluginId << "itemKey=" << itemKey
+            << "(popup does not receive initial active_color; relies on global plugin_manager_v1 event)";
     QWaylandSurface *qwaylandSurface = QWaylandSurface::fromResource(surface);
     QWaylandResource shellSurfaceResource(wl_resource_create(resource->client(), &::plugin_popup_interface,
                                                            wl_resource_get_version(resource->handle), id));
@@ -824,8 +828,11 @@ void PluginManager::onFontChanged()
 
 void PluginManager::onActiveColorChanged()
 {
-    foreachPluginSurface([this](Resource *source) {
-        auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+    auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+    qInfo() << "[DDE-50] onActiveColorChanged active=" << theme->activeColor().name()
+            << "darkActive=" << theme->darkActiveColor().name()
+            << "surfaces=" << m_pluginSurfaces.size();
+    foreachPluginSurface([this, theme](Resource *source) {
         send_active_color_changed(source->handle, theme->activeColor().name(), theme->darkActiveColor().name());
     });
 }
