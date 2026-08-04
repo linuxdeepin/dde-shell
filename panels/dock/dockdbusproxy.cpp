@@ -63,24 +63,13 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
         });
     }
 
-    // Communicate with the other module
-    auto getOtherApplet = [ = ] {
-        {
-            DAppletBridge bridge("org.deepin.ds.dock.tray");
-            m_trayApplet = bridge.applet();
-        }
-
-        return m_trayApplet;
-    };
-
     // TODO: DQmlGlobal maybe missing a  signal which named `appletListChanged`?
-    QTimer *timer = new QTimer;
+    QTimer *timer = new QTimer(this);
     timer->setInterval(1000);
-    connect(timer, &QTimer::timeout, this, [ = ] {
-        if (getOtherApplet()) {
+    connect(timer, &QTimer::timeout, this, [this, timer] {
+        if (trayApplet()) {
             timer->stop();
             timer->deleteLater();
-            connect(m_trayApplet, SIGNAL(pluginsChanged()), this, SIGNAL(pluginsChanged()));
             // Log the initial plugin list after 30s delay to ensure the list has fully loaded
             QTimer::singleShot(30000, this, [this]() {
                 logInitialPluginState();
@@ -93,6 +82,25 @@ DockDBusProxy::DockDBusProxy(DockPanel* parent)
 DockPanel* DockDBusProxy::parent() const
 {
     return static_cast<DockPanel*>(QObject::parent());
+}
+
+QObject *DockDBusProxy::trayApplet()
+{
+    DAppletBridge bridge("org.deepin.ds.dock.tray");
+    QObject *currentApplet = bridge.applet();
+    if (m_trayApplet.data() == currentApplet) {
+        return m_trayApplet.data();
+    }
+
+    if (m_trayApplet) {
+        QObject::disconnect(m_trayApplet.data(), SIGNAL(pluginsChanged()), this, SIGNAL(pluginsChanged()));
+    }
+
+    m_trayApplet = currentApplet;
+    if (m_trayApplet) {
+        QObject::connect(m_trayApplet.data(), SIGNAL(pluginsChanged()), this, SIGNAL(pluginsChanged()), Qt::UniqueConnection);
+    }
+    return m_trayApplet.data();
 }
 
 QString DockDBusProxy::getAppID(const QString &desktopfile)
@@ -251,8 +259,8 @@ QStringList DockDBusProxy::GetLoadedPlugins()
 DockItemInfos DockDBusProxy::plugins()
 {
     DockItemInfos iteminfos;
-    if (m_trayApplet) {
-        QMetaObject::invokeMethod(m_trayApplet, "dockItemInfos", Qt::DirectConnection, qReturnArg(iteminfos));
+    if (auto *tray = trayApplet()) {
+        QMetaObject::invokeMethod(tray, "dockItemInfos", Qt::DirectConnection, qReturnArg(iteminfos));
     }
 
     for (auto *dockApplet : dockApplets(parent())) {
@@ -326,9 +334,9 @@ void DockDBusProxy::setItemOnDock(const QString &settingKey, const QString &item
         }
     }
 
-    if (m_trayApplet) {
+    if (auto *tray = trayApplet()) {
         Q_EMIT pluginVisibleChanged(itemKey, visible);
-        QMetaObject::invokeMethod(m_trayApplet, "setItemOnDock", Qt::QueuedConnection, settingKey, itemKey, visible);
+        QMetaObject::invokeMethod(tray, "setItemOnDock", Qt::QueuedConnection, settingKey, itemKey, visible);
         logCurrentVisiblePluginList(itemKey, visible);
     }
 }
