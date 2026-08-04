@@ -15,6 +15,7 @@
 #include <QObject>
 #include <QDBusContext>
 #include <QDBusArgument>
+#include <QPointer>
 #include <QTimer>
 
 /** this class used for old dock api compatible
@@ -87,12 +88,13 @@ Q_SIGNALS:
 
 private:
     DockPanel* parent() const;
+    QObject *trayApplet();
     QString getAppID(const QString &desktopfile);
     void updateDockPluginsVisible(const QVariantMap &pluginsVisible);
     void logInitialPluginState();
     void logCurrentVisiblePluginList(const QString &changedItemKey = QString(), bool changedVisible = true);
 
     DS_NAMESPACE::DAppletProxy *m_oldDockApplet;
-    DS_NAMESPACE::DAppletProxy *m_trayApplet;
+    QPointer<QObject> m_trayApplet;
 };
 }

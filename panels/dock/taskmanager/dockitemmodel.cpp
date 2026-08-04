@@ -129,7 +129,14 @@ int DockItemModel::rowCount(const QModelIndex &parent) const
 QVariant DockItemModel::data(const QModelIndex &index, int role) const
 {
     auto sourceModel = this->sourceModel();
-    auto data = sourceModel->data(sourceModel->index(index.row(), index.column()), role);
+    if (!sourceModel || !index.isValid())
+        return {};
+
+    const auto sourceIndex = sourceModel->index(index.row(), index.column());
+    if (!sourceIndex.isValid())
+        return {};
+
+    auto data = sourceModel->data(sourceIndex, role);
     if (role == TaskManager::IconNameRole) {
         if (data.toString().isEmpty()) {
             return DEFAULT_APP_ICONNAME;
@@ -141,7 +148,11 @@ QVariant DockItemModel::data(const QModelIndex &index, int role) const
 
 QModelIndex DockItemModel::mapToSource(const QModelIndex &proxyIndex) const
 {
-    return sourceModel()->index(proxyIndex.row(), proxyIndex.column());
+    auto sourceModel = this->sourceModel();
+    if (!sourceModel || !proxyIndex.isValid())
+        return {};
+
+    return sourceModel->index(proxyIndex.row(), proxyIndex.column());
 }
 
 QModelIndex DockItemModel::mapFromSource(const QModelIndex &sourceIndex) const
