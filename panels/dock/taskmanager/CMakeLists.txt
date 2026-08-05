@@ -76,6 +76,8 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     dockgroupmodel.h
     hoverpreviewproxymodel.cpp
     hoverpreviewproxymodel.h
+    launchdurationreporter.cpp
+    launchdurationreporter.h
     taskmanager.cpp
     taskmanager.h
     treelandwindow.cpp

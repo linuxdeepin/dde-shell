@@ -15,6 +15,7 @@
 #include "globals.h"
 #include "hoverpreviewproxymodel.h"
 #include "itemmodel.h"
+#include "launchdurationreporter.h"
 #include "pluginfactory.h"
 #include "taskmanager.h"
 #include "taskmanageradaptor.h"
@@ -153,6 +154,8 @@ TaskManager::TaskManager(QObject *parent)
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
     connect(Settings, &TaskManagerSettings::showAttentionAnimationChanged, this, &TaskManager::showAttentionAnimationChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
+
+    m_launchDurationReporter = new LaunchDurationReporter(this);
 }
 
 bool TaskManager::load()
@@ -336,8 +339,11 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
 
     QSharedPointer<DesktopfileAbstractParser> desktopfile = nullptr;
     QString desktopId;
+    QString desktopSourcePath;
     if (res.size() > 0) {
-        desktopId = res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString();
+        const auto index = res.first();
+        desktopId = index.data(TaskManager::DesktopIdRole).toString();
+        desktopSourcePath = index.data(TaskManager::DesktopSourcePathRole).toString();
         qCDebug(taskManagerLog()) << "identify by model:" << desktopId;
     }
 
@@ -362,6 +368,10 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     appitem->setDesktopFileParser(desktopfile);
 
     ItemModel::instance()->addItem(appitem);
+
+    if (m_launchDurationReporter && !desktopId.isEmpty()) {
+        m_launchDurationReporter->reportWindowAppeared(desktopId, desktopSourcePath, window->pid());
+    }
 }
 
 void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls)
