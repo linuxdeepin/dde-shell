@@ -1,0 +1,62 @@
+name: Build dde-shell deb packages
+
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    container: linuxdeepin/deepin:crimson
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          set -euxo pipefail
+
+          echo "deb [trusted=yes] http://mirrors.kernel.org/deepin/beige/ crimson main commercial community" > /etc/apt/sources.list
+          echo "deb-src [trusted=yes] http://mirrors.kernel.org/deepin/beige/ crimson main commercial community" >> /etc/apt/sources.list
+          rm -rf /etc/apt/sources.list.d
+
+          apt-get update
+          apt-get install -y devscripts equivs git
+
+          # Build and install treeland-protocols (required build dependency not from repo)
+          echo "Building treeland-protocols from source"
+          cd /tmp
+          if [ ! -d treeland-protocols ]; then
+            git clone --depth=1 --branch master --single-branch https://github.com/linuxdeepin/treeland-protocols.git
+          fi
+          cd treeland-protocols
+          mk-build-deps --install --remove --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' debian/control
+          dpkg-buildpackage -uc -us -b
+          apt-get install -y ../*.deb || dpkg -i ../*.deb || apt-get -f install -y
+
+          cd "$GITHUB_WORKSPACE"
+
+          # Install build-deps defined in dde-shell/debian/control
+          mk-build-deps --install --remove --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' debian/control
+
+      - name: Build dde-shell deb packages
+        run: |
+          set -euxo pipefail
+          dpkg-buildpackage -uc -us -b
+          echo "dde-shell deb packages built successfully!"
+          ls -la ../
+
+      - name: Collect deb artifacts
+        run: |
+          set -euxo pipefail
+          mkdir -p dist
+          mv ../*.deb dist/
+          ls -la dist
+
+      - name: Upload deb packages as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dde-shell-deb-packages
+          path: dist/*.deb
+          if-no-files-found: error
+          retention-days: 30

@@ -273,7 +273,7 @@ TreeLandDockWakeUpArea::TreeLandDockWakeUpArea(QScreen *screen, WaylandDockHelpe
     // force create windowHandle for layershell.
     winId();
     window()->setScreen(screen);
-    window()->resize(QSize(15, 15));
+    window()->resize(QSize(1, 1));
     setAttribute(Qt::WA_TranslucentBackground, true);
 
     auto window = ds::DLayerShellWindow::get(windowHandle());
@@ -315,7 +315,7 @@ void TreeLandDockWakeUpArea::updateDockWakeArea(Position pos)
     }
     }
 
-    window()->resize(QSize(15, 15));
+    window()->resize(QSize(1, 1));
     auto window = ds::DLayerShellWindow::get(windowHandle());
     window->setAnchors(anchors);
 }
@@ -337,9 +337,9 @@ void TreeLandDockWakeUpArea::resizeEvent(QResizeEvent *event)
     auto size = event->size();
     if (m_pos == Left || m_pos == Right) {
         size.setHeight(m_screen->size().height());
-        size.setWidth(15);
+        size.setWidth(1);
     } else {
-        size.setHeight(15);
+        size.setHeight(1);
         size.setWidth(m_screen->size().width());
     }
 
