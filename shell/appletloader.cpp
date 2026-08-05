@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 -2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "appletloader.h"
+#include "appletconfigmanager.h"
 #include "pluginloader.h"
 #include "applet.h"
 #include "containment.h"
@@ -84,22 +85,30 @@ public:
     bool init(DApplet *applet);
 
     void createChildren(DApplet *applet);
+    DApplet *findApplet(DApplet *applet, const QString &pluginId) const;
+    DApplet *parentApplet(const QString &pluginId) const;
+    void fail(const QString &pluginId, const QString &reason);
 
     void loadTranslation(const DPluginMetaData &pluginData);
     void removeTranslation(const QString &pluginId);
+    void removeTranslations(const QString &pluginId);
 
     QPointer<DApplet> m_applet = nullptr;
+    QPointer<AppletConfigManager> m_configManager = nullptr;
+    QString m_pluginId;
     QMap<QString, QTranslator *> m_pluginTranslators;
 
     D_DECLARE_PUBLIC(DAppletLoader);
 };
 
-DAppletLoader::DAppletLoader(class DApplet *applet, QObject *parent)
+DAppletLoader::DAppletLoader(DApplet *applet, AppletConfigManager *configManager, QObject *parent)
     : QObject(parent)
     , DObject(*new DAppletLoaderPrivate(this))
 {
     D_D(DAppletLoader);
     d->m_applet = applet;
+    d->m_configManager = configManager;
+    Q_ASSERT(configManager);
 }
 
 DAppletLoader::~DAppletLoader()
@@ -107,18 +116,54 @@ DAppletLoader::~DAppletLoader()
 
 }
 
+void DAppletLoader::setPluginId(const QString &pluginId)
+{
+    D_D(DAppletLoader);
+    d->m_pluginId = pluginId;
+}
+
 void DAppletLoader::exec()
 {
     D_D(DAppletLoader);
-    d->loadTranslation(d->m_applet->pluginMetaData());
+    auto applet = d->m_applet.data();
 
-    if (!d->load(d->m_applet))
+    if (!d->m_pluginId.isEmpty()) {
+        applet = d->findApplet(applet, d->m_pluginId);
+        if (applet) {
+            return;
+        }
+        auto containment = qobject_cast<DContainment *>(d->parentApplet(d->m_pluginId));
+        if (!containment) {
+            d->fail(d->m_pluginId, QStringLiteral("Parent containment was not found."));
+            return;
+        }
+
+        applet = containment->createApplet(DAppletData(d->m_pluginId));
+        if (!applet) {
+            d->fail(d->m_pluginId, QStringLiteral("Failed to create applet in its parent containment."));
+            return;
+        }
+    }
+
+    d->loadTranslation(applet->pluginMetaData());
+
+    if (!d->load(applet))
         return;
+    
+    d->createRootObject(applet);
 
-    d->createRootObject(d->m_applet);
-
-    if (!d->init(d->m_applet))
+    if (!d->init(applet))
         return;
+}
+
+void DAppletLoader::remove(const QString &pluginId)
+{
+    D_D(DAppletLoader);
+    auto applet = d->findApplet(d->m_applet, pluginId);
+    if (auto containment = applet ? qobject_cast<DContainment *>(applet->parentApplet()) : nullptr) {
+        containment->removeApplet(applet);
+        d->removeTranslations(pluginId);
+    }
 }
 
 DApplet *DAppletLoader::applet() const
@@ -145,11 +190,12 @@ void DAppletLoaderPrivate::doCreateRootObject(DApplet *applet)
             qCDebug(dsLoaderLog) << "Created rootObject for the applet:" << applet->pluginId();
         }
     });
-
     qCDebug(dsLoaderLog) << "Begin to create rootObject the applet:" << applet->pluginId();
-    if (!engine->create()) {
-        engine->deleteLater();
-    }
+    QMetaObject::invokeMethod(engine, [engine]() {
+        if (!engine->create()) {
+            engine->deleteLater();
+        }
+    }, Qt::QueuedConnection);
 }
 
 bool DAppletLoaderPrivate::doLoad(DApplet *applet)
@@ -190,6 +236,10 @@ void DAppletLoaderPrivate::createChildren(DApplet *applet)
         const auto data = applet->appletData();
         auto groups = groupList(applet, data);
         for (const auto &item : std::as_const(groups)) {
+            if (!m_configManager->isAppletEnabled(item.pluginId()))
+                continue;
+            if (findApplet(m_applet, item.pluginId()))
+                continue;
 
             auto child = containment->createApplet(item);
             if (!child) {
@@ -197,6 +247,41 @@ void DAppletLoaderPrivate::createChildren(DApplet *applet)
             }
         }
     }
+}
+
+DApplet *DAppletLoaderPrivate::findApplet(DApplet *applet, const QString &pluginId) const
+{
+    if (!applet)
+        return nullptr;
+    if (applet->pluginId() == pluginId)
+        return applet;
+
+    auto containment = qobject_cast<DContainment *>(applet);
+    if (!containment)
+        return nullptr;
+
+    const auto children = containment->applets();
+    for (const auto &child : children) {
+        if (auto result = findApplet(child, pluginId))
+            return result;
+    }
+    return nullptr;
+}
+
+DApplet *DAppletLoaderPrivate::parentApplet(const QString &pluginId) const
+{
+    const auto parentPlugin = DPluginLoader::instance()->parentPlugin(pluginId);
+    if (!parentPlugin.isValid())
+        return m_applet;
+
+    return findApplet(m_applet, parentPlugin.pluginId());
+}
+
+void DAppletLoaderPrivate::fail(const QString &pluginId, const QString &reason)
+{
+    D_Q(DAppletLoader);
+    qCWarning(dsLoaderLog) << reason << pluginId;
+    Q_EMIT q->failed(pluginId);
 }
 
 bool DAppletLoaderPrivate::load(DApplet *applet)
@@ -248,6 +333,9 @@ void DAppletLoaderPrivate::loadTranslation(const DPluginMetaData &pluginData)
     const QString baseDir = pluginData.pluginDir();
     const QString pluginId = pluginData.pluginId();
 
+    if (!m_configManager->isAppletEnabled(pluginId))
+        return;
+
     auto translator = new QTranslator(qApp);
     const QString pluginTranslationDir(baseDir + "/translations/");
     if (translator->load(QLocale::system(), pluginId, QLatin1String("_"), pluginTranslationDir)) {
@@ -273,6 +361,14 @@ void DAppletLoaderPrivate::removeTranslation(const QString &pluginId)
         m_pluginTranslators.value(pluginId)->deleteLater();
         m_pluginTranslators.remove(pluginId);
     }
+}
+
+void DAppletLoaderPrivate::removeTranslations(const QString &pluginId)
+{
+    const auto children = DPluginLoader::instance()->childrenPlugin(pluginId);
+    for (const auto &child : children)
+        removeTranslations(child.pluginId());
+    removeTranslation(pluginId);
 }
 
 DS_END_NAMESPACE

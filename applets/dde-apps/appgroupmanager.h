@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,6 +6,7 @@
 
 #include <QHash>
 #include <QObject>
+#include <QPointer>
 #include <DConfig>
 #include <QTimer>
 #include <QQmlEngine>
@@ -82,7 +83,7 @@ private:
 
 private:
     bool m_appGroupInitialized;
-    AMAppItemModel * m_referenceModel;
+    QPointer<AMAppItemModel> m_referenceModel;
     QTimer* m_dumpTimer;
     Dtk::Core::DConfig *m_config;
 };

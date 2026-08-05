@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -240,6 +240,11 @@ QVariantList AppGroupManager::fromListOfStringList(const QList<QStringList> & li
 // On AM model changed, add newly installed apps to group (if any) and remove apps that are no longer exists.
 void AppGroupManager::onReferenceModelChanged()
 {
+    if (!m_referenceModel) {
+        qWarning() << "referenceModel has been destroyed, skip updating";
+        return;
+    }
+
     // Avoid remove all existing records when first time (AM model is not ready).
     if (m_referenceModel->rowCount() == 0) {
         qDebug() << "referenceModel not ready, wait for next time";
