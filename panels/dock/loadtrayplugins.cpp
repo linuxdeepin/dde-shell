@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -97,6 +97,10 @@ void LoadTrayPlugins::setProcessEnv(QProcess *process)
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     // TODO: use protocols to determine the environment instead of environment variables
     env.remove("DDE_CURRENT_COMPOSITOR");
+    // 告知插件进程: 由 dde-shell 的 dockplugin 合成器托管, 需要在创建
+    // DPlatformTheme 之前注册 DQWaylandPlatformInterface(见 tray-loader 的
+    // main.cpp), 否则活动色/主题/字体等属性无法同步到插件。
+    env.insert("DDE_TRAY_LOADER_REGISTER_PLATFORM_INTERFACE", "1");
 
     process->setProcessEnvironment(env);
 }
