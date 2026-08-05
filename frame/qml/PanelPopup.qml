@@ -142,10 +142,13 @@ Item {
             if (control.grabInactivePending || popupWindow.x11GrabFocusTransition) {
                 return
             }
-            // TODO why activeChanged is not emit.
-            if (!popupWindow.active) {
+            Qt.callLater(function() {
+                if (!popupWindow
+                        || popupWindow.active) {
+                    return
+                }
                 control.close()
-            }
+            })
         }
 
         function onUpdateGeometryFinished()
