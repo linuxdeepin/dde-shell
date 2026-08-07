@@ -32,6 +32,8 @@ QHash<int, QByteArray> AppItemModel::roleNames() const
             {AppItemModel::IdRole, QByteArrayLiteral("id")},
             {AppItemModel::XCreatedByRole, QByteArrayLiteral("xCreatedBy")},
             {AppItemModel::ExecsRole, QByteArrayLiteral("execs")},
-            {AppItemModel::DesktopSourcePathRole, QByteArrayLiteral("desktopSourcePath")}};
+            {AppItemModel::DesktopSourcePathRole, QByteArrayLiteral("desktopSourcePath")},
+            {AppItemModel::VendorRole, QByteArrayLiteral("vendor")},
+            {AppItemModel::GenericNameRole, QByteArrayLiteral("genericName")}};
 }
 }
