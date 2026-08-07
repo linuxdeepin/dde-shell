@@ -91,6 +91,8 @@ Item {
     property int dropHoverIndex: -1
     required property var surfaceAcceptor
     readonly property bool isDropping: dropArea.containsDrag
+    // 拖拽成功移入 stash 时的回调（命中 action-show-stash），由 tray.qml 传入
+    property var onStashDropSucceeded: null
 
     onIsDraggingChanged: {
         animationEnable = !isDragging
@@ -220,8 +222,17 @@ Item {
             if (isStash || source === "quickPanel") {
                 DDT.TraySortOrderModel.commitStagedDrop()
             } else {
+                // 检查是否放到了展开按钮上（命中 action-show-stash 分支，图标移入 stash）
+                // 在 dropToDockTray 之前检查，避免模型变更后索引失效
+                let modelIndex = DDT.TraySortOrderModel.getModelIndexByVisualIndex(Math.floor(currentItemIndex))
+                let dropOnSurfaceId = root.model.data(modelIndex, DDT.TraySortOrderModel.SurfaceIdRole)
+                let isDroppedOnStashButton = (dropOnSurfaceId === "internal/action-show-stash")
+
                 // 托盘内部拖拽直接提交
-                DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
+                let success = DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
+                if (isDroppedOnStashButton && success && onStashDropSucceeded) {
+                    onStashDropSucceeded()
+                }
             }
             DDT.TraySortOrderModel.actionsAlwaysVisible = false
         }
