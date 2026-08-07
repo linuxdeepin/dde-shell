@@ -1,14 +1,14 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "appsapplet.h"
 #include "amappitemmodel.h"
 #include "appgroupmanager.h"
+#include "appitemmodel.h"
 #include "pluginfactory.h"
 
-#include <DUtil>
-#include <QtConcurrent>
+#include <QMetaEnum>
 
 namespace apps
 {
@@ -18,16 +18,6 @@ AppsApplet::AppsApplet(QObject *parent)
     , m_groupModel(new AppGroupManager(m_appModel, this))
 {
     connect(m_appModel, &AMAppItemModel::readyChanged, this, &AppsApplet::appModelReadyChanged);
-}
-
-AppsApplet::~AppsApplet()
-{
-
-}
-
-bool AppsApplet::load()
-{
-    return true;
 }
 
 QAbstractItemModel *AppsApplet::groupModel() const
@@ -43,6 +33,15 @@ QAbstractItemModel *AppsApplet::appModel() const
 bool AppsApplet::appModelReady() const
 {
     return m_appModel->ready();
+}
+
+QVariantMap AppsApplet::ddeCategories() const
+{
+    QVariantMap categories;
+    const QMetaEnum metaEnum = QMetaEnum::fromType<AppItemModel::DDECategories>();
+    for (int i = 0; i < metaEnum.keyCount(); ++i)
+        categories.insert(QString::fromLatin1(metaEnum.key(i)), metaEnum.value(i));
+    return categories;
 }
 
 D_APPLET_CLASS(AppsApplet)
