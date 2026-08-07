@@ -104,11 +104,6 @@ void NotifyServerApplet::removeExpiredNotifications()
     m_manager->removeExpiredNotifications();
 }
 
-void NotifyServerApplet::setBlockClosedId(qint64 id)
-{
-    m_manager->setBlockClosedId(id);
-}
-
 D_APPLET_CLASS(NotifyServerApplet)
 
 }

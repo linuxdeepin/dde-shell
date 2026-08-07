@@ -32,6 +32,7 @@ public:
     uint replacesId() const;
     bool isReplace() const;
     int urgency() const;
+    int timeout() const;
     QString bodyImagePath() const;
     qint64 ctime() const;
 

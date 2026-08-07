@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,6 +10,7 @@
 
 #include "notifyitem.h"
 #include "dataaccessor.h"
+#include "expiretimer.h"
 
 namespace notifycenter {
 /**
@@ -65,6 +66,14 @@ private:
     void updateTime();
     NotifyEntity notifyById(qint64 id) const;
 
+    // Notifications shown in the staging area (notification center) need their
+    // own expire timeout because the bubble panel is disabled while the center
+    // window is open, so the bubble-side timers are not running.
+    void startExpireTimer(const NotifyEntity &entity);
+    void stopExpireTimer(qint64 id);
+    void stopAllExpireTimers();
+    void onExpireTimeout(qint64 id);
+
 private:
     QList<AppNotifyItem *> m_appNotifies;
     const int BubbleMaxCount{3};
@@ -73,5 +82,6 @@ private:
     DataAccessor *m_accessor = nullptr;
     int m_overlapCount = 0;
     int m_contentRowCount = 6;
+    ExpireTimer m_expireTimer;
 };
 }

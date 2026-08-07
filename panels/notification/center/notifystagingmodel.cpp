@@ -25,11 +25,15 @@ NotifyStagingModel::NotifyStagingModel(QObject *parent)
     connect(NotifyAccessor::instance(), &NotifyAccessor::stagingEntityReceived, this, &NotifyStagingModel::doEntityReceived);
     connect(NotifyAccessor::instance(), &NotifyAccessor::stagingEntityClosed, this, &NotifyStagingModel::onEntityClosed);
     connect(NotifySetting::instance(), &NotifySetting::contentRowCountChanged, this, &NotifyStagingModel::updateContentRowCount);
+
+    connect(&m_expireTimer, &ExpireTimer::expired, this, &NotifyStagingModel::onExpireTimeout);
 }
 
 void NotifyStagingModel::close()
 {
     qDebug(notifyLog) << "close";
+
+    stopAllExpireTimers();
 
     beginResetModel();
     qDeleteAll(m_appNotifies);
@@ -63,6 +67,8 @@ void NotifyStagingModel::push(const NotifyEntity &entity)
         updateOverlapCount(count);
     }
 
+    startExpireTimer(entity);
+
     if (m_refreshTimer < 0) {
         m_refreshTimer = startTimer(std::chrono::milliseconds(1000));
     }
@@ -89,6 +95,8 @@ void NotifyStagingModel::invokeNotify(qint64 id, const QString &actionId)
 void NotifyStagingModel::remove(qint64 id)
 {
     qDebug(notifyLog) << "Remove notify by id" << id;
+
+    stopExpireTimer(id);
 
     int row = -1;
     for (int i = 0; i < m_appNotifies.size(); i++) {
@@ -146,6 +154,7 @@ void NotifyStagingModel::remove(qint64 id)
             auto notify = new AppNotifyItem(newEntity);
             m_appNotifies.insert(insertedIndex, notify);
             endInsertRows();
+            startExpireTimer(newEntity);
         }
     }
     updateOverlapCount(entities.size());
@@ -154,6 +163,8 @@ void NotifyStagingModel::remove(qint64 id)
 void NotifyStagingModel::open()
 {
     qDebug(notifyLog) << "Open staging model";
+
+    stopAllExpireTimers();
 
     auto entities = m_accessor->fetchEntities(DataAccessor::AllApp(), NotifyEntity::NotProcessed, BubbleMaxCount + OverlayMaxCount);
 
@@ -171,6 +182,9 @@ void NotifyStagingModel::open()
     for (int i = 0; i < count; i++) {
         auto notify = new AppNotifyItem(entities.at(i));
         m_appNotifies << notify;
+    }
+    for (const auto &entity : entities) {
+        startExpireTimer(entity);
     }
     updateOverlapCount(entities.size());
 
@@ -251,7 +265,9 @@ void NotifyStagingModel::replace(const NotifyEntity &entity)
     for (int i = 0; i < m_appNotifies.size(); i++) {
         auto item = m_appNotifies[i];
         if (item->id() == entity.bubbleId()) {
+            stopExpireTimer(entity.bubbleId());
             item->setEntity(entity);
+            startExpireTimer(entity);
             const auto index = this->index(i, 0, {});
             dataChanged(index, index);
             break;
@@ -333,9 +349,36 @@ void NotifyStagingModel::updateContentRowCount(int rowCount)
         return;
 
     m_contentRowCount = rowCount;
-
     if (!m_appNotifies.isEmpty()) {
         dataChanged(index(0), index(m_appNotifies.size() - 1), {NotifyRole::NotifyContentRowCount});
     }
 }
+
+void NotifyStagingModel::startExpireTimer(const NotifyEntity &entity)
+{
+    const auto id = entity.id();
+    stopExpireTimer(id);
+
+    const int interval = effectiveTimeout(entity.urgency(), entity.timeout());
+    if (interval <= 0)
+        return;
+
+    m_expireTimer.start(id, interval);
+}
+
+void NotifyStagingModel::stopExpireTimer(qint64 id)
+{
+    m_expireTimer.stop(id);
+}
+
+void NotifyStagingModel::stopAllExpireTimers()
+{
+    m_expireTimer.stopAll();
+}
+
+void NotifyStagingModel::onExpireTimeout(qint64 id)
+{
+    closeNotify(id, NotifyEntity::Expired);
+}
+
 }
