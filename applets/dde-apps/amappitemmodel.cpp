@@ -8,8 +8,6 @@
 #include "objectmanager1interface.h"
 
 #include <DUtil>
-#include <QDBusPendingCallWatcher>
-#include <QDBusPendingReply>
 
 Q_LOGGING_CATEGORY(appsLog, "org.deepin.dde.shell.dde-apps.amappitemmodel")
 
@@ -50,25 +48,29 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
         removeRow(res.first().row());
     });
 
-    // load static desktop info from am asynchronously
-    auto reply = m_manager->GetManagedObjects();
-    auto *watcher = new QDBusPendingCallWatcher(reply, this);
+    auto watcher = new QDBusPendingCallWatcher(m_manager->GetManagedObjects(), this);
     connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, watcher]() {
-        watcher->deleteLater();
         QDBusPendingReply<ObjectMap> reply = *watcher;
+        watcher->deleteLater();
         if (reply.isError()) {
-            qCWarning(appsLog()) << "Failed to get managed objects:" << reply.error().message();
+            qCWarning(appsLog) << "Failed to load applications from ApplicationManager:" << reply.error();
             return;
         }
-        auto apps = reply.value();
-        for (auto app = apps.cbegin(); app != apps.cend(); app++) {
-            auto path = app.key();
-            if (!path.path().isEmpty()) {
-                auto c = new AMAppItem(path, app.value());
-                appendRow(c);
-            }
+
+        const auto apps = reply.value();
+        for (auto app = apps.cbegin(); app != apps.cend(); ++app) {
+            const auto path = app.key();
+            if (path.path().isEmpty())
+                continue;
+
+            const auto desktopId = DUtil::unescapeFromObjectPath(path.path().split('/').last());
+            if (!match(index(0, 0), AppItemModel::DesktopIdRole, desktopId, 1, Qt::MatchExactly).isEmpty())
+                continue;
+            appendRow(new AMAppItem(path, app.value()));
         }
-        setProperty("ready", true);
+
+        m_ready = true;
+        Q_EMIT readyChanged(true);
         qCDebug(appsLog) << "AMAppItemModel is now ready with apps counts:" << rowCount();
     });
 }

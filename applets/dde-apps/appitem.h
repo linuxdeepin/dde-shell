@@ -78,5 +78,11 @@ public:
 
     QString desktopSourcePath() const;
     void setDesktopSourcePath(const QString &desktopSourcePath);
+
+    QString vendor() const;
+    void setVendor(const QString &vendor);
+
+    QString genericName() const;
+    void setGenericName(const QString &genericName);
 };
 }
