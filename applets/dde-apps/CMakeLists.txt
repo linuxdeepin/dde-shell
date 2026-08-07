@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -59,7 +59,6 @@ add_library(dde-apps SHARED ${DBUS_INTERFACES}
 
 target_link_libraries(dde-apps PRIVATE
     dde-shell-frame
-    Qt${QT_VERSION_MAJOR}::Concurrent
     yaml-cpp
 )
 
