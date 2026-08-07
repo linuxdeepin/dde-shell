@@ -22,6 +22,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QMap<int, QVariant> itemData(const QModelIndex &index) const override;
 
     bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
     bool hasIndex(int row, int column, const QModelIndex &parent = QModelIndex()) const;
