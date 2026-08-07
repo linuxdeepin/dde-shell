@@ -53,6 +53,14 @@ bool BubblePanel::init()
 
     connect(m_bubbles, &BubbleModel::rowsInserted, this, &BubblePanel::onBubbleCountChanged);
     connect(m_bubbles, &BubbleModel::rowsRemoved, this, &BubblePanel::onBubbleCountChanged);
+    // The bubble model runs one expire timer per shown bubble. When a bubble
+    // times out, close it and notify the server so it moves the notification
+    // from the in-memory store to the center database and emits the signals.
+    connect(m_bubbles, &BubbleModel::bubbleExpired, this, [this](qint64 id, uint bubbleId) {
+        closeBubble(id);
+        QMetaObject::invokeMethod(m_notificationServer, "notificationClosed", Qt::DirectConnection,
+                                  Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(uint, NotifyEntity::Expired));
+    });
 
     return true;
 }
@@ -217,7 +225,7 @@ void BubblePanel::setEnabled(bool newEnabled)
 
 void BubblePanel::setHoveredId(qint64 id)
 {
-    QMetaObject::invokeMethod(m_notificationServer, "setBlockClosedId", Qt::DirectConnection, Q_ARG(qint64, id));
+    m_bubbles->setBlockedId(id);
 }
 }
 

@@ -20,6 +20,8 @@ Q_DECLARE_LOGGING_CATEGORY(notifyLog)
 
 namespace notification {
 
+static const int BlockItemTimeout = 1000;
+
 BubbleModel::BubbleModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_updateTimeTipTimer(new QTimer(this))
@@ -41,6 +43,7 @@ BubbleModel::BubbleModel(QObject *parent)
             m_processPendingTimer->start();
         }
     });
+    connect(&m_expireTimer, &ExpireTimer::expired, this, &BubbleModel::onTimeout);
 
     connect(NotifySetting::instance(), &NotifySetting::contentRowCountChanged, this, &BubbleModel::updateContentRowCount);
     connect(NotifySetting::instance(), &NotifySetting::bubbleCountChanged, this, &BubbleModel::updateBubbleCount);
@@ -82,6 +85,8 @@ void BubbleModel::insertBubble(BubbleItem *bubble)
     beginInsertRows(QModelIndex(), 0, 0);
     m_bubbles.prepend(bubble);
     endInsertRows();
+
+    startTimeout(bubble);
 }
 
 bool BubbleModel::isReplaceBubble(const BubbleItem *bubble) const
@@ -95,8 +100,16 @@ BubbleItem *BubbleModel::replaceBubble(BubbleItem *bubble)
     const auto replaceIndex = replaceBubbleIndex(bubble);
     const auto oldBubble = m_bubbles[replaceIndex];
 
+    stopTimeout(oldBubble->id());
+
     m_bubbles.replace(replaceIndex, bubble);
     Q_EMIT dataChanged(index(replaceIndex), index(replaceIndex));
+
+    startTimeout(bubble);
+
+    // If the replaced bubble was the hovered one, keep blocking the new one.
+    if (m_blockedId == oldBubble->id())
+        pauseTimeout(bubble->id());
 
     return oldBubble;
 }
@@ -108,6 +121,8 @@ void BubbleModel::clear()
     }
     qDeleteAll(m_pendingBubbles);
     m_pendingBubbles.clear();
+
+    stopAllTimeouts();
 
     if (m_bubbles.count() <= 0)
         return;
@@ -129,11 +144,12 @@ void BubbleModel::remove(int index)
     if (index < 0 || index >= m_bubbles.size())
         return;
 
-    beginRemoveRows(QModelIndex(), index, index);
     auto bubble = m_bubbles.takeAt(index);
+    stopTimeout(bubble->id());
+
+    beginRemoveRows(QModelIndex(), index, index);
     bubble->deleteLater();
     endRemoveRows();
-
 }
 
 void BubbleModel::remove(const BubbleItem *bubble)
@@ -298,4 +314,81 @@ void BubbleModel::updateContentRowCount(int rowCount)
         Q_EMIT dataChanged(index(0), index(m_bubbles.size() - 1), {BubbleModel::ContentRowCount});
     }
 }
+
+void BubbleModel::setBlockedId(qint64 id)
+{
+    if (id == m_blockedId)
+        return;
+
+    if (m_blockedId != NotifyEntity::InvalidId)
+        resumeTimeout(m_blockedId);
+
+    m_blockedId = id;
+
+    if (id != NotifyEntity::InvalidId)
+        pauseTimeout(id);
 }
+
+int BubbleModel::timeoutInterval(const BubbleItem *bubble) const
+{
+    return effectiveTimeout(bubble->urgency(), bubble->timeout());
+}
+
+void BubbleModel::startTimeout(BubbleItem *bubble)
+{
+    const auto id = bubble->id();
+    stopTimeout(id);
+
+    const int interval = timeoutInterval(bubble);
+    if (interval <= 0)
+        return;
+
+    m_expireTimer.start(id, interval);
+    m_timeoutBubbleIds.insert(id, bubble->bubbleId());
+}
+
+void BubbleModel::stopTimeout(qint64 id)
+{
+    m_expireTimer.stop(id);
+    m_timeoutBubbleIds.remove(id);
+    m_pausedRemaining.remove(id);
+}
+
+void BubbleModel::pauseTimeout(qint64 id)
+{
+    if (!m_expireTimer.contains(id))
+        return;
+
+    m_pausedRemaining.insert(id, m_expireTimer.remaining(id));
+    m_expireTimer.stop(id);
+}
+
+void BubbleModel::resumeTimeout(qint64 id)
+{
+    auto it = m_pausedRemaining.find(id);
+    if (it == m_pausedRemaining.end())
+        return;
+
+    auto remaining = it.value();
+    m_pausedRemaining.erase(it);
+    if (remaining < BlockItemTimeout)
+        remaining = BlockItemTimeout;
+
+    m_expireTimer.start(id, remaining);
+}
+
+void BubbleModel::stopAllTimeouts()
+{
+    m_blockedId = NotifyEntity::InvalidId;
+    m_timeoutBubbleIds.clear();
+    m_pausedRemaining.clear();
+    m_expireTimer.stopAll();
+}
+
+void BubbleModel::onTimeout(qint64 id)
+{
+    const uint bubbleId = m_timeoutBubbleIds.take(id);
+    Q_EMIT bubbleExpired(id, bubbleId);
+}
+
+} // notification

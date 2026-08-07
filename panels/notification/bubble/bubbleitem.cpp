@@ -91,6 +91,11 @@ int BubbleItem::urgency() const
     return m_urgency;
 }
 
+int BubbleItem::timeout() const
+{
+    return m_entity.timeout();
+}
+
 QString BubbleItem::bodyImagePath() const
 {
     return m_entity.bodyIcon();

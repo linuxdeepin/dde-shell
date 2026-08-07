@@ -6,8 +6,10 @@
 
 #include "dsglobal.h"
 #include "notifyentity.h"
+#include "expiretimer.h"
 
 #include <QAbstractListModel>
+#include <QHash>
 #include <QQueue>
 
 class QTimer;
@@ -38,6 +40,10 @@ public:
     explicit BubbleModel(QObject *parent = nullptr);
     ~BubbleModel() override;
 
+Q_SIGNALS:
+    // Emitted when a bubble reaches its expire timeout and should be closed.
+    void bubbleExpired(qint64 id, uint bubbleId);
+
 public:
     void push(BubbleItem *bubble);
 
@@ -50,6 +56,10 @@ public:
     void remove(const BubbleItem *bubble);
     BubbleItem *removeById(qint64 id);
     void clear();
+
+    // Pause/resume the expire timer of the hovered bubble so hovering
+    // keeps the bubble on screen (0 clears the blocked bubble).
+    void setBlockedId(qint64 id);
 
     BubbleItem *bubbleItem(int bubbleIndex) const;
 
@@ -68,11 +78,23 @@ private:
     void updateBubbleTimeTip();
     void updateContentRowCount(int rowCount);
 
+    int timeoutInterval(const BubbleItem *bubble) const;
+    void startTimeout(BubbleItem *bubble);
+    void stopTimeout(qint64 id);
+    void pauseTimeout(qint64 id);
+    void resumeTimeout(qint64 id);
+    void stopAllTimeouts();
+    void onTimeout(qint64 id);
+
 private:
     QTimer *m_updateTimeTipTimer = nullptr;
     QTimer *m_processPendingTimer = nullptr;
+    ExpireTimer m_expireTimer;
     QList<BubbleItem *> m_bubbles;
     QQueue<BubbleItem *> m_pendingBubbles;
+    QHash<qint64, uint> m_timeoutBubbleIds;
+    QHash<qint64, int> m_pausedRemaining;
+    qint64 m_blockedId = NotifyEntity::InvalidId;
     int m_maxKeep{5};
     int m_contentRowCount{6};
 };
