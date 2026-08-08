@@ -17,6 +17,7 @@ Item {
     property bool readyBinding: false
     property bool openPending: false
     property bool grabInactivePending: false
+    property bool closeOnInactive: true
     property int grabInactiveTimeout: 200
     // WM_NAME, used for kwin.
     property string windowTitle: "dde-shell/panelpopup"
@@ -117,6 +118,9 @@ Item {
             if (!popupWindow || !readyBinding || popupWindow.currentItem !== control || !popup.visible) {
                 return
             }
+            if (!control.closeOnInactive) {
+                return
+            }
             if (!popupWindow.active) {
                 control.close()
             }
@@ -137,6 +141,9 @@ Item {
             if (popupWindow.active) {
                 control.grabInactivePending = false
                 grabInactiveTimer.stop()
+                return
+            }
+            if (!control.closeOnInactive) {
                 return
             }
             if (control.grabInactivePending || popupWindow.x11GrabFocusTransition) {
@@ -175,7 +182,8 @@ Item {
                         || !readyBinding
                         || popupWindow.currentItem !== control
                         || !popup.visible
-                        || control.grabInactivePending) {
+                        || control.grabInactivePending
+                        || !control.closeOnInactive) {
                     return
                 }
                 if (!popupWindow.active) {

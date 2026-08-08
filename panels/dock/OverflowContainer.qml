@@ -30,6 +30,11 @@ Item {
     }
 
     function calculateImplicitWidth(prev, current) {
+        // Zero-width delegates are hidden (for example, items moved into the
+        // overflow popup) and must not leave an extra spacing slot behind.
+        if (current <= 0) {
+            return prev
+        }
         if (useColumnLayout) {
             return Math.max(prev, current)
         } else {
@@ -41,6 +46,11 @@ Item {
     }
 
     function calculateImplicitHeight(prev, current) {
+        // Keep the vertical layout consistent with the horizontal one: hidden
+        // delegates contribute neither size nor spacing.
+        if (current <= 0) {
+            return prev
+        }
         if (useColumnLayout) {
             if (prev == 0) {
                 return current

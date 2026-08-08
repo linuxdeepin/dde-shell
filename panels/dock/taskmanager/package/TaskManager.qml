@@ -14,6 +14,7 @@ ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int dockOrder: 16
+    readonly property bool fashionMode: Panel.fashionMode
 
     Accessible.role: Accessible.Grouping
     Accessible.name: qsTr("Task Manager")
@@ -21,10 +22,12 @@ ContainmentItem {
     function calcRemainingSpace(baseSize) {
         const otherCount = Panel.rootObject.dockCenterPartCount - 1;
         const otherOccupied = otherCount > 0 ? otherCount * baseSize * multitaskViewIconRatio : 0;
-        return Panel.rootObject.dockRawCenterSpace - otherOccupied;
+        return Panel.rootObject.dockEffectiveCenterSpace - otherOccupied;
     }
 
-    readonly property real remainingSpacesForTaskManager: calcRemainingSpace(Panel.rootObject.dockItemMaxSize)
+    property real remainingSpacesForTaskManager: fashionMode
+        ? 0
+        : calcRemainingSpace(Panel.rootObject.dockItemMaxSize)
     readonly property int appTitleSpacing: Math.max(10, Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14) / 3)
     // Start padding for the app container so that the visual gap
     // (multitask icon right edge → first app icon left edge) = appTitleSpacing.
@@ -37,15 +40,20 @@ ContainmentItem {
     // Defined in main.qml as dockItemIconSize = dockItemMaxSize * 9 / 14.
     // At default dock size (56), icon = 36px; at min (37), icon ≈ 24px; at max (100), icon ≈ 64px.
     readonly property real iconWidthToMaxSizeRatio: 9 / 14
+    readonly property int minimumDockItemSize: Math.max(
+        Dock.MIN_DOCK_SIZE,
+        Math.round(Panel.rootObject.dockSize * Dock.MIN_DOCK_SIZE / Dock.DEFAULT_DOCK_SIZE))
     readonly property real startPadding: Math.max(0, appTitleSpacing - (Panel.rootObject.dockItemMaxSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2))
 
     implicitWidth: {
+        if (fashionMode) return appContainer.implicitWidth + (useColumnLayout ? 0 : startPadding)
         let extra = useColumnLayout ? 0 : startPadding
         let w = appContainer.implicitWidth + extra
         let maxW = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, w) : Math.min(remainingSpacesForTaskManager, w)
         return useColumnLayout ? Panel.rootObject.dockSize : maxW
     }
     implicitHeight: {
+        if (fashionMode && useColumnLayout) return appContainer.implicitHeight + startPadding
         let extra = useColumnLayout ? startPadding : 0
         let h = appContainer.implicitHeight + extra
         let maxH = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, h) : Math.min(remainingSpacesForTaskManager, h)
@@ -82,9 +90,22 @@ ContainmentItem {
     }
     property real blendOpacity: blendColorAlpha(D.DTK.themeType === D.ApplicationHelper.DarkType ? 0.25 : 1.0)
 
+    TaskOverflowController {
+        id: taskOverflow
+        // Window-split title layout has priority. Only fall back to adaptive icon
+        // shrinking and overflow when no title layout can fit the available space.
+        enabled: !textCalculator.enabled || textCalculator.totalWidth <= 0
+        availableExtent: Math.max(0, taskmanager.calcRemainingSpace(Panel.rootObject.dockItemMaxSize) - taskmanager.startPadding)
+        minimumReached: Panel.rootObject.dockItemMaxSize <= taskmanager.minimumDockItemSize + 0.5
+        fallbackItemExtent: Math.max(1, Panel.rootObject.dockItemMaxSize * taskmanager.iconWidthToMaxSizeRatio)
+        spacing: taskmanager.appTitleSpacing
+        visualModel: visualModel
+        dataModel: taskmanager.Applet.dataModel
+    }
+
     TextCalculator {
         id: textCalculator
-        enabled: taskmanager.Applet.windowSplit && (Panel.position == Dock.Bottom || Panel.position == Dock.Top)
+        enabled: !fashionMode && taskmanager.Applet.windowSplit && (Panel.position == Dock.Bottom || Panel.position == Dock.Top)
         dataModel: taskmanager.Applet.dataModel
         iconSize: Panel.rootObject.dockSize * 9 / 14
         spacing: Math.max(10, Math.round(textCalculator.iconSize) / 3)
@@ -131,14 +152,29 @@ ContainmentItem {
                 required property string icon // winIconName
                 required property string menus
                 required property list<string> windows
+                required property var groupItems
                 z: attention ? -1 : 0
                 property bool visibility: {
-                    let draggedAppId = taskmanager.Applet.desktopIdToAppId(launcherDndDropArea.launcherDndDesktopId)
-                    if (itemId !== draggedAppId) {
+                    const draggedItemId = launcherDndDropArea.dockItemId(launcherDndDropArea.launcherDndDesktopId)
+                    if (itemId !== draggedItemId) {
                         return true 
                     }
                     return windows.length > 0 && launcherDndDropArea.launcherDndWinId !== windows[0]
                 }
+
+                readonly property bool overflowActive: taskOverflow.popupItems.length > 0
+                readonly property bool isOverflowButton: overflowActive
+                    && DelegateModel.itemsIndex === taskOverflow.visibleItemCount
+                readonly property bool hiddenInOverflow: overflowActive
+                    && DelegateModel.itemsIndex > taskOverflow.visibleItemCount
+                visible: !hiddenInOverflow
+
+                readonly property real normalDelegateWidth: useColumnLayout
+                    ? taskmanager.implicitWidth
+                    : appItem.implicitWidth
+                readonly property real normalDelegateHeight: useColumnLayout
+                    ? Panel.rootObject.dockItemMaxSize * 9 / 14
+                    : taskmanager.implicitHeight
 
                 ListView.onAdd: NumberAnimation {
                     target: delegateRoot
@@ -164,8 +200,8 @@ ContainmentItem {
                 Behavior on opacity { NumberAnimation { duration: 200 } }
                 Behavior on scale { NumberAnimation { duration: 200 } }
 
-                implicitWidth: useColumnLayout ? taskmanager.implicitWidth : appItem.implicitWidth
-                implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 9 / 14 : taskmanager.implicitHeight
+                implicitWidth: hiddenInOverflow? 0 : normalDelegateWidth
+                implicitHeight: hiddenInOverflow? 0 : normalDelegateHeight
 
                 property int visualIndex: DelegateModel.itemsIndex
                 property var modelIndex: visualModel.modelIndex(index)
@@ -181,8 +217,29 @@ ContainmentItem {
                     y: delegateRoot.y
                     width: delegateRoot.width
                     height: delegateRoot.height
-                    scale: delegateRoot.scale
+                    readonly property bool hiddenByOverflow: delegateRoot.isOverflowButton
+                        || delegateRoot.hiddenInOverflow
+                    property real overflowTransitionScale: hiddenByOverflow ? 0.8 : 1.0
+                    scale: delegateRoot.scale * overflowTransitionScale
+                    opacity: hiddenByOverflow ? 0 : 1
+                    visible: opacity > 0.001
                     property bool positionAnimationEnabled: false
+
+                    Behavior on opacity {
+                        enabled: appItemRect.positionAnimationEnabled
+                        NumberAnimation {
+                            duration: 120
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    Behavior on overflowTransitionScale {
+                        enabled: appItemRect.positionAnimationEnabled
+                        NumberAnimation {
+                            duration: 120
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
                     Behavior on x {
                         enabled: appItemRect.positionAnimationEnabled
                         NumberAnimation {
@@ -217,6 +274,7 @@ ContainmentItem {
                         iconName: delegateRoot.iconName
                         menus: delegateRoot.menus
                         windows: delegateRoot.windows
+                        groupItems: delegateRoot.groupItems
                         visualIndex: delegateRoot.visualIndex
                         modelIndex: delegateRoot.modelIndex
                         blendOpacity: taskmanager.blendOpacity
@@ -234,42 +292,117 @@ ContainmentItem {
             }
         }
 
+        TaskOverflowButton {
+            id: overflowButton
+            taskManagerItem: taskmanager
+            overflow: taskOverflow
+        }
+
         DropArea {
             id: launcherDndDropArea
             anchors.fill: parent
             z: 3
-            keys: ["text/x-dde-dock-dnd-appid"]
+            keys: ["text/x-dde-dock-dnd-appid", "text/x-dde-launcher-dnd-desktopId"]
             property string launcherDndDesktopId: ""
             property string launcherDndDragSource: ""
             property string launcherDndWinId: ""
+            property bool launcherDndDocked: false
 
             function resetDndState() {
                 launcherDndDesktopId = ""
                 launcherDndDragSource = ""
                 launcherDndWinId = ""
+                launcherDndDocked = false
+            }
+
+            function isOverflowButtonIndex(targetIndex) {
+                return taskOverflow.popupItems.length > 0
+                    && targetIndex === taskOverflow.visibleItemCount
+            }
+
+            function targetIndexAt(x, y) {
+                if (launcherDndDragSource !== "overflow-popup") {
+                    return appContainer.indexAt(x, y)
+                }
+
+                const visibleCount = taskOverflow.visibleItemCount
+                if (visibleCount <= 0) {
+                    return -1
+                }
+
+                const itemExtent = taskOverflow.fallbackItemExtent
+                const pitch = itemExtent + taskOverflow.spacing
+                const position = taskmanager.useColumnLayout ? y : x
+                const nearestSlot = Math.floor((Math.max(0, position) + taskOverflow.spacing / 2) / pitch)
+                return Math.max(0, Math.min(visibleCount - 1, nearestSlot))
+            }
+
+            function isInternalDrag() {
+                return launcherDndDragSource === "taskbar"
+                    || launcherDndDragSource === "overflow-popup"
+            }
+
+            function isLauncherFolderId(id) {
+                return typeof id === "string"
+                    && id.indexOf("internal/folders/") === 0
+            }
+
+            function dockItemId(id) {
+                return taskmanager.Applet.desktopIdToAppId(id)
+            }
+
+            function requestDockIfNeeded() {
+                if (isInternalDrag() || launcherDndDocked) {
+                    return true
+                }
+
+                if (taskmanager.Applet.requestDockByDesktopId(launcherDndDesktopId) === false) {
+                    resetDndState()
+                    return false
+                }
+
+                launcherDndDocked = true
+                return true
             }
 
             onEntered: function(drag) {
                 let desktopId = drag.getDataAsString("text/x-dde-dock-dnd-appid")
+                if (!desktopId) {
+                    const launcherId = drag.getDataAsString("text/x-dde-launcher-dnd-desktopId")
+                    if (isLauncherFolderId(launcherId)) {
+                        desktopId = launcherId
+                    }
+                }
+                if (!desktopId) {
+                    resetDndState()
+                    return
+                }
                 launcherDndDragSource = drag.getDataAsString("text/x-dde-dock-dnd-source")
                 launcherDndWinId = drag.getDataAsString("text/x-dde-dock-dnd-winid")
                 launcherDndDesktopId = desktopId
-                if (launcherDndDragSource !== "taskbar" && taskmanager.Applet.requestDockByDesktopId(desktopId) === false) {
-                    drag.accepted = false
-                    resetDndState()
+                let targetIndex = targetIndexAt(drag.x, drag.y)
+                if (!isOverflowButtonIndex(targetIndex) && !requestDockIfNeeded()) {
+                    return
+                }
+                if (!isOverflowButtonIndex(targetIndex)) {
+                    drag.acceptProposedAction()
                 }
             }
 
             onPositionChanged: function(drag) {
                 if (launcherDndDesktopId === "") return
-                let targetIndex = appContainer.indexAt(drag.x, drag.y)
-                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
+                if (launcherDndDragSource === "overflow-popup") return
+                let targetIndex = targetIndexAt(drag.x, drag.y)
+                if (isOverflowButtonIndex(targetIndex) || !requestDockIfNeeded()) return
+                drag.acceptProposedAction()
+                const itemId = dockItemId(launcherDndDesktopId)
+                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(itemId, launcherDndWinId) : taskmanager.findAppIndex(itemId)
                 if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
                     if (taskmanager.Applet.windowSplit) {
                         taskmanager.Applet.moveItem(currentIndex, targetIndex)
                     } else {
                         visualModel.items.move(currentIndex, targetIndex)
+                        taskOverflow.scheduleSync()
                     }
                 }
             }
@@ -277,14 +410,16 @@ ContainmentItem {
             onDropped: function(drop) {
                 Panel.contextDragging = false
                 if (launcherDndDesktopId === "") return
-                let targetIndex = appContainer.indexAt(drop.x, drop.y)
-                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
+                let targetIndex = targetIndexAt(drop.x, drop.y)
+                if (!requestDockIfNeeded()) return
+                const itemId = dockItemId(launcherDndDesktopId)
+                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(itemId, launcherDndWinId) : taskmanager.findAppIndex(itemId)
                 if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
                     if (taskmanager.Applet.windowSplit) {
                         taskmanager.Applet.moveItem(currentIndex, targetIndex)
                     } else {
                         visualModel.items.move(currentIndex, targetIndex)
+                        taskOverflow.scheduleSync()
                     }
                 }
                 let appIds = []
@@ -292,11 +427,16 @@ ContainmentItem {
                     appIds.push(visualModel.items.get(i).model.itemId)
                 }
                 taskmanager.Applet.saveDockElementsOrder(appIds)
+                if (isInternalDrag()) {
+                    drop.accept(Qt.MoveAction)
+                } else {
+                    drop.acceptProposedAction()
+                }
                 resetDndState()
             }
 
             onExited: function() {
-                if (launcherDndDesktopId !== "" && launcherDndDragSource !== "taskbar") {
+                if (launcherDndDesktopId !== "" && !isInternalDrag() && launcherDndDocked) {
                     taskmanager.Applet.requestUndockByDesktopId(launcherDndDesktopId)
                 }
                 resetDndState()
@@ -349,8 +489,10 @@ ContainmentItem {
                 return dockSize;
 
             const otherItems = Math.max(0, Panel.rootObject.dockCenterPartCount - 1);
-            const optimal = solveMaxSizeFull(Panel.rootObject.dockRawCenterSpace, appCount, otherItems);
-            return optimal >= dockSize ? dockSize : optimal;
+            const optimal = solveMaxSizeFull(Panel.rootObject.dockEffectiveCenterSpace, appCount, otherItems);
+            const fitted = optimal >= dockSize ? dockSize : optimal;
+            return Math.max(taskmanager.minimumDockItemSize, fitted);
         })
+        taskOverflow.scheduleSync()
     }
 }
