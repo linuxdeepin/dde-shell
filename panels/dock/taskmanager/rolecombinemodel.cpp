@@ -158,6 +158,23 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
         endRemoveColumns();
     });
 
+    // forward modelReset from major source
+    connect(sourceModel(), &QAbstractItemModel::modelReset, this, [this, majorRoles, func]() {
+        beginResetModel();
+        m_indexMap.clear();
+        int rowCount = sourceModel()->rowCount();
+        int columnCount = sourceModel()->columnCount();
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < columnCount; j++) {
+                QModelIndex majorIndex = sourceModel()->index(i, j);
+                QModelIndex minorIndex = func(majorIndex.data(majorRoles), m_minor);
+                if (majorIndex.isValid() && minorIndex.isValid())
+                    m_indexMap[qMakePair(i, j)] = qMakePair(minorIndex.row(), minorIndex.column());
+            }
+        }
+        endResetModel();
+    });
+
     // connect changedSignal
     connect(major, &QAbstractItemModel::dataChanged, this,
         [this, majorRoles, func](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles){

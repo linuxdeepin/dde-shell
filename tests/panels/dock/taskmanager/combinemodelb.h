@@ -40,6 +40,7 @@ public:
 
     void addData(DataB *data);
     void removeData(DataB *data);
+    void clear();
 
 
 private:

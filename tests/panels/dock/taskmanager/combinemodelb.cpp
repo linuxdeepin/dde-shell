@@ -93,3 +93,11 @@ void TestModelB::removeData(DataB *data)
     delete data;
     endRemoveRows();
 }
+
+void TestModelB::clear()
+{
+    beginResetModel();
+    qDeleteAll(m_list);
+    m_list.clear();
+    endResetModel();
+}
