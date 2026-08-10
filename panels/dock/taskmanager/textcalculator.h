@@ -184,6 +184,7 @@ private:
     QPointer<QAbstractItemModel> m_dataModel;
     qreal m_remainingSpace;
     bool m_enabled;
+    bool m_calculationPending = false;
 
     QHash<int, qreal> m_baselineWidthCache; // Cache for baseline widths of different character counts
 };

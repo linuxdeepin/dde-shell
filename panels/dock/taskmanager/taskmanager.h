@@ -65,6 +65,7 @@ public:
         ExecsRole,
         CategoriesRole,
         DesktopSourcePathRole,
+        GroupItemsRole,
     };
     Q_ENUM(Roles)
 
@@ -94,6 +95,8 @@ public:
     Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId);
     Q_INVOKABLE bool requestDockByDesktopId(const QString& desktopID);
     Q_INVOKABLE bool requestUndockByDesktopId(const QString& desktopID);
+    Q_INVOKABLE bool launchGroupApplication(const QString &desktopId);
+    Q_INVOKABLE bool requestUndockElement(const QString &elementKey);
     Q_INVOKABLE bool RequestDock(QString appID);
     Q_INVOKABLE bool IsDocked(QString appID);
     Q_INVOKABLE bool RequestUndock(QString appID);
@@ -126,6 +129,7 @@ private:
     DockItemModel *m_itemModel = nullptr;
     HoverPreviewProxyModel *m_hoverPreviewModel = nullptr;
     int queryTrashCount() const;
+    QPointer<QObject> m_appsApplet;
 };
 
 }

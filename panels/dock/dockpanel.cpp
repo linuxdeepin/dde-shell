@@ -100,6 +100,7 @@ bool DockPanel::init()
     });
     connect(SETTINGS, &DockSettings::positionChanged, this, [this, dockDaemonAdaptor](){
         Q_EMIT positionChanged(position());
+        Q_EMIT fashionModeChanged();
         Q_EMIT dockDaemonAdaptor->PositionChanged(position());
         Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
 
@@ -117,6 +118,9 @@ bool DockPanel::init()
     connect(SETTINGS, &DockSettings::dockSizeChanged, this, &DockPanel::dockSizeChanged);
     connect(SETTINGS, &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
+    connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, [this](){
+        Q_EMIT fashionModeChanged();
+    });
     connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
     connect(SETTINGS, &DockSettings::lockedChanged, this, &DockPanel::lockedChanged);
     connect(SETTINGS, &DockSettings::contextMenuEnabledChanged, this, &DockPanel::contextMenuEnabledChanged);
@@ -297,6 +301,13 @@ ItemAlignment DockPanel::itemAlignment()
 void DockPanel::setItemAlignment(const ItemAlignment& alignment)
 {
     SETTINGS->setItemAlignment(alignment);
+}
+
+bool DockPanel::fashionMode()
+{
+    const auto dockPosition = position();
+    return itemAlignment() == FashionAlignment
+        && (dockPosition == Top || dockPosition == Bottom);
 }
 
 IndicatorStyle DockPanel::indicatorStyle()

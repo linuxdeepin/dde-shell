@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,6 +13,7 @@ DS_USE_NAMESPACE
 
 namespace apps {
 class AMAppItemModel;
+class AppGroupManager;
 class AppItem;
 class AppsApplet : public DApplet
 {
@@ -30,6 +31,9 @@ public:
     QAbstractItemModel *appModel() const;
     QAbstractItemModel *groupModel() const;
 
+    Q_INVOKABLE QVariantList groupItemDetails(const QString &groupId) const;
+    Q_INVOKABLE bool launchApplication(const QString &desktopId);
+
     bool appModelReady() const;
 
 signals:
@@ -38,6 +42,6 @@ signals:
 private:
     bool m_appModelReady;
     AMAppItemModel *m_appModel;
-    QAbstractItemModel *m_groupModel;
+    AppGroupManager *m_groupModel;
 };
 }

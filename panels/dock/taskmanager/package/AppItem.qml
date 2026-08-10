@@ -24,27 +24,45 @@ Item {
     required property int visualIndex
     required property var modelIndex
     required property string title
+    required property var groupItems
+    readonly property bool isGroup: itemId.indexOf("internal/folders/") === 0
+    readonly property bool useCompositePreview: root.isGroup
 
     property real blendOpacity: 1.0
+    property bool dragEnabled: true
+    property string dragSource: "taskbar"
+    property bool restorePositionAfterDrag: false
+    property real dragStartX: 0
+    property real dragStartY: 0
 
     signal dropFilesOnItem(itemId: string, files: list<string>)
-    signal dragFinished()
+    signal dragFinished(int dropAction)
 
-    Drag.active: mouseArea.drag.active
+    Drag.active: root.dragEnabled && mouseArea.drag.active
     Drag.source: root
     Drag.hotSpot.x: icon.width / 2
     Drag.hotSpot.y: icon.height / 2
     Drag.dragType: Drag.Automatic
-    Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
 
     Accessible.role: Accessible.Button
     Accessible.name: root.name
     Accessible.description: root.attention ? qsTr("Demands attention") : (root.active ? qsTr("Active") : "")
     
+    Drag.supportedActions: Qt.CopyAction | Qt.MoveAction
+    Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": dragSource, "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
+    Drag.onDragFinished: function(dropAction) {
+        if (root.restorePositionAfterDrag) {
+            root.x = root.dragStartX
+            root.y = root.dragStartY
+        }
+        root.dragFinished(dropAction)
+    }
+    
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property real iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
     property bool enableTitle: false
     property bool titleActive: enableTitle && titleLoader.active
+    property bool preservePanelPopupOnContextMenu: false
     property var iconGlobalPoint: {
         var a = icon
         var x = 0, y = 0
@@ -150,6 +168,7 @@ Item {
             D.DciIcon {
                 id: icon
                 name: root.iconName
+                visible: !root.useCompositePreview
                 height: iconSize
                 width: iconSize
                 sourceSize: Qt.size(iconSize, iconSize)
@@ -228,6 +247,44 @@ Item {
                     target: icon
                     loops: 1
                     running: false
+                }
+            }
+
+            Item {
+                anchors.centerIn: parent
+                width: root.iconSize
+                height: root.iconSize
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Math.max(6, Math.round(root.iconSize / 4))
+                    color: root.colorTheme === Dock.Dark ?
+                               Qt.rgba(1, 1, 1, 0.10) :
+                               Qt.rgba(0, 0, 0, 0.10)
+                    border.width: 1
+                    border.color: root.colorTheme === Dock.Dark ?
+                                      Qt.rgba(1, 1, 1, 0.40) :
+                                      Qt.rgba(0, 0, 0, 0.20)
+                    visible: root.useCompositePreview
+                }
+
+                Grid {
+                    anchors.centerIn: parent
+                    visible: root.useCompositePreview
+                    columns: 2
+                    spacing: Math.max(1, Math.round(root.iconSize * 0.04))
+
+                    Repeater {
+                        model: Math.min(4, root.groupItems.length)
+                        D.DciIcon {
+                            required property int index
+                            width: Math.round(root.iconSize * 0.34)
+                            height: width
+                            sourceSize: Qt.size(width, height)
+                            name: root.groupItems[index].iconName
+                            retainWhileLoading: true
+                        }
+                    }
                 }
             }
         }
@@ -414,7 +471,10 @@ Item {
         running: false
         repeat: false
         onTriggered: {
-            var pos = icon.mapToItem(null, 0, 0)
+            const point = icon.mapToItem(null, 0, 0)
+            icon.DockPositioner.bounding = Qt.rect(point.x, point.y, 0, 0)
+            icon.DockPositioner.updatePosition()
+            const pos = Qt.point(icon.DockPositioner.x, icon.DockPositioner.y)
             taskmanager.Applet.requestUpdateWindowIconGeometry(root.modelIndex, Qt.rect(pos.x, pos.y,
                 icon.width, icon.height), Panel.rootObject)
         }
@@ -428,6 +488,8 @@ Item {
         property int xOffset: 0
         property int yOffset: 0
         onTriggered: {
+            xOffset = icon.DockPanelPositioner.x
+            yOffset = icon.DockPanelPositioner.y
             if (root.windows.length != 0 || Qt.platform.pluginName === "wayland") {
                 // 使用基于 modelIndex 的预览API，确保精确匹配
                 taskmanager.Applet.requestPreview(root.modelIndex, Panel.rootObject, xOffset, yOffset, Panel.position);
@@ -437,22 +499,13 @@ Item {
 
 
     function onEntered() {
-        if (windows.length === 0) {
+        if (root.isGroup || windows.length === 0) {
             toolTipShowTimer.start()
             return
         }
 
-        var itemPos = root.mapToItem(null, 0, 0)
-        let xOffset, yOffset, interval = 10
-        if (Panel.position % 2 === 0) {
-            xOffset = itemPos.x + (root.width / 2)
-            yOffset = (Panel.position == 2 ? -interval : interval + Panel.dockSize)
-        } else {
-            xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
-            yOffset = itemPos.y + (root.height / 2)
-        }
-        previewTimer.xOffset = xOffset
-        previewTimer.yOffset = yOffset
+        const point = icon.mapToItem(null, icon.width / 2, icon.height / 2)
+        icon.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, 0, 0)
         previewTimer.start()
     }
 
@@ -472,6 +525,23 @@ Item {
         closeItemPreview()
     }
 
+    function toggleGroupPopup() {
+        toolTip.close()
+        Panel.requestClosePopup()
+        const point = icon.mapToItem(null, icon.width / 2, icon.height / 2)
+        groupPopup.openAt(point)
+    }
+
+    FolderPopup {
+        id: groupPopup
+        groupName: root.name
+        groupItems: root.groupItems
+        displayMode: root.displayMode
+        onLaunchApplicationRequested: function(desktopId) {
+            taskmanager.Applet.launchGroupApplication(desktopId)
+        }
+    }
+
     function closeItemPreview() {
         if (previewTimer.running) {
             previewTimer.stop()
@@ -481,7 +551,9 @@ Item {
     }
 
     function requestAppItemMenu() {
-        Panel.requestClosePopup()
+        if (!root.preservePanelPopupOnContextMenu) {
+            Panel.requestClosePopup()
+        }
         contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
         contextMenuLoader.active = true
         MenuHelper.openMenu(contextMenuLoader.item)
@@ -492,13 +564,14 @@ Item {
         anchors.fill: parent
         hoverEnabled: false
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        drag.target: root
+        drag.target: root.dragEnabled ? root : null
         drag.onActiveChanged: {
             if (!drag.active) {
                 Panel.contextDragging = false
-                root.dragFinished()
                 return
             }
+            root.dragStartX = root.x
+            root.dragStartY = root.y
             Panel.contextDragging = true
         }
 
@@ -515,7 +588,7 @@ Item {
         }
         onPressed: function (mouse) {
             isTouchLongPressed = false
-            if (mouse.button === Qt.LeftButton) {
+            if (root.dragEnabled && mouse.button === Qt.LeftButton) {
                 appItem.grabToImage(function(result) {
                     root.Drag.imageSource = result.url;
                 })
@@ -534,6 +607,10 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 requestAppItemMenu()
             } else {
+                if (root.isGroup) {
+                    toggleGroupPopup()
+                    return
+                }
                 if (root.windows.length === 0) {
                     launchAnimation.start();
                     TaskManager.requestNewInstance(index, "");
@@ -545,15 +622,15 @@ Item {
 
         PanelToolTip {
             id: toolTip
-            toolTipX: DockPanelPositioner.x
-            toolTipY: DockPanelPositioner.y
+            toolTipX: icon.DockPanelPositioner.x
+            toolTipY: icon.DockPanelPositioner.y
         }
 
         PanelToolTip {
             id: dragToolTip
             text: qsTr("Move to Trash")
-            toolTipX: DockPanelPositioner.x
-            toolTipY: DockPanelPositioner.y
+            toolTipX: icon.DockPanelPositioner.x
+            toolTipY: icon.DockPanelPositioner.y
             visible: false
         }
 
@@ -561,9 +638,10 @@ Item {
             id: toolTipShowTimer
             interval: 50
             onTriggered: {
-                var point = root.mapToItem(null, root.width / 2, root.height / 2)
                 toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
-                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+                const point = icon.mapToItem(null, icon.width / 2, icon.height / 2)
+                icon.DockPanelPositioner.bounding = Qt.rect(point.x, point.y,
+                                                            toolTip.width, toolTip.height)
                 toolTip.open()
             }
         }
@@ -585,8 +663,9 @@ Item {
             if (root.itemId === "dde-trash") {
                 dragToolTipCloseTimer.stop()
                 if (!dragToolTip.toolTipVisible) {
-                    var point = root.mapToItem(null, root.width / 2, root.height / 2)
-                    dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
+                    const point = icon.mapToItem(null, icon.width / 2, icon.height / 2)
+                    icon.DockPanelPositioner.bounding = Qt.rect(point.x, point.y,
+                                                                dragToolTip.width, dragToolTip.height)
                     dragToolTip.open()
                 }
             }

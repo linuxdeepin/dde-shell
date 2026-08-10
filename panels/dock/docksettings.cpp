@@ -86,6 +86,8 @@ static QString itemAlignment2String(const ItemAlignment& alignment)
             return "left";
         case ItemAlignment::CenterAlignment:
             return "center";
+        case ItemAlignment::FashionAlignment:
+            return "fashion";
     }
 
     return "center";
@@ -112,6 +114,8 @@ static ItemAlignment string2ItenAlignment(const QString& alignmentStr)
         return ItemAlignment::LeftAlignment;
     else if (alignmentStr == "center")
         return ItemAlignment::CenterAlignment;
+    else if (alignmentStr == "fashion")
+        return ItemAlignment::FashionAlignment;
 
     return ItemAlignment::CenterAlignment;
 }
