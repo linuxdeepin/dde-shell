@@ -42,6 +42,7 @@ public:
 
     void addData(DataA *data);
     void removeData(DataA *data);
+    void resetModel();
 
 private:
     QList<DataA*> m_list;
