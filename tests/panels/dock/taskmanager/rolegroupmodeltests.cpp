@@ -634,3 +634,105 @@ TEST(RoleGroupModel, ScrollingBoundaryTest)
         EXPECT_FALSE(negativeChild.isValid());
     }
 }
+
+// ---- 验证 Bug: RoleGroupModel::rowsRemoved 批量删除时跳过后续分组 ----
+// 当一次 rowsRemoved 覆盖多行、且中间某个分组被删空时，该分组从 m_rowMap 移除后
+// 循环下标前移，导致后续分组被跳过、其成员行未被移除，
+// 随后 adjustMap 甚至可能把残留的源行号修正为负数。
+TEST(RoleGroupModel, RowsRemovedRangeSkip)
+{
+    QStandardItemModel model;
+    auto role = Qt::UserRole + 1;
+    RoleGroupModel groupModel(&model, role);
+
+    // 构造 3 个分组：g0=[0], g1=[2], g2=[3,4]（行 1 为空数据, 不分组）
+    QStandardItem *g0a = new QStandardItem;
+    g0a->setData(QString("g0"), role);
+    model.appendRow(g0a);                           // source row 0
+
+    model.appendRow(new QStandardItem);             // source row 1, empty -> not grouped
+
+    QStandardItem *g1a = new QStandardItem;
+    g1a->setData(QString("g1"), role);
+    model.appendRow(g1a);                           // source row 2
+
+    QStandardItem *g2a = new QStandardItem;
+    g2a->setData(QString("g2"), role);
+    model.appendRow(g2a);                           // source row 3
+
+    QStandardItem *g2b = new QStandardItem;
+    g2b->setData(QString("g2"), role);
+    model.appendRow(g2b);                           // source row 4
+
+    ASSERT_EQ(groupModel.rowCount(), 3);            // g0, g1, g2
+    ASSERT_EQ(groupModel.rowCount(groupModel.index(0, 0)), 1);  // g0: 1 child
+    ASSERT_EQ(groupModel.rowCount(groupModel.index(1, 0)), 1);  // g1: 1 child
+    ASSERT_EQ(groupModel.rowCount(groupModel.index(2, 0)), 2);  // g2: 2 children
+
+    // 删除 source rows 0..2：g0 的唯一子项被删（g0 变空），g1 的唯一子项被删
+    // BUG: g0 变空后从 m_rowMap 移除，循环下标前移，g2 中的 row 3 不会被处理
+    // 而且 g2 中的 row 2 残留，adjustMap 后变成负数。
+    model.removeRows(0, 3);
+
+    // g2 应保留，有 2 个子项（原 row 3,4 调整后变为 row 0,1）
+    EXPECT_EQ(groupModel.rowCount(), 1) << "FAIL: expected 1 group (g2), got " << groupModel.rowCount();
+
+    if (groupModel.rowCount() > 0) {
+        auto g2Idx = groupModel.index(0, 0);
+        int childCount = groupModel.rowCount(g2Idx);
+        EXPECT_EQ(childCount, 2) << "FAIL: g2 should have 2 children, got " << childCount;
+
+        // 验证 mapToSource 返回的索引都在有效范围内
+        for (int i = 0; i < childCount; ++i) {
+            auto child = groupModel.index(i, 0, g2Idx);
+            auto src = groupModel.mapToSource(child);
+            EXPECT_TRUE(src.isValid()) << "FAIL: child " << i << " maps to invalid source row";
+            EXPECT_LT(src.row(), model.rowCount()) << "FAIL: child " << i << " source row out of range";
+        }
+    }
+}
+
+// ---- 验证 Bug: RoleGroupModel 发出带有效 parent 的子级 dataChanged ----
+// 当源模型中分组内某行的非去重角色数据改变时，RoleGroupModel 发出的 dataChanged
+// 是一个子级索引（parent 有效）。下游的 DockItemModel 在分组模式下直接取
+// topLeft.row() 作为顶层行号，导致刷新到错误的行或越界。
+TEST(RoleGroupModel, ChildDataChangedHasValidParent)
+{
+    QStandardItemModel model;
+    auto role = Qt::UserRole + 1;
+    RoleGroupModel groupModel(&model, role);
+
+    // 构造一个分组 "app" 包含 2 个子项
+    QStandardItem *a = new QStandardItem;
+    a->setData(QString("app"), role);
+    model.appendRow(a);
+
+    QStandardItem *b = new QStandardItem;
+    b->setData(QString("app"), role);
+    model.appendRow(b);
+
+    ASSERT_EQ(groupModel.rowCount(), 1);
+    auto groupIdx = groupModel.index(0, 0);
+    ASSERT_EQ(groupModel.rowCount(groupIdx), 2);
+
+    // 监听 dataChanged 信号，检查 child 索引的 parent 是否有效
+    QSignalSpy spy(&groupModel, &QAbstractItemModel::dataChanged);
+
+    // 改变非去重角色（Qt::DisplayRole），不触发去重重建
+    model.setData(model.index(1, 0), QVariant("new-title"), Qt::DisplayRole);
+
+    bool sawChildWithValidParent = false;
+    for (const auto &args : spy) {
+        if (args.size() >= 1) {
+            QModelIndex tl = args[0].value<QModelIndex>();
+            if (tl.parent().isValid()) {
+                sawChildWithValidParent = true;
+                break;
+            }
+        }
+    }
+
+    // BUG: 子级 dataChanged 会被下游 DockItemModel 错误地转发为顶层行号
+    EXPECT_TRUE(sawChildWithValidParent)
+        << "FAIL: RoleGroupModel should emit child dataChanged with valid parent";
+}

@@ -88,6 +88,7 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
                 m_rowMap.removeOne(sourceRows);
                 delete sourceRows;
                 endRemoveRows();
+                --i;
             }
         }
         adjustMap(first, -((last - first) + 1));
