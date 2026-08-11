@@ -65,7 +65,7 @@ void DockItemModel::setSourceModel(QAbstractItemModel *model)
         endRemoveRows();
     });
     connect(sourceModel(), &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
-        if (m_isUpdating)
+        if (m_isUpdating || !topLeft.isValid() || !bottomRight.isValid())
             return;
         auto first = topLeft.row();
         auto last = bottomRight.row();

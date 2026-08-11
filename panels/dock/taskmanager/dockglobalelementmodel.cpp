@@ -57,6 +57,40 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
         },
         Qt::QueuedConnection);
 
+    // Keep the cached apps-model sourceRow in sync when apps are inserted.
+    // Without this the cached sourceRow drifts during the startup app-model
+    // rebuild and docked items resolve to the wrong app (wrong icon/name).
+    connect(
+        m_appsModel,
+        &QAbstractItemModel::rowsInserted,
+        this,
+        [this](const QModelIndex &parent, int first, int last) {
+            Q_UNUSED(parent)
+            const int insertedCount = (last - first) + 1;
+            std::for_each(m_data.begin(), m_data.end(), [this, first, insertedCount](auto &data) {
+                if (std::get<1>(data) == m_appsModel && std::get<2>(data) >= first) {
+                    data = std::make_tuple(std::get<0>(data), std::get<1>(data), std::get<2>(data) + insertedCount);
+                }
+            });
+        },
+        Qt::QueuedConnection);
+
+    // Apps model full rebuild (modelReset): re-resolve every cached sourceRow.
+    connect(
+        m_appsModel,
+        &QAbstractItemModel::modelReset,
+        this,
+        [this]() {
+            for (auto &data : m_data) {
+                if (std::get<1>(data) != m_appsModel)
+                    continue;
+                const auto id = std::get<0>(data);
+                auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
+                std::get<2>(data) = res.isEmpty() ? -1 : res.first().row();
+            }
+        },
+        Qt::QueuedConnection);
+
     connect(
         m_activeAppModel,
         &QAbstractItemModel::rowsInserted,
@@ -94,7 +128,9 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                                         TaskManager::AttentionRole,
                                         TaskManager::WindowsRole,
                                         TaskManager::MenusRole,
-                                        TaskManager::WinTitleRole});
+                                        TaskManager::WinTitleRole,
+                                        TaskManager::IconNameRole,
+                                        TaskManager::NameRole});
                     continue;
                 }
 
@@ -181,7 +217,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                 auto pIndex = this->index(pos, 0);
                 Q_EMIT dataChanged(pIndex,
                                    pIndex,
-                                   {TaskManager::ActiveRole, TaskManager::AttentionRole, TaskManager::WindowsRole, TaskManager::MenusRole, TaskManager::WinTitleRole});
+                                   {TaskManager::ActiveRole, TaskManager::AttentionRole, TaskManager::WindowsRole, TaskManager::MenusRole, TaskManager::WinTitleRole, TaskManager::IconNameRole, TaskManager::NameRole});
             }
         },
         Qt::QueuedConnection);
@@ -318,7 +354,7 @@ void DockGlobalElementModel::loadDockedElements()
 
     if (!m_data.isEmpty()) {
         // MenusRole should also be handled here due to it contains the copywriting of docked or undocked
-        Q_EMIT dataChanged(index(0, 0), index(m_data.size() - 1, 0), {TaskManager::DockedRole, TaskManager::MenusRole});
+        Q_EMIT dataChanged(index(0, 0), index(m_data.size() - 1, 0), {TaskManager::DockedRole, TaskManager::MenusRole, TaskManager::IconNameRole, TaskManager::NameRole});
     }
 }
 
@@ -379,20 +415,33 @@ QVariant DockGlobalElementModel::data(const QModelIndex &index, int role) const
     auto model = std::get<1>(data);
     auto row = std::get<2>(data);
 
+    // cached sourceRow can be out of range after the apps model is rebuilt;
+    // re-resolve by desktopId instead of reading a wrong row
+    if (model == m_appsModel && (row < 0 || row >= model->rowCount())) {
+        auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
+        row = res.isEmpty() ? -1 : res.first().row();
+    }
+
     switch (role) {
     case TaskManager::ItemIdRole:
         return id;
     case TaskManager::WindowsRole: {
         if (model == m_activeAppModel) {
+            if (row < 0 || row >= model->rowCount())
+                return {};
             return QStringList{model->index(row, 0).data(TaskManager::WinIdRole).toString()};
         }
         // For m_appsModel data, when it's GroupModel we can directly get all window IDs for this desktop ID
+        if (row < 0 || row >= model->rowCount())
+            return {};
         QModelIndex groupIndex = model->index(row, 0);
         return groupIndex.data(TaskManager::WindowsRole).toStringList();
     }
     case TaskManager::ActiveRole:
     case TaskManager::AttentionRole: {
         if (model == m_activeAppModel) {
+            if (row < 0 || row >= model->rowCount())
+                return false;
             return model->index(row, 0).data(role);
         }
         return false;
@@ -404,6 +453,8 @@ QVariant DockGlobalElementModel::data(const QModelIndex &index, int role) const
 
     default: {
         if (model) {
+            if (row < 0 || row >= model->rowCount())
+                return {};
             return model->index(row, 0).data(role);
         }
         return {};
