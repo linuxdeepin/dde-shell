@@ -69,8 +69,10 @@ Window {
     }
 
     DLayerShellWindow.anchors: position2Anchors(positionForAnimation)
-    DLayerShellWindow.layer: DLayerShellWindow.LayerTop
-    DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing ? Applet.dockSize : 0
+    // Wayland: 升至 LayerOverlay，使 dock 弹窗经 get_popup 继承本层后压过通知横幅(bubble)。
+    // X11: 维持 LayerTop——x11dlayershellemulation 将 LayerOverlay 映射为 Notification 窗口类型，
+    // 会导致 KeepShowing 模式下 exclusionZone/strut 失效(见 x11dlayershellemulation.cpp:110 FIXME)。
+    DLayerShellWindow.layer: Qt.platform.pluginName === "wayland" ? DLayerShellWindow.LayerOverlay : DLayerShellWindow.LayerTop
     DLayerShellWindow.scope: "dde-shell/dock"
     DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityNone
 
