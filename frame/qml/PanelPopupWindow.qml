@@ -74,7 +74,7 @@ PopupWindow {
 
     width: 10
     height: 10
-    flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint) : Qt.Popup)
+    flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint | Qt.X11BypassWindowManagerHint) : Qt.Popup)
     font: D.DTK.fontManager.t6
     D.DWindow.enabled: true
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius
