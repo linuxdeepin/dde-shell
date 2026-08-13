@@ -109,6 +109,18 @@ Item {
                     popupMenu.shellSurface.updatePluginGeometry(Qt.rect(popupMenu.menuWindow.x, popupMenu.menuWindow.y, 0, 0))
                 }
             }
+
+            // 监听菜单 surface 尺寸变化，内容异步到达后重新请求几何更新。
+            Connections {
+                target: popupMenuContent
+                enabled: popupMenu.readyBinding && popupMenu.menuVisible
+                function onWidthChanged() {
+                    popupMenu.menuWindow.requestUpdateGeometry()
+                }
+                function onHeightChanged() {
+                    popupMenu.menuWindow.requestUpdateGeometry()
+                }
+            }
         }
     }
 

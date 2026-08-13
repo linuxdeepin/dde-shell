@@ -65,6 +65,18 @@ Item {
         }
     }
 
+    // 监听子菜单 surface 尺寸变化，内容异步到达后重新请求几何更新。
+    Connections {
+        target: popupSurfaceLayer
+        enabled: popup.readyBinding && popup.menuVisible
+        function onWidthChanged() {
+            popup.menuWindow.requestUpdateGeometry()
+        }
+        function onHeightChanged() {
+            popup.menuWindow.requestUpdateGeometry()
+        }
+    }
+
     Connections {
         target: DockCompositor
         function onPopupCreated(popupSurface) {
