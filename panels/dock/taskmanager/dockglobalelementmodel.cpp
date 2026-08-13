@@ -72,6 +72,14 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                     data = std::make_tuple(std::get<0>(data), std::get<1>(data), std::get<2>(data) + insertedCount);
                 }
             });
+
+            for (auto &data : m_data) {
+                if (std::get<1>(data) != m_appsModel || std::get<2>(data) != -1)
+                    continue;
+                const auto id = std::get<0>(data);
+                auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
+                std::get<2>(data) = res.isEmpty() ? -1 : res.first().row();
+            }
         },
         Qt::QueuedConnection);
 
@@ -234,7 +242,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                 });
 
                 if (it == m_data.end())
-                    return;
+                    continue;
                 auto pos = it - m_data.constBegin();
 
                 auto oldRoles = roles;
@@ -244,6 +252,30 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                     oldRoles.append(TaskManager::ItemIdRole);
                 }
                 Q_EMIT dataChanged(index(pos, 0), index(pos, 0), oldRoles);
+            }
+        },
+        Qt::QueuedConnection);
+
+    connect(
+        m_appsModel,
+        &QAbstractItemModel::dataChanged,
+        this,
+        [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
+            int first = topLeft.row(), last = bottomRight.row();
+            for (int i = first; i <= last; i++) {
+                auto id = m_appsModel->index(i, 0).data(TaskManager::DesktopIdRole).toString();
+                if (id.isEmpty())
+                    continue;
+
+                auto it = std::find_if(m_data.begin(), m_data.end(), [&id](const auto &data) {
+                    return std::get<0>(data) == id;
+                });
+
+                if (it == m_data.end())
+                    continue;
+
+                auto pos = it - m_data.begin();
+                Q_EMIT dataChanged(index(pos, 0), index(pos, 0), roles);
             }
         },
         Qt::QueuedConnection);

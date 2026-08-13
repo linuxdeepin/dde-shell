@@ -356,3 +356,58 @@ TEST(RoleCombineModel, ParentParameterHandlingFix)
     EXPECT_EQ(model.rowCount(), 1);
     EXPECT_TRUE(model.index(0, 0).isValid());
 }
+
+// 验证多个major行映射到同一minor行时，minor dataChanged能转发给所有major行
+TEST(RoleCombineModel, MinorDataChangedForwardToAllMappedMajorRows)
+{
+    TestModelA modelA;
+    TestModelB modelB;
+
+    RoleCombineModel model(&modelA, &modelB, TestModelA::idRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+        auto matches = model->match(model->index(0, 0), TestModelB::idRole, data);
+        return matches.isEmpty() ? QModelIndex() : matches.first();
+    });
+
+    QSignalSpy spy(&model, &QAbstractItemModel::dataChanged);
+
+    // 添加两个major行，都映射到同一个minor行(id=0)
+    modelA.addData(new DataA(0, "window1", &modelA));
+    modelA.addData(new DataA(0, "window2", &modelA));
+
+    // 添加对应的minor数据
+    modelB.addData(new DataB(0, "appData", &modelB));
+
+    // 验证两个major行都映射到minor行0
+    auto roleNames = model.roleNames();
+    auto roleNamesA = modelA.roleNames();
+    auto roleNamesB = modelB.roleNames();
+    QHash<QByteArray, int> names2Role;
+    for (auto roleName : roleNames.keys()) {
+        names2Role.insert(roleNames.value(roleName), roleName);
+    }
+    int bDataRole = names2Role.value(roleNamesB.value(TestModelB::dataRole));
+
+    // Verify initial mapping works
+    ASSERT_EQ(model.rowCount(), 2) << "Model should have 2 rows";
+    ASSERT_TRUE(model.index(0, 0).isValid()) << "Major row 0 should be valid";
+    ASSERT_TRUE(model.index(1, 0).isValid()) << "Major row 1 should be valid";
+    ASSERT_NE(bDataRole, -1) << "bData role not found in combined model";
+
+    EXPECT_EQ(model.index(0, 0).data(bDataRole).toString(), "appData");
+    EXPECT_EQ(model.index(1, 0).data(bDataRole).toString(), "appData");
+
+    // 修改minor数据，触发dataChanged
+    spy.clear();
+
+    // Verify DataB::setData emits dataChanged on modelB
+    QSignalSpy spyB(&modelB, &QAbstractItemModel::dataChanged);
+    modelB.setData(modelB.index(0), "newAppData", TestModelB::dataRole);
+    EXPECT_EQ(spyB.count(), 1) << "modelB should emit dataChanged when setData is called";
+
+    // Now check if RoleCombineModel forwarded the signal
+    EXPECT_EQ(spy.count(), 2) << "Should emit dataChanged for both major rows mapping to the same minor row";
+
+    // 验证数据已更新
+    EXPECT_EQ(model.index(0, 0).data(bDataRole).toString(), "newAppData");
+    EXPECT_EQ(model.index(1, 0).data(bDataRole).toString(), "newAppData");
+}
