@@ -181,22 +181,27 @@ RoleCombineModel::RoleCombineModel(QAbstractItemModel* major, QAbstractItemModel
     connect(m_minor, &QAbstractItemModel::dataChanged, this,
         [this, majorRoles, func](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles){
             Q_UNUSED(roles)
+            QPair<int,int> minorPair;
             for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
                 for (int j =  topLeft.column(); j <= bottomRight.column(); j++) {
-                    auto majorPos = m_indexMap.key(qMakePair(i, j), qMakePair(-1, -1));
-                    if (-1 == majorPos.first && -1 == majorPos.second)
-                        continue;
+                    minorPair = qMakePair(i, j);
+                    for (auto mapIt = m_indexMap.constBegin(); mapIt != m_indexMap.constEnd(); ++mapIt) {
+                        if (mapIt.value() != minorPair)
+                            continue;
 
-                    auto majorIndex = sourceModel()->index(majorPos.first, majorPos.second);
-                    if (!majorIndex.isValid())
-                        continue;
+                        auto majorPos = mapIt.key();
 
-                    auto minorIndex = func(majorIndex.data(majorRoles), m_minor);
-                    if (!minorIndex.isValid())
-                        continue;
+                        auto majorIndex = sourceModel()->index(majorPos.first, majorPos.second);
+                        if (!majorIndex.isValid())
+                            continue;
 
-                    m_indexMap[majorPos] = qMakePair(minorIndex.row(), minorIndex.column());
-                    Q_EMIT dataChanged(majorIndex, majorIndex, m_minorRolesMap.values());
+                        auto minorIndex = func(majorIndex.data(majorRoles), m_minor);
+                        if (!minorIndex.isValid())
+                            continue;
+
+                        m_indexMap[majorPos] = qMakePair(minorIndex.row(), minorIndex.column());
+                        Q_EMIT dataChanged(majorIndex, majorIndex, m_minorRolesMap.values());
+                    }
                 }
             }
     });
