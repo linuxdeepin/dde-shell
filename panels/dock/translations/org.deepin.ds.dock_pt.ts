@@ -3,7 +3,7 @@
     <name>main</name>
     <message>
         <source>Indicator Style</source>
-        <translation type="unfinished"/>
+        <translation>Estilo do Indicador</translation>
     </message>
     <message>
         <source>Fashion Mode</source>
@@ -11,7 +11,7 @@
     </message>
     <message>
         <source>Efficient Mode</source>
-        <translation type="unfinished"/>
+        <translation>Modo Eficiente</translation>
     </message>
     <message>
         <source>Classic Mode</source>
@@ -27,7 +27,7 @@
     </message>
     <message>
         <source>Position</source>
-        <translation type="unfinished"/>
+        <translation>Posição</translation>
     </message>
     <message>
         <source>Mode</source>
@@ -51,23 +51,23 @@
     </message>
     <message>
         <source>Keep Shown</source>
-        <translation type="unfinished"/>
+        <translation>Manter Visível</translation>
     </message>
     <message>
         <source>Keep Hidden</source>
-        <translation type="unfinished"/>
+        <translation>Manter Escondido</translation>
     </message>
     <message>
         <source>Smart Hide</source>
-        <translation type="unfinished"/>
+        <translation>Esconder Inteligente</translation>
     </message>
     <message>
         <source>Dock Settings</source>
-        <translation type="unfinished"/>
+        <translation>Definições do Dock</translation>
     </message>
     <message>
         <source>Lock the Dock</source>
-        <translation type="unfinished"/>
+        <translation>Trancar o Dock</translation>
     </message>
 </context>
 </TS>
