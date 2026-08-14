@@ -6,6 +6,7 @@
 #include "amappitem.h"
 #include "appitemmodel.h"
 #include "objectmanager1interface.h"
+#include "trashmonitor.h"
 
 #include <DUtil>
 
@@ -16,6 +17,7 @@ namespace apps
 AMAppItemModel::AMAppItemModel(QObject *parent)
     : AppItemModel(parent)
     , m_manager(new ObjectManager("org.desktopspec.ApplicationManager1", "/org/desktopspec/ApplicationManager1", QDBusConnection::sessionBus(), this))
+    , m_trashMonitor(new TrashMonitor(this))
     , m_ready(false)
 {
     qRegisterMetaType<ObjectInterfaceMap>();
@@ -35,6 +37,18 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
             return;
         }
         appendRow(new AMAppItem(objPath, interfacesAndProperties));
+        updateTrashIcon();
+    });
+
+    connect(m_trashMonitor, &TrashMonitor::emptyChanged, this, &AMAppItemModel::updateTrashIcon);
+    connect(this, &QAbstractItemModel::dataChanged, this,
+            [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
+        const auto trashIndex = match(index(0, 0), AppItemModel::DesktopIdRole,
+                                      QStringLiteral("dde-trash"), 1, Qt::MatchExactly).value(0);
+        if (trashIndex.isValid() && trashIndex.row() >= topLeft.row() && trashIndex.row() <= bottomRight.row()
+            && (roles.isEmpty() || roles.contains(AppItemModel::IconNameRole))) {
+            updateTrashIcon();
+        }
     });
 
     connect(m_manager, &ObjectManager::InterfacesRemoved, this, [this](const QDBusObjectPath &objPath, const QStringList &interfaces) {
@@ -69,6 +83,9 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
             appendRow(new AMAppItem(path, app.value()));
         }
 
+
+        updateTrashIcon();
+
         m_ready = true;
         Q_EMIT readyChanged(true);
         qCDebug(appsLog) << "AMAppItemModel is now ready with apps counts:" << rowCount();
@@ -88,6 +105,19 @@ AMAppItem * AMAppItemModel::appItem(const QString &id)
             return static_cast<AMAppItem *>(app);
     }
     return nullptr;
+}
+
+void AMAppItemModel::updateTrashIcon()
+{
+    auto *trash = appItem(QStringLiteral("dde-trash"));
+    if (!trash)
+        return;
+
+    const QString iconName = m_trashMonitor->isEmpty()
+            ? QStringLiteral("user-trash")
+            : QStringLiteral("user-trash-full");
+    if (trash->appIconName() != iconName)
+        trash->setAppIconName(iconName);
 }
 
 }
