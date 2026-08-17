@@ -8,6 +8,7 @@
 #include "notifyentity.h"
 
 #include <QAbstractListModel>
+#include <QHash>
 #include <QQueue>
 
 class QTimer;
@@ -49,7 +50,6 @@ public:
     Q_INVOKABLE void remove(int index);
     void remove(const BubbleItem *bubble);
     BubbleItem *removeById(qint64 id);
-    void clear();
 
     BubbleItem *bubbleItem(int bubbleIndex) const;
 
@@ -68,7 +68,6 @@ private:
     void updateBubbleTimeTip();
     void updateContentRowCount(int rowCount);
 
-private:
     QTimer *m_updateTimeTipTimer = nullptr;
     QTimer *m_processPendingTimer = nullptr;
     QList<BubbleItem *> m_bubbles;

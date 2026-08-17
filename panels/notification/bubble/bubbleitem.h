@@ -21,6 +21,7 @@ public:
 
 public:
     void setEntity(const NotifyEntity &entity);
+    const NotifyEntity &entity() const;
 
 public:
     qint64 id() const;

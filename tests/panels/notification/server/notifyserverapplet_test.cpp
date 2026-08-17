@@ -34,7 +34,6 @@ public:
     MOCK_METHOD(void, removeNotifications, (const QString &appName));
     MOCK_METHOD(void, removeNotifications, ());
     MOCK_METHOD(void, removeExpiredNotifications, ());
-    MOCK_METHOD(void, setBlockClosedId, (qint64 id));
 };
 
 // Test fixture for NotifyServerApplet
@@ -244,17 +243,6 @@ TEST_F(NotifyServerAppletTest, RemoveExpiredNotificationsTest) {
     EXPECT_NO_THROW(applet->removeExpiredNotifications());
 }
 
-// Test setBlockClosedId
-TEST_F(NotifyServerAppletTest, SetBlockClosedIdTest) {
-    // Initialize applet first
-    applet->init();
-    
-    qint64 testId = 12345;
-    
-    // Test that setBlockClosedId doesn't crash
-    EXPECT_NO_THROW(applet->setBlockClosedId(testId));
-}
-
 // Test notificationStateChanged signal
 TEST_F(NotifyServerAppletTest, NotificationStateChangedSignalTest) {
     // Initialize applet first
@@ -313,16 +301,6 @@ TEST_F(NotifyServerAppletTest, NotificationClosedEdgeCasesTest) {
     EXPECT_NO_THROW(applet->notificationClosed(0, 0, 0));
     EXPECT_NO_THROW(applet->notificationClosed(-1, 0, 1));
     EXPECT_NO_THROW(applet->notificationClosed(999999999, 999999, 3));
-}
-
-// Test edge cases for setBlockClosedId
-TEST_F(NotifyServerAppletTest, SetBlockClosedIdEdgeCasesTest) {
-    applet->init();
-    
-    // Test with various ID values
-    EXPECT_NO_THROW(applet->setBlockClosedId(0));
-    EXPECT_NO_THROW(applet->setBlockClosedId(-1));
-    EXPECT_NO_THROW(applet->setBlockClosedId(9223372036854775807LL)); // max qint64
 }
 
 // Test that applet properly inherits from DApplet

@@ -51,6 +51,11 @@ qint64 BubbleItem::id() const
     return m_entity.id();
 }
 
+const NotifyEntity &BubbleItem::entity() const
+{
+    return m_entity;
+}
+
 uint BubbleItem::bubbleId() const
 {
     return m_entity.bubbleId();
