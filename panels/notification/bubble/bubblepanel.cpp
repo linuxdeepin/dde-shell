@@ -6,6 +6,7 @@
 #include "bubbleitem.h"
 #include "bubblemodel.h"
 #include "dataaccessorproxy.h"
+#include "expiretimer.h"
 #include "pluginfactory.h"
 
 #include <QTimer>
@@ -217,7 +218,7 @@ void BubblePanel::setEnabled(bool newEnabled)
 
 void BubblePanel::setHoveredId(qint64 id)
 {
-    QMetaObject::invokeMethod(m_notificationServer, "setBlockClosedId", Qt::DirectConnection, Q_ARG(qint64, id));
+    ExpireTimer::instance()->setBlockId(id);
 }
 }
 

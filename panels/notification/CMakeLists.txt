@@ -22,6 +22,8 @@ add_library(ds-notification-shared SHARED
     ${CMAKE_SOURCE_DIR}/panels/notification/common/dbaccessor.cpp
     ${CMAKE_SOURCE_DIR}/panels/notification/common/notifysetting.h
     ${CMAKE_SOURCE_DIR}/panels/notification/common/notifysetting.cpp
+    ${CMAKE_SOURCE_DIR}/panels/notification/common/expiretimer.h
+    ${CMAKE_SOURCE_DIR}/panels/notification/common/expiretimer.cpp
 )
 
 set_target_properties(ds-notification-shared PROPERTIES
