@@ -4,6 +4,7 @@
 
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS DBus)
 find_package(DDEApplicationManager REQUIRED)
+find_package(GLIB2 REQUIRED COMPONENTS GIO)
 find_package(yaml-cpp REQUIRED)
 
 set_source_files_properties(
@@ -55,10 +56,14 @@ add_library(dde-apps SHARED ${DBUS_INTERFACES}
     categoryutils.h
     itemspage.cpp
     itemspage.h
+    trashmonitor.cpp
+    trashmonitor.h
 )
 
 target_link_libraries(dde-apps PRIVATE
     dde-shell-frame
+    Qt${QT_VERSION_MAJOR}::Concurrent
+    GLIB2::GIO
     yaml-cpp
 )
 

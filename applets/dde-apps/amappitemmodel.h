@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,6 +10,7 @@
 namespace apps
 {
 class AMAppItem;
+class TrashMonitor;
 class AMAppItemModel : public AppItemModel
 {
     Q_OBJECT
@@ -25,7 +26,10 @@ signals:
     void readyChanged(bool);
 
 private:
+    void updateTrashIcon();
+
     bool m_ready;
     ObjectManager *m_manager;
+    TrashMonitor *m_trashMonitor;
 };
 }
