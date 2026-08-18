@@ -1,3 +1,31 @@
+dde-shell (2.0.53) unstable; urgency=medium
+
+  * feat: refactor notification center into separate plugin and applet
+  * chore: update Debian control file descriptions
+  * fix(dock): prevent dock from taking focus
+  * fix: handle QDBusArgument type in hint conversion
+  * refactor: move ShellSurfaceItemProxy to dock plugin level
+  * feat: add DConfig toggles for dock context menu and docked
+    applications
+  * fix(taskmanager): reject invalid drag in onEntered
+  * i18n: Translate org.deepin.ds.dock.multitaskview.ts in pt_BR (#1673)
+  * feat: add applet enable/disable API with DConfig support
+  * fix: prevent dde-apps crash when restarting due to concurrent model
+    updates
+  * fix: improve tray applet lifecycle management and model safety
+  * i18n: Updates for project Deepin Desktop Environment (#1686)
+  * chore: add itemData implementation for RoleGroupModel
+  * fix: fix launcher not showing after popup menu on x11
+  * fix(dock-tray): prevent stash popup from closing during drag-and-
+    drop
+  * refactor: optimize AM appitem property update handling
+  * fix(dock): fix wrong docked app icons after login
+  * fix: add X11BypassWindowManagerHint to panel popup window flags
+  * i18n: Updates for project Deepin Desktop Environment (#1694)
+  * fix: icon not updated on taskbar if icon name in desktop changed
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 18 Aug 2026 13:27:15 +0800
+
 dde-shell (2.0.52) unstable; urgency=medium
 
   * fix(CI): broken cppcheck
