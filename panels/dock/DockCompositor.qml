@@ -1,0 +1,148 @@
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+pragma Singleton
+
+import QtQuick
+import QtQuick.Controls
+import QtWayland.Compositor
+
+import org.deepin.ds 1.0
+import org.deepin.dtk 1.0 as D
+import org.deepin.ds.dock 1.0
+
+Item {
+    id: dockCompositor
+
+    property alias dockPosition: pluginManager.dockPosition
+    property alias dockColorTheme: pluginManager.dockColorTheme
+    property alias dockSize: pluginManager.dockSize
+    property var moveXEmbedWindowHandler: null
+
+    function notifyXEmbedWindowMoveResult(wid, success) {
+        pluginManager.notifyXEmbedWindowMoveResult(wid, success)
+    }
+    function sendRightClickForSurface() {
+        pluginManager.sendRightClickForSurface()
+    }
+
+    property ListModel trayPluginSurfaces: ListModel {}
+    property ListModel quickPluginSurfaces: ListModel {}
+    property ListModel fixedPluginSurfaces: ListModel {}
+
+    property var compositor: waylandCompositor
+    property var panelScale: 1.0
+
+    signal pluginSurfacesUpdated()
+    signal popupCreated(var popup)
+    signal requestShutdown(var type)
+    signal popupClosed()
+
+    function removeDockPluginSurface(model, object) {
+        for (var i = 0; i < model.count; ++i) {
+            if (object === model.get(i).shellSurface) {
+                model.remove(i)
+                break
+            }
+        }
+    }
+
+    function findSurfaceFromModel(model, surfaceId) {
+        for (var i = 0; i < model.count; ++i) {
+            let item = model.get(i).shellSurface
+            if (surfaceId === `${item.pluginId}::${item.itemKey}`) {
+                return item
+            }
+        }
+        return null
+    }
+
+    function findSurface(surfaceId) {
+        let ret = findSurfaceFromModel(trayPluginSurfaces, surfaceId)
+        if (ret === null) ret = findSurfaceFromModel(quickPluginSurfaces, surfaceId)
+        if (ret === null) ret = findSurfaceFromModel(fixedPluginSurfaces, surfaceId)
+        return ret
+    }
+
+    function closeShellSurface(shellSurface)
+    {
+        if (shellSurface) {
+            shellSurface.close()
+        }
+    }
+
+    function updatePopupMinHeight(height)
+    {
+        pluginManager.setPopupMinHeight(height)
+    }
+
+    WaylandCompositor {
+        id: waylandCompositor
+        socketName: "dockplugin"
+
+        PluginManager {
+            id: pluginManager
+
+            onPluginSurfaceCreated: (dockPluginSurface) => {
+                console.log("plugin surface created", dockPluginSurface.pluginId, dockPluginSurface.itemKey, dockPluginSurface.pluginType)
+                if (dockPluginSurface.pluginType === Dock.Tray) {
+                    trayPluginSurfaces.append({shellSurface: dockPluginSurface})
+                } else if (dockPluginSurface.pluginType === Dock.Quick) {
+                    quickPluginSurfaces.append({shellSurface: dockPluginSurface})
+                } else if (dockPluginSurface.pluginType === Dock.Fixed) {
+                    fixedPluginSurfaces.append({shellSurface: dockPluginSurface})
+                }
+                dockCompositor.pluginSurfacesUpdated()
+            }
+
+            onPluginSurfaceDestroyed: (dockPluginSurface) => {
+                console.log("plugin surface destroyed", dockPluginSurface.pluginId, dockPluginSurface.itemKey, dockPluginSurface.pluginType)
+                if (dockPluginSurface.pluginType === Dock.Tray) {
+                    removeDockPluginSurface(trayPluginSurfaces, dockPluginSurface)
+                } else if (dockPluginSurface.pluginType === Dock.Quick) {
+                    removeDockPluginSurface(quickPluginSurfaces, dockPluginSurface)
+                } else if (dockPluginSurface.pluginType === Dock.Fixed) {
+                    removeDockPluginSurface(fixedPluginSurfaces, dockPluginSurface)
+                }
+                dockCompositor.pluginSurfacesUpdated()
+            }
+
+            onPluginPopupCreated: (popup) => {
+                console.log("plugin popup created", popup.pluginId, popup.itemKey, popup.popupType)
+                dockCompositor.popupCreated(popup)
+            }
+
+            onRequestShutdown: (type) => {
+                dockCompositor.requestShutdown(type)
+            }
+
+            onPluginCloseQuickPanelPopup: {
+                console.log("quick panel closed")
+                dockCompositor.popupClosed()
+            }
+            
+            onMoveXEmbedWindowRequested: (wid, pluginId, itemKey, dx, dy, anchorWindow) => {
+                console.log("move xembed window requested:", wid, pluginId, itemKey, dx, dy, "anchorWindow:", anchorWindow)
+                if (typeof dockCompositor.moveXEmbedWindowHandler === 'function') {
+                    var sent = dockCompositor.moveXEmbedWindowHandler(wid, dx, dy, anchorWindow)
+                    if (!sent) {
+                        // Pre-check failed (e.g. manager not ready) — no wl_callback registered
+                        pluginManager.notifyXEmbedWindowMoveResult(wid, false)
+                    }
+                    // If sent, result arrives asynchronously via xembedWindowMoveResult signal
+                } else {
+                    console.warn("moveXEmbedWindowHandler not available")
+                    pluginManager.notifyXEmbedWindowMoveResult(wid, false)
+                }
+            }
+        }
+
+        PluginScaleManager{
+            id: pluginScaleManager
+            pluginScale: dockCompositor.panelScale * 120
+        }
+
+        XdgActivationManager {}
+    }
+}

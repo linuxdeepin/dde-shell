@@ -1,0 +1,564 @@
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "abstracttaskmanagerinterface.h"
+#include "appitem.h"
+
+#include "abstractwindow.h"
+#include "abstractwindowmonitor.h"
+#include "desktopfileamparser.h"
+#include "desktopfileparserfactory.h"
+#include "dockcombinemodel.h"
+#include "dockglobalelementmodel.h"
+#include "dsglobal.h"
+#include "globals.h"
+#include "hoverpreviewproxymodel.h"
+#include "itemmodel.h"
+#include "pluginfactory.h"
+#include "taskmanager.h"
+#include "taskmanageradaptor.h"
+#include "taskmanagersettings.h"
+#include "textcalculator.h"
+#include "treelandwindowmonitor.h"
+
+#ifdef HAVE_DDE_API_EVENTLOGGER
+#include <dde-api/eventlogger.hpp>
+#endif
+
+#include <QGuiApplication>
+#include <QProcess>
+#include <QStandardPaths>
+#include <QStringLiteral>
+#include <QUrl>
+#include <QtQml/QtQml>
+
+#include <appletbridge.h>
+#include <DSGApplication>
+
+#ifdef BUILD_WITH_X11
+#include "x11windowmonitor.h"
+#include "x11utils.h"
+#endif
+
+Q_LOGGING_CATEGORY(taskManagerLog, "org.deepin.dde.shell.dock.taskmanager", QtDebugMsg)
+
+#define Settings TaskManagerSettings::instance()
+
+#define DESKTOPFILEFACTORY DesktopfileParserFactory<    \
+                            DesktopFileAMParser,        \
+                            DesktopfileAbstractParser   \
+                        >
+
+namespace dock {
+
+// 通过AM(Application Manager)匹配应用程序的辅助函数
+static QString getDesktopIdByPid(const QStringList &identifies)
+{
+    if (identifies.isEmpty())
+        return {};
+
+    pid_t windowPid = identifies.last().toInt();
+    if (windowPid <= 0)
+        return {};
+
+    auto appId = DSGApplication::getId(windowPid);
+    if (appId.isEmpty()) {
+        qCDebug(taskManagerLog) << "appId is empty, AM failed to identify window with pid:" << windowPid;
+        return {};
+    }
+
+    return QString::fromUtf8(appId);
+}
+
+// 尝试通过 AM(Application Manager) 匹配应用程序
+static QModelIndex tryMatchByApplicationManager(const QStringList &identifies,
+                                                  QAbstractItemModel *model,
+                                                  const QHash<int, QByteArray> &roleNames)
+{
+    Q_ASSERT(model);
+
+    if (!Settings->cgroupsBasedGrouping()) {
+        return QModelIndex();
+    }
+
+    auto desktopId = getDesktopIdByPid(identifies);
+    if (desktopId.isEmpty() || Settings->cgroupsBasedGroupingSkipIds().contains(desktopId)) {
+        return QModelIndex();
+    }
+
+    // 先在 model 中查找 desktopId 对应的 item
+    auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID),
+                           desktopId, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
+
+    if (!res.isValid()) {
+        return QModelIndex();
+    }
+
+    // 检查应用的 Categories 是否在跳过列表中
+    auto skipCategories = Settings->cgroupsBasedGroupingSkipCategories();
+    if (!skipCategories.isEmpty()) {
+        QStringList categories = res.data(TaskManager::CategoriesRole).toStringList();
+        if (!categories.isEmpty()) {
+            // 检查是否有任何 skipCategory 在应用的 categories 中
+            for (const QString &skipCategory : skipCategories) {
+                if (categories.contains(skipCategory)) {
+                    qCDebug(taskManagerLog) << "Skipping cgroups grouping for" << desktopId
+                                           << "due to category:" << skipCategory;
+                    return QModelIndex();
+                }
+            }
+        }
+    }
+
+    qCDebug(taskManagerLog) << "matched by AM desktop ID:" << desktopId << res;
+    return res;
+}
+
+class BoolFilterModel : public QSortFilterProxyModel, public AbstractTaskManagerInterface
+{
+    Q_OBJECT
+public:
+    explicit BoolFilterModel(QAbstractItemModel *sourceModel, int role, QObject *parent = nullptr)
+        : QSortFilterProxyModel(parent)
+        , AbstractTaskManagerInterface(this)
+        , m_role(role)
+    {
+        setSourceModel(sourceModel);
+        setDynamicSortFilter(false);
+    }
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override
+    {
+        if (sourceRow >= sourceModel()->rowCount())
+            return false;
+
+        QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+        return !sourceModel()->data(index, m_role).toBool();
+    }
+
+private:
+    int m_role;
+};
+
+TaskManager::TaskManager(QObject *parent)
+    : DContainment(parent)
+    , AbstractTaskManagerInterface(nullptr)
+    , m_windowFullscreen(false)
+{
+    qmlRegisterType<TextCalculator>("org.deepin.ds.dock.taskmanager", 1, 0, "TextCalculator");
+    qmlRegisterUncreatableType<TextCalculatorAttached>("org.deepin.ds.dock.taskmanager", 1, 0, "TextCalculatorAttached", "TextCalculator Attached");
+
+    connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
+    connect(Settings, &TaskManagerSettings::showAttentionAnimationChanged, this, &TaskManager::showAttentionAnimationChanged);
+    connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
+}
+
+bool TaskManager::load()
+{
+    auto platformName = QGuiApplication::platformName();
+    if (QStringLiteral("wayland") == platformName) {
+        m_windowMonitor.reset(new TreeLandWindowMonitor());
+    }
+
+#ifdef BUILD_WITH_X11
+    else if (QStringLiteral("xcb") == platformName) {
+        m_windowMonitor.reset(new X11WindowMonitor());
+    }
+#endif
+
+    connect(m_windowMonitor.get(), &AbstractWindowMonitor::windowAdded, this, &TaskManager::handleWindowAdded);
+    return true;
+}
+
+bool TaskManager::init()
+{
+    Settings->logMergeAppModel(!Settings->isWindowSplit());
+
+    auto adaptor = new TaskManagerAdaptor(this);
+    Q_UNUSED(adaptor)
+    QDBusConnection::sessionBus().registerService("org.deepin.ds.Dock.TaskManager");
+    QDBusConnection::sessionBus().registerObject("/org/deepin/ds/Dock/TaskManager", "org.deepin.ds.Dock.TaskManager", this);
+
+    DApplet::init();
+
+    DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dde-apps");
+    BoolFilterModel *leftModel = new BoolFilterModel(m_windowMonitor.data(), m_windowMonitor->roleNames().key("shouldSkip"), this);
+    if (auto applet = bridge.applet()) {
+        auto model = applet->property("appModel").value<QAbstractItemModel *>();
+        Q_ASSERT(model);
+        m_activeAppModel = new DockCombineModel(leftModel, model, TaskManager::IdentityRole, [](QVariant data, QAbstractItemModel *model) -> QModelIndex {
+            auto roleNames = model->roleNames();
+            QList<QByteArray> identifiedOrders = {MODEL_DESKTOPID, MODEL_STARTUPWMCLASS, MODEL_NAME, MODEL_ICONNAME};
+
+            auto identifies = data.toStringList();
+            for (auto id : identifies) {
+                if (id.isEmpty()) {
+                    continue;
+                }
+
+                for (auto identifiedOrder : identifiedOrders) {
+                    auto res = model->match(model->index(0, 0), roleNames.key(identifiedOrder), id, 1, Qt::MatchFixedString | Qt::MatchWrap).value(0);
+                    if (res.isValid()) {
+                        qCDebug(taskManagerLog) << "matched" << res;
+                        return res;
+                    }
+                }
+            }
+
+            // 尝试通过AM(Application Manager)匹配应用程序
+            auto amMatchResult = tryMatchByApplicationManager(identifies, model, roleNames);
+            if (amMatchResult.isValid()) {
+                return amMatchResult;
+            }
+
+            auto res = model->match(model->index(0, 0), roleNames.key(MODEL_DESKTOPID), identifies.value(0), 1, Qt::MatchEndsWith);
+            qCDebug(taskManagerLog) << "matched" << res.value(0);
+            return res.value(0);
+        });
+
+        m_dockGlobalElementModel = new DockGlobalElementModel(model, m_activeAppModel, this);
+        m_itemModel = new DockItemModel(m_dockGlobalElementModel, this);
+
+        // 初始化预览代理模型，基于合并后的数据
+        m_hoverPreviewModel = new HoverPreviewProxyModel(this);
+        m_hoverPreviewModel->setSourceModel(m_dockGlobalElementModel);
+
+        connect(applet, SIGNAL(appModelReadyChanged(bool)), m_dockGlobalElementModel, SLOT(initDockedElements(bool)));
+    }
+
+    connect(m_windowMonitor.data(), &AbstractWindowMonitor::windowFullscreenChanged, this, [this] (bool isFullscreen) {
+        m_windowFullscreen = isFullscreen;
+        emit windowFullscreenChanged(isFullscreen);
+    });
+
+    connect(m_windowMonitor.data(), &AbstractWindowMonitor::previewShouldClear, this, [this]() {
+        // 当预览窗口真正隐藏时，清空过滤条件
+        if (m_hoverPreviewModel) {
+            m_hoverPreviewModel->clearFilter();
+        }
+    });
+
+    // 设置preview opacity
+    DS_NAMESPACE::DAppletBridge appearanceBridge("org.deepin.ds.dde-appearance");
+    auto appearanceApplet = appearanceBridge.applet();
+    if (appearanceApplet) {
+        modifyOpacityChanged();
+        connect(appearanceApplet, SIGNAL(opacityChanged()), this, SLOT(modifyOpacityChanged()));
+    }
+    QTimer::singleShot(500, this, [this]() {
+        if (m_windowMonitor)
+            m_windowMonitor->start();
+    });
+
+    return true;
+}
+
+DockItemModel *TaskManager::dataModel() const
+{
+    return m_itemModel;
+}
+
+HoverPreviewProxyModel *TaskManager::hoverPreviewModel() const
+{
+    return m_hoverPreviewModel;
+}
+
+void TaskManager::requestActivate(const QModelIndex &index) const
+{
+    dataModel()->requestActivate(index);
+}
+
+void TaskManager::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
+{
+    dataModel()->requestOpenUrls(index, urls);
+}
+
+void TaskManager::requestNewInstance(const QModelIndex &index, const QString &action) const
+{
+    dataModel()->requestNewInstance(index, action);
+}
+
+void TaskManager::requestClose(const QModelIndex &index, bool force) const
+{
+    dataModel()->requestClose(index, force);
+}
+
+void TaskManager::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+{
+    dataModel()->requestUpdateWindowIconGeometry(index, geometry, delegate);
+}
+
+void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+{
+    if (!m_hoverPreviewModel) {
+        qCWarning(taskManagerLog) << "TaskManager::requestPreview: m_hoverPreviewModel is null";
+        return;
+    }
+
+    // Set the preview filter condition based on the incoming model index
+    if (windowSplit()) {
+        QString winId = index.data(TaskManager::WinIdRole).toString();
+        m_hoverPreviewModel->setFilter(winId, HoverPreviewProxyModel::FilterByWinId);
+    } else {
+        QString appId = index.data(TaskManager::DesktopIdRole).toString();
+        m_hoverPreviewModel->setFilter(appId, HoverPreviewProxyModel::FilterByAppId);
+    }
+
+    // Check if there are any windows after filtering
+    if (m_hoverPreviewModel->rowCount() == 0) {
+        qCDebug(taskManagerLog) << "TaskManager::requestPreview: No windows found for index";
+        hideItemPreview();
+        return;
+    }
+
+    m_windowMonitor->requestPreview(m_hoverPreviewModel, qobject_cast<QWindow *>(relativePositionItem), previewXoffset, previewYoffset, direction);
+}
+
+void TaskManager::requestWindowsView(const QModelIndexList &indexes) const
+{
+    dataModel()->requestWindowsView(indexes);
+}
+
+void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
+{
+    if (!window || window->shouldSkip() || window->getAppItem() != nullptr) return;
+
+    // TODO: remove below code and use use model replaced.
+    QModelIndexList res;
+    if (m_activeAppModel && m_activeAppModel->rowCount() > 0) {
+        auto startIndex = m_activeAppModel->index(0, 0);
+        if (startIndex.isValid()) {
+            res = m_activeAppModel->match(startIndex, TaskManager::WinIdRole, window->id());
+        }
+    }
+
+    QSharedPointer<DesktopfileAbstractParser> desktopfile = nullptr;
+    QString desktopId;
+    if (res.size() > 0) {
+        desktopId = res.first().data(m_activeAppModel->roleNames().key("desktopId")).toString();
+        qCDebug(taskManagerLog()) << "identify by model:" << desktopId;
+    }
+
+    if (!desktopId.isEmpty()) {
+        desktopfile = DESKTOPFILEFACTORY::createById(desktopId, "amAPP");
+        qCDebug(taskManagerLog()) << "identify by AM:" << desktopId;
+    }
+
+    if (Settings->cgroupsBasedGrouping() && (desktopfile.isNull() || !desktopfile->isValied().first)) {
+        desktopfile = DESKTOPFILEFACTORY::createByWindow(window);
+        qCDebug(taskManagerLog()) << "identify by Fallback:" << desktopId;
+    }
+
+    auto appitem = desktopfile->getAppItem();
+
+    if (appitem.isNull() || (appitem->hasWindow() && windowSplit())) {
+        auto id = windowSplit() ? QString("%1@%2").arg(desktopfile->id()).arg(window->id()) : desktopfile->id();
+        appitem = new AppItem(id);
+    }
+
+    appitem->appendWindow(window);
+    appitem->setDesktopFileParser(desktopfile);
+
+    ItemModel::instance()->addItem(appitem);
+}
+
+void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls)
+{
+    auto indexes = m_itemModel->match(m_itemModel->index(0, 0), TaskManager::ItemIdRole, itemId, 1, Qt::MatchExactly);
+    if (indexes.isEmpty()) {
+        return;
+    }
+
+    QList<QUrl> urlList;
+    for (const QString &url : urls) {
+        urlList.append(QUrl::fromLocalFile(url));
+    }
+
+    dataModel()->requestOpenUrls(indexes.first(), urlList);
+}
+
+void TaskManager::hideItemPreview()
+{
+    m_windowMonitor->hideItemPreview();
+}
+
+bool TaskManager::allowForceQuit()
+{
+    return Settings->isAllowedForceQuit();
+}
+
+bool TaskManager::showAttentionAnimation()
+{
+    return Settings->showAttentionAnimation();
+}
+
+QString TaskManager::desktopIdToAppId(const QString& desktopId)
+{
+    return Q_LIKELY(desktopId.endsWith(".desktop")) ? desktopId.chopped(8) : desktopId;
+}
+
+bool TaskManager::requestDockByDesktopId(const QString& desktopID)
+{
+    if (!Settings->dockedApplicationsEnabled()) return false;
+    if (desktopID.startsWith("internal/")) return false;
+    QString appId = desktopIdToAppId(desktopID);
+    // 检查应用是否已经在任务栏中，如果是则返回 false
+    if (IsDocked(appId))
+        return false;
+
+    return RequestDock(appId);
+}
+
+bool TaskManager::requestUndockByDesktopId(const QString& desktopID)
+{
+    if (!Settings->dockedApplicationsEnabled()) return false;
+    if (desktopID.startsWith("internal/")) return false;
+    return RequestUndock(desktopIdToAppId(desktopID));
+}
+
+bool TaskManager::RequestDock(QString appID)
+{
+    if (!Settings->dockedApplicationsEnabled())
+        return false;
+
+    auto desktopfileParser = DESKTOPFILEFACTORY::createById(appID, "amAPP");
+
+    auto res = desktopfileParser->isValied();
+    if (!res.first) {
+        qCWarning(taskManagerLog) << res.second;
+        return false;
+    }
+
+    QPointer<AppItem> appitem = desktopfileParser->getAppItem();
+    if (appitem.isNull()) {
+        appitem = new AppItem(appID);
+        appitem->setDesktopFileParser(desktopfileParser);
+        ItemModel::instance()->addItem(appitem);
+    }
+    appitem->setDocked(true);
+    return true;
+}
+
+bool TaskManager::IsDocked(QString appID)
+{
+    auto desktopfileParser = DESKTOPFILEFACTORY::createById(appID, "amAPP");
+
+    auto res = desktopfileParser->isValied();
+    if (!res.first) {
+        qCWarning(taskManagerLog) << res.second;
+        return false;
+    }
+
+    return desktopfileParser->isDocked();
+}
+
+bool TaskManager::RequestUndock(QString appID)
+{
+    if (!Settings->dockedApplicationsEnabled())
+        return false;
+
+    auto desktopfileParser = DESKTOPFILEFACTORY::createById(appID, "amAPP");
+    auto res = desktopfileParser->isValied();
+    if (!res.first) {
+        qCWarning(taskManagerLog) << res.second;
+        return false;
+    }
+    QPointer<AppItem> appitem = desktopfileParser->getAppItem();
+    if (appitem.isNull()) {
+        desktopfileParser->setDocked(false);
+        return true;
+    }
+    appitem->setDocked(false);
+    return true;
+}
+
+bool TaskManager::windowSplit()
+{
+    return Settings->isWindowSplit();
+}
+
+bool TaskManager::windowFullscreen()
+{
+    return m_windowFullscreen;
+}
+
+void TaskManager::activateWindow(uint32_t windowID)
+{
+#ifdef BUILD_WITH_X11
+    X11Utils::instance()->setActiveWindow(static_cast<xcb_window_t>(windowID));
+#else
+    qCWarning(taskManagerLog) << "activateWindow not supported on this platform";
+    Q_UNUSED(windowID)
+#endif
+}
+
+void TaskManager::saveDockElementsOrder(const QStringList &appIds)
+{
+    if (!Settings->dockedApplicationsEnabled())
+        return;
+
+    const QStringList &dockedElements = TaskManagerSettings::instance()->dockedElements();
+    QStringList newDockedElements;
+    for (const auto &appId : appIds) {
+        auto desktopElement = QString("desktop/%1").arg(appId);
+        if (dockedElements.contains(desktopElement) && !newDockedElements.contains(desktopElement)) {
+            newDockedElements.append(desktopElement);
+        }
+    }
+    TaskManagerSettings::instance()->setDockedElements(newDockedElements);
+}
+
+void TaskManager::moveItem(int from, int to)
+{
+    if (m_dockGlobalElementModel)
+        m_dockGlobalElementModel->moveItem(from, to);
+}
+
+QString TaskManager::getTrashTipText()
+{
+    const auto count = queryTrashCount();
+    return tr("%1 files").arg(count);
+}
+
+bool TaskManager::isTrashEmpty() const
+{
+    return queryTrashCount() == 0;
+}
+
+int TaskManager::queryTrashCount() const
+{
+    int count = 0;
+
+    QProcess gio;
+    gio.start("gio", QStringList() << "trash" << "--list");
+    if (gio.waitForFinished(1000) && gio.exitStatus() == QProcess::NormalExit && gio.exitCode() == 0) {
+        const QByteArray &out = gio.readAllStandardOutput();
+        const QList<QByteArray> lines = out.split('\n');
+        for (const QByteArray &l : lines) {
+            if (!l.trimmed().isEmpty()) count++;
+        }
+        return count;
+    }
+    return count;
+}
+
+void TaskManager::modifyOpacityChanged()
+{
+    DS_NAMESPACE::DAppletBridge appearanceBridge("org.deepin.ds.dde-appearance");
+    auto appearanceApplet = appearanceBridge.applet();
+    if (appearanceApplet) {
+        if (auto x11Monitor = qobject_cast<X11WindowMonitor*>(m_windowMonitor.data())) {
+            double opacity = appearanceApplet->property("opacity").toReal();
+            x11Monitor->setPreviewOpacity(opacity);
+        }
+    } else {
+        qCWarning(taskManagerLog) << "modifyOpacityChanged: appearanceApplet is null";
+    }
+}
+
+D_APPLET_CLASS(TaskManager)
+}
+
+#include "taskmanager.moc"

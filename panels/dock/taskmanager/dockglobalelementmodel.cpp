@@ -1,0 +1,643 @@
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "dockglobalelementmodel.h"
+#include "applicationinterface.h"
+#include "globals.h"
+#include "taskmanager.h"
+#include "taskmanagersettings.h"
+
+#include <QAbstractListModel>
+#include <QDBusConnection>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QLoggingCategory>
+#include <QProcess>
+
+Q_LOGGING_CATEGORY(dockGlobalElementModelLog, "org.deepin.dde.shell.dock.taskmanager.dockglobalelementmodel")
+
+#include <algorithm>
+#include <tuple>
+
+namespace dock
+{
+DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, DockCombineModel *activeAppModel, QObject *parent)
+    : QAbstractListModel(parent)
+    , AbstractTaskManagerInterface(nullptr)
+    , m_appsModel(appsModel)
+    , m_activeAppModel(activeAppModel)
+{
+    connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedElementsChanged, this, &DockGlobalElementModel::loadDockedElements);
+    connect(TaskManagerSettings::instance(), &TaskManagerSettings::windowSplitChanged, this, &DockGlobalElementModel::groupItemsByApp);
+    connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedApplicationsEnabledChanged, this, &DockGlobalElementModel::loadDockedElements);
+
+    connect(
+        m_appsModel,
+        &QAbstractItemModel::rowsRemoved,
+        this,
+        [this](const QModelIndex &parent, int first, int last) {
+            Q_UNUSED(parent)
+            for (int i = first; i <= last; ++i) {
+                auto it = std::find_if(m_data.begin(), m_data.end(), [this, &i](auto data) {
+                    return std::get<1>(data) == m_appsModel && std::get<2>(data) == i;
+                });
+                if (it != m_data.end()) {
+                    auto pos = it - m_data.begin();
+                    beginRemoveRows(QModelIndex(), pos, pos);
+                    m_data.remove(pos);
+                    endRemoveRows();
+                }
+            }
+            std::for_each(m_data.begin(), m_data.end(), [this, first, last](auto &data) {
+                if (std::get<1>(data) == m_appsModel && std::get<2>(data) >= first) {
+                    data = std::make_tuple(std::get<0>(data), std::get<1>(data), std::get<2>(data) - ((last - first) + 1));
+                }
+            });
+        },
+        Qt::QueuedConnection);
+
+    // Keep the cached apps-model sourceRow in sync when apps are inserted.
+    // Without this the cached sourceRow drifts during the startup app-model
+    // rebuild and docked items resolve to the wrong app (wrong icon/name).
+    connect(
+        m_appsModel,
+        &QAbstractItemModel::rowsInserted,
+        this,
+        [this](const QModelIndex &parent, int first, int last) {
+            Q_UNUSED(parent)
+            const int insertedCount = (last - first) + 1;
+            std::for_each(m_data.begin(), m_data.end(), [this, first, insertedCount](auto &data) {
+                if (std::get<1>(data) == m_appsModel && std::get<2>(data) >= first) {
+                    data = std::make_tuple(std::get<0>(data), std::get<1>(data), std::get<2>(data) + insertedCount);
+                }
+            });
+
+            for (auto &data : m_data) {
+                if (std::get<1>(data) != m_appsModel || std::get<2>(data) != -1)
+                    continue;
+                const auto id = std::get<0>(data);
+                auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
+                std::get<2>(data) = res.isEmpty() ? -1 : res.first().row();
+            }
+        },
+        Qt::QueuedConnection);
+
+    // Apps model full rebuild (modelReset): re-resolve every cached sourceRow.
+    connect(
+        m_appsModel,
+        &QAbstractItemModel::modelReset,
+        this,
+        [this]() {
+            for (auto &data : m_data) {
+                if (std::get<1>(data) != m_appsModel)
+                    continue;
+                const auto id = std::get<0>(data);
+                auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
+                std::get<2>(data) = res.isEmpty() ? -1 : res.first().row();
+            }
+        },
+        Qt::QueuedConnection);
+
+    connect(
+        m_activeAppModel,
+        &QAbstractItemModel::rowsInserted,
+        this,
+        [this](const QModelIndex &parent, int first, int last) {
+            Q_UNUSED(parent)
+            for (int i = first; i <= last; ++i) {
+                auto index = m_activeAppModel->index(i, 0);
+                auto desktopId = index.data(TaskManager::DesktopIdRole).toString();
+
+               if (desktopId.isEmpty())
+                    continue;
+                //将同一应用的窗口添加到一起 
+                // Find the first occurrence of this app in m_data (either docked item or existing window)
+                auto firstIt = std::find_if(m_data.begin(), m_data.end(), [&desktopId](const auto &data) {
+                    return std::get<0>(data) == desktopId;
+                });
+
+                if (firstIt == m_data.end()) {
+                    // No docked item or existing window yet, append to the end
+                    beginInsertRows(QModelIndex(), m_data.size(), m_data.size());
+                    m_data.append(std::make_tuple(desktopId, m_activeAppModel, i));
+                    endInsertRows();
+                    continue;
+                }
+
+                // If the first occurrence still comes from m_appsModel, this is the first window:
+                // reuse the docked position and turn it into a running window.
+                if (std::get<1>(*firstIt) == m_appsModel) {
+                    *firstIt = std::make_tuple(desktopId, m_activeAppModel, i);
+                    auto pIndex = this->index(firstIt - m_data.begin(), 0);
+                    Q_EMIT dataChanged(pIndex,
+                                       pIndex,
+                                       {TaskManager::ActiveRole,
+                                        TaskManager::AttentionRole,
+                                        TaskManager::WindowsRole,
+                                        TaskManager::MenusRole,
+                                        TaskManager::WinTitleRole,
+                                        TaskManager::IconNameRole,
+                                        TaskManager::NameRole});
+                    continue;
+                }
+
+                // There are already windows for this app: insert the new window
+                // right after the last (rightmost) existing one.
+                // Search the entire list since windows may not be consecutive after drag reorder.
+                auto lastIt = firstIt;
+                for (auto it = firstIt + 1; it != m_data.end(); ++it) {
+                    if (std::get<0>(*it) == desktopId) {
+                        lastIt = it;
+                    }
+                }
+
+                auto insertRow = (lastIt - m_data.begin()) + 1;
+                beginInsertRows(QModelIndex(), insertRow, insertRow);
+                m_data.insert(lastIt + 1, std::make_tuple(desktopId, m_activeAppModel, i));
+                endInsertRows();
+            }
+
+            std::for_each(m_data.begin(), m_data.end(), [this, first, last](auto &data) {
+                if (std::get<1>(data) == m_activeAppModel && std::get<2>(data) > first) {
+                    data = std::make_tuple(std::get<0>(data),
+                                           std::get<1>(data),
+                                           std::get<2>(data) + ((last - first) + 1));
+                }
+            });
+        },
+        Qt::QueuedConnection);
+
+    connect(
+        m_activeAppModel,
+        &QAbstractItemModel::rowsRemoved,
+        this,
+        [this](const QModelIndex &parent, int first, int last) {
+            Q_UNUSED(parent)
+
+            QList<int> pendingDataChangedRows;
+
+            for (int i = first; i <= last; ++i) {
+                auto it = std::find_if(m_data.begin(), m_data.end(), [this, i](auto data) {
+                    return std::get<1>(data) == m_activeAppModel && std::get<2>(data) == i;
+                });
+
+                if (it == m_data.end()) {
+                    qWarning() << "failed to find a running apps on dock" << i;
+                    continue;
+                }
+
+                auto pos = it - m_data.begin();
+                auto id = std::get<0>(*it);
+
+                auto oit = std::find_if(m_data.constBegin(), m_data.constEnd(), [this, &id, i](auto &data) {
+                    return std::get<0>(data) == id && std::get<1>(data) == m_activeAppModel && std::get<2>(data) != i;
+                });
+
+                if (oit == m_data.constEnd() && m_dockedElements.contains(std::make_tuple("desktop", id))) {
+                    auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
+                    if (res.isEmpty()) {
+                        beginRemoveRows(QModelIndex(), pos, pos);
+                        m_data.remove(pos);
+                        endRemoveRows();
+                    } else {
+                        auto row = res.first().row();
+                        *it = std::make_tuple(id, m_appsModel, row);
+                        // DEFER emitter until internal model shift is done!
+                        pendingDataChangedRows.append(pos);
+                    }
+                } else {
+                    beginRemoveRows(QModelIndex(), pos, pos);
+                    m_data.remove(pos);
+                    endRemoveRows();
+                }
+            }
+
+            // Adjust remaining row mappings for the active app model BEFORE any outer access
+            std::for_each(m_data.begin(), m_data.end(), [this, first, last](auto &data) {
+                if (std::get<1>(data) == m_activeAppModel && std::get<2>(data) >= first) {
+                    data = std::make_tuple(std::get<0>(data), std::get<1>(data), std::get<2>(data) - ((last - first) + 1));
+                }
+            });
+
+            // Now it is safe to emit dataChanged for rows that were swapped to docked elements
+            for (int pos : pendingDataChangedRows) {
+                auto pIndex = this->index(pos, 0);
+                Q_EMIT dataChanged(pIndex,
+                                   pIndex,
+                                   {TaskManager::ActiveRole, TaskManager::AttentionRole, TaskManager::WindowsRole, TaskManager::MenusRole, TaskManager::WinTitleRole, TaskManager::IconNameRole, TaskManager::NameRole});
+            }
+        },
+        Qt::QueuedConnection);
+
+    connect(
+        m_activeAppModel,
+        &QAbstractItemModel::dataChanged,
+        this,
+        [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
+            int first = topLeft.row(), last = bottomRight.row();
+            for (int i = first; i <= last; i++) {
+                auto it = std::find_if(m_data.constBegin(), m_data.constEnd(), [this, i](auto data) {
+                    return std::get<1>(data) == m_activeAppModel && std::get<2>(data) == i;
+                });
+
+                if (it == m_data.end())
+                    continue;
+                auto pos = it - m_data.constBegin();
+
+                auto oldRoles = roles;
+                auto desktopId = roles.indexOf(TaskManager::DesktopIdRole);
+                auto identifyId = roles.indexOf(TaskManager::IdentityRole);
+                if (desktopId != -1 || identifyId != -1) {
+                    oldRoles.append(TaskManager::ItemIdRole);
+                }
+                Q_EMIT dataChanged(index(pos, 0), index(pos, 0), oldRoles);
+            }
+        },
+        Qt::QueuedConnection);
+
+    connect(
+        m_appsModel,
+        &QAbstractItemModel::dataChanged,
+        this,
+        [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
+            int first = topLeft.row(), last = bottomRight.row();
+            for (int i = first; i <= last; i++) {
+                auto id = m_appsModel->index(i, 0).data(TaskManager::DesktopIdRole).toString();
+                if (id.isEmpty())
+                    continue;
+
+                auto it = std::find_if(m_data.begin(), m_data.end(), [&id](const auto &data) {
+                    return std::get<0>(data) == id;
+                });
+
+                if (it == m_data.end())
+                    continue;
+
+                auto pos = it - m_data.begin();
+                Q_EMIT dataChanged(index(pos, 0), index(pos, 0), roles);
+            }
+        },
+        Qt::QueuedConnection);
+
+    QMetaObject::invokeMethod(this, &DockGlobalElementModel::loadDockedElements, Qt::QueuedConnection);
+}
+
+QHash<int, QByteArray> DockGlobalElementModel::roleNames() const
+{
+    return {
+        {TaskManager::ItemIdRole, MODEL_ITEMID},
+        {TaskManager::NameRole, MODEL_NAME},
+        {TaskManager::IconNameRole, MODEL_ICONNAME},
+        {TaskManager::ActiveRole, MODEL_ACTIVE},
+        {TaskManager::AttentionRole, MODEL_ATTENTION},
+        {TaskManager::MenusRole, MODEL_MENUS},
+        {TaskManager::DockedRole, MODEL_DOCKED},
+        {TaskManager::WindowsRole, MODEL_WINDOWS},
+        {TaskManager::WinTitleRole, MODEL_TITLE},
+        {TaskManager::WinIconRole, MODEL_WINICON},
+        {TaskManager::WinIdRole, MODEL_WINID},
+    };
+}
+
+QModelIndex DockGlobalElementModel::index(int row, int column, const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+    return createIndex(row, column);
+}
+
+QModelIndex DockGlobalElementModel::parent(const QModelIndex &child) const
+{
+    Q_UNUSED(child)
+    return QModelIndex();
+}
+
+int DockGlobalElementModel::columnCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+    return 1;
+}
+
+void DockGlobalElementModel::initDockedElements(bool unused)
+{
+    Q_UNUSED(unused);
+    loadDockedElements();
+}
+
+void DockGlobalElementModel::loadDockedElements()
+{
+    QList<std::tuple<QString, QString>> newDocked;
+    if (TaskManagerSettings::instance()->dockedApplicationsEnabled()) {
+        for (auto elementInfo : TaskManagerSettings::instance()->dockedElements()) {
+            auto pair = elementInfo.split('/');
+            if (pair.size() != 2)
+                continue;
+
+            auto type = pair[0];
+            auto id = pair[1];
+
+            auto tmp = std::make_tuple(type, id);
+
+            // check desktop is installed
+            QAbstractItemModel *model = nullptr;
+            int row = 0;
+            if (type == "desktop") {
+                model = m_appsModel;
+                auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly).value(0);
+                if (!res.isValid())
+                    continue;
+                row = res.row();
+            }
+
+            newDocked.append(tmp);
+            if (m_dockedElements.contains(tmp))
+                continue;
+
+            auto isRunning = std::any_of(m_data.constBegin(), m_data.constEnd(), [&id](const auto &data) {
+                return std::get<0>(data) == id;
+            });
+
+            if (!isRunning) {
+                beginInsertRows(QModelIndex(), m_data.size(), m_data.size());
+                m_data.append(std::make_tuple(id, model, row));
+                endInsertRows();
+            }
+        }
+    }
+
+    for (auto it = m_dockedElements.begin(); it < m_dockedElements.end(); ++it) {
+        if (newDocked.contains(*it))
+            continue;
+        auto type = std::get<0>(*it), id = std::get<1>(*it);
+        auto dataIt = std::find_if(m_data.begin(), m_data.end(), [this, &id](const auto &data) {
+            return std::get<0>(data) == id && std::get<1>(data) == m_appsModel;
+        });
+        if (dataIt != m_data.end()) {
+            auto pos = (dataIt - m_data.begin());
+            beginRemoveRows(QModelIndex(), pos, pos);
+            m_data.remove(pos);
+            endRemoveRows();
+        }
+    }
+
+    m_dockedElements = newDocked;
+
+    qCDebug(dockGlobalElementModelLog) << "loaded docked elements count:" << m_dockedElements.count() << "appsModel row count:" << m_appsModel->rowCount();
+
+    if (!m_data.isEmpty()) {
+        // MenusRole should also be handled here due to it contains the copywriting of docked or undocked
+        Q_EMIT dataChanged(index(0, 0), index(m_data.size() - 1, 0), {TaskManager::DockedRole, TaskManager::MenusRole, TaskManager::IconNameRole, TaskManager::NameRole});
+    }
+}
+
+QString DockGlobalElementModel::getMenus(const QModelIndex &index) const
+{
+    auto data = m_data.at(index.row());
+    auto id = std::get<0>(data);
+    auto model = std::get<1>(data);
+    auto row = std::get<2>(data);
+
+    QJsonArray menusArray;
+    QString appNameInMenu = tr("Open");
+    if (model == m_activeAppModel) {
+        appNameInMenu = index.data(TaskManager::NameRole).toString();
+        // In case a window does not belongs to a known application, use the window title instead
+        if (appNameInMenu.isEmpty()) {
+            appNameInMenu = index.data(TaskManager::WinTitleRole).toString();
+        }
+    }
+    menusArray.append(QJsonObject{{"id", ""}, {"name", appNameInMenu}});
+
+    auto actions = model->index(row, 0).data(TaskManager::ActionsRole).toByteArray();
+    for (auto action : QJsonDocument::fromJson(actions).array()) {
+        menusArray.append(action);
+    }
+
+    if (TaskManagerSettings::instance()->dockedApplicationsEnabled()) {
+        bool isDocked = (model == nullptr) || m_dockedElements.contains(std::make_tuple("desktop", id));
+        menusArray.append(QJsonObject{{"id", DOCK_ACTION_DOCK}, {"name", isDocked ? tr("Undock") : tr("Dock")}});
+    }
+
+    if (model == m_activeAppModel) {
+        if (TaskManagerSettings::instance()->isAllowedForceQuit()) {
+            menusArray.append(QJsonObject{{"id", DOCK_ACTION_FORCEQUIT}, {"name", tr("Force Quit")}});
+        }
+        if (TaskManagerSettings::instance()->isWindowSplit()) {
+            menusArray.append(QJsonObject{{"id", DOCK_ACTION_CLOSEWINDOW}, {"name", tr("Close this window")}});
+        } else {
+            menusArray.append(QJsonObject{{"id", DOCK_ACTION_CLOSEALL}, {"name", tr("Close All")}});
+        }
+    }
+
+    return QJsonDocument(menusArray).toJson();
+}
+
+int DockGlobalElementModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : m_data.size();
+}
+
+QVariant DockGlobalElementModel::data(const QModelIndex &index, int role) const
+{
+    if (index.row() >= m_data.size())
+        return {};
+
+    auto data = m_data.at(index.row());
+    auto id = std::get<0>(data);
+    auto model = std::get<1>(data);
+    auto row = std::get<2>(data);
+
+    // cached sourceRow can be out of range after the apps model is rebuilt;
+    // re-resolve by desktopId instead of reading a wrong row
+    if (model == m_appsModel && (row < 0 || row >= model->rowCount())) {
+        auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
+        row = res.isEmpty() ? -1 : res.first().row();
+    }
+
+    switch (role) {
+    case TaskManager::ItemIdRole:
+        return id;
+    case TaskManager::WindowsRole: {
+        if (model == m_activeAppModel) {
+            if (row < 0 || row >= model->rowCount())
+                return {};
+            return QStringList{model->index(row, 0).data(TaskManager::WinIdRole).toString()};
+        }
+        // For m_appsModel data, when it's GroupModel we can directly get all window IDs for this desktop ID
+        if (row < 0 || row >= model->rowCount())
+            return {};
+        QModelIndex groupIndex = model->index(row, 0);
+        return groupIndex.data(TaskManager::WindowsRole).toStringList();
+    }
+    case TaskManager::ActiveRole:
+    case TaskManager::AttentionRole: {
+        if (model == m_activeAppModel) {
+            if (row < 0 || row >= model->rowCount())
+                return false;
+            return model->index(row, 0).data(role);
+        }
+        return false;
+    }
+
+    case TaskManager::MenusRole: {
+        return getMenus(index);
+    }
+
+    default: {
+        if (model) {
+            if (row < 0 || row >= model->rowCount())
+                return {};
+            return model->index(row, 0).data(role);
+        }
+        return {};
+    }
+    }
+}
+
+void DockGlobalElementModel::requestActivate(const QModelIndex &index) const
+{
+    auto data = m_data.value(index.row());
+    auto id = std::get<0>(data);
+    auto sourceModel = std::get<1>(data);
+    auto sourceRow = std::get<2>(data);
+
+    if (sourceModel == m_activeAppModel) {
+        auto sourceIndex = sourceModel->index(sourceRow, 0);
+        m_activeAppModel->requestActivate(sourceIndex);
+    } else {
+        if (auto interface = dynamic_cast<AbstractTaskManagerInterface*>(sourceModel)) {
+            auto sourceIndex = sourceModel->index(sourceRow, 0);
+            interface->requestNewInstance(sourceIndex, "");
+        }
+    }
+}
+
+void DockGlobalElementModel::requestNewInstance(const QModelIndex &index, const QString &action) const
+{
+    auto data = m_data.value(index.row());
+    auto id = std::get<0>(data);
+    qDebug(dockGlobalElementModelLog) << "Requesting new instance for index:" << index << "with action:" << action << "id:" << id;
+
+    // Handle special actions first (for both active and docked apps)
+    if (action == DOCK_ACTION_DOCK) {
+        TaskManagerSettings::instance()->toggleDockedElement(QStringLiteral("desktop/%1").arg(id));
+        return;
+    } else if (action == DOCK_ACTION_FORCEQUIT) {
+        requestClose(index, true);
+        return;
+    } else if (action == DOCK_ACTION_CLOSEWINDOW || action == DOCK_ACTION_CLOSEALL) {
+        requestClose(index, false);
+        return;
+    } else {
+        QProcess process;
+        process.setProcessChannelMode(QProcess::MergedChannels);
+#ifdef HAVE_DDE_API_EVENTLOGGER
+        process.start("dde-am", {"--by-user", "--launch-type", "dde-shell", id, action});
+#else
+        process.start("dde-am", {"--by-user", id, action});
+#endif
+        process.waitForFinished();
+    }
+}
+
+void DockGlobalElementModel::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
+{
+    auto data = m_data.value(index.row());
+    auto id = std::get<0>(data);
+
+    QStringList urlStrings;
+    for (const QUrl &url : urls) {
+        urlStrings.append(url.toLocalFile());
+    }
+
+    QString dbusPath = QStringLiteral("/org/desktopspec/ApplicationManager1/") + escapeToObjectPath(id);
+    using Application = org::desktopspec::ApplicationManager1::Application;
+    Application appInterface(QStringLiteral("org.desktopspec.ApplicationManager1"), dbusPath, QDBusConnection::sessionBus());
+
+    if (appInterface.isValid()) {
+        appInterface.Launch(QString(), urlStrings, QVariantMap{{QStringLiteral("_launch_type"), QStringLiteral("dde-shell")}});
+    }
+}
+
+void DockGlobalElementModel::requestClose(const QModelIndex &index, bool force) const
+{
+    auto data = m_data.value(index.row());
+    auto id = std::get<0>(data);
+    auto sourceModel = std::get<1>(data);
+    auto sourceRow = std::get<2>(data);
+
+    if (sourceModel == m_activeAppModel) {
+        auto sourceIndex = sourceModel->index(sourceRow, 0);
+        m_activeAppModel->requestClose(sourceIndex, force);
+        return;
+    }
+
+    qWarning() << "unable to close app not running";
+}
+
+void DockGlobalElementModel::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+{
+    auto data = m_data.value(index.row());
+    auto id = std::get<0>(data);
+    auto sourceModel = std::get<1>(data);
+    auto sourceRow = std::get<2>(data);
+
+    if (sourceModel == m_activeAppModel) {
+        auto sourceIndex = sourceModel->index(sourceRow, 0);
+        m_activeAppModel->requestUpdateWindowIconGeometry(sourceIndex, geometry, delegate);
+    }
+}
+
+void DockGlobalElementModel::requestWindowsView(const QModelIndexList &indexes) const
+{
+    Q_UNUSED(indexes)
+}
+
+void DockGlobalElementModel::moveItem(int from, int to)
+{
+    if (from < 0 || from >= m_data.size() || to < 0 || to >= m_data.size() || from == to)
+        return;
+
+    int destRow = from < to ? to + 1 : to;
+
+    if (!beginMoveRows(QModelIndex(), from, from, QModelIndex(), destRow))
+        return;
+
+    m_data.move(from, to);
+    endMoveRows();
+}
+
+void DockGlobalElementModel::groupItemsByApp()
+{
+    if (m_data.isEmpty())
+        return;
+
+    if (TaskManagerSettings::instance()->isWindowSplit())
+        return;
+
+    for (int i = 0; i < m_data.size(); ++i) {
+        const QString currentId = std::get<0>(m_data.at(i));
+
+        int insertPos = i + 1;
+
+        while (insertPos < m_data.size() && std::get<0>(m_data.at(insertPos)) == currentId) {
+            ++insertPos;
+        }
+
+        for (int j = insertPos; j < m_data.size(); ++j) {
+            if (std::get<0>(m_data.at(j)) != currentId)
+                continue;
+
+            int destRow = insertPos < j ? insertPos : insertPos + 1;
+            if (!beginMoveRows(QModelIndex(), j, j, QModelIndex(), destRow))
+                continue;
+            m_data.move(j, insertPos);
+            endMoveRows();
+
+            ++insertPos;
+        }
+
+        i = insertPos - 1;
+    }
+}
+}

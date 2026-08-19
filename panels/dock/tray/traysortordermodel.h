@@ -1,0 +1,137 @@
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
+
+#include "constants.h"
+#include <QQmlEngine>
+#include <QStandardItemModel>
+
+namespace Dtk {
+namespace Core {
+class DConfig;
+}}
+
+namespace docktray {
+
+class TraySortOrderModel : public QStandardItemModel
+{
+    Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
+
+    Q_PROPERTY(int visualItemCount MEMBER m_visualItemCount NOTIFY visualItemCountChanged)
+    Q_PROPERTY(bool collapsed MEMBER m_collapsed NOTIFY collapsedChanged)
+    Q_PROPERTY(bool isCollapsing MEMBER m_isCollapsing NOTIFY isCollapsingChanged)
+    Q_PROPERTY(bool actionsAlwaysVisible MEMBER m_actionsAlwaysVisible NOTIFY actionsAlwaysVisibleChanged)
+    Q_PROPERTY(bool isUpdating MEMBER m_isUpdating NOTIFY isUpdatingChanged)
+    Q_PROPERTY(QList<QVariantMap> availableSurfaces MEMBER m_availableSurfaces NOTIFY availableSurfacesChanged)
+    Q_PROPERTY(QString stagedSurfaceId MEMBER m_stagedSurfaceId NOTIFY stagedDropChanged)
+    Q_PROPERTY(int stagedVisualIndex MEMBER m_stagedVisualIndex NOTIFY stagedDropChanged)
+public:
+    // enum SectionTypes {
+    //     TrayAction,
+    //     Stashed,
+    //     Collapsable,
+    //     Pinned,
+    //     Fixed
+    // };
+    // Q_ENUM(SectionTypes)
+
+    enum Roles {
+        SurfaceIdRole = Qt::UserRole, // actually "pluginId::itemKey" or an internal one.
+        VisibilityRole,
+        DockVisibleRole,
+        SectionTypeRole,
+        VisualIndexRole,
+        DelegateTypeRole,
+        // this tray item cannot be drop (or moved in any form) to the given sections
+        ForbiddenSectionsRole,
+        PluginFlagsRole,
+        ModelExtendedRole = 0x1000
+    };
+    Q_ENUM(Roles)
+
+    enum VisualSections {
+        DockTraySection,
+        StashedSection
+    };
+    Q_ENUM(VisualSections)
+
+    explicit TraySortOrderModel(QObject *parent = nullptr);
+    ~TraySortOrderModel();
+
+    Q_INVOKABLE bool dropToStashTray(const QString & draggedSurfaceId, int dropVisualIndex, bool isBefore);
+    Q_INVOKABLE bool dropToDockTray(const QString & draggedSurfaceId, int dropVisualIndex, bool isBefore);
+    Q_INVOKABLE void setSurfaceVisible(const QString & surfaceId, bool visible);
+    Q_INVOKABLE bool isDisplayedSurface(const QString &surfaceId) const;
+    Q_INVOKABLE void setDockVisible(const QString & surfaceId, bool visible);
+    Q_INVOKABLE bool isDockVisible(const QString &surfaceId) const;
+    Q_INVOKABLE QModelIndex getModelIndexByVisualIndex(int visualIndex) const;
+    
+    // Staged drop methods for drag preview
+    Q_INVOKABLE void stageDropPosition(const QString &surfaceId, int visualIndex);
+    Q_INVOKABLE void commitStagedDrop();
+    Q_INVOKABLE void clearStagedDrop();
+
+signals:
+    void collapsedChanged(bool);
+    void isCollapsingChanged(bool);
+    void actionsAlwaysVisibleChanged(bool);
+    void isUpdatingChanged(bool);
+    void visualItemCountChanged(int);
+    void availableSurfacesChanged(const QList<QVariantMap> &);
+    void stagedDropChanged();
+
+private:
+    int m_visualItemCount = 0;
+    bool m_collapsed = false;
+    bool m_isCollapsing = false;
+    bool m_actionsAlwaysVisible = false;
+    bool m_isUpdating = false;
+    std::unique_ptr<Dtk::Core::DConfig> m_dconfig;
+    // this is for the plugins that currently available.
+    QList<QVariantMap> m_availableSurfaces;
+    // these are the sort order data source, it might contain items that are no longer existed.
+    QStringList m_stashedIds;
+    QStringList m_collapsableIds;
+    QStringList m_pinnedIds;
+    QStringList m_fixedIds;
+    // surface IDs that should be invisible/hidden from the tray area.
+    QStringList m_hiddenIds;
+    // surface IDs that should be hidden from dock tray but keep VisibilityRole true.
+    QStringList m_dockHiddenIds;
+    
+    // Staged drop state for drag preview
+    QString m_stagedSurfaceId;
+    int m_stagedVisualIndex = -1;
+
+    QStandardItem * findItemByVisualIndex(int visualIndex, VisualSections visualSection) const;
+    QStringList * getSection(const QString & sectionType);
+    
+    // Helper function for reserving space during staged drop
+    void reserveStagedDropSpace(int &currentVisualIndex);
+    QString findSection(const QString &surfaceId, const QString &fallback, const QStringList &forbiddenSections, int pluginFlags);
+    void registerToSection(const QString & surfaceId, const QString & sectionType);
+    QStandardItem *createTrayItem(const QString &name,
+                                  const QString &sectionType,
+                                  const QString &delegateType,
+                                  const QStringList &forbiddenSections = {},
+                                  int pluginFlags = Dock::Attribute_Normal);
+    void updateVisualIndexes();
+    QString registerSurfaceId(const QVariantMap &surfaceData);
+    void loadDataFromDConfig();
+    void saveDataToDConfig();
+    void saveSortOrderToDConfig();
+    void saveHiddenDataToDConfig();
+    void saveHiddenIdsToDConfig();
+    void saveDockHiddenIdsToDConfig();
+    void saveCollapsedToDConfig();
+    void handlePluginVisibleChanged(const QString &surfaceId, bool visible);
+
+private slots:
+    void onAvailableSurfacesChanged();
+};
+
+}

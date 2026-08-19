@@ -1,0 +1,162 @@
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "dockitemmodel.h"
+#include "abstracttaskmanagerinterface.h"
+#include "dockgroupmodel.h"
+#include "globals.h"
+#include "taskmanager.h"
+#include "taskmanagersettings.h"
+
+namespace dock
+{
+DockItemModel::DockItemModel(QAbstractItemModel *globalModel, QObject *parent)
+    : QAbstractProxyModel(parent)
+    , AbstractTaskManagerInterface(this)
+    , m_globalModel(globalModel)
+    , m_groupModel(nullptr)
+    , m_split(!TaskManagerSettings::instance()->isWindowSplit())
+    , m_isUpdating(false)
+{
+    auto updateSourceModel = [this]() {
+        bool isWindowSplit = TaskManagerSettings::instance()->isWindowSplit();
+        if (isWindowSplit == m_split)
+            return;
+
+        m_split = isWindowSplit;
+
+        if (isWindowSplit) {
+            setSourceModel(m_globalModel);
+        } else {
+            m_groupModel = new DockGroupModel(m_globalModel, TaskManager::DesktopIdRole, this);
+            setSourceModel(m_groupModel);
+        }
+    };
+
+    connect(TaskManagerSettings::instance(), &TaskManagerSettings::windowSplitChanged, this, updateSourceModel);
+    QMetaObject::invokeMethod(this, updateSourceModel, Qt::QueuedConnection);
+}
+
+void DockItemModel::setSourceModel(QAbstractItemModel *model)
+{
+    if (sourceModel() == model)
+        return;
+
+    m_isUpdating = true;
+    if (sourceModel()) {
+        sourceModel()->disconnect(this);
+    }
+
+    beginResetModel();
+    QAbstractProxyModel::setSourceModel(model);
+    endResetModel();
+
+    connect(sourceModel(), &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int first, int last) {
+        if (parent.isValid() || m_isUpdating)
+            return;
+        beginInsertRows(QModelIndex(), first, last);
+        endInsertRows();
+    });
+    connect(sourceModel(), &QAbstractItemModel::rowsRemoved, this, [this](const QModelIndex &parent, int first, int last) {
+        if (parent.isValid() || m_isUpdating)
+            return;
+        beginRemoveRows(QModelIndex(), first, last);
+        endRemoveRows();
+    });
+    connect(sourceModel(), &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
+        if (m_isUpdating || !topLeft.isValid() || !bottomRight.isValid())
+            return;
+        auto first = topLeft.row();
+        auto last = bottomRight.row();
+        Q_EMIT dataChanged(index(first, 0), index(last, 0), roles);
+    });
+    connect(sourceModel(), &QAbstractItemModel::rowsMoved, this, [this](const QModelIndex &parent, int start, int end, const QModelIndex &destination, int row) {
+        Q_UNUSED(destination)
+        if (parent.isValid() || m_isUpdating)
+            return;
+        beginMoveRows(QModelIndex(), start, end, QModelIndex(), row);
+        endMoveRows();
+    });
+
+    m_isUpdating = false;
+}
+
+void DockItemModel::dumpItemInfo(const QModelIndex &index)
+{
+    // clang-format off
+    qDebug() << "Index in DockItemModel:" << index
+             << "DesktopIdRole:" << data(index, TaskManager::DesktopIdRole)
+             << "ItemIdRole:" << data(index, TaskManager::ItemIdRole)
+             << "WinIconRole:" << data(index, TaskManager::WinIconRole)
+             << "IconNameRole:" << data(index, TaskManager::IconNameRole)
+             << "DockedRole:" << data(index, TaskManager::DockedRole);
+    // clang-format on
+}
+
+QHash<int, QByteArray> DockItemModel::roleNames() const
+{
+    if (!m_globalModel)
+        return {};
+    return m_globalModel->roleNames();
+}
+
+QModelIndex DockItemModel::index(int row, int column, const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+    return createIndex(row, column);
+}
+
+QModelIndex DockItemModel::parent(const QModelIndex &child) const
+{
+    Q_UNUSED(child)
+    return QModelIndex();
+}
+
+int DockItemModel::columnCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+    return 1;
+}
+
+int DockItemModel::rowCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+    auto sourceModel = this->sourceModel();
+    return sourceModel == nullptr ? 0 : sourceModel->rowCount();
+}
+
+QVariant DockItemModel::data(const QModelIndex &index, int role) const
+{
+    auto sourceModel = this->sourceModel();
+    if (!sourceModel || !index.isValid())
+        return {};
+
+    const auto sourceIndex = sourceModel->index(index.row(), index.column());
+    if (!sourceIndex.isValid())
+        return {};
+
+    auto data = sourceModel->data(sourceIndex, role);
+    if (role == TaskManager::IconNameRole) {
+        if (data.toString().isEmpty()) {
+            return DEFAULT_APP_ICONNAME;
+        }
+    }
+
+    return data;
+}
+
+QModelIndex DockItemModel::mapToSource(const QModelIndex &proxyIndex) const
+{
+    auto sourceModel = this->sourceModel();
+    if (!sourceModel || !proxyIndex.isValid())
+        return {};
+
+    return sourceModel->index(proxyIndex.row(), proxyIndex.column());
+}
+
+QModelIndex DockItemModel::mapFromSource(const QModelIndex &sourceIndex) const
+{
+    return index(sourceIndex.row(), sourceIndex.column());
+}
+}
