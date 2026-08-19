@@ -38,7 +38,10 @@ option(FRAME_BUILD_COVERAGE "Enable gcov coverage instrumentation for dde-shell 
 # ---- OBJECT library: all frame/ sources under test, compiled once ------------
 # DS_LIB mirrors frame/CMakeLists.txt so the DS_SHARE export macro is correct
 # while compiling these sources into the test objects.
+# Sources are grouped by batch.  BUILD_WITH_X11 is intentionally NOT defined
+# for this OBJECT lib so that dsutility.cpp uses the base (non-X11) Utility class.
 add_library(frame_test_objects OBJECT
+    # Batch 1 (PR #1703): pluginmetadata, appletdata, appletitemmodel, models, pluginfactory
     ${CMAKE_SOURCE_DIR}/frame/pluginmetadata.h
     ${CMAKE_SOURCE_DIR}/frame/pluginmetadata.cpp
     ${CMAKE_SOURCE_DIR}/frame/appletdata.h
@@ -51,16 +54,70 @@ add_library(frame_test_objects OBJECT
     ${CMAKE_SOURCE_DIR}/frame/models/listtotableproxymodel.cpp
     ${CMAKE_SOURCE_DIR}/frame/pluginfactory.h
     ${CMAKE_SOURCE_DIR}/frame/pluginfactory.cpp
+
+    # Batch N+1: dstypes, applet, appletproxy, dsutility
+    ${CMAKE_SOURCE_DIR}/frame/dstypes.h
+    ${CMAKE_SOURCE_DIR}/frame/dstypes.cpp
+    ${CMAKE_SOURCE_DIR}/frame/applet.h
+    ${CMAKE_SOURCE_DIR}/frame/applet.cpp
+    ${CMAKE_SOURCE_DIR}/frame/appletproxy.h
+    ${CMAKE_SOURCE_DIR}/frame/appletproxy.cpp
+    ${CMAKE_SOURCE_DIR}/frame/dsutility.h
+    ${CMAKE_SOURCE_DIR}/frame/dsutility.cpp
 )
 target_compile_definitions(frame_test_objects PRIVATE DS_LIB)
 target_include_directories(frame_test_objects PUBLIC
     ${CMAKE_SOURCE_DIR}/frame
     ${CMAKE_SOURCE_DIR}/frame/models
 )
+# Dtk::Core is needed by applet.cpp/appletproxy.cpp/dsutility.cpp (DObject/DObjectPrivate).
+# Qt::Gui is needed by dsutility.cpp (QGuiApplication/QWindow).
+# Both are already found by the top-level CMakeLists.txt.
 target_link_libraries(frame_test_objects PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Qml
+    Qt${QT_VERSION_MAJOR}::Gui
+    Dtk${DTK_VERSION_MAJOR}::Core
 )
+
+# --- B1 workaround (test-side, no src change) -------------------------------
+# dsutility.cpp uses QGuiApplication::platformName() / qGuiApp->allWindows() but
+# does NOT directly #include <QGuiApplication>. In production, BUILD_WITH_X11=ON
+# (default) pulls in utility_x11_p.h which transitively includes QGuiApplication.
+# This test OBJECT lib intentionally does NOT define BUILD_WITH_X11 (to avoid XCB
+# cascade), which cuts that transitive include. As a test-side workaround we
+# force-include <qguiapplication.h> into every TU of the OBJECT lib so dsutility.cpp
+# compiles without touching src. NB: this is a workaround for a src robustness
+# gap (dsutility.cpp should directly include <QGuiApplication>); a separate src
+# defect issue should fix it, after which this block can be removed.
+#
+# Use find_path to resolve the absolute header path (avoid hardcoding), then pass
+# -include and the path as TWO separate list elements (CMake list separator) —
+# writing "-include<path>" would be misparsed ("<" as redirection by make/shell).
+find_path(QT6_GUIAPP_INCLUDE_DIR qguiapplication.h
+    PATHS ${Qt${QT_VERSION_MAJOR}Gui_INCLUDE_DIRS}
+    NO_DEFAULT_PATH
+)
+if(QT6_GUIAPP_INCLUDE_DIR)
+    target_compile_options(frame_test_objects PRIVATE
+        "-include" "${QT6_GUIAPP_INCLUDE_DIR}/qguiapplication.h")
+else()
+    # Fallback: Qt6 may expose headers under a QtGui/ subdirectory or via the
+    # imported target's INTERFACE_INCLUDE_DIRECTORIES. Resolve via the target.
+    get_target_property(_qt6gui_incdirs Qt${QT_VERSION_MAJOR}::Gui
+        INTERFACE_INCLUDE_DIRECTORIES)
+    find_path(QT6_GUIAPP_INCLUDE_DIR qguiapplication.h
+        PATHS ${_qt6gui_incdirs}
+        NO_DEFAULT_PATH
+    )
+    if(QT6_GUIAPP_INCLUDE_DIR)
+        target_compile_options(frame_test_objects PRIVATE
+            "-include" "${QT6_GUIAPP_INCLUDE_DIR}/qguiapplication.h")
+    else()
+        message(WARNING "qguiapplication.h not found in Qt${QT_VERSION_MAJOR}::Gui include dirs; "
+            "dsutility.cpp may fail to compile. Set QT6_GUIAPP_INCLUDE_DIR manually.")
+    endif()
+endif()
 
 # ---- Helper: declare a frame test executable with the standard link set -------
 set(FRAME_TEST_TARGETS "")
@@ -91,6 +148,12 @@ frame_add_test(proxymodel_tests
     listtotableproxymodeltests.cpp
 )
 frame_add_test(pluginfactory_tests    pluginfactorytests.cpp)
+
+# Batch N+1: dstypes, applet, appletproxy, dsutility
+frame_add_test(types_tests            typestests.cpp)
+frame_add_test(applet_tests           applettests.cpp)
+frame_add_test(appletproxy_tests      appletproxytests.cpp)
+frame_add_test(utility_tests          utilitytests.cpp)
 
 # Visibility: private-member access for ListToTableProxyModel::m_roles /
 # m_sourceColumn is done via a scoped `#define private public` block in
