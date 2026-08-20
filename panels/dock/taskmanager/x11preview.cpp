@@ -1,0 +1,821 @@
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "x11preview.h"
+
+#include "appitem.h"
+#include "taskmanager.h"
+#include "x11utils.h"
+#include "x11windowmonitor.h"
+
+#include <cstdint>
+#include <unistd.h>
+#include <fcntl.h>
+#include <poll.h>
+
+#include <DIconButton>
+#include <QByteArray>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDBusUnixFileDescriptor>
+#include <QEvent>
+#include <QFile>
+#include <QHash>
+#include <QLayout>
+#include <QLoggingCategory>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPixmap>
+#include <QScreen>
+#include <QTimer>
+#include <QWindow>
+#include <QtConcurrent>
+
+#include <DStyle>
+#include <DPlatformHandle>
+
+#include <DWindowManagerHelper>
+#include <DGuiApplicationHelper>
+
+Q_LOGGING_CATEGORY(x11WindowPreview, "org.deepin.dde.shell.dock.taskmanager.x11WindowPreview")
+
+#define PREVIEW_TITLE_HEIGHT 24
+#define PREVIEW_TITLE_BOTTOMMARGIN 8
+#define PREVIEW_CONTENT_HEIGHT 118
+#define PREVIEW_CONTENT_MAX_WIDTH 240
+#define PREVIEW_CONTENT_MIN_WIDTH 80
+#define PREVIEW_CONTENT_MARGIN 10
+#define PREVIEW_CONTAINER_MARGIN 10
+#define PREVIEW_HOVER_BORDER 4
+#define PREVIEW_MINI_WIDTH 140
+#define PREVIEW_HOVER_BORDER_COLOR QColor(0, 0, 0, 255 * 0.2)
+#define PREVIEW_HOVER_BORDER_COLOR_DARK_MODE QColor(255, 255, 255, 255 * 0.3)
+#define PREVIEW_BACKGROUND_COLOR QColor(0, 0, 0, 255 * 0.05)
+#define PREVIEW_BACKGROUND_COLOR_DARK_MODE QColor(255, 255, 255, 255 * 0.05)
+#define WM_HELPER DWindowManagerHelper::instance()
+
+DGUI_USE_NAMESPACE
+
+namespace dock {
+
+static QHash<uint32_t, QPixmap> s_windowPreviewCache;
+
+QPixmap fetchWindowPreview(const uint32_t &winId)
+{
+    // TODO: check kwin is load screenshot plugin
+    if (!WM_HELPER->hasComposite())
+        return QPixmap();
+
+    if (s_windowPreviewCache.contains(winId)) {
+        return s_windowPreviewCache.value(winId);
+    }
+
+    // pipe read write fd
+    int fd[2];
+
+    if (pipe2(fd, O_CLOEXEC) < 0) {
+        qDebug() << "failed to create pipe";
+        return QPixmap();
+    }
+
+    QDBusInterface interface(QStringLiteral("org.kde.KWin"), QStringLiteral("/org/kde/KWin/ScreenShot2"), QStringLiteral("org.kde.KWin.ScreenShot2"));
+    // 第一个参数，winID或者UUID
+    QList<QVariant> args;
+    args << QVariant::fromValue(QString::number(winId));
+    // 第二个参数，需要截图的选项
+    QVariantMap option;
+    option["include-decoration"] = true;
+    option["include-cursor"] = false;
+    option["native-resolution"] = true;
+    args << QVariant::fromValue(option);
+    // 第三个参数，文件描述符
+    args << QVariant::fromValue(QDBusUnixFileDescriptor(fd[1]));
+
+    QDBusReply<QVariantMap> reply = interface.callWithArgumentList(QDBus::Block, QStringLiteral("CaptureWindow"), args);
+
+    // close write
+    ::close(fd[1]);
+
+    if (!reply.isValid()) {
+        ::close(fd[0]);
+        qDebug() << "get current workspace background error: " << reply.error().message();
+        return QPixmap();
+    }
+
+    QVariantMap imageInfo = reply.value();
+    int imageWidth = imageInfo.value("width").toUInt();
+    int imageHeight = imageInfo.value("height").toUInt();
+    int imageStride = imageInfo.value("stride").toUInt();
+    int imageFormat = imageInfo.value("format").toUInt();
+
+    if (imageWidth <= 1 || imageHeight <= 1) {
+        ::close(fd[0]);
+        return QPixmap();
+    }
+
+    QImage::Format qimageFormat = static_cast<QImage::Format>(imageFormat);
+
+    // imageStride 是每行实际字节数（含内存对齐 padding），必须用它而非 width*bpp/8
+    qsizetype expectedSize = static_cast<qsizetype>(imageHeight) * imageStride;
+    QByteArray fileContent(expectedSize, Qt::Uninitialized);
+    qsizetype totalRead = 0;
+
+    // 用 poll() + 超时保护替代阻塞的 QFile::read()：
+    // 若 KWin 内部异常（持有写端但不写也不关），read() 会永久阻塞；
+    // poll() 超时后直接放弃，避免主线程（此处为正常 UI 线程上下文）死锁。
+    constexpr int kTimeoutMs = 5000;
+    while (totalRead < expectedSize) {
+        struct pollfd pfd{fd[0], POLLIN, 0};
+        int ret = ::poll(&pfd, 1, kTimeoutMs);
+        if (ret == 0) {
+            qWarning(x11WindowPreview) << "fetchWindowPreview: pipe read timeout, KWin may have stalled";
+            break;
+        }
+        if (ret < 0) {
+            qWarning(x11WindowPreview) << "fetchWindowPreview: poll error:" << strerror(errno);
+            break;
+        }
+        if (pfd.revents & (POLLERR | POLLNVAL)) {
+            qWarning(x11WindowPreview) << "fetchWindowPreview: pipe error, revents=" << pfd.revents;
+            break;
+        }
+        // POLLHUP（写端已关闭 EOF）：继续读出剩余数据，下次 read 返回 0 退出
+        ssize_t n = ::read(fd[0], fileContent.data() + totalRead, expectedSize - totalRead);
+        if (n <= 0) {
+            if (n < 0)
+                qWarning(x11WindowPreview) << "fetchWindowPreview: read error:" << strerror(errno);
+            break; // n==0: EOF
+        }
+        totalRead += n;
+    }
+
+    ::close(fd[0]);
+
+    if (totalRead < expectedSize) {
+        qWarning(x11WindowPreview) << "fetchWindowPreview: incomplete data, got" << totalRead << "/ expected" << expectedSize;
+        return QPixmap();
+    }
+
+    QImage image(reinterpret_cast<const uchar *>(fileContent.constData()),
+                 imageWidth, imageHeight, imageStride, qimageFormat);
+    auto pixmap = QPixmap::fromImage(image);
+
+    if (!pixmap.isNull()) {
+        s_windowPreviewCache.insert(winId, pixmap);
+    }
+
+    return pixmap;
+}
+
+class PreviewsListView : public QListView
+{
+public:
+    using QListView::QListView;
+
+    QSize viewportSizeHint() const override
+    {
+        QSize size(0, 0);
+        int count = model()->rowCount();
+        for (int row = 0; row < count; row++) {
+            QModelIndex index = model()->index(row, 0);
+
+            QSize s = sizeHintForIndex(index);
+            if (flow() == Flow::LeftToRight) {
+                size.rwidth() += s.width();
+                if (size.height() < s.height()) {
+                    size.setHeight(s.height());
+                }
+            } else {
+                size.rheight() += s.height();
+                if (size.width() < s.width()) {
+                    size.setWidth(s.width());
+                }
+            }
+        }
+
+        if (flow() == Flow::LeftToRight) {
+            size.rwidth() += spacing() * count * 2;
+            size.rheight() += spacing() * 2;
+        } else {
+            size.rheight() += spacing() * count * 2;
+            size.rwidth() += spacing() * 2;
+        }
+
+        return size;
+    }
+};
+
+// DockItemWindowModel 已移除，现在直接使用 HoverPreviewProxyModel
+
+class AppItemWindowDeletegate : public QAbstractItemDelegate
+{
+private:
+    QListView *m_listView;
+    X11WindowPreviewContainer* m_parent;
+
+public:
+    AppItemWindowDeletegate(QListView *listview, X11WindowPreviewContainer *parent = nullptr) : QAbstractItemDelegate(parent)
+    {
+        m_listView = listview;
+        m_parent = parent;
+    }
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        auto themeType = DGuiApplicationHelper::instance()->themeType();
+
+        QRect hoverRect = option.rect;
+
+        QPen pen;
+        if (WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
+            uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+            auto pixmap = fetchWindowPreview(winId);
+            auto size = calSize(pixmap.size());
+
+            DStyleHelper dstyle(m_listView->style());
+            const int radius = dstyle.pixelMetric(DStyle::PM_FrameRadius);
+            painter->setRenderHint(QPainter::Antialiasing);
+
+            painter->save();
+            painter->setPen(Qt::NoPen);
+            if (themeType == DGuiApplicationHelper::DarkType) {
+                painter->setBrush(QColor(255, 255, 255, 0.05 * 255));
+            } else {
+                painter->setBrush(QColor(0, 0, 0, 0.05 * 255));
+            }
+            painter->drawRoundedRect(option.rect.marginsRemoved(QMargins(PREVIEW_HOVER_BORDER, PREVIEW_HOVER_BORDER, PREVIEW_HOVER_BORDER, PREVIEW_HOVER_BORDER)), radius, radius);
+            painter->restore();
+
+
+            painter->save();
+            pen.setWidth(1);
+            pen.setColor(themeType == DGuiApplicationHelper::DarkType ? QColor(255, 255, 255, 255 * 0.1) : QColor(0, 0, 0, 255 * 0.1));
+            painter->setPen(pen);
+            QRect imageRect(
+                (option.rect.left() + ((option.rect.width() - size.width()) / 2)),
+                (option.rect.top() + ((option.rect.height() - size.height()) / 2)),
+                size.width(),
+                size.height());
+            QPainterPath clipPath;
+            clipPath.addRoundedRect(imageRect, radius, radius);
+            painter->setClipPath(clipPath);
+            painter->drawPixmap(imageRect, pixmap);
+            painter->setClipping(false);
+            painter->drawRoundedRect(imageRect, radius, radius);
+            if (option.state.testFlag(QStyle::State_MouseOver)) {
+                QPainterPath path;
+                path.addRoundedRect(option.rect.marginsRemoved(QMargins(2, 2, 2, 2)), radius + 2, radius + 2);
+                pen.setWidth(PREVIEW_HOVER_BORDER);
+                pen.setColor(themeType == DGuiApplicationHelper::DarkType ? PREVIEW_HOVER_BORDER_COLOR_DARK_MODE : PREVIEW_HOVER_BORDER_COLOR);
+                painter->setPen(pen);
+                painter->drawPath(path);
+            }
+            painter->restore();
+        } else {
+            auto rect = QRect((option.rect.left()),
+                                    (option.rect.top()),
+                                    PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2,
+                                    PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2)
+                                .marginsAdded(QMargins(-PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER));
+            auto text = QFontMetrics(m_parent->font())
+                            .elidedText(index.data(TaskManager::WinTitleRole).toString(), Qt::TextElideMode::ElideRight, rect.width() - PREVIEW_TITLE_HEIGHT);
+            painter->drawText(rect, text);
+
+            if (option.state.testFlag(QStyle::State_MouseOver)) {
+                hoverRect.setSize(QSize(PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2));
+                hoverRect = hoverRect.marginsAdded(QMargins(-2, -2, -2, -2));
+
+                painter->save();
+                painter->setRenderHint(QPainter::Antialiasing);
+                painter->setPen(pen);
+                painter->drawRect(hoverRect);
+                painter->restore();
+            }
+        }
+
+        if (!option.state.testFlag(QStyle::State_MouseOver)) {
+            m_listView->closePersistentEditor(index);
+            return;
+        }
+        m_listView->openPersistentEditor(index);
+    }
+
+    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        Q_UNUSED(option)
+        if (!WM_HELPER->hasComposite() || !WM_HELPER->hasBlurWindow()) {
+            return QSize(PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2);
+        }
+
+        uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+        auto pixmap = fetchWindowPreview(winId);
+        int width = qBound(PREVIEW_CONTENT_MIN_WIDTH, calSize(pixmap.size()).width(), PREVIEW_CONTENT_MAX_WIDTH);
+        return QSize(width, PREVIEW_CONTENT_HEIGHT) + QSize(PREVIEW_HOVER_BORDER * 2, PREVIEW_HOVER_BORDER * 2);
+    }
+
+    virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        auto closeButton = new DIconButton(parent);
+        closeButton->setIcon(DDciIcon::fromTheme("close"));
+        closeButton->setEnabledCircle(true);
+        QPalette palette = closeButton->palette();
+
+        QColor lightColor = palette.color(QPalette::Normal, QPalette::Light);
+        QColor darkColor = palette.color(QPalette::Normal, QPalette::Dark);
+
+        lightColor.setAlpha(255 * 0.6);
+        darkColor.setAlpha(255 * 0.6);
+
+        palette.setColor(QPalette::Light,  lightColor);
+        palette.setColor(QPalette::Dark,  darkColor);
+        closeButton->setPalette(palette);
+
+        closeButton->setIconSize(QSize(16, 16));
+        closeButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+        closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + 4, -5));
+        closeButton->setVisible(true);
+
+        connect(closeButton, &DToolButton::clicked, this, [this, index]() {
+            uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+
+            s_windowPreviewCache.remove(winId);
+            X11Utils::instance()->closeWindow(winId);
+
+            // 给一点时间让窗口关闭事件传播
+            QTimer::singleShot(100, this, [this]() {
+                if (m_listView->model()->rowCount() == 0) {
+                    m_parent->hide();
+                }
+                // 大小更新现在由模型变化信号自动处理
+            });
+        });
+
+        return closeButton;
+    }
+
+private:
+    QSize calSize(const QSize &imageSize) const
+    {
+        qreal factor = 1.0f;
+        if (imageSize.height() > PREVIEW_CONTENT_HEIGHT) {
+            factor = qreal(PREVIEW_CONTENT_HEIGHT) / imageSize.height();
+        }
+        if (imageSize.width() * factor > PREVIEW_CONTENT_MAX_WIDTH) {
+            factor = qreal(PREVIEW_CONTENT_MAX_WIDTH) / imageSize.width();
+        }
+
+        return imageSize.scaled(imageSize * factor, Qt::KeepAspectRatio);
+    }
+
+};
+
+X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, QWidget *parent)
+    : DBlurEffectWidget(parent)
+    , m_isPreviewEntered(false)
+    , m_isDockPreviewCount(0)
+    , m_monitor(monitor)
+    , m_sourceModel(nullptr)
+    , m_titleWidget(new QWidget())
+    , m_direction(0)
+{
+    m_hideTimer = new QTimer(this);
+    m_hideTimer->setSingleShot(true);
+    m_hideTimer->setInterval(500);
+
+    setWindowFlags(Qt::ToolTip | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus | Qt::FramelessWindowHint);
+    setMouseTracking(true);
+    initUI();
+
+    connect(m_hideTimer, &QTimer::timeout, this, &X11WindowPreviewContainer::callHide);
+
+    connect(m_closeAllButton, &DIconButton::clicked, this, [this]() {
+        qCDebug(x11WindowPreview) << "closeAllButton clicked";
+        if (!m_sourceModel) {
+            return;
+        }
+
+        QList<uint32_t> windowIds;
+        for (int i = 0; i < m_sourceModel->rowCount(); i++) {
+            QModelIndex index = m_sourceModel->index(i, 0);
+            uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+            if (winId != 0) {
+                windowIds.append(winId);
+            }
+        }
+
+        for (auto windowId : windowIds) {
+            s_windowPreviewCache.remove(windowId);
+            X11Utils::instance()->closeWindow(windowId);
+        }
+
+        hide();
+    });
+
+    connect(m_view, &QListView::entered, this, [this](const QModelIndex &enter) {
+        m_closeAllButton->setVisible(false);
+        if (WM_HELPER->hasComposite()) {
+            m_monitor->previewWindow(enter.data(TaskManager::WinIdRole).toInt());
+        }
+
+        // 获取图标，优先使用窗口图标，如果为空则使用应用图标
+        QVariant iconData = enter.data(TaskManager::WinIconRole);
+        if (iconData.toString().isEmpty()) {
+            iconData = enter.data(TaskManager::IconNameRole);
+        }
+        updatePreviewIconFromString(iconData.toString());
+        updatePreviewTitle(enter.data(TaskManager::WinTitleRole).toString());
+    });
+}
+
+void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceModel,
+                                                     const QPointer<QWindow> &window,
+                                                     int32_t previewXoffset,
+                                                     int32_t previewYoffset,
+                                                     uint32_t direction)
+{
+    m_baseWindow = window;
+    m_previewXoffset = previewXoffset;
+    m_previewYoffset = previewYoffset;
+    m_direction = direction;
+
+    m_isDockPreviewCount += 1;
+
+    // 只在第一次设置模型或模型真的发生变化时才重新设置
+    if (m_sourceModel != sourceModel) {
+        // 断开之前模型的连接
+        if (m_sourceModel) {
+            disconnect(m_sourceModel, nullptr, this, nullptr);
+        }
+
+        m_sourceModel = sourceModel;
+
+        // 设置新模型给 view
+        m_view->setModel(sourceModel);
+
+        // 建立模型变化监听（只在模型真正变化时建立）
+        if (sourceModel) {
+            connect(sourceModel, &QAbstractItemModel::rowsRemoved, this, [this]() {
+                // 当窗口被移除时，清理相关缓存
+                s_windowPreviewCache.clear();
+                // 延迟调用，确保视图完全更新后再计算大小
+                QTimer::singleShot(0, this, [this]() {
+                    if (m_sourceModel) {
+                        if (m_sourceModel->rowCount() > 0) {
+                            // 强制视图立即更新几何信息
+                            m_view->updateGeometry();
+                            m_view->adjustSize();
+                            updateSize(m_sourceModel->rowCount());
+                        } else {
+                            // 如果没有窗口了，隐藏预览容器
+                            hide();
+                        }
+                    }
+                });
+            });
+
+            connect(sourceModel, &QAbstractItemModel::rowsInserted, this, [this]() {
+                // 延迟调用，确保视图完全更新后再计算大小
+                QTimer::singleShot(0, this, [this]() {
+                    if (m_sourceModel) {
+                        // 强制视图立即更新几何信息
+                        m_view->updateGeometry();
+                        m_view->adjustSize();
+                        updateSize(m_sourceModel->rowCount());
+                    }
+                });
+            });
+        }
+    }
+
+    if (sourceModel && sourceModel->rowCount() > 0) {
+        const QModelIndex &firstIndex = sourceModel->index(0, 0);
+        // 获取图标，优先使用窗口图标，如果为空则使用应用图标
+        QVariant iconData = firstIndex.data(TaskManager::WinIconRole);
+        if (iconData.toString().isEmpty()) {
+            iconData = firstIndex.data(TaskManager::IconNameRole);
+        }
+        updatePreviewIconFromString(iconData.toString());
+        updatePreviewTitle(firstIndex.data(TaskManager::WinTitleRole).toString());
+        updateSize(sourceModel->rowCount());
+    } else {
+        updateSize(0);
+    }
+
+    if (isHidden()) {
+        show();
+    }
+}
+
+void X11WindowPreviewContainer::updateOrientation()
+{
+
+    if (m_direction % 2 == 0 && WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
+        m_view->setFlow(QListView::LeftToRight);
+    } else {
+        m_view->setFlow(QListView::TopToBottom);
+    }
+
+    updateSize();
+}
+
+void X11WindowPreviewContainer::callHide()
+{
+    if (m_isPreviewEntered) return;
+    if (m_isDockPreviewCount > 0) return;
+
+    hide();
+    s_windowPreviewCache.clear();
+}
+
+void X11WindowPreviewContainer::hidePreView()
+{
+    m_isDockPreviewCount -= 1;
+    m_isDockPreviewCount = std::max(0, m_isDockPreviewCount);
+    m_hideTimer->start();
+}
+
+void X11WindowPreviewContainer::enterEvent(QEnterEvent* event)
+{
+    m_isPreviewEntered = true;
+    return DBlurEffectWidget::enterEvent(event);
+}
+
+void X11WindowPreviewContainer::leaveEvent(QEvent* event)
+{
+    m_isPreviewEntered = false;
+    m_hideTimer->start();
+    m_closeAllButton->setVisible(false);
+    return DBlurEffectWidget::leaveEvent(event);
+}
+
+void X11WindowPreviewContainer::showEvent(QShowEvent *event)
+{
+    updateOrientation();
+    m_closeAllButton->setVisible(false);
+    return DBlurEffectWidget::showEvent(event);
+}
+
+void X11WindowPreviewContainer::hideEvent(QHideEvent*)
+{
+    // 只通知监视器清空预览状态，让 TaskManager 统一管理模型清理
+    // 不要在这里断开模型连接，因为 clearPreviewState 信号会触发 TaskManager 的 clearFilter
+    // QPointer 会自动处理对象销毁的情况
+    if (m_monitor) {
+        m_monitor->clearPreviewState();
+    }
+}
+
+void X11WindowPreviewContainer::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event)
+    updatePosition();
+}
+
+void X11WindowPreviewContainer::updatePosition()
+{
+    auto screenRect = m_baseWindow->screen()->geometry();
+    auto dockWindowPosition = m_baseWindow->position();
+    int xPosition = dockWindowPosition.x() + m_previewXoffset;
+    int yPosition = dockWindowPosition.y() + m_previewYoffset;
+    switch(m_direction) {
+        case 0: {
+            xPosition -= width() / 2;
+            break;
+        }
+        case 1: {
+            xPosition -= width();
+            yPosition -= height() / 2;
+            break;
+        }
+        case 2: {
+            xPosition -= width() / 2;
+            yPosition -= height();
+            break;
+        }
+        case 3: {
+            yPosition -= height() / 2;
+            break;
+        }
+        default: {
+            qCWarning(x11WindowPreview) << QStringLiteral("unknown dock direction");
+            break;
+        }
+    }
+
+    xPosition = std::max(xPosition, screenRect.x() + 10);
+    xPosition = std::min(xPosition, screenRect.x() + screenRect.width() - width() - 10);
+
+    yPosition = std::max(yPosition, screenRect.y() + 10);
+    yPosition = std::min(yPosition, screenRect.y() + screenRect.height() - height() - 10);
+
+    move(xPosition, yPosition);
+}
+
+void X11WindowPreviewContainer::updatePreviewTitle(const QString& title)
+{
+    m_previewTitleStr = title;
+    m_previewTitle->setText(m_previewTitleStr);
+}
+
+void X11WindowPreviewContainer::initUI()
+{
+    m_view = new PreviewsListView(this);
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+    QHBoxLayout* titleLayout = new QHBoxLayout;
+    titleLayout->setContentsMargins(5, 0, 5, 0);
+    titleLayout->setSpacing(0);
+
+    m_previewIcon = new QLabel(this);
+    m_previewTitle = new DLabel(this);
+    m_previewTitle->setFixedHeight(PREVIEW_TITLE_HEIGHT);
+    m_previewIcon->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+    m_previewIcon->setScaledContents(true);
+
+    m_closeAllButton = new DIconButton(this);
+
+    m_closeAllButton->setIconSize(QSize(16, 16));
+    m_closeAllButton->setIcon(DDciIcon::fromTheme("close"));
+    m_closeAllButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+    m_closeAllButton->setEnabledCircle(true);
+
+    DIconButtonHoverFilter *hoverHandler = new DIconButtonHoverFilter(this);
+    m_closeAllButton->installEventFilter(hoverHandler);
+
+    m_previewIcon->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    m_previewTitle->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    m_previewTitle->setElideMode(Qt::ElideRight);
+
+    auto updateWindowTitleColorType = [this](){
+        QPalette pa = palette();
+        auto type = DGuiApplicationHelper::instance()->themeType();
+        pa.setColor(QPalette::WindowText, type == DGuiApplicationHelper::ColorType::LightType ? Qt::black : Qt::white);
+        m_previewTitle->setPalette(pa);
+    };
+
+    updateWindowTitleColorType();
+
+    connect(DGuiApplicationHelper::instance(), & DGuiApplicationHelper::themeTypeChanged, this , updateWindowTitleColorType);
+
+    titleLayout->addWidget(m_previewIcon);
+    titleLayout->setSpacing(0);
+    titleLayout->setContentsMargins(QMargins(PREVIEW_HOVER_BORDER, 0, PREVIEW_HOVER_BORDER, 0));
+    titleLayout->addSpacing(6);
+    titleLayout->addWidget(m_previewTitle);
+    titleLayout->addStretch();
+    titleLayout->addWidget(m_closeAllButton, 0, Qt::AlignRight);
+
+    // 模型将在 showPreviewWithModel 中设置
+    m_view->setItemDelegate(new AppItemWindowDeletegate(m_view, this));
+    m_view->setMouseTracking(true);
+    m_view->viewport()->installEventFilter(this);
+    m_view->setAutoFillBackground(false);
+    m_view->setFrameStyle(QFrame::NoFrame);
+    m_view->setSpacing(2);
+    m_view->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    m_view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
+    QPalette pal = m_view->palette();
+    pal.setColor(QPalette::Base, Qt::transparent);
+    m_view->setPalette(pal);
+
+    m_titleWidget->setLayout(titleLayout);
+
+    mainLayout->addWidget(m_titleWidget, 0, Qt::AlignHCenter);
+    mainLayout->addSpacing(PREVIEW_TITLE_BOTTOMMARGIN - PREVIEW_HOVER_BORDER - m_view->spacing());
+    mainLayout->addWidget(m_view);
+    mainLayout->setAlignment(m_view, Qt::AlignCenter);
+    mainLayout->setSpacing(0);
+    mainLayout->setContentsMargins(PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER, PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER / 2,
+                                    PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER, PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER);
+
+    setLayout(mainLayout);
+
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    winId();
+    if (auto handle = this->windowHandle()) {
+        handle->setProperty("isDockPreview", true);
+    }
+    DPlatformHandle handler(this->windowHandle());
+    handler.setShadowRadius(12 * qApp->devicePixelRatio());
+    handler.setShadowColor(QColor(0, 0, 0, 0.6 * 255));
+    handler.setShadowOffset(QPoint(0, 4 * qApp->devicePixelRatio()));
+}
+
+void X11WindowPreviewContainer::updateSize(int windowCount)
+{
+    if (windowCount != -1) {
+        if (windowCount == 0) {
+            DBlurEffectWidget::hide();
+            return;
+        }
+    }
+
+    m_view->adjustSize();
+    m_view->updateGeometry();
+
+    auto screenSize = screen()->size();
+
+    auto calFixHeight = [=]()-> int {
+        int resHeight = screenSize.height();
+
+        bool beyondEdge = m_view->viewportSizeHint().height() + 2 * PREVIEW_CONTENT_MARGIN + PREVIEW_TITLE_HEIGHT > screenSize.height();
+        // ListView的高度 + Title下边距 + Container上下边距
+        int listviewContainerHeight = m_view->viewportSizeHint().height() + PREVIEW_TITLE_BOTTOMMARGIN - PREVIEW_HOVER_BORDER + 2 * (PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER) + PREVIEW_TITLE_HEIGHT;
+
+        if (m_direction % 2 == 0) {
+            // 2D模式下Listview纵向排列, 需要去掉任务栏高度, 所以减去 m_baseWindow->height()
+            resHeight = beyondEdge ? screenSize.height() - 2 * PREVIEW_CONTENT_MARGIN - m_baseWindow->height() : listviewContainerHeight;
+        } else {
+            resHeight = beyondEdge ? screenSize.height() - 2 * PREVIEW_CONTENT_MARGIN : listviewContainerHeight;
+        }
+
+        return resHeight;
+    };
+
+    auto calFixWidth = [=]()-> int {
+        int resWidth = screenSize.width();
+
+        bool beyondEdge = m_view->viewportSizeHint().width() + 2 * (PREVIEW_CONTENT_MARGIN + PREVIEW_CONTAINER_MARGIN) > screenSize.width();
+        int listviewContainerWidth = m_view->viewportSizeHint().width() + 2 * (PREVIEW_CONTENT_MARGIN - PREVIEW_HOVER_BORDER);
+
+        if (m_direction % 2 == 0) {
+            resWidth = beyondEdge ? screenSize.width() - 2 * PREVIEW_CONTENT_MARGIN : listviewContainerWidth;
+        } else {
+            resWidth = listviewContainerWidth;
+        }
+
+        return resWidth;
+    };
+
+    setFixedSize(calFixWidth(), calFixHeight());
+
+    if (m_view->width() + this->contentsMargins().left() * 2 <= PREVIEW_MINI_WIDTH) {
+        setMaximumWidth(PREVIEW_MINI_WIDTH);
+    }
+
+    m_titleWidget->setFixedWidth(m_view->width());
+    QTimer::singleShot(0, this, &X11WindowPreviewContainer::adjustSize);
+}
+
+bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched != m_view->viewport()) return false;
+
+    switch (event->type()) {
+    case QEvent::HoverLeave: {
+        if (WM_HELPER->hasComposite()) {
+            m_monitor->cancelPreviewWindow();
+        }
+
+        m_closeAllButton->setVisible(true);
+        if (!m_sourceModel || m_sourceModel->rowCount() == 0)
+            return false;
+        updatePreviewTitle(m_previewTitleStr);
+        break;
+    }
+    case QEvent::QEvent::MouseButtonRelease: {
+        auto mouseEvent = static_cast<QMouseEvent*>(event);
+        if (mouseEvent->button() != Qt::LeftButton) return false;
+
+        // cancel preview b4 active window
+        if (WM_HELPER->hasComposite())
+            m_monitor->cancelPreviewWindow();
+
+        auto index = m_view->indexAt(mouseEvent->pos());
+        if (index.isValid()) {
+            X11Utils::instance()->setActiveWindow(index.data(TaskManager::WinIdRole).toUInt());
+        }
+        DBlurEffectWidget::hide();
+        break;
+    }
+    default: {}
+    }
+
+    return false;
+}
+
+void X11WindowPreviewContainer::updatePreviewIconFromString(const QString &stringData)
+{
+    QPixmap pix;
+    const QStringList strs = stringData.split("base64,");
+    if (strs.size() == 2) {
+        // is base64 image data
+        pix.loadFromData(QByteArray::fromBase64(strs.at(1).toLatin1()));
+    } else {
+        // is (likely) icon name from theme
+        const int scaledSize = PREVIEW_TITLE_HEIGHT * qApp->devicePixelRatio();
+        pix = QIcon::fromTheme(stringData).pixmap(scaledSize, scaledSize);
+    }
+
+    if (pix.isNull()) {
+        qCInfo(x11WindowPreview) << "Cannot load icon from string data:" << stringData;
+        pix = QPixmap(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+        pix.fill(Qt::transparent);
+    }
+
+    m_previewIcon->setPixmap(pix);
+}
+}

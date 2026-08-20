@@ -1,0 +1,66 @@
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="pt">
+<context>
+    <name>AppItem</name>
+    <message>
+        <source>Move to Trash</source>
+        <translation>Mover para a Reciclagem</translation>
+    </message>
+</context>
+<context>
+    <name>dock::AppItem</name>
+    <message>
+        <source>Open</source>
+        <translation>Abrir</translation>
+    </message>
+    <message>
+        <source>Undock</source>
+        <translation>Retirar do Dock</translation>
+    </message>
+    <message>
+        <source>Dock</source>
+        <translation>Dock</translation>
+    </message>
+    <message>
+        <source>Force Quit</source>
+        <translation>Forçar Fecho</translation>
+    </message>
+    <message>
+        <source>Close All</source>
+        <translation>Fechar Tudo</translation>
+    </message>
+</context>
+<context>
+    <name>dock::DockGlobalElementModel</name>
+    <message>
+        <source>Open</source>
+        <translation>Abrir</translation>
+    </message>
+    <message>
+        <source>Undock</source>
+        <translation>Retirar do Dock</translation>
+    </message>
+    <message>
+        <source>Dock</source>
+        <translation>Dock</translation>
+    </message>
+    <message>
+        <source>Force Quit</source>
+        <translation>Forçar Fecho</translation>
+    </message>
+    <message>
+        <source>Close All</source>
+        <translation>Fechar Tudo</translation>
+    </message>
+    <message>
+        <source>Close this window</source>
+        <translation>Fechar esta janela</translation>
+    </message>
+</context>
+<context>
+    <name>dock::TaskManager</name>
+    <message>
+        <source>%1 files</source>
+        <translation>%1 ficheiros</translation>
+    </message>
+</context>
+</TS>

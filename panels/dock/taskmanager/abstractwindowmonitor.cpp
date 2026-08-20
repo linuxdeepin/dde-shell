@@ -1,0 +1,170 @@
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "abstractwindowmonitor.h"
+#include "abstractwindow.h"
+#include "globals.h"
+#include "taskmanager.h"
+
+namespace dock {
+AbstractWindowMonitor::AbstractWindowMonitor(QObject *parent)
+    : QAbstractListModel(parent)
+    , AbstractTaskManagerInterface(nullptr)
+{
+}
+
+QHash<int, QByteArray> AbstractWindowMonitor::roleNames() const
+{
+    return {{TaskManager::WinIdRole, MODEL_WINID},
+            {TaskManager::PidRole, MODEL_PID},
+            {TaskManager::IdentityRole, MODEL_IDENTIFY},
+            {TaskManager::WinIconRole, MODEL_WINICON},
+            {TaskManager::WinTitleRole, MODEL_TITLE},
+            {TaskManager::ActiveRole, MODEL_ACTIVE},
+            {TaskManager::AttentionRole, MODEL_ATTENTION},
+            {TaskManager::ShouldSkipRole, MODEL_SHOULDSKIP}};
+}
+
+int AbstractWindowMonitor::rowCount(const QModelIndex &parent) const
+{
+    Q_UNUSED(parent)
+    return m_trackedWindows.size();
+}
+
+void AbstractWindowMonitor::requestActivate(const QModelIndex &index) const
+{
+    auto window = m_trackedWindows.value(index.row(), nullptr);
+    if (nullptr == window)
+        return;
+
+    if (window->isActive()) {
+        window->minimize();
+    } else {
+        window->activate();
+    }
+}
+
+void AbstractWindowMonitor::requestOpenUrls(const QModelIndex &index, const QList<QUrl> &urls) const
+{
+}
+
+void AbstractWindowMonitor::requestNewInstance(const QModelIndex &index, const QString &action) const
+{
+}
+
+void AbstractWindowMonitor::requestClose(const QModelIndex &index, bool force) const
+{
+    auto window = m_trackedWindows.value(index.row(), nullptr);
+    if (nullptr == window)
+        return;
+    if (force) {
+        window->killClient();
+    } else {
+        window->close();
+    }
+}
+
+void AbstractWindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
+{
+}
+
+void AbstractWindowMonitor::requestWindowsView(const QModelIndexList &indexes) const
+{
+    qDebug() << indexes;
+}
+
+QVariant AbstractWindowMonitor::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return QVariant();
+
+    auto pos = index.row();
+    if (pos < 0 || pos >= m_trackedWindows.size())
+        return QVariant();
+    auto window = m_trackedWindows.value(pos, nullptr);
+    if (!window)
+        return QVariant();
+
+    switch (role) {
+    case TaskManager::WinIdRole:
+        return window->id();
+    case TaskManager::PidRole:
+        return window->pid();
+    case TaskManager::IdentityRole:
+        return window->identity();
+    case TaskManager::WinIconRole:
+        return window->icon();
+    case TaskManager::WinTitleRole:
+        return window->title();
+    case TaskManager::ActiveRole:
+        return window->isActive();
+    case TaskManager::ShouldSkipRole:
+        return window->shouldSkip();
+    case TaskManager::AttentionRole:
+        return window->isAttention();
+    }
+
+    return QVariant();
+}
+
+void AbstractWindowMonitor::trackWindow(AbstractWindow* window)
+{
+    beginInsertRows(QModelIndex(), m_trackedWindows.size(), m_trackedWindows.size());
+    m_trackedWindows.append(window);
+    endInsertRows();
+
+    connect(window, &AbstractWindow::pidChanged, this, [this, window]() {
+        auto pos = m_trackedWindows.indexOf(window);
+        auto modelIndex = index(pos);
+        Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::PidRole});
+    });
+    connect(window, &AbstractWindow::identityChanged, this, [this, window]() {
+        auto pos = m_trackedWindows.indexOf(window);
+        auto modelIndex = index(pos);
+        Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::IdentityRole});
+    });
+    connect(window, &AbstractWindow::iconChanged, this, [this, window]() {
+        auto pos = m_trackedWindows.indexOf(window);
+        auto modelIndex = index(pos);
+        Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::WinIconRole});
+    });
+    connect(window, &AbstractWindow::titleChanged, this, [this, window]() {
+        auto pos = m_trackedWindows.indexOf(window);
+        auto modelIndex = index(pos);
+        Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::WinTitleRole});
+    });
+
+    connect(window, &AbstractWindow::stateChanged, this, [this, window]() {
+        auto pos = m_trackedWindows.indexOf(window);
+        auto modelIndex = index(pos);
+        Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::ActiveRole, TaskManager::AttentionRole});
+    });
+    connect(window, &AbstractWindow::shouldSkipChanged, this, [this, window]() {
+        auto pos = m_trackedWindows.indexOf(window);
+        auto modelIndex = index(pos);
+        Q_EMIT dataChanged(modelIndex, modelIndex, {TaskManager::ShouldSkipRole});
+    });
+}
+
+void AbstractWindowMonitor::destroyWindow(AbstractWindow * window)
+{
+    auto pos = m_trackedWindows.indexOf(window);
+    if (pos == -1)
+        return;
+
+    beginRemoveRows(QModelIndex(), pos, pos);
+    m_trackedWindows.removeAt(pos);
+    endRemoveRows();
+}
+
+void AbstractWindowMonitor::clearTrackedWindows()
+{
+    if (m_trackedWindows.isEmpty())
+        return;
+
+    beginResetModel();
+    m_trackedWindows.clear();
+    endResetModel();
+}
+}

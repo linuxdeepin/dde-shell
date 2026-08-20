@@ -1,0 +1,278 @@
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+/*
+## Design Overview
+
+The tray area follows the following design:
+.___.
+| O |
+.___.
+  v
+_________________________________________
+ [.] (@) (@) [>] (%) (%) [=] [%] [12:34]
+
+[.]: Tray popup action (to show stashed icons)
+(@): Collapsable tray icons
+[>]: Collapse action icon
+(%): Pinned tray icons
+[=]: Quick settings panel action icon
+[%]: Fixed tray plugins
+[12:34]: Date-time plugin (one of the fixed tray plugins)
+
+## Implementation Overview
+
+Dock plugins are categorized as 4 types:
+
+1. Stashed Trays
+2. Collapsable Trays
+3. Pinned Trays (can still drag to re-arrange or put to stased or collapsable area)
+4. Fixed Trays (cannot drag, or declared as fixed)
+
+We'll need a class (TraySortOrderModel) dedicated to load/save tray icon sort order.
+Such model store the positions of all known tray items. The sort order is reflected
+as a property instead of the item index of the model, and is intended to use together
+with a/multple proxy model(s).
+
+class TraySortOrderModel {
+property:
+    collapsed: bool, get, set
+roles:
+    pluginId: string
+    visiblity: bool // can be used for filtering
+    sectionType: enum {
+        tray-action // sort not involved by section type
+        stashed
+        collapsable
+        pinned
+        fixed
+    }
+    visualIndex: int // global sort order, calculated by the model from C++ side, can be duplicated, cannot have gap number
+    delegateType: enum { // for DelegateChooser
+        legacy-tray-plugin
+        action-show-stash
+        action-toggle-collapse
+        action-toggle-quick-settings
+        dummy // test-only, id as icon name
+    }
+function:
+    // DnD related
+    void stageChange() // update visual index, but not actual sort order (e.g. when dragging)
+    void commitChange() // save change on disk, also clear staged cache
+    void restoreChange() // restore staged changes (e.g. when cancelling a drag)
+}
+*/
+
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt.labs.platform 1.1 as LP
+import org.deepin.ds.dock.tray 1.0 as DDT
+
+Item {
+    id: root
+
+    required property DDT.TraySortOrderModel model
+
+    property string color: "red"
+    property bool collapsed: false
+    property bool isHorizontal: true
+
+    readonly property int itemVisualSize: DDT.TrayItemPositionManager.itemVisualSize.width
+    readonly property int itemSpacing: DDT.TrayItemPositionManager.itemSpacing
+    readonly property int itemPadding: DDT.TrayItemPositionManager.itemPadding
+
+    property int trayHeight: 50
+    property size containerSize: DDT.TrayItemPositionManager.visualSize
+    property bool isDragging: DDT.TraySortOrderModel.actionsAlwaysVisible
+    property bool animationEnable: true
+    // visiualIndex default value is -1
+    property int dropHoverIndex: -1
+    required property var surfaceAcceptor
+    readonly property bool isDropping: dropArea.containsDrag
+    // 拖拽成功移入 stash 时的回调（命中 action-show-stash），由 tray.qml 传入
+    property var onStashDropSucceeded: null
+
+    onIsDraggingChanged: {
+        animationEnable = !isDragging
+        animationEnableTimer.start()
+    }
+
+    Timer {
+        id: animationEnableTimer
+        interval: 10
+        repeat: false
+        onTriggered: {
+            animationEnable = true
+        }
+    }
+
+    implicitWidth: width
+    width: containerSize.width
+    implicitHeight: height
+    height: containerSize.height
+
+    Behavior on width {
+        enabled: animationEnable
+        NumberAnimation { duration: 200; easing.type: collapsed || !DDT.TraySortOrderModel.isCollapsing ? Easing.OutQuad : Easing.InQuad }
+    }
+
+    Behavior on height {
+        enabled: animationEnable
+        NumberAnimation { duration: 200; easing.type: collapsed || !DDT.TraySortOrderModel.isCollapsing ? Easing.OutQuad : Easing.InQuad }
+    }
+
+    // Delegates
+    TrayItemDelegateChooser {
+        id: trayItemDelegateChooser
+        isHorizontal: root.isHorizontal
+        collapsed: root.collapsed
+        itemPadding: root.itemPadding
+        surfaceAcceptor: root.surfaceAcceptor
+        disableInputEvents: root.isDropping
+    }
+
+    // debug
+    Rectangle {
+        color: root.color
+        anchors.fill: parent
+    }
+
+    DropArea {
+        id: dropArea
+        anchors.fill: parent
+        keys: ["text/x-dde-shell-tray-dnd-surfaceId"]
+        property bool isDropped: false
+        property bool dragExited: false
+        property string source: ""
+        property string surfaceId: ""
+
+        onEntered: function (dragEvent) {
+            dragExited = false
+            isDropped = false
+            surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            source = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-source")
+            console.log(surfaceId, source)
+            // Make action icons (collapse/show stash) visible while dragging over tray
+            DDT.TraySortOrderModel.actionsAlwaysVisible = true
+            if (source !== "" && DDT.TraySortOrderModel.isDisplayedSurface(surfaceId)) {
+                dragEvent.accepted = false
+            } else {
+                dragEvent.accepted = true
+            }
+        }
+
+        onPositionChanged: function (dragEvent) {
+            let surfaceId = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            let pos = root.isHorizontal ? drag.x : drag.y
+            let dropIdx = DDT.TrayItemPositionManager.itemIndexByPoint(Qt.point(drag.x, drag.y))
+            let currentItemIndex = dropIdx.index
+            let isBefore = dropIdx.isBefore            
+            let isStash = dragEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType") === "stashed"
+            dropHoverIndex = dropIdx.index
+            
+            // 检查当前悬停位置是否是禁止拖拽的插件
+            let modelIndex = DDT.TraySortOrderModel.getModelIndexByVisualIndex(currentItemIndex)
+            let sectionType = root.model.data(modelIndex, DDT.TraySortOrderModel.SectionTypeRole)
+            if (sectionType === "fixed") {
+                dragEvent.accepted = false
+                return
+            }
+            
+            // 检查 ActionShowStashDelegate 是否显示
+            let showStashActionVisible = false
+            for (let i = 0; i < root.model.rowCount(); i++) {
+                let index = root.model.index(i, 0)
+                let itemSurfaceId = root.model.data(index, DDT.TraySortOrderModel.SurfaceIdRole)
+                if (itemSurfaceId === "internal/action-show-stash") {
+                    showStashActionVisible = root.model.data(index, DDT.TraySortOrderModel.VisibilityRole)
+                    break
+                }
+            }
+            
+            // 根据 ActionShowStashDelegate 的显示状态动态改变条件
+            let shouldAllowDrop = showStashActionVisible ? (dropHoverIndex !== 0) : (dropHoverIndex !== -1)
+
+            if (shouldAllowDrop && (isStash || source === "quickPanel")) {
+                // 收纳区或快捷面板拖拽：使用暂存机制
+                DDT.TraySortOrderModel.stageDropPosition(surfaceId, Math.floor(currentItemIndex))
+            } else if (shouldAllowDrop) {
+                // 托盘内部拖拽：使用定时器机制
+                dropTrayTimer.handleDrop = function() {
+                    if (isDropped || dragExited) return
+                    DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore)
+                }
+                dropTrayTimer.start()
+            } else if (!surfaceId.startsWith("application-tray")){
+                dragEvent.accepted = false
+            }
+        }
+        
+        onDropped: function (dropEvent) {
+            isDropped = true
+            let surfaceId = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-surfaceId")
+            let dropIdx = DDT.TrayItemPositionManager.itemIndexByPoint(Qt.point(drag.x, drag.y))
+            let currentItemIndex = dropIdx.index
+            let isBefore = dropIdx.isBefore
+            let isStash = dropEvent.getDataAsString("text/x-dde-shell-tray-dnd-sectionType") === "stashed"
+            console.log("dropped", currentItemIndex, isBefore, isStash)
+
+            // 从收纳区或快捷中心拖拽的使用暂存机制
+            if (isStash || source === "quickPanel") {
+                DDT.TraySortOrderModel.commitStagedDrop()
+            } else {
+                // 检查是否放到了展开按钮上（命中 action-show-stash 分支，图标移入 stash）
+                // 在 dropToDockTray 之前检查，避免模型变更后索引失效
+                let modelIndex = DDT.TraySortOrderModel.getModelIndexByVisualIndex(Math.floor(currentItemIndex))
+                let dropOnSurfaceId = root.model.data(modelIndex, DDT.TraySortOrderModel.SurfaceIdRole)
+                let isDroppedOnStashButton = (dropOnSurfaceId === "internal/action-show-stash")
+
+                // 托盘内部拖拽直接提交
+                let success = DDT.TraySortOrderModel.dropToDockTray(surfaceId, Math.floor(currentItemIndex), isBefore);
+                if (isDroppedOnStashButton && success && onStashDropSucceeded) {
+                    onStashDropSucceeded()
+                }
+            }
+            DDT.TraySortOrderModel.actionsAlwaysVisible = false
+        }
+
+        onExited: function () {
+            dragExited = true
+            DDT.TraySortOrderModel.clearStagedDrop()
+            // Hide action icons when drag leaves tray without dropping
+            if (!isDropped) {
+                DDT.TraySortOrderModel.actionsAlwaysVisible = false
+            }
+        }
+
+        Timer {
+            id: dropTrayTimer
+            interval: 50
+            repeat: false
+            property var handleDrop
+            onTriggered: {
+                handleDrop()
+            }
+        }
+    }
+
+    // Tray items
+    Repeater {
+        anchors.fill: parent
+        model: root.model
+        delegate: trayItemDelegateChooser
+    }
+
+    Component.onCompleted: {
+        DDT.TrayItemPositionManager.orientation = Qt.binding(function() {
+            return root.isHorizontal ? Qt.Horizontal : Qt.Vertical
+        });
+        DDT.TrayItemPositionManager.visualItemCount = Qt.binding(function() {
+            return root.model.visualItemCount
+        });
+        DDT.TrayItemPositionManager.dockHeight = Qt.binding(function() {
+            return root.trayHeight
+        });
+    }
+}

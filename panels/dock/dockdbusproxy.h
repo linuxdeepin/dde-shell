@@ -1,0 +1,100 @@
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
+
+#include "dsglobal.h"
+#include "dockpanel.h"
+#include "constants.h"
+#include "frame/dockiteminfo.h"
+#include "frame/dappletdock.h"
+
+#include <appletproxy.h>
+
+#include <QObject>
+#include <QDBusContext>
+#include <QDBusArgument>
+#include <QPointer>
+#include <QTimer>
+
+/** this class used for old dock api compatible
+  * it will forward old dbus call to new implementation
+  */
+namespace dock {
+class DockDBusProxy final: public QObject, public QDBusContext
+{
+    Q_OBJECT
+    Q_PROPERTY(QRect geometry READ geometry FINAL)
+    Q_PROPERTY(QRect FrontendWindowRect READ frontendWindowRect FINAL)
+    Q_PROPERTY(Position Position READ position WRITE setPosition FINAL)
+
+    Q_PROPERTY(HideMode HideMode READ hideMode WRITE setHideMode FINAL)
+    Q_PROPERTY(HideState HideState READ hideState FINAL)
+    Q_PROPERTY(uint WindowSizeEfficient READ windowSizeEfficient WRITE setWindowSizeEfficient)
+    Q_PROPERTY(uint WindowSizeFashion READ windowSizeFashion WRITE setWindowSizeFashion)
+    Q_PROPERTY(int DisplayMode READ displayMode WRITE setDisplayMode FINAL)
+    Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary FINAL)
+    Q_PROPERTY(bool Locked READ locked WRITE setLocked FINAL)
+
+
+public:
+    DockDBusProxy(DockPanel* parent = nullptr);
+
+    void setItemOnDock(const QString &settingKey, const QString &itemKey, bool visible);
+    void setPluginVisible(const QString &pluginName, bool visible);
+    bool getPluginVisible(const QString &pluginName);
+    QString getPluginKey(const QString &pluginName);
+    void resizeDock(int offset, bool dragging);
+    QStringList GetLoadedPlugins();
+    DockItemInfos plugins();
+    void ReloadPlugins();
+    void callShow();
+
+    QRect geometry();
+    QRect frontendWindowRect();
+
+    Position position();
+    void setPosition(Position position);
+
+    HideMode hideMode();
+    void setHideMode(HideMode mode);
+
+    HideState hideState();
+
+    uint windowSizeEfficient();
+    void setWindowSizeEfficient(uint size);
+
+    uint windowSizeFashion();
+    void setWindowSizeFashion(uint size);
+
+    int displayMode();
+    void setDisplayMode(int displayMode);
+
+    bool RequestDock(const QString &desktopFile, int index);
+    bool IsDocked(const QString &desktopFile);
+    bool RequestUndock(const QString &desktopFile);
+    void ActivateWindow(uint32_t win);
+
+    bool showInPrimary() const;
+    void setShowInPrimary(bool newShowInPrimary);
+
+    bool locked() const;
+    void setLocked(bool newLocked);
+
+Q_SIGNALS:
+    void pluginVisibleChanged(const QString &pluginName, bool visible) const;
+    void pluginsChanged();
+
+private:
+    DockPanel* parent() const;
+    QObject *trayApplet();
+    QString getAppID(const QString &desktopfile);
+    void updateDockPluginsVisible(const QVariantMap &pluginsVisible);
+    void logInitialPluginState();
+    void logCurrentVisiblePluginList(const QString &changedItemKey = QString(), bool changedVisible = true);
+
+    DS_NAMESPACE::DAppletProxy *m_oldDockApplet;
+    QPointer<QObject> m_trayApplet;
+};
+}

@@ -1,0 +1,123 @@
+{
+	"magic": "dsg.config.meta",
+	"version": "1.0",
+	"contents": {
+		"Allow_Force_Quit": {
+			"value": "enabled",
+			"serial": 0,
+			"flags": [],
+			"name": "Allow_Force_Quit",
+			"name[zh_CN]": "强制退出",
+			"description": "allow force quit app ot not",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"Window_Split": {
+			"value": "disabled",
+			"serial": 0,
+			"flags": [],
+			"name": "Window_Split",
+			"name[zh_CN]": "窗口拆分",
+			"description": "is window split",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"showAttentionAnimation": {
+			"value": true,
+			"serial": 0,
+			"flags": [],
+			"name": "Show Attention Animation",
+			"name[zh_CN]": "显示消息通知动画",
+			"description": "Show attention animation for applications",
+			"description[zh_CN]": "显示应用有新消息时的水波纹动画",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"noTaskGrouping": {
+			"value": false,
+			"serial": 0,
+			"flags": [],
+			"name": "No Task-Grouping",
+			"name[zh_CN]": "禁用任务分组",
+			"description": "Disable Taskbar Icon Grouping by Application",
+			"description[zh_CN]": "禁用任务栏图标按应用分组",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"cgroupsBasedGrouping": {
+			"value": true,
+			"serial": 0,
+			"flags": [],
+			"name": "CGroups-based Grouping",
+			"name[zh_CN]": "基于 cgroups 的任务图标分组",
+			"description": "Enable cgroups-based task grouping",
+			"description[zh_CN]": "启用基于 cgroups 的任务图标分组",
+			"permissions": "readonly",
+			"visibility": "private"
+		},
+		"cgroupsBasedGroupingSkipAppIds": {
+			"value": ["deepin-terminal"],
+			"serial": 0,
+			"flags": [],
+			"name": "CGroups-Based Grouping Skipped App IDs",
+			"name[zh_CN]": "基于 cgroups 的任务图标分组所应跳过的应用列表",
+			"description": "List of app id that cgroups-based grouping should skip checking",
+			"description[zh_CN]": "一个表示基于 CGroups 的应用分组所应当跳过的 App ID 列表",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"cgroupsBasedGroupingSkipCategories": {
+			"value": ["TerminalEmulator"],
+			"serial": 0,
+			"flags": [],
+			"name": "CGroups-Based Grouping Skipped Categories",
+			"name[zh_CN]": "基于 cgroups 的任务图标分组所应跳过的应用类别列表",
+			"description": "List of desktop file categories that cgroups-based grouping should skip checking",
+			"description[zh_CN]": "一个表示基于 CGroups 的应用分组所应当跳过的应用类别列表",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"Docked_Items": {
+			"value": ["id: dde-file-manager,type: amAPP", "id: org.deepin.browser,type: amAPP", "id: deepin-app-store,type: amAPP", "id: org.deepin.dde.control-center, type: amAPP", "id: deepin-music,type: amAPP", "id: deepin-editor,type: amAPP", "id: deepin-mail,type: amAPP","id: deepin-terminal,type: amAPP","id: dde-calendar,type: amAPP", "id: deepin-calculator,type: amAPP"],
+			"serial": 0,
+			"flags": [],
+			"name": "Docked_Items",
+			"name[zh_CN]": "已固定项目(已弃用)",
+			"description": "`Docked_Items` is deprecated, please use `dockedElements` instead",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"dockedElements": {
+			"value": ["desktop/dde-file-manager", "desktop/deepin-app-store", "desktop/org.deepin.browser", "desktop/deepin-mail", "desktop/deepin-terminal", "desktop/dde-calendar", "desktop/deepin-music", "desktop/deepin-editor", "desktop/deepin-calculator", "desktop/org.deepin.dde.control-center"],
+			"serial": 0,
+			"flags": [],
+			"name": "dockedElements",
+			"name[zh_CN]": "任务栏驻留项目",
+			"description": "The items which is docked when dock is started.",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"windowIconWhitelist": {
+			"value": ["com.tencent.wechat", "com.qq.weixin.work.deepin"],
+			"serial": 0,
+			"flags": [],
+			"name": "windowIconWhitelist",
+			"name[zh_CN]": "窗口图标白名单",
+			"description": "List of app id that should prefer window icon when window split is disabled",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"enableDockedApplications": {
+			"value": true,
+			"serial": 0,
+			"flags": [],
+			"name": "Enable Docked Applications",
+			"name[zh_CN]": "启用驻留任务栏应用",
+			"description": "Enable or disable docked applications on the taskbar. When disabled, docked applications that are not running are hidden and docking changes are rejected, while the saved docked application list is preserved.",
+			"description[zh_CN]": "启用或禁用任务栏驻留应用；关闭时隐藏未运行的驻留应用并禁止更改驻留状态，但保留已保存的驻留应用列表。",
+			"permissions": "readwrite",
+			"visibility": "private"
+		}
+		
+	}
+}

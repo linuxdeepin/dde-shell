@@ -1,0 +1,1648 @@
+dde-shell (2.0.53) unstable; urgency=medium
+
+  * feat: refactor notification center into separate plugin and applet
+  * chore: update Debian control file descriptions
+  * fix(dock): prevent dock from taking focus
+  * fix: handle QDBusArgument type in hint conversion
+  * refactor: move ShellSurfaceItemProxy to dock plugin level
+  * feat: add DConfig toggles for dock context menu and docked
+    applications
+  * fix(taskmanager): reject invalid drag in onEntered
+  * i18n: Translate org.deepin.ds.dock.multitaskview.ts in pt_BR (#1673)
+  * feat: add applet enable/disable API with DConfig support
+  * fix: prevent dde-apps crash when restarting due to concurrent model
+    updates
+  * fix: improve tray applet lifecycle management and model safety
+  * i18n: Updates for project Deepin Desktop Environment (#1686)
+  * chore: add itemData implementation for RoleGroupModel
+  * fix: fix launcher not showing after popup menu on x11
+  * fix(dock-tray): prevent stash popup from closing during drag-and-
+    drop
+  * refactor: optimize AM appitem property update handling
+  * fix(dock): fix wrong docked app icons after login
+  * fix: add X11BypassWindowManagerHint to panel popup window flags
+  * i18n: Updates for project Deepin Desktop Environment (#1694)
+  * fix: icon not updated on taskbar if icon name in desktop changed
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 18 Aug 2026 13:27:15 +0800
+
+dde-shell (2.0.52) unstable; urgency=medium
+
+  * fix(CI): broken cppcheck
+  * feat(dock): add accessibility annotations to dock QML
+  * fix: resolve missing icon on first drag in treeland
+  * fix: move image decoding logic from bubble item to notify entity
+
+ -- Kun Zhang <zhangkun2@uniontech.com>  Thu, 23 Jul 2026 22:03:24 +0800
+
+dde-shell (2.0.51) unstable; urgency=medium
+
+  * fix(dock): correct AppItemBackground hovered color and outer border
+    logic in efficient mode
+  * fix: fix bubble list layout update on height change
+  * fix: cache appearance opacity in the shell
+  * fix(osd): read Wayland brightness from Treeland instead of Display1
+  * fix(dock): smart hide fails to show dock after window dragged away
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 16 Jul 2026 21:37:56 +0800
+
+dde-shell (2.0.50) unstable; urgency=medium
+
+  * fix: prioritize notification-specific image hints in appIcon
+  * fix(dock): prevent menu hide after touch long-press
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 09 Jul 2026 19:29:58 +0800
+
+dde-shell (2.0.49) unstable; urgency=medium
+
+  * fix: correct task manager space calculation for window split mode
+  * feat: add pid and AM-based appid query fallback for wayland session
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 30 Jun 2026 14:58:40 +0800
+
+dde-shell (2.0.48) unstable; urgency=medium
+
+  * revert: "fix: correct dock context menu popup positioning"
+  * fix: prevent crash on toplevel destruction
+  * fix: destroy wayland proxy before cleanup to prevent use-after-free
+    crash
+  * chore: Sync by
+    https://github.com/linuxdeepin/.github/commit/88706fa723e3771211cb07
+    81d3d97fd4a6cd2a68
+  * fix: keep notification hover state on close button edge
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 24 Jun 2026 15:35:39 +0800
+
+dde-shell (2.0.47) unstable; urgency=medium
+
+  * fix(debian): add Breaks and Replaces for libdde-shell-dev
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 18 Jun 2026 11:18:15 +0800
+
+dde-shell (2.0.46) unstable; urgency=medium
+
+  * fix(dock): subtract startPadding from remainingSpacesForTaskManager
+  * fix(dock): Adjust the calculation logic of dockItemMaxSize
+  * fix(osd): re-establish selectIndex binding in onVisibleChanged for
+    reactive sync
+  * fix(dock): align delegate implicitHeight with icon ratio for
+    consistent spacing
+  * fix: bind hover and pressed states to background
+  * fix: bind taskmanager start timer to applet lifetime
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 17 Jun 2026 16:25:27 +0800
+
+dde-shell (2.0.45) unstable; urgency=medium
+
+  * feat: add XdgActivation support for notifications
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 11 Jun 2026 19:45:36 +0800
+
+dde-shell (2.0.44) unstable; urgency=medium
+
+  * fix(dock): align multitask view to first app gap with app icon
+    spacing
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 04 Jun 2026 19:32:58 +0800
+
+dde-shell (2.0.43) unstable; urgency=medium
+
+  * fix: xembed tray popup window position correction for stashed
+    container (#1608)
+  * fix: fallback dock theme to system settings on wayland
+  * feat: support move xembed window on treeland
+  * fix: handle touch outside popup on X11
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 28 May 2026 17:33:40 +0800
+
+dde-shell (2.0.42) unstable; urgency=medium
+
+  * fix: disable context menu trigger on multitask view
+  * fix(dock): extend tray plugin list logging delay to ensure stable
+    load
+  * fix: add qq.weixin work to dock window icon whitelist
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 20 May 2026 15:16:51 +0800
+
+dde-shell (2.0.41) unstable; urgency=medium
+
+  * fix(dock): fix premature icon label compression in taskbar
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 14 May 2026 20:03:22 +0800
+
+dde-shell (2.0.40) unstable; urgency=medium
+
+  * feat(dock): pass launch_type when launching apps from taskbar
+  * fix: use dummy drag target on Wayland to prevent layout breakage
+  * feat: add window icon whitelist for dock task manager
+  * fix: replace touch long press handling with TapHandler for better
+    reliability
+  * feat: recalculate dock window rect on screen geometry change
+  * feat: use multi-field event logger with cmake find_package
+    使用多字段事件日志记录器并迁移到 cmake find_package
+  * fix: keep dock visible during multitask view
+  * refactor: optimize dock spacing calculation for FullscreenFrame
+  * fix: prevent duplicate menu trigger on touchscreen long press
+  * i18n: Updates for project Deepin Desktop Environment (#743)
+  * fix: fix icon scale reset during attention animation
+  * feat: add libdde-shell-dock package (#1587)
+  * fix: resolve null pointer crash when TextCalculator exits
+  * fix: prevent crash from invalid indexes in window monitoring
+  * fix: resolve occasional crash in TreeLandWindow destructor under
+    treeland
+  * fix: fix occasional crash in treeland under layer shell surface
+  * feat(dock): integrate event logging with cmake find_package support
+    集成事件日志记录并使用 cmake find_package 管理
+  * chore: add Breaks relation with older dde-shell versions
+  * fix: resolve flickering and position shift when switching panel
+    popups
+
+ -- zhangkun <zhangkun2@uniontech.com>  Sat, 09 May 2026 09:31:25 +0800
+
+dde-shell (2.0.39) unstable; urgency=medium
+
+  * fix: correct SPDX comment syntax in DDEShellDockConfig.cmake.in
+  * chore: update copyright years and fix tooltip behavior
+  * fix: correct ActiveRole and AttentionRole data retrieval for active
+    app model
+  * fix: prevent use-after-free in DataAccessorProxy::setSource
+  * fix: modernize CMake configuration for notification server tests
+  * chore: update copyright year ranges in source headers
+  * build(debian): add libgmock-dev to build dependencies
+  * fix(dock): fix memory leak in RoleGroupModel and add comprehensive
+    tests
+  * Revert "feat(build): add ENABLE_SANITIZER option for debugging"
+  * chore(tests): update license and copyright headers
+  * feat(build): add ENABLE_SANITIZER option for debugging
+  * chore(build): remove sanitizer flags from CMakeLists
+  * fix(test): fix memory leaks in test code
+  * fix:add test notification server applet case by gtest
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 29 Apr 2026 16:10:12 +0800
+
+dde-shell (2.0.38) unstable; urgency=medium
+
+  * fix: resolve tray submenu display position issue at screen top-left
+  * refactor(notification): move bubble overlay logic to QML delegate
+  * fix: remove unnecessary platform check in AppItem tooltip
+  * fix: improve dock center space calculation and taskmanager layout
+  * fix: avoid quick panel placeholder not aligned to center on startup
+  * fix: filter unsupported dock applets in DBus proxy
+  * feat: add dock library and refactor dock plugin management
+  * fix: filter clipboard data for plugin Wayland clients
+  * fix: centralize relative time formatting logic
+  * feat: add attention animation toggle for taskmanager
+  * Revert "refactor: move dockiteminfo to shared frame library"
+  * fix: separate touchscreen and mouse context menu triggers in
+    notification center
+  * fix: reset icon scale when attention animation ends
+  * refactor: move dockiteminfo to shared frame library
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 23 Apr 2026 21:46:08 +0800
+
+dde-shell (2.0.37) unstable; urgency=medium
+
+  * fix: update tooltip window property bindings and hover behavior
+  * fix: resolve abnormal compositor window size due to popup panel
+    height change
+  * feat: add split window background support for dock app items
+  * feat: fix notification center height calculation for bottom dock
+  * fix: guard PanelPopup close behavior against transient X11 grab
+    focus changes
+  * fix: fix notification bubble animation glitch
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 09 Apr 2026 20:27:14 +0800
+
+dde-shell (2.0.36) unstable; urgency=medium
+
+  * fix: prevent position fix during drag or animation
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 07 Apr 2026 21:08:51 +0800
+
+dde-shell (2.0.35) unstable; urgency=medium
+
+  * fix: disable smooth rendering for tray icons to prevent blur
+  * feat: adjust notification list margins
+  * feat: adjust notification center styling and opacity
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 07 Apr 2026 17:17:04 +0800
+
+dde-shell (2.0.34) unstable; urgency=medium
+
+  * fix(notification): adjust notification sound playback timing
+  * fix: fix notification settings opening via direct D-Bus call
+  * fix: move TapHandler outside MouseArea to fix event handling
+  * fix: adjust notification UI colors and positions
+  * fix: delay enable taskmanager icon position animation
+  * fix: improve notification close button visibility logic
+  * feat: close other popups when opening context menus
+  * fix: prevent ListView overscroll in notification panel
+  * fix: replace ComboBox with Menu for notification actions
+  * feat: adjust notification center UI styling and layout
+  * fix: improve notification center keyboard navigation
+  * feat: add blur background to notification center
+  * i18n: Updates for project Deepin Desktop Environment (#1518)
+  * fix: fix warning with closebtn and binding loop.
+  * i18n: Updates for project Deepin Desktop Environment (#1515)
+  * fix: improve menu interaction and notification center handling
+  * feat: add windowTitle property for popup windows
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 25 Mar 2026 17:13:14 +0800
+
+dde-shell (2.0.33) unstable; urgency=medium
+
+  * fix: stop submenu loader delay timer when menu becomes visible
+  * fix: add touch screen support for dock menu
+  * fix: prevent notification list overscrolling
+  * fix: change notification title elide mode to right
+  * fix(tray): use positionForAnimation to prevent layout direction
+    abrupt change
+  * feat: add hover protection for notification bubbles
+  * i18n: Updates for project Deepin Desktop Environment (#1504)
+  * fix(notification): increase ListView topMargin to prevent focus
+    border clipping
+  * fix: prevent dock from hiding when hovering over preview windows
+  * fix: avoid icon overlap caused by ListView move and displace
+    animation
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 18 Mar 2026 14:13:18 +0800
+
+dde-shell (2.0.32) unstable; urgency=medium
+
+  * fix(notification): change bubble window layer from LayerTop to
+    LayerOverlay
+  * fix: remove bubble removal animation and simplify visibility logic
+  * fix: prevent negative margins in dock center alignment
+  * fix: replace raw pointers with QPointer to prevent wild pointers
+  * fix: improve window grouping and drag reordering in dock
+  * fix: improve notification bubble panel hide animation
+  * fix(dock): disable smooth rendering for tray icons
+  * fix: Abnormal behavior when dragging app icons to the tray window
+  * fix(taskmanager): fix tooltip flickering when dragging files to
+    trash icon
+  * fix: Optimized tray window icon sorting
+  * docs: add plugin development documentation
+  * fix: Fix the issue of tray area icons moving when released
+  * fix: font not updating in windowed launcher popup on system font
+    change
+  * fix: prevent indefinite blocking in fetchWindowPreview pipe read
+  * fix: Fix the issue where no space is reserved after dragging out the
+    tray icon
+  * fix: prevent visual ghosting and flashing during dock position
+    change
+  * fix: correct touchscreen right-click menu interaction
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 12 Mar 2026 21:32:15 +0800
+
+dde-shell (2.0.31) unstable; urgency=medium
+
+  * fix(dock): fix pasting text in Wayland plugin windows
+  * fix(dock): support wayland text input on plugin popup windows
+  * feat: add desktop source path support for app items
+  * fix: sync dock position before position change operations
+  * fix(notification): fix invisible delegates after collapsing expanded
+    notifications
+  * fix: remove scale and opacity animations from task manager
+    transitions
+  * fix: prevent crash when destroying QWidget during XIO error
+  * feat: add window title to PanelPopupWindow
+  * fix: remove source model destroyed handler to prevent crash
+  * feat(notification): add notification setting translation
+  * fix(notification): align notification items in staging area
+  * fix(notification): Enable WAL mode and optimize SQLite configuration
+    for notification performance
+  * fix: update copyright year and fix notification bubble actions
+  * fix: adjust notification UI spacing and action margins
+  * feat: Add support for modifying the plugin popup cursor shape via
+    the protocol.
+  * fix: prevent animation glitch during task text width changes
+  * fix: change killClient to use SIGKILL instead of WM_DELETE_WINDOW
+  * fix: prevent premature dataChanged emission causing dock state
+    desync
+  * fix: improve text truncation with gradient fade effect
+  * fix: Information time display in English
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 05 Mar 2026 20:43:09 +0800
+
+dde-shell (2.0.30) unstable; urgency=medium
+
+  * fix(bubble): use frontendWindowRect for dock margin to avoid overlap
+    during animations
+  * feat: show popup menu on NotifyHeader more button click
+  * fix: make notification center follow dock screen
+  * fix(notification): improve action button background styling
+  * fix(notification): improve combobox width calculation and styling
+  * fix: fix wild pointer issue when screen switching
+  * fix: prevent crash during static destruction of DPluginLoader
+  * fix(notification): avoid delayed-remove id collision
+  * fix: remove invalid DBus error message sending
+  * fix: disable tray item interactions during collapse
+  * fix(notification): emit layoutChanged after collapse to refresh
+    ListView
+  * Revert "fix: correct icon display order from right to left"
+  * style: replace shadows with borders in OSD notifications
+  * fix(notification): improve text rendering at high DPI scaling
+  * fix: Fix the issue of the close button and shadow being cut off
+  * feat: add left edge click signal for dock panel
+  * feat: add hover background and adjust window indicator position
+  * feat(notification): improve keyboard navigation and focus management
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 27 Feb 2026 17:02:07 +0800
+
+dde-shell (2.0.29) unstable; urgency=medium
+
+  * feat: add hover background and adjust spacing for dock app items
+  * fix(notification): Button text is truncated when hovering over
+    "Clear all" in English environment with 20 font size
+  * fix: restore checkbox binding after menu item triggered
+  * fix: close tooltip when window appears in AppItem
+  * i18n: Translate org.deepin.ds.dock.taskmanager.ts in fr (#1404)
+  * fix: disable tray items during collapse animation
+  * fix: return mute icon for silent audio
+  * fix: improve notification center window positioning
+  * fix: emit IconNameRole change when WinIconRole changes
+  * fix: prevent dock screen switch if any popup is showing
+  * feat: add X11 WM_CLASS support for layer shell windows
+  * fix: Optimize the entrance animation logic for notification bubbles
+  * fix: set default window title for panel windows
+  * fix: fix tray plugin drag behavior based on plugin flags
+  * fix: fix dock hide timer behavior with context menu
+  * feat(notification): Adjust the activation logic for the notification
+    button
+  * fix: emit opacityChanged signal on DBus proxy initialization
+  * fix: correct notification ID handling and validation
+  * fix: fix crash caused by DockGroupModel destruction issue
+  * feat: add tray plugins changed signal
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 05 Feb 2026 19:23:23 +0800
+
+dde-shell (2.0.28) unstable; urgency=medium
+
+  * fix: refactor dock position management and decouple from animation
+    flow
+  * fix: correct icon display order from right to left
+  * feat: reorder task manager role enum for compatibility
+  * fix: move CategoriesRole to end of enum for compatibility
+  * fix: lower default font size for tray action
+  * fix: Use dde-am to execute command in notifications
+  * Revert "fix: add command whitelist validation for notification
+    actions"
+  * Revert "fix: update safeCommands whitelist for notification service"
+  * fix: disable dock animations during resize operations
+  * fix: update window icon geometry when panel position changes
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 29 Jan 2026 20:22:15 +0800
+
+dde-shell (2.0.27) unstable; urgency=medium
+
+  * fix: adjust dock shadow parameters
+  * fix: FTBFS when building with newer treeland-protocols
+  * fix: close launchpad when right-clicking taskbar to open menu
+  * feat: add category-based skip list for cgroups grouping
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 23 Jan 2026 09:36:09 +0800
+
+dde-shell (2.0.26) unstable; urgency=medium
+
+  * fix: update safeCommands whitelist for notification service
+  * i18n: Updates for project Deepin Desktop Environment (#1381)
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Wed, 14 Jan 2026 14:50:15 +0800
+
+dde-shell (2.0.25) unstable; urgency=medium
+
+  * fix: clip ListView content to prevent overflow in NotifyView
+  * fix: ensure focus before expand in OverlapNotify
+  * fix: improve focus handling after expand/collapse in NotifyView
+  * fix: add command whitelist validation for notification actions
+  * fix: Fix taskbar failing to cancel app pinning
+  * fix: add DTK preference override configuration
+  * fix: enable Tab focus for staging area buttons in notification
+    center
+  * fix: keep dock indicator distance constant when icons scale down
+  * i18n: Updates for project Deepin Desktop Environment (#1378)
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 07 Jan 2026 10:16:39 +0800
+
+dde-shell (2.0.24) unstable; urgency=medium
+
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in tr
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in ru
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in uk
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in zh_CN
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in pt_BR
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in nl
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in zh_TW
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in sq
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in zh_HK
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in pl
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in ja
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in fi
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in lo
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in fr
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in es
+  * [skip CI] Translate org.deepin.ds.dock.taskmanager.ts in ca
+  * feat: improve translation files and task manager menu text
+  * refactor: unify app split/merge display and optimize text
+    calculation
+  * fix: correct instance request handling in dock model
+  * fix: remove bash -c for security hardening
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 25 Dec 2025 19:32:57 +0800
+
+dde-shell (2.0.23) unstable; urgency=medium
+
+  * fix: Fix error in obtaining resident app status
+  * fix: resolve Tab key focus navigation issues in notification center
+  * chore: backup plan to temporary switch back to legacy ItemModel
+  * fix: update test CMakeLists for role models
+  * Revert "fix: 主要是处理打包单元测试报错问题。"
+  * fix: icons stuck together caused by listview add animation
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 18 Dec 2025 19:49:23 +0800
+
+dde-shell (2.0.22) unstable; urgency=medium
+
+  * fix: unescape quotes in Bluetooth device notification
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 11 Dec 2025 20:32:24 +0800
+
+dde-shell (2.0.21) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1359)
+
+ -- fuleyi <fuleyi@uniontech.com>  Thu, 04 Dec 2025 19:12:53 +0800
+
+dde-shell (2.0.20) unstable; urgency=medium
+
+  * feat: add dock-specific tray item visibility control
+  * fix: tooltip not centered when first hover
+  * feat: group application windows together in task manager
+  * fix: 主要是处理打包单元测试报错问题。
+  * fix: reduce app item border width
+  * feat: implement window split mode with dynamic title display
+  * fix: Fix the focus issue on secondary pages in Quick Settings
+  * fix: avoid use DQuickDrag under wayland session
+  * i18n: remove de_DE translation resources
+  * fix: shadow too hard caused by incorrect Qt.rgba usage
+  * fix: optimize plugin installation to avoid redundant files
+  * feat: add reproducible build parameters
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Thu, 27 Nov 2025 17:33:36 +0800
+
+dde-shell (2.0.19) unstable; urgency=medium
+
+  * feat: enhance notification animations and visual effects
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 14 Nov 2025 10:30:15 +0800
+
+dde-shell (2.0.18) unstable; urgency=medium
+
+  * fix: fix collapsed tray item visual index
+  * fix: scale task manager preview icons for high DPI displays
+  * chore: make hover preview proxy model simpler
+  * i18n: Updates for project Deepin Desktop Environment (#1341)
+  * fix: disable dynamic sort filter in task manager proxy model
+  * feat: add plugin update to tray whitelist
+  * fix: WinSCP dock icon stayed when window closed
+  * fix: add exact match flag to prevent duplicate app entries
+  * i18n: Translate org.deepin.ds.osd.default.ts in pl (#1335)
+  * fix: update dde-shell.install for debug log configs
+  * chore: adapt debugging settings function
+
+ -- xionglinlin <xionglinlin@uniontech.com>  Thu, 13 Nov 2025 19:48:04 +0800
+
+dde-shell (2.0.17) unstable; urgency=medium
+
+  * fix: use correct index when adding dock elements
+  * i18n: Translate org.deepin.ds.osd.default.ts in fi (#1327)
+  * fix: incorrect window state for JLCPCB
+  * chore: ensure ctest can detect gtest unit tests
+  * feat: ability to fine-tune cgroups-based appid detection
+  * fix: skip tooltip windows in dock event filter
+  * i18n: Updates for project Deepin Desktop Environment (#1322)
+
+ -- caixiangrong <caixiangrong@uniontech.com>  Thu, 06 Nov 2025 16:14:02 +0800
+
+dde-shell (2.0.16) unstable; urgency=medium
+
+  * feat: implement trash empty state detection
+  * feat: add camera status OSD notifications
+  * i18n: Updates for project Deepin Desktop Environment (#1315)
+  * fix: disable dock panel dragging when locked
+  * fix: correct bubble ID handling in notification system
+  * feat: set focus to first expanded notification item
+  * feat: enhance window identification with ApplicationManager
+  * feat: add modal property to notification setting menu
+  * refactor: optimize expired notification cleanup implementation
+  * Revert "feat: add trash file drop support"
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 30 Oct 2025 21:44:35 +0800
+
+dde-shell (2.0.15) unstable; urgency=medium
+
+  * fix: add missing definitions for dockpanel
+  * feat: add notification auto cleanup and timeout handling
+  * fix: Signals during the process of adding dock animations
+  * fix: move tooltip text assignment to show handler
+  * fix: improve OSD panel timeout behavior with modifier key
+  * i18n: Updates for project Deepin Desktop Environment (#1304)
+  * fix: sometimes clicking dock icon won't activate window as intended
+
+ -- wujiangyu <wujiangyu@uniontech.com>  Thu, 23 Oct 2025 15:59:54 +0800
+
+dde-shell (2.0.14) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1294)
+  * fix: icon minimize animation location on treeland is incorrect
+  * fix: activate changed can cause crash
+  * fix: compatibility with Qt 6.10
+  * fix: align notification body text to top
+  * fix: use rootObject to access dockSize property
+  * fix: change text wrap mode from WordWrap to Wrap
+  * chore: rename dock network plugin (#1296)
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 16 Oct 2025 21:13:36 +0800
+
+dde-shell (2.0.13) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1283)
+  * feat: add delayed window state reset with singleShot
+  * fix: show tray action icons during drag operations
+  * feat: enhance trash functionality with file count and drag hints
+  * fix: prevent time text flickering on hover
+  * fix: Ensure the show desktop line is always 1 physical pixel
+    regardless of system scaling
+  * feat: add clean all button to notification center
+  * feat: implement close all windows functionality
+  * chore: update window icon geometry via new taskmanager interface
+  * feat: add sorting to tray items
+  * fix: The newly dragged in stash container item is not displayed at
+    the back (#1280)
+  * i18n: Updates for project Deepin Desktop Environment (#1276)
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Fri, 10 Oct 2025 17:32:04 +0800
+
+dde-shell (2.0.12) unstable; urgency=medium
+
+  * fix: prevent dragging items to fixed plugin section
+  * feat: add clean all button for overlap notifications
+  * fix: improve text visibility logic in AnimationSettingButton
+  * fix: Popup windows was not closed  when dock screen changed (#1274)
+  * fix: Application tray button can accept right mouse button to open
+    popup window
+  * fix: ensure preview icon will use icon from theme as fallback
+  * fix: taskmanager context menu should use app name instead of window
+    title
+  * i18n: Updates for project Deepin Desktop Environment (#1266)
+  * fix: adjust notification center window positioning
+  * feat: add button text labels for accessibility
+
+ -- wujiangyu <wujiangyu@uniontech.com>  Thu, 25 Sep 2025 17:40:29 +0800
+
+dde-shell (2.0.11) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1257)
+  * fix: sometimes dock might be empty after boot and login
+  * fix: improve notification close button hover detection
+  * fix: desktop menu actions shows English instead of locale language
+  * fix: fix notification center tab key focus issue
+  * fix: missing attention role for taskmanager's base model
+  * chore: Use the hasBlurWindow interface
+  * fix: The tray popup was was hidden when an item is dragged in or out
+  * fix: When clicked the application tray button, the hover background
+    is not displayed
+
+ -- Wang Zichong <wangzichong@deepin.org>  Tue, 23 Sep 2025 13:09:55 +0800
+
+dde-shell (2.0.10) unstable; urgency=medium
+
+  * fix: adjust notification center scrollbar position
+  * fix: adjust notification center width calculation
+  * fix: remove redundant focus property in notification center
+  * fix: ensure panel tooltips are capitalized
+  * i18n: Updates for project Deepin Desktop Environment (#1247)
+  * chore: bump CMake minimum required version to 3.16
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 18 Sep 2025 20:39:39 +0800
+
+dde-shell (2.0.9) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1244)
+  * fix: add back cache for window preview to avoid lag
+  * chore: eliminate CMake configuration warnings
+  * fix: add QML annotations to eliminate compilation warnings
+  * fix: crash when click close on preview window in some cases
+  * fix: improve task manager layout calculation
+  * fix: prevent duplicate QML import paths
+  * feat: add trash file drop support
+  * refactor: migrate taskmanager model to the new DockItemModel
+  * i18n: Updates for project Deepin Desktop Environment (#1236)
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 11 Sep 2025 21:00:13 +0800
+
+dde-shell (2.0.8) unstable; urgency=medium
+
+  * fix: OSD cannot displayed on top of the lock window (#1234)
+  * chore: remove requestPreview from abstracttaskmanagerinterface.h
+  * i18n: Updates for project Deepin Desktop Environment (#1232)
+  * fix: pluginVisibleChanged signal needs to be sent when dragging the
+    plugin docked to tray
+  * chore: add showdesktop and windoweffect to transifex.yaml
+  * i18n: Updates for project Deepin Desktop Environment (#1231)
+  * chore: implement dock item menus for DockGlobalElementModel
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 28 Aug 2025 14:33:05 +0200
+
+dde-shell (2.0.7) unstable; urgency=medium
+
+  * Fix: missing license header in new developer document
+  * Fix: fix dock window shadow animation issue
+  * Chore: Re-implement the calculation method of exclusion zone (#1227)
+  * Chore: optimize packaging (#1225)
+  * Feat: add configurable show desktop feature
+  * Feat: new dconfig option to allow disable cgroups-based app grouping
+  * Fix: update building warning.
+
+ -- zyz <zhaoyingzhen@uniontech.com>  Fri, 22 Aug 2025 09:32:54 +0800
+
+dde-shell (2.0.6) unstable; urgency=medium
+
+  * i18n: Translate org.deepin.ds.notificationbubble.ts in lo (#1219)
+  * chore: add ar, de, lo, sq to DDEShellPackageMacros.cmake
+  * i18n: Updates for project Deepin Desktop Environment (#1211)
+  * fix: close tooltip before show desktop action
+
+ -- wujiangyu <wujiangyu@uniontech.com>  Tue, 12 Aug 2025 10:39:15 +0800
+
+dde-shell (2.0.5) unstable; urgency=medium
+
+  * fix: click area keep same with app on dock
+  * fix: handle NoDisplay apps in notification settings
+  * chore: change item delegate for taskmanager from DropArea to Item
+  * refactor: migrated docked items config to
+    TASKMANAGER_DOCKEDELEMENTS_KEY
+  * chore: avoid using cell width to calculate target index for taskbar
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 07 Aug 2025 20:00:27 +0800
+
+dde-shell (2.0.4) unstable; urgency=medium
+
+  * chore: clang-format code related to refactor branch
+  * i18n: Updates for project Deepin Desktop Environment (#1209)
+  * chore: add .tx/config for tx-cli, switch to REUSE.toml
+  * fix: add translation resources to config for multitasking view
+  * fix: prevent duplicate taskbar entries during drag
+  * i18n: Updates for project Deepin Desktop Environment (#1203)
+  * feat: add keyboard focus management for plugin surfaces
+  * fix: prevent duplicate dock requests
+  * i18n: Updates for project Deepin Desktop Environment (#1200)
+  * fix: update homepage url in debian/control
+  * chore: use roles defined in TaskManager class
+  * fix: incorrect icon and copywriting for Mic ON/OFF OSD
+  * i18n: Updates for project Deepin Desktop Environment (#1195)
+  * fix: update connection for active window icon change
+  * fix: many issues with RoleGroupModel
+  * fix: many issues with RoleCombineModel
+  * feat: add empty state for notification center
+  * i18n: Updates for project Deepin Desktop Environment (#1192)
+  * chore: remove dde-control-center-dock package
+  * fix: handle empty icon name in notification item
+  * fix: Chinese translation should not appear in source translation
+    resource
+  * fix: correct iterator position calculation in DockGlobalElementModel
+  * feat: enhance notification icon handling
+
+ -- Wang Zichong <wangzichong@deepin.org>  Thu, 31 Jul 2025 20:24:00 +0800
+
+dde-shell (2.0.3) unstable; urgency=medium
+
+  * feat: enhance notification validation and cleanup
+  * refactor: remove debug panel and legacy DBus code
+  * refactor: update notification handling and data access logic
+  * fix: sort notifications by timestamp before display
+  * i18n: Updates for project Deepin Desktop Environment (#1174)
+  * chore: reduce layershell emulate log message's log level
+
+ -- WuJiangYu <wujiangyu@uniontech.com>  Thu, 10 Jul 2025 20:15:01 +0800
+
+dde-shell (2.0.2) unstable; urgency=medium
+
+  * fix: fix safe build.
+  * fix: cannot build on Archlinux
+  * fix: Fixed the blurriness of the preview window to separate the X11
+    and wayland environments.
+  * fix: fix launchpad fullsream, click dock ,it will not close.
+  * fix: init showingDesktop for smart Hide.
+  * feat: add preview follows the system opacity.
+  * fix: modify when keep hiden animation has launched, has shadow and
+    line.
+  * fix: adapt import change of QtQml.Models in Qt 6.9
+  * i18n: Updates for project Deepin Desktop Environment (#1172)
+  * fix(tray): allow plugin icons to be dragged to leftmost position ﻿ -
+    Fix overly strict drag condition in TrayContainer.qml that prevented
+    plugin icons from being dragged to the leftmost position - Replace
+    `dropHoverIndex !== 0` check with precise condition `dropHoverIndex
+    === 0 && !surfaceId.startsWith("application-tray") && isBefore` -
+    Maintain protection for application tray icons while allowing plugin
+    icons to be properly positioned - Fix inconsistent behavior between
+    animation states
+
+ -- WuJiangYu <wujiangyu@uniontech.com>  Thu, 03 Jul 2025 16:32:57 +0800
+
+dde-shell (2.0.1) unstable; urgency=medium
+
+  * chore: remove invalid translation resources
+  * i18n: Updates for project Deepin Desktop Environment (#1168)
+  * fix: incorrect target ts file path in transifex.yaml
+  * i18n: Updates for project Deepin Desktop Environment (#1167)
+  * fix: add missing resource in .tx/transifex.yaml
+
+ -- WuJiangYu <wujiangyu@uniontech.com>  Tue, 24 Jun 2025 10:40:41 +0800
+
+dde-shell (2.0.0) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1162)
+  * chore: adjust dockedElements DConfig
+  * feat: add smart hide when hide desktop.
+  * i18n: Updates for project Deepin Desktop Environment (#1159)
+  * chore: set libdde-shell.so SOVERSION to 1
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 19 Jun 2025 10:15:26 +0800
+
+dde-shell (1.99.39) unstable; urgency=medium
+
+  * chore: use ICU for relative datetime formatting
+  * fix: layershell calcular in x11 emulation
+  * fix: The tray application flashes an icon when opened
+  * feat: add activeWindow D-Bus interface
+  * chore: tweak role{group,combine}model
+
+ -- Wang Zichong <wangzichong@deepin.org>  Thu, 12 Jun 2025 19:12:00 +0800
+
+dde-shell (1.99.38) unstable; urgency=medium
+
+  * fix: The tray window panel automatically opens
+  * fix: just use one Dbus interface.
+  * fix: update tanslation with Lock dock.
+  * feat: Lock the height of dock.
+
+ -- Wu Jiangyu <wujiangyu@uniontech.com>  Thu, 05 Jun 2025 16:35:14 +0800
+
+dde-shell (1.99.37) unstable; urgency=medium
+
+  * fix: support string list in notification hints
+  * fix: replace NumberAnimation with XAnimator in notification bubble
+  * style: enhance OSD window visual effects
+  * fix: remove redundant mode property in NotifyItemContent
+  * chore: simplify window effect descriptions
+  * fix: incorrectly removed window in AbstractWindowMonitor
+  * fix: add missing winIconRole to DockCombineModel
+  * fix: smart hide state not updated when window closed
+  * i18n: Updates for project Deepin Desktop Environment (#1127)
+  * refactor: prepare for combined model for taskmanager
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Wed, 28 May 2025 18:30:25 +0800
+
+dde-shell (1.99.36) unstable; urgency=medium
+
+  * feat: introduce RoleGroupModel
+  * refactor: update display mode icons and logic
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 15 May 2025 21:15:21 +0800
+
+dde-shell (1.99.35) unstable; urgency=medium
+
+  * chore: drop no longer existed translation resource
+  * chore: update copywriting of dock modes
+  * feat: Add animation for position switching to dock
+  * Update translations from Transifex
+
+ -- Wu Jiangyu <wujiangyu@uniontech.com>  Tue, 13 May 2025 17:20:00 +0800
+
+dde-shell (1.99.34) unstable; urgency=medium
+
+  * refactor: simplify notification action handling
+  * fix: need request back when embed popup hidden
+  * fix: prevent duplicate OSD actions for same type
+  * fix: remove DSG_APP_ID from notification action
+  * chore: release dde-shell 1.99.33
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Thu, 08 May 2025 17:41:17 +0800
+
+dde-shell (1.99.33) unstable; urgency=medium
+
+  * [skip CI] Translate org.deepin.ds.osd.default.ts in pl
+  * [skip CI] Translate org.deepin.ds.notificationcenter.ts in pt_BR
+  * fix: Fixed the issue that qCDebug does not output
+  * fix: initialize dock color theme with default value
+  * fix: adjust ui of title for notification
+  * fix: [Font-size] The Font size can not change by dde-control-center. (#1105)
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Tue, 29 Apr 2025 14:39:30 +0800
+
+dde-shell (1.99.32) UNRELEASED; urgency=medium
+
+  * chore: missing some translations for notification (BUG-289337)
+  * fix: compatibility with Qt 6.9+
+  * fix: elements not aligned correctly when dock resize (BUG-312831)
+  * fix: need update exclusion zone when screen was added or removed
+    (BUG-306339)
+  * fix: bluetooth still entered notificationcenter (BUG-311617)
+  * fix: The icons residing on pannel move from the right side to the left side
+    (BUG-309403)
+  * fix: dnd does not disable to play sound for notification (BUG-310921)
+
+ -- Wang Zichong <wangzichong@deepin.org>  Thu, 17 Apr 2025 17:46:00 +0800
+
+dde-shell (1.99.31) UNRELEASED; urgency=medium
+
+  * fix: dock plugin display blurred on 1.25 screen scale ratio
+  * refactor: Remove `searchitem` module from dock
+
+ -- zhaoyingzhen <zhaoyingzhen@uniontech.com>  Thu, 10 Apr 2025 17:36:25 +0800
+
+dde-shell (1.99.30) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.30
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 27 Mar 2025 16:48:29 +0800
+
+dde-shell (1.99.29) UNRELEASED; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1064)
+    Thanks to transifex-integration[bot]
+  * feat: Receive close quick panel requests from plugins(Bug: 272277)
+  * feat: adjust OSD ui according to v25
+  * fix: shadow clipped for notification
+  * fix: window preview blurry
+
+ -- YeShanShan <yeshanshan@deepin.org>  Thu, 27 Mar 2025 16:48:29 +0800
+
+dde-shell (1.99.28) UNRELEASED; urgency=medium
+
+  * chore: update translation
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 14 Mar 2025 11:07:05 +0800
+
+dde-shell (1.99.27) UNRELEASED; urgency=medium
+
+  * fix: task area might have incorrect height after resize in some cases
+    (BUG: 303541, 303155)
+
+ --  Wang Zichong <wangzichong@deepin.org>  Thu, 13 Mar 2025 15:13:00 +0800
+
+dde-shell (1.99.26) UNRELEASED; urgency=medium
+
+  * fix: num-lock can't enable
+
+ -- YeShanShan <yeshanshan@deepin.org>  Wed, 12 Mar 2025 14:50:53 +0800
+
+dde-shell (1.99.25) UNRELEASED; urgency=medium
+
+  * chore: bump version to 1.99.25
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 06 Mar 2025 19:58:56 +0800
+
+dde-shell (1.99.24) UNRELEASED; urgency=medium
+
+  * chore: bump version to 1.99.24
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 28 Feb 2025 10:25:56 +0800
+
+dde-shell (1.99.23) UNRELEASED; urgency=medium
+
+  * chore: remove dcc-dock-plugin
+
+ -- zhangkun <zhangkun2@uniontech.com>  Fri, 21 Feb 2025 18:17:08 +0800
+
+dde-shell (1.99.22) UNRELEASED; urgency=medium
+
+  * fix: record replaced notification to DB (Bug: 296235)
+  * fix: Error with SmartHidden and KeepHidden modes of dock (Bug: 302819)
+  * feat: drop to dock task icon to launch with uri (Bug: 275395)
+  * fix: Staging notifications cannot disappear after timeout (Bug: 303331)
+  * fix: Incorrect application layout menu display content (Bug: 289221, 286541, 286553)
+  * fix: Notifications not displayed in the center cannot disappear after timeout (Bug: 303295)
+  * fix: Staging notifications cannot disappear after timeout (Bug: 303331)
+  * fix: Dragging an application will hide the dock (Bug: 289207, 289205)
+  * fix: add offset to quick panel drag item to avoid cursor cover icon (Bug: 293867)
+  * fix: The dock automatically hides
+  * fix: item size not updated when taskbar item count was changed (Bug: 289225)
+  * i18n: Updates for project Deepin Desktop Environment
+
+ -- Wang Zichong <wangzichong@deepin.org>  Fri, 21 Feb 2025 13:42:00 +0800
+
+dde-shell (1.99.21) UNRELEASED; urgency=medium
+
+  * fix: update replace notification entity expired time(Bug: 296507)
+  * fix: pinned application, notifications display order is incorrect(Bug: 299887)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 14 Feb 2025 10:24:56 +0800
+
+dde-shell (1.99.20) UNRELEASED; urgency=medium
+
+  * feat: provide execs and isLingLong properties
+  * fix: jittering when draggin quick action applet
+  * feat: Add files generated by qdbusXML2cpp and DCONG2cpp
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 23 Jan 2025 17:35:43 +0800
+
+dde-shell (1.99.19) UNRELEASED; urgency=medium
+
+  * Temporary disable grand search icon for treeland
+  * Fix access wild pointer in notification center
+
+ -- Wang Zichong <wangzichong@deepin.org>  Tue, 14 Jan 2025 16:00:00 +0800
+
+dde-shell (1.99.18) UNRELEASED; urgency=medium
+
+  * fix: plugin docked into tray area (#1007)
+  * fix: drop BoxShadow for Attention animation
+  * chore: Add the qt6-wayland running dependency
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 09 Jan 2025 20:34:48 +0800
+
+dde-shell (1.99.17) UNRELEASED; urgency=medium
+
+  * UNRELEASED
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 03 Jan 2025 13:29:38 +0800
+
+dde-shell (1.99.16) UNRELEASED; urgency=medium
+
+  * fix: notification-center auto hide when clicked other window as title(Bug: 294647)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Tue, 24 Dec 2024 20:35:07 +0800
+
+dde-shell (1.99.15) UNRELEASED; urgency=medium
+
+  * fix: Video memory explosion caused by randomly clicking on dock plugins
+  * chore: update section to shells in debian/control
+
+ -- Deepin Packages Builder <packages@deepin.org>  Mon, 23 Dec 2024 15:30:15 +0800
+
+dde-shell (1.99.14) UNRELEASED; urgency=medium
+
+  * fix: incorrect margin in treeland for notification
+  * fix: error max height of embed plugin popup
+  * fix: can't query Notify for notification
+  * fix: missing default action for shutdown
+
+ -- YeShanShan <yeshanshan@deepin.org>  Mon, 23 Dec 2024 10:49:38 +0800
+
+dde-shell (1.99.13) UNRELEASED; urgency=medium
+
+  * fix: Remove position change timer on X11Emulation
+  * fix: Shutdown plugin miss menu function(Bug: 294875)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 19 Dec 2024 10:24:00 +0800
+
+dde-shell (1.99.12) UNRELEASED; urgency=medium
+
+  * UNRELEASED bump version to 1.99.12
+
+ -- Deepin Packages Builder <packages@deepin.org>  Sat, 14 Dec 2024 14:46:32 +0800
+
+dde-shell (1.99.11) UNRELEASED; urgency=medium
+
+  * fix: popup can not hide while click twice on treeland
+  * fix: action can't work
+  * fix: adjust ui for notification
+  * fix: windoweffect osd triggered abnormally
+
+ -- tsic404 <liuheng@depein.org>  Mon, 09 Dec 2024 13:39:32 +0800
+
+dde-shell (1.99.10) UNRELEASED; urgency=medium
+
+  * feat: Auto hide dde-dock on window fullscreen in Wayland(BUG: 263325, 278961)
+  * fix: Modifying notifications number, old notifications are displayed after new notifications are added.(Bug: 290209)
+  * fix: Setting notifications number less than 3, do not display overlay(Bug: 290185)
+  * fix: Closing notification when it was closed or invoked from notification-center.(Bug: 290009)
+  * fix: Modify 'dndMode' and 'openByTimeInterval' setting default value(Bug: 289603)
+  * fix: Disable dropping of already displayed plugin.(Bug: 266651)
+  * chore: Modify professional os taskManager fixed application(Bug: 266869)
+  * chore: TrayLoader single process support to start multiple plugins(Bug: 283901)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 06 Dec 2024 15:19:20 +0800
+
+dde-shell (1.99.9) UNRELEASED; urgency=medium
+
+  * fix popup can not hide on treeland
+
+ -- tsic404 <liuheng@depein.org>  Fri, 29 Nov 2024 17:30:18 +0800
+
+dde-shell (1.99.8) UNRELEASED; urgency=medium
+
+  * fix: Adjust the effects level of kwin to Optimal-performance, multiTasks plugin can not hide(Bug: 286871)
+  * fix: Display bubble icon normally(Bug: 286813)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Fri, 29 Nov 2024 11:14:42 +0800
+
+dde-shell (1.99.7) UNRELEASED; urgency=medium
+
+  * fix: can't response action for notification(Bug: 284861)
+  * fix: incomplete display of time for notification(Bug: 283509)
+  * fix: error displayed in stage for notification(Bug: 283969)
+  * fix: empty string can't represent AllApp for notification(Task: 366403)
+  * fix: change notification's layer for notification(Bug: 284425)
+  * fix: incorrect height of notificationCenter for notification(Bug: 283749)
+  * refact: extract notifyItem content for notification(Task: 366403)
+  * fix: incorrect position of panel for notification(Bug: 284191)
+  * fix(dcc-dock-plugin): Interface description text error(Bug: 286501)
+  * fix: ActionInvoked returned wrong id (#894)(Bug: 283561)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Wed, 20 Nov 2024 14:08:41 +0800
+
+dde-shell (1.99.6) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.6
+
+ -- Wang Zichong <wangzichong@deepin.org>  Thu, 14 Nov 2024 10:20:16 +0800
+
+dde-shell (1.99.5) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.5
+
+ -- Zhangkun <zhangkun2@uniontech.com>  Fri, 08 Nov 2024 09:14:16 +0800
+
+dde-shell (1.99.4) unstable; urgency=medium
+
+  * bump version to 1.99.4
+
+ -- Zhangkun <zhangkun2@uniontech.com>  Thu, 07 Nov 2024 16:03:21 +0800
+
+dde-shell (1.99.3) unstable; urgency=medium
+
+  * bump version to 1.99.3
+
+ -- YeShanShan <yeshanshan@deepin.org>  Thu, 31 Oct 2024 14:51:43 +0800
+
+dde-shell (1.99.2) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.2
+
+ -- YeShanShan <yeshanshan@deepin.org>  Thu, 31 Oct 2024 10:19:57 +0800
+
+dde-shell (1.99.1) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.1
+
+ -- YeShanShan <yeshanshan@deepin.org>  Wed, 23 Oct 2024 10:04:25 +0800
+
+dde-shell (1.99.0) UNRELEASED; urgency=medium
+
+  * bump version to 1.99.0
+
+ -- tsic404 <liuheng@deepin.org>  Fri, 11 Oct 2024 16:43:51 +0800
+
+dde-shell (0.0.43) unstable; urgency=medium
+
+  * bump version to 0.0.43
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 29 Aug 2024 10:41:01 +0800
+
+dde-shell (0.0.42) unstable; urgency=medium
+
+  * feat: tooltip and preview call to treeland
+  * fix: animation when drag from launchpad to dock
+
+ -- tsic404 <liuheng@deepin.org>  Fri, 23 Aug 2024 16:45:08 +0800
+
+dde-shell (0.0.41) unstable; urgency=medium
+
+  * fix: incorrect animation application when dragging(Issue: 10330)
+  * fix: Dock following mouse display error when modifying SmartHide(Issue: 10404)
+  * fix: plugin process is pulled up again after crashed(Issue: 10400)
+  * fix: modify panel popup shadow offset and color(Issue: 10325)
+  * fix: forced exit is invalid(Issue: 10436)
+  * fix: searchItem right click response range is too large(Issue: 10294)
+  * fix: pupup surface doesn't release(Issue: 10121)
+  * chore: adjust iconSize for quickpanel(Issue: 9852)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Wed, 21 Aug 2024 17:32:09 +0800
+
+dde-shell (0.0.40) unstable; urgency=medium
+
+  * fix: incorrect height for quickpanel's childplugin(Issue: 10036)
+  * fix: incorrect backgroundColor for quickpanel's item (#696)(Issue: 10379)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Wed, 14 Aug 2024 14:18:35 +0800
+
+dde-shell (0.0.39) unstable; urgency=medium
+
+  * chore: disable hide force-docked item(Issue: 10371)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Tue, 13 Aug 2024 20:43:29 +0800
+
+dde-shell (0.0.38) unstable; urgency=medium
+
+  * chore: move network plugin to pinned area(Issue: 10355)
+  * feat: hide search, clipboard and workspace when leftAlignment(Issue: 10363)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Tue, 13 Aug 2024 16:04:21 +0800
+
+dde-shell (0.0.37) unstable; urgency=medium
+
+  * fix: temporary revert application name change
+
+ -- Deepin Packages Builder <packages@deepin.org>  Tue, 13 Aug 2024 10:48:37 +0800
+
+dde-shell (0.0.36) unstable; urgency=medium
+
+  * bump version to 0.0.36
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 08 Aug 2024 19:31:54 +0800
+
+dde-shell (0.0.35) unstable; urgency=medium
+
+  * fix: dock covered by fullscreen launchpad(Issue: 10222)
+  * fix: drag plugin item cause plugin's event blocked (#663)(Issue: 9819)(Influence: dragging plugin and plugin item display)
+  * chore: change the default order of system tray(Issue: 10049)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 08 Aug 2024 15:15:13 +0800
+
+dde-shell (0.0.34) unstable; urgency=medium
+
+  * chore: hide tray plugins by default(Issue: #10049)
+  * fix: Modify smart hide to always hide issues(Issue: https://github.com/linuxdeepin/developer-center/issues/10107)
+  * fix: Popup can't switch to other by one click(Issue: https://github.com/linuxdeepin/developer-center/issues/10095)
+  * fix: mouse position drift(Issue: https://github.com/linuxdeepin/developer-center/issues/9964)
+  * fix: dateTime plugin position error
+  * fix: popup can't close when click empty area for dock(Issue: https://github.com/linuxdeepin/developer-center/issues/10075)
+  * chore: tooltip poupu and panel popup delayed show(Issue: https://github.com/linuxdeepin/developer-center/issues/10119)(Influence: tooltip and panle popup display)
+  * fix: dock needs to be on top of the launchpad(Issue: https://github.com/linuxdeepin/developer-center/issues/9996, https://github.com/linuxdeepin/developer-center/issues/9992)
+  * fix: PopupWindow position cannot be refreshed(Issue: https://github.com/linuxdeepin/developer-center/issues/10096)
+  * fix: Unable to pop up when modifying network pop ups(Issue: https://github.com/linuxdeepin/developer-center/issues/10153)
+  * fix: quick panel icon size error(Issue: https://github.com/linuxdeepin/developer-center/issues/9957)
+  * fix: adjust border's width for quickpanel(Issue: https://github.com/linuxdeepin/developer-center/issues/9798)
+  * fix: adjust ui for stashed(Issue: https://github.com/linuxdeepin/developer-center/issues/9894)
+  * fix: Temporarily disable all windows action(Issue: https://github.com/linuxdeepin/developer-center/issues/10172)
+  * fix: fullscreen frame follows the dock(Issue: https://github.com/linuxdeepin/developer-center/issues/7188)
+  * fix: no tooltip when moving from the volume plugin to the shortcut panel icon (#651)(Influence: shortcut panel tooltip)
+  * fix: subMenu can't show
+  * fix: The padding and rounded corners of the tooltip are incorrect
+  * chore: show bluetooth tray icon by default(Issue: #10049)
+  * fix: wrong size(Issue: #10077)
+  * fix: dock's frontendWindowRect size is wrong(Issue: https://github.com/linuxdeepin/developer-center/issues/10155)(Influence: frontendWindowRect size)
+  * fix: sub menu miss focus(Issue: https://github.com/linuxdeepin/developer-center/issues/10015)
+  * fix: adjust radius for stashed
+
+ -- YeShanShan <yeshanshan@deepin.org>  Tue, 06 Aug 2024 15:37:33 +0800
+
+dde-shell (0.0.33) unstable; urgency=medium
+
+  * fix: Update translation (#611)(issue: 9965)
+  * fix: adjust ui for dock's applet(Issue: 8633)
+  * feat: support active state for quickpanel's item(Issue: 10020)
+  * fix: The dock translation is incorrect(Issue: 9947)
+  * fix: popup's height isn't enough(Issue: 9702)
+  * fix: adjust ui(Issue: 9995, 9894)
+  * fix: Plugin should not be dragged into the application tray(Issue: 10048)
+  * feat: Add smart hide function(Issue: 9842)
+  * chore: modify the order of systray(Issue: 10049)
+  * Revert "fix: unable to set visibility of 'Show Desktop' in DCC"(Issue: 10055)
+
+ -- zyz <zhaoyingzhen@uniontech.com>  Wed, 31 Jul 2024 13:53:47 +0800
+
+dde-shell (0.0.32) unstable; urgency=medium
+
+  * fix: unable to set visibility of 'Show Desktop' in DCC(Issue: 9820)
+
+ -- zyz <zhaoyingzhen@uniontech.com>  Fri, 26 Jul 2024 16:11:19 +0800
+
+dde-shell (0.0.31) unstable; urgency=medium
+
+  * bump version to 0.0.31
+
+ -- zyz <zhaoyingzhen@uniontech.com>  Thu, 25 Jul 2024 22:05:46 +0800
+
+dde-shell (0.0.30) unstable; urgency=medium
+
+  * fix: the item of datetime and showdesktop display overlap(Issue: 9696)
+  * fix: add margins to extend mouse area for tray item(Issue: 9720)
+  * fix: large radius when exist scaling(Issue: 9818)
+  * fix: popup can drag(Issue: 9896)
+  * fix: workSpace toolTip text error(Issue: 9877)
+  * fix: Tray button rotates as a whole(Issue: 9880)
+  * fix: Application tray position drift(Issue: 9603)
+  * fix: tray container shows blank area when there is only one item(Issue: 9887)
+  * fix: Application preview background color overflow(Issue: 9433)
+  * fix: Application preview background color overflow(Issue: 9433)
+  * fix: the stash container turns into a small ball(Issue: 9830)
+  * refact: using Item instead of Popup for PanelPopup(Issue: 9676)
+
+ -- zyz <zhaoyingzhen@uniontech.com>  Wed, 24 Jul 2024 14:27:44 +0800
+
+dde-shell (0.0.29) unstable; urgency=medium
+
+  * fix: can't hide menu when click outside dock
+  * feat: add grabMouse for window
+
+ -- Yingzhen zhao <zhaoyingzhen@uniontech.com>  Fri, 19 Jul 2024 17:50:32 +0800
+
+dde-shell (0.0.28) unstable; urgency=medium
+
+  * fix: dock now show when init
+  * feat: support popup to align with dock
+  * chore: tray area show dragged item at cursor position
+  * chore: using Image to display drag image
+  * chore: set the plugin visibility
+  * fix: the workspace preview image is displayed abnormally
+
+ -- Wang Fei <wangfei@deepin.org>  Mon, 08 Jul 2024 13:21:32 +0800
+
+dde-shell (0.0.23) unstable; urgency=medium
+
+  * fix: uos-ai disabled(issue: 8593)
+
+ -- tsic404 <liuheng@deepin.org>  Tue, 14 May 2024 20:39:52 +0800
+
+dde-shell (0.0.22) unstable; urgency=medium
+
+  * fix: x11 preview title length too small(Influence: x11 preview title display)
+
+ -- tsic404 <liuheng@deepin.org>  Tue, 14 May 2024 19:01:07 +0800
+
+dde-shell (0.0.21) unstable; urgency=medium
+
+  * fix: app tray icon size not same as plugin
+
+ -- tsic404 <liuheng@deepin.org>  Tue, 14 May 2024 14:44:31 +0800
+
+dde-shell (0.0.20) unstable; urgency=medium
+
+  * fix: brightness-popup's setting button no blur effect and txt color has error
+    Thanks to ZhaoYingZhen(Issue: https://github.com/linuxdeepin/developer-center/issues/8470)(Influence: brightness-popup's setting button)
+  * fix: tray plugin mouse right click cause dock crash
+    Thanks to ZhaoYingZhen(Issue: https://github.com/linuxdeepin/developer-center/issues/8506)(Influence: tray plugin menu display)
+  * fix: onboard has same icon with fcitx(issue: #8557)
+  * chore: bump version 0.0.20
+
+ -- tsic404 <liuheng@deepin.org>  Tue, 14 May 2024 10:20:00 +0800
+
+dde-shell (0.0.19) unstable; urgency=medium
+
+  * feat: remove uos-ai plugin when uos ai uninstalled
+
+ -- tsic404 <liuheng@deepin.org>  Mon, 13 May 2024 14:09:19 +0800
+
+dde-shell (0.0.18) unstable; urgency=medium
+
+  * feat: add tray dci icons(Issue: https://github.com/linuxdeepin/developer-center/issues/8082)
+  * fix: build on qt 6.7
+  * fix: build failures with Qt 6.7+
+    Thanks to Felix Yan
+  * fix: bluetooth popup has no blur effect and wrong position of separator line
+    Thanks to ZhaoYingZhen(Issue: https://github.com/linuxdeepin/developer-center/issues/8494)(Influence: bluetooth popup has blur effect)
+  * fix: dragging tray icon to dock, but show error app in dock tray area
+    Thanks to ZhaoYingZhen(issue: #8480)(Influence: drag tray icon to dock)
+  * fix: tray plugin mouse right click menu causing dock to crash
+    Thanks to ZhaoYingZhen(Issue: https://github.com/linuxdeepin/developer-center/issues/8506)(Influence: tray plugin mouse right click menu)
+  * fix: qt 6.7 cannot build
+  * fix: dock not shown with launchpad(issue: #8502)
+  * fix: menu can uncheked while double click(issue: #8503)
+  * fix: need link xcb-aux and xkbcommon
+    Thanks to Hillwood Yang
+
+ -- tsic404 <liuheng@deepin.org>  Mon, 13 May 2024 06:54:37 +0800
+
+dde-shell (0.0.17) unstable; urgency=medium
+
+  * fix: fix the size of app icon when resizing dock size by dcc
+    Thanks to ZhaoYingZhen(issue: #8401)(Influence: icon size)
+  * fix: event delivery error(issue: #8326)
+  * fix: button's icon is not clear(Issue: https://github.com/linuxdeepin/developer-center/issues/8409)
+  * fix: drag mark error(issue: #8208)
+  * fix: refresh when bluetooth panel shown(issue: #8279)
+  * fix: some icon too large(issue: #8372)
+  * fix: tips position error(issue: #8197)
+  * chore: remove warning
+  * fix: dock wake area position not right sometime(issue: #8163)
+  * fix: popup window always hide
+  * fix: power popup cannot show
+  * fix: menu checked status not right(issue: #8478)
+  * fix: click dragArea can open app(issue: #8479)
+
+ -- tsic404 <liuheng@deepin.org>  Fri, 10 May 2024 11:09:47 +0800
+
+dde-shell (0.0.16) unstable; urgency=medium
+
+  * fix: font warning when exit
+  * chore: using Panel to find children applet
+  * fix: modify launch system-monitor by AM dbus (#312)
+    Thanks to ZhaoYingZhen(issue: 8319)(Influence: dock can display system-monitor app icon)
+  * fix: fix incorrect bluetooth activation status icon in the tray quick panel (#279)
+    Thanks to ZhaoYingZhen(issue: 8237)(Influence: bluetooth activation status icon display)
+  * fix: opacity can't flow changed with dde-appearance(Issue: https://github.com/linuxdeepin/developer-center/issues/8250)
+  * fix: dbus warning when exit
+  * fix: background change when hover(Issue: https://github.com/linuxdeepin/developer-center/issues/8275)
+  * fix: fix show-desktop line color error (#309)
+    Thanks to ZhaoYingZhen(issue: 8284)(Influence: show-desktop line)
+  * fix: fix the power icon displays incorrectly (#320)
+    Thanks to ZhaoYingZhen(issue: 8347)(Influence: power icon display)
+  * chore: set QT_QUICK_FLICKABLE_WHEEL_DECELERATION env
+  * fix: fix the problem of abnormal location of uos-ai plugin(issue: 8322)(Influence: uos-ai plugin display)
+  * feat: destroy plugins manually
+  * fix: dock not in left when no left plugins(issue: 8353, 8352)
+
+ -- Yixue Wang <wangyixue@deepin.org>  Tue, 07 May 2024 15:42:20 +0800
+
+dde-shell (0.0.15) unstable; urgency=medium
+
+  * fix: plugin icons should not changed in dcc(issue: 8245)
+  * fix: Solve the problem of small plugin icon in the quick panel popup under high zoom (#299)
+    Thanks to ZhaoYingZhen(issue: 8111)(Influence: quick panel plugin icons size)
+  * feat: Move tooltipShowTimer to Item
+    Thanks to zhangkun
+  * fix: bluetooth and network plugin applet layout error when clicked by icon on quick panel(issue: 7704)
+  * chore: update icon such as weixin(wine)(issue: 8280)
+  * fix: tooltip shown when drag dock(issue: 8287)
+  * chore: make multitaskview can set invisible by dcc(issue: 8312)
+  * fix: window display abnormality for PanelToolTip(Issue: https://github.com/linuxdeepin/developer-center/issues/8071)
+  * fix: dock crash when get currenActiveWindow is Null
+  * fix: fix preview widget display abnormally(issue: 8311)(Influence: preview display)
+  * fix: When dragging the tray application, tray expansion box is hidden.(issue: 8315)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Mon, 29 Apr 2024 15:43:53 +0800
+
+dde-shell (0.0.14) unstable; urgency=medium
+
+  * fix: crashed when open dock's menu(Issue: https://github.com/linuxdeepin/developer-center/issues/8243)
+  * fix: double release pointer
+  * fix: invalid fallback for DesktopfileAbstractParser
+  * fix: crashed when load plugins in sometimes
+  * fix: crashed when QScrollArea during deconstruction
+  * fix: "showtimetofull" option didn't work(Issue: https://github.com/linuxdeepin/developer-center/issues/8144)
+  * fix: application preview stuttering.
+    Thanks to zhangkun(Issue: https://github.com/linuxdeepin/developer-center/issues/8095)
+  * chore: missing lincense
+  * fix: incorrect resources for device icon(Issue: https://github.com/linuxdeepin/developer-center/issues/8238)
+  * chore: modify ts file (#281)
+    Thanks to ZhaoYingZhen(issue: 8270)(Influence: translation display)
+  * fix: crashed by qmlcache(Issue: https://github.com/linuxdeepin/developer-center/issues/8289)
+  * fix: quick panel popup has focus (#293)
+    Thanks to ZhaoYingZhen(Influence: quick panel popup has no focus)
+  * chore: add uos-ai tray plugin (#283)
+    Thanks to ZhaoYingZhen(issue: 8247)(Influence: uos-ai tray plugin icon display)
+  * fix: modify plugin hover style
+  * fix: workspace not localize(issue: 8223, 8278)
+  * feat: Hide multitask button when composition is disabled(Issue: https://github.com/linuxdeepin/developer-center/issues/8224)
+  * fix: crashed by tipWidget when exit
+  * fix: fix `mapToGlobal` error
+  * fix: notification plugin not generated in correct location in debug mode(issue: 8245)
+  * fix: tips position error(issue: 8197)
+  * fix: some widget layout margin incorrect(issue: 7704)
+  * [dde-shell] Updates for project Deepin Desktop Environment (#277)
+    Thanks to transifex-integration[bot]
+
+ -- Deepin Packages Builder <packages@deepin.org>  Sun, 28 Apr 2024 13:14:13 +0800
+
+dde-shell (0.0.13) unstable; urgency=medium
+
+  * chore: adjust radius for ToolTips
+  * fix: unable to connect to wifi with password for the first time(Issue: https://github.com/linuxdeepin/developer-center/issues/7966)
+  * fix: multitaskview not scale realtime
+    Thanks to justforlxz
+  * fix: When the dock is hidden, the system tray expansion box is not hidden.(issue: 8153)
+  * fix: set cursor shape for dock and tray(Issue: https://github.com/linuxdeepin/developer-center/issues/8181)
+  * fix: transparent windows cannot be blurred(Issue: https://github.com/linuxdeepin/developer-center/issues/8211)
+  * feat: adjust ui
+  * fix: deepin-launcher icon incorrect on bloom theme(Issue: https://github.com/linuxdeepin/developer-center/issues/8206)
+  * fix: The dock cannot record the tray icon dragged to the dock plug-in area.(issue: 8189)(Influence: tray icons display)
+  * fix: Clicking the collapse button does not collapse the tray view.(issue: 8175)
+  * fix: multitaskview ts
+    Thanks to justforlxz(Issue: https://github.com/linuxdeepin/developer-center/issues/8225)
+
+ -- Deepin Packages Builder <packages@deepin.org>  Thu, 25 Apr 2024 21:28:43 +0800
+
+dde-shell (0.0.12) unstable; urgency=medium
+
+  * fix: popup window cannot show on first run
+  * chore: add open workspace item
+  * fix: After logging out, the workspace icons are not displayed
+  * fix: some icon not clear
+  * refact: update ColorSelector family for dock panel
+  * fix: solve the problem of blurry icons in the tray area
+  * fix: preview title not elided
+  * fix: icon blurry
+  * fix: text color of ToolTip doesn't change with theme
+  * fix: solve the problem of the dock jumping when the height changes
+
+ -- tsic404 <liuheng@deepin.org>  Wed, 24 Apr 2024 15:30:04 +0800
+
+dde-shell (0.0.11) unstable; urgency=medium
+
+  * fix: don't emit FrontendWindowRectChanged signal
+
+ -- Wang Fei <wangfei@deepin.org>  Tue, 23 Apr 2024 14:24:08 +0800
+
+dde-shell (0.0.10) unstable; urgency=medium
+
+  * fix: x11 preview show without content
+  * fix: appitem not remove when uninstalled
+  * fix: fix popup position error
+  * fix: fix some icon not clear when system scaled to 1.25X
+  * fix: dde-control-center unable to set dockSize
+  * fix: modify the distance between app icons and indicator margins
+  * fix: workspace item not preserving aspect ratio
+  * fix: launchpad's left align
+  * fix: battery plugin tooltips show remaining time info
+  * feat: add tooltip for dock
+  * chore: update icon
+  * fix: don't save the visibility
+  * fix: workspace can interactive
+  * fix: dock centerPart not screen center
+  * fix: no icon when desktopfile no icon defined
+  * fix: not set themeType to DWindow
+  * fix: dock height change causes the app icon to be blurred
+  * fix: Task Manager preview size is not correct
+  * fix: null rootObject of launchpad
+  * chore: update tray tips radius
+  * fix: datetime plugin not update
+  * fix: error palette when get pixmap form dci
+  * fix: adjust indicator palette
+  * fix: not show search menu
+  * fix: GrandSearch without translate
+  * fix: Alignment without translate
+  * fix: app icon not centered
+
+ -- tsic404 <liuheng@deepin.org>  Fri, 19 Apr 2024 15:09:33 +0800
+
+dde-shell (0.0.9) unstable; urgency=medium
+
+  * fix: not set window icon gemeotry for window
+  * fix: menu invisible
+  * fix: rename mode to Alignment
+  * fix: player icon not update
+  * feat: adjust search and clipboard ui
+  * fix: the distance between the preview window and the dock is not always 10 pixels
+  * fix: the close button of the preview widget has no hover state
+  * fix: unable to launch terminal with quake-mode by dock menu
+  * chore: tiny code format
+  * chore: avoid hardcode path
+  * fix: fix no distance between dateTime and showDesktop
+  * fix: nullptr for dde-appearance
+  * fix: can't show system monitor plugin popup widget
+  * fix: calendar icon error on dock when click datetime plugin
+  * fix: fix translations error
+  * fix: plugin border color not clear when system scaled to 1.25X
+  * fix: fix the problem of drag tray icon into dock invalid
+  * fix: fix quick tray icon not show in vertical center
+
+ -- tsic404 <liuheng@deepin.org>  Thu, 18 Apr 2024 13:30:19 +0800
+
+dde-shell (0.0.8) unstable; urgency=medium
+
+  * fix: dock item get default icon when set auto start
+  * feat: limit opacity from dde-appearance
+  * fix: dock panel never accept focus
+  * chore: change to more common method to insert old dock widget
+  * fix: appitem windows order always changed
+  * fix: x11 preview not fit screen
+  * fix: icon blink when resize
+  * fix: dock get worng positoin when screen size changed
+  * fix: icon missing after drag
+  * feat: add disk-mount plugin
+  * feat: add system-monitor plugin
+  * feat: add dock-network-plugin
+  * feat: add translation of dde-shell plugin
+
+ -- tsic404 <liuheng@deepin.org>  Thu, 11 Apr 2024 21:05:29 +0800
+
+dde-shell (0.0.7) unstable; urgency=medium
+
+  * fix: dock menu not shown
+  * fix: dock not show while HideMode changed in hiden
+  * fix: dock centerAlignment not work on left/right
+  * fix: x11 preview not auto hide
+  * fix: undocked item still existed when restart dock
+  * fix: show window even is bypassWM
+  * fix: show deepin application with deepin prefix
+  * fix: dock tray tips position error
+  * fix: brightness widget display is incomplete
+  * fix: Show desktop item is not displayed in the bottom right corner
+  * fix: repair the time display is not clear
+  * feat: we can hide dock plugin in dde-control-center
+
+ -- tsic404 <liuheng@deepin.org>  Mon, 08 Apr 2024 18:56:30 +0800
+
+dde-shell (0.0.6) unstable; urgency=medium
+
+  * new dock ui
+  * dock x11 preview
+  * dock tmp tray
+  * add clipboard/workspace/search applet for dock
+  * feat: support to get other root applet
+  * refact: launching app by dde-am tool
+  * feat: add AM applet to reset appsLaunchedTimes
+  * fix: can't filter root applet when loaded failed
+  * chore: disable notification and osd in release
+
+ -- tsic404 <liuheng@deepin.org>  Tue, 26 Mar 2024 17:46:41 +0800
+
+dde-shell (0.0.5) unstable; urgency=medium
+
+  * feat: add application preview in dock
+  * fix: worng place and way to install libdde-dockplugin-interface
+  * fix: missing ds.dock configs
+  * fix: tooltip reparent error
+  * fix: show-desktop shown on treeland
+  * feat: set radius for dock in Fashion mode
+  * fix: plugin theme not follow dock
+  * fix: tmp adjust dock ui and datetime theme
+  * chore: dock disable some menu on release
+
+ -- tsic404 <liuheng@deepin.org>  Wed, 10 Jan 2024 17:25:52 +0800
+
+dde-shell (0.0.4) unstable; urgency=medium
+
+  * chore: optimize cmake
+  * chore: promote qt wayland version constraint
+  * fix: menu not closed when popup second one
+  * feat: add PanelPopup to manage Panel's popup
+  * refact: async load qml
+  * fix: PanelPopup's size is wrong
+  * fix: protocol error when changing anchors
+  * feat: add PanelToolTip
+  * feat: modify data model in dnd
+  * feat: add dock quick plugins
+  * chore: mark getters const
+  * fix: drag handler still active when finished
+  * refact: modify containment's appletItems type
+  * refact: adjust dock project
+  * fix: SortFilterModel can't update when item's property changed
+  * refact: use Binding instead of Qt.binding
+  * feat: add sub Applet's property example
+
+ -- YeShanShan <yeshanshan@deepin.org>  Thu, 28 Dec 2023 17:28:59 +0800
+
+dde-shell (0.0.3) unstable; urgency=medium
+
+  * fix: transparent mouse event
+  * fix: unable set margins when anchor three sides in xorg
+  * fix: missing files for dock plugin
+
+ -- YeShanShan <yeshanshan@deepin.org>  Tue, 19 Dec 2023 15:20:17 +0800
+
+dde-shell (0.0.2) unstable; urgency=medium
+
+  * feat: add dock(issue: 6221)
+  * feat: support multi instance with same Applet(Issue: https://github.com/linuxdeepin/developer-center/issues/6245)
+  * chore: remove warning
+  * feat: add notification to display bubble(Issue: https://github.com/linuxdeepin/developer-center/issues/6095)
+  * optimize: use triple equal operator
+  * chore: correct typos in pluginfactory.cpp
+    Thanks to Felix Yan
+  * feat: support to find parent applet
+  * chore: Add Processed type
+  * feat: support to use labs-platform Controls
+  * chore: Change PUBLIC to PRIVATE for PkgConfig::XCB
+  * fix: exclusionZone type error
+  * feat: support systemd to manage plugin
+  * fix: can't access Applet for non Item
+  * fix: release rootObject when delete Applet
+  * feat: support to access the nearest Panel
+  * feat: add treeland-foreign-toplevel-manager support
+  * chore: modify qml import path
+  * chore: correct typo
+  * fix: lacking implementation of get_popup
+  * chore: optimize log
+  * feat: add qml plugin dockpanel
+  * feat: add window and state indicator
+  * feat: add drag and drop function
+  * fix: missing systemd package
+  * fix: missing labs package
+  * feat: Add new UI about notification
+
+ -- YeShanShan <yeshanshan@deepin.org>  Fri, 15 Dec 2023 09:20:22 +0800
+
+dde-shell (0.0.1) unstable; urgency=medium
+
+  * feat: add plugin framework structure and example(Issue: https://github.com/linuxdeepin/developer-center/issues/5810)
+  * feat: add layershell wrap(Issue: https://github.com/linuxdeepin/developer-center/issues/5808)
+  * feat: load all root applet by default(Issue: https://github.com/linuxdeepin/developer-center/issues/5965)
+  * fix: failed fetch Applet attached property for Panel
+  * fix: Fix typo in cmakelist
+  * fix: target link error in qt6.6
+  * chore: redefine DS_SHARE
+  * feat: don't load disabled applet by option
+  * fix: missing dependencies for debian
+  * feat: add x11 layershell emulation
+  * feat: add osd plugin(Issue: https://github.com/linuxdeepin/developer-center/issues/6026)
+  * fix: missing some dependices for debian(Issue: https://github.com/linuxdeepin/developer-center/issues/6026)
+  * chore: rename 'corona' to 'panel'
+  * feat: support to access AppletItem for Applet
+  * feat: add plugin's check
+  * fix: example crashed
+  * feat: filter unload applet
+  * fix: layershell wrap bugs
+  * feat: add signal handler to release applets
+
+ -- YeShanShan <yeshanshan@deepin.org>  Fri, 17 Nov 2023 08:58:18 +0800
+
+dde-shell (0.0.0) unstable; urgency=medium
+
+  * chore: init
+
+ -- YeShanShan <yeshanshan@deepin.org>  Thu, 19 Oct 2023 15:49:28 +0800
