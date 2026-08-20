@@ -114,6 +114,7 @@ Item {
     }
 
     Connections {
+        ignoreUnknownSignals: true
         target: shellSurface
         // TODO it's maybe a bug for qt, we force shellSurface's value to update
         function onAboutToDestroy()

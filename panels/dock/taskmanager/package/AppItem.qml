@@ -518,7 +518,7 @@ Item {
             if (mouse.button === Qt.LeftButton) {
                 appItem.grabToImage(function(result) {
                     root.Drag.imageSource = result.url;
-                })
+                }, Qt.size(appItem.width, appItem.height))
             }
             toolTip.close()
             closeItemPreview()

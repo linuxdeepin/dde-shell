@@ -40,16 +40,16 @@ ContainmentItem {
     readonly property real startPadding: Math.max(0, appTitleSpacing - (Panel.rootObject.dockItemMaxSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2))
 
     implicitWidth: {
-        let extra = useColumnLayout ? 0 : startPadding
+        if (useColumnLayout) return Panel.rootObject.dockSize
+        let extra = startPadding
         let w = appContainer.implicitWidth + extra
-        let maxW = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, w) : Math.min(remainingSpacesForTaskManager, w)
-        return useColumnLayout ? Panel.rootObject.dockSize : maxW
+        return Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, w) : Math.min(remainingSpacesForTaskManager, w)
     }
     implicitHeight: {
-        let extra = useColumnLayout ? startPadding : 0
+        if (!useColumnLayout) return Panel.rootObject.dockSize
+        let extra = startPadding
         let h = appContainer.implicitHeight + extra
-        let maxH = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, h) : Math.min(remainingSpacesForTaskManager, h)
-        return useColumnLayout ? maxH : Panel.rootObject.dockSize
+        return Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, h) : Math.min(remainingSpacesForTaskManager, h)
     }
     // Helper function to find the current index of an app by its appId in the visualModel
     function findAppIndex(appId) {
@@ -114,6 +114,14 @@ ContainmentItem {
                 duration: 200
             }
         }
+        add: Transition {
+            NumberAnimation {
+                properties: "scale,opacity"
+                from: 0
+                to: 1
+                duration: 200
+            }
+        }
         model: DelegateModel {
             id: visualModel
             model: taskmanager.Applet.dataModel
@@ -138,14 +146,6 @@ ContainmentItem {
                         return true 
                     }
                     return windows.length > 0 && launcherDndDropArea.launcherDndWinId !== windows[0]
-                }
-
-                ListView.onAdd: NumberAnimation {
-                    target: delegateRoot
-                    properties: "scale,opacity"
-                    from: 0
-                    to: 1
-                    duration: 200
                 }
 
                 states: [
