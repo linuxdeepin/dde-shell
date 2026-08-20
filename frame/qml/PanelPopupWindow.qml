@@ -18,6 +18,8 @@ PopupWindow {
     property int requestedWidth: 10
     property int requestedHeight: 10
     property bool geometryUpdatePending: false
+    // Individual popup instances can override this for window-manager compatibility.
+    property bool useX11BypassWindowManagerHint: true
     signal requestUpdateGeometry()
     signal updateGeometryFinished()
 
@@ -74,7 +76,10 @@ PopupWindow {
 
     width: 10
     height: 10
-    flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint | Qt.X11BypassWindowManagerHint) : Qt.Popup)
+    flags: (Qt.platform.pluginName === "xcb"
+            ? (Qt.Tool | Qt.WindowStaysOnTopHint
+               | (useX11BypassWindowManagerHint ? Qt.X11BypassWindowManagerHint : 0))
+            : Qt.Popup)
     font: D.DTK.fontManager.t6
     D.DWindow.enabled: true
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius

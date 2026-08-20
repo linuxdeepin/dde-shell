@@ -18,6 +18,7 @@ Item {
     property bool openPending: false
     property bool grabInactivePending: false
     property int grabInactiveTimeout: 200
+    property bool useX11BypassWindowManagerHint: true
     // WM_NAME, used for kwin.
     property string windowTitle: "dde-shell/panelpopup"
     width: popup.childrenRect.width
@@ -42,6 +43,11 @@ Item {
         when: readyBinding
         target: popupWindow; property: "yOffset"
         value: control.popupY
+    }
+    Binding {
+        when: readyBinding
+        target: popupWindow; property: "useX11BypassWindowManagerHint"
+        value: control.useX11BypassWindowManagerHint
     }
 
     function open()
