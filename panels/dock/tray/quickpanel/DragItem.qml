@@ -146,7 +146,7 @@ Item {
 
                     draggingImage = result.url
                     Qt.callLater(function() { dragItem.Drag.active = true })
-                })
+                }, Qt.size(dragItem.width, dragItem.height))
             } else {
                 dragItem.Drag.active = false
             }

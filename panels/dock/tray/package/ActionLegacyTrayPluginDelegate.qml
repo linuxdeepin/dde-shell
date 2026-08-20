@@ -178,7 +178,7 @@ AppletItemButton {
         if (Qt.platform.pluginName !== "xcb") {
             root.grabToImage(function(result) {
                 root.Drag.imageSource = result.url;
-            })
+            }, Qt.size(root.width, root.height))
         }
 
         if (!Drag.active) {
@@ -194,7 +194,7 @@ AppletItemButton {
         if (Qt.platform.pluginName !== "xcb") {
             root.grabToImage(function(result) {
                 root.Drag.imageSource = result.url;
-            })
+            }, Qt.size(root.width, root.height))
         }
     }
 
