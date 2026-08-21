@@ -1,0 +1,21 @@
+// SPDX-FileCopyrightText: 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Minimal stub for <QQmlEngine> — Qt6 Qml dev package not installed.
+// trayitempositionmanager.h uses QML_ELEMENT, QML_SINGLETON macros and
+// QQmlEngine*/QJSEngine* pointer parameters in the create() factory.
+// Forward declarations suffice since the pointers are only used with Q_UNUSED.
+
+#pragma once
+
+#ifndef QML_ELEMENT
+#define QML_ELEMENT
+#endif
+
+#ifndef QML_SINGLETON
+#define QML_SINGLETON
+#endif
+
+class QQmlEngine;
+class QJSEngine;
