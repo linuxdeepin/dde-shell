@@ -1,0 +1,11 @@
+{
+    "name": "dde-shell",
+    "group": "dde",
+    "submodules": [
+        {
+            "name": "org.deepin.dde.shell",
+            "exec": "org.deepin.dde.shell.sh"
+        }
+    ],
+    "version": "V1.0"
+}

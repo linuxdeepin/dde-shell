@@ -1,0 +1,132 @@
+Source: dde-shell
+Section: DDE
+Priority: optional
+Maintainer: Deepin Packages Builder <packages@deepin.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake,
+ dde-application-manager-api (>= 1.2.48),
+ dde-api-dev (>> 6.0.39),
+ dde-tray-loader-dev (>> 2.0.24),
+ extra-cmake-modules,
+ libdtk6core-bin,
+ libdtk6core-dev,
+ libdtk6declarative,
+ libdtk6gui-dev,
+ libdtk6widget-dev,
+ libdtkcommon-dev,
+ libgtest-dev,
+ libgmock-dev,
+ libicu-dev,
+ libqt6svg6,
+ libxcb-ewmh-dev,
+ libxcb-icccm4-dev,
+ libxcb-res0-dev,
+ libxcb-util-dev,
+ libxcb1-dev,
+ libxcb-shape0-dev,
+ libxtst-dev,
+ libyaml-cpp-dev,
+ qml6-module-qtquick-controls2-styles-chameleon,
+ qt6-base-dev,
+ qt6-base-dev-tools,
+ qt6-declarative-dev,
+ qt6-declarative-private-dev,
+ qt6-l10n-tools,
+ qt6-svg-dev,
+ qt6-tools-dev,
+ qt6-wayland (>= 6.8.0-0deepin6),
+ qt6-wayland-dev (>= 6.8.0-0deepin6),
+ qt6-wayland-dev-tools,
+ qt6-wayland-private-dev,
+ systemd,
+ treeland-protocols (>> 0.5.7),
+ wayland-protocols,
+Standards-Version: 4.6.2
+Homepage: https://github.com/linuxdeepin/dde-shell
+
+Package: libdde-shell
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Multi-Arch: same
+Description: DDE Shell library
+ DDE Shell is a plugin system that integrates plugins
+ developed based on this plugin system into DDE.
+
+Package: libdde-shell-dock
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Breaks:
+ libdde-shell-dock-dev (<< 2.0.39),
+Replaces:
+ libdde-shell-dock-dev (<< 2.0.39),
+Multi-Arch: same
+Description: DDE Shell dock library
+ DDE Shell Dock is a library for dock item info.
+
+Package: dde-shell
+Architecture: any
+Depends:
+ dde-tray-loader (>= 1.99.8),
+ libdde-shell (= ${binary:Version}),
+ libdde-shell-dock (= ${binary:Version}),
+ libdtk6declarative,
+ libqt6sql6-sqlite,
+ libqt6svg6,
+ qml6-module-qt-labs-platform,
+ qml6-module-qt-labs-qmlmodels,
+ qml6-module-qtquick-controls2-styles-chameleon,
+ qml6-module-qtquick-layouts,
+ qml6-module-qtquick-window,
+ qt6-wayland (>= 6.8),
+ dde-application-manager (>> 1.2.55),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Breaks:
+ dde-clipboard (<< 1:6.0.14),
+ libdde-shell-dev (<< 2.0.38)
+Replaces: libdde-shell-dev (<< 2.0.38)
+Description: Wrapper for dde-shell plugin system
+ DDE Shell is a plugin-based desktop shell framework. This package
+ provides the runtime components including dock, notification, OSD,
+ and other shell applets.
+
+Package: dde-shell-example
+Architecture: any
+Depends:
+ libdde-shell (= ${binary:Version}),
+ qml6-module-qt-labs-platform,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Multi-Arch: same
+Description: Example plugins for dde-shell
+ This package contains example plugins demonstrating the
+ dde-shell plugin system.
+
+Package: libdde-shell-dev
+Architecture: any
+Depends:
+ libdde-shell (= ${binary:Version}),
+ libdtk6core-dev,
+ qt6-base-dev,
+ qt6-declarative-dev,
+ qt6-tools-dev,
+ ${misc:Depends},
+Description: DDE Shell development files
+ Development headers and CMake config files for building
+ plugins based on the dde-shell plugin system.
+
+Package: libdde-shell-dock-dev
+Architecture: any
+Depends:
+ libdde-shell-dock (= ${binary:Version}),
+ libdde-shell-dev (= ${binary:Version}),
+ qt6-base-dev,
+ qt6-declarative-dev,
+ ${misc:Depends},
+Description: DDE Shell dock devel library
+ DDE Shell Dock is a library for dock item info.
