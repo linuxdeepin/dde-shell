@@ -35,6 +35,7 @@ IconButton {
     }
 
     background: AppletItemBackground {
+        Accessible.ignored: true
         radius: control.radius
         isActive: control.isActive
     }

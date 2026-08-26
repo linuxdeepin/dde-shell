@@ -32,6 +32,8 @@ Control {
     }
 
     PanelToolTip {
+        Accessible.role: Accessible.ToolTip
+        Accessible.id: "QuickActions"
         id: toolTip
         text: qsTr("Quick actions")
         toolTipX: DockPanelPositioner.x
@@ -81,6 +83,7 @@ Control {
         }
     }
     background: AppletItemBackground {
+        Accessible.ignored: true
         isActive: root.isOpened
     }
 
@@ -91,6 +94,8 @@ Control {
         property alias hovered: surfaceLayer.hovered
 
         ShellSurfaceItemProxy {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "SurfaceLayer"
             id: surfaceLayer
             property var itemGlobalPoint: {
                 var a = surfaceLayer

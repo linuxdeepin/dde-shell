@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -13,6 +13,7 @@ AppletItem {
     implicitHeight: 200
 
     GridView {
+        Accessible.id: "Gridview"
         anchors.fill: parent
         cellHeight: 40
         property var audioTypes: ["AudioUp", "AudioDown", "AudioMute", "AudioUpAsh", "AudioDownAsh", "AudioMuteAsh"]
@@ -25,6 +26,7 @@ AppletItem {
 
         model: types
         delegate: Button {
+            Accessible.id: "OsdButton"
             text: model.modelData
             onClicked: Applet.sendOsd(modelData)
         }

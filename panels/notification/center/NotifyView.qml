@@ -66,7 +66,9 @@ Control {
         keyNavigationEnabled: false
         activeFocusOnTab: false
         boundsBehavior: Flickable.StopAtBounds
-        ScrollBar.vertical: ScrollBar { }
+        ScrollBar.vertical: ScrollBar {
+            Accessible.id: "Scrollbar"
+        }
         topMargin: 20
         bottomMargin: 10
         leftMargin: NotifyStyle.leftMargin
@@ -248,5 +250,8 @@ Control {
         }
     }
 
-    background: BoundingRectangle {}
+    background: BoundingRectangle {
+        Accessible.role: Accessible.Pane
+        Accessible.id: "BoundingRectangle"
+    }
 }

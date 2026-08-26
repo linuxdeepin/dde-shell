@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -8,6 +8,7 @@ import org.deepin.ds.dock 1.0
 import org.deepin.ds.dock.tray 1.0 as DDT
 
 Button {
+    Accessible.id: "Button"
     icon.name: model.surfaceId
     icon.width: 16
     icon.height: 16

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -33,6 +33,7 @@ AppletItem {
     }
 
     ListView {
+        Accessible.id: "View"
         id: view
         anchors {
             margins: 10
@@ -54,6 +55,7 @@ AppletItem {
         implicitWidth: maxItemWidth()
 
         delegate: D.ItemDelegate {
+            Accessible.id: "ItemView"
             id: itemView
             width: view.width
             height: 48

@@ -15,6 +15,8 @@ import org.deepin.ds.dock 1.0
 import org.deepin.ds.dock.tray 1.0 as DDT
 
 AppletItemButton {
+    Accessible.role: Accessible.Button
+    Accessible.id: "AppletItemButton"
     id: root
     property alias inputEventsEnabled: surfaceItem.inputEventsEnabled
 
@@ -83,6 +85,8 @@ AppletItemButton {
         }
 
         ShellSurfaceItemProxy {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "SurfaceItem"
             id: surfaceItem
             anchors.fill: parent
             shellSurface: pluginItem.plugin

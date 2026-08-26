@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -43,6 +43,8 @@ AppletItem {
     }
 
     PanelPopup {
+        Accessible.role: Accessible.Dialog
+        Accessible.id: "Popup"
         id: popup
         x: 100
         y: -200
@@ -50,12 +52,15 @@ AppletItem {
         height: 200
 
         Button {
+            Accessible.id: "PopupContent"
             text: "popup content"
             anchors.centerIn: parent
         }
     }
 
     PanelToolTip {
+        Accessible.role: Accessible.ToolTip
+        Accessible.id: "TooltipContent"
         id: toolTip
         x: 100
         y: -100

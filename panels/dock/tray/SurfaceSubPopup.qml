@@ -47,6 +47,8 @@ Item {
             }
 
             PanelMenu {
+                Accessible.role: Accessible.PopupMenu
+                Accessible.id: "Popup"
                 id: popup
                 width: popupSurfaceLayer.width
                 height: popupSurfaceLayer.height
@@ -54,6 +56,8 @@ Item {
 
                 property alias shellSurface: popupSurfaceLayer.shellSurface
                 ShellSurfaceItemProxy {
+                    Accessible.role: Accessible.Pane
+                    Accessible.id: "PopupSurfaceLayer"
                     id: popupSurfaceLayer
                     anchors.centerIn: parent
                     autoClose: true

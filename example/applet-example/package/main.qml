@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -16,6 +16,8 @@ AppletItem {
         anchors.fill: parent
         color: "green"
         TextEx {
+            Accessible.role: Accessible.StaticText
+            Accessible.id: "HelloWorldn"
             anchors.centerIn: parent
             text: "Hello world \n" + String(Applet.id).slice(1, 16)
         }

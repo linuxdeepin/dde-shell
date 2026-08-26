@@ -27,6 +27,8 @@ Item {
     }
 
     PanelPopup {
+        Accessible.role: Accessible.Dialog
+        Accessible.id: "Popup"
         id: popup
         property alias shellSurface: popupContent.shellSurface
         width: popupContent.width
@@ -39,6 +41,8 @@ Item {
         Item {
             anchors.fill: parent
             ShellSurfaceItemProxy {
+                Accessible.role: Accessible.Pane
+                Accessible.id: "PopupContent"
                 id: popupContent
                 anchors.centerIn: parent
                 autoClose: true
@@ -50,6 +54,8 @@ Item {
     }
 
     PanelMenu {
+        Accessible.role: Accessible.PopupMenu
+        Accessible.id: "PopupMenu"
         id: popupMenu
         property alias shellSurface: popupMenuContent.shellSurface
         width: popupMenuContent.width
@@ -69,6 +75,8 @@ Item {
         Item {
             anchors.fill: parent
             ShellSurfaceItemProxy {
+                Accessible.role: Accessible.Pane
+                Accessible.id: "PopupMenuContent"
                 id: popupMenuContent
                 anchors.centerIn: parent
                 autoClose: true
@@ -91,6 +99,8 @@ Item {
                 id: subMenuLoader
                 active: false
                 sourceComponent: SurfaceSubPopup {
+                    Accessible.role: Accessible.Dialog
+                    Accessible.id: "SurfaceSubPopup"
                     objectName: "tray's subPopup"
                     transientParent: popupMenu.menuWindow
                     surfaceAcceptor: function (surfaceId) {
@@ -115,12 +125,16 @@ Item {
     }
 
     PanelToolTip {
+        Accessible.role: Accessible.ToolTip
+        Accessible.id: "ToolTip"
         id: toolTip
         property alias shellSurface: toolTipContent.shellSurface
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
 
         ShellSurfaceItemProxy {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "ToolTipContent"
             id: toolTipContent
             anchors.centerIn: parent
             autoClose: true

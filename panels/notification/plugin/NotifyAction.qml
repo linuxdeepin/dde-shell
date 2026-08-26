@@ -180,6 +180,7 @@ Control {
     }
 
     component NotifyActionButton: Button {
+        Accessible.id: "ActionButton"
         id: actionButton
         required property var actionData
         property var actionMenu: null
@@ -216,6 +217,7 @@ Control {
         }
 
         background: NotifyItemBackground {
+            Accessible.ignored: true
             implicitHeight: 30
             implicitWidth: 50
             radius: 6

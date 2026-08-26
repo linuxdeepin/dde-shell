@@ -56,6 +56,8 @@ DelegateChooser {
     DelegateChoice {
         roleValue: "group"
         GroupNotify {
+            Accessible.role: Accessible.ListItem
+            Accessible.id: "GroupNotify"
             id: groupNotify
             objectName: "group-" + model.appName
             width: NotifyStyle.contentItem.width
@@ -91,6 +93,8 @@ DelegateChooser {
     DelegateChoice {
         roleValue: "normal"
         NormalNotify {
+            Accessible.role: Accessible.ListItem
+            Accessible.id: "NormalNotify"
             id: normalNotify
             objectName: "normal-" + model.appName
             width: NotifyStyle.contentItem.width
@@ -163,6 +167,8 @@ DelegateChooser {
     DelegateChoice {
         roleValue: "overlap"
         OverlapNotify {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "OverlapNotify_2"
             id: overlapNotify
             objectName: "overlap-" + model.appName
             width: NotifyStyle.contentItem.width
@@ -184,6 +190,8 @@ DelegateChooser {
             contentRowCount: model.contentRowCount
             enableDismissed: false
             notifyContent.clearButton: AnimationSettingButton {
+                Accessible.role: Accessible.Button
+                Accessible.id: "CleanAll"
                 id: clearBtn
                 icon.name: "clean-alone"
                 text: qsTr("Clean All")
