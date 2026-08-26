@@ -55,6 +55,8 @@ QStringList ItemsPage::items(int page) const
 QStringList ItemsPage::firstNItems(int count)
 {
     QStringList result;
+    if (count <= 0)
+        return result;
 
     for (const QStringList & pageItems : std::as_const(m_pages)) {
         for (const QString & item : pageItems) {
