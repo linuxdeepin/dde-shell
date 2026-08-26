@@ -10,6 +10,8 @@ import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 NotifyItem {
+    Accessible.role: Accessible.ListItem
+    Accessible.id: "NotifyItem"
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
@@ -100,6 +102,8 @@ NotifyItem {
             width: parent.width
             implicitHeight: notifyContent.height + indicator.height
             NotifyItemContent {
+                Accessible.role: Accessible.Pane
+                Accessible.id: "NotifyContent"
                 id: notifyContent
                 width: parent.width
                 appName: root.appName
@@ -129,6 +133,8 @@ NotifyItem {
                 onGotoPrevItem: root.gotoPrevItem()
 
                 background: NotifyItemBackground {
+                    Accessible.role: Accessible.DrawingArea
+                    Accessible.id: "NotifyItemBackground"
                     backgroundColor: Palette {
                         normal {
                             common: ("transparent")
@@ -142,6 +148,8 @@ NotifyItem {
             }
 
             OverlapIndicator {
+                Accessible.role: Accessible.Indicator
+                Accessible.id: "Indicator"
                 id: indicator
                 enableAnimation: root.ListView.view.panelShown
                 clipItems: true
@@ -155,6 +163,8 @@ NotifyItem {
                 z: -1
                 count: root.count
                 background: NotifyItemBackground {
+                    Accessible.role: Accessible.DrawingArea
+                    Accessible.id: "NotifyItemBackground"
                     opacity: realIndex === 0 ? 0.6 : 0.4
                     backgroundColor: Palette {
                         normal {

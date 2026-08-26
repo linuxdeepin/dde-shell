@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -43,6 +43,8 @@ AppletItem {
     }
 
     PanelPopup {
+        Accessible.role: Accessible.Dialog
+        Accessible.id: "Popup"
         id: popup
         x: 100
         y: -200
@@ -50,12 +52,15 @@ AppletItem {
         height: 200
 
         Button {
+            Accessible.id: "PopupContent"
             text: "popup content"
             anchors.centerIn: parent
         }
     }
 
     PanelToolTip {
+        Accessible.role: Accessible.ToolTip
+        Accessible.id: "TooltipContent"
         id: toolTip
         x: 100
         y: -100
@@ -66,20 +71,26 @@ AppletItem {
     }
 
     LP.Menu {
+        Accessible.id: "PlatformMenu"
         id: platformMenu
         LP.MenuItem {
+            Accessible.id: "Item1"
             text: "item 1"
         }
         LP.MenuItem {
+            Accessible.id: "NonItem"
             text: "non Item " + String(Applet.id).slice(0, 5)
         }
         LP.MenuItem {
+            Accessible.id: "Panel"
             text: "Panel " + String(Panel.id).slice(0, 5)
         }
         LP.MenuItem {
+            Accessible.id: "DSApplet"
             text: "DS.applet " + String(DS.applet("org.deepin.ds.example").id).slice(0, 5)
         }
         LP.MenuItem {
+            Accessible.id: "Popup"
             text: "Popup"
             onTriggered: {
                 popup.open()

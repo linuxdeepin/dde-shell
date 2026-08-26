@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -32,6 +32,8 @@ AppletItem {
     }
 
     PanelPopup {
+        Accessible.role: Accessible.Dialog
+        Accessible.id: "LauncherDebuggerPanel"
         id: launcherDebuggerPanel
 
         width: 1000
@@ -58,6 +60,7 @@ AppletItem {
                 anchors.bottom: parent.bottom
 
                 TreeView {
+                    Accessible.id: "TreeView"
                     id: treeView
                     model: DListToTableProxyModel {
                         sourceModel: testmodel // Applet.applicationsModel

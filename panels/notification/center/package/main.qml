@@ -214,6 +214,8 @@ Window {
         }
 
         NotifyStaging {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "NotifyStaging"
             id: notifyStaging
             anchors {
                 top: parent.top
@@ -240,6 +242,8 @@ Window {
         }
 
         NotifyCenter {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "NotifyCenter"
             id: notifyCenter
             anchors {
                 top: notifyStaging.bottom

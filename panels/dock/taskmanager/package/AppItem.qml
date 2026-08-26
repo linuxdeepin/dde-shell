@@ -71,6 +71,8 @@ Item {
     }
 
     AppItemPalette {
+        Accessible.role: Accessible.Pane
+        Accessible.id: "ItemPalette"
         id: itemPalette
         displayMode: root.displayMode
         colorTheme: root.colorTheme
@@ -84,6 +86,8 @@ Item {
         implicitWidth: root.titleActive ? (root.iconSize + hoverBackground.horizontalSpacing + titleLoader.width) : iconContainer.width
         visible: !root.Drag.active // When in dragging, hide app item
         background: AppItemBackground {
+            Accessible.role: Accessible.DrawingArea
+            Accessible.id: "HoverBackground"
             id: hoverBackground
 
             readonly property int verticalSpacing: Math.round(root.iconSize / 8) + 1
@@ -233,6 +237,8 @@ Item {
         }
 
         WindowIndicator {
+            Accessible.role: Accessible.Indicator
+            Accessible.id: "WindowIndicator"
             id: windowIndicator
             dotWidth: root.useColumnLayout  ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2)
             dotHeight: root.useColumnLayout ? Math.max(iconSize / 3, 2) : Math.max(iconSize / 16, 2)
@@ -290,6 +296,8 @@ Item {
         }
 
         AppItemTitle {
+            Accessible.role: Accessible.StaticText
+            Accessible.id: "TitleLoader"
             id: titleLoader
             anchors.left: iconContainer.right
             anchors.leftMargin: Math.round(root.iconSize / 8)
@@ -389,11 +397,13 @@ Item {
         active: false
         property bool trashEmpty: true
         sourceComponent: LP.Menu {
+            Accessible.id: "ContextMenu"
             id: contextMenu
             Instantiator {
                 id: menuItemInstantiator
                 model: JSON.parse(menus)
                 delegate: LP.MenuItem {
+                    Accessible.id: "ContextMenuItem"
                     text: modelData.name
                     enabled: (root.itemId === "dde-trash" && modelData.id === "clean-trash")
                             ? !contextMenuLoader.trashEmpty
@@ -544,12 +554,16 @@ Item {
         }
 
         PanelToolTip {
+            Accessible.role: Accessible.ToolTip
+            Accessible.id: "ToolTip"
             id: toolTip
             toolTipX: DockPanelPositioner.x
             toolTipY: DockPanelPositioner.y
         }
 
         PanelToolTip {
+            Accessible.role: Accessible.ToolTip
+            Accessible.id: "MoveToTrash"
             id: dragToolTip
             text: qsTr("Move to Trash")
             toolTipX: DockPanelPositioner.x

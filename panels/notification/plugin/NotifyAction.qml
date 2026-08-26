@@ -167,6 +167,8 @@ Control {
                     event.accepted = true
                 }
                 actionMenu: NotifyActionMenu {
+                    Accessible.role: Accessible.PopupMenu
+                    Accessible.id: "NotifyActionMenu"
                     onActionInvoked: function(actionId) {
                         console.log("Action invoked from menu with ID:", actionId)
                         root.actionInvoked(actionId)
@@ -180,6 +182,7 @@ Control {
     }
 
     component NotifyActionButton: Button {
+        Accessible.id: "ActionButton"
         id: actionButton
         required property var actionData
         property var actionMenu: null
@@ -216,6 +219,8 @@ Control {
         }
 
         background: NotifyItemBackground {
+            Accessible.role: Accessible.DrawingArea
+            Accessible.id: "NotifyItemBackground"
             implicitHeight: 30
             implicitWidth: 50
             radius: 6

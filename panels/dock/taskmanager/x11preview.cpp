@@ -219,6 +219,7 @@ public:
     AppItemWindowDeletegate(QListView *listview, X11WindowPreviewContainer *parent = nullptr) : QAbstractItemDelegate(parent)
     {
         m_listView = listview;
+        m_listView->setObjectName("ListView");
         m_parent = parent;
     }
 
@@ -634,6 +635,7 @@ void X11WindowPreviewContainer::initUI()
     m_previewIcon->setScaledContents(true);
 
     m_closeAllButton = new DIconButton(this);
+    m_closeAllButton->setObjectName("CloseAllButton");
 
     m_closeAllButton->setIconSize(QSize(16, 16));
     m_closeAllButton->setIcon(DDciIcon::fromTheme("close"));

@@ -8,6 +8,7 @@ import Qt.labs.platform 1.1 as LP
 import org.deepin.ds.notification
 
 LP.Menu {
+    Accessible.id: "Menu"
     id: root
 
     property var actions: []
@@ -17,6 +18,7 @@ LP.Menu {
     Instantiator {
         model: root.actions
         delegate: LP.MenuItem {
+            Accessible.id: "NotifyActionMenuItem"
             text: modelData.text
             onTriggered: {
                 console.log("Action triggered: " + modelData.text + " (ID: " + modelData.id + ")")

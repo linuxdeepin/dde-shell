@@ -17,6 +17,8 @@ AppletDockItem {
     Accessible.name: toolTip.text
 
     PanelToolTip {
+        Accessible.role: Accessible.ToolTip
+        Accessible.id: "MultitaskingView"
         id: toolTip
         text: qsTr("Multitasking View")
         toolTipX: DockPanelPositioner.x

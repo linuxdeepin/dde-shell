@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -24,20 +24,31 @@ LQM.DelegateChooser {
     LQM.DelegateChoice {
         roleValue: "dummy"
         StashedItemPositioner {
-            contentItem: DummyDelegate {}
+            Accessible.role: Accessible.Pane
+            Accessible.id: "StashedItemPositioner"
+            contentItem: DummyDelegate {
+                Accessible.role: Accessible.Button
+                Accessible.id: "DummyDelegate"
+            }
         }
     }
     LQM.DelegateChoice {
         roleValue: "legacy-tray-plugin"
         StashedItemPositioner {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "StashItemPositioner"
             id: stashItemPositioner
             contentItem: ActionLegacyTrayPluginDelegate {
+                Accessible.role: Accessible.Button
+                Accessible.id: "TrayDelegate"
                 id: trayDelegate
                 objectName: "stash"
                 itemVisible: stashItemPositioner.itemVisible
                 radius: 8
 
                 background: AppletItemBackground {
+                    Accessible.role: Accessible.DrawingArea
+                    Accessible.id: "AppletItemBackground"
                     radius: trayDelegate.radius
                     isActive: trayDelegate.isActive
                     backgroundColor: Palette {
@@ -103,13 +114,22 @@ LQM.DelegateChooser {
     LQM.DelegateChoice {
         roleValue: "action-show-stash"
         StashedItemPositioner {
-            contentItem: ActionShowStashDelegate {}
+            Accessible.role: Accessible.Pane
+            Accessible.id: "StashedItemPositioner"
+            contentItem: ActionShowStashDelegate {
+                Accessible.role: Accessible.Button
+                Accessible.id: "ActionShowStashDelegate"
+            }
         }
     }
     LQM.DelegateChoice {
         roleValue: "action-toggle-collapse"
         StashedItemPositioner {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "StashedItemPositioner"
             contentItem: ActionToggleCollapseDelegate {
+                Accessible.role: Accessible.Button
+                Accessible.id: "ActionToggleCollapseDelegate"
                 isHorizontal: root.isHorizontal
             }
         }

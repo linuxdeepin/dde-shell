@@ -10,6 +10,8 @@ import org.deepin.dtk.style 1.0 as DStyle
 import org.deepin.ds.notification
 
 NotifyItem {
+    Accessible.role: Accessible.ListItem
+    Accessible.id: "NotifyItem"
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
@@ -115,6 +117,8 @@ NotifyItem {
                 // Show when mouse hovers or notification item has focus
                 active: !(root.strongInteractive && root.actions.length > 0) && (root.closeVisible || closePlaceHolder.hovered)
                 sourceComponent: SettingActionButton {
+                    Accessible.role: Accessible.Button
+                    Accessible.id: "CloseBtn"
                     id: closeBtn
                     objectName: "closeNotify-" + root.appName
                     icon.name: "clean-alone"
@@ -332,6 +336,8 @@ NotifyItem {
                     Layout.alignment: Qt.AlignRight | Qt.AlignBottom
                     Layout.topMargin: 8
                     sourceComponent: NotifyAction {
+                        Accessible.role: Accessible.Button
+                        Accessible.id: "NotifyAction"
                         actions: root.actions
                         onActionInvoked: function (actionId) {
                             root.actionInvoked(actionId)
@@ -353,6 +359,9 @@ NotifyItem {
             }
         }
 
-        background: NotifyItemBackground { }
+        background: NotifyItemBackground {
+            Accessible.role: Accessible.DrawingArea
+            Accessible.id: "NotifyItemBackground"
+        }
     }
 }
