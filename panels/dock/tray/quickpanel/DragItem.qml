@@ -122,6 +122,8 @@ Item {
             anchors.centerIn: parent
             anchors.verticalCenterOffset: -root.fallbackIconSize.height / 3 * 2
             sourceComponent: ShellSurfaceItemProxy {
+                Accessible.role: Accessible.Pane
+                Accessible.id: "ShellSurfaceItemProxy"
                 shellSurface: root.fallbackDragImage
                 width: root.fallbackIconSize.width
                 height: root.fallbackIconSize.height

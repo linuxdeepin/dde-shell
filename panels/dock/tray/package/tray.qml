@@ -37,6 +37,8 @@ AppletItem {
     }
 
     PanelPopup {
+        Accessible.role: Accessible.Dialog
+        Accessible.id: "StashedPopup"
         id: stashedPopup
         width: stashedContainer.width
         height: stashedContainer.height
@@ -57,6 +59,8 @@ AppletItem {
             id: stashedContainer
             padding: 10
             contentItem: StashContainer {
+                Accessible.role: Accessible.Pane
+                Accessible.id: "StashContainer"
                 id: stashContainer
                 color: "transparent"
                 model: DDT.SortFilterProxyModel {
@@ -129,6 +133,8 @@ AppletItem {
 
 
     TrayContainer {
+        Accessible.role: Accessible.Pane
+        Accessible.id: "TrayContainter"
         id: trayContainter
         isHorizontal: !tray.useColumnLayout
         model: DDT.TraySortOrderModel

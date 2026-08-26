@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -15,6 +15,7 @@ NotifySettingMenu {
     property string appName
 
     MenuItem {
+        Accessible.id: "Unpin"
         text: pinned ? qsTr("Unpin") : qsTr("Pin")
         onClicked: {
             let state = !root.pinned
@@ -23,6 +24,7 @@ NotifySettingMenu {
         }
     }
     MenuItem {
+        Accessible.id: "NotificationSetting"
         text: qsTr("Notification Setting")
         onClicked: {
             console.log("Notify setting")

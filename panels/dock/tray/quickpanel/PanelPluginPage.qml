@@ -75,6 +75,8 @@ Item {
         model: root.model
 
         delegate: PluginItem {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "PluginItem"
             id: pluginItem
             width: {
                 if (model.surfaceLayoutType === 4)

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick 2.15
@@ -20,12 +20,16 @@ AppletItem {
     property bool isMenuVisible: false
 
     PanelToolTip {
+        Accessible.role: Accessible.ToolTip
+        Accessible.id: "Appruntime"
         id: toolTip
         text: qsTr("appruntime")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
     }
     AppletItemButton {
+        Accessible.role: Accessible.Button
+        Accessible.id: "Button"
         id: button
         anchors.centerIn: parent
         icon.name: "qrc:/ddeshell/package/icons/appruntime.svg"

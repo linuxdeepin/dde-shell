@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -28,6 +28,7 @@ Window {
     Column {
         id: comboBox
         ComboBox {
+            Accessible.id: "LayerCombox"
             id: layerCombox
             width: 100
             textRole: "text"
@@ -45,6 +46,7 @@ Window {
         }
 
         ComboBox {
+            Accessible.id: "KeyboardInteractivityCombox"
             id: keyboardInteractivityCombox
             width: 200
             textRole: "text"
@@ -61,6 +63,7 @@ Window {
         }
 
         ComboBox {
+            Accessible.id: "ScreenComboBox"
             id: screenComboBox
             width: 200
             textRole: "name"
@@ -80,6 +83,7 @@ Window {
         Column {
             spacing: 20
             Button {
+                Accessible.id: "Top"
                 id: buttonTop
                 text: "Top"
                 width: 40
@@ -97,6 +101,7 @@ Window {
             Row {
                 spacing: 20
                 Button {
+                    Accessible.id: "Left"
                     id: buttonLeft
                     text: "Left"
                     width: 40
@@ -110,6 +115,7 @@ Window {
                     }
                 }
                 Button {
+                    Accessible.id: "Right"
                     id: buttonRight
                     text: "Right"
                     width: 40
@@ -124,6 +130,7 @@ Window {
                 }
             }
             Button {
+                Accessible.id: "Buttom"
                 id: buttonBottom
                 text: "Buttom"
                 width: 40
@@ -150,6 +157,7 @@ Window {
             text: "LeftMargin: "
         }
         SpinBox {
+            Accessible.id: "Left"
             id: left
             stepSize: 10
             editable: true
@@ -159,6 +167,7 @@ Window {
             text: "TopMargin: "
         }
         SpinBox {
+            Accessible.id: "Top"
             id: top
             stepSize: 10
             editable: true
@@ -168,6 +177,7 @@ Window {
             text: "RightMargin: "
         }
         SpinBox {
+            Accessible.id: "Right"
             id: right
             stepSize: 10
             editable: true
@@ -177,6 +187,7 @@ Window {
             text: "BottomMargin: "
         }
         SpinBox {
+            Accessible.id: "Bottom"
             id: bottom
             stepSize: 10
             editable: true
@@ -187,6 +198,7 @@ Window {
         }
 
         SpinBox {
+            Accessible.id: "Excludezone"
             id: excludezone
             editable: true
             from: -1

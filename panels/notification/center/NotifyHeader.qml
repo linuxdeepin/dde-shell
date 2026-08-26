@@ -72,6 +72,8 @@ FocusScope {
             }
 
             NotifyHeaderTitleText {
+                Accessible.role: Accessible.StaticText
+                Accessible.id: "NotificationCenter"
                 id: titleText
                 text: qsTr("Notification Center")
                 elide: Text.ElideNone
@@ -80,6 +82,8 @@ FocusScope {
         }
 
         AnimationSettingButton {
+            Accessible.role: Accessible.Button
+            Accessible.id: "Fold"
             id: collapseBtn
             objectName: "collapse"
             visible: !notifyModel.collapse
@@ -103,6 +107,8 @@ FocusScope {
         }
 
         AnimationSettingButton {
+            Accessible.role: Accessible.Button
+            Accessible.id: "More"
             id: moreBtn
             objectName: "more"
             Layout.alignment: Qt.AlignRight
@@ -132,6 +138,7 @@ FocusScope {
             NotifySettingMenu {
                 id: headerSettingMenu
                 MenuItem {
+                    Accessible.id: "NotificationSetting"
                     text: qsTr("Notification Setting")
                     onClicked: {
                         console.log("Notification setting")
@@ -142,6 +149,8 @@ FocusScope {
         }
 
         AnimationSettingButton {
+            Accessible.role: Accessible.Button
+            Accessible.id: "ClearAll"
             id: clearAllBtn
             objectName: "closeAllNotify"
             activeFocusOnTab: false

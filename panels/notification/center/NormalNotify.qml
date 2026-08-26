@@ -10,6 +10,8 @@ import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 NotifyItem {
+    Accessible.role: Accessible.ListItem
+    Accessible.id: "NotifyItem"
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
@@ -52,6 +54,8 @@ NotifyItem {
         }
 
         contentItem: NotifyItemContent {
+            Accessible.role: Accessible.Pane
+            Accessible.id: "NotifyContent"
             id: notifyContent
             width: parent.width
             appName: root.appName
@@ -68,6 +72,7 @@ NotifyItem {
             contentRowCount: root.contentRowCount
             indexInGroup: root.indexInGroup
             background: NotifyItemBackground {
+                Accessible.ignored: true
                 backgroundColor: Palette {
                     normal {
                         common: ("transparent")

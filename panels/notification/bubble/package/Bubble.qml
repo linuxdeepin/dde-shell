@@ -10,6 +10,8 @@ import org.deepin.ds.notification 1.0
 import org.deepin.dtk 1.0 as D
 
 NotifyItemContent {
+    Accessible.role: Accessible.Pane
+    Accessible.id: "Bubble"
     id: control
     property var bubble
 

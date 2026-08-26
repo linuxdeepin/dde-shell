@@ -9,6 +9,7 @@ import org.deepin.ds.dock 1.0
 import org.deepin.dtk
 
 AppletItemBackground {
+    Accessible.ignored: true
     id: control
     property int windowCount: 0
     property int displayMode: Dock.Efficient
