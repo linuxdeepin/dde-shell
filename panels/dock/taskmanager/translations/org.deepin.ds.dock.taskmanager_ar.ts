@@ -3,7 +3,7 @@
     <name>AppItem</name>
     <message>
         <source>Move to Trash</source>
-        <translation type="unfinished"/>
+        <translation>نقل إلى المهملات</translation>
     </message>
 </context>
 <context>
@@ -33,34 +33,34 @@
     <name>dock::DockGlobalElementModel</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>فتح</translation>
     </message>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>إلغاء الإرساء</translation>
     </message>
     <message>
         <source>Dock</source>
-        <translation type="unfinished"/>
+        <translation>إرساء</translation>
     </message>
     <message>
         <source>Force Quit</source>
-        <translation type="unfinished"/>
+        <translation>إنهاء إجباري</translation>
     </message>
     <message>
         <source>Close All</source>
-        <translation type="unfinished"/>
+        <translation>إغلاق الكل</translation>
     </message>
     <message>
         <source>Close this window</source>
-        <translation type="unfinished"/>
+        <translation>إغلاق هذه النافذة</translation>
     </message>
 </context>
 <context>
     <name>dock::TaskManager</name>
     <message>
         <source>%1 files</source>
-        <translation type="unfinished"/>
+        <translation>%1 ملفات</translation>
     </message>
 </context>
 </TS>
