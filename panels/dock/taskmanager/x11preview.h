@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -106,6 +106,8 @@ private:
     DIconButton* m_closeAllButton;
 
     QTimer* m_hideTimer;
+    QTimer* m_previewDelayTimer;
+    uint32_t m_pendingPreviewWinId;
 
     int32_t m_previewXoffset;
     int32_t m_previewYoffset;
