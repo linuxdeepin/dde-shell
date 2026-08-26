@@ -3,11 +3,11 @@
     <name>GroupNotify</name>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>طي</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"/>
+        <translation>المزيد</translation>
     </message>
     <message>
         <source>Clear All</source>
@@ -18,7 +18,7 @@
     <name>NotifyCenter</name>
     <message>
         <source>No recent notifications</source>
-        <translation type="unfinished"/>
+        <translation>لا توجد إشعارات حديثة</translation>
     </message>
 </context>
 <context>
@@ -29,11 +29,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>طي</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"/>
+        <translation>المزيد</translation>
     </message>
     <message>
         <source>Notification Setting</source>
@@ -63,7 +63,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"/>
+        <translation>مسح الكل</translation>
     </message>
 </context>
 <context>
