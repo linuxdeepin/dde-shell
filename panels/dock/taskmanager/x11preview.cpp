@@ -50,6 +50,7 @@ Q_LOGGING_CATEGORY(x11WindowPreview, "org.deepin.dde.shell.dock.taskmanager.x11W
 #define PREVIEW_CONTAINER_MARGIN 10
 #define PREVIEW_HOVER_BORDER 4
 #define PREVIEW_MINI_WIDTH 140
+#define PREVIEW_WINDOW_DELAY 300
 #define PREVIEW_HOVER_BORDER_COLOR QColor(0, 0, 0, 255 * 0.2)
 #define PREVIEW_HOVER_BORDER_COLOR_DARK_MODE QColor(255, 255, 255, 255 * 0.3)
 #define PREVIEW_BACKGROUND_COLOR QColor(0, 0, 0, 255 * 0.05)
@@ -378,11 +379,23 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
     , m_monitor(monitor)
     , m_sourceModel(nullptr)
     , m_titleWidget(new QWidget())
+    , m_previewDelayTimer(nullptr)
+    , m_pendingPreviewWinId(0)
     , m_direction(0)
 {
     m_hideTimer = new QTimer(this);
     m_hideTimer->setSingleShot(true);
     m_hideTimer->setInterval(500);
+
+    m_previewDelayTimer = new QTimer(this);
+    m_previewDelayTimer->setSingleShot(true);
+    m_previewDelayTimer->setInterval(PREVIEW_WINDOW_DELAY);
+    connect(m_previewDelayTimer, &QTimer::timeout, this, [this]() {
+        if (m_pendingPreviewWinId == 0 || m_monitor.isNull())
+            return;
+        if (WM_HELPER->hasComposite())
+            m_monitor->previewWindow(m_pendingPreviewWinId);
+    });
 
     setWindowFlags(Qt::ToolTip | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus | Qt::FramelessWindowHint);
     setMouseTracking(true);
@@ -415,9 +428,9 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
 
     connect(m_view, &QListView::entered, this, [this](const QModelIndex &enter) {
         m_closeAllButton->setVisible(false);
-        if (WM_HELPER->hasComposite()) {
-            m_monitor->previewWindow(enter.data(TaskManager::WinIdRole).toInt());
-        }
+        // 延迟预览：记录待预览窗口并重启定时器，300ms 后仍停留才显示窗口
+        m_pendingPreviewWinId = enter.data(TaskManager::WinIdRole).toUInt();
+        m_previewDelayTimer->start();
 
         // 获取图标，优先使用窗口图标，如果为空则使用应用图标
         QVariant iconData = enter.data(TaskManager::WinIconRole);
@@ -559,6 +572,9 @@ void X11WindowPreviewContainer::showEvent(QShowEvent *event)
 
 void X11WindowPreviewContainer::hideEvent(QHideEvent*)
 {
+    m_previewDelayTimer->stop();
+    m_pendingPreviewWinId = 0;
+
     // 只通知监视器清空预览状态，让 TaskManager 统一管理模型清理
     // 不要在这里断开模型连接，因为 clearPreviewState 信号会触发 TaskManager 的 clearFilter
     // QPointer 会自动处理对象销毁的情况
@@ -766,6 +782,9 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
 
     switch (event->type()) {
     case QEvent::HoverLeave: {
+        // 取消尚未触发的延迟预览
+        m_previewDelayTimer->stop();
+        m_pendingPreviewWinId = 0;
         if (WM_HELPER->hasComposite()) {
             m_monitor->cancelPreviewWindow();
         }
@@ -781,6 +800,8 @@ bool X11WindowPreviewContainer::eventFilter(QObject *watched, QEvent *event)
         if (mouseEvent->button() != Qt::LeftButton) return false;
 
         // cancel preview b4 active window
+        m_previewDelayTimer->stop();
+        m_pendingPreviewWinId = 0;
         if (WM_HELPER->hasComposite())
             m_monitor->cancelPreviewWindow();
 
