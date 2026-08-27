@@ -40,16 +40,19 @@ AMAppItem::AMAppItem(const QDBusObjectPath &path, const ObjectInterfaceMap &sour
     if (appInfo.isEmpty())
         return;
 
-    auto name = getLocaleOrDefaultValue(qdbus_cast<QStringMap>(appInfo.value(u8"Name")), locale, DEFAULT_KEY);
-    auto genericName = getLocaleOrDefaultValue(qdbus_cast<QStringMap>(appInfo.value(u8"GenericName")), locale, DEFAULT_KEY);
+    const auto nameMap = qdbus_cast<QStringMap>(appInfo.value(u8"Name"));
+    const auto genericNameMap = qdbus_cast<QStringMap>(appInfo.value(u8"GenericName"));
+    const auto localizedName = getLocaleOrDefaultValue(nameMap, locale, DEFAULT_KEY);
+    const auto localizedGenericName = getLocaleOrDefaultValue(genericNameMap, locale, DEFAULT_KEY);
     auto xDeepinVendor = appInfo.value(u8"X_Deepin_Vendor").toString();
-    AppItem::setGenericName(genericName);
+    // Keep the default generic name for launchpad's English search while NameRole remains localized.
+    AppItem::setGenericName(genericNameMap.value(DEFAULT_KEY));
     AppItem::setVendor(xDeepinVendor);
 
-    if (QStringLiteral("deepin") == xDeepinVendor && !genericName.isEmpty()) {
-        AppItem::setAppName(genericName);
+    if (QStringLiteral("deepin") == xDeepinVendor && !localizedGenericName.isEmpty()) {
+        AppItem::setAppName(localizedGenericName);
     } else {
-        AppItem::setAppName(name);
+        AppItem::setAppName(localizedName);
     }
 
     auto iconName = getLocaleOrDefaultValue(qdbus_cast<QStringMap>(appInfo.value(u8"Icons")), DESKTOP_ENTRY_ICON_KEY, "");
@@ -156,24 +159,23 @@ void AMAppItem::onPropertyChanged(const QDBusMessage &msg)
 
     if (contains(QLatin1String("Name")) || contains(QLatin1String("GenericName"))
         || contains(QLatin1String("X_Deepin_Vendor"))) {
-        const QString name = getLocaleOrDefaultValue(
-                contains(QLatin1String("Name"))
-                        ? qdbus_cast<QStringMap>(value(QLatin1String("Name")))
-                        : Application::name(),
-                locale,
-                DEFAULT_KEY);
-        const QString genericName = getLocaleOrDefaultValue(
-                contains(QLatin1String("GenericName"))
-                        ? qdbus_cast<QStringMap>(value(QLatin1String("GenericName")))
-                        : Application::genericName(),
-                locale,
-                DEFAULT_KEY);
+        const QStringMap nameMap = contains(QLatin1String("Name"))
+                ? qdbus_cast<QStringMap>(value(QLatin1String("Name")))
+                : Application::name();
+        const QStringMap genericNameMap = contains(QLatin1String("GenericName"))
+                ? qdbus_cast<QStringMap>(value(QLatin1String("GenericName")))
+                : Application::genericName();
+        const QString localizedName = getLocaleOrDefaultValue(nameMap, locale, DEFAULT_KEY);
+        const QString localizedGenericName = getLocaleOrDefaultValue(genericNameMap, locale, DEFAULT_KEY);
         const QString vendor = contains(QLatin1String("X_Deepin_Vendor"))
                 ? value(QLatin1String("X_Deepin_Vendor")).toString()
                 : Application::x_Deepin_Vendor();
-        AppItem::setGenericName(genericName);
+        // Keep the default generic name for launchpad's English search while NameRole remains localized.
+        AppItem::setGenericName(genericNameMap.value(DEFAULT_KEY));
         AppItem::setVendor(vendor);
-        AppItem::setAppName(vendor == QLatin1String("deepin") && !genericName.isEmpty() ? genericName : name);
+        AppItem::setAppName(vendor == QLatin1String("deepin") && !localizedGenericName.isEmpty()
+                                     ? localizedGenericName
+                                     : localizedName);
     }
 
     if (contains(QLatin1String("Icons"))) {
