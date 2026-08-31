@@ -31,6 +31,12 @@ AppletItemBackground {
             crystal: ("transparent")
         }
         normalDark: normal
+        pressed {
+            crystal: Qt.rgba(1.0, 1.0, 1.0, 0.25)
+        }
+        pressedDark {
+            crystal: Qt.rgba(1.0, 1.0, 1.0, 0.25)
+        }
         hovered {
             crystal: Qt.rgba(1.0, 1.0, 1.0, 0.15)
         }

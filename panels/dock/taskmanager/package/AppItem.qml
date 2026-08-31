@@ -79,8 +79,10 @@ Item {
     }
 
     Control {
-        anchors.fill: parent
         id: appItem
+        width: root.useColumnLayout ? parent.width : hoverBackground.width
+        height: root.useColumnLayout ? hoverBackground.height : parent.height
+        anchors.centerIn: parent
         implicitWidth: root.titleActive ? (root.iconSize + hoverBackground.horizontalSpacing + titleLoader.width) : iconContainer.width
         visible: !root.Drag.active // When in dragging, hide app item
         background: AppItemBackground {
@@ -118,6 +120,10 @@ Item {
                         target: iconContainer
                         anchors.left: parent.left
                         anchors.horizontalCenter: undefined
+                    }
+                    PropertyChanges {
+                        target: iconContainer
+                        anchors.leftMargin: hoverBackground.horizontalSpacing
                     }
                 },
                 State {
