@@ -143,7 +143,7 @@ NotifyItem {
 
             OverlapIndicator {
                 id: indicator
-                enableAnimation: root.ListView.view.panelShown
+                enableAnimation: (root.ListView.view && root.ListView.view.panelShown) ?? false
                 clipItems: true
                 anchors {
                     bottom: parent.bottom

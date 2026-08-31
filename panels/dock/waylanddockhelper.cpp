@@ -73,7 +73,7 @@ void WaylandDockHelper::updateOverlapCheckerPos()
     if (!waylandScreen)
         return;
 
-    uint32_t anchor;
+    uint32_t anchor = 0;
     switch (m_panel->position()) {
     case Top:
         anchor = QtWayland::treeland_window_overlap_checker::anchor_top;

@@ -40,16 +40,24 @@ ContainmentItem {
     readonly property real startPadding: Math.max(0, appTitleSpacing - (Panel.rootObject.dockItemMaxSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2))
 
     implicitWidth: {
-        let extra = useColumnLayout ? 0 : startPadding
+        // In column layout the width is fixed to the dock size, so do not
+        // depend on appContainer.implicitWidth (the delegates read this
+        // implicitWidth back, which would cause a binding loop).
+        if (useColumnLayout)
+            return Panel.rootObject.dockSize
+        let extra = startPadding
         let w = appContainer.implicitWidth + extra
-        let maxW = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, w) : Math.min(remainingSpacesForTaskManager, w)
-        return useColumnLayout ? Panel.rootObject.dockSize : maxW
+        return Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, w) : Math.min(remainingSpacesForTaskManager, w)
     }
     implicitHeight: {
-        let extra = useColumnLayout ? startPadding : 0
+        // In row layout the height is fixed to the dock size, so do not
+        // depend on appContainer.implicitHeight (the delegates read this
+        // implicitHeight back, which would cause a binding loop).
+        if (!useColumnLayout)
+            return Panel.rootObject.dockSize
+        let extra = startPadding
         let h = appContainer.implicitHeight + extra
-        let maxH = Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, h) : Math.min(remainingSpacesForTaskManager, h)
-        return useColumnLayout ? maxH : Panel.rootObject.dockSize
+        return Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, h) : Math.min(remainingSpacesForTaskManager, h)
     }
     // Helper function to find the current index of an app by its appId in the visualModel
     function findAppIndex(appId) {

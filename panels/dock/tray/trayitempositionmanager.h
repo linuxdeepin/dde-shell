@@ -15,7 +15,7 @@ struct DropIndex {
     Q_PROPERTY(int index MEMBER index)
     Q_PROPERTY(bool isOnItem MEMBER isOnItem)
     Q_PROPERTY(bool isBefore MEMBER isBefore)
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(dropIndex)
 public:
     int index;
     bool isOnItem = true;

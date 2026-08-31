@@ -33,6 +33,8 @@ add_executable(notifyserverapplet_tests
     notifyserverapplet_test.cpp
 )
 
+set_property(TARGET notifyserverapplet_tests APPEND PROPERTY AUTOMOC_MACRO_NAMES "D_APPLET_CLASS")
+
 target_compile_options(notifyserverapplet_tests PRIVATE
     -fvisibility=hidden
     -fvisibility-inlines-hidden

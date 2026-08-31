@@ -30,7 +30,10 @@ Item {
     signal dropFilesOnItem(itemId: string, files: list<string>)
     signal dragFinished()
 
-    Drag.active: mouseArea.drag.active
+    // Binding Drag.active to mouseArea.drag.active would make Drag.active read
+    // back the very property it drives (see visible/fixPosition below),
+    // causing a QML binding loop. Set it imperatively from the MouseArea instead.
+    Drag.active: false
     Drag.source: root
     Drag.hotSpot.x: icon.width / 2
     Drag.hotSpot.y: icon.height / 2
@@ -494,6 +497,7 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         drag.target: root
         drag.onActiveChanged: {
+            root.Drag.active = drag.active
             if (!drag.active) {
                 Panel.contextDragging = false
                 root.dragFinished()

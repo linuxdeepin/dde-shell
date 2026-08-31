@@ -139,8 +139,15 @@ TrayItemPositionManager::TrayItemPositionManager(QObject *parent)
 
     connect(this, &TrayItemPositionManager::visualItemCountChanged,
             this, &TrayItemPositionManager::updateVisualSize);
+    // Use QueuedConnection for dockHeightChanged to break a synchronous
+    // signal/slot cascade that causes "Binding loop for dockItemMaxSize".
+    // When dockSize changes (e.g. during drag), dockHeightChanged fires
+    // synchronously, calling updateVisualSize -> visualSizeChanged, which
+    // marks dockItemMaxSize dirty (it transitively reads visualSize via
+    // dockRawCenterSpace -> dockRightPart -> tray). Queuing the slot lets
+    // the current binding evaluation finish before visualSize updates.
     connect(this, &TrayItemPositionManager::dockHeightChanged,
-            this, &TrayItemPositionManager::updateVisualSize);
+            this, &TrayItemPositionManager::updateVisualSize, Qt::QueuedConnection);
     connect(this, &TrayItemPositionManager::orientationChanged,
             this, &TrayItemPositionManager::updateVisualSize);
     connect(this, &TrayItemPositionManager::visualItemSizeChanged,

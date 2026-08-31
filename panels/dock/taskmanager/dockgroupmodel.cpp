@@ -42,7 +42,6 @@ DockGroupModel::DockGroupModel(QAbstractItemModel *sourceModel, int role, QObjec
             int parentRow = parent.row();
             if (m_currentActiveWindow.contains(parentRow)) {
                 int currentActive = m_currentActiveWindow.value(parentRow);
-                int windowCount = RoleGroupModel::rowCount(parent);
 
                 // Check if the current active window was removed
                 if (currentActive >= first && currentActive <= last) {

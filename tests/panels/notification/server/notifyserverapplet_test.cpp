@@ -80,7 +80,7 @@ TEST_F(NotifyServerAppletTest, DestructorMemoryLeakTest) {
     auto *testApplet = new NotifyServerApplet();
     
     // Initialize the applet (creates m_manager, m_worker, and DbusAdaptors)
-    bool initResult = testApplet->init();
+    testApplet->init();
     
     // Even if init fails (e.g., D-Bus not available), we should clean up properly
     // Record the state before deletion

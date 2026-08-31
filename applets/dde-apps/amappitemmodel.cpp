@@ -15,8 +15,8 @@ namespace apps
 {
 AMAppItemModel::AMAppItemModel(QObject *parent)
     : AppItemModel(parent)
-    , m_manager(new ObjectManager("org.desktopspec.ApplicationManager1", "/org/desktopspec/ApplicationManager1", QDBusConnection::sessionBus(), this))
     , m_ready(false)
+    , m_manager(new ObjectManager("org.desktopspec.ApplicationManager1", "/org/desktopspec/ApplicationManager1", QDBusConnection::sessionBus(), this))
 {
     qRegisterMetaType<ObjectInterfaceMap>();
     qDBusRegisterMetaType<ObjectInterfaceMap>();

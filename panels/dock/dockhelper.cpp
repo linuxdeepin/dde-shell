@@ -198,7 +198,7 @@ void DockHelper::updateAllDockWakeArea()
 
 void DockHelper::checkNeedHideOrNot()
 {
-    bool needHide;
+    bool needHide = false;
     switch (parent()->hideMode()) {
     case KeepShowing: {
         // KeepShow. current activeWindow is fullscreend.
@@ -238,7 +238,7 @@ void DockHelper::checkNeedHideOrNot()
 
 void DockHelper::checkNeedShowOrNot()
 {
-    bool needShow;
+    bool needShow = false;
     switch (parent()->hideMode()) {
     case KeepShowing: {
         // KeepShow. currentWindow is not fullscreened.

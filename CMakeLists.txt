@@ -18,6 +18,7 @@ endif ()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:-Werror>)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -119,5 +120,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/DDEShellConfigVersion.cmake" DESTINAT
 
 # add clang-format target for all our real source files
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h)
-kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
-kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)
+if(KDE_CLANG_FORMAT_EXECUTABLE)
+    kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
+    kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)
+endif()
