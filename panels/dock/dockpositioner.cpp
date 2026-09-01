@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -36,7 +36,10 @@ DockPositioner::DockPositioner(DPanel *panel, QObject *parent)
     Q_ASSERT(m_panel);
     connect(m_panel, SIGNAL(positionChanged(Position)), this, SLOT(update()));
     connect(m_panel, SIGNAL(geometryChanged(QRect)), this, SLOT(update()));
-    connect(this, &DockPositioner::boundingChanged, this, &DockPositioner::update);
+    // The popup may be opened in the same event-loop turn as its anchor is
+    // assigned. Calculate anchor changes immediately so its first frame does
+    // not use the default (0, 0) position.
+    connect(this, &DockPositioner::boundingChanged, this, &DockPositioner::updatePosition);
 }
 
 DockPositioner::~DockPositioner()

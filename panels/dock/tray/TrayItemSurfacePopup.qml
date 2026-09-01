@@ -33,6 +33,8 @@ Item {
         height: popupContent.height
         popupX: DockPanelPositioner.x
         popupY: DockPanelPositioner.y
+        contentReady: popupContent.hasSurfaceContent
+        revealAfterRender: true
 
         Item {
             anchors.fill: parent

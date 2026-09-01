@@ -18,6 +18,7 @@ Item {
     property bool pressed: tapHandler.pressed
     property int cursorShape: Qt.ArrowCursor
     property alias shellSurfaceItem: impl
+    readonly property bool hasSurfaceContent: impl.surface ? impl.surface.hasContent : false
 
     implicitWidth: shellSurface ? shellSurface.width : 16
     implicitHeight: shellSurface ? shellSurface.height : 16
