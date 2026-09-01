@@ -9,9 +9,11 @@
 #include <QThread>
 #include <QSignalSpy>
 #include <QVariant>
+#include <QStandardItemModel>
 
 #include "notifyserverapplet.h"
 #include "notificationmanager.h"
+#include "notificationsetting.h"
 
 using namespace notification;
 using ::testing::_;
@@ -369,6 +371,24 @@ TEST_F(NotifyServerAppletTest, AppValueEmptyAppIdTest) {
     
     QVariant result = applet->appValue(QString(), 0);
     (void)result; // Suppress unused warning
+}
+
+// Test that deleting the app model accessor does not leave a dangling pointer
+TEST_F(NotifyServerAppletTest, AppAccessorDestroyedTest) {
+    auto *setting = new NotificationSetting();
+    auto *model = new QStandardItemModel();
+    setting->setAppAccessor(model);
+    EXPECT_NE(setting->appAccessor(), nullptr);
+
+    delete model;
+    model = nullptr;
+
+    EXPECT_EQ(setting->appAccessor(), nullptr);
+    EXPECT_NO_THROW({
+        EXPECT_TRUE(setting->apps().isEmpty());
+    });
+
+    delete setting;
 }
 
 // Main function for tests
