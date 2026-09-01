@@ -16,6 +16,10 @@ Item {
     property int popupY: 0
     property bool readyBinding: false
     property bool openPending: false
+    property bool contentReady: true
+    property bool contentOpenPending: false
+    property bool revealAfterRender: false
+    property bool revealPending: false
     property bool grabInactivePending: false
     property int grabInactiveTimeout: 200
     // WM_NAME, used for kwin.
@@ -54,6 +58,12 @@ Item {
         if (!popupWindow)
             return
 
+        if (!contentReady) {
+            contentOpenPending = true
+            return
+        }
+        contentOpenPending = false
+
         // The popup is being displayed. If you click on other plugin at this time,
         // the popup content of the previous plugin will be displayed first,
         // and the wrong popup size will cause the window size to change and flicker.
@@ -84,10 +94,15 @@ Item {
     function close()
     {
         openPending = false
+        contentOpenPending = false
+        revealPending = false
         grabInactivePending = false
         grabInactiveTimer.stop()
         if (!popupWindow)
             return
+
+        if (popupWindow.currentItem === control)
+            popupWindow.opacity = 1
 
         // avoid to closing window by other PanelPopup.
         if (!readyBinding)
@@ -97,6 +112,16 @@ Item {
         popupWindow.currentItem = null
     }
 
+    onContentReadyChanged: {
+        if (!contentReady || !contentOpenPending)
+            return
+
+        Qt.callLater(function () {
+            if (contentReady && contentOpenPending)
+                control.open()
+        })
+    }
+
     function finalizeOpen()
     {
         if (!popupWindow || !openPending || !readyBinding || popupWindow.currentItem !== control)
@@ -104,8 +129,16 @@ Item {
 
         openPending = false
         popupWindow.title = windowTitle
+        revealPending = revealAfterRender
+        // popupWindow is shared by all PanelPopup instances. Always initialize
+        // its opacity so a popup cannot inherit an interrupted reveal state.
+        popupWindow.opacity = revealPending ? 0 : 1
         popupWindow.show()
-        popupWindow.requestActivate()
+        if (revealPending) {
+            popupWindow.update()
+        } else {
+            popupWindow.requestActivate()
+        }
     }
 
     Timer {
@@ -154,6 +187,16 @@ Item {
         function onUpdateGeometryFinished()
         {
             control.finalizeOpen()
+        }
+
+        function onFrameSwapped()
+        {
+            if (!control.revealPending || !popupWindow || popupWindow.currentItem !== control)
+                return
+
+            control.revealPending = false
+            popupWindow.opacity = 1
+            popupWindow.requestActivate()
         }
 
         function onX11FocusOutByGrab()
