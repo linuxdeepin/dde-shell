@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -58,6 +58,10 @@ void NotificationSetting::setAppAccessor(QAbstractItemModel *model)
     m_appAccessor = model;
     QObject::connect(m_appAccessor, &QAbstractItemModel::rowsInserted, this, &NotificationSetting::onAppsChanged);
     QObject::connect(m_appAccessor, &QAbstractItemModel::rowsRemoved, this, &NotificationSetting::onAppsChanged);
+    QObject::connect(m_appAccessor, &QObject::destroyed, this, [this](QObject *obj) {
+        if (m_appAccessor == obj)
+            m_appAccessor = nullptr;
+    });
 }
 
 QAbstractItemModel *NotificationSetting::appAccessor() const
@@ -275,6 +279,9 @@ QVariantMap NotificationSetting::appInfo(const QString &id) const
 
 void NotificationSetting::onAppsChanged()
 {
+    if (!m_appAccessor)
+        return;
+
     const auto old = appItems();
     const auto current = appItemsImpl();
 
