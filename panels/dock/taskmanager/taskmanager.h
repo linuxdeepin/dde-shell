@@ -17,6 +17,7 @@
 namespace dock {
 class AppItem;
 class AbstractWindowMonitor;
+class LaunchDurationReporter;
 class TaskManager : public DS_NAMESPACE::DContainment, public AbstractTaskManagerInterface
 {
     Q_OBJECT
@@ -125,6 +126,7 @@ private:
     DockGlobalElementModel *m_dockGlobalElementModel = nullptr;
     DockItemModel *m_itemModel = nullptr;
     HoverPreviewProxyModel *m_hoverPreviewModel = nullptr;
+    LaunchDurationReporter *m_launchDurationReporter = nullptr;
     int queryTrashCount() const;
 };
 
