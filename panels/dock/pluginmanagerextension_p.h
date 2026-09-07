@@ -15,6 +15,7 @@
 #include <QtWaylandCompositor/QWaylandSurface>
 
 #include <cstdint>
+#include <limits>
 
 #include "qwayland-server-fractional-scale-v1.h"
 #include "qwayland-server-plugin-manager-v1.h"
@@ -60,6 +61,7 @@ class PluginManager : public QWaylandCompositorExtensionTemplate<PluginManager>,
     Q_PROPERTY(uint32_t dockPosition READ dockPosition WRITE setDockPosition)
     Q_PROPERTY(uint32_t dockColorTheme READ dockColorTheme WRITE setDockColorTheme)
     Q_PROPERTY(QSize dockSize READ dockSize WRITE setDockSize NOTIFY dockSizeChanged FINAL)
+    Q_PROPERTY(bool fashionMode READ fashionMode WRITE setFashionMode NOTIFY fashionModeChanged FINAL)
 
 public:
     PluginManager(QWaylandCompositor *compositor = nullptr);
@@ -88,6 +90,9 @@ public:
     QSize dockSize() const;
     void setDockSize(const QSize &newDockSize);
 
+    bool fashionMode() const;
+    void setFashionMode(bool newFashionMode);
+
     void removePluginSurface(PluginSurface *plugin);
 
     //处理鼠标焦点给到相应插件
@@ -102,6 +107,7 @@ Q_SIGNALS:
     void pluginSurfaceDestroyed(PluginSurface*);
     void messageRequest(PluginSurface *, const QString &msg);
     void dockSizeChanged();
+    void fashionModeChanged();
     void requestShutdown(const QString &type);
     // Signal emitted when XEmbed window move is requested
     // Parameters: wid (window ID), pluginId, itemKey, dx, dy, anchorWindow (the window containing the plugin item)
@@ -125,6 +131,7 @@ private:
     void sendEventMsg(const QString &msg);
     void sendEventMsg(Resource *target, const QString &msg);
     QString dockSizeMsg() const;
+    QString fashionModeMsg() const;
     QString popupMinHeightMsg() const;
     using PluginSurfaceCallback = std::function<void(Resource *)>;
     void foreachPluginSurface(PluginSurfaceCallback callback);
@@ -141,6 +148,7 @@ private:
     uint32_t m_dockPosition = 0;
     uint32_t m_dockColorTheme = 0;
     QSize m_dockSize;
+    bool m_fashionMode = false;
     int m_popupMinHeight = 0;
     
     // Map of pending XEmbed callbacks: wid -> callback info
@@ -160,6 +168,7 @@ class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public
     Q_PROPERTY(int height READ height NOTIFY heightChanged)
     Q_PROPERTY(int width READ width NOTIFY widthChanged)
     Q_PROPERTY(bool isItemActive WRITE setItemActive READ isItemActive NOTIFY itemActiveChanged)
+    Q_PROPERTY(int cardOrder READ cardOrder NOTIFY cardOrderChanged)
     Q_PROPERTY(QString dccIcon READ dccIcon CONSTANT)
     Q_PROPERTY(int margins READ margins WRITE setMargins NOTIFY marginsChanged FINAL)
     QML_ELEMENT
@@ -195,6 +204,12 @@ public:
     void setItemActive(bool isActive);
     bool isItemActive() const;
 
+    // Sort order of a card surface, reported by the plugin.  Smaller comes
+    // first; cards sharing a value keep the order their surfaces were created
+    // in.  Until a plugin reports its order the card sorts last.
+    int cardOrder() const;
+    void setCardOrder(int order);
+
     Q_INVOKABLE void updatePluginGeometry(const QRect &geometry);
     Q_INVOKABLE void setGlobalPos(const QPoint &pos);
     Q_INVOKABLE void setAnchorWindow(QQuickWindow *window);
@@ -209,6 +224,7 @@ public:
 
 signals:
     void itemActiveChanged();
+    void cardOrderChanged();
     void heightChanged();
     void widthChanged();
     void recvMouseEvent(QEvent::Type type);
@@ -239,6 +255,7 @@ private:
     uint32_t m_sizePolicy;
 
     bool m_isItemActive = false;
+    int m_cardOrder = std::numeric_limits<int>::max();
     int m_margins = 0;
     int m_height;
     int m_width;

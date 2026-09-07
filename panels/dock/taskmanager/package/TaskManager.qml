@@ -14,6 +14,7 @@ ContainmentItem {
     id: taskmanager
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property int dockOrder: 16
+    readonly property bool fashionMode: Panel.fashionMode
 
     Accessible.role: Accessible.Grouping
     Accessible.name: qsTr("Task Manager")
@@ -24,7 +25,9 @@ ContainmentItem {
         return Panel.rootObject.dockRawCenterSpace - otherOccupied;
     }
 
-    readonly property real remainingSpacesForTaskManager: calcRemainingSpace(Panel.rootObject.dockItemMaxSize)
+    property real remainingSpacesForTaskManager: fashionMode
+        ? 0
+        : calcRemainingSpace(Panel.rootObject.dockItemMaxSize)
     readonly property int appTitleSpacing: Math.max(10, Math.round(Panel.rootObject.dockItemMaxSize * 9 / 14) / 3)
     // Start padding for the app container so that the visual gap
     // (multitask icon right edge → first app icon left edge) = appTitleSpacing.
@@ -40,25 +43,32 @@ ContainmentItem {
     readonly property real startPadding: Math.max(0, appTitleSpacing - (Panel.rootObject.dockItemMaxSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2))
 
     implicitWidth: {
-        // In column layout the width is fixed to the dock size, so do not
-        // depend on appContainer.implicitWidth (the delegates read this
-        // implicitWidth back, which would cause a binding loop).
+        // In column layout the width is the cross axis: it is fixed to the dock
+        // size, so do not depend on appContainer.implicitWidth (the delegates
+        // read this implicitWidth back, which would cause a binding loop).
         if (useColumnLayout)
             return Panel.rootObject.dockSize
-        let extra = startPadding
-        let w = appContainer.implicitWidth + extra
+        let w = appContainer.implicitWidth + startPadding
+        // Fashion mode hugs its content instead of filling the dock, and
+        // remainingSpacesForTaskManager is 0 there, so skip the clamping.
+        if (fashionMode)
+            return w
         return Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, w) : Math.min(remainingSpacesForTaskManager, w)
     }
     implicitHeight: {
-        // In row layout the height is fixed to the dock size, so do not
-        // depend on appContainer.implicitHeight (the delegates read this
-        // implicitHeight back, which would cause a binding loop).
+        // In row layout the height is the cross axis: it is fixed to the dock
+        // size, so do not depend on appContainer.implicitHeight (the delegates
+        // read this implicitHeight back, which would cause a binding loop).
         if (!useColumnLayout)
             return Panel.rootObject.dockSize
-        let extra = startPadding
-        let h = appContainer.implicitHeight + extra
+        let h = appContainer.implicitHeight + startPadding
+        // See implicitWidth: fashion mode sizes to its content.
+        if (fashionMode)
+            return h
         return Panel.itemAlignment === Dock.LeftAlignment ? Math.max(remainingSpacesForTaskManager, h) : Math.min(remainingSpacesForTaskManager, h)
     }
+
+    onFashionModeChanged: taskmanager.Applet.setFashionMode(fashionMode)
     // Helper function to find the current index of an app by its appId in the visualModel
     function findAppIndex(appId) {
         for (let i = 0; i < visualModel.items.count; i++) {
@@ -92,7 +102,7 @@ ContainmentItem {
 
     TextCalculator {
         id: textCalculator
-        enabled: taskmanager.Applet.windowSplit && (Panel.position == Dock.Bottom || Panel.position == Dock.Top)
+        enabled: !fashionMode && taskmanager.Applet.windowSplit && (Panel.position == Dock.Bottom || Panel.position == Dock.Top)
         dataModel: taskmanager.Applet.dataModel
         iconSize: Panel.rootObject.dockSize * 9 / 14
         spacing: Math.max(10, Math.round(textCalculator.iconSize) / 3)
@@ -346,6 +356,7 @@ ContainmentItem {
     }
 
     Component.onCompleted: {
+        taskmanager.Applet.setFashionMode(fashionMode)
         Panel.rootObject.dockItemMaxSize = Qt.binding(function(){
             const dockSize = Panel.rootObject.dockSize;
             const appCount = visualModel.count;

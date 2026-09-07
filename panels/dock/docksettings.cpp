@@ -25,9 +25,11 @@ const static QString keyDockSize                = "Dock_Size";
 const static QString keyItemAlignment           = "Item_Alignment";
 const static QString keyIndicatorStyle          = "Indicator_Style";
 const static QString keyPluginsVisible           = "Plugins_Visible";
+const static QString keyCardCurrent              = "cardCurrent";
 const static QString keyShowInPrimary           = "Show_In_Primary";
 const static QString keyLocked                  = "Locked";
 const static QString keyEnableContextMenu       = "enableContextMenu";
+const static QString keyEnableFashionMode       = "enableFashionMode";
 
 namespace dock {
 
@@ -86,6 +88,8 @@ static QString itemAlignment2String(const ItemAlignment& alignment)
             return "left";
         case ItemAlignment::CenterAlignment:
             return "center";
+        case ItemAlignment::FashionAlignment:
+            return "fashion";
     }
 
     return "center";
@@ -112,6 +116,8 @@ static ItemAlignment string2ItenAlignment(const QString& alignmentStr)
         return ItemAlignment::LeftAlignment;
     else if (alignmentStr == "center")
         return ItemAlignment::CenterAlignment;
+    else if (alignmentStr == "fashion")
+        return ItemAlignment::FashionAlignment;
 
     return ItemAlignment::CenterAlignment;
 }
@@ -151,6 +157,7 @@ DockSettings::DockSettings(QObject* parent)
     : QObject(parent)
     , m_dockConfig(DConfig::create("org.deepin.dde.shell", "org.deepin.ds.dock", QString(), this))
     , m_writeTimer(new QTimer(this))
+    , m_cardCurrentWriteTimer(new QTimer(this))
     , m_dockSize(dock::DEFAULT_DOCK_SIZE)
     , m_hideMode(dock::KeepShowing)
     , m_dockPosition(dock::Bottom)
@@ -161,6 +168,13 @@ DockSettings::DockSettings(QObject* parent)
 {
     m_writeTimer->setSingleShot(true);
     m_writeTimer->setInterval(1000);
+    m_cardCurrentWriteTimer->setSingleShot(true);
+    m_cardCurrentWriteTimer->setInterval(1000);
+    connect(m_cardCurrentWriteTimer, &QTimer::timeout, this, [this](){
+        if (m_dockConfig) {
+            m_dockConfig->setValue(keyCardCurrent, m_cardCurrent);
+        }
+    });
     qCInfo(dockSettingsLog) << "EventLogger initialized";
     init();
 }
@@ -174,9 +188,11 @@ void DockSettings::init()
         m_alignment = string2ItenAlignment(m_dockConfig->value(keyItemAlignment).toString());
         m_style = string2IndicatorStyle(m_dockConfig->value(keyIndicatorStyle).toString());
         m_pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
+        m_cardCurrent = m_dockConfig->value(keyCardCurrent).toString();
         m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
         m_locked = m_dockConfig->value(keyLocked).toBool();
         m_contextMenuEnabled = m_dockConfig->value(keyEnableContextMenu, true).toBool();
+        m_fashionModeEnabled = m_dockConfig->value(keyEnableFashionMode, false).toBool();
 
         // Log dock config on startup - merge shell_pos and shell_dock_mode into one log entry
         logDockConfig(m_dockPosition, m_alignment, QStringLiteral("on startup"));
@@ -210,6 +226,13 @@ void DockSettings::init()
             } else if (keyPluginsVisible == key) {
                 auto pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
                 setPluginsVisible(pluginsVisible);
+            } else if (keyCardCurrent == key) {
+                auto cardCurrent = m_dockConfig->value(keyCardCurrent).toString();
+                if (cardCurrent == m_cardCurrent) return;
+                // Set the value directly, going through setCardCurrent() would
+                // write the value we have just read back to the config.
+                m_cardCurrent = cardCurrent;
+                Q_EMIT cardCurrentChanged(m_cardCurrent);
             } else if (keyShowInPrimary == key) {
                 auto showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
                 if (showInPrimary == m_showInPrimary) return;
@@ -225,6 +248,11 @@ void DockSettings::init()
                 if (enabled == m_contextMenuEnabled) return;
                 m_contextMenuEnabled = enabled;
                 Q_EMIT contextMenuEnabledChanged(m_contextMenuEnabled);
+            } else if (keyEnableFashionMode == key) {
+                const auto enabled = m_dockConfig->value(keyEnableFashionMode, false).toBool();
+                if (enabled == m_fashionModeEnabled) return;
+                m_fashionModeEnabled = enabled;
+                Q_EMIT fashionModeEnabledChanged(m_fashionModeEnabled);
             }
         });
     } else {
@@ -319,6 +347,23 @@ void DockSettings::setPluginsVisible(const QVariantMap & pluginsVisible)
     Q_EMIT pluginsVisibleChanged(m_pluginsVisible);
 }
 
+QString DockSettings::cardCurrent() const
+{
+    return m_cardCurrent;
+}
+
+void DockSettings::setCardCurrent(const QString &cardCurrent)
+{
+    if (m_cardCurrent == cardCurrent) {
+        return;
+    }
+
+    m_cardCurrent = cardCurrent;
+    Q_EMIT cardCurrentChanged(m_cardCurrent);
+    // The value changes on every card switch (wheel/swipe), write it lazily.
+    m_cardCurrentWriteTimer->start();
+}
+
 void DockSettings::setShowInPrimary(bool newShowInPrimary)
 {
     if (m_showInPrimary == newShowInPrimary) {
@@ -342,6 +387,11 @@ bool DockSettings::locked() const
 bool DockSettings::contextMenuEnabled() const
 {
     return m_contextMenuEnabled;
+}
+
+bool DockSettings::fashionModeEnabled() const
+{
+    return m_fashionModeEnabled;
 }
 
 void DockSettings::setLocked(bool newLocked)

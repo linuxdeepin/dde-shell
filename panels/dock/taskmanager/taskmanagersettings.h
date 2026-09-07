@@ -28,8 +28,15 @@ public:
 
     bool showAttentionAnimation() const;
 
+    // The DConfig value of "noTaskGrouping" (window split option in control center).
+    bool windowSplitValue() const;
+    // The effective split state: the DConfig value is not applied in fashion mode.
     bool isWindowSplit();
     void setWindowSplit(bool split);
+
+    // Fashion mode (Item_Alignment == "fashion") disables the window split feature.
+    void setFashionMode(bool fashionMode);
+    bool fashionMode() const;
 
     bool cgroupsBasedGrouping() const;
     QStringList cgroupsBasedGroupingSkipIds() const;
@@ -56,6 +63,7 @@ Q_SIGNALS:
     void allowedForceQuitChanged();
     void showAttentionAnimationChanged();
     void windowSplitChanged();
+    void fashionModeChanged();
     void dockedItemsChanged();
     void dockedElementsChanged();
     void dockedApplicationsEnabledChanged(bool enabled);
@@ -66,6 +74,7 @@ private:
     bool m_allowForceQuit;
     bool m_showAttentionAnimation;
     bool m_windowSplit;
+    bool m_fashionMode = false;
     bool m_cgroupsBasedGrouping;
     bool m_dockedApplicationsEnabled;
     QStringList m_dockedElements;

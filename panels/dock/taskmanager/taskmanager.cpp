@@ -153,6 +153,7 @@ TaskManager::TaskManager(QObject *parent)
     connect(Settings, &TaskManagerSettings::allowedForceQuitChanged, this, &TaskManager::allowedForceQuitChanged);
     connect(Settings, &TaskManagerSettings::showAttentionAnimationChanged, this, &TaskManager::showAttentionAnimationChanged);
     connect(Settings, &TaskManagerSettings::windowSplitChanged, this, &TaskManager::windowSplitChanged);
+    connect(Settings, &TaskManagerSettings::fashionModeChanged, this, &TaskManager::fashionModeChanged);
 }
 
 bool TaskManager::load()
@@ -477,6 +478,16 @@ bool TaskManager::RequestUndock(QString appID)
 bool TaskManager::windowSplit()
 {
     return Settings->isWindowSplit();
+}
+
+void TaskManager::setFashionMode(bool fashionMode)
+{
+    Settings->setFashionMode(fashionMode);
+}
+
+bool TaskManager::fashionMode()
+{
+    return Settings->fashionMode();
 }
 
 bool TaskManager::windowFullscreen()

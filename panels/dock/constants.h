@@ -36,6 +36,7 @@ enum IndicatorStyle {
 enum ItemAlignment {
     CenterAlignment      = 0,
     LeftAlignment        = 1,
+    FashionAlignment      = 2,
 };
 
 enum ColorTheme {
@@ -79,6 +80,7 @@ enum TrayPluginType {
     Tray = 1,
     Fixed,
     Quick,
+    Card,
 };
 
 enum TrayPluginSizePolicy {
@@ -108,6 +110,14 @@ const QString MSG_SUPPORT_FLAG_CHANGED = QStringLiteral("supportFlagChanged");
 const QString MSG_ITEM_ACTIVE_STATE = QStringLiteral("itemActiveState");
 
 /**
+ * @brief 插件卡片的排序值；插件在卡片 surface 创建后主动上报给任务栏
+ * 任务栏按该值升序排列卡片，值最小的卡片显示在第一个，值相同则保持创建顺序。
+ * MSG_DATA 类型为 int。任务栏不解释具体数值，也不感知插件 id，
+ * 因此独立发布的插件也能参与排序。
+ */
+const QString MSG_CARD_ORDER = QStringLiteral("cardOrder");
+
+/**
  * @brief 插件请求任务栏更新插件的 tooltips
  * 任务栏收到请求后会主动调用 itemTips() 方法。
  * 一般用于一个插件里面含有多个图标，鼠标 hover 到不同图标上时显示不同 tooltips 的场景。
@@ -134,6 +144,13 @@ enum OverFlowState {
  * 插件根据任务栏size做出大小调整，例如时间日期插件
  */
 const QString MSG_DOCK_PANEL_SIZE_CHANGED = QStringLiteral("dockPanelSizeChanged");
+
+/**
+ * @brief 任务栏是否处于时尚模式；插件 surface 创建时和模式变化时，任务栏主动发给插件
+ * MSG_DATA 类型为 bool。插件可以据此对时尚模式做单独的布局调整，
+ * 例如时间日期插件在时尚模式下把时间和日期并排显示成一行。
+ */
+const QString MSG_DOCK_FASHION_MODE = QStringLiteral("dockFashionMode");
 
 /**
  * @brief 最小弹窗高度，根据快捷面板的高度动态变化

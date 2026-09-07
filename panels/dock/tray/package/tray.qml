@@ -152,6 +152,8 @@ AppletItem {
             return true
         if (DockCompositor.findSurfaceFromModel(DockCompositor.fixedPluginSurfaces, surfaceId))
             return true
+        if (DockCompositor.findSurfaceFromModel(DockCompositor.cardPluginSurfaces, surfaceId))
+            return true
         return false
     }
 
