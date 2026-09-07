@@ -97,7 +97,7 @@ ds_install_package(PACKAGE org.deepin.ds.dock TARGET dockpanel)
 ds_handle_package_translation(PACKAGE org.deepin.ds.dock)
 
 # sub plugins
-#add_subdirectory(cardleft)
+add_subdirectory(cardleft)
 add_subdirectory(showdesktop)
 add_subdirectory(taskmanager)
 add_subdirectory(tray)

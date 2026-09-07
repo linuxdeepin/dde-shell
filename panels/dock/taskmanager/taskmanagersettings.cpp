@@ -96,15 +96,37 @@ bool TaskManagerSettings::showAttentionAnimation() const
     return m_showAttentionAnimation;
 }
 
-bool TaskManagerSettings::isWindowSplit()
+bool TaskManagerSettings::windowSplitValue() const
 {
     return m_windowSplit;
+}
+
+bool TaskManagerSettings::isWindowSplit()
+{
+    // The window split (noTaskGrouping) is not applied in fashion mode.
+    return m_windowSplit && !m_fashionMode;
 }
 
 void TaskManagerSettings::setWindowSplit(bool split)
 {
     m_windowSplit = split;
     m_taskManagerDconfig->setValue(TASKMANAGER_WINDOWSPLIT_KEY, m_windowSplit);
+}
+
+void TaskManagerSettings::setFashionMode(bool fashionMode)
+{
+    if (m_fashionMode == fashionMode)
+        return;
+
+    m_fashionMode = fashionMode;
+    // Notify consumers (models, QML) so the effective split state is re-evaluated.
+    Q_EMIT windowSplitChanged();
+    Q_EMIT fashionModeChanged();
+}
+
+bool TaskManagerSettings::fashionMode() const
+{
+    return m_fashionMode;
 }
 
 bool TaskManagerSettings::cgroupsBasedGrouping() const

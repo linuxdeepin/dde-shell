@@ -253,6 +253,21 @@ bool PluginSurface::isItemActive() const
     return m_isItemActive;
 }
 
+int PluginSurface::cardOrder() const
+{
+    return m_cardOrder;
+}
+
+void PluginSurface::setCardOrder(int order)
+{
+    if (m_cardOrder == order) {
+        return;
+    }
+
+    m_cardOrder = order;
+    Q_EMIT cardOrderChanged();
+}
+
 void PluginSurface::updatePluginGeometry(const QRect &geometry)
 {
     m_itemPosition = geometry.topLeft();
@@ -652,6 +667,9 @@ void PluginManager::plugin_manager_v1_request_message(Resource *resource, const 
         // todo
     } else if (msgType == dock::MSG_ITEM_ACTIVE_STATE) {
         dstPlugin->setItemActive(rootObj.value(dock::MSG_DATA).toBool());
+    } else if (msgType == dock::MSG_CARD_ORDER) {
+        dstPlugin->setCardOrder(rootObj.value(dock::MSG_DATA)
+                                    .toInt(std::numeric_limits<int>::max()));
     } else if (msgType == dock::MSG_UPDATE_TOOLTIPS_VISIBLE) {
 
     }
@@ -676,6 +694,7 @@ void PluginManager::plugin_manager_v1_create_plugin(Resource *resource, const QS
     Q_EMIT pluginSurfaceCreated(plugin);
 
     sendEventMsg(resource, dockSizeMsg());
+    sendEventMsg(resource, fashionModeMsg());
     sendEventMsg(resource, popupMinHeightMsg());
 }
 
@@ -808,6 +827,20 @@ void PluginManager::setDockSize(const QSize &newDockSize)
     emit dockSizeChanged();
 }
 
+bool PluginManager::fashionMode() const
+{
+    return m_fashionMode;
+}
+
+void PluginManager::setFashionMode(bool newFashionMode)
+{
+    if (m_fashionMode == newFashionMode)
+        return;
+    m_fashionMode = newFashionMode;
+    sendEventMsg(fashionModeMsg());
+    emit fashionModeChanged();
+}
+
 void PluginManager::removePluginSurface(PluginSurface *plugin)
 {
     Q_EMIT pluginSurfaceDestroyed(plugin);
@@ -870,6 +903,14 @@ QString PluginManager::dockSizeMsg() const
     QJsonObject obj;
     obj[dock::MSG_TYPE] = dock::MSG_DOCK_PANEL_SIZE_CHANGED;
     obj[dock::MSG_DATA] = sizeData;
+    return toJson(obj);
+}
+
+QString PluginManager::fashionModeMsg() const
+{
+    QJsonObject obj;
+    obj[dock::MSG_TYPE] = dock::MSG_DOCK_FASHION_MODE;
+    obj[dock::MSG_DATA] = m_fashionMode;
     return toJson(obj);
 }
 

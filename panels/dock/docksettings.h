@@ -26,9 +26,11 @@ class DockSettings : public QObject
     Q_PROPERTY(ItemAlignment itemAlignment READ itemAlignment WRITE setItemAlignment NOTIFY itemAlignmentChanged FINAL)
     Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
     Q_PROPERTY(QVariantMap pluginsVisible READ pluginsVisible WRITE setPluginsVisible NOTIFY pluginsVisibleChanged FINAL)
+    Q_PROPERTY(QString cardCurrent READ cardCurrent WRITE setCardCurrent NOTIFY cardCurrentChanged FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
     Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
     Q_PROPERTY(bool contextMenuEnabled READ contextMenuEnabled NOTIFY contextMenuEnabledChanged FINAL)
+    Q_PROPERTY(bool fashionModeEnabled READ fashionModeEnabled NOTIFY fashionModeEnabledChanged FINAL)
 
 public:
     static DockSettings* instance();
@@ -39,9 +41,12 @@ public:
     ItemAlignment itemAlignment();
     IndicatorStyle indicatorStyle();
     QVariantMap pluginsVisible();
+    QString cardCurrent() const;
     bool showInPrimary() const;
     bool locked() const;
     bool contextMenuEnabled() const;
+    // 时尚模式是否允许开启，由 DConfig 的 enableFashionMode 控制，默认关闭
+    bool fashionModeEnabled() const;
 
     void setDockSize(const uint& size);
     void setHideMode(const HideMode& mode);
@@ -49,6 +54,7 @@ public:
     void setItemAlignment(const ItemAlignment& alignment);
     void setIndicatorStyle(const IndicatorStyle& style);
     void setPluginsVisible(const QVariantMap & pluginsVisible);
+    void setCardCurrent(const QString &cardCurrent);
     void setShowInPrimary(bool newShowInPrimary);
     void setLocked(bool newLocked);
 
@@ -75,14 +81,19 @@ Q_SIGNALS:
     void itemAlignmentChanged(ItemAlignment alignment);
     void indicatorStyleChanged(IndicatorStyle style);
     void pluginsVisibleChanged(const QVariantMap &pluginsVisible);
+    void cardCurrentChanged(const QString &cardCurrent);
 
     void showInPrimaryChanged(bool showInPrimary);
     void lockedChanged(bool locked);
     void contextMenuEnabledChanged(bool enabled);
+    void fashionModeEnabledChanged(bool enabled);
 
 private:
     QScopedPointer<DConfig> m_dockConfig;
     QTimer* m_writeTimer;
+    // The current card changes on every wheel/swipe event, debounce the writes
+    // separately so they cannot delay the other settings in m_writeJob.
+    QTimer* m_cardCurrentWriteTimer;
     QList<WriteJob> m_writeJob;
 
     uint m_dockSize;
@@ -91,8 +102,10 @@ private:
     ItemAlignment m_alignment;
     IndicatorStyle m_style;
     QVariantMap m_pluginsVisible;
+    QString m_cardCurrent;
     bool m_showInPrimary;
     bool m_locked;
     bool m_contextMenuEnabled;
+    bool m_fashionModeEnabled = false;
 };
 }

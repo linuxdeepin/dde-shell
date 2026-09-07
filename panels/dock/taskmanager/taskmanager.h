@@ -26,6 +26,7 @@ class TaskManager : public DS_NAMESPACE::DContainment, public AbstractTaskManage
     Q_PROPERTY(bool windowFullscreen READ windowFullscreen NOTIFY windowFullscreenChanged)
     Q_PROPERTY(bool allowForceQuit READ allowForceQuit NOTIFY allowedForceQuitChanged)
     Q_PROPERTY(bool showAttentionAnimation READ showAttentionAnimation NOTIFY showAttentionAnimationChanged)
+    Q_PROPERTY(bool fashionMode READ fashionMode NOTIFY fashionModeChanged)
 
 public:
     enum Roles {
@@ -80,6 +81,9 @@ public:
     bool windowFullscreen();
     bool allowForceQuit();
     bool showAttentionAnimation();
+    // Synced from QML (Panel.fashionMode); the window split is not applied in fashion mode.
+    Q_INVOKABLE void setFashionMode(bool fashionMode);
+    bool fashionMode();
 
     Q_INVOKABLE void requestActivate(const QModelIndex &index) const override;
     Q_INVOKABLE void requestNewInstance(const QModelIndex &index, const QString &action = QString()) const override;
@@ -113,6 +117,7 @@ Q_SIGNALS:
     void windowFullscreenChanged(bool);
     void allowedForceQuitChanged();
     void showAttentionAnimationChanged();
+    void fashionModeChanged();
 
 private Q_SLOTS:
     void handleWindowAdded(QPointer<AbstractWindow> window);

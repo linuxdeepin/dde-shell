@@ -19,13 +19,47 @@ Window {
     id: dock
     property int positionForAnimation: Panel.position
     property bool useColumnLayout: positionForAnimation % 2
-    property int dockCenterPartCount: dockCenterPartModel.count
 
+    property alias fashionDock: fashionDockState
+
+    QtObject {
+        id: fashionDockState
+
+        readonly property bool enabled: !dock.useColumnLayout
+            && Panel.itemAlignment === Dock.FashionAlignment
+            && (dock.positionForAnimation === Dock.Bottom || dock.positionForAnimation === Dock.Top)
+        readonly property int floatingMargin: 8
+        readonly property int backgroundRadius: {
+            const verticalPadding = Math.max(6, Math.round(dock.dockSize * 0.16))
+            return Math.round((dock.dockSize + verticalPadding * 2) / 4)
+        }
+        readonly property real contentWidth: {
+            if (!enabled) {
+                return 0
+            }
+
+            let width = gridLayout.implicitWidth
+            if (dockRightPart.visible) {
+                if (width > 0) {
+                    width += gridLayout.columnSpacing
+                }
+                width += dockRightPart.implicitWidth
+            }
+            return width
+        }
+    }
+    property int dockCenterPartCount: dockCenterPartModel.count
     readonly property int dockRawCenterSpace: {
         if (useColumnLayout) {
             return Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight;
         } else {
-            return Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth;
+            let space = Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth;
+            if (fashionDock.enabled && gridLayout) {
+                // 时尚模式下，dockRightPart 在 gridLayout 右侧，之间需要扣除 dockSpacing
+                // 同时保留左右悬浮间距，避免窗口铺满屏幕后圆角边框被屏幕边缘裁剪。
+                space -= Math.ceil(gridLayout.columnSpacing) * 2 + fashionDock.floatingMargin * 2;
+            }
+            return Math.max(0, space);
         }
     }
 
@@ -45,7 +79,14 @@ Window {
     property real dockItemIconSize: dockItemMaxSize * 9 / 14
 
     // NOTE: -1 means not set its size, follow the platform size
-    width: positionForAnimation === Dock.Top || positionForAnimation === Dock.Bottom ? -1 : dockSize
+    width: {
+        if (fashionDock.enabled) {
+            const maximumWidth = Math.max(1, Screen.width - fashionDock.floatingMargin * 2)
+            return Math.max(1, Math.round(Math.min(fashionDock.contentWidth, maximumWidth)))
+        }
+
+        return positionForAnimation === Dock.Top || positionForAnimation === Dock.Bottom ? -1 : dockSize
+    }
     height: positionForAnimation === Dock.Left || positionForAnimation === Dock.Right ? -1 : dockSize
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
@@ -68,14 +109,25 @@ Window {
         MenuHelper.openMenu(dockMenuLoader.item)
     }
 
-    DLayerShellWindow.anchors: position2Anchors(positionForAnimation)
+    DLayerShellWindow.anchors: fashionDock.enabled
+        ? (positionForAnimation === Dock.Top ? DLayerShellWindow.AnchorTop : DLayerShellWindow.AnchorBottom)
+        : position2Anchors(positionForAnimation)
+    DLayerShellWindow.topMargin: fashionDock.enabled && positionForAnimation === Dock.Top
+        ? fashionDock.floatingMargin
+        : 0
+
+    DLayerShellWindow.bottomMargin: fashionDock.enabled && positionForAnimation === Dock.Bottom
+        ? fashionDock.floatingMargin
+        : 0
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
-    DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing ? Applet.dockSize : 0
+    DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing
+        ? Applet.dockSize + (fashionDock.enabled ? fashionDock.floatingMargin : 0)
+        : 0
     DLayerShellWindow.scope: "dde-shell/dock"
     DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityNone
 
     D.DWindow.enabled: true
-    D.DWindow.windowRadius: 0
+    D.DWindow.windowRadius: fashionDock.enabled ? fashionDock.backgroundRadius : 0
     //TODO：由于windoweffect处理有BUG，导致动画结束后一致保持无阴影，无borderwidth状态。 无法恢复到最初的阴影和边框
     //D.DWindow.windowEffect: hideShowAnimation.running ? D.PlatformHandle.EffectNoShadow | D.PlatformHandle.EffectNoBorder : 0
     
@@ -91,11 +143,20 @@ Window {
     D.DWindow.borderColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, dock.blendColorAlpha(0.6) + 20 / 255) : Qt.rgba(0, 0, 0, 0.15)
     D.ColorSelector.family: D.Palette.CrystalColor
 
+    // 指示器样式只跟任务栏尺寸相关，三种模式保持一致：
+    // 拉到最小尺寸时用高效模式的指示器（应用图标带背景），其他尺寸用时尚模式的圆点指示器。
     onDockSizeChanged: {
         if (dock.dockSize === Dock.MIN_DOCK_SIZE) {
             Panel.indicatorStyle = Dock.Efficient
         } else {
             Panel.indicatorStyle = Dock.Fashion
+        }
+    }
+    Behavior on width {
+        enabled: fashionDock.enabled && !dock.isDragging
+        NumberAnimation {
+            duration: 200
+            easing.type: Easing.OutQuad
         }
     }
 
@@ -108,7 +169,7 @@ Window {
     PropertyAnimation {
         id: hideShowAnimation;
         // Currently, Wayland (Treeland) doesn't support StyledBehindWindowBlur inside the window, thus we keep using the window size approach on Wayland
-        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
+        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb" && !fashionDock.enabled
         property bool hiding: false
         target: useTransformBasedAnimation ? dockTransform : dock;
         property: {
@@ -136,7 +197,7 @@ Window {
 
     Connections {
         target: dockTransform
-        enabled: Qt.platform.pluginName === "xcb" && hideShowAnimation.running
+        enabled: hideShowAnimation.useTransformBasedAnimation && hideShowAnimation.running
         
         function onXChanged() {
             if (dock.useColumnLayout) {
@@ -153,7 +214,7 @@ Window {
 
     Connections {
         target: dock
-        enabled: Qt.platform.pluginName !== "xcb" && hideShowAnimation.running
+        enabled: !hideShowAnimation.useTransformBasedAnimation && hideShowAnimation.running
         
         function onWidthChanged() {
             if (dock.useColumnLayout) {
@@ -181,7 +242,7 @@ Window {
 
     SequentialAnimation {
         id: dockAnimation
-        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
+        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb" && !fashionDock.enabled
         property bool isShowing: false
         property bool isPositionChanging: false
         property var target: useTransformBasedAnimation ? dockTransform : dock
@@ -326,9 +387,18 @@ Window {
                     prop: "itemAlignment"
                     value: Dock.CenterAlignment
                 }
+                EnumPropertyMenuItem {
+                    name: qsTr("Fashion Mode")
+                    prop: "itemAlignment"
+                    value: Dock.FashionAlignment
+                    // 时尚模式尚未放开，由 DConfig 的 enableFashionMode 控制入口是否显示
+                    visible: Panel.fashionModeEnabled
+                }
             }
             MutuallyExclusiveMenu {
                 title: qsTr("Position")
+                // Fashion mode only allows top/bottom. Hide the left/right items
+                // from the context menu so the user can only pick supported edges.
                 EnumPropertyMenuItem {
                     name: qsTr("Top")
                     prop: "position"
@@ -343,11 +413,13 @@ Window {
                     name: qsTr("Left")
                     prop: "position"
                     value: Dock.Left
+                    visible: !fashionDock.enabled
                 }
                 EnumPropertyMenuItem {
                     name: qsTr("Right")
                     prop: "position"
                     value: Dock.Right
+                    visible: !fashionDock.enabled
                 }
             }
             MutuallyExclusiveMenu {
@@ -414,7 +486,7 @@ Window {
         D.StyledBehindWindowBlur {
             control: parent
             anchors.fill: parent
-            cornerRadius: 0
+            cornerRadius: fashionDock.enabled ? fashionDock.backgroundRadius : 0
             blendColor: {
                 if (valid) {
                     return DStyle.Style.control.selectColor(undefined,
@@ -500,7 +572,7 @@ Window {
         //此处为边距区域的点击实践特殊处理。
         MouseArea {                                                                                                                                     
             id: leftMarginArea                                                                                                                          
-            width: useColumnLayout ? parent.width : gridLayout.columnSpacing                                                                            
+            width: useColumnLayout ? parent.width : (fashionDock.enabled ? 0 : gridLayout.columnSpacing)
             height: useColumnLayout ? gridLayout.rowSpacing : parent.height                                                                             
             anchors.left: parent.left
             anchors.top: parent.top
@@ -519,16 +591,24 @@ Window {
         // TODO: remove GridLayout and use delegatechosser manager all items
         GridLayout {
             id: gridLayout
-            anchors.fill: parent
+            anchors {
+                fill: parent
+                rightMargin: fashionDock.enabled && dockRightPart.visible
+                    ? dockRightPart.implicitWidth + Math.ceil(gridLayout.columnSpacing)
+                    : 0
+            }
             columns: 1
             rows: 1
             flow: useColumnLayout ? GridLayout.LeftToRight : GridLayout.TopToBottom
             property real itemMargin: Math.max((dockItemIconSize / 48 * 10))
-            columnSpacing: dockLeftPartModel.count > 0 ? 10 : itemMargin
+            columnSpacing: fashionDock.enabled
+                ? dockItemIconSize
+                : (dockLeftPartModel.count > 0 ? 10 : itemMargin)
             rowSpacing: columnSpacing
 
             Item {
                 id: leftMargin
+                visible: !fashionDock.enabled
                 implicitWidth: 0
                 implicitHeight: 0
             }
@@ -562,8 +642,13 @@ Window {
                 Layout.maximumHeight: useColumnLayout ? dockRawCenterSpace : -1
                 onXChanged: dockCenterPartPosChanged()
                 onYChanged: dockCenterPartPosChanged()
-                Layout.leftMargin: !useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
-                    Math.max(0, (dock.width - dockCenterPart.implicitWidth) / 2 - (dockLeftPart.implicitWidth + 20) + Math.min((dock.width - dockCenterPart.implicitWidth) / 2 - (dockRightPart.implicitWidth + 20), 0)) : 0
+                Layout.leftMargin: {
+                    if (!useColumnLayout && fashionDock.enabled) {
+                        return dockLeftPart.visible ? 0 : Math.max(10, Math.round(dockItemIconSize) / 3)
+                    }
+                    return !useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
+                        Math.max(0, (dock.width - dockCenterPart.implicitWidth) / 2 - (dockLeftPart.implicitWidth + 20) + Math.min((dock.width - dockCenterPart.implicitWidth) / 2 - (dockRightPart.implicitWidth + 20), 0)) : 0
+                }
                 Layout.topMargin: useColumnLayout && Panel.itemAlignment === Dock.CenterAlignment ?
                     Math.max(0, (dock.height - dockCenterPart.implicitHeight) / 2 - (dockLeftPart.implicitHeight + 20) + Math.min((dock.height - dockCenterPart.implicitHeight) / 2 - (dockRightPart.implicitHeight + 20), 0)) : 0
 
@@ -597,8 +682,9 @@ Window {
             }
 
             Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+                Layout.fillWidth: !fashionDock.enabled
+                Layout.fillHeight: !fashionDock.enabled
+                visible: !fashionDock.enabled
             }
         }
 
@@ -879,6 +965,12 @@ Window {
 
         DockCompositor.dockSize = Qt.binding(function(){
             return Qt.size(Panel.frontendWindowRect.width, Panel.frontendWindowRect.height)
+        })
+
+        // 插件需要知道任务栏是否处于时尚模式，例如时间日期插件在时尚模式下
+        // 把时间和日期并排显示成一行
+        DockCompositor.fashionMode = Qt.binding(function(){
+            return Panel.fashionMode
         })
 
         DockCompositor.panelScale = Qt.binding(function(){

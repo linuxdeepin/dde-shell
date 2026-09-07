@@ -30,12 +30,15 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(HideMode hideMode READ hideMode WRITE setHideMode NOTIFY hideModeChanged FINAL)
     Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged FINAL)
     Q_PROPERTY(ItemAlignment itemAlignment READ itemAlignment WRITE setItemAlignment NOTIFY itemAlignmentChanged FINAL)
+    Q_PROPERTY(bool fashionMode READ fashionMode NOTIFY fashionModeChanged FINAL)
     Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
     Q_PROPERTY(QString screenName READ screenName NOTIFY screenNameChanged FINAL)
     Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
     Q_PROPERTY(bool isResizing READ isResizing WRITE setIsResizing NOTIFY isResizingChanged FINAL)
     Q_PROPERTY(bool contextMenuEnabled READ contextMenuEnabled NOTIFY contextMenuEnabledChanged FINAL)
+    Q_PROPERTY(bool fashionModeEnabled READ fashionModeEnabled NOTIFY fashionModeEnabledChanged FINAL)
+    Q_PROPERTY(QString cardCurrent READ cardCurrent WRITE setCardCurrent NOTIFY cardCurrentChanged FINAL)
 
     Q_PROPERTY(qreal devicePixelRatio READ devicePixelRatio NOTIFY devicePixelRatioChanged FINAL)
 
@@ -73,6 +76,14 @@ public:
     ItemAlignment itemAlignment();
     void setItemAlignment(const ItemAlignment& alignment);
 
+    bool fashionMode();
+
+    // The card shown in the card area, kept as "pluginId::itemKey" so it stays
+    // valid across restarts even when the card surfaces show up in a different
+    // order than before.
+    QString cardCurrent() const;
+    void setCardCurrent(const QString &cardCurrent);
+
     IndicatorStyle indicatorStyle();
     void setIndicatorStyle(const IndicatorStyle& style);
 
@@ -95,6 +106,9 @@ public:
     bool locked() const;
     void setLocked(bool newLocked);
     bool contextMenuEnabled() const;
+    // 时尚模式是否允许开启，对应 DConfig 的 enableFashionMode，默认关闭。
+    // 关闭时右键菜单不显示时尚模式入口，已保存的时尚模式也会回退成居中模式。
+    bool fashionModeEnabled() const;
 
     void setHideState(HideState newHideState);
     QScreen* dockScreen();
@@ -129,6 +143,8 @@ Q_SIGNALS:
     void beforePositionChanged(Position beforePosition);
     void positionChanged(Position position);
     void itemAlignmentChanged(ItemAlignment alignment);
+    void fashionModeChanged();
+    void cardCurrentChanged(const QString &cardCurrent);
     void indicatorStyleChanged(IndicatorStyle style);
     void showInPrimaryChanged(bool showInPrimary);
     void dockScreenChanged(QScreen *screen);
@@ -138,6 +154,7 @@ Q_SIGNALS:
     void devicePixelRatioChanged(qreal ratio);
     void lockedChanged(bool locked);
     void contextMenuEnabledChanged(bool enabled);
+    void fashionModeEnabledChanged(bool enabled);
 
     void contextDraggingChanged();
     void isResizingChanged(bool isResizing);

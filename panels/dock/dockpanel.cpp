@@ -61,6 +61,19 @@ bool DockPanel::load()
 
 bool DockPanel::init()
 {
+    // Normalize legacy/hand-edited configurations before exporting the state
+    // to D-Bus or creating the QML panel.
+    if (!SETTINGS->fashionModeEnabled()
+        && SETTINGS->itemAlignment() == ItemAlignment::FashionAlignment) {
+        // 时尚模式没有放开时，已保存的时尚模式回退成居中模式
+        SETTINGS->setItemAlignment(ItemAlignment::CenterAlignment);
+    }
+
+    if (SETTINGS->itemAlignment() == ItemAlignment::FashionAlignment
+        && (SETTINGS->position() == Position::Left || SETTINGS->position() == Position::Right)) {
+        SETTINGS->setPosition(Position::Bottom);
+    }
+
     DockAdaptor* adaptor = new DockAdaptor(this);
     Q_UNUSED(adaptor)
     QDBusConnection::sessionBus().registerService("org.deepin.ds.Dock");
@@ -100,6 +113,7 @@ bool DockPanel::init()
     });
     connect(SETTINGS, &DockSettings::positionChanged, this, [this, dockDaemonAdaptor](){
         Q_EMIT positionChanged(position());
+        Q_EMIT fashionModeChanged();
         Q_EMIT dockDaemonAdaptor->PositionChanged(position());
         Q_EMIT dockDaemonAdaptor->FrontendWindowRectChanged(frontendWindowRect());
 
@@ -117,9 +131,34 @@ bool DockPanel::init()
     connect(SETTINGS, &DockSettings::dockSizeChanged, this, &DockPanel::dockSizeChanged);
     connect(SETTINGS, &DockSettings::hideModeChanged, this, &DockPanel::hideModeChanged);
     connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, &DockPanel::itemAlignmentChanged);
+    connect(SETTINGS, &DockSettings::itemAlignmentChanged, this, [this](){
+        // 时尚模式没有放开时不允许切过去，把对齐方式改回居中
+        if (!fashionModeEnabled() && SETTINGS->itemAlignment() == ItemAlignment::FashionAlignment) {
+            SETTINGS->setItemAlignment(ItemAlignment::CenterAlignment);
+            return;
+        }
+
+        // Fashion mode only supports top/bottom positions. If the dock is
+        // currently on the left/right edge when the user switches to fashion
+        // mode, snap it to bottom so the layout stays valid and the value
+        // persisted for the control center is consistent.
+        if (SETTINGS->itemAlignment() == ItemAlignment::FashionAlignment
+            && (position() == Position::Left || position() == Position::Right)) {
+            setPosition(Position::Bottom);
+        }
+        Q_EMIT fashionModeChanged();
+    });
     connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
     connect(SETTINGS, &DockSettings::lockedChanged, this, &DockPanel::lockedChanged);
     connect(SETTINGS, &DockSettings::contextMenuEnabledChanged, this, &DockPanel::contextMenuEnabledChanged);
+    connect(SETTINGS, &DockSettings::fashionModeEnabledChanged, this, [this](bool enabled){
+        // 开关被关掉时，正处于时尚模式的任务栏要回退成居中模式
+        if (!enabled && SETTINGS->itemAlignment() == ItemAlignment::FashionAlignment) {
+            SETTINGS->setItemAlignment(ItemAlignment::CenterAlignment);
+        }
+        Q_EMIT fashionModeEnabledChanged(enabled);
+    });
+    connect(SETTINGS, &DockSettings::cardCurrentChanged, this, &DockPanel::cardCurrentChanged);
 
     connect(SETTINGS, &DockSettings::dockSizeChanged, this, [this, dockDaemonAdaptor](){
         Q_EMIT dockDaemonAdaptor->WindowSizeEfficientChanged(dockSize());
@@ -299,6 +338,23 @@ void DockPanel::setItemAlignment(const ItemAlignment& alignment)
     SETTINGS->setItemAlignment(alignment);
 }
 
+bool DockPanel::fashionMode()
+{
+    const auto dockPosition = position();
+    return itemAlignment() == FashionAlignment
+        && (dockPosition == Top || dockPosition == Bottom);
+}
+
+QString DockPanel::cardCurrent() const
+{
+    return SETTINGS->cardCurrent();
+}
+
+void DockPanel::setCardCurrent(const QString &cardCurrent)
+{
+    SETTINGS->setCardCurrent(cardCurrent);
+}
+
 IndicatorStyle DockPanel::indicatorStyle()
 {
     return SETTINGS->indicatorStyle();
@@ -429,6 +485,11 @@ bool DockPanel::locked() const
 bool DockPanel::contextMenuEnabled() const
 {
     return SETTINGS->contextMenuEnabled();
+}
+
+bool DockPanel::fashionModeEnabled() const
+{
+    return SETTINGS->fashionModeEnabled();
 }
 
 void DockPanel::setLocked(bool newLocked)
