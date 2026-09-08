@@ -487,9 +487,9 @@ PluginManager::PluginManager(QWaylandCompositor *compositor)
     m_themeNotifyTimer->setSingleShot(true);
     m_themeNotifyTimer->setInterval(0);
     connect(m_themeNotifyTimer, &QTimer::timeout, this, [this]() {
-        foreachPluginSurface([this](Resource *source) {
+        auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+        foreachPluginSurface([this, theme](Resource *source) {
             send_color_theme_changed(source->handle, m_dockColorTheme);
-            auto theme = DGuiApplicationHelper::instance()->applicationTheme();
             send_theme_changed(source->handle, theme->themeName(), theme->iconThemeName());
             send_active_color_changed(source->handle, theme->activeColor().name(), theme->darkActiveColor().name());
         });
