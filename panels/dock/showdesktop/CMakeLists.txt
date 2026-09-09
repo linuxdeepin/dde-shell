@@ -4,19 +4,19 @@
 
 find_package(PkgConfig REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} COMPONENTS WaylandClient)
-find_package(TreelandProtocols REQUIRED)
+find_package(TreelandProtocols 0.6.0 REQUIRED)
 pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
 
 add_library(dock-showdesktop SHARED
     showdesktop.cpp
     showdesktop.h
-    treelandwindowmanager.cpp
-    treelandwindowmanager.h
+    treelandshowdesktop.cpp
+    treelandshowdesktop.h
 )
 
 qt_generate_wayland_protocol_client_sources(dock-showdesktop
     FILES
-        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-window-management-v1.xml
+        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-show-desktop-unstable-v1.xml
 )
 
 target_link_libraries(dock-showdesktop PRIVATE
