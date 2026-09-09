@@ -1,11 +1,11 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "showdesktop.h"
 #include "applet.h"
 #include "pluginfactory.h"
-#include "treelandwindowmanager.h"
+#include "treelandshowdesktop.h"
 
 #include <QProcess>
 #include <QGuiApplication>
@@ -22,7 +22,7 @@ namespace dock {
 
 ShowDesktop::ShowDesktop(QObject *parent)
     : DApplet(parent)
-    , m_windowManager(nullptr)
+    , m_showDesktop(nullptr)
     , m_dockConfig(nullptr)
     , m_visible(true)
 {
@@ -47,7 +47,7 @@ bool ShowDesktop::load()
 bool ShowDesktop::init()
 {
     if (QStringLiteral("wayland") == QGuiApplication::platformName()) {
-        m_windowManager = new TreelandWindowManager(this);
+        m_showDesktop = new TreelandShowDesktop(this);
     }
     
     // 从配置中读取初始的可见性状态
@@ -61,8 +61,8 @@ bool ShowDesktop::init()
 
 void ShowDesktop::toggleShowDesktop()
 {
-    if (m_windowManager) {
-        m_windowManager->desktopToggle();
+    if (m_showDesktop) {
+        m_showDesktop->desktopToggle();
         return;
     }
 
