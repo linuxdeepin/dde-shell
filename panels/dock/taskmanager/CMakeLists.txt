@@ -90,7 +90,7 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
 
 qt_generate_wayland_protocol_client_sources(dock-taskmanager
     FILES
-        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-foreign-toplevel-manager-v1.xml
+        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-foreign-toplevel-manager-unstable-v2.xml
         ${WaylandProtocols_DATADIR}/staging/ext-foreign-toplevel-list/ext-foreign-toplevel-list-v1.xml
 )
 

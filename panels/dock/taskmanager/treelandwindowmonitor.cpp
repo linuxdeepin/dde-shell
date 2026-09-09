@@ -19,18 +19,18 @@
 
 namespace dock {
 ForeignToplevelManager::ForeignToplevelManager(TreeLandWindowMonitor* monitor)
-    : QWaylandClientExtensionTemplate<ForeignToplevelManager>(2)
+    : QWaylandClientExtensionTemplate<ForeignToplevelManager, &QtWayland::treeland_foreign_toplevel_manager_v2::destroy>(1)
     , m_monitor(monitor)
 {
 }
 
-void ForeignToplevelManager::treeland_foreign_toplevel_manager_v1_toplevel(struct ::treeland_foreign_toplevel_handle_v1 *toplevel)
+void ForeignToplevelManager::treeland_foreign_toplevel_manager_v2_toplevel(struct ::treeland_foreign_toplevel_handle_v2 *toplevel)
 {
     ForeignToplevelHandle* handle = new ForeignToplevelHandle(toplevel);
     connect(handle, &ForeignToplevelHandle::handlerIsReady, m_monitor, &TreeLandWindowMonitor::handleForeignToplevelHandleAdded, Qt::UniqueConnection);
 }
 
-TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v1 *context)
+TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v2 *context)
     : QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>(1)
     , m_isPreviewEntered(false)
     , m_isDockMouseAreaEnter(false)
@@ -66,12 +66,12 @@ void TreeLandDockPreviewContext::hideWindowsPreview()
     m_hideTimer->start();
 }
 
-void TreeLandDockPreviewContext::treeland_dock_preview_context_v1_enter()
+void TreeLandDockPreviewContext::treeland_dock_preview_context_v2_enter()
 {
     m_isPreviewEntered = true;
 }
 
-void TreeLandDockPreviewContext::treeland_dock_preview_context_v1_leave()
+void TreeLandDockPreviewContext::treeland_dock_preview_context_v2_leave()
 {
     m_isPreviewEntered = false;
     m_hideTimer->start();
