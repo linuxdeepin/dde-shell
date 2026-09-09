@@ -215,10 +215,10 @@ Item {
                         switch (Panel.position) {
                         case Dock.Top:
                         case Dock.Bottom:
-                            return (root.height - icon.height) / 2
+                            return hoverBackground.verticalSpacing
                         case Dock.Left:
                         case Dock.Right:
-                            return (root.width - icon.width) / 2
+                            return hoverBackground.horizontalSpacing
                         }
                     }
 
