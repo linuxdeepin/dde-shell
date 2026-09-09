@@ -4,10 +4,12 @@
 
 #pragma once
 
-#include "qwayland-treeland-output-manager-v1.h"
+#include "qwayland-treeland-output-manager-unstable-v2.h"
 #include <QtWaylandClient/QWaylandClientExtension>
 
-class TreelandOutputWatcher : public QWaylandClientExtensionTemplate<TreelandOutputWatcher>, public QtWayland::treeland_output_manager_v1
+struct wl_output;
+
+class TreelandOutputWatcher : public QWaylandClientExtensionTemplate<TreelandOutputWatcher>, public QtWayland::treeland_output_manager_v2
 {
     Q_OBJECT
 public:
@@ -15,5 +17,5 @@ public:
     ~TreelandOutputWatcher();
 
 protected:
-    void treeland_output_manager_v1_primary_output(const QString &output_name) override;
+    void treeland_output_manager_v2_primary_output(struct ::wl_output *output) override;
 };
