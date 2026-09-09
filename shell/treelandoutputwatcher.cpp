@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "treelandoutputwatcher.h"
-#include "wayland-treeland-output-manager-v1-client-protocol.h"
+#include "wayland-treeland-output-manager-unstable-v2-client-protocol.h"
 
 #include <QGuiApplication>
 #include <QScreen>
@@ -11,7 +11,7 @@
 #include <qpa/qwindowsysteminterface.h>
 
 TreelandOutputWatcher::TreelandOutputWatcher(QObject *parent)
-    : QWaylandClientExtensionTemplate<TreelandOutputWatcher>(treeland_output_manager_v1_interface.version)
+    : QWaylandClientExtensionTemplate<TreelandOutputWatcher>(treeland_output_manager_v2_interface.version)
 {
     setParent(parent);
 }
@@ -21,13 +21,14 @@ TreelandOutputWatcher::~TreelandOutputWatcher()
     destroy();
 }
 
-void TreelandOutputWatcher::treeland_output_manager_v1_primary_output(const QString &output_name)
+void TreelandOutputWatcher::treeland_output_manager_v2_primary_output(struct ::wl_output *output)
 {
-    if (qApp->primaryScreen()->name() == output_name)
+    if (!output)
         return;
 
     for (auto screen : qApp->screens()) {
-        if (screen->name() == output_name) {
+        auto *waylandScreen = screen->nativeInterface<QNativeInterface::QWaylandScreen>();
+        if (waylandScreen && waylandScreen->output() == output) {
             QWindowSystemInterface::handlePrimaryScreenChanged(screen->handle());
             return;
         }
