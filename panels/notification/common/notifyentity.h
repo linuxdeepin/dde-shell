@@ -81,6 +81,10 @@ public:
     void setReplacesId(uint replacesId);
     bool isReplace() const;
 
+    // Expire timeout in milliseconds passed in by the client (-1 means server default).
+    int timeout() const;
+    int urgency() const;
+
     qint64 cTime() const;
     void setCTime(qint64 cTime);
 

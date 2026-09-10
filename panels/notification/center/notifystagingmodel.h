@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -64,6 +64,7 @@ private:
     void remove(qint64 id);
     void updateTime();
     NotifyEntity notifyById(qint64 id) const;
+    int rowByBubbleId(uint bubbleId) const;
 
 private:
     QList<AppNotifyItem *> m_appNotifies;

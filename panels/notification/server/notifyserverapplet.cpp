@@ -5,6 +5,7 @@
 #include "notifyserverapplet.h"
 #include "notificationmanager.h"
 #include "dbusadaptor.h"
+#include "expiretimer.h"
 #include "pluginfactory.h"
 
 #include <QThread>
@@ -56,6 +57,25 @@ bool NotifyServerApplet::init()
 
     connect(m_manager, &NotificationManager::NotificationStateChanged, this, &NotifyServerApplet::notificationStateChanged);
 
+    // The server is the single owner of a notification's lifecycle: once it
+    // closes or archives a notification (Processed/Removed), stop its countdown
+    // here instead of letting each frontend view call ExpireTimer::remove on
+    // its own. remove() by id is a no-op when the entry already expired on its
+    // own (its deadline was dropped when expired() was emitted).
+    connect(m_manager, &NotificationManager::NotificationStateChanged, this, [](qint64 id, int processedType) {
+        if (processedType == NotifyEntity::Processed || processedType == NotifyEntity::Removed)
+            ExpireTimer::instance()->remove(id);
+    }, Qt::QueuedConnection);
+
+    // ExpireTimer tracks the countdown of every shown notification (bubble and
+    // staging area). When a deadline passes, this is the single place that tells
+    // the server to close the notification; the frontend views only react to the
+    // resulting NotificationStateChanged instead of closing on their own.
+    connect(ExpireTimer::instance(), &ExpireTimer::expired, this, [this](qint64 id, uint bubbleId) {
+        QMetaObject::invokeMethod(m_manager, "notificationClosed", Qt::QueuedConnection,
+                                  Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(uint, NotifyEntity::Expired));
+    });
+
     removeExpiredNotifications();
 
     m_worker = new QThread();
@@ -76,7 +96,8 @@ void NotifyServerApplet::actionInvoked(qint64 id, const QString &actionKey)
 
 void NotifyServerApplet::notificationClosed(qint64 id, uint bubbleId, uint reason)
 {
-    QMetaObject::invokeMethod(m_manager, "notificationClosed", Qt::DirectConnection, Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(uint, reason));
+    // The manager lives on the worker thread, so deliver the close to it there.
+    QMetaObject::invokeMethod(m_manager, "notificationClosed", Qt::QueuedConnection, Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(uint, reason));
 }
 
 QVariant NotifyServerApplet::appValue(const QString &appId, int configItem)
@@ -102,11 +123,6 @@ void NotifyServerApplet::removeNotifications()
 void NotifyServerApplet::removeExpiredNotifications()
 {
     m_manager->removeExpiredNotifications();
-}
-
-void NotifyServerApplet::setBlockClosedId(qint64 id)
-{
-    m_manager->setBlockClosedId(id);
 }
 
 D_APPLET_CLASS(NotifyServerApplet)
