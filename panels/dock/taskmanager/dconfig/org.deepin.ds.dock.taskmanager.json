@@ -35,14 +35,14 @@
 		},
 		"noTaskGrouping": {
 			"value": false,
-			"serial": 0,
+			"serial": 1,
 			"flags": [],
 			"name": "No Task-Grouping",
 			"name[zh_CN]": "禁用任务分组",
 			"description": "Disable Taskbar Icon Grouping by Application",
 			"description[zh_CN]": "禁用任务栏图标按应用分组",
 			"permissions": "readwrite",
-			"visibility": "private"
+			"visibility": "public"
 		},
 		"cgroupsBasedGrouping": {
 			"value": true,
