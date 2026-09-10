@@ -56,6 +56,17 @@ enum Position {
     Left    = 3,
 };
 
+enum ResizeEdge {
+    ResizeEdgeTop = 1,
+    ResizeEdgeBottom = 2,
+    ResizeEdgeLeft = 4,
+    ResizeEdgeTopLeft = 5,
+    ResizeEdgeBottomLeft = 6,
+    ResizeEdgeRight = 8,
+    ResizeEdgeTopRight = 9,
+    ResizeEdgeBottomRight = 10,
+};
+
 enum HideState {
     Unknown     = 0,
     Show        = 1,
@@ -151,6 +162,7 @@ Q_ENUM_NS(ItemAlignment)
 Q_ENUM_NS(ColorTheme)
 Q_ENUM_NS(HideMode)
 Q_ENUM_NS(Position)
+Q_ENUM_NS(ResizeEdge)
 Q_ENUM_NS(HideState)
 Q_ENUM_NS(AniAction)
 Q_ENUM_NS(TrayPopupType)
@@ -165,6 +177,7 @@ Q_DECLARE_METATYPE(dock::ItemAlignment)
 Q_DECLARE_METATYPE(dock::ColorTheme)
 Q_DECLARE_METATYPE(dock::HideMode)
 Q_DECLARE_METATYPE(dock::HideState)
+Q_DECLARE_METATYPE(dock::ResizeEdge)
 Q_DECLARE_METATYPE(dock::AniAction)
 Q_DECLARE_METATYPE(dock::Position)
 Q_DECLARE_METATYPE(dock::TrayPopupType)

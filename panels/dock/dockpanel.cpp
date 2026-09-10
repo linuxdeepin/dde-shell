@@ -6,6 +6,7 @@
 #include "constants.h"
 #include "dockadaptor.h"
 #include "docksettings.h"
+#include "layershellextension.h"
 #include "panel.h"
 #include "pluginfactory.h"
 #include "waylanddockhelper.h"
@@ -25,6 +26,10 @@
 #include <QQuickWindow>
 
 #include <wayland/xdgactivation.h>
+
+#include <QtWaylandClient/private/qwaylanddisplay_p.h>
+#include <QtWaylandClient/private/qwaylandinputdevice_p.h>
+#include <QtWaylandClient/private/qwaylandwindow_p.h>
 
 #ifdef HAVE_DDE_API_EVENTLOGGER
 #include <dde-api/eventlogger.hpp>
@@ -167,6 +172,7 @@ bool DockPanel::init()
         m_helper = new WaylandDockHelper(this);
         connect(static_cast<WaylandDockHelper *>(m_helper), &WaylandDockHelper::xembedWindowMoveResult,
                 this, &DockPanel::xembedWindowMoveResult);
+        m_dockShellExtensionManager.reset(new TreeLandLayerShellExtensionManager());
         // Fallback to DGuiApplicationHelper for theme color when wayland wallpaper color is not available.
         // TODO: remove this when initWallpaperColorManager is re-enabled
         QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
@@ -519,6 +525,60 @@ bool DockPanel::moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindo
         return m_helper->moveXEmbedWindow(wid, dx, dy, anchorWindow);
     }
     return false;
+}
+
+bool DockPanel::beginDockResize(uint edges)
+{
+    // The manager is created in DockPanel::init() on the Wayland platform. On
+    // X11 (or any other) platform it stays null, so fall back to the legacy
+    // client-side drag logic.
+    if (!m_dockShellExtensionManager)
+        return false;
+    if (!m_dockShellExtensionManager->isActive())
+        return false;
+
+    auto *waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow *>(window()->handle());
+    if (!waylandWindow)
+        return false;
+
+    auto *surface = waylandWindow->wlSurface();
+    if (!surface)
+        return false;
+
+    auto *inputDevice = waylandWindow->display()->lastInputDevice();
+    if (!inputDevice)
+        return false;
+
+    if (!m_dockShellExtensionObject || m_dockShellExtensionObject->nativeSurface() != surface) {
+        m_dockShellExtensionObject.reset();
+        auto *dockSurface = m_dockShellExtensionManager->getLayerShellExtensionObject(surface);
+        if (!dockSurface)
+            return false;
+
+        m_dockShellExtensionObject.reset(new TreeLandLayerShellExtensionObject(dockSurface, surface));
+        connect(m_dockShellExtensionObject.get(), &TreeLandLayerShellExtensionObject::resizingChanged, this, &DockPanel::setIsResizing);
+    }
+
+    int minW = 0, maxW = 0, minH = 0, maxH = 0;
+    switch (position()) {
+    case Position::Left:
+    case Position::Right:
+        minW = MIN_DOCK_SIZE;
+        maxW = MAX_DOCK_SIZE;
+        break;
+    case Position::Top:
+    case Position::Bottom:
+        minH = MIN_DOCK_SIZE;
+        maxH = MAX_DOCK_SIZE;
+        break;
+    default:
+        Q_UNREACHABLE();
+        break;
+    }
+
+    m_dockShellExtensionObject->beginResize(inputDevice->wl_seat(), inputDevice->serial(), edges, minW, minH, maxW, maxH);
+    inputDevice->handleEndDrag();
+    return true;
 }
 }
 
