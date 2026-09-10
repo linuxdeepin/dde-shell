@@ -1,3 +1,23 @@
+dde-shell (2.0.54) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1716)
+  * fix: keep default generic name for launcher search functionality
+  * style: refine dock app item sizing and pressed state
+  * fix: address build and QML runtime warnings across shell and dock
+  * chore: update quickPlugins config permissions and serial
+  * fix: prevent dock tray popup flicker
+  * fix(notification): fix crash when the app accessor model is
+    destroyed
+  * fix: add delay for x11 window preview to prevent accidental shows
+  * style: adjust icon offset to use hover background spacing
+  * feat: adapt showdesktop to show-desktop-v1
+  * feat: adapt taskmanager to v2 toplevel protocol
+  * fix(shell): track delayed Treeland primary output
+  * fix(notification): prevent bubble window from taking focus
+  * feat: add fashion dock mode with card plugin support
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 10 Sep 2026 20:29:32 +0800
+
 dde-shell (2.0.53) unstable; urgency=medium
 
   * feat: refactor notification center into separate plugin and applet
