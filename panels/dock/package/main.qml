@@ -75,6 +75,8 @@ Window {
     property int itemSpacing: 0
 
     property bool isDragging: false
+    property bool compositorOwnsResize: false
+    property bool resizingReceived: false
 
     property real dockItemIconSize: dockItemMaxSize * 9 / 14
 
@@ -736,6 +738,21 @@ Window {
             oldDockSize = dockSize
             recentDeltas = []
             Panel.requestClosePopup()
+
+            var edges = 0
+            if (Panel.position === Dock.Bottom) {
+                edges = Dock.ResizeEdgeTop
+            } else if (Panel.position === Dock.Top) {
+                edges = Dock.ResizeEdgeBottom
+            } else if (Panel.position === Dock.Right) {
+                edges = Dock.ResizeEdgeLeft
+            } else if (Panel.position === Dock.Left) {
+                edges = Dock.ResizeEdgeRight
+            }
+            dock.resizingReceived = false
+            var accepted = Panel.beginDockResize(edges)
+            dock.compositorOwnsResize = accepted
+
             DS.grabMouse(Panel.rootObject, true)
         }
 
@@ -744,6 +761,9 @@ Window {
 
         onPositionChanged: function(mouse) {
             if (Panel.locked || !dock.isDragging) return
+
+            if (dock.compositorOwnsResize) return
+
             var newPos = mapToGlobal(mouse.x, mouse.y)
             var xChange = newPos.x - oldMousePos.x
             var yChange = newPos.y - oldMousePos.y
@@ -780,7 +800,19 @@ Window {
 
         onReleased: function(mouse) {
             if (Panel.locked) return
+            // Compositor-driven path: the compositor owns the release. If a
+            // stray release still reaches us, ignore it - resizing(0) ends
+            // the resize and finishResize() then. (Without this guard a stray
+            // release would clear compositorOwnsResize and cut the resize short.)
+            if (dock.compositorOwnsResize && dock.resizingReceived) return
+
+            finishResize()
+        }
+
+        function finishResize() {
             dock.isDragging = false
+            dock.compositorOwnsResize = false
+            dock.resizingReceived = false
             Applet.dockSize = dockSize
             itemIconSizeBase = dockItemMaxSize
             pressedAndDragging(false)
@@ -816,7 +848,35 @@ Window {
             anchors.top = parent.top
             dragArea.width = 5
         }
+    }
 
+    Connections {
+        target: Panel
+        function onIsResizingChanged(resizing) {
+            if (resizing) {
+                dock.resizingReceived = true
+                return
+            }
+            if (dock.isDragging) {
+                dragArea.finishResize()
+            }
+        }
+    }
+
+    Connections {
+        function onWidthChanged() {
+            if (dock.compositorOwnsResize && dock.useColumnLayout) {
+                dock.dockSize = dock.width
+            }
+        }
+
+        function onHeightChanged() {
+            if (dock.compositorOwnsResize && !dock.useColumnLayout) {
+                dock.dockSize = dock.height
+            }
+        }
+
+        target: dock
     }
 
     function changeDragAreaAnchor() {
