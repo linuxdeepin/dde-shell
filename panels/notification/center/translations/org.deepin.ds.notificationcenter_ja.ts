@@ -3,15 +3,15 @@
     <name>GroupNotify</name>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>たたむ</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"/>
+        <translation>オプション</translation>
     </message>
     <message>
         <source>Clear All</source>
-        <translation>すべて消去</translation>
+        <translation>すべてクリア</translation>
     </message>
 </context>
 <context>
@@ -29,11 +29,11 @@
     </message>
     <message>
         <source>Fold</source>
-        <translation type="unfinished"/>
+        <translation>たたむ</translation>
     </message>
     <message>
         <source>More</source>
-        <translation type="unfinished"/>
+        <translation>オプション</translation>
     </message>
     <message>
         <source>Notification Setting</source>
@@ -41,7 +41,7 @@
     </message>
     <message>
         <source>Clear All</source>
-        <translation>すべて消去</translation>
+        <translation>すべてクリア</translation>
     </message>
 </context>
 <context>
@@ -63,7 +63,7 @@
     <name>NotifyViewDelegate</name>
     <message>
         <source>Clean All</source>
-        <translation type="unfinished"/>
+        <translation>すべてクリア</translation>
     </message>
 </context>
 <context>
