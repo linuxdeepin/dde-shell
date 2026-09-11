@@ -14,6 +14,8 @@
 #include <QStandardItemModel>
 
 class ItemsPage;
+Q_MOC_INCLUDE("itemspage.h")
+
 namespace apps {
 // To make it easier to access in QML
 struct ItemPosition
