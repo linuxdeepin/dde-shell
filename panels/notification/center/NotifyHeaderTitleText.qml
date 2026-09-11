@@ -9,6 +9,8 @@ import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 DropShadowText {
+    Accessible.role: Accessible.StaticText
+    Accessible.id: "DropShadowText"
     property font tFont: DTK.fontManager.t4
     color: DTK.themeType === ApplicationHelper.DarkType ?
         Qt.rgba(255, 255, 255, 0.7) :

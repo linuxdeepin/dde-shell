@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -23,6 +23,7 @@ AppletItem {
 
     Column {
         Button {
+            Accessible.id: "Lock"
             text: "Lock"
             onClicked: {
                 let lockscreen = lockscreenApplet()
@@ -32,6 +33,7 @@ AppletItem {
             }
         }
         Button {
+            Accessible.id: "Shutdown"
             text: "Shutdown"
             onClicked: {
                 let lockscreen = lockscreenApplet()
@@ -41,6 +43,7 @@ AppletItem {
             }
         }
         Button {
+            Accessible.id: "Switchuser"
             text: "SwitchUser"
             onClicked: {
                 let lockscreen = lockscreenApplet()

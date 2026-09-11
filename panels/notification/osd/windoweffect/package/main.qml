@@ -72,6 +72,7 @@ AppletItem {
     }
 
     ListView {
+        Accessible.id: "Listview"
         id: listview
         width: 410
         height: contentHeight
@@ -83,6 +84,7 @@ AppletItem {
         spacing: 10
 
         delegate: D.ItemDelegate {
+            Accessible.id: "ItemView"
             id: itemView
 
             padding: 0

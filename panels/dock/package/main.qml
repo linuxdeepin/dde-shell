@@ -342,6 +342,7 @@ Window {
         checked: Applet[prop] === value
     }
     component MutuallyExclusiveMenu: LP.Menu {
+        Accessible.id: "Menu"
         id: menu
         LP.MenuItemGroup {
             id: group
@@ -360,6 +361,7 @@ Window {
         id: dockMenuLoader
         active: false
         sourceComponent: LP.Menu {
+            Accessible.id: "DockMenu"
             id: dockMenu
             MutuallyExclusiveMenu {
                 visible: Panel.debugMode
@@ -441,6 +443,7 @@ Window {
                 }
             }
             LP.MenuItem {
+                Accessible.id: "LockTheDock"
                 text: qsTr("Lock the Dock")
                 checked: Panel.locked
                 onTriggered: {
@@ -448,6 +451,7 @@ Window {
                 }
             }
             LP.MenuItem {
+                Accessible.id: "DockSettings"
                 text: qsTr("Dock Settings")
                 onTriggered: {
                     Panel.openDockSettings()
@@ -621,6 +625,8 @@ Window {
                 Accessible.role: Accessible.Grouping
                 Accessible.name: qsTr("Dock Left Area")
                 OverflowContainer {
+                    Accessible.role: Accessible.Pane
+                    Accessible.id: "LeftLoader"
                     id: leftLoader
                     anchors.fill: parent
                     useColumnLayout: dock.useColumnLayout
@@ -669,6 +675,8 @@ Window {
                 }
 
                 OverflowContainer {
+                    Accessible.role: Accessible.Pane
+                    Accessible.id: "CenterLoader"
                     id: centerLoader
                     anchors.fill: parent
                     useColumnLayout: dock.useColumnLayout
@@ -697,6 +705,8 @@ Window {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             OverflowContainer {
+                Accessible.role: Accessible.Pane
+                Accessible.id: "RightLoader"
                 id: rightLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout

@@ -35,6 +35,8 @@ IconButton {
     }
 
     background: AppletItemBackground {
+        Accessible.role: Accessible.DrawingArea
+        Accessible.id: "AppletItemBackground"
         radius: control.radius
         isActive: control.isActive
     }
