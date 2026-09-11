@@ -498,6 +498,18 @@ void PluginPopup::plugin_popup_set_cursor(Resource *resource, int32_t cursor_sha
 PluginManager::PluginManager(QWaylandCompositor *compositor)
     : QWaylandCompositorExtensionTemplate(compositor)
 {
+    m_themeNotifyTimer = new QTimer(this);
+    m_themeNotifyTimer->setSingleShot(true);
+    m_themeNotifyTimer->setInterval(0);
+    connect(m_themeNotifyTimer, &QTimer::timeout, this, [this]() {
+        auto theme = DGuiApplicationHelper::instance()->applicationTheme();
+        foreachPluginSurface([this, theme](Resource *source) {
+            send_color_theme_changed(source->handle, m_dockColorTheme);
+            send_theme_changed(source->handle, theme->themeName(), theme->iconThemeName());
+            send_active_color_changed(source->handle, theme->activeColor().name(), theme->darkActiveColor().name());
+        });
+    });
+
     auto theme = DGuiApplicationHelper::instance()->applicationTheme();
     QObject::connect(theme, &DPlatformTheme::fontNameChanged, this, &PluginManager::onFontChanged);
     QObject::connect(theme, &DPlatformTheme::fontPointSizeChanged, this, &PluginManager::onFontChanged);
@@ -624,12 +636,7 @@ void PluginManager::setDockColorTheme(uint32_t type)
         return;
 
     m_dockColorTheme = type;
-    foreach (PluginSurface *plugin, m_pluginSurfaces) {
-        Resource *target = resourceMap().value(plugin->surface()->waylandClient());
-        if (target) {
-            send_color_theme_changed(target->handle, m_dockColorTheme);
-        }
-    }
+    scheduleThemeNotify();
 }
 
 void PluginManager::setEmbedPanelMinHeight(int height)
@@ -857,10 +864,7 @@ void PluginManager::onFontChanged()
 
 void PluginManager::onActiveColorChanged()
 {
-    foreachPluginSurface([this](Resource *source) {
-        auto theme = DGuiApplicationHelper::instance()->applicationTheme();
-        send_active_color_changed(source->handle, theme->activeColor().name(), theme->darkActiveColor().name());
-    });
+    scheduleThemeNotify();
 }
 
 PluginSurface* PluginManager::findPluginSurface(const QString &pluginId, const QString &itemKey) const
@@ -875,10 +879,7 @@ PluginSurface* PluginManager::findPluginSurface(const QString &pluginId, const Q
 
 void PluginManager::onThemeChanged()
 {
-    foreachPluginSurface([this](Resource *source) {
-        auto theme = DGuiApplicationHelper::instance()->applicationTheme();
-        send_theme_changed(source->handle, theme->themeName(), theme->iconThemeName());
-    });
+    scheduleThemeNotify();
 }
 
 void PluginManager::foreachPluginSurface(PluginSurfaceCallback callback)
@@ -889,6 +890,12 @@ void PluginManager::foreachPluginSurface(PluginSurfaceCallback callback)
             callback(target);
         }
     }
+}
+
+void PluginManager::scheduleThemeNotify()
+{
+    if (m_themeNotifyTimer)
+        m_themeNotifyTimer->start();
 }
 
 QString PluginManager::dockSizeMsg() const
