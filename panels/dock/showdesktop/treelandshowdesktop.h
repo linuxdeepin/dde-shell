@@ -21,6 +21,9 @@ public:
 protected:
     void treeland_show_desktop_v1_show_desktop_state(uint32_t state) override;
 
+Q_SIGNALS:
+    void showDesktopStateChanged(bool shown);
+
 private:
     uint32_t m_desktopState;
 };

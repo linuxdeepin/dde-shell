@@ -30,6 +30,7 @@ public:
 
 Q_SIGNALS:
     void visibleChanged();
+    void desktopShownChanged(bool shown);
 
 private slots:
     void onEnableShowDesktopChanged();

@@ -25,6 +25,7 @@ void TreelandShowDesktop::treeland_show_desktop_v1_show_desktop_state(uint32_t s
 {
     if (state != m_desktopState) {
         m_desktopState = state;
+        Q_EMIT showDesktopStateChanged(state == state_show);
     }
 }
 }

@@ -924,6 +924,16 @@ Window {
         target: MenuHelper
     }
 
+    Connections {
+        function onDesktopShownChanged(shown) {
+            if (shown) {
+                Panel.requestClosePopup()
+            }
+        }
+
+        target: DS.applet("org.deepin.ds.dock.showdesktop")
+    }
+
     function position2Anchors(position) {
         switch (position) {
         case Dock.Top:

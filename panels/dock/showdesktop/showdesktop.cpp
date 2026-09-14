@@ -48,6 +48,8 @@ bool ShowDesktop::init()
 {
     if (QStringLiteral("wayland") == QGuiApplication::platformName()) {
         m_showDesktop = new TreelandShowDesktop(this);
+        connect(m_showDesktop, &TreelandShowDesktop::showDesktopStateChanged,
+                this, &ShowDesktop::desktopShownChanged);
     }
     
     // 从配置中读取初始的可见性状态
