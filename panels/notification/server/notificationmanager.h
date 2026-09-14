@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void actionInvoked(qint64 id, uint bubbleId, const QString &actionKey);
     Q_INVOKABLE void notificationClosed(qint64 id, uint bubbleId, uint reason);
     Q_INVOKABLE void notificationReplaced(qint64 id);
+    Q_INVOKABLE void onBubbleShowed(qint64 id);
 
     void removeNotification(qint64 id);
     void removeNotifications(const QString &appName);
@@ -99,6 +100,7 @@ private:
     QTimer *m_pendingTimeout = nullptr;
     qint64 m_lastTimeoutPoint = std::numeric_limits<qint64>::max();
     QMultiHash<qint64, NotifyEntity> m_pendingTimeoutEntities;
+    QHash<qint64, int> m_pendingExpireTimeouts;
     QStringList m_systemApps;
     QMap<QString, QVariant> m_appNamesMap;
     int m_cleanupDays = 7;

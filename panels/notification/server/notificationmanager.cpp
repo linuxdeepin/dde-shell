@@ -310,7 +310,7 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
         }
         // 0: never expire. -1: DefaultTimeOutMSecs
         if (expireTimeout != 0 && !critical) {
-            pushPendingEntity(entity, expireTimeout);
+            m_pendingExpireTimeouts.insert(entity.id(), expireTimeout);
         }
     }
 
@@ -511,6 +511,25 @@ void NotificationManager::pushPendingEntity(const NotifyEntity &entity, int expi
         m_pendingTimeout->setInterval(newInterval);
         m_pendingTimeout->start();
     }
+}
+
+void NotificationManager::onBubbleShowed(qint64 id)
+{
+    auto it = m_pendingExpireTimeouts.find(id);
+    if (it == m_pendingExpireTimeouts.end()) {
+        return;
+    }
+
+    auto entity = m_persistence->fetchEntity(id);
+    if (!entity.isValid()) {
+        qWarning(notifyLog) << "onBubbleShowed: invalid entity for id" << id;
+        m_pendingExpireTimeouts.erase(it);
+        return;
+    }
+
+    int expireTimeout = it.value();
+    m_pendingExpireTimeouts.erase(it);
+    pushPendingEntity(entity, expireTimeout);
 }
 
 void NotificationManager::updateEntityProcessed(qint64 id, uint reason)
@@ -768,6 +787,7 @@ void NotificationManager::removePendingEntity(const NotifyEntity &entity)
         }
         ++iter;
     }
+    m_pendingExpireTimeouts.remove(entity.id());
 }
 
 void NotificationManager::onScreenLockedChanged(bool screenLocked)

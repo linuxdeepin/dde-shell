@@ -38,6 +38,9 @@ public:
     explicit BubbleModel(QObject *parent = nullptr);
     ~BubbleModel() override;
 
+Q_SIGNALS:
+    void bubbleShown(qint64 id);
+
 public:
     void push(BubbleItem *bubble);
 

@@ -51,6 +51,7 @@ private Q_SLOTS:
     void addBubble(qint64 id);
     void closeBubble(qint64 id);
     void onBubbleCountChanged();
+    void onBubbleShown(qint64 id);
 
 private:
     void onBubbleExpired(BubbleItem *);

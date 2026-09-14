@@ -82,6 +82,8 @@ void BubbleModel::insertBubble(BubbleItem *bubble)
     beginInsertRows(QModelIndex(), 0, 0);
     m_bubbles.prepend(bubble);
     endInsertRows();
+
+    Q_EMIT bubbleShown(bubble->id());
 }
 
 bool BubbleModel::isReplaceBubble(const BubbleItem *bubble) const
@@ -97,6 +99,8 @@ BubbleItem *BubbleModel::replaceBubble(BubbleItem *bubble)
 
     m_bubbles.replace(replaceIndex, bubble);
     Q_EMIT dataChanged(index(replaceIndex), index(replaceIndex));
+
+    Q_EMIT bubbleShown(bubble->id());
 
     return oldBubble;
 }

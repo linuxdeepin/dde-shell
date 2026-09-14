@@ -109,6 +109,11 @@ void NotifyServerApplet::setBlockClosedId(qint64 id)
     m_manager->setBlockClosedId(id);
 }
 
+void NotifyServerApplet::onBubbleShowed(qint64 id)
+{
+    QMetaObject::invokeMethod(m_manager, "onBubbleShowed", Qt::DirectConnection, Q_ARG(qint64, id));
+}
+
 D_APPLET_CLASS(NotifyServerApplet)
 
 }

@@ -54,6 +54,8 @@ bool BubblePanel::init()
     connect(m_bubbles, &BubbleModel::rowsInserted, this, &BubblePanel::onBubbleCountChanged);
     connect(m_bubbles, &BubbleModel::rowsRemoved, this, &BubblePanel::onBubbleCountChanged);
 
+    connect(m_bubbles, &BubbleModel::bubbleShown, this, &BubblePanel::onBubbleShown);
+
     return true;
 }
 
@@ -166,6 +168,11 @@ void BubblePanel::onBubbleClosed(qint64 id, uint bubbleId, uint reason)
 {
     QMetaObject::invokeMethod(m_notificationServer, "notificationClosed", Qt::DirectConnection,
                               Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(uint, reason));
+}
+
+void BubblePanel::onBubbleShown(qint64 id)
+{
+    QMetaObject::invokeMethod(m_notificationServer, "onBubbleShowed", Qt::DirectConnection, Q_ARG(qint64, id));
 }
 
 void BubblePanel::setVisible(const bool visible)
