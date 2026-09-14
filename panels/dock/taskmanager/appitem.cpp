@@ -8,6 +8,7 @@
 #include "abstractwindow.h"
 #include "desktopfileabstractparser.h"
 #include "taskmanagersettings.h"
+#include "calendariconhelper.h"
 
 #include <QPointer>
 #include <QJsonArray>
@@ -15,6 +16,8 @@
 #include <QJsonDocument>
 #include <QStringLiteral>
 #include <QLoggingCategory>
+#include <QStandardPaths>
+#include <QDate>
 
 Q_LOGGING_CATEGORY(appitemLog, "org.deepin.dde.shell.dock.taskmanger.appitem")
 
@@ -54,20 +57,22 @@ QString AppItem::type() const
 
 QString AppItem::icon() const
 {
+    QString iconName;
     if (m_currentActiveWindow.isNull() || m_currentActiveWindow->icon().isEmpty() || (m_desktopfileParser && m_desktopfileParser->isValied().first))
-        return m_desktopfileParser ? m_desktopfileParser->desktopIcon() : "application-default-icon";
+        iconName = m_desktopfileParser ? m_desktopfileParser->desktopIcon() : "application-default-icon";
     else {
-        return m_currentActiveWindow->icon();
+        iconName = m_currentActiveWindow->icon();
     }
 
-    // QString icon;
-    // if (m_currentActiveWindow) {
-    //     icon = m_currentActiveWindow->icon();
-    // }
-    // if (icon.isEmpty() && m_desktopfileParser && !m_desktopfileParser.isNull()) {
-    //     icon = m_desktopfileParser->desktopIcon();
-    // }
-    // return icon;
+    if (iconName == QStringLiteral("dde-calendar-dynamic")) {
+        const QDate today = QDate::currentDate();
+        const QString tempDir = QStandardPaths::standardLocations(QStandardPaths::TempLocation).constFirst();
+        const QString svgPath = tempDir + QStringLiteral("/%1_%2.svg").arg(today.year()).arg(today.dayOfYear());
+        if (dock::createCalendarIcon(svgPath))
+            return svgPath;
+    }
+
+    return iconName;
 }
 
 QString AppItem::name() const

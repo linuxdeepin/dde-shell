@@ -156,15 +156,30 @@ Item {
                 target: Panel
             }
 
-            D.DciIcon {
+            Item {
                 id: icon
-                name: root.iconName
                 height: iconSize
                 width: iconSize
-                sourceSize: Qt.size(iconSize, iconSize)
                 anchors.centerIn: parent
-                retainWhileLoading: true
-                smooth: false
+
+                D.DciIcon {
+                    id: dciIcon
+                    name: root.iconName
+                    anchors.fill: parent
+                    sourceSize: Qt.size(iconSize, iconSize)
+                    retainWhileLoading: true
+                    smooth: false
+                    visible: !root.iconName.startsWith("/")
+                }
+
+                Image {
+                    id: imageIcon
+                    source: root.iconName
+                    anchors.fill: parent
+                    sourceSize: Qt.size(iconSize, iconSize)
+                    smooth: false
+                    visible: root.iconName.startsWith("/")
+                }
 
                 function mapToScene(px, py) {
                     return parent.mapToItem(Window.window.contentItem, Qt.point(px, py))

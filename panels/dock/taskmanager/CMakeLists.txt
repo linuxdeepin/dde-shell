@@ -55,6 +55,8 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     abstractitem.cpp
     appitem.cpp
     appitem.h
+    calendariconhelper.cpp
+    calendariconhelper.h
     rolecombinemodel.cpp
     rolecombinemodel.h
     rolegroupmodel.cpp
