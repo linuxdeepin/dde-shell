@@ -233,7 +233,7 @@ void TreeLandWindowMonitor::handleForeignToplevelHandleRemoved()
 void TreeLandWindowMonitor::updateFullscreenState()
 {
     for (auto window : std::as_const(m_windows)) {
-        if (window && window->isFullscreen()) {
+        if (window && window->isFullscreen() && !window->isMinimized()) {
             if (!m_fullscreenState) {
                 m_fullscreenState = true;
                 emit windowFullscreenChanged(true);
