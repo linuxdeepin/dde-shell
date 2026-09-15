@@ -12,6 +12,9 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 
+#include <QFile>
+#include <QTextStream>
+
 #include <DDBusSender>
 #include <QDBusConnection>
 #include <QLoggingCategory>
@@ -147,17 +150,35 @@ QString DesktopFileAMParser::id2dbusPath(const QString& id)
     return QStringLiteral("/org/desktopspec/ApplicationManager1/") + escapeToObjectPath(id);
 }
 
-QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
+// Read PPID from /proc/<pid>/status. Returns 0 on failure.
+static pid_t findParentPid(pid_t pid)
 {
-    if (!m_amIsAvaliable) m_amIsAvaliable = QDBusConnection::sessionBus().
-        interface()->isServiceRegistered(AM_DBUS_PATH);
+    QFile statusFile(QStringLiteral("/proc/%1/status").arg(pid));
+    if (!statusFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return 0;
+    }
+    QTextStream stream(&statusFile);
+    QString line;
+    while (stream.readLineInto(&line)) {
+        if (line.startsWith(QStringLiteral("PPid:"))) {
+            bool ok = false;
+            pid_t ppid = line.mid(5).trimmed().toInt(&ok);
+            return ok ? ppid : 0;
+        }
+    }
+    return 0;
+}
 
-    if (!m_amIsAvaliable) return QString();
-
-    auto pidfd = pidfd_open(window->pid(),0);
+// Try AM Identify with the given PID. Returns the identified desktop ID or empty string.
+static QString tryAmIdentify(pid_t pid)
+{
+    auto pidfd = pidfd_open(pid, 0);
+    if (pidfd < 0) {
+        return QString();
+    }
     auto res = DDBusSender().service("org.desktopspec.ApplicationManager1")
                                          .interface("org.desktopspec.ApplicationManager1")
-                                         .path("/org/desktopspec/ApplicationManager1")
+                                         .path("/org/desktopspec.ApplicationManager1")
                                          .method("Identify")
                                          .arg(QDBusUnixFileDescriptor(pidfd))
                                          .call();
@@ -168,8 +189,41 @@ QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
         QList<QVariant> data = reply.arguments();
         return data.first().toString();
     }
+    qCDebug(amdesktopfileLog()) << "AM failed to identify pid" << pid
+                                << ", reason is:" << res.error().message();
+    return QString();
+}
 
-    qCDebug(amdesktopfileLog()) << "AM failed to identify, reason is: " << res.error().message();
+QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
+{
+    if (!m_amIsAvaliable) m_amIsAvaliable = QDBusConnection::sessionBus().
+        interface()->isServiceRegistered(AM_DBUS_PATH);
+
+    if (!m_amIsAvaliable) return QString();
+
+    // First attempt: identify using the window's own PID.
+    QString result = tryAmIdentify(window->pid());
+    if (!result.isEmpty()) {
+        return result;
+    }
+
+    // Fallback: walk up the process tree. Electron and similar multi-process
+    // apps may create windows with a renderer subprocess PID. The main process
+    // (parent or grandparent) is the one AM can identify.
+    pid_t currentPid = window->pid();
+    for (int i = 0; i < 5; ++i) {
+        pid_t parentPid = findParentPid(currentPid);
+        if (parentPid <= 0 || parentPid == currentPid) {
+            break;
+        }
+        result = tryAmIdentify(parentPid);
+        if (!result.isEmpty()) {
+            qCDebug(amdesktopfileLog()) << "Identified via parent pid" << parentPid
+                                        << "after child pid" << window->pid() << "failed";
+            return result;
+        }
+        currentPid = parentPid;
+    }
 
     return QString();
 }

@@ -352,6 +352,11 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
         qCDebug(taskManagerLog()) << "identify by Fallback:" << desktopId;
     }
 
+    if (desktopfile.isNull()) {
+        qCWarning(taskManagerLog()) << "Failed to identify window, desktopfile is null, skip window:" << window->id();
+        return;
+    }
+
     auto appitem = desktopfile->getAppItem();
 
     if (appitem.isNull() || (appitem->hasWindow() && windowSplit())) {
