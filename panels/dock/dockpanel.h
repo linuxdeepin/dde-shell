@@ -13,6 +13,8 @@
 
 namespace dock {
 class DockHelper;
+class TreeLandLayerShellExtensionManager;
+class TreeLandLayerShellExtensionObject;
 
 class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
 {
@@ -99,6 +101,8 @@ public:
     // anchorWindow: the window containing the plugin item (dock panel or popup window)
     Q_INVOKABLE bool moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindow *anchorWindow = nullptr);
 
+    Q_INVOKABLE bool beginResize();
+
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);
 
@@ -171,6 +175,8 @@ private:
     bool m_contextDragging;
     bool m_isResizing;
     QRect m_frontendWindowRect;
+    QScopedPointer<TreeLandLayerShellExtensionManager> m_dockShellExtensionManager;
+    QPointer<TreeLandLayerShellExtensionObject> m_dockShellExtensionObject;
 };
 
 }
