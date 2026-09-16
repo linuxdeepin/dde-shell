@@ -42,6 +42,8 @@ Window {
 
     property bool isDragging: false
 
+    readonly property bool compositorDrivenResize: Qt.platform.pluginName !== "xcb"
+
     property real dockItemIconSize: dockItemMaxSize * 9 / 14
 
     // NOTE: -1 means not set its size, follow the platform size
@@ -650,6 +652,10 @@ Window {
             oldDockSize = dockSize
             recentDeltas = []
             Panel.requestClosePopup()
+            
+            if (dock.compositorDrivenResize) {
+                Panel.beginResize()
+            }
             DS.grabMouse(Panel.rootObject, true)
         }
 
@@ -658,6 +664,9 @@ Window {
 
         onPositionChanged: function(mouse) {
             if (Panel.locked || !dock.isDragging) return
+
+            if (dock.compositorDrivenResize) return
+
             var newPos = mapToGlobal(mouse.x, mouse.y)
             var xChange = newPos.x - oldMousePos.x
             var yChange = newPos.y - oldMousePos.y
@@ -694,6 +703,13 @@ Window {
 
         onReleased: function(mouse) {
             if (Panel.locked) return
+        
+            if (dock.compositorDrivenResize && Applet.isResizing) return
+
+            finishResize()
+        }
+
+        function finishResize() {
             dock.isDragging = false
             Applet.dockSize = dockSize
             itemIconSizeBase = dockItemMaxSize
@@ -730,9 +746,32 @@ Window {
             anchors.top = parent.top
             dragArea.width = 5
         }
-
     }
 
+    Connections {
+        target: Panel
+        function onIsResizingChanged(resizing) {
+            if (!resizing && dock.isDragging) {
+                dragArea.finishResize()
+            }
+        }
+    }
+
+    Connections {
+        target: dock
+        enabled: dock.compositorDrivenResize && Applet.isResizing
+        function onWidthChanged() {
+            if (dock.useColumnLayout) {
+                dock.dockSize = dock.width
+            }
+        }
+
+        function onHeightChanged() {
+            if (!dock.useColumnLayout) {
+                dock.dockSize = dock.height
+            }
+        }
+    }
     function changeDragAreaAnchor() {
         switch(dock.positionForAnimation) {
         case Dock.Top: {
