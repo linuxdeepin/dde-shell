@@ -41,6 +41,8 @@ IconButton {
     }
 
     Component.onCompleted: {
-        contentItem.smooth = false
+        contentItem.smooth = Qt.binding(function () {
+            return Math.round(contentItem.rotation) % 90 !== 0
+        })
     }
 }
