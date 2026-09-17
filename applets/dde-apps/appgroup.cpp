@@ -61,7 +61,7 @@ int AppGroup::parseGroupId(const QString & id)
 {
     using namespace std::string_view_literals;
     constexpr size_t len = "internal/folder/"sv.size();
-    return QStringView{id}.mid(len + 1).toInt();
+    return QStringView{id}.mid(len).toInt();
 }
 
 void AppGroup::setItemsPerPage(int number)
