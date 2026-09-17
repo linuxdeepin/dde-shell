@@ -352,6 +352,24 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
         qCDebug(taskManagerLog()) << "identify by Fallback:" << desktopId;
     }
 
+    if (desktopfile.isNull() || !desktopfile->isValied().first) {
+        auto identities = window->identity();
+        for (const auto& identity : identities) {
+            if (identity.isEmpty()) continue;
+            auto tryParser = DESKTOPFILEFACTORY::createById(identity, "amAPP");
+            if (!tryParser.isNull() && tryParser->isValied().first) {
+                desktopfile = tryParser;
+                qCDebug(taskManagerLog()) << "identify by Wayland app_id:" << identity;
+                break;
+            }
+        }
+    }
+
+    if (desktopfile.isNull()) {
+        qCWarning(taskManagerLog()) << "Failed to identify desktop file for window:" << window->id();
+        return;
+    }
+
     auto appitem = desktopfile->getAppItem();
 
     if (appitem.isNull() || (appitem->hasWindow() && windowSplit())) {
