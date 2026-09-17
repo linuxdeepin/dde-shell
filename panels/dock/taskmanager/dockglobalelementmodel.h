@@ -45,6 +45,7 @@ private:
     void loadDockedElements();
     QString getMenus(const QModelIndex &index) const;
     void groupItemsByApp();
+    int findActiveRowByDesktopId(const QString &id) const;
 
 private:
     // id, model, and pos

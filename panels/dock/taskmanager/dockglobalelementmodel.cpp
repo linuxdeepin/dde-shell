@@ -176,6 +176,9 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
             Q_UNUSED(parent)
 
             QList<int> pendingDataChangedRows;
+            // apps that are still running and whose cached active-model row must be
+            // refreshed once the remaining rows have been renumbered
+            QStringList pendingRowRefresh;
 
             for (int i = first; i <= last; ++i) {
                 auto it = std::find_if(m_data.begin(), m_data.end(), [this, i](auto data) {
@@ -194,23 +197,41 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                     return std::get<0>(data) == id && std::get<1>(data) == m_activeAppModel && std::get<2>(data) != i;
                 });
 
-                if (oit == m_data.constEnd() && m_dockedElements.contains(std::make_tuple("desktop", id))) {
-                    auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
-                    if (res.isEmpty()) {
+                if (oit == m_data.constEnd()) {
+                    // Sole entry for this app. The notification above is queued, so the
+                    // active-app model may already represent another window of the same
+                    // app by now: an app keeps one row while its window is replaced,
+                    // which is what happens when an Electron splash window closes and
+                    // the main window appears. Only "is this app still running" matters,
+                    // not which row was reported as removed.
+                    if (findActiveRowByDesktopId(id) >= 0) {
+                        pendingRowRefresh.append(id);
+                        continue;
+                    }
+
+                    if (m_dockedElements.contains(std::make_tuple("desktop", id))) {
+                        auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
+                        if (res.isEmpty()) {
+                            beginRemoveRows(QModelIndex(), pos, pos);
+                            m_data.remove(pos);
+                            endRemoveRows();
+                        } else {
+                            *it = std::make_tuple(id, m_appsModel, res.first().row());
+                            // DEFER emitter until internal model shift is done!
+                            pendingDataChangedRows.append(pos);
+                        }
+                    } else {
                         beginRemoveRows(QModelIndex(), pos, pos);
                         m_data.remove(pos);
                         endRemoveRows();
-                    } else {
-                        auto row = res.first().row();
-                        *it = std::make_tuple(id, m_appsModel, row);
-                        // DEFER emitter until internal model shift is done!
-                        pendingDataChangedRows.append(pos);
                     }
-                } else {
-                    beginRemoveRows(QModelIndex(), pos, pos);
-                    m_data.remove(pos);
-                    endRemoveRows();
+                    continue;
                 }
+
+                // The app still has other windows on the dock; drop only this one.
+                beginRemoveRows(QModelIndex(), pos, pos);
+                m_data.remove(pos);
+                endRemoveRows();
             }
 
             // Adjust remaining row mappings for the active app model BEFORE any outer access
@@ -220,8 +241,25 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                 }
             });
 
+            // Re-point entries of apps that are still running at their current row.
+            // Done after the renumbering above, which would otherwise invalidate them.
+            for (const auto &id : std::as_const(pendingRowRefresh)) {
+                const int liveRow = findActiveRowByDesktopId(id);
+                if (liveRow < 0)
+                    continue;
+                auto refreshIt = std::find_if(m_data.begin(), m_data.end(), [&id](const auto &data) {
+                    return std::get<0>(data) == id;
+                });
+                if (refreshIt == m_data.end())
+                    continue;
+                *refreshIt = std::make_tuple(id, m_activeAppModel, liveRow);
+                pendingDataChangedRows.append(refreshIt - m_data.begin());
+            }
+
             // Now it is safe to emit dataChanged for rows that were swapped to docked elements
             for (int pos : pendingDataChangedRows) {
+                if (pos >= m_data.size())
+                    continue;
                 auto pIndex = this->index(pos, 0);
                 Q_EMIT dataChanged(pIndex,
                                    pIndex,
@@ -605,6 +643,17 @@ void DockGlobalElementModel::moveItem(int from, int to)
 
     m_data.move(from, to);
     endMoveRows();
+}
+
+int DockGlobalElementModel::findActiveRowByDesktopId(const QString &id) const
+{
+    if (!m_activeAppModel || id.isEmpty())
+        return -1;
+
+    const auto rows = m_activeAppModel->match(m_activeAppModel->index(0, 0),
+                                              TaskManager::DesktopIdRole, id, 1,
+                                              Qt::MatchExactly);
+    return rows.isEmpty() ? -1 : rows.first().row();
 }
 
 void DockGlobalElementModel::groupItemsByApp()
