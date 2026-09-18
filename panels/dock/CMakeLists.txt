@@ -26,6 +26,8 @@ file(
     dockhelper.cpp
     waylanddockhelper.h
     waylanddockhelper.cpp
+    layershellextension.h
+    layershellextension.cpp
     loadtrayplugins.h
     loadtrayplugins.cpp
 )
@@ -64,6 +66,7 @@ qt_generate_wayland_protocol_client_sources(dockpanel
     FILES
         ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-wallpaper-color-v1.xml
         ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-dde-shell-v1.xml
+        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-layer-shell-extension-unstable-v1.xml
 )
 
 target_link_libraries(dockpanel PRIVATE
