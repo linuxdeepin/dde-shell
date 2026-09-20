@@ -263,6 +263,7 @@ NotifyItem {
                     text: root.title
                     visible: text !== ""
                     maximumLineCount: 1
+                    textFormat: Text.PlainText
                     font {
                         pixelSize: DTK.fontManager.t8.pixelSize
                         family: DTK.fontManager.t8.family
