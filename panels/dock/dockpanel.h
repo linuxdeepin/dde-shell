@@ -13,7 +13,6 @@
 
 namespace dock {
 class DockHelper;
-class LoadTrayPlugins;
 
 class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
 {
@@ -167,7 +166,6 @@ private:
     HideState m_hideState;
     DockHelper* m_helper;
     QPointer<QScreen> m_dockScreen;
-    LoadTrayPlugins *m_loadTrayPlugins;
     bool m_compositorReady;
     bool m_launcherShown;
     bool m_contextDragging;

@@ -15,7 +15,6 @@
 #include "dockdbusproxy.h"
 #include "dockfrontadaptor.h"
 #include "dockdaemonadaptor.h"
-#include "loadtrayplugins.h"
 
 #include <DGuiApplicationHelper>
 #include <QGuiApplication>
@@ -41,15 +40,21 @@ DockPanel::DockPanel(QObject *parent)
     , m_theme(ColorTheme::Dark)
     , m_hideState(Show)
     , m_dockScreen(nullptr)
-    , m_loadTrayPlugins(new LoadTrayPlugins(this))
     , m_compositorReady(false)
     , m_launcherShown(false)
     , m_contextDragging(false)
     , m_isResizing(false)
 {
+    // The org.deepin.dde.Dock1 service name is used as the readiness flag of the
+    // Type=dbus systemd unit (dde-shell@DDE.service). It must only be acquired
+    // after the QML DockCompositor is created, so that tray plugin loader
+    // services ordered After=dde-shell@DDE.service can rely on it being safe
+    // to connect to the dockplugin Wayland socket.
     connect(this, &DockPanel::compositorReadyChanged, this, [this] {
         if (!m_compositorReady) return;
-        m_loadTrayPlugins->loadDockPlugins();
+        if (!QDBusConnection::sessionBus().registerService("org.deepin.dde.Dock1")) {
+            qCWarning(dockLog) << "Failed to register org.deepin.dde.Dock1 after compositor ready";
+        }
     });
 }
 
@@ -83,7 +88,10 @@ bool DockPanel::init()
     DockDBusProxy* proxy = new DockDBusProxy(this);
     DockFrontAdaptor* dockFrontAdaptor = new DockFrontAdaptor(proxy);
     Q_UNUSED(dockFrontAdaptor)
-    QDBusConnection::sessionBus().registerService("org.deepin.dde.Dock1");
+    // NOTE: the object is exported here, but the org.deepin.dde.Dock1 service
+    // name is only acquired once the compositor is ready, see the constructor.
+    // It is the BusName of the Type=dbus unit dde-shell@DDE.service and thus
+    // defines when systemd considers the dock started.
     QDBusConnection::sessionBus().registerObject("/org/deepin/dde/Dock1", "org.deepin.dde.Dock1", proxy);
 
     DockDaemonAdaptor* dockDaemonAdaptor = new DockDaemonAdaptor(proxy);

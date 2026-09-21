@@ -71,7 +71,8 @@ Description: DDE Shell dock library
 Package: dde-shell
 Architecture: any
 Depends:
- dde-tray-loader (>= 1.99.8),
+ dde-session (>= 2.0.33),
+ dde-tray-loader (>= 2.0.41),
  libdde-shell (= ${binary:Version}),
  libdde-shell-dock (= ${binary:Version}),
  libdtk6declarative,

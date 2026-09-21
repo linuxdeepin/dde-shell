@@ -15,7 +15,10 @@
 #include <DConfig>
 
 #include <QAbstractItemModel>
-#include <QDBusInterface>
+#include <QDBusMessage>
+#include <QDBusPendingCallWatcher>
+#include <QDBusPendingReply>
+#include <QDBusServiceWatcher>
 #include <QProcess>
 #include <QTimer>
 #include <QLoggingCategory>
@@ -45,6 +48,8 @@ static const QString DDENotifyDBusServer = "org.deepin.dde.Notification1";
 static const QString DDENotifyDBusPath = "/org/deepin/dde/Notification1";
 static const QString SessionDBusService = "org.deepin.dde.SessionManager1";
 static const QString SessionDaemonDBusPath = "/org/deepin/dde/SessionManager1";
+static const QString LockFrontDBusService = "org.deepin.dde.LockFront1";
+static const QString LockFrontDBusPath = "/org/deepin/dde/LockFront1";
 
 NotificationManager::NotificationManager(QObject *parent)
     : QObject(parent)
@@ -689,22 +694,55 @@ bool NotificationManager::invokeShellAction(const QString &data)
 
 void NotificationManager::initScreenLockedState()
 {
-    const QString interfaceAndServiceName = "org.deepin.dde.LockFront1";
-    const QString path = "/org/deepin/dde/LockFront1";
-
-    QDBusInterface interface(interfaceAndServiceName, path,
-        "org.freedesktop.DBus.Properties", QDBusConnection::sessionBus());
-
-    QDBusReply<QDBusVariant> reply = interface.call("Get", "org.deepin.dde.LockFront1", "Visible");
-    if (reply.isValid()) {
-        m_screenLocked = reply.value().variant().toBool();
-    } else {
-        m_screenLocked = false;
-        qWarning(notifyLog) << "Failed to get the lock visible property:" << reply.error().message();
-    }
-
-    QDBusConnection::sessionBus().connect(interfaceAndServiceName, path, interfaceAndServiceName,
+    auto connection = QDBusConnection::sessionBus();
+    connection.connect(LockFrontDBusService, LockFrontDBusPath, LockFrontDBusService,
         "Visible", this, SLOT(onScreenLockedChanged(bool)));
+
+    auto *serviceWatcher = new QDBusServiceWatcher(LockFrontDBusService, connection,
+        QDBusServiceWatcher::WatchForOwnerChange, this);
+    connect(serviceWatcher, &QDBusServiceWatcher::serviceOwnerChanged, this,
+        [this](const QString &, const QString &, const QString &newOwner) {
+            // Discard any reply from the previous owner before starting a new query.
+            if (m_screenLockedQueryWatcher) {
+                m_screenLockedQueryWatcher->deleteLater();
+                m_screenLockedQueryWatcher = nullptr;
+            }
+            if (!newOwner.isEmpty())
+                queryScreenLockedState();
+        });
+
+    queryScreenLockedState();
+}
+
+void NotificationManager::queryScreenLockedState()
+{
+    if (m_screenLockedQueryWatcher)
+        return;
+
+    auto message = QDBusMessage::createMethodCall(LockFrontDBusService, LockFrontDBusPath,
+        "org.freedesktop.DBus.Properties", "Get");
+    // dde-session starts LockFront after the dock; querying must not activate it early.
+    message.setAutoStartService(false);
+    message << LockFrontDBusService << QStringLiteral("Visible");
+    m_screenLockedQueryWatcher = new QDBusPendingCallWatcher(
+        QDBusConnection::sessionBus().asyncCall(message), this);
+    connect(m_screenLockedQueryWatcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *watcher) {
+        watcher->deleteLater();
+        if (watcher != m_screenLockedQueryWatcher)
+            return;
+        m_screenLockedQueryWatcher = nullptr;
+        const QDBusPendingReply<QDBusVariant> reply = *watcher;
+        if (reply.isError()) {
+            // An absent service is expected at startup. Wait for its registration or Visible.
+            const auto error = reply.error();
+            if (error.type() != QDBusError::ServiceUnknown
+                && error.name() != QLatin1String("org.freedesktop.DBus.Error.NameHasNoOwner")) {
+                qWarning(notifyLog) << "Failed to get the lock visible property:" << error.message();
+            }
+            return;
+        }
+        onScreenLockedChanged(reply.value().variant().toBool());
+    });
 }
 
 void NotificationManager::onHandingPendingEntities()
@@ -772,6 +810,11 @@ void NotificationManager::removePendingEntity(const NotifyEntity &entity)
 
 void NotificationManager::onScreenLockedChanged(bool screenLocked)
 {
+    // A Visible signal supersedes any pending query reply.
+    if (m_screenLockedQueryWatcher) {
+        m_screenLockedQueryWatcher->deleteLater();
+        m_screenLockedQueryWatcher = nullptr;
+    }
     m_screenLocked = screenLocked;
 }
 
