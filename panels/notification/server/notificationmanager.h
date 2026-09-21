@@ -7,6 +7,7 @@
 #include <QDBusContext>
 #include <QDBusVariant>
 
+class QDBusPendingCallWatcher;
 class QTimer;
 namespace notification {
 
@@ -84,6 +85,7 @@ private:
     bool isExtendedAction(qint64 id, const QString &actionId) const;
     bool invokeShellAction(const QString &data);
     void initScreenLockedState();
+    void queryScreenLockedState();
 
 private slots:
     void onHandingPendingEntities();
@@ -93,6 +95,7 @@ private slots:
 private:
     uint m_replacesCount = 0;
     bool m_screenLocked = false;
+    QDBusPendingCallWatcher *m_screenLockedQueryWatcher = nullptr;
 
     DataAccessor *m_persistence = nullptr;
     NotificationSetting *m_setting = nullptr;
