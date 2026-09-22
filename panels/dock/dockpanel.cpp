@@ -6,6 +6,7 @@
 #include "constants.h"
 #include "dockadaptor.h"
 #include "docksettings.h"
+#include "layershellextension.h"
 #include "panel.h"
 #include "pluginfactory.h"
 #include "waylanddockhelper.h"
@@ -25,6 +26,10 @@
 #include <QQuickWindow>
 
 #include <wayland/xdgactivation.h>
+
+#include <QtWaylandClient/private/qwaylanddisplay_p.h>
+#include <QtWaylandClient/private/qwaylandinputdevice_p.h>
+#include <QtWaylandClient/private/qwaylandwindow_p.h>
 
 #ifdef HAVE_DDE_API_EVENTLOGGER
 #include <dde-api/eventlogger.hpp>
@@ -206,6 +211,7 @@ bool DockPanel::init()
         m_helper = new WaylandDockHelper(this);
         connect(static_cast<WaylandDockHelper *>(m_helper), &WaylandDockHelper::xembedWindowMoveResult,
                 this, &DockPanel::xembedWindowMoveResult);
+        m_dockShellExtensionManager.reset(new TreeLandLayerShellExtensionManager());
         // Fallback to DGuiApplicationHelper for theme color when wayland wallpaper color is not available.
         // TODO: remove this when initWallpaperColorManager is re-enabled
         QObject::connect(Dtk::Gui::DGuiApplicationHelper::instance(), &Dtk::Gui::DGuiApplicationHelper::themeTypeChanged,
@@ -580,6 +586,94 @@ bool DockPanel::moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindo
         return m_helper->moveXEmbedWindow(wid, dx, dy, anchorWindow);
     }
     return false;
+}
+
+bool DockPanel::beginResize()
+{
+    uint edges = 0;
+    int minW = 0, maxW = 0, minH = 0, maxH = 0;
+    switch (position()) {
+    case Position::Left:
+        edges = TreeLandLayerShellExtensionObject::resize_edge_right;
+        minW = MIN_DOCK_SIZE;
+        maxW = MAX_DOCK_SIZE;
+        break;
+    case Position::Right:
+        edges = TreeLandLayerShellExtensionObject::resize_edge_left;
+        minW = MIN_DOCK_SIZE;
+        maxW = MAX_DOCK_SIZE;
+        break;
+    case Position::Top:
+        edges = TreeLandLayerShellExtensionObject::resize_edge_bottom;
+        minH = MIN_DOCK_SIZE;
+        maxH = MAX_DOCK_SIZE;
+        break;
+    case Position::Bottom:
+        edges = TreeLandLayerShellExtensionObject::resize_edge_top;
+        minH = MIN_DOCK_SIZE;
+        maxH = MAX_DOCK_SIZE;
+        break;
+    default:
+        Q_UNREACHABLE();
+        break;
+    }
+
+    if (!m_dockShellExtensionManager) {
+        qCWarning(dockLog) << "beginResize: layer shell extension manager is null";
+        return false;
+    }
+
+    if (!m_dockShellExtensionManager->isActive()) {
+        qCWarning(dockLog) << "beginResize: layer shell extension manager inactive";
+        return false;
+    }
+
+    auto *w = window();
+    if (!w) {
+        qCWarning(dockLog) << "beginResize: window is null";
+        return false;
+    }
+
+    auto *waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow *>(w->handle());
+    if (!waylandWindow) {
+        qCWarning(dockLog) << "beginResize: failed to get QWaylandWindow";
+        return false;
+    }
+
+    auto *surface = waylandWindow->wlSurface();
+
+    if (!surface) {
+        qCWarning(dockLog) << "beginResize: wl_surface is null";
+        return false;
+    }
+
+    auto *inputDevice = waylandWindow->display()->lastInputDevice();
+
+    if (!inputDevice) {
+        qCWarning(dockLog) << "beginResize: no last input device";
+        return false;
+    }
+
+    auto *dockSurface = m_dockShellExtensionManager->getLayerShellExtensionObject(surface);
+
+    if (!dockSurface) {
+        qCWarning(dockLog) << "beginResize: failed to get layer shell extension object";
+        return false;
+    }
+    if (m_dockShellExtensionObject)
+        return false;
+    m_dockShellExtensionObject = new TreeLandLayerShellExtensionObject(dockSurface, surface);
+    m_dockShellExtensionObject->setParent(this);
+    connect(m_dockShellExtensionObject, &TreeLandLayerShellExtensionObject::resizingChanged, this, [this](bool resizing) {
+        setIsResizing(resizing);
+        if (!resizing) {
+            m_dockShellExtensionObject->deleteLater();
+        }
+    });
+
+    m_dockShellExtensionObject->beginResize(inputDevice->wl_seat(), inputDevice->serial(), edges, minW, minH, maxW, maxH);
+    inputDevice->handleEndDrag();
+    return true;
 }
 }
 
