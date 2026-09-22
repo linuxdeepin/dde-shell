@@ -622,7 +622,7 @@ Window {
                 Accessible.name: qsTr("Dock Left Area")
                 OverflowContainer {
                     Accessible.role: Accessible.Pane
-                    Accessible.id: "LeftLoader"
+                    Component.onCompleted: { Accessible.id = "LeftLoader" }
                     id: leftLoader
                     anchors.fill: parent
                     useColumnLayout: dock.useColumnLayout
@@ -672,7 +672,7 @@ Window {
 
                 OverflowContainer {
                     Accessible.role: Accessible.Pane
-                    Accessible.id: "CenterLoader"
+                    Component.onCompleted: { Accessible.id = "CenterLoader" }
                     id: centerLoader
                     anchors.fill: parent
                     useColumnLayout: dock.useColumnLayout
@@ -702,7 +702,7 @@ Window {
             anchors.bottom: parent.bottom
             OverflowContainer {
                 Accessible.role: Accessible.Pane
-                Accessible.id: "RightLoader"
+                Component.onCompleted: { Accessible.id = "RightLoader" }
                 id: rightLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout

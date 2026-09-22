@@ -33,7 +33,7 @@ AppletItem {
     }
 
     ListView {
-        Accessible.id: "View"
+        Component.onCompleted: { Accessible.id = "View" }
         id: view
         anchors {
             margins: 10
@@ -55,7 +55,6 @@ AppletItem {
         implicitWidth: maxItemWidth()
 
         delegate: D.ItemDelegate {
-            Accessible.id: "ItemView"
             id: itemView
             width: view.width
             height: 48
@@ -147,6 +146,7 @@ AppletItem {
                 Qt.callLater(function () {
                     view.implicitWidth = view.maxItemWidth()
                 })
+                Accessible.id = "ItemView"
             }
         }
     }

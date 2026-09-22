@@ -60,7 +60,7 @@ Item {
 
     PanelTrayItem {
         Accessible.role: Accessible.Button
-        Accessible.id: "PanelTrayItem"
+        Component.onCompleted: { Accessible.id = "PanelTrayItem" }
         id: panelTrayItem
         shellSurface: quickpanelModel.trayItemSurface
         isOpened: popup.popupVisible
@@ -77,7 +77,7 @@ Item {
 
     PanelPopup {
         Accessible.role: Accessible.Dialog
-        Accessible.id: "Popup"
+        Component.onCompleted: { Accessible.id = "Popup" }
         id: popup
         width: popupContent.width
         height: popupContent.height
@@ -86,13 +86,13 @@ Item {
 
         QuickPanelPage {
             Accessible.role: Accessible.Pane
-            Accessible.id: "PopupContent"
+            Component.onCompleted: { Accessible.id = "PopupContent" }
             id: popupContent
             model: quickpanelModel
 
             DDT.SurfacePopup {
                 Accessible.role: Accessible.Dialog
-                Accessible.id: "SurfacePopup"
+                Component.onCompleted: { Accessible.id = "SurfacePopup" }
                 objectName: "quickpanel"
                 surfaceAcceptor: function (surfaceId) {
                     let pluginId = pluginIdBySurfaceId(surfaceId)
@@ -110,7 +110,7 @@ Item {
     // trayItem's popup
     DDT.TrayItemSurfacePopup {
         Accessible.role: Accessible.Dialog
-        Accessible.id: "TrayItemSurfacePopup"
+        Component.onCompleted: { Accessible.id = "TrayItemSurfacePopup" }
         id: trayItemSurfacePopup
         surfaceAcceptor: isTrayItemPopup
         surfaceFilter: function (surfaceId) {

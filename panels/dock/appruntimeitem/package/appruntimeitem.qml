@@ -21,7 +21,7 @@ AppletItem {
 
     PanelToolTip {
         Accessible.role: Accessible.ToolTip
-        Accessible.id: "Appruntime"
+        Component.onCompleted: { Accessible.id = "Appruntime" }
         id: toolTip
         text: qsTr("appruntime")
         toolTipX: DockPanelPositioner.x
@@ -29,7 +29,7 @@ AppletItem {
     }
     AppletItemButton {
         Accessible.role: Accessible.Button
-        Accessible.id: "Button"
+        Component.onCompleted: { Accessible.id = "Button" }
         id: button
         anchors.centerIn: parent
         icon.name: "qrc:/ddeshell/package/icons/appruntime.svg"

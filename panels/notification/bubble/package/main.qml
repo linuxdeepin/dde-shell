@@ -91,7 +91,7 @@ Window {
     }
 
     ListView  {
-        Accessible.id: "BubbleView"
+        Component.onCompleted: { Accessible.id = "BubbleView" }
         id: bubbleView
         // Close button overhang: half of 20px button height minus 2px visual offset
         // (see NotifyItemContent.qml closePlaceHolder topMargin: -height / 2 + 2)
@@ -184,7 +184,7 @@ Window {
 
         delegate: BubbleDelegate {
             Accessible.role: Accessible.ListItem
-            Accessible.id: "BubbleDelegate"
+            Component.onCompleted: { Accessible.id = "BubbleDelegate" }
             maxCount: model.bubbleCount
 
             onHeightChanged: {

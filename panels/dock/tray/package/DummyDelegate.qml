@@ -8,7 +8,7 @@ import org.deepin.ds.dock 1.0
 import org.deepin.ds.dock.tray 1.0 as DDT
 
 Button {
-    Accessible.id: "Button"
+    Component.onCompleted: { Accessible.id = "Button" }
     icon.name: model.surfaceId
     icon.width: 16
     icon.height: 16
