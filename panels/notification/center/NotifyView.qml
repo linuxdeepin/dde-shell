@@ -67,7 +67,7 @@ Control {
         activeFocusOnTab: false
         boundsBehavior: Flickable.StopAtBounds
         ScrollBar.vertical: ScrollBar {
-            Accessible.id: "Scrollbar"
+            Component.onCompleted: { Accessible.id = "Scrollbar" }
         }
         topMargin: 20
         bottomMargin: 10
@@ -252,6 +252,6 @@ Control {
 
     background: BoundingRectangle {
         Accessible.role: Accessible.Pane
-        Accessible.id: "BoundingRectangle"
+        Component.onCompleted: { Accessible.id = "BoundingRectangle" }
     }
 }

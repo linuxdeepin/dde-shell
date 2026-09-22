@@ -11,7 +11,7 @@ import org.deepin.ds.notificationcenter
 
 NotifyItem {
     Accessible.role: Accessible.ListItem
-    Accessible.id: "NotifyItem"
+    Component.onCompleted: { Accessible.id = "NotifyItem" }
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
@@ -55,7 +55,7 @@ NotifyItem {
 
         contentItem: NotifyItemContent {
             Accessible.role: Accessible.Pane
-            Accessible.id: "NotifyContent"
+            Component.onCompleted: { Accessible.id = "NotifyContent" }
             id: notifyContent
             width: parent.width
             appName: root.appName

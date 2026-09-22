@@ -25,10 +25,10 @@ LQM.DelegateChooser {
         roleValue: "dummy"
         StashedItemPositioner {
             Accessible.role: Accessible.Pane
-            Accessible.id: "StashedItemPositioner"
+            Component.onCompleted: { Accessible.id = "StashedItemPositioner" }
             contentItem: DummyDelegate {
                 Accessible.role: Accessible.Button
-                Accessible.id: "DummyDelegate"
+                Component.onCompleted: { Accessible.id = "DummyDelegate" }
             }
         }
     }
@@ -36,11 +36,11 @@ LQM.DelegateChooser {
         roleValue: "legacy-tray-plugin"
         StashedItemPositioner {
             Accessible.role: Accessible.Pane
-            Accessible.id: "StashItemPositioner"
+            Component.onCompleted: { Accessible.id = "StashItemPositioner" }
             id: stashItemPositioner
             contentItem: ActionLegacyTrayPluginDelegate {
                 Accessible.role: Accessible.Button
-                Accessible.id: "TrayDelegate"
+                Component.onCompleted: { Accessible.id = "TrayDelegate" }
                 id: trayDelegate
                 objectName: "stash"
                 itemVisible: stashItemPositioner.itemVisible
@@ -114,10 +114,10 @@ LQM.DelegateChooser {
         roleValue: "action-show-stash"
         StashedItemPositioner {
             Accessible.role: Accessible.Pane
-            Accessible.id: "StashedItemPositioner"
+            Component.onCompleted: { Accessible.id = "StashedItemPositioner" }
             contentItem: ActionShowStashDelegate {
                 Accessible.role: Accessible.Button
-                Accessible.id: "ActionShowStashDelegate"
+                Component.onCompleted: { Accessible.id = "ActionShowStashDelegate" }
             }
         }
     }
@@ -125,10 +125,10 @@ LQM.DelegateChooser {
         roleValue: "action-toggle-collapse"
         StashedItemPositioner {
             Accessible.role: Accessible.Pane
-            Accessible.id: "StashedItemPositioner"
+            Component.onCompleted: { Accessible.id = "StashedItemPositioner" }
             contentItem: ActionToggleCollapseDelegate {
                 Accessible.role: Accessible.Button
-                Accessible.id: "ActionToggleCollapseDelegate"
+                Component.onCompleted: { Accessible.id = "ActionToggleCollapseDelegate" }
                 isHorizontal: root.isHorizontal
             }
         }

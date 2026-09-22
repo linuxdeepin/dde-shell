@@ -47,7 +47,7 @@ FocusScope {
         anchors.fill: parent
         NotifyHeader {
             Accessible.role: Accessible.Pane
-            Accessible.id: "Header"
+            Component.onCompleted: { Accessible.id = "Header" }
             id: header
             anchors {
                 top: parent.top
@@ -75,7 +75,7 @@ FocusScope {
 
         NotifyView {
             Accessible.role: Accessible.List
-            Accessible.id: "View"
+            Component.onCompleted: { Accessible.id = "View" }
             id: view
             anchors {
                 left: parent.left
@@ -100,7 +100,7 @@ FocusScope {
 
         DropShadowText {
             Accessible.role: Accessible.StaticText
-            Accessible.id: "NoRecentNotifications"
+            Component.onCompleted: { Accessible.id = "NoRecentNotifications" }
             text: qsTr("No recent notifications")
             visible: root.stagingViewCount === 0 && view.viewCount === 0
             anchors {

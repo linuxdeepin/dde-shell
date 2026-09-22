@@ -75,7 +75,7 @@ Item {
 
     AppItemPalette {
         Accessible.role: Accessible.Pane
-        Accessible.id: "ItemPalette"
+        Component.onCompleted: { Accessible.id = "ItemPalette" }
         id: itemPalette
         displayMode: root.displayMode
         colorTheme: root.colorTheme
@@ -246,7 +246,6 @@ Item {
 
         WindowIndicator {
             Accessible.role: Accessible.Indicator
-            Accessible.id: "WindowIndicator"
             id: windowIndicator
             dotWidth: root.useColumnLayout  ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2)
             dotHeight: root.useColumnLayout ? Math.max(iconSize / 3, 2) : Math.max(iconSize / 16, 2)
@@ -300,12 +299,13 @@ Item {
 
             Component.onCompleted: {
                 windowIndicator.updateIndicatorAnchors()
+                Accessible.id = "WindowIndicator"
             }
         }
 
         AppItemTitle {
             Accessible.role: Accessible.StaticText
-            Accessible.id: "TitleLoader"
+            Component.onCompleted: { Accessible.id = "TitleLoader" }
             id: titleLoader
             anchors.left: iconContainer.right
             anchors.leftMargin: Math.round(root.iconSize / 8)
@@ -562,7 +562,7 @@ Item {
 
         PanelToolTip {
             Accessible.role: Accessible.ToolTip
-            Accessible.id: "ToolTip"
+            Component.onCompleted: { Accessible.id = "ToolTip" }
             id: toolTip
             toolTipX: DockPanelPositioner.x
             toolTipY: DockPanelPositioner.y
@@ -570,7 +570,7 @@ Item {
 
         PanelToolTip {
             Accessible.role: Accessible.ToolTip
-            Accessible.id: "MoveToTrash"
+            Component.onCompleted: { Accessible.id = "MoveToTrash" }
             id: dragToolTip
             text: qsTr("Move to Trash")
             toolTipX: DockPanelPositioner.x

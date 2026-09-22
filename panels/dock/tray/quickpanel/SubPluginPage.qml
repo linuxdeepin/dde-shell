@@ -90,7 +90,7 @@ Item {
         // content
         ShellSurfaceItemProxy {
             Accessible.role: Accessible.Pane
-            Accessible.id: "SurfaceLayer"
+            Component.onCompleted: { Accessible.id = "SurfaceLayer" }
             id: surfaceLayer
             autoClose: true
             Layout.fillWidth: true
