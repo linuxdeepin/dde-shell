@@ -1,3 +1,19 @@
+dde-shell (2.0.55) unstable; urgency=medium
+
+  * i18n: Translate org.deepin.ds.notificationcenter.ts in ja (#1719)
+  * fix(dde-apps): support GCC 16 meta-object compilation
+  * test: add GTest for frame, applets and dock modules
+  * fix(a11y): add AT-SPI accessible ids/roles for dde-shell panels
+  * fix: correct tray drag hover index handling
+  * fix: adjust applet icon smoothing on rotation
+  * fix(dock): keep taskbar entry when an app replaces its window
+  * fix(a11y): fix Accessible.id crash and compile warning
+  * fix: set textFormat to PlainText for notification title
+  * feat: move tray plugin loading to systemd-managed tray loader
+    services
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 22 Sep 2026 20:44:22 +0800
+
 dde-shell (2.0.54) unstable; urgency=medium
 
   * i18n: Updates for project Deepin Desktop Environment (#1716)
