@@ -9,7 +9,9 @@
 #include "dockpanel.h"
 #include "layershell/dlayershellwindow.h"
 #include "qwayland-treeland-dde-shell-v1.h"
+#include "qwayland-treeland-xwindow-control-unstable-v1.h"
 #include "wayland-treeland-dde-shell-v1-client-protocol.h"
+#include "wayland-treeland-xwindow-control-unstable-v1-client-protocol.h"
 
 #include <QtWaylandClient/private/qwaylandscreen_p.h>
 #include <QtWaylandClient/private/qwaylandsurface_p.h>
@@ -23,6 +25,7 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     , m_panel(panel)
 {
     m_ddeShellManager.reset(new TreeLandDDEShellManager());
+    m_xwindowControl.reset(new TreeLandXWindowControl());
     DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
     if (auto applet = bridge.applet()) {
         connect(applet, SIGNAL(windowFullscreenChanged(bool)), this, SLOT(setCurrentActiveWindowFullscreened(bool)));
@@ -177,14 +180,14 @@ bool WaylandDockHelper::moveXEmbedWindow(uint32_t wid, double dx, double dy, QQu
         }
     }
 
-    if (!m_ddeShellManager || !m_ddeShellManager->isActive() || !anchorSurface) {
-        qWarning() << "WaylandDockHelper::moveXEmbedWindow: not ready, manager active:" 
-                   << (m_ddeShellManager && m_ddeShellManager->isActive())
+    if (!m_xwindowControl || !m_xwindowControl->isActive() || !anchorSurface) {
+        qWarning() << "WaylandDockHelper::moveXEmbedWindow: not ready, xwindow control active:" 
+                   << (m_xwindowControl && m_xwindowControl->isActive())
                    << "surface:" << (anchorSurface != nullptr);
         return false;
     }
     
-    struct wl_callback *cb = m_ddeShellManager->setXWindowPositionRelative(wid, anchorSurface, dx, dy);
+    struct wl_callback *cb = m_xwindowControl->setXWindowPositionRelative(wid, anchorSurface, dx, dy);
 
     // Register wl_callback listener — result arrives asynchronously
     if (!cb) {
@@ -233,12 +236,17 @@ TreeLandDDEShellManager::TreeLandDDEShellManager()
 {
 }
 
-struct ::wl_callback *TreeLandDDEShellManager::setXWindowPositionRelative(uint32_t wid, struct ::wl_surface *anchor, double dx, double dy)
+TreeLandXWindowControl::TreeLandXWindowControl()
+    : QWaylandClientExtensionTemplate<TreeLandXWindowControl>(treeland_xwindow_control_v1_interface.version)
+{
+}
+
+struct ::wl_callback *TreeLandXWindowControl::setXWindowPositionRelative(uint32_t wid, struct ::wl_surface *anchor, double dx, double dy)
 {
     if (!isActive()) {
         return nullptr;
     }
-    return QtWayland::treeland_dde_shell_manager_v1::set_xwindow_position_relative(wid, anchor, wl_fixed_from_double(dx), wl_fixed_from_double(dy));
+    return QtWayland::treeland_xwindow_control_v1::set_xwindow_position_relative(wid, anchor, wl_fixed_from_double(dx), wl_fixed_from_double(dy));
 }
 
 TreeLandWindowOverlapChecker::TreeLandWindowOverlapChecker(WaylandDockHelper *helper, struct ::treeland_window_overlap_checker *checker)
