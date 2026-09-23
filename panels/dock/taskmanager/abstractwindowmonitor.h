@@ -45,6 +45,10 @@ public:
     virtual void
     requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) = 0;
 
+    // 返回是否已交由合成器绘制，false 时调用方应回退到自身的 tooltip。
+    virtual bool
+    requestTooltip(const QString &text, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+
     void requestWindowsView(const QModelIndexList &indexes) const override;
 
     virtual void presentWindows(QList<uint32_t> windowsId) = 0;
