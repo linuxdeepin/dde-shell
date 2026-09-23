@@ -4,8 +4,24 @@
 
 #pragma once
 
+#include <QPointer>
 #include "applet.h"
 
+#define CHECK_MANAGER() \
+  do { \
+        if (!m_manager) { \
+            qWarning(notifyLog) << "NotificationManager is null."; \
+            return; \
+        } \
+    } while(0)
+
+#define CHECK_MANAGER_RET(val) \
+    do { \
+        if (!m_manager) { \
+            qWarning(notifyLog) << "NotificationManager is null."; \
+            return val; \
+        } \
+     } while(0)
 namespace notification {
 
 class NotificationManager;
@@ -34,8 +50,8 @@ public Q_SLOTS:
     void setBlockClosedId(qint64 id);
 
 private:
-    NotificationManager *m_manager = nullptr;
-    QThread *m_worker = nullptr;
+    QPointer<NotificationManager> m_manager;
+    QPointer<QThread> m_worker;
 };
 
 }
