@@ -1,3 +1,9 @@
+dde-shell (2.0.56) unstable; urgency=medium
+
+  * fix(dock): keep dock shown when fullscreen window minimized
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 23 Sep 2026 09:32:36 +0800
+
 dde-shell (2.0.55) unstable; urgency=medium
 
   * i18n: Translate org.deepin.ds.notificationcenter.ts in ja (#1719)
