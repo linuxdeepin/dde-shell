@@ -124,7 +124,7 @@ Window {
         ? Applet.dockSize + (fashionDock.enabled ? fashionDock.floatingMargin : 0)
         : 0
     DLayerShellWindow.scope: "dde-shell/dock"
-    DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityNone
+    DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
 
     D.DWindow.enabled: true
     D.DWindow.windowRadius: fashionDock.enabled ? fashionDock.backgroundRadius : 0
