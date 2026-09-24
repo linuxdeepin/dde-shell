@@ -374,20 +374,7 @@ void X11DockHelper::onHideModeChanged(HideMode mode)
         connect(m_xcbHelper, &XcbEventFilter::windowPropertyChanged, this, &X11DockHelper::onWindowPropertyChanged);
         connect(m_xcbHelper, &XcbEventFilter::windowGeometryChanged, this, &X11DockHelper::onWindowGeometryChanged);
         connect(m_xcbHelper, &XcbEventFilter::currentWorkspaceChanged, this, [this]() {
-            static bool updating = false;
-            if (updating)
-                return;
-
-            updating = true;
-            int currentWorkspace = m_xcbHelper->getCurrentWorkspace();
-            for (auto &&data : m_windows) {
-                if (data->overlap && (static_cast<int>(data->workspace) == currentWorkspace || data->workspace == static_cast<uint32_t>(allWorkspace))) {
-                    Q_EMIT isWindowOverlapChanged(isWindowOverlap());
-                    updating = false;
-                    return;
-                }
-            }
-            updating = false;
+            Q_EMIT isWindowOverlapChanged(isWindowOverlap());
         });
     } break;
     case KeepShowing:
@@ -455,6 +442,7 @@ void X11DockHelper::onWindowWorkspaceChanged(xcb_window_t window)
 {
     if (m_windows.contains(window)) {
         m_windows[window]->workspace = m_xcbHelper->getWindowWorkspace(window);
+        Q_EMIT isWindowOverlapChanged(isWindowOverlap());
     }
 }
 
@@ -535,10 +523,13 @@ bool X11DockHelper::isWindowOverlap()
         return false;
     }
     
-    // any widnow overlap
+    // any window overlap in current workspace
+    uint32_t currentWorkspace = m_xcbHelper->getCurrentWorkspace();
     bool overlap = false;
-    std::for_each(m_windows.begin(), m_windows.end(), [&overlap](const auto &window) {
-        return overlap |= window->overlap;
+    std::for_each(m_windows.begin(), m_windows.end(), [&overlap, currentWorkspace](const auto &window) {
+        if (window->overlap && (window->workspace == currentWorkspace || window->workspace == allWorkspace)) {
+            overlap = true;
+        }
     });
     return overlap;
 }
