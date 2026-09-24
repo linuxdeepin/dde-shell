@@ -68,6 +68,7 @@ private:
     void updateBubbleTimeTip();
     void updateContentRowCount(int rowCount);
 
+private:
     QTimer *m_updateTimeTipTimer = nullptr;
     QTimer *m_processPendingTimer = nullptr;
     QList<BubbleItem *> m_bubbles;
