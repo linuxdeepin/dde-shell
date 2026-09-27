@@ -18,6 +18,7 @@
 #include <QTranslator>
 #include <QApplication>
 #include <QFile>
+#include <QDir>
 #include <DWindowManagerHelper>
 
 DS_BEGIN_NAMESPACE
@@ -336,16 +337,23 @@ void DAppletLoaderPrivate::loadTranslation(const DPluginMetaData &pluginData)
     if (!m_configManager->isAppletEnabled(pluginId))
         return;
 
-    auto translator = new QTranslator(qApp);
     const QString pluginTranslationDir(baseDir + "/translations/");
-    if (translator->load(QLocale::system(), pluginId, QLatin1String("_"), pluginTranslationDir)) {
-        m_pluginTranslators[pluginId] = translator;
-        qApp->installTranslator(translator);
-        qInfo(dsLoaderLog) << "Loaded translation:" << translator->filePath();
+    // Not every plugin ships translations; a missing directory is expected,
+    // only warn when the directory exists but no matching qm can be loaded.
+    if (!QDir(pluginTranslationDir).exists()) {
+        qCDebug(dsLoaderLog) << "Skip translation loading, directory does not exist:" << pluginTranslationDir
+                             << "plugin id:" << pluginId;
     } else {
-        qCWarning(dsLoaderLog) << "Failed to load translation:" << pluginTranslationDir << "plugin id:" << pluginId
-                               << "locale:" << QLocale::system().uiLanguages();
-        translator->deleteLater();
+        auto translator = new QTranslator(qApp);
+        if (translator->load(QLocale::system(), pluginId, QLatin1String("_"), pluginTranslationDir)) {
+            m_pluginTranslators[pluginId] = translator;
+            qApp->installTranslator(translator);
+            qInfo(dsLoaderLog) << "Loaded translation:" << translator->filePath();
+        } else {
+            qCWarning(dsLoaderLog) << "Failed to load translation:" << pluginTranslationDir << "plugin id:" << pluginId
+                                   << "locale:" << QLocale::system().uiLanguages();
+            translator->deleteLater();
+        }
     }
 
     const auto children = DPluginLoader::instance()->childrenPlugin(pluginId);
