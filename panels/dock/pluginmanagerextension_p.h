@@ -8,10 +8,11 @@
 #include <QPointer>
 #include <QQuickWindow>
 #include <QtWaylandCompositor/QWaylandCompositor>
+#include <QtWaylandCompositor/QWaylandCompositorExtensionTemplate>
 #include <QtWaylandCompositor/QWaylandQuickExtension>
 #include <QtWaylandCompositor/QWaylandResource>
 #include <QtWaylandCompositor/QWaylandSeat>
-#include <QtWaylandCompositor/QWaylandShellSurfaceTemplate>
+#include <QtWaylandCompositor/QWaylandShellSurface>
 #include <QtWaylandCompositor/QWaylandSurface>
 
 #include <cstdint>
@@ -23,7 +24,7 @@
 class PluginSurface;
 class PluginPopup;
 class PluginScale;
-class PluginScaleManager : public QWaylandCompositorExtensionTemplate<PluginScaleManager>, public QtWaylandServer::wp_fractional_scale_manager_v1
+class PluginScaleManager : public QWaylandCompositorExtension, public QtWaylandServer::wp_fractional_scale_manager_v1
 {
     Q_OBJECT
     QML_ELEMENT
@@ -31,6 +32,10 @@ class PluginScaleManager : public QWaylandCompositorExtensionTemplate<PluginScal
 
 public:
     PluginScaleManager(QWaylandCompositor *compositor = nullptr);
+    const struct wl_interface *extensionInterface() const override
+    {
+        return QtWaylandServer::wp_fractional_scale_manager_v1::interface();
+    }
     uint32_t pluginScale();
     void setPluginScale(const uint32_t &scale);
 
@@ -50,10 +55,14 @@ class PluginScale : public QWaylandCompositorExtensionTemplate<PluginScale>, pub
     Q_OBJECT
 public:
     PluginScale(PluginScaleManager *manager, QWaylandSurface *surface, const QWaylandResource &resource);
+    const struct wl_interface *extensionInterface() const override
+    {
+        return QtWaylandServer::wp_fractional_scale_v1::interface();
+    }
     void wp_fractional_scale_v1_destroy(Resource *resource) override;
 };
 
-class PluginManager : public QWaylandCompositorExtensionTemplate<PluginManager>, public QtWaylandServer::plugin_manager_v1
+class PluginManager : public QWaylandCompositorExtension, public QtWaylandServer::plugin_manager_v1
 {
     Q_OBJECT
     QML_ELEMENT
@@ -65,6 +74,10 @@ class PluginManager : public QWaylandCompositorExtensionTemplate<PluginManager>,
 
 public:
     PluginManager(QWaylandCompositor *compositor = nullptr);
+    const struct wl_interface *extensionInterface() const override
+    {
+        return QtWaylandServer::plugin_manager_v1::interface();
+    }
     void initialize() override;
 
     Q_INVOKABLE void updateDockOverflowState(int state);
@@ -156,7 +169,7 @@ private:
     QMap<uint32_t, PendingXEmbedCallback> m_pendingXEmbedCallbacks;
 };
 
-class PluginSurface : public QWaylandShellSurfaceTemplate<PluginSurface>, public QtWaylandServer::plugin
+class PluginSurface : public QWaylandShellSurface, public QtWaylandServer::plugin
 {
     Q_OBJECT
     Q_PROPERTY(QString pluginId READ pluginId CONSTANT)
@@ -183,6 +196,10 @@ public:
                   const QString &itemKey, const QString &displayName,
                   int pluginFlags, int pluginType, int sizePolicy,
                   QWaylandSurface *surface, const QWaylandResource &resource);
+    const struct wl_interface *extensionInterface() const override
+    {
+        return QtWaylandServer::plugin::interface();
+    }
     QWaylandQuickShellIntegration *
     createIntegration(QWaylandQuickShellSurfaceItem *item) override;
 
@@ -263,7 +280,7 @@ private:
     QPointer<QQuickWindow> m_anchorWindow;
 };
 
-class PluginPopup : public QWaylandShellSurfaceTemplate<PluginPopup>, public QtWaylandServer::plugin_popup
+class PluginPopup : public QWaylandShellSurface, public QtWaylandServer::plugin_popup
 {
     Q_OBJECT
     Q_PROPERTY(int32_t x READ x WRITE setX NOTIFY xChanged)
@@ -279,6 +296,10 @@ class PluginPopup : public QWaylandShellSurfaceTemplate<PluginPopup>, public QtW
 public:
     PluginPopup(PluginManager* shell, const QString &pluginId, const QString &itemKey, int x, int y, int popupType,
                 QWaylandSurface *surface, const QWaylandResource &resource);
+    const struct wl_interface *extensionInterface() const override
+    {
+        return QtWaylandServer::plugin_popup::interface();
+    }
     QWaylandQuickShellIntegration *createIntegration(QWaylandQuickShellSurfaceItem *item) override;
 
     QWaylandSurface *surface() const;

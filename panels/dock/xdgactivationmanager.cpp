@@ -19,14 +19,14 @@ Q_LOGGING_CATEGORY(xdgActivationMgr, "dde.shell.xdgactivation.manager")
 // ---------------------------------------------------------------------------
 
 XdgActivationManager::XdgActivationManager(QWaylandCompositor *compositor)
-    : QWaylandCompositorExtensionTemplate(compositor)
+    : QWaylandCompositorExtension(compositor)
     , m_compositor(compositor)
 {
 }
 
 void XdgActivationManager::initialize()
 {
-    QWaylandCompositorExtensionTemplate::initialize();
+    QWaylandCompositorExtension::initialize();
     QWaylandCompositor *compositor = static_cast<QWaylandCompositor *>(extensionContainer());
     Q_ASSERT(compositor);
     m_compositor = compositor;

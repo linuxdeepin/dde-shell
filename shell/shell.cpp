@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -124,8 +124,13 @@ bool Shell::dconfigMigrate(const QString &newConf, const QString &oldConf)
     auto oldLastIndex = oldConf.lastIndexOf('/');
     auto oldFirstIndex = oldConf.indexOf('/');
 
-    std::unique_ptr<Dtk::Core::DConfig> newDconfig(Dtk::Core::DConfig::create(newConf.left(newFirstIndex), newConf.mid(newLastIndex + 1), newConf.mid(newFirstIndex + 1, newLastIndex - newFirstIndex - 1)));
-    std::unique_ptr<Dtk::Core::DConfig> oldDconfig(Dtk::Core::DConfig::create(oldConf.left(oldFirstIndex), oldConf.mid(oldLastIndex + 1), oldConf.mid(oldFirstIndex + 1, oldLastIndex - newFirstIndex - 1)));
+    const QString newAppId = newConf.left(newFirstIndex);
+    const QString newName = newConf.mid(newLastIndex + 1);
+    const QString oldAppId = oldConf.left(oldFirstIndex);
+    const QString oldName = oldConf.mid(oldLastIndex + 1);
+
+    std::unique_ptr<Dtk::Core::DConfig> newDconfig(Dtk::Core::DConfig::create(newAppId, newName, newConf.mid(newFirstIndex + 1, newLastIndex - newFirstIndex - 1)));
+    std::unique_ptr<Dtk::Core::DConfig> oldDconfig(Dtk::Core::DConfig::create(oldAppId, oldName, oldConf.mid(oldFirstIndex + 1, oldLastIndex - oldFirstIndex - 1)));
 
     if (!newDconfig->isValid() || !oldDconfig->isValid()) {
         return false;

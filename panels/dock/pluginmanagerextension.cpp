@@ -90,7 +90,7 @@ struct WlQtTextInputMethodHelper : public QtWaylandServer::qt_text_input_method_
 };
 
 PluginScaleManager::PluginScaleManager(QWaylandCompositor *compositor)
-    : QWaylandCompositorExtensionTemplate(compositor)
+    : QWaylandCompositorExtension(compositor)
     , m_compositor(compositor)
 {
 }
@@ -119,7 +119,7 @@ uint32_t PluginScaleManager::pluginScale()
 
 void PluginScaleManager::initialize()
 {
-    QWaylandCompositorExtensionTemplate::initialize();
+    QWaylandCompositorExtension::initialize();
     QWaylandCompositor *compositor = static_cast<QWaylandCompositor *>(extensionContainer());
     Q_ASSERT(compositor);
 
@@ -166,7 +166,8 @@ PluginSurface::PluginSurface(PluginManager *manager,
                              int sizePolicy,
                              QWaylandSurface *surface,
                              const QWaylandResource &resource)
-    : m_manager(manager)
+    : QWaylandShellSurface(nullptr)
+    , m_manager(manager)
     , m_surface(surface)
     , m_itemKey(itemKey)
     , m_pluginId(pluginId)
@@ -370,7 +371,8 @@ PluginPopup::PluginPopup(PluginManager *manager,
                          int popupType,
                          QWaylandSurface *surface,
                          const QWaylandResource &resource)
-    : m_manager(manager)
+    : QWaylandShellSurface(nullptr)
+    , m_manager(manager)
     , m_surface(surface)
     , m_itemKey(itemKey)
     , m_pluginId(pluginId)
@@ -496,7 +498,7 @@ void PluginPopup::plugin_popup_set_cursor(Resource *resource, int32_t cursor_sha
 }
 
 PluginManager::PluginManager(QWaylandCompositor *compositor)
-    : QWaylandCompositorExtensionTemplate(compositor)
+    : QWaylandCompositorExtension(compositor)
 {
     auto theme = DGuiApplicationHelper::instance()->applicationTheme();
     QObject::connect(theme, &DPlatformTheme::fontNameChanged, this, &PluginManager::onFontChanged);
@@ -509,7 +511,7 @@ PluginManager::PluginManager(QWaylandCompositor *compositor)
 
 void PluginManager::initialize()
 {
-    QWaylandCompositorExtensionTemplate::initialize();
+    QWaylandCompositorExtension::initialize();
     QWaylandCompositor *compositor = static_cast<QWaylandCompositor *>(extensionContainer());
 
     // ###(zccrs): 在dde-shell中不要使用QWaylandCompositor的event handler，它会对key event进行
