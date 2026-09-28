@@ -9,6 +9,7 @@
 
 #include "qwayland-treeland-dde-shell-v1.h"
 #include "qwayland-treeland-wallpaper-color-v1.h"
+#include "qwayland-treeland-xwindow-control-unstable-v1.h"
 #include <QWidget>
 
 #include <QtWaylandClient/QWaylandClientExtension>
@@ -19,6 +20,7 @@ namespace dock {
 class WallpaperColorManager;
 class TreeLandDockTriggerArea;
 class TreeLandDDEShellManager;
+class TreeLandXWindowControl;
 class TreeLandWindowOverlapChecker;
 
 class WaylandDockHelper : public DockHelper
@@ -61,6 +63,7 @@ private:
     QScopedPointer<WallpaperColorManager> m_wallpaperColorManager;
     QScopedPointer<TreeLandWindowOverlapChecker> m_overlapChecker;
     QScopedPointer<TreeLandDDEShellManager> m_ddeShellManager;
+    QScopedPointer<TreeLandXWindowControl> m_xwindowControl;
     struct ::wl_surface *m_dockWlSurface = nullptr;  // Dock's wl_surface for XEmbed positioning
 };
 
@@ -86,9 +89,15 @@ class TreeLandDDEShellManager : public QWaylandClientExtensionTemplate<TreeLandD
 
 public:
     explicit TreeLandDDEShellManager();
-    
-    // Move XEmbed window to position relative to anchor surface
-    // Returns wl_callback* or nullptr if not active
+};
+
+class TreeLandXWindowControl : public QWaylandClientExtensionTemplate<TreeLandXWindowControl>, public QtWayland::treeland_xwindow_control_v1
+{
+    Q_OBJECT
+
+public:
+    explicit TreeLandXWindowControl();
+
     struct ::wl_callback *setXWindowPositionRelative(uint32_t wid, struct ::wl_surface *anchor, double dx, double dy);
 };
 
