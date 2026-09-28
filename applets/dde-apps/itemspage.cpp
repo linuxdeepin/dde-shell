@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -55,6 +55,8 @@ QStringList ItemsPage::items(int page) const
 QStringList ItemsPage::firstNItems(int count)
 {
     QStringList result;
+    if (count <= 0)
+        return result;
 
     for (const QStringList & pageItems : std::as_const(m_pages)) {
         for (const QString & item : pageItems) {
