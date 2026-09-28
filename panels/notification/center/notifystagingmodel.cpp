@@ -8,6 +8,7 @@
 #include <QLoggingCategory>
 
 #include "dataaccessorproxy.h"
+#include "expiretimer.h"
 #include "notifyaccessor.h"
 #include "notifyentity.h"
 #include "notifyitem.h"
@@ -62,6 +63,9 @@ void NotifyStagingModel::push(const NotifyEntity &entity)
         auto count = m_accessor->fetchEntityCount(DataAccessor::AllApp(), NotifyEntity::NotProcessed);
         updateOverlapCount(count);
     }
+
+    // The panel is open here, so the entity is displayed: start the countdown.
+    ExpireTimer::instance()->push(entity);
 
     if (m_refreshTimer < 0) {
         m_refreshTimer = startTimer(std::chrono::milliseconds(1000));
@@ -146,6 +150,7 @@ void NotifyStagingModel::remove(qint64 id)
             auto notify = new AppNotifyItem(newEntity);
             m_appNotifies.insert(insertedIndex, notify);
             endInsertRows();
+            ExpireTimer::instance()->push(newEntity);
         }
     }
     updateOverlapCount(entities.size());
@@ -169,8 +174,10 @@ void NotifyStagingModel::open()
 
     const auto count = std::min(static_cast<int>(entities.size()), BubbleMaxCount);
     for (int i = 0; i < count; i++) {
-        auto notify = new AppNotifyItem(entities.at(i));
+        const auto &entity = entities.at(i);
+        auto notify = new AppNotifyItem(entity);
         m_appNotifies << notify;
+        ExpireTimer::instance()->push(entity);
     }
     updateOverlapCount(entities.size());
 
@@ -246,17 +253,29 @@ NotifyEntity NotifyStagingModel::notifyById(qint64 id) const
     return {};
 }
 
-void NotifyStagingModel::replace(const NotifyEntity &entity)
+int NotifyStagingModel::rowByBubbleId(uint bubbleId) const
 {
     for (int i = 0; i < m_appNotifies.size(); i++) {
-        auto item = m_appNotifies[i];
-        if (item->id() == entity.bubbleId()) {
-            item->setEntity(entity);
-            const auto index = this->index(i, 0, {});
-            dataChanged(index, index);
-            break;
-        }
+        if (m_appNotifies[i]->entity().bubbleId() == bubbleId)
+            return i;
     }
+    return -1;
+}
+
+void NotifyStagingModel::replace(const NotifyEntity &entity)
+{
+    // Match by bubble id, like BubbleModel::replaceBubbleIndex: a replacement
+    // keeps the bubble id but may reuse the entity id or carry a fresh one.
+    const int row = rowByBubbleId(entity.bubbleId());
+    if (row < 0)
+        return;
+
+    auto item = m_appNotifies[row];
+    // push() cancels the old countdown of the bubble slot and starts the new one.
+    item->setEntity(entity);
+    ExpireTimer::instance()->push(entity);
+    const auto index = this->index(row, 0, {});
+    dataChanged(index, index);
 }
 
 QHash<int, QByteArray> NotifyStagingModel::roleNames() const
@@ -299,12 +318,13 @@ int NotifyStagingModel::overlapCount() const
 void NotifyStagingModel::doEntityReceived(qint64 id)
 {
     qDebug(notifyLog) << "Receive entity" << id;
+
     auto entity = m_accessor->fetchEntity(id);
     if (!entity.isValid()) {
         qWarning(notifyLog) << "Received invalid entity:" << id << ", appName:" << entity.appName();
         return;
     }
-    if (entity.isReplace() && notifyById(id).isValid()) {
+    if (entity.isReplace() && rowByBubbleId(entity.bubbleId()) >= 0) {
         replace(entity);
     } else {
         push(entity);

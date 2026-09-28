@@ -236,6 +236,16 @@ bool NotifyEntity::isReplace() const
     return d->replacesId != NoReplaceId;
 }
 
+int NotifyEntity::timeout() const
+{
+    return d->expireTimeout;
+}
+
+int NotifyEntity::urgency() const
+{
+    return d->hints.value("urgency").toInt();
+}
+
 qint64 NotifyEntity::cTime() const
 {
     return d->cTime;

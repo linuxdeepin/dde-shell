@@ -39,16 +39,16 @@ void BubbleItem::setEntity(const NotifyEntity &entity)
 {
     m_entity = entity;
     updateActions();
-
-    QVariantMap hints = entity.hints();
-    if (hints.contains("urgency")) {
-        m_urgency = hints.value("urgency").toInt();
-    }
 }
 
 qint64 BubbleItem::id() const
 {
     return m_entity.id();
+}
+
+const NotifyEntity &BubbleItem::entity() const
+{
+    return m_entity;
 }
 
 uint BubbleItem::bubbleId() const
@@ -88,7 +88,7 @@ bool BubbleItem::isReplace() const
 
 int BubbleItem::urgency() const
 {
-    return m_urgency;
+    return m_entity.urgency();
 }
 
 QString BubbleItem::bodyImagePath() const
