@@ -81,6 +81,12 @@ public:
     void setReplacesId(uint replacesId);
     bool isReplace() const;
 
+    // Expire timeout in milliseconds passed by the client; -1 means the server
+    // default and 0 means the notification never expires.
+    int timeout() const;
+    // Urgency hint, Normal unless the client sent one.
+    int urgency() const;
+
     qint64 cTime() const;
     void setCTime(qint64 cTime);
 

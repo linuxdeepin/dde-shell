@@ -21,6 +21,7 @@ public:
 
 public:
     void setEntity(const NotifyEntity &entity);
+    const NotifyEntity &entity() const;
 
 public:
     qint64 id() const;
@@ -56,7 +57,6 @@ private:
 
 private:
     NotifyEntity m_entity;
-    int m_urgency = NotifyEntity::Normal;
     QString m_timeTip;
     bool m_enablePreview = true;
     QVariantList m_actions;

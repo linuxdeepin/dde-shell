@@ -7,6 +7,7 @@
 #include <notifysetting.h>
 
 #include "bubbleitem.h"
+#include "expiretimer.h"
 
 #include <QTimer>
 #include <QLoggingCategory>
@@ -82,6 +83,10 @@ void BubbleModel::insertBubble(BubbleItem *bubble)
     beginInsertRows(QModelIndex(), 0, 0);
     m_bubbles.prepend(bubble);
     endInsertRows();
+
+    // Start the countdown now that the bubble is displayed. A queued bubble
+    // starts it only when it reaches insertBubble().
+    ExpireTimer::instance()->push(bubble->entity());
 }
 
 bool BubbleModel::isReplaceBubble(const BubbleItem *bubble) const
@@ -98,25 +103,11 @@ BubbleItem *BubbleModel::replaceBubble(BubbleItem *bubble)
     m_bubbles.replace(replaceIndex, bubble);
     Q_EMIT dataChanged(index(replaceIndex), index(replaceIndex));
 
+    // The replacement takes over the old bubble slot: push() cancels the old
+    // countdown (moving the hover block along) and starts the new one.
+    ExpireTimer::instance()->push(bubble->entity());
+
     return oldBubble;
-}
-
-void BubbleModel::clear()
-{
-    if (m_processPendingTimer) {
-        m_processPendingTimer->stop();
-    }
-    qDeleteAll(m_pendingBubbles);
-    m_pendingBubbles.clear();
-
-    if (m_bubbles.count() <= 0)
-        return;
-    beginResetModel();
-    qDeleteAll(m_bubbles);
-    m_bubbles.clear();
-    endResetModel();
-
-    m_updateTimeTipTimer->stop();
 }
 
 QList<BubbleItem *> BubbleModel::items() const
@@ -133,7 +124,6 @@ void BubbleModel::remove(int index)
     auto bubble = m_bubbles.takeAt(index);
     bubble->deleteLater();
     endRemoveRows();
-
 }
 
 void BubbleModel::remove(const BubbleItem *bubble)
@@ -298,4 +288,5 @@ void BubbleModel::updateContentRowCount(int rowCount)
         Q_EMIT dataChanged(index(0), index(m_bubbles.size() - 1), {BubbleModel::ContentRowCount});
     }
 }
-}
+
+} // notification

@@ -22,6 +22,12 @@ public:
 Q_SIGNALS:
     void notificationStateChanged(qint64 id, int processedType);
 
+    // The expiry close is forwarded from the main thread (where ExpireTimer
+    // runs) to the worker-thread manager through this typed, queued signal;
+    // see init(). The wrapper slots keep their existing
+    // QMetaObject::invokeMethod delivery.
+    void notificationClosedForwarded(qint64 id, uint bubbleId, uint reason);
+
 public Q_SLOTS:
     void actionInvoked(qint64 id, uint bubbleId, const QString &actionKey);
     void actionInvoked(qint64 id, const QString &actionKey);
@@ -31,7 +37,6 @@ public Q_SLOTS:
     void removeNotifications(const QString &appName);
     void removeNotifications();
     void removeExpiredNotifications();
-    void setBlockClosedId(qint64 id);
 
 private:
     NotificationManager *m_manager = nullptr;
