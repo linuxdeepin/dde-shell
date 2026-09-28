@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -123,7 +123,7 @@ DPluginMetaData DPluginMetaData::fromJsonFile(const QString &file)
 DPluginMetaData DPluginMetaData::fromJsonString(const QByteArray &data)
 {
     QJsonParseError error;
-    const QJsonObject metaData = QJsonDocument::fromJson(data).object();
+    const QJsonObject metaData = QJsonDocument::fromJson(data, &error).object();
     if (error.error) {
         qCWarning(dsLog) << "error parsing json data"  << error.errorString();
         return DPluginMetaData();
