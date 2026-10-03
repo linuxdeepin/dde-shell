@@ -20,12 +20,16 @@ class XdgActivation;
 }
 
 class XdgActivationTokenV1;
-class XdgActivationManager : public QWaylandCompositorExtensionTemplate<XdgActivationManager>, public QtWaylandServer::xdg_activation_v1
+class XdgActivationManager : public QWaylandCompositorExtension, public QtWaylandServer::xdg_activation_v1
 {
     Q_OBJECT
     QML_ELEMENT
 public:
     XdgActivationManager(QWaylandCompositor *compositor = nullptr);
+    const struct wl_interface *extensionInterface() const override
+    {
+        return QtWaylandServer::xdg_activation_v1::interface();
+    }
     void initialize() override;
 
     void setPendingToken(XdgActivationTokenV1 *token);

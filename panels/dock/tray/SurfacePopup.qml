@@ -128,10 +128,10 @@ Item {
 
                 toolTip.shellSurface = popupSurface
                 toolTip.toolTipX = Qt.binding(function () {
-                    return Panel.popupWindow.xOffset + toolTip.shellSurface.x - toolTip.width / 2
+                    return toolTip.shellSurface ? Panel.popupWindow.xOffset + toolTip.shellSurface.x - toolTip.width / 2 : 0
                 })
                 toolTip.toolTipY = Qt.binding(function () {
-                    return Panel.popupWindow.yOffset + toolTip.shellSurface.y - toolTip.height - toolTipVOffset
+                    return toolTip.shellSurface ? Panel.popupWindow.yOffset + toolTip.shellSurface.y - toolTip.height - toolTipVOffset : 0
                 })
                 toolTip.open()
             } else if (popupSurface.popupType === Dock.TrayPopupTypeMenu) {
