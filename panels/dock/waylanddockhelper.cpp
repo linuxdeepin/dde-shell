@@ -12,6 +12,8 @@
 #include "qwayland-treeland-xwindow-control-unstable-v1.h"
 #include "wayland-treeland-dde-shell-v1-client-protocol.h"
 #include "wayland-treeland-xwindow-control-unstable-v1-client-protocol.h"
+#include "qwayland-treeland-region-watch-unstable-v1.h"
+#include "wayland-treeland-region-watch-unstable-v1-client-protocol.h"
 
 #include <QtWaylandClient/private/qwaylandscreen_p.h>
 #include <QtWaylandClient/private/qwaylandsurface_p.h>
@@ -26,6 +28,7 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
 {
     m_ddeShellManager.reset(new TreeLandDDEShellManager());
     m_xwindowControl.reset(new TreeLandXWindowControl());
+    m_regionWatchManager.reset(new TreeLandRegionWatchManager());
     DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
     if (auto applet = bridge.applet()) {
         connect(applet, SIGNAL(windowFullscreenChanged(bool)), this, SLOT(setCurrentActiveWindowFullscreened(bool)));
@@ -40,33 +43,26 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     }
 
 
-    connect(m_panel, &DockPanel::positionChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
-    connect(m_panel, &DockPanel::dockSizeChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
-    connect(m_panel, &DockPanel::rootObjectChanged, this, &WaylandDockHelper::updateOverlapCheckerPos);
+    connect(m_panel, &DockPanel::positionChanged, this, &WaylandDockHelper::updateRegionWatchPos);
+    connect(m_panel, &DockPanel::dockSizeChanged, this, &WaylandDockHelper::updateRegionWatchPos);
+    connect(m_panel, &DockPanel::rootObjectChanged, this, &WaylandDockHelper::updateRegionWatchPos);
 
-    connect(m_ddeShellManager.get(), &TreeLandDDEShellManager::activeChanged, this, [this]() {
-        if (m_panel->hideMode() == HideMode::SmartHide && m_ddeShellManager->isActive()) {
-            m_overlapChecker.reset(new TreeLandWindowOverlapChecker(this, m_ddeShellManager->get_window_overlap_checker()));
-            updateOverlapCheckerPos();
+    auto ensureRegionWatch = [this]() {
+        if (m_panel->hideMode() == HideMode::SmartHide && m_regionWatchManager->isActive()) {
+            m_regionWatch.reset(new TreeLandRegionWatch(this, m_regionWatchManager->get_region_watch()));
+            updateRegionWatchPos();
         } else {
-            m_overlapChecker.reset(nullptr);
+            m_regionWatch.reset(nullptr);
         }
-    });
-
-    connect(m_panel, &DockPanel::hideModeChanged, this, [this](HideMode mode) {
-        if (mode == HideMode::SmartHide && m_ddeShellManager->isActive()) {
-            m_overlapChecker.reset(new TreeLandWindowOverlapChecker(this, m_ddeShellManager->get_window_overlap_checker()));
-            updateOverlapCheckerPos();
-        } else {
-            m_overlapChecker.reset(nullptr);
-        }
-    });
+    };
+    connect(m_regionWatchManager.get(), &TreeLandRegionWatchManager::activeChanged, this, ensureRegionWatch);
+    connect(m_panel, &DockPanel::hideModeChanged, this, ensureRegionWatch);
 
 }
 
-void WaylandDockHelper::updateOverlapCheckerPos()
+void WaylandDockHelper::updateRegionWatchPos()
 {
-    if (!m_overlapChecker)
+    if (!m_regionWatch)
         return;
 
     if (!m_panel->rootObject())
@@ -79,20 +75,20 @@ void WaylandDockHelper::updateOverlapCheckerPos()
     uint32_t anchor = 0;
     switch (m_panel->position()) {
     case Top:
-        anchor = QtWayland::treeland_window_overlap_checker::anchor_top;
+        anchor = QtWayland::treeland_region_watch_v1::anchor_top;
         break;
     case Bottom:
-        anchor = QtWayland::treeland_window_overlap_checker::anchor_bottom;
+        anchor = QtWayland::treeland_region_watch_v1::anchor_bottom;
         break;
     case Left:
-        anchor = QtWayland::treeland_window_overlap_checker::anchor_left;
+        anchor = QtWayland::treeland_region_watch_v1::anchor_left;
         break;
     case Right:
-        anchor = QtWayland::treeland_window_overlap_checker::anchor_right;
+        anchor = QtWayland::treeland_region_watch_v1::anchor_right;
         break;
     }
 
-    m_overlapChecker->update(m_panel->dockSize(), m_panel->dockSize(), anchor, waylandScreen->output());
+    m_regionWatch->set_region(m_panel->dockSize(), m_panel->dockSize(), anchor, waylandScreen->output());
 }
 
 DockWakeUpArea *WaylandDockHelper::createArea(QScreen *screen)
@@ -256,26 +252,43 @@ struct ::wl_callback *TreeLandXWindowControl::setXWindowPositionRelative(uint32_
     return QtWayland::treeland_xwindow_control_v1::set_xwindow_position_relative(wid, anchor, wl_fixed_from_double(dx), wl_fixed_from_double(dy));
 }
 
-TreeLandWindowOverlapChecker::TreeLandWindowOverlapChecker(WaylandDockHelper *helper, struct ::treeland_window_overlap_checker *checker)
-    : QWaylandClientExtensionTemplate<TreeLandWindowOverlapChecker>(treeland_dde_shell_manager_v1_interface.version)
+TreeLandRegionWatchManager::TreeLandRegionWatchManager()
+    : QWaylandClientExtensionTemplate<TreeLandRegionWatchManager>(treeland_region_watch_manager_v1_interface.version)
+{
+}
+
+TreeLandRegionWatchManager::~TreeLandRegionWatchManager()
+{
+    if (isInitialized())
+        destroy();
+}
+
+TreeLandRegionWatch::TreeLandRegionWatch(WaylandDockHelper *helper, struct ::treeland_region_watch_v1 *watcher)
+    : QWaylandClientExtensionTemplate<TreeLandRegionWatch>(treeland_region_watch_v1_interface.version)
     , m_helper(helper)
 {
     setParent(helper);
-    init(checker);
+    init(watcher);
 }
 
-TreeLandWindowOverlapChecker::~TreeLandWindowOverlapChecker()
+TreeLandRegionWatch::~TreeLandRegionWatch()
 {
     destroy();
 }
 
-void TreeLandWindowOverlapChecker::treeland_window_overlap_checker_enter()
+void TreeLandRegionWatch::treeland_region_watch_v1_enter()
 {
     m_helper->m_isWindowOverlap = true;
     Q_EMIT m_helper->isWindowOverlapChanged(m_helper->m_isWindowOverlap);
 }
 
-void TreeLandWindowOverlapChecker::treeland_window_overlap_checker_leave()
+void TreeLandRegionWatch::treeland_region_watch_v1_leave()
+{
+    m_helper->m_isWindowOverlap = false;
+    Q_EMIT m_helper->isWindowOverlapChanged(m_helper->m_isWindowOverlap);
+}
+
+void TreeLandRegionWatch::treeland_region_watch_v1_output_removed()
 {
     m_helper->m_isWindowOverlap = false;
     Q_EMIT m_helper->isWindowOverlapChanged(m_helper->m_isWindowOverlap);
