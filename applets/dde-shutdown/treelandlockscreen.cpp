@@ -1,51 +1,44 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "treelandlockscreen.h"
+#include "wayland-treeland-compositor-action-unstable-v1-client-protocol.h"
 
 DS_BEGIN_NAMESPACE
 namespace shutdown
 {
 TreeLandLockScreen::TreeLandLockScreen()
-    : QWaylandClientExtensionTemplate<TreeLandLockScreen>(treeland_dde_shell_manager_v1_interface.version)
+    : QWaylandClientExtensionTemplate<TreeLandLockScreen>(treeland_compositor_action_v1_interface.version)
 {
+}
+
+TreeLandLockScreen::~TreeLandLockScreen()
+{
+    if (isActive()) {
+        destroy();
+    }
 }
 
 void TreeLandLockScreen::lock()
 {
-    if (auto impl = workder())
-        impl->lock();
+    if (isActive()) {
+        trigger(action_lockscreen);
+    }
 }
 
 void TreeLandLockScreen::shutdown()
 {
-    if (auto impl = workder())
-        impl->shutdown();
+    if (isActive()) {
+        trigger(action_shutdown_menu);
+    }
 }
 
 void TreeLandLockScreen::switchUser()
 {
-    if (auto impl = workder())
-        impl->switch_user();
-}
-
-TreeLandLockScreenWorker *TreeLandLockScreen::workder()
-{
-    if (!isActive()) {
-        return nullptr;
+    if (isActive()) {
+        trigger(action_show_user_switch);
     }
-
-    if (m_worker.isNull()) {
-        m_worker.reset(new TreeLandLockScreenWorker(get_treeland_lockscreen()));
-    }
-    return m_worker.get();
-}
-
-TreeLandLockScreenWorker::TreeLandLockScreenWorker(struct ::treeland_lockscreen_v1 *object)
-    : QWaylandClientExtensionTemplate<TreeLandLockScreenWorker>(treeland_lockscreen_v1_interface.version)
-    , QtWayland::treeland_lockscreen_v1(object)
-{
 }
 }
 DS_END_NAMESPACE
