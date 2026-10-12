@@ -1,3 +1,12 @@
+dde-shell (2.0.57) unstable; urgency=medium
+
+  * fix: isolate smart-hide state per workspace
+  * fix(notification): expire notifications after display
+  * fix: address runtime warnings across shell and dock
+  * feat(dock): adapt to treeland-xwindow-control-unstable-v1 protocol
+
+ -- zhangkun <zhangkun2@uniontech.com>  Mon, 12 Oct 2026 18:15:23 +0800
+
 dde-shell (2.0.56) unstable; urgency=medium
 
   * fix(dock): keep dock shown when fullscreen window minimized
