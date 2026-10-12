@@ -7,7 +7,6 @@
 #include "dockhelper.h"
 #include "dockpanel.h"
 
-#include "qwayland-treeland-dde-shell-v1.h"
 #include "qwayland-treeland-wallpaper-color-v1.h"
 #include "qwayland-treeland-xwindow-control-unstable-v1.h"
 #include "qwayland-treeland-region-watch-unstable-v1.h"
@@ -20,7 +19,6 @@
 namespace dock {
 class WallpaperColorManager;
 class TreeLandDockTriggerArea;
-class TreeLandDDEShellManager;
 class TreeLandXWindowControl;
 class TreeLandRegionWatchManager;
 class TreeLandRegionWatch;
@@ -65,7 +63,6 @@ private:
     QScopedPointer<WallpaperColorManager> m_wallpaperColorManager;
     QScopedPointer<TreeLandRegionWatch> m_regionWatch;
     QScopedPointer<TreeLandRegionWatchManager> m_regionWatchManager;
-    QScopedPointer<TreeLandDDEShellManager> m_ddeShellManager;
     QScopedPointer<TreeLandXWindowControl> m_xwindowControl;
     struct ::wl_surface *m_dockWlSurface = nullptr;  // Dock's wl_surface for XEmbed positioning
 };
@@ -84,14 +81,6 @@ Q_SIGNALS:
 
 private:
     WaylandDockHelper *m_helper;
-};
-
-class TreeLandDDEShellManager : public QWaylandClientExtensionTemplate<TreeLandDDEShellManager>, public QtWayland::treeland_dde_shell_manager_v1
-{
-    Q_OBJECT
-
-public:
-    explicit TreeLandDDEShellManager();
 };
 
 class TreeLandXWindowControl : public QWaylandClientExtensionTemplate<TreeLandXWindowControl>, public QtWayland::treeland_xwindow_control_v1

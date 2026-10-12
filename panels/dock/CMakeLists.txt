@@ -61,7 +61,6 @@ qt_generate_wayland_protocol_client_sources(dockpanel
     NO_INCLUDE_CORE_ONLY
     FILES
         ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-wallpaper-color-v1.xml
-        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-dde-shell-v1.xml
         ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-xwindow-control-unstable-v1.xml
         ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-region-watch-unstable-v1.xml
 )

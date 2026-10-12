@@ -41,7 +41,7 @@ MultiTaskView::MultiTaskView(QObject *parent)
     });
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
-        m_multitaskview.reset(new TreeLandMultitaskview);
+        m_compositorAction.reset(new TreelandCompositorAction);
     } else {
         m_kWinCompositingConfig = DConfig::create("org.kde.kwin", "org.kde.kwin.compositing", QString(), this);
         m_kWinEffect = m_kWinCompositingConfig->value(windowEffectTypeKey).toInt() != KWinOptimalPerformance;
@@ -87,8 +87,8 @@ void MultiTaskView::openWorkspace()
             {QStringLiteral("kwin_version"), m_kwinVersion}
         }));
 #endif
-    if (m_multitaskview) {
-        m_multitaskview->toggle();
+    if (m_compositorAction) {
+        m_compositorAction->toggle();
         return;
     }
 

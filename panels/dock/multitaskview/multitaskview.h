@@ -8,7 +8,7 @@
 #include "../frame/dockiteminfo.h"
 #include "applet.h"
 #include "dsglobal.h"
-#include "treelandmultitaskview.h"
+#include "treelandcompositoraction.h"
 
 #include <DConfig>
 
@@ -38,7 +38,7 @@ private:
     bool m_kWinEffect = true;
     QString m_kwinVersion;
     QString m_iconName;
-    QScopedPointer<TreeLandMultitaskview> m_multitaskview;
+    QScopedPointer<TreelandCompositorAction> m_compositorAction;
     Dtk::Core::DConfig *m_kWinCompositingConfig = nullptr;
 };
 

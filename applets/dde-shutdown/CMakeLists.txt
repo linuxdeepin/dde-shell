@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+# SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-find_package(TreelandProtocols REQUIRED)
+find_package(TreelandProtocols 0.7.0 REQUIRED)
 
 add_library(dde-shutdown SHARED
     shutdownapplet.cpp
@@ -11,9 +11,8 @@ add_library(dde-shutdown SHARED
 )
 
 qt_generate_wayland_protocol_client_sources(dde-shutdown
-    NO_INCLUDE_CORE_ONLY
     FILES
-        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-dde-shell-v1.xml
+        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-compositor-action-unstable-v1.xml
 )
 
 target_link_libraries(dde-shutdown PRIVATE

@@ -6,7 +6,7 @@
 
 #include "applet.h"
 #include "dsglobal.h"
-#include "treelandshowdesktop.h"
+#include "treelandcompositoraction.h"
 
 #include <DConfig>
 
@@ -35,7 +35,7 @@ private slots:
     void onEnableShowDesktopChanged();
 
 private:
-    TreelandShowDesktop *m_showDesktop;
+    TreelandCompositorAction *m_compositorAction;
     Dtk::Core::DConfig *m_dockConfig;
     bool m_visible;
 };

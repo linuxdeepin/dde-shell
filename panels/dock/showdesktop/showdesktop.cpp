@@ -5,7 +5,7 @@
 #include "showdesktop.h"
 #include "applet.h"
 #include "pluginfactory.h"
-#include "treelandshowdesktop.h"
+#include "treelandcompositoraction.h"
 
 #include <QProcess>
 #include <QGuiApplication>
@@ -22,7 +22,7 @@ namespace dock {
 
 ShowDesktop::ShowDesktop(QObject *parent)
     : DApplet(parent)
-    , m_showDesktop(nullptr)
+    , m_compositorAction(nullptr)
     , m_dockConfig(nullptr)
     , m_visible(true)
 {
@@ -47,7 +47,7 @@ bool ShowDesktop::load()
 bool ShowDesktop::init()
 {
     if (QStringLiteral("wayland") == QGuiApplication::platformName()) {
-        m_showDesktop = new TreelandShowDesktop(this);
+        m_compositorAction = new TreelandCompositorAction(this);
     }
     
     // 从配置中读取初始的可见性状态
@@ -61,8 +61,8 @@ bool ShowDesktop::init()
 
 void ShowDesktop::toggleShowDesktop()
 {
-    if (m_showDesktop) {
-        m_showDesktop->desktopToggle();
+    if (m_compositorAction) {
+        m_compositorAction->desktopToggle();
         return;
     }
 
