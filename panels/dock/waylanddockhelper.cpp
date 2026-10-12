@@ -8,9 +8,7 @@
 #include "dockhelper.h"
 #include "dockpanel.h"
 #include "layershell/dlayershellwindow.h"
-#include "qwayland-treeland-dde-shell-v1.h"
 #include "qwayland-treeland-xwindow-control-unstable-v1.h"
-#include "wayland-treeland-dde-shell-v1-client-protocol.h"
 #include "wayland-treeland-xwindow-control-unstable-v1-client-protocol.h"
 #include "qwayland-treeland-region-watch-unstable-v1.h"
 #include "wayland-treeland-region-watch-unstable-v1-client-protocol.h"
@@ -26,7 +24,6 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     , m_isCurrentActiveWindowFullscreened(false)
     , m_panel(panel)
 {
-    m_ddeShellManager.reset(new TreeLandDDEShellManager());
     m_xwindowControl.reset(new TreeLandXWindowControl());
     m_regionWatchManager.reset(new TreeLandRegionWatchManager());
     DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
@@ -225,11 +222,6 @@ void WallpaperColorManager::watchScreen(const QString &screeName)
     if (isActive() && !screeName.isEmpty()) {
         watch(screeName);
     }
-}
-
-TreeLandDDEShellManager::TreeLandDDEShellManager()
-    : QWaylandClientExtensionTemplate<TreeLandDDEShellManager>(treeland_dde_shell_manager_v1_interface.version)
-{
 }
 
 TreeLandXWindowControl::TreeLandXWindowControl()
