@@ -51,7 +51,8 @@ TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_pr
 
 TreeLandDockPreviewContext::~TreeLandDockPreviewContext()
 {
-    destroy();
+    if (isInitialized())
+        destroy();
 }
 
 void TreeLandDockPreviewContext::showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)

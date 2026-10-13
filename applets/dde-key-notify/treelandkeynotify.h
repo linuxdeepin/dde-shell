@@ -24,6 +24,7 @@ class TreelandKeyNotify : public QWaylandClientExtensionTemplate<TreelandKeyNoti
 
 public:
     explicit TreelandKeyNotify(QObject *parent = nullptr);
+    ~TreelandKeyNotify() override;
 
     void setCapsLockEnabled(bool enabled);
 
@@ -48,6 +49,7 @@ class TreelandKeyWatcher : public QObject, public QtWayland::treeland_keyboard_s
 
 public:
     explicit TreelandKeyWatcher(struct ::treeland_keyboard_state_watcher_v1 *object, QObject *parent = nullptr);
+    ~TreelandKeyWatcher() override;
 
     void watchLocks(bool watchCapsLock);
 

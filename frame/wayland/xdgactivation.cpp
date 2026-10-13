@@ -29,7 +29,8 @@ class XdgActivationTokenV1 : public QObject, public QtWayland::xdg_activation_to
 public:
     ~XdgActivationTokenV1() override
     {
-        destroy();
+        if (isInitialized())
+            destroy();
     }
 
 Q_SIGNALS:
