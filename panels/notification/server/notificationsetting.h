@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,7 +6,6 @@
 
 #include <QMutex>
 #include <QObject>
-#include <QTimer>
 #include <QVariantMap>
 
 namespace Dtk {
@@ -55,8 +54,13 @@ public:
 
 public:
     explicit NotificationSetting(QObject *parent = nullptr);
+    ~NotificationSetting() override;
 
+    // Configure once during construction, on the shared model/setting thread.
     void setAppAccessor(QAbstractItemModel *model);
+    // Model-thread only. Must be called before deleting the setting on a worker.
+    void stopAppMonitoring();
+    // Model-thread only; the worker must query the cache instead.
     QAbstractItemModel *appAccessor() const;
 
     void setAppValue(const QString &id, AppConfigItem item, const QVariant &value);
@@ -90,7 +94,7 @@ private:
     Dtk::Core::DConfig *m_impl = nullptr;
     QAbstractItemModel *m_appAccessor = nullptr;
     QList<AppItem> m_appItems;
-    QMutex m_appItemsMutex;
+    mutable QMutex m_appItemsMutex;
     QVariantMap m_appsInfo;
     QMutex m_appsInfoMutex;
     QVariantMap m_systemInfo;

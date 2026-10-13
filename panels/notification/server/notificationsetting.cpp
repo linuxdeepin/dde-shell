@@ -7,6 +7,7 @@
 #include <QVariant>
 #include <QAbstractListModel>
 #include <QLoggingCategory>
+#include <QThread>
 
 #include <DConfig>
 
@@ -53,15 +54,45 @@ NotificationSetting::NotificationSetting(QObject *parent)
     });
 }
 
+NotificationSetting::~NotificationSetting()
+{
+    stopAppMonitoring();
+}
+
 void NotificationSetting::setAppAccessor(QAbstractItemModel *model)
 {
+    Q_ASSERT(QThread::currentThread() == thread());
+    Q_ASSERT(!model || QThread::currentThread() == model->thread());
+    Q_ASSERT(!m_appAccessor);
     m_appAccessor = model;
-    QObject::connect(m_appAccessor, &QAbstractItemModel::rowsInserted, this, &NotificationSetting::onAppsChanged);
-    QObject::connect(m_appAccessor, &QAbstractItemModel::rowsRemoved, this, &NotificationSetting::onAppsChanged);
-    QObject::connect(m_appAccessor, &QObject::destroyed, this, [this](QObject *obj) {
-        if (m_appAccessor == obj)
-            m_appAccessor = nullptr;
-    });
+
+    const auto initial = appItemsImpl();
+    {
+        QMutexLocker locker(&m_appItemsMutex);
+        m_appItems = initial;
+    }
+    if (!model)
+        return;
+
+    // Refresh in the model's emitting thread, not the setting's worker thread.
+    connect(m_appAccessor, &QAbstractItemModel::rowsInserted, this,
+            &NotificationSetting::onAppsChanged, Qt::DirectConnection);
+    connect(m_appAccessor, &QAbstractItemModel::rowsRemoved, this,
+            &NotificationSetting::onAppsChanged, Qt::DirectConnection);
+    connect(m_appAccessor, &QObject::destroyed, this, [this] {
+        // Do not read the model during destruction; publish an empty cache.
+        m_appAccessor = nullptr;
+        onAppsChanged();
+    }, Qt::DirectConnection);
+}
+
+void NotificationSetting::stopAppMonitoring()
+{
+    if (!m_appAccessor)
+        return;
+    Q_ASSERT(QThread::currentThread() == m_appAccessor->thread());
+    disconnect(m_appAccessor, nullptr, this, nullptr);
+    m_appAccessor = nullptr;
 }
 
 QAbstractItemModel *NotificationSetting::appAccessor() const
@@ -233,12 +264,7 @@ NotificationSetting::AppItem NotificationSetting::appItem(const QString &id) con
 
 QList<NotificationSetting::AppItem> NotificationSetting::appItems() const
 {
-    QMutexLocker locker(&(const_cast<NotificationSetting *>(this)->m_appItemsMutex));
-    if (!m_appItems.isEmpty())
-        return m_appItems;
-
-    QList<NotificationSetting::AppItem> apps = appItemsImpl();
-    const_cast<NotificationSetting *>(this)->m_appItems = apps;
+    QMutexLocker locker(&m_appItemsMutex);
     return m_appItems;
 }
 
@@ -247,9 +273,11 @@ QList<NotificationSetting::AppItem> NotificationSetting::appItemsImpl() const
     if (!m_appAccessor)
         return {};
 
+    Q_ASSERT(QThread::currentThread() == m_appAccessor->thread());
     QList<NotificationSetting::AppItem> apps;
-    apps.reserve(m_appAccessor->rowCount());
-    for (int i = 0; i < m_appAccessor->rowCount(); i++) {
+    const int count = m_appAccessor->rowCount();
+    apps.reserve(count);
+    for (int i = 0; i < count; i++) {
         const auto index = m_appAccessor->index(i, 0);
 
         const auto desktopId = m_appAccessor->data(index, DesktopIdRole).toString();
@@ -279,11 +307,13 @@ QVariantMap NotificationSetting::appInfo(const QString &id) const
 
 void NotificationSetting::onAppsChanged()
 {
-    if (!m_appAccessor)
-        return;
-
-    const auto old = appItems();
     const auto current = appItemsImpl();
+    QList<AppItem> old;
+    {
+        QMutexLocker locker(&m_appItemsMutex);
+        old = m_appItems;
+        m_appItems = current;
+    }
 
     QList<NotificationSetting::AppItem> added;
     for (auto item : current) {
@@ -313,11 +343,6 @@ void NotificationSetting::onAppsChanged()
     for (auto item : removed) {
         qDebug(notifyLog) << "Application removed" << item.id;
         Q_EMIT appRemoved(item.id);
-    }
-
-    {
-        QMutexLocker locker(&m_appItemsMutex);
-        m_appItems = current;
     }
 }
 

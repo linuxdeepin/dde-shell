@@ -90,6 +90,11 @@ NotificationManager::~NotificationManager()
 {
 }
 
+void NotificationManager::stopAppMonitoring()
+{
+    m_setting->stopAppMonitoring();
+}
+
 bool NotificationManager::registerDbusService()
 {
     QDBusConnection connection = QDBusConnection::sessionBus();
