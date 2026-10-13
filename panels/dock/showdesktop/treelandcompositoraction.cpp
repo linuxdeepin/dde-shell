@@ -15,7 +15,7 @@ TreelandCompositorAction::TreelandCompositorAction(QObject *parent)
 
 TreelandCompositorAction::~TreelandCompositorAction()
 {
-    if (isActive()) {
+    if (isInitialized()) {
         destroy();
     }
 }

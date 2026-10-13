@@ -20,7 +20,8 @@ TreelandOutputWatcher::TreelandOutputWatcher(QObject *parent)
 
 TreelandOutputWatcher::~TreelandOutputWatcher()
 {
-    destroy();
+    if (isInitialized())
+        destroy();
 }
 
 void TreelandOutputWatcher::onScreenAdded(QScreen *)

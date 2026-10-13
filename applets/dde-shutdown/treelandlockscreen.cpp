@@ -15,7 +15,7 @@ TreeLandLockScreen::TreeLandLockScreen()
 
 TreeLandLockScreen::~TreeLandLockScreen()
 {
-    if (isActive()) {
+    if (isInitialized()) {
         destroy();
     }
 }

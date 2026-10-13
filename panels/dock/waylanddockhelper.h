@@ -72,6 +72,7 @@ class WallpaperColorManager : public QWaylandClientExtensionTemplate<WallpaperCo
     Q_OBJECT
 public:
     explicit WallpaperColorManager(WaylandDockHelper *helper);
+    ~WallpaperColorManager() override;
 
     void watchScreen(const QString &screeName);
     void treeland_wallpaper_color_manager_v1_output_color(const QString &output, uint32_t isDark) override;

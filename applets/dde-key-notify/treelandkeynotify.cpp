@@ -17,6 +17,16 @@ TreelandKeyNotify::TreelandKeyNotify(QObject *parent)
     connect(this, &TreelandKeyNotify::activeChanged, this, &TreelandKeyNotify::updateWatcher);
 }
 
+TreelandKeyNotify::~TreelandKeyNotify()
+{
+    if (m_watcher) {
+        delete m_watcher;
+        m_watcher = nullptr;
+    }
+    if (isInitialized())
+        destroy();
+}
+
 void TreelandKeyNotify::setCapsLockEnabled(bool enabled)
 {
     if (m_capsLockEnabled == enabled) {
@@ -81,6 +91,12 @@ TreelandKeyWatcher::TreelandKeyWatcher(struct ::treeland_keyboard_state_watcher_
     : QObject(parent)
     , QtWayland::treeland_keyboard_state_watcher_v1(object)
 {
+}
+
+TreelandKeyWatcher::~TreelandKeyWatcher()
+{
+    if (isInitialized())
+        destroy();
 }
 
 void TreelandKeyWatcher::watchLocks(bool watchCapsLock)

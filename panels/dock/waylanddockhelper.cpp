@@ -210,6 +210,12 @@ WallpaperColorManager::WallpaperColorManager(WaylandDockHelper *helper)
 {
 }
 
+WallpaperColorManager::~WallpaperColorManager()
+{
+    if (isInitialized())
+        destroy();
+}
+
 void WallpaperColorManager::treeland_wallpaper_color_manager_v1_output_color(const QString &output, uint32_t isDark)
 {
     if (output == m_helper->dockScreenName()) {
@@ -265,7 +271,8 @@ TreeLandRegionWatch::TreeLandRegionWatch(WaylandDockHelper *helper, struct ::tre
 
 TreeLandRegionWatch::~TreeLandRegionWatch()
 {
-    destroy();
+    if (isInitialized())
+        destroy();
 }
 
 void TreeLandRegionWatch::treeland_region_watch_v1_enter()
