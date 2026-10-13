@@ -27,6 +27,8 @@ NotifyServerApplet::~NotifyServerApplet()
 {
     qDebug(notifyLog) << "Exit notification server.";
     if (m_manager) {
+        // Cancel model-thread callbacks before the worker can delete the setting.
+        m_manager->stopAppMonitoring();
         m_manager->deleteLater();
     }
     if (m_worker) {

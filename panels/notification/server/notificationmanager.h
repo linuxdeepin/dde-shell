@@ -24,6 +24,8 @@ public:
 
 public:
     bool registerDbusService();
+    // Main/model-thread shutdown step, before the manager is deleted on its worker.
+    void stopAppMonitoring();
 
     uint recordCount() const;
     Q_INVOKABLE void actionInvoked(qint64 id, const QString &actionKey);
