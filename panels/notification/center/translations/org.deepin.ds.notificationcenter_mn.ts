@@ -1,0 +1,76 @@
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="mn">
+<context>
+    <name>GroupNotify</name>
+    <message>
+        <source>Fold</source>
+        <translation>Эвхлэх</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Илүү</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Бүгдийг арилгах</translation>
+    </message>
+</context>
+<context>
+    <name>NotifyCenter</name>
+    <message>
+        <source>No recent notifications</source>
+        <translation>Саяхны мэдэгдэл алга</translation>
+    </message>
+</context>
+<context>
+    <name>NotifyHeader</name>
+    <message>
+        <source>Notification Center</source>
+        <translation>Мэдэгдлийн төв</translation>
+    </message>
+    <message>
+        <source>Fold</source>
+        <translation>Эвхлэх</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Илүү</translation>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Мэдэгдлийн тохиргоо</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation>Бүгдийг арилгах</translation>
+    </message>
+</context>
+<context>
+    <name>NotifySetting</name>
+    <message>
+        <source>Unpin</source>
+        <translation>Тогтоохыг цуцлах</translation>
+    </message>
+    <message>
+        <source>Pin</source>
+        <translation>Тогтоох</translation>
+    </message>
+    <message>
+        <source>Notification Setting</source>
+        <translation>Мэдэгдлийн тохиргоо</translation>
+    </message>
+</context>
+<context>
+    <name>NotifyViewDelegate</name>
+    <message>
+        <source>Clean All</source>
+        <translation>Бүгдийг цэвэрлэх</translation>
+    </message>
+</context>
+<context>
+    <name>notifycenter::AppNotifyItem</name>
+    <message>
+        <source>Just now</source>
+        <translation>Саяхан</translation>
+    </message>
+</context>
+</TS>
