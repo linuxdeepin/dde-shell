@@ -48,6 +48,7 @@ AppletItem {
 
         onClicked: {
             toolTip.close()
+            Panel.requestClosePopup()
             Applet.toggleShowDesktop()
         }
         onHoveredChanged: {
