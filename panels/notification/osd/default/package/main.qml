@@ -64,6 +64,8 @@ AppletItem {
         ListElement { type: "FnToggle"; iconName: "osd_fn"; text: qsTr("Fn toggle")} // Fn切换
         ListElement { type: "AirplaneModeOn"; iconName: "osd_airplane_on"; text: qsTr("Airplane mode on")}
         ListElement { type: "AirplaneModeOff"; iconName: "osd_airplane_off"; text: qsTr("Airplane mode off")}
+        ListElement { type: "BluetoothOn"; iconName: "osd_bluetooth_on"; text: qsTr("Bluetooth on")}
+        ListElement { type: "BluetoothOff"; iconName: "osd_bluetooth_off"; text: qsTr("Bluetooth off")}
         ListElement { type: "AudioMicMuteOn"; iconName: "osd_mic_off"; text: qsTr("Microphone off")}
         ListElement { type: "AudioMicMuteOff"; iconName: "osd_mic_on"; text: qsTr("Microphone on")}
         ListElement { type: "balance"; iconName: "osd_power_balance"; text: qsTr("Balanced power")}
