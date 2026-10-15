@@ -1,3 +1,14 @@
+dde-shell (2.0.58) unstable; urgency=medium
+
+  * i18n: Updates for project Deepin Desktop Environment (#1759)
+  * fix: prevent cross-thread access in notification app monitoring
+  * fix: resolve show-desktop panel flicker
+  * feat: migrate showdesktop and multitaskview to compositor-action
+    protocol
+  * fix: guard Wayland protocol destruction with isInitialized
+
+ -- zhangkun <zhangkun2@uniontech.com>  Thu, 15 Oct 2026 21:34:16 +0800
+
 dde-shell (2.0.57) unstable; urgency=medium
 
   * fix: isolate smart-hide state per workspace
