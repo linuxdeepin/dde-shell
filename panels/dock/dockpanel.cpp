@@ -18,8 +18,10 @@
 #include "dockdaemonadaptor.h"
 
 #include <DGuiApplicationHelper>
+#include <QEnterEvent>
 #include <QGuiApplication>
 #include <QLoggingCategory>
+#include <QMouseEvent>
 #include <QProcess>
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -50,6 +52,10 @@ DockPanel::DockPanel(QObject *parent)
     , m_contextDragging(false)
     , m_isResizing(false)
 {
+    connect(this, &DockPanel::fashionModeChanged, this, &DockPanel::syncSpotlightTracking);
+    connect(this, &DockPanel::hideStateChanged, this, &DockPanel::syncSpotlightTracking);
+    connect(this, &DockPanel::rootObjectChanged, this, &DockPanel::syncSpotlightTracking);
+
     // The org.deepin.dde.Dock1 service name is used as the readiness flag of the
     // Type=dbus systemd unit (dde-shell@DDE.service). It must only be acquired
     // after the QML DockCompositor is created, so that tray plugin loader
@@ -552,11 +558,60 @@ qreal DockPanel::devicePixelRatio() const
 
 bool DockPanel::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == window() && event->type() == QEvent::DevicePixelRatioChange) {
+    if (watched != window())
+        return false;
+
+    if (event->type() == QEvent::DevicePixelRatioChange) {
         Q_EMIT devicePixelRatioChanged(window()->devicePixelRatio());
+    } else if (m_spotlightTracking) {
+        // Observe the window before delivery to Qt Quick controls. No
+        // per-item handlers, coordinate reports or periodic cursor queries.
+        switch (event->type()) {
+        case QEvent::Enter:
+            setCursorPosition(static_cast<QEnterEvent *>(event)->position());
+            setContainsMouse(true);
+            break;
+        case QEvent::MouseMove: {
+            const auto position = static_cast<QMouseEvent *>(event)->position();
+            setCursorPosition(position);
+            // A pressed control may keep its grab after the pointer leaves.
+            setContainsMouse(QRectF(QPointF(), window()->size()).contains(position));
+            break;
+        }
+        case QEvent::Leave:
+        case QEvent::Hide:
+            setContainsMouse(false);
+            break;
+        default:
+            break;
+        }
     }
 
     return false;
+}
+
+void DockPanel::syncSpotlightTracking()
+{
+    // Cache the mode so the hot event path never needs to query settings.
+    m_spotlightTracking = fashionMode() && hideState() == Show;
+    if (!m_spotlightTracking)
+        setContainsMouse(false);
+}
+
+void DockPanel::setContainsMouse(bool containsMouse)
+{
+    if (m_containsMouse == containsMouse)
+        return;
+    m_containsMouse = containsMouse;
+    Q_EMIT containsMouseChanged(containsMouse);
+}
+
+void DockPanel::setCursorPosition(const QPointF &cursorPosition)
+{
+    if (m_cursorPosition == cursorPosition)
+        return;
+    m_cursorPosition = cursorPosition;
+    Q_EMIT cursorPositionChanged(cursorPosition);
 }
 
 bool DockPanel::contextDragging() const
