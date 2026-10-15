@@ -499,6 +499,17 @@ Window {
             }
         }
 
+        Loader {
+            anchors.fill: parent
+            active: dock.fashionDock.enabled && Panel.hideState === Dock.Show
+            sourceComponent: DockSpotlight {
+                containsMouse: Panel.containsMouse
+                cursorPosition: dockContainer.mapFromItem(null, Panel.cursorPosition)
+                itemSize: dock.dockItemMaxSize
+                darkTheme: Panel.colorTheme === Dock.Dark
+            }
+        }
+
         TapHandler {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             gesturePolicy: TapHandler.WithinBounds
