@@ -50,8 +50,14 @@ Item {
 
     function open()
     {
+        // Keep open() pure-open semantics: when already visible, do nothing
+        // instead of toggling closed. The redundant toggle-close here caused
+        // BUG-353435: during the async window between open() setting
+        // popup.visible=true and finalizeOpen() showing the window, a second
+        // right-click could reach PluginItem, trigger another open(), and hit
+        // this branch, closing the popup. Left-click toggle is already handled
+        // in the C++ layer (itemPopupApplet). See PanelMenu.open() too.
         if (popup.visible) {
-            close()
             return
         }
 
