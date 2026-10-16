@@ -4,7 +4,7 @@
 
 #include "treelandbrightness.h"
 
-#include "wayland-treeland-output-manager-v1-client-protocol.h"
+#include "wayland-treeland-output-manager-unstable-v2-client-protocol.h"
 
 #include <QGuiApplication>
 #include <QScreen>
@@ -13,32 +13,32 @@
 
 namespace osd {
 
-TreelandColorControl::TreelandColorControl(struct ::treeland_output_color_control_v1 *object, QObject *parent)
+TreelandPictureControl::TreelandPictureControl(struct ::treeland_output_picture_control_v2 *object, QObject *parent)
     : QObject(parent)
-    , QtWayland::treeland_output_color_control_v1(object)
+    , QtWayland::treeland_output_picture_control_v2(object)
 {
 }
 
-TreelandColorControl::~TreelandColorControl()
+TreelandPictureControl::~TreelandPictureControl()
 {
     if (isInitialized()) {
         destroy();
     }
 }
 
-double TreelandColorControl::brightness() const
+double TreelandPictureControl::brightness() const
 {
     return m_brightness;
 }
 
-void TreelandColorControl::treeland_output_color_control_v1_brightness(wl_fixed_t brightness)
+void TreelandPictureControl::treeland_output_picture_control_v2_brightness(wl_fixed_t brightness)
 {
     m_brightness = wl_fixed_to_double(brightness);
     Q_EMIT brightnessChanged(m_brightness);
 }
 
 TreelandBrightness::TreelandBrightness(QObject *parent)
-    : QWaylandClientExtensionTemplate<TreelandBrightness>(treeland_output_manager_v1_interface.version)
+    : QWaylandClientExtensionTemplate<TreelandBrightness>(treeland_output_manager_v2_interface.version)
 {
     setParent(parent);
     connect(this, &TreelandBrightness::activeChanged, this, &TreelandBrightness::refresh);
@@ -47,8 +47,6 @@ TreelandBrightness::TreelandBrightness(QObject *parent)
 TreelandBrightness::~TreelandBrightness()
 {
     delete m_control;
-    m_control = nullptr;
-    m_output = nullptr;
     if (isInitialized()) {
         destroy();
     }
@@ -76,13 +74,13 @@ void TreelandBrightness::refresh()
         return;
     }
 
-    auto *raw = get_color_control(output);
+    auto *raw = get_picture_control(output);
     if (!raw) {
         return;
     }
 
-    m_control = new TreelandColorControl(raw, this);
-    connect(m_control, &TreelandColorControl::brightnessChanged,
+    m_control = new TreelandPictureControl(raw, this);
+    connect(m_control, &TreelandPictureControl::brightnessChanged,
             this, &TreelandBrightness::brightnessChanged);
 }
 

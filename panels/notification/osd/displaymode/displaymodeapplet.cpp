@@ -13,6 +13,9 @@
 
 #include <DConfig>
 #include <DDBusSender>
+#include <DGuiApplicationHelper>
+
+DGUI_USE_NAMESPACE
 
 Q_LOGGING_CATEGORY(osdDPLog, "org.deepin.dde.shell.osd.display")
 
@@ -77,6 +80,12 @@ DisPlayModeApplet::DisPlayModeApplet(QObject *parent)
     QObject::connect(m_actionTimer, &QTimer::timeout, this, &DisPlayModeApplet::doAction);
 }
 
+bool DisPlayModeApplet::load()
+{
+    m_isWayland = DGuiApplicationHelper::testAttribute(DGuiApplicationHelper::IsWaylandPlatform);
+    return DApplet::load();
+}
+
 int DisPlayModeApplet::state() const
 {
     return m_state;
@@ -102,6 +111,13 @@ QQmlListProperty<DPItem> DisPlayModeApplet::planItems()
 
 void DisPlayModeApplet::sync()
 {
+    // On Wayland there is no Treeland display-mode protocol yet; fall back to
+    // a disabled state so the OSD shows "unavailable" until a protocol is ready.
+    if (m_isWayland) {
+        setState(2);
+        return;
+    }
+
     if (!m_actionTimer->isActive()) {
         fetchPlanItems();
         auto current = fetchCurrentPlanItem();
@@ -115,6 +131,11 @@ void DisPlayModeApplet::sync()
 
 void DisPlayModeApplet::next()
 {
+    // Display mode switching is not available on Wayland yet.
+    if (m_isWayland) {
+        return;
+    }
+
     auto it = std::find_if(m_planItems.begin(), m_planItems.end(), [this](const DPItem *item) {
         return m_currentPlanItem && item->key() == m_currentPlanItem->key();
     });
@@ -131,6 +152,11 @@ void DisPlayModeApplet::next()
 
 void DisPlayModeApplet::doAction()
 {
+    // Display mode switching is not available on Wayland yet.
+    if (m_isWayland) {
+        return;
+    }
+
     const auto item = currentPlanItem();
     if (!item)
         return;

@@ -19,6 +19,10 @@ namespace osd {
 OsdPanel::OsdPanel(QObject *parent)
     : DPanel(parent)
 {
+    m_osdTimer = new QTimer(this);
+    m_osdTimer->setInterval(m_interval);
+    m_osdTimer->setSingleShot(true);
+    QObject::connect(m_osdTimer, &QTimer::timeout, this, &OsdPanel::doneSetting);
 }
 
 bool OsdPanel::load()
@@ -44,10 +48,6 @@ bool OsdPanel::init()
     }
     new OsdDBusAdaptor(this);
 
-    m_osdTimer = new QTimer(this);
-    m_osdTimer->setInterval(m_interval);
-    m_osdTimer->setSingleShot(true);
-    QObject::connect(m_osdTimer, &QTimer::timeout, this, &OsdPanel::doneSetting);
     return DPanel::init();
 }
 

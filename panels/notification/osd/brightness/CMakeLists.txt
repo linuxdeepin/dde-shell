@@ -16,7 +16,7 @@ add_library(osd-brightness SHARED
 qt_generate_wayland_protocol_client_sources(osd-brightness
     NO_INCLUDE_CORE_ONLY
     FILES
-        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-output-manager-v1.xml
+        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-output-manager-unstable-v2.xml
 )
 
 target_link_libraries(osd-brightness PRIVATE

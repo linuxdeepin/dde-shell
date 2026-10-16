@@ -56,6 +56,8 @@ class DisPlayModeApplet : public DS_NAMESPACE::DApplet
 public:
     explicit DisPlayModeApplet(QObject *parent = nullptr);
 
+    bool load() override;
+
     int state() const;
     DPItem *currentPlanItem() const;
     QQmlListProperty<DPItem> planItems();
@@ -79,8 +81,9 @@ private:
 private:
     QList<DPItem *> m_planItems;
     DPItem *m_currentPlanItem = nullptr;
-    int m_state;
+    int m_state = 0;
     QTimer *m_actionTimer = nullptr;
+    bool m_isWayland = false;
 };
 
 }
