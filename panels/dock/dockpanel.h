@@ -10,6 +10,7 @@
 
 #include <QDBusContext>
 #include <QPointer>
+#include <QPointF>
 
 namespace dock {
 class DockHelper;
@@ -46,6 +47,8 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(bool debugMode READ debugMode FINAL CONSTANT)
 
     Q_PROPERTY(bool contextDragging READ contextDragging WRITE setContextDragging NOTIFY contextDraggingChanged FINAL)
+    Q_PROPERTY(bool containsMouse READ containsMouse NOTIFY containsMouseChanged FINAL)
+    Q_PROPERTY(QPointF cursorPosition READ cursorPosition NOTIFY cursorPositionChanged FINAL)
 
 public:
     explicit DockPanel(QObject *parent = nullptr);
@@ -123,6 +126,9 @@ public:
     bool contextDragging() const;
     void setContextDragging(bool newContextDragging);
 
+    bool containsMouse() const { return m_containsMouse; }
+    QPointF cursorPosition() const { return m_cursorPosition; }
+
     bool isResizing() const;
     void setIsResizing(bool resizing);
 
@@ -133,6 +139,7 @@ private Q_SLOTS:
     void onWindowGeometryChanged();
     void launcherVisibleChanged(bool visible);
     void updateDockScreen();
+    void syncSpotlightTracking();
 
 Q_SIGNALS:
     void geometryChanged(QRect geometry);
@@ -160,12 +167,20 @@ Q_SIGNALS:
     void fashionModeEnabledChanged(bool enabled);
 
     void contextDraggingChanged();
+    void containsMouseChanged(bool containsMouse);
+    void cursorPositionChanged(const QPointF &cursorPosition);
     void isResizingChanged(bool isResizing);
 
     // Emitted when async XEmbed window move completes
     void xembedWindowMoveResult(uint32_t wid, bool success);
 
 private:
+    void setContainsMouse(bool containsMouse);
+    void setCursorPosition(const QPointF &cursorPosition);
+
+    bool m_spotlightTracking = false;
+    bool m_containsMouse = false;
+    QPointF m_cursorPosition;
     ColorTheme m_theme;
     HideState m_hideState;
     DockHelper* m_helper;
