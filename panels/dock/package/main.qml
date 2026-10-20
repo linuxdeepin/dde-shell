@@ -58,6 +58,13 @@ Window {
                 // 时尚模式下，dockRightPart 在 gridLayout 右侧，之间需要扣除 dockSpacing
                 // 同时保留左右悬浮间距，避免窗口铺满屏幕后圆角边框被屏幕边缘裁剪。
                 space -= Math.ceil(gridLayout.columnSpacing) * 2 + fashionDock.floatingMargin * 2;
+            } else if (gridLayout) {
+                // 非时尚模式下扣除 GridLayout 列间距，避免中间区域与右侧托盘区域重叠
+                let spacing = Math.ceil(gridLayout.columnSpacing);
+                space -= spacing;
+                if (dockLeftPart.visible) {
+                    space -= spacing;
+                }
             }
             return Math.max(0, space);
         }
