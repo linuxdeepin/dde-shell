@@ -115,7 +115,7 @@ Item {
         id: toolTip
         visible: readyBinding
         anchors.centerIn: parent
-        parent: toolTipWindow ? toolTipWindow.contentItem : undefined
+        parent: toolTipWindow ? toolTipWindow.contentItem : control
         font {
             family: DTK.fontManager.t8.family
             pixelSize: DTK.fontManager.t8.pixelSize
