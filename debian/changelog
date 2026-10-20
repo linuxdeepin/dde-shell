@@ -1,3 +1,9 @@
+dde-shell (2.0.60) unstable; urgency=medium
+
+  * refactor: disable unused dconfig migrations
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 20 Oct 2026 21:31:04 +0800
+
 dde-shell (2.0.59) unstable; urgency=medium
 
   * feat(dock): support compositor-driven dock resize
