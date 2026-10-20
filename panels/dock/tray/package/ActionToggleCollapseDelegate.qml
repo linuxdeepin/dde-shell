@@ -32,6 +32,12 @@ AppletItemButton {
         toolTip.close()
     }
 
+    Component.onCompleted: {
+        contentItem.smooth = Qt.binding(function() {
+            return contentItem.rotation % 180 !== 0;
+        });
+    }
+
     states: [
         State {
             name: "opened"
