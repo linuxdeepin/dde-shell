@@ -45,8 +45,8 @@ AMAppItem::AMAppItem(const QDBusObjectPath &path, const ObjectInterfaceMap &sour
     const auto localizedName = getLocaleOrDefaultValue(nameMap, locale, DEFAULT_KEY);
     const auto localizedGenericName = getLocaleOrDefaultValue(genericNameMap, locale, DEFAULT_KEY);
     auto xDeepinVendor = appInfo.value(u8"X_Deepin_Vendor").toString();
-    // Reuse the single GenericName role for the selected locale.
-    AppItem::setGenericName(localizedGenericName);
+    // Keep the default generic name for launchpad's English search while NameRole remains localized.
+    AppItem::setGenericName(genericNameMap.value(DEFAULT_KEY));
     AppItem::setKeywords(getLocaleOrDefaultValue(qdbus_cast<QStringListMap>(appInfo.value(u8"Keywords")), locale, DEFAULT_KEY));
     AppItem::setVendor(xDeepinVendor);
 
@@ -172,8 +172,8 @@ void AMAppItem::onPropertyChanged(const QDBusMessage &msg)
         const QString vendor = contains(QLatin1String("X_Deepin_Vendor"))
                 ? value(QLatin1String("X_Deepin_Vendor")).toString()
                 : Application::x_Deepin_Vendor();
-        // Reuse the single GenericName role for the selected locale.
-        AppItem::setGenericName(localizedGenericName);
+        // Keep the default generic name for launchpad's English search while NameRole remains localized.
+        AppItem::setGenericName(genericNameMap.value(DEFAULT_KEY));
         AppItem::setVendor(vendor);
         AppItem::setAppName(vendor == QLatin1String("deepin") && !localizedGenericName.isEmpty()
                                      ? localizedGenericName

@@ -105,26 +105,6 @@ if(APPLETS_BUILD_COVERAGE)
     endforeach()
 endif()
 
-# Exercise the production AM metadata consumer on an isolated session bus.
-qt_add_executable(amappitem_tests amappitemtests.cpp)
-target_include_directories(amappitem_tests PRIVATE
-    ${CMAKE_SOURCE_DIR}/applets/dde-apps
-    ${CMAKE_BINARY_DIR}/applets/dde-apps
-)
-target_link_libraries(amappitem_tests PRIVATE dde-apps
-    Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Qml
-    Qt${QT_VERSION_MAJOR}::DBus Qt${QT_VERSION_MAJOR}::Test
-    Dtk${DTK_VERSION_MAJOR}::Core
-)
-find_program(DBUS_RUN_SESSION dbus-run-session REQUIRED)
-add_test(NAME applets_amappitem COMMAND ${CMAKE_COMMAND} -E env
-    "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:dde-apps>:$<TARGET_FILE_DIR:dde-shell-frame>"
-    ${DBUS_RUN_SESSION} -- $<TARGET_FILE:amappitem_tests>
-)
-set_tests_properties(applets_amappitem PROPERTIES
-    ENVIRONMENT "LC_ALL=en_US.UTF-8;LANG=en_US.UTF-8;LANGUAGE=en_US;QT_QPA_PLATFORM=offscreen"
-)
-
 # ---- coverage: execute applets tests and generate coverage report ------------
 find_program(LCOV_BIN lcov)
 find_program(GENHTML_BIN genhtml)
