@@ -24,6 +24,8 @@ AMAppItemModel::AMAppItemModel(QObject *parent)
     qDBusRegisterMetaType<ObjectMap>();
     qDBusRegisterMetaType<QStringMap>();
     qRegisterMetaType<QStringMap>();
+    qDBusRegisterMetaType<QStringListMap>();
+    qRegisterMetaType<QStringListMap>();
     qRegisterMetaType<PropMap>();
     qDBusRegisterMetaType<PropMap>();
     qDBusRegisterMetaType<QDBusObjectPath>();

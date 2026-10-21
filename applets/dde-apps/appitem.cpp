@@ -250,4 +250,14 @@ void AppItem::setGenericName(const QString &genericName)
 {
     setData(genericName, AppItemModel::GenericNameRole);
 }
+
+QStringList AppItem::keywords() const
+{
+    return data(AppItemModel::KeywordsRole).toStringList();
+}
+
+void AppItem::setKeywords(const QStringList &keywords)
+{
+    setData(keywords, AppItemModel::KeywordsRole);
+}
 }

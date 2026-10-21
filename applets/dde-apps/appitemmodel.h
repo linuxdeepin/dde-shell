@@ -36,6 +36,7 @@ public:
         DesktopSourcePathRole,
         VendorRole,
         GenericNameRole,
+        KeywordsRole,     // Expose parsed, locale-selected Keywords through the shared app model.
     };
     Q_ENUM(Roles)
 
