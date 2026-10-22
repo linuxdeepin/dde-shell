@@ -7,6 +7,12 @@ source_file = panels/dock/translations/org.deepin.ds.dock.ts
 source_lang = en_US
 type = QT
 
+[o:linuxdeepin:p:deepin-desktop-environment:r:794da9ef6e6e103c5c43b042fbb9bd97]
+file_filter = panels/dock/showdesktop/translations/org.deepin.ds.dock.showdesktop_<lang>.ts
+source_file = panels/dock/showdesktop/translations/org.deepin.ds.dock.showdesktop.ts
+source_lang = en_US
+type = QT
+
 [o:linuxdeepin:p:deepin-desktop-environment:r:58e1e70781dc390d3cd6be0632a841d8]
 file_filter = panels/dock/taskmanager/translations/org.deepin.ds.dock.taskmanager_<lang>.ts
 source_file = panels/dock/taskmanager/translations/org.deepin.ds.dock.taskmanager.ts
@@ -46,5 +52,11 @@ type = QT
 [o:linuxdeepin:p:deepin-desktop-environment:r:e31bc6050698ef334e3f68e2dbc3631c]
 file_filter = panels/notification/osd/displaymode/translations/org.deepin.ds.osd.displaymode_<lang>.ts
 source_file = panels/notification/osd/displaymode/translations/org.deepin.ds.osd.displaymode.ts
+source_lang = en_US
+type = QT
+
+[o:linuxdeepin:p:deepin-desktop-environment:r:c0be9e377696cb8d3d4298f6b392e5b0]
+file_filter = panels/notification/osd/windoweffect/translations/org.deepin.ds.osd.windoweffect_<lang>.ts
+source_file = panels/notification/osd/windoweffect/translations/org.deepin.ds.osd.windoweffect.ts
 source_lang = en_US
 type = QT
