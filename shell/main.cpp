@@ -16,6 +16,8 @@
 
 #include <csignal>
 #include <iostream>
+#include <X11/Xlib.h>
+#include <unistd.h>
 
 #include "applet.h"
 #include "containment.h"
@@ -133,6 +135,11 @@ public:
 
     QList<DAppletLoader *> m_loaders;
 };
+
+static int x11IOErrorHandler(Display *)
+{
+    _exit(0);
+}
 
 int main(int argc, char *argv[])
 {
@@ -254,6 +261,8 @@ int main(int argc, char *argv[])
     QMetaObject::invokeMethod(&a, [&manager](){
         manager.exec();
     }, Qt::QueuedConnection);
+
+    XSetIOErrorHandler(x11IOErrorHandler);
 
     QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [&manager]() {
         qCInfo(dsLog) << "Exit dde-shell.";
