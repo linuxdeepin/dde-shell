@@ -56,6 +56,7 @@ private:
     explicit ExpireTimer(QObject *parent = nullptr);
 
     void onTimeout();
+    void reschedule();
 
     QTimer *m_timer = nullptr;
     // Pending entities keyed by absolute expire deadline (ms since the epoch);
