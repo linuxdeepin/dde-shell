@@ -47,6 +47,7 @@ AMAppItem::AMAppItem(const QDBusObjectPath &path, const ObjectInterfaceMap &sour
     auto xDeepinVendor = appInfo.value(u8"X_Deepin_Vendor").toString();
     // Keep the default generic name for launchpad's English search while NameRole remains localized.
     AppItem::setGenericName(genericNameMap.value(DEFAULT_KEY));
+    AppItem::setKeywords(getLocaleOrDefaultValue(qdbus_cast<QStringListMap>(appInfo.value(u8"Keywords")), locale, DEFAULT_KEY));
     AppItem::setVendor(xDeepinVendor);
 
     if (QStringLiteral("deepin") == xDeepinVendor && !localizedGenericName.isEmpty()) {
@@ -124,12 +125,13 @@ void AMAppItem::setOnDesktop(bool on)
     AppItem::setOnDesktop(on);
 }
 
-QString AMAppItem::getLocaleOrDefaultValue(const QStringMap &value, const QString &localeCode, const QString &fallbackKey)
+template<typename T>
+T AMAppItem::getLocaleOrDefaultValue(const QMap<QString, T> &value, const QString &localeCode, const QString &fallbackKey) const
 {
     if (value.contains(localeCode)) {
         return value.value(localeCode);
     } else {
-        QString fallbackValue = value.value(fallbackKey);
+        T fallbackValue = value.value(fallbackKey);
         if (localeCode.contains('_')) {
             QString prefix = localeCode.split('_')[0];
             return value.value(prefix, fallbackValue);
@@ -176,6 +178,11 @@ void AMAppItem::onPropertyChanged(const QDBusMessage &msg)
         AppItem::setAppName(vendor == QLatin1String("deepin") && !localizedGenericName.isEmpty()
                                      ? localizedGenericName
                                      : localizedName);
+    }
+
+    if (contains(QLatin1String("Keywords"))) {
+        const auto keywords = qdbus_cast<QStringListMap>(value(QLatin1String("Keywords")));
+        AppItem::setKeywords(getLocaleOrDefaultValue(keywords, locale, DEFAULT_KEY));
     }
 
     if (contains(QLatin1String("Icons"))) {
