@@ -50,15 +50,18 @@ protected:
 
 protected Q_SLOTS:
     void setCurrentActiveWindowFullscreened(bool);
+    void onShowingDesktopChanged(bool showing);
 
 private:
     void updateRegionWatchPos();
     void initWallpaperColorManager();
+    void setupKWinDBusConnection();
 
 private:
     friend class TreeLandRegionWatch;
     bool m_isWindowOverlap;
     bool m_isCurrentActiveWindowFullscreened;
+    bool m_showingDesktop;
     DockPanel *m_panel;
     QScopedPointer<WallpaperColorManager> m_wallpaperColorManager;
     QScopedPointer<TreeLandRegionWatch> m_regionWatch;
