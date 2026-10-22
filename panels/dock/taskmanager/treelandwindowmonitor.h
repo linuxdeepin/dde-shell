@@ -40,6 +40,7 @@ public:
     explicit TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v2 *);
     ~TreeLandDockPreviewContext();
     void showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    void showTooltip(const QString &text, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
     void hideWindowsPreview();
 
 Q_SIGNALS:
@@ -75,6 +76,8 @@ public:
 
     void
     requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
+    bool
+    requestTooltip(const QString &text, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) override;
     void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
 
 private Q_SLOTS:
@@ -85,6 +88,8 @@ private Q_SLOTS:
     void updateFullscreenState();
 
 private:
+    void ensureDockPreviewContext(QWindow *relativePositionItem);
+
     QHash<ulong, QSharedPointer<TreeLandWindow>> m_windows;
     QScopedPointer<ForeignToplevelManager> m_foreignToplevelManager;
     QScopedPointer<TreeLandDockPreviewContext> m_dockPreview;
