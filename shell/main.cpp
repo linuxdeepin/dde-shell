@@ -240,7 +240,6 @@ int main(int argc, char *argv[])
         });
     }
 
-    shell.dconfigsMigrate();
     AppletConfigManager appletConfigManager;
     appletConfigManager.ensureAppletConfigs();
     // TODO disable qml's cache avoid to parsing error for ExecutionEngine.
