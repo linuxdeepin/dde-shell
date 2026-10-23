@@ -15,6 +15,7 @@ AppletItemBackground {
     property int displayMode: Dock.Efficient
     property Palette minDockEffectActive: Palette {
         normal {
+            common: ("transparent")
             crystal: Qt.rgba(1.0, 1.0, 1.0, 0.8)
         }
         normalDark {
@@ -29,6 +30,7 @@ AppletItemBackground {
     }
     property Palette normalDockEffectActive: Palette {
         normal {
+            common: ("transparent")
             crystal: ("transparent")
         }
         normalDark: normal
@@ -45,6 +47,7 @@ AppletItemBackground {
     }
     backgroundColor: Palette {
         normal {
+            common: ("transparent")
             crystal: if (displayMode === Dock.Efficient && control.windowCount > 0) {
                     return Qt.rgba(1.0, 1.0, 1.0, 0.35)
             } else {
@@ -74,6 +77,7 @@ AppletItemBackground {
     activeBackgroundColor: displayMode === Dock.Efficient ? minDockEffectActive : normalDockEffectActive
     insideBorderColor: Palette {
         normal {
+            common: ("transparent")
             crystal: if (displayMode === Dock.Efficient && control.windowCount > 0) {
                     return Qt.rgba(1.0, 1.0, 1.0, 0.05)
             } else {
@@ -91,6 +95,7 @@ AppletItemBackground {
 
     activeInsideBorderColor: Palette {
         normal {
+            common: ("transparent")
             crystal: if (displayMode === Dock.Efficient) {
                     return Qt.rgba(0, 0, 0, 0.1)
             } else {
@@ -113,6 +118,7 @@ AppletItemBackground {
     }
     outsideBorderColor: Palette {
         normal {
+            common: ("transparent")
             crystal: if (displayMode === Dock.Efficient && control.windowCount > 0) {
                     return Qt.rgba(0, 0, 0, 0.1)
             } else {
@@ -139,6 +145,7 @@ AppletItemBackground {
     }
     activeOutsideBorderColor: Palette {
         normal {
+            common: ("transparent")
             crystal: if (displayMode === Dock.Efficient) {
                     return Qt.rgba(0, 0, 0, 0.1)
             } else {
