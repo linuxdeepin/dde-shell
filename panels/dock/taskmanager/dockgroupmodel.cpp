@@ -194,6 +194,7 @@ void DockGroupModel::requestWindowsView(const QModelIndexList &indexes) const
 
 void DockGroupModel::requestNewInstance(const QModelIndex &index, const QString &action) const
 {
+    if (!index.data(TaskManager::FolderTypeRole).toString().isEmpty()) return;
     if (action == DOCK_ACTION_DOCK) {
         auto desktopId = index.data(TaskManager::DesktopIdRole).toString();
         TaskManagerSettings::instance()->toggleDockedElement(QStringLiteral("desktop/%1").arg(desktopId));

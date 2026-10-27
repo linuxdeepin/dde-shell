@@ -25,6 +25,10 @@ Item {
     required property var modelIndex
     required property string title
 
+    property var applicationFolderContents: []
+    property string folderType: ""
+    property var folderPresentation: null
+    readonly property bool isFolder: folderType !== ""
     property real blendOpacity: 1.0
 
     signal dropFilesOnItem(itemId: string, files: list<string>)
@@ -38,7 +42,9 @@ Item {
     Drag.hotSpot.x: icon.width / 2
     Drag.hotSpot.y: icon.height / 2
     Drag.dragType: Drag.Automatic
-    Drag.mimeData: { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
+    Drag.mimeData: root.folderPresentation
+        ? { "text/x-dde-dock-dnd-folder": itemId, "text/x-dde-dock-dnd-source": "taskbar" }
+        : { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
 
     Accessible.role: Accessible.Button
     Accessible.name: root.name
@@ -161,13 +167,24 @@ Item {
 
             D.DciIcon {
                 id: icon
-                name: root.iconName
+                name: root.isFolder ? "" : root.iconName
                 height: iconSize
                 width: iconSize
                 sourceSize: Qt.size(iconSize, iconSize)
                 anchors.centerIn: parent
                 retainWhileLoading: true
                 smooth: false
+
+                Loader {
+                    anchors.centerIn: parent
+                    width: parent.width - 2
+                    height: parent.height - 2
+                    active: root.isFolder
+                    sourceComponent: FolderIcon {
+                        contents: root.applicationFolderContents
+                        presentation: root.folderPresentation
+                    }
+                }
 
                 function mapToScene(px, py) {
                     return parent.mapToItem(Window.window.contentItem, Qt.point(px, py))
@@ -400,6 +417,52 @@ Item {
         }
     }
 
+    function openFolder() {
+        toolTip.close()
+        closeItemPreview()
+        if (folderUi.item)
+            folderUi.item.popup.openAt(root.mapToItem(null, root.width / 2, root.height / 2))
+    }
+
+    // One source-neutral popup instance handles launcher folders and provider
+    // content. The provider presentation selects its own page inside the same
+    // popup lifecycle and positioning template.
+    Loader {
+        id: folderUi
+        active: root.isFolder
+        sourceComponent: Item {
+            property alias popup: folderPopup
+            property alias contextMenu: folderContextMenu
+            FolderContextMenu {
+                id: folderContextMenu
+                registry: TaskManager
+                onOpenRequested: root.openFolder()
+                onUndockRequested: TaskManager.requestUndockByDesktopId(root.itemId)
+            }
+            FolderPopup {
+                id: folderPopup
+                folderName: root.name
+                contents: root.applicationFolderContents
+                presentation: root.folderPresentation
+                interactionActive: applicationMenu.busy
+                onActivated: function(entry) {
+                    close()
+                    TaskManager.launchFolderApplication(entry.id)
+                }
+                onContextMenuRequested: function(entry) {
+                    applicationMenu.openFor(entry, TaskManager.folderApplicationBackend())
+                }
+            }
+            FolderApplicationMenu {
+                id: applicationMenu
+                onLaunchRequested: function(id) {
+                    folderPopup.close()
+                    TaskManager.launchFolderApplication(id)
+                }
+            }
+        }
+    }
+
     Loader {
         id: contextMenuLoader
         active: false
@@ -498,6 +561,10 @@ Item {
 
     function requestAppItemMenu() {
         Panel.requestClosePopup()
+        if (root.isFolder) {
+            if (folderUi.item) folderUi.item.contextMenu.openFor(root.folderType, root.itemId, root.name)
+            return
+        }
         contextMenuLoader.trashEmpty = TaskManager.isTrashEmpty()
         contextMenuLoader.active = true
         MenuHelper.openMenu(contextMenuLoader.item)
@@ -516,6 +583,7 @@ Item {
                 root.dragFinished()
                 return
             }
+            if (folderUi.item) folderUi.item.popup.close()
             Panel.contextDragging = true
         }
 
@@ -551,6 +619,10 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 requestAppItemMenu()
             } else {
+                if (root.isFolder) {
+                    root.openFolder()
+                    return
+                }
                 if (root.windows.length === 0) {
                     launchAnimation.start();
                     TaskManager.requestNewInstance(index, "");

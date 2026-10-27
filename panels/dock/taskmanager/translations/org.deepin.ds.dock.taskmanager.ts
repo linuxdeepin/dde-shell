@@ -65,4 +65,50 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>FolderApplicationMenu</name>
+    <message>
+        <source>Open</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove from desktop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send to desktop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove from dock</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send to dock</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove from startup</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add to startup</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Uninstall</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Uninstall %1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FolderContextMenu</name>
+    <message>
+        <source>Undock</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>
