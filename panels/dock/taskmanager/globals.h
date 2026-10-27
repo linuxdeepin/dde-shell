@@ -48,6 +48,9 @@ constexpr auto MODEL_ACTIONS = "actions";
 constexpr auto MODEL_MENUS = "menus";
 constexpr auto MODEL_DOCKED = "docked";
 constexpr auto MODEL_WINDOWS = "windows";
+constexpr auto MODEL_APPLICATIONFOLDERCONTENTS = "applicationFolderContents";
+constexpr auto MODEL_FOLDERTYPE = "folderType";
+constexpr auto MODEL_FOLDERPRESENTATION = "folderPresentation";
 
 // default item icon
 constexpr auto DEFAULT_APP_ICONNAME = "application-default-icon";

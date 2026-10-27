@@ -149,6 +149,9 @@ ContainmentItem {
                 required property string title // winTitle
                 required property string iconName
                 required property string icon // winIconName
+                required property string folderType
+                required property var applicationFolderContents
+                required property var folderPresentation
                 required property string menus
                 required property list<string> windows
                 z: attention ? -1 : 0
@@ -236,6 +239,9 @@ ContainmentItem {
                         itemId: delegateRoot.itemId
                         name: delegateRoot.name
                         iconName: delegateRoot.iconName
+                        folderType: delegateRoot.folderType
+                        applicationFolderContents: delegateRoot.applicationFolderContents
+                        folderPresentation: delegateRoot.folderPresentation
                         menus: delegateRoot.menus
                         windows: delegateRoot.windows
                         visualIndex: delegateRoot.visualIndex
@@ -260,7 +266,7 @@ ContainmentItem {
             id: launcherDndDropArea
             anchors.fill: parent
             z: 3
-            keys: ["text/x-dde-dock-dnd-appid"]
+            keys: ["text/x-dde-dock-dnd-appid", "text/x-dde-dock-dnd-folder"]
             property string launcherDndDesktopId: ""
             property string launcherDndDragSource: ""
             property string launcherDndWinId: ""
@@ -272,7 +278,7 @@ ContainmentItem {
             }
 
             onEntered: function(drag) {
-                let desktopId = drag.getDataAsString("text/x-dde-dock-dnd-appid")
+                let desktopId = drag.getDataAsString("text/x-dde-dock-dnd-folder") || drag.getDataAsString("text/x-dde-dock-dnd-appid")
                 launcherDndDragSource = drag.getDataAsString("text/x-dde-dock-dnd-source")
                 launcherDndWinId = drag.getDataAsString("text/x-dde-dock-dnd-winid")
                 launcherDndDesktopId = desktopId
@@ -314,6 +320,10 @@ ContainmentItem {
                     appIds.push(visualModel.items.get(i).model.itemId)
                 }
                 taskmanager.Applet.saveDockElementsOrder(appIds)
+                if (drop.formats.indexOf("text/x-dde-dock-dnd-folder") !== -1)
+                    drop.accept(Qt.CopyAction)
+                else
+                    drop.acceptProposedAction()
                 resetDndState()
             }
 

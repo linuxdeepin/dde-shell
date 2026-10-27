@@ -20,7 +20,7 @@ add_custom_target(coverage
 find_program(QML_TEST_RUNNER NAMES qmltestrunner6 qmltestrunner
     HINTS /usr/lib/qt${QT_VERSION_MAJOR}/bin)
 if(QML_TEST_RUNNER)
-    foreach(_suite frame/qml)
+    foreach(_suite frame/qml panels/dock/taskmanager/qml)
         string(REPLACE "/" "_" _name "${_suite}")
         add_test(NAME ${_name}
             COMMAND ${CMAKE_COMMAND} -E env
@@ -29,4 +29,9 @@ if(QML_TEST_RUNNER)
                 ${QML_TEST_RUNNER} -input "${CMAKE_CURRENT_SOURCE_DIR}/${_suite}"
                 -import "${CMAKE_BINARY_DIR}/plugins")
     endforeach()
+    add_custom_target(folder_qml_tests
+        DEPENDS dde-shell-plugin dde-shell-dock dock-plugin
+        COMMAND ${CMAKE_CTEST_COMMAND} --test-dir "${CMAKE_BINARY_DIR}"
+            -R "^(frame_qml|panels_dock_taskmanager_qml)$" --output-on-failure
+        VERBATIM)
 endif()

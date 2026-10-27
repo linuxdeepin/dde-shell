@@ -11,6 +11,7 @@
 #include "dockglobalelementmodel.h"
 #include "dockitemmodel.h"
 #include "hoverpreviewproxymodel.h"
+#include "foldermenuregistry.h"
 
 #include <QPointer>
 
@@ -44,6 +45,9 @@ public:
         ItemIdRole,
         MenusRole,
         WindowsRole,
+        ApplicationFolderContentsRole,
+        FolderTypeRole,
+        FolderPresentationRole,
 
         // from dde-apps
         DesktopIdRole = 0x1000,
@@ -110,6 +114,13 @@ public:
     Q_INVOKABLE void moveItem(int from, int to);
     Q_INVOKABLE QString getTrashTipText();
 
+    // A folder-source plugin can append actions without changing the dock UI.
+    Q_INVOKABLE bool registerFolderMenuProvider(const QString &folderType, QObject *provider);
+    Q_INVOKABLE void unregisterFolderMenuProvider(const QString &folderType, QObject *provider);
+    Q_INVOKABLE QVariantList folderMenuItems(const QString &folderType, const QString &folderId, const QString &folderName) const;
+    Q_INVOKABLE bool triggerFolderMenuAction(const QString &folderType, const QString &folderId, const QString &actionId) const;
+    Q_INVOKABLE QObject *folderApplicationBackend() const;
+    Q_INVOKABLE void launchFolderApplication(const QString &id) const;
     Q_INVOKABLE bool isTrashEmpty() const;
 Q_SIGNALS:
     void dataModelChanged();
@@ -124,6 +135,7 @@ private Q_SLOTS:
     void modifyOpacityChanged();
 
 private:
+    FolderMenuRegistry m_folderMenuRegistry;
     QScopedPointer<AbstractWindowMonitor> m_windowMonitor;
     bool m_windowFullscreen;
     DockCombineModel *m_activeAppModel = nullptr;

@@ -105,6 +105,7 @@ QObject *DockDBusProxy::trayApplet()
 
 QString DockDBusProxy::getAppID(const QString &desktopfile)
 {
+    if (desktopfile.startsWith("internal/folders/")) return desktopfile;
     const QString desktopLeft = "/applications/";
     const QString desktopSuffix = ".desktop";
     return desktopfile.mid(desktopfile.lastIndexOf(desktopLeft) + desktopLeft.size(), desktopfile.lastIndexOf(desktopSuffix) - desktopfile.lastIndexOf(desktopLeft) - desktopLeft.size());
