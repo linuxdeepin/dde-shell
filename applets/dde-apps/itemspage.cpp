@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -49,12 +49,13 @@ int ItemsPage::pageCount() const
 
 QStringList ItemsPage::items(int page) const
 {
-    return m_pages.at(page);
+    return m_pages.value(page);
 }
 
 QStringList ItemsPage::firstNItems(int count)
 {
     QStringList result;
+    if (count <= 0) return result;
 
     for (const QStringList & pageItems : std::as_const(m_pages)) {
         for (const QString & item : pageItems) {
@@ -128,10 +129,9 @@ void ItemsPage::appendItem(const QString id, int page)
 
 void ItemsPage::insertItem(const QString id, int page, int pos)
 {
-    Q_ASSERT(page >= 0 && page < m_pages.size());
-
-    if (m_pages[page].count() < pos)
-        pos = m_pages[page].count();
+    if (page < 0 || page > m_pages.size()) return;
+    if (page == m_pages.size()) appendEmptyPage();
+    pos = qBound(0, pos, int(m_pages[page].size()));
 
     m_pages[page].insert(pos, id);
     if (m_pages[page].size() > m_maxItemCountPerPage) {
@@ -146,15 +146,16 @@ void ItemsPage::insertItem(const QString id, int page, int pos)
 
 void ItemsPage::insertItemToPage(const QString &id, int toPage)
 {
-    Q_ASSERT(toPage < m_pages.count());
-
-    if (toPage < 0) toPage = qMax(m_pages.count() - 1, 0);
-
-    insertItem(id, toPage, m_pages[toPage].count());
+    if (toPage < 0) toPage = qMax(int(m_pages.count()) - 1, 0);
+    insertItem(id, toPage, m_pages.value(toPage).count());
 }
 
 void ItemsPage::moveItemPosition(int fromPage, int fromIndex, int toPage, int toIndex, bool appendToIndexItem)
 {
+    if (fromPage < 0 || fromPage >= m_pages.size() || toPage < 0 || toPage >= m_pages.size()
+        || fromIndex < 0 || fromIndex >= m_pages[fromPage].size() || toIndex < 0
+        || toIndex > m_pages[toPage].size()) return;
+    if (fromPage == toPage && toIndex == m_pages[toPage].size()) --toIndex;
     if (fromPage == toPage && fromIndex > toIndex && appendToIndexItem) {
         if (fromIndex == (toIndex+1)) {
             // same page, append operate, do nothing

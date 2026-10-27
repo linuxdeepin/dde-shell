@@ -11,6 +11,15 @@
 			"description": "用于记录运行过程中产生的程序组信息",
 			"permissions": "readwrite",
 			"visibility": "private"
+		},
+		"ArrangementMigrated": {
+			"value": false,
+			"serial": 0,
+			"flags": [],
+			"name": "Launcher arrangement migration completed",
+			"description": "Import the legacy launcher INI once, keeping it as a backup",
+			"permissions": "readwrite",
+			"visibility": "private"
 		}
 	}
 }

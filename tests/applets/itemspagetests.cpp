@@ -385,8 +385,8 @@ TEST(ItemsPage, FirstNItems)
     EXPECT_EQ(page.firstNItems(2), (QStringList{QStringLiteral("a"), QStringLiteral("b")}));
     EXPECT_EQ(page.firstNItems(3), (QStringList{QStringLiteral("a"), QStringLiteral("b"), QStringLiteral("c")}));
     EXPECT_EQ(page.firstNItems(10), (QStringList{QStringLiteral("a"), QStringLiteral("b"), QStringLiteral("c"), QStringLiteral("d")}));
-    // src defect: firstNItems(0) appends first item then checks count >= 0, returns [a]
-    EXPECT_EQ(page.firstNItems(0), (QStringList{QStringLiteral("a")}));
+    EXPECT_TRUE(page.firstNItems(0).isEmpty());
+    EXPECT_TRUE(page.firstNItems(-1).isEmpty());
 }
 
 // --- Additional edge-case coverage (per review) ---
@@ -422,4 +422,21 @@ TEST(ItemsPage, MoveItemSamePageForwardNonAdjacentAppend)
     page.moveItemPosition(0, 2, 0, 0, true);
     // "c" moved from index 2 to index 1 → [a, c, b]
     EXPECT_EQ(page.items(0), (QStringList{QStringLiteral("a"), QStringLiteral("c"), QStringLiteral("b")}));
+}
+
+TEST(ItemsPage, InsertIntoInitiallyEmptyDestination)
+{
+    ItemsPage page(4);
+    page.insertItemToPage("a", -1);
+    EXPECT_EQ(page.allArrangedItems(), QStringList({"a"}));
+}
+
+TEST(ItemsPage, StaleDragCoordinatesAreIgnored)
+{
+    ItemsPage page(4);
+    page.appendPage({"a", "b"});
+    page.moveItemPosition(-1, 0, 0, 1, false);
+    page.moveItemPosition(0, 5, 0, 1, false);
+    page.insertItemToPage("c", 99);
+    EXPECT_EQ(page.allArrangedItems(), QStringList({"a", "b"}));
 }
