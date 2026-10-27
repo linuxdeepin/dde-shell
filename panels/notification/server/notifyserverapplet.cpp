@@ -83,13 +83,18 @@ bool NotifyServerApplet::init()
 
 void NotifyServerApplet::actionInvoked(qint64 id, uint bubbleId, const QString &actionKey)
 {
-    QMetaObject::invokeMethod(m_manager, "actionInvoked", Qt::QueuedConnection,
+    // Keep the action synchronous with the notification center's remove()
+    // call. The center invokes the action and then deletes the notification,
+    // so the action has to reach the manager before that deletion. This was
+    // the behavior before the expire rework switched these calls to queued
+    // connections; the synchronous blocking is small and intentional.
+    QMetaObject::invokeMethod(m_manager, "actionInvoked", Qt::DirectConnection,
                               Q_ARG(qint64, id), Q_ARG(uint, bubbleId), Q_ARG(QString, actionKey));
 }
 
 void NotifyServerApplet::actionInvoked(qint64 id, const QString &actionKey)
 {
-    QMetaObject::invokeMethod(m_manager, "actionInvoked", Qt::QueuedConnection,
+    QMetaObject::invokeMethod(m_manager, "actionInvoked", Qt::DirectConnection,
                               Q_ARG(qint64, id), Q_ARG(QString, actionKey));
 }
 
