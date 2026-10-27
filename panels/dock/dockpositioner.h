@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -23,6 +23,7 @@ class DockPositioner : public QObject
     Q_PROPERTY(QRect bounding READ bounding WRITE setBounding NOTIFY boundingChanged FINAL)
     Q_PROPERTY(int x READ x NOTIFY xChanged FINAL)
     Q_PROPERTY(int y READ y NOTIFY yChanged FINAL)
+    Q_PROPERTY(QRect availableGeometry READ availableGeometry NOTIFY availableGeometryChanged FINAL)
     QML_NAMED_ELEMENT(DockPositioner)
     QML_UNCREATABLE("DockPositioner is only available via attached properties.")
     QML_ATTACHED(DockPositioner)
@@ -37,6 +38,7 @@ public:
     int x() const;
     int y() const;
     QRect dockGeometry() const;
+    QRect availableGeometry() const;
     Position dockPosition() const;
 
     void setX(int x);
@@ -49,8 +51,11 @@ signals:
     void boundingChanged();
     void xChanged();
     void yChanged();
+    void availableGeometryChanged();
 
 protected:
+    void setScreen(QScreen *screen);
+    QPointer<QScreen> m_screen;
     QPointer<DS_NAMESPACE::DPanel> m_panel;
     QRect m_bounding {};
     int m_x = 0;
