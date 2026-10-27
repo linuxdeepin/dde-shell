@@ -4,12 +4,14 @@
 set(DOCK_PUBLIC_HEADERS
     dockiteminfo.h
     dappletdock.h
+    foldercontent.h
 )
 
 add_library(dde-shell-dock SHARED
     ${DOCK_PUBLIC_HEADERS}
     dockiteminfo.cpp
     dappletdock.cpp
+    foldercontent.cpp
 )
 
 set_target_properties(dde-shell-dock PROPERTIES
@@ -38,7 +40,10 @@ target_link_directories(dde-shell-dock INTERFACE
     $<INSTALL_INTERFACE:${LIB_INSTALL_DIR}>
 )
 
-target_compile_definitions(dde-shell-dock PRIVATE DS_LIB)
+target_compile_definitions(dde-shell-dock PRIVATE
+    DDE_SHELL_PLUGIN_INSTALL_DIR="${CMAKE_INSTALL_PREFIX}/${DDE_SHELL_PLUGIN_INSTALL_DIR}"
+    DS_LIB
+)
 
 install(TARGETS dde-shell-dock EXPORT DDEShellDockTargets DESTINATION "${LIB_INSTALL_DIR}" PUBLIC_HEADER DESTINATION "${INCLUDE_INSTALL_DIR}/dock")
 
