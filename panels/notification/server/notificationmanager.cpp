@@ -144,8 +144,10 @@ void NotificationManager::actionInvoked(qint64 id, uint bubbleId, const QString 
         Q_EMIT ActionInvoked(bubbleId, actionKey);
         Q_EMIT NotificationClosed(bubbleId, NotifyEntity::Closed);
     } else {
-        // For non-extended actions, emit ActivationToken first if available
-        auto *activation = new DS_NAMESPACE::XdgActivation(this);
+        // For non-extended actions, emit ActivationToken first if available.
+        // The activation must not be parented to the worker-thread manager;
+        // the tokenReady handler below deletes it when the token arrives.
+        auto *activation = new DS_NAMESPACE::XdgActivation();
         connect(
             activation,
             &DS_NAMESPACE::XdgActivation::tokenReady,
@@ -561,8 +563,10 @@ void NotificationManager::doActionInvoked(const NotifyEntity &entity, const QStr
                     amArgs << "--" << args;
                 }
 
-                // Get activation token, then start process
-                auto *activation = new DS_NAMESPACE::XdgActivation(this);
+                // Get activation token, then start process. It must not be
+                // parented to the worker-thread manager; the tokenReady
+                // handler below deletes it when the token arrives.
+                auto *activation = new DS_NAMESPACE::XdgActivation();
                 auto amArgsCopy = amArgs;
                 connect(activation, &DS_NAMESPACE::XdgActivation::tokenReady, this,
                     [amArgsCopy, activation](const QString &token) {
