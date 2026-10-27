@@ -49,3 +49,13 @@ target_include_directories(rolegroupmodel_tests PRIVATE
 )
 
 gtest_discover_tests(rolegroupmodel_tests)
+
+# Folder-source menu extensions are tested without a desktop or applet service.
+add_executable(foldermenuregistry_tests
+    foldermenuregistrytests.cpp
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/foldermenuregistry.cpp
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/foldermenuregistry.h
+)
+target_include_directories(foldermenuregistry_tests PRIVATE ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager)
+target_link_libraries(foldermenuregistry_tests PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Test)
+add_test(NAME folder_menu_registry COMMAND foldermenuregistry_tests)
