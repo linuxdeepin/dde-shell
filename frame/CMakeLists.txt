@@ -18,6 +18,7 @@ set(PUBLIC_HEADERS
     wayland/xdgactivation.h
     models/listtotableproxymodel.h
     dsutility.h
+    foldercontent.h
 )
 
 set(PRIVATE_HEADERS
@@ -77,6 +78,7 @@ add_library(dde-shell-frame SHARED
     popupwindow.cpp
     ddeshell_qml.qrc
     dsutility.cpp
+    foldercontent.cpp
 )
 
 set_target_properties(dde-shell-frame PROPERTIES
