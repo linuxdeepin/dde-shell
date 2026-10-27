@@ -14,6 +14,7 @@ Item {
     property var popupWindow: Panel.popupWindow
     property int popupX: 0
     property int popupY: 0
+    property bool closeOnInactive: true
     property bool readyBinding: false
     property bool openPending: false
     property bool contentReady: true
@@ -112,6 +113,15 @@ Item {
         popupWindow.currentItem = null
     }
 
+    onCloseOnInactiveChanged: {
+        if (!closeOnInactive) return
+        Qt.callLater(function() {
+            if (control.closeOnInactive && popupWindow && readyBinding
+                    && popupWindow.currentItem === control && !popupWindow.active)
+                control.close()
+        })
+    }
+
     onContentReadyChanged: {
         if (!contentReady || !contentOpenPending)
             return
@@ -150,7 +160,7 @@ Item {
             if (!popupWindow || !readyBinding || popupWindow.currentItem !== control || !popup.visible) {
                 return
             }
-            if (!popupWindow.active) {
+            if (control.closeOnInactive && !popupWindow.active) {
                 control.close()
             }
         }
@@ -176,7 +186,7 @@ Item {
                 return
             }
             Qt.callLater(function() {
-                if (!popupWindow
+                if (!control.closeOnInactive || !popupWindow
                         || popupWindow.active) {
                     return
                 }
@@ -224,7 +234,7 @@ Item {
                         || control.grabInactivePending) {
                     return
                 }
-                if (!popupWindow.active) {
+                if (control.closeOnInactive && !popupWindow.active) {
                     control.close()
                 }
             })
@@ -236,7 +246,7 @@ Item {
         visible: readyBinding
         width: control.width
         height: control.height
-        parent: popupWindow ? popupWindow.contentItem : undefined
+        parent: popupWindow ? popupWindow.contentItem : null
     }
     Component.onDestruction: {
         if (popup.visible)
