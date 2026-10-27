@@ -87,13 +87,16 @@ applets_add_test(categoryutils_tests    categoryutilstests.cpp)
 # itemspage: pure-logic pagination manager (append/insert/move/remove/find).
 applets_add_test(itemspage_tests        itemspagetests.cpp)
 
-# NOTE: appgroup static helpers (idIsFolder/groupIdFromNumber/parseGroupId) are
-# deferred: appgroup.h → appitem.h → am.h → QDBusObjectPath (Qt6::DBus) +
-# appgroupmanager.h → DConfig (Dtk6::Core) + QQmlEngine (Qt6::Qml) + yaml-cpp.
-# The dependency chain is too heavy for 3 trivial one-liner static methods.
-# Defer to a future batch with DConfig mock or after src refactoring.
-# Also: parseGroupId has an off-by-one bug (mid(len+1) should be mid(len)) —
-# recorded as a src defect, not fixed here.
+# Shared launcher/dock folder mutations, using an in-memory source and configuration backend.
+add_executable(appgroupmanager_tests appgroupmanagertests.cpp)
+target_include_directories(appgroupmanager_tests PRIVATE ${CMAKE_SOURCE_DIR}/applets/dde-apps)
+target_link_libraries(appgroupmanager_tests PRIVATE dde-apps Qt${QT_VERSION_MAJOR}::Test
+    Qt${QT_VERSION_MAJOR}::Qml Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::DBus Dtk${DTK_VERSION_MAJOR}::Core)
+add_test(NAME applets_appgroupmanager COMMAND appgroupmanager_tests)
+# Debian builds disable build RPATH; use the plugin and frame from this build.
+set_tests_properties(applets_appgroupmanager PROPERTIES ENVIRONMENT
+    "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:dde-apps>:$<TARGET_FILE_DIR:dde-shell-frame>")
+list(APPEND APPLETS_TEST_TARGETS appgroupmanager_tests)
 
 # ---- Coverage instrumentation + report generation ---------------------------
 if(APPLETS_BUILD_COVERAGE)
