@@ -145,9 +145,15 @@ Item {
 
     property D.Palette iconTextPalette: D.Palette {
         normal {
-            common: Qt.rgba(0, 0, 0, 1)
+            common: Qt.rgba(0, 0, 0, 0.7)
         }
         normalDark {
+            common: Qt.rgba(1, 1, 1, 0.7)
+        }
+        hovered {
+            common: Qt.rgba(0, 0, 0, 1)
+        }
+        hoveredDark {
             common: Qt.rgba(1, 1, 1, 1)
         }
     }
