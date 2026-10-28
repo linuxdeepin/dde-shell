@@ -180,7 +180,7 @@ Control {
     }
 
     component NotifyActionButton: Button {
-        Component.onCompleted: { Accessible.id = "ActionButton" }
+        Accessible.id: "ActionButton"
         id: actionButton
         required property var actionData
         property var actionMenu: null

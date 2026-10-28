@@ -215,7 +215,7 @@ Window {
 
         NotifyStaging {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "NotifyStaging" }
+            Accessible.id: "NotifyStaging"
             id: notifyStaging
             anchors {
                 top: parent.top
@@ -243,7 +243,7 @@ Window {
 
         NotifyCenter {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "NotifyCenter" }
+            Accessible.id: "NotifyCenter"
             id: notifyCenter
             anchors {
                 top: notifyStaging.bottom

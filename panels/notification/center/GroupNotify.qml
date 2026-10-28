@@ -11,7 +11,7 @@ import org.deepin.ds.notificationcenter
 
 NotifyItem {
     Accessible.role: Accessible.ListItem
-    Component.onCompleted: { Accessible.id = "NotifyItem" }
+    Accessible.id: "NotifyItem"
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
@@ -60,7 +60,7 @@ NotifyItem {
         contentItem: RowLayout {
             NotifyHeaderTitleText {
                 Accessible.role: Accessible.StaticText
-                Component.onCompleted: { Accessible.id = "NotifyHeaderTitleText" }
+                Accessible.id: "NotifyHeaderTitleText"
                 text: root.appName
                 Layout.alignment: Qt.AlignLeft
                 Layout.leftMargin: 18
@@ -74,7 +74,7 @@ NotifyItem {
 
             AnimationSettingButton {
                 Accessible.role: Accessible.Button
-                Component.onCompleted: { Accessible.id = "Fold" }
+                Accessible.id: "Fold"
                 id: foldBtn
                 Layout.alignment: Qt.AlignRight
                 activeFocusOnTab: false
@@ -96,7 +96,7 @@ NotifyItem {
             }
             AnimationSettingButton {
                 Accessible.role: Accessible.Button
-                Component.onCompleted: { Accessible.id = "More" }
+                Accessible.id: "More"
                 id: groupMoreBtn
                 Layout.alignment: Qt.AlignRight
                 activeFocusOnTab: false
@@ -119,7 +119,7 @@ NotifyItem {
             }
             AnimationSettingButton {
                 Accessible.role: Accessible.Button
-                Component.onCompleted: { Accessible.id = "ClearAll" }
+                Accessible.id: "ClearAll"
                 id: groupClearBtn
                 Layout.alignment: Qt.AlignRight
                 activeFocusOnTab: false
