@@ -119,7 +119,7 @@ ContainmentItem {
 
     OverflowContainer {
         Accessible.role: Accessible.Pane
-        Component.onCompleted: { Accessible.id = "AppContainer" }
+        Accessible.id: "AppContainer"
         id: appContainer
         anchors.fill: parent
         anchors.leftMargin: useColumnLayout ? 0 : taskmanager.startPadding
@@ -229,6 +229,7 @@ ContainmentItem {
 
                     AppItem {
                         Accessible.role: Accessible.ListItem
+                        Accessible.id: "AppItem"
                         id: appItem
                         anchors.fill: parent // This is mandatory for draggable item center in drop area
 
@@ -252,7 +253,6 @@ ContainmentItem {
                         ListView.delayRemove: Drag.active
                         Component.onCompleted: {
                             dropFilesOnItem.connect(taskmanager.Applet.dropFilesOnItem)
-                            Accessible.id = "AppItem"
                         }
                         onDragFinished: function() {
                             launcherDndDropArea.resetDndState()

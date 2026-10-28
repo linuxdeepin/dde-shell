@@ -22,7 +22,7 @@ AppletItem {
 
     PanelToolTip {
         Accessible.role: Accessible.ToolTip
-        Component.onCompleted: { Accessible.id = "ShowDesktop" }
+        Accessible.id: "ShowDesktop"
         id: toolTip
         text: qsTr("show desktop")
         toolTipX: DockPanelPositioner.x

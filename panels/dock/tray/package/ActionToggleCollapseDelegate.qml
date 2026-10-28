@@ -54,7 +54,7 @@ AppletItemButton {
 
     PanelToolTip {
         Accessible.role: Accessible.ToolTip
-        Component.onCompleted: { Accessible.id = "CollapseTray" }
+        Accessible.id: "CollapseTray"
         id: toolTip
         text: qsTr("Collapse tray")
         toolTipX: DockPanelPositioner.x

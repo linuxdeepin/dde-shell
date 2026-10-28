@@ -80,7 +80,7 @@ FocusScope {
     }
 
     ListView {
-        Component.onCompleted: { Accessible.id = "View" }
+        Accessible.id: "View"
         id: view
         spacing: 10
         snapMode: ListView.SnapToItem
@@ -91,7 +91,7 @@ FocusScope {
         model: notifyModel
         delegate: OverlapNotify {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "OverlapNotify" }
+            Accessible.id: "OverlapNotify"
             id: overlapNotify
             objectName: "overlap-" + model.appName
             focus: true

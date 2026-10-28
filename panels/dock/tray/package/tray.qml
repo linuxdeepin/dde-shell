@@ -38,6 +38,7 @@ AppletItem {
 
     PanelPopup {
         Accessible.role: Accessible.Dialog
+        Accessible.id: "StashedPopup"
         id: stashedPopup
         width: stashedContainer.width
         height: stashedContainer.height
@@ -59,7 +60,7 @@ AppletItem {
             padding: 10
             contentItem: StashContainer {
                 Accessible.role: Accessible.Pane
-                Component.onCompleted: { Accessible.id = "StashContainer" }
+                Accessible.id: "StashContainer"
                 id: stashContainer
                 color: "transparent"
                 model: DDT.SortFilterProxyModel {
@@ -90,7 +91,6 @@ AppletItem {
             DockPanelPositioner.bounding = Qt.binding(function () {
                 return Qt.rect(collapsedBtnCenterPoint.x, collapsedBtnCenterPoint.y, stashedPopup.width, stashedPopup.height)
             })
-            Accessible.id = "StashedPopup"
         }
     }
     Connections {
@@ -134,6 +134,7 @@ AppletItem {
 
     TrayContainer {
         Accessible.role: Accessible.Pane
+        Accessible.id: "TrayContainter"
         id: trayContainter
         isHorizontal: !tray.useColumnLayout
         model: DDT.TraySortOrderModel
@@ -143,7 +144,6 @@ AppletItem {
         color: "transparent"
         Component.onCompleted: {
             DDT.TrayItemPositionManager.layoutHealthCheck(1500)
-            Accessible.id = "TrayContainter"
         }
         // 拖拽成功移入 stash 时由 TrayContainer 回调（命中 action-show-stash）
         onStashDropSucceeded: function() {

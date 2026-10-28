@@ -28,7 +28,7 @@ Control {
 
     DragItem {
         Accessible.role: Accessible.Pane
-        Component.onCompleted: { Accessible.id = "DragLayer" }
+        Accessible.id: "DragLayer"
         id: dragLayer
         anchors.fill: parent
         dragItem: root
@@ -53,7 +53,7 @@ Control {
 
     ShellSurfaceItemProxy {
         Accessible.role: Accessible.Pane
-        Component.onCompleted: { Accessible.id = "SurfaceLayer" }
+        Accessible.id: "SurfaceLayer"
         id: surfaceLayer
         anchors.centerIn: parent
         anchors.fill: parent
