@@ -20,7 +20,7 @@ Item {
     property alias removeDisplaced: listView.removeDisplaced
     property alias moveDisplaced: listView.moveDisplaced
     ListView {
-        Component.onCompleted: { Accessible.id = "ListView" }
+        Accessible.id: "ListView"
         id: listView
         anchors.fill: parent
         orientation: useColumnLayout ? ListView.Vertical : ListView.Horizontal

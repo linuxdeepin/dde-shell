@@ -76,7 +76,7 @@ Item {
 
         delegate: PluginItem {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "PluginItem" }
+            Accessible.id: "PluginItem"
             id: pluginItem
             width: {
                 if (model.surfaceLayoutType === 4)
