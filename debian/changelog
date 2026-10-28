@@ -1,3 +1,13 @@
+dde-shell (2.0.61) unstable; urgency=medium
+
+  * feat: expose localized Keywords in the app model
+    (linuxdeepin/developer-center#3375) (#1776)
+  * feat: update .tx/config with new Transifex resource mappings
+  * i18n: Updates for project Deepin Desktop Environment (#1780)
+  * fix(notification): restore synchronous action dispatch
+
+ -- zhangkun <zhangkun2@uniontech.com>  Wed, 28 Oct 2026 13:59:08 +0800
+
 dde-shell (2.0.60) unstable; urgency=medium
 
   * refactor: disable unused dconfig migrations
