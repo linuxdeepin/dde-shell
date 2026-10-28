@@ -15,7 +15,7 @@ NotifySettingMenu {
     property string appName
 
     MenuItem {
-        Component.onCompleted: { Accessible.id = "Unpin" }
+        Accessible.id: "Unpin"
         text: pinned ? qsTr("Unpin") : qsTr("Pin")
         onClicked: {
             let state = !root.pinned
@@ -24,7 +24,7 @@ NotifySettingMenu {
         }
     }
     MenuItem {
-        Component.onCompleted: { Accessible.id = "NotificationSetting" }
+        Accessible.id: "NotificationSetting"
         text: qsTr("Notification Setting")
         onClicked: {
             console.log("Notify setting")

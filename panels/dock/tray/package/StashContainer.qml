@@ -72,7 +72,7 @@ Item {
     // tooltip and menu
     DDT.SurfacePopup {
         Accessible.role: Accessible.Dialog
-        Component.onCompleted: { Accessible.id = "StashSurfacePopup" }
+        Accessible.id: "StashSurfacePopup"
         id: stashSurfacePopup
         objectName: "stash"
         surfaceAcceptor: isStashPopup

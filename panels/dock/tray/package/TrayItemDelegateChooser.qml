@@ -23,11 +23,11 @@ LQM.DelegateChooser {
         roleValue: "dummy"
         TrayItemPositioner {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "TrayItemPositioner" }
+            Accessible.id: "TrayItemPositioner"
             visualSize: dummyDelegate.visualSize
             contentItem: DummyDelegate {
                 Accessible.role: Accessible.Button
-                Component.onCompleted: { Accessible.id = "DummyDelegate" }
+                Accessible.id: "DummyDelegate"
                 id: dummyDelegate
             }
         }
@@ -36,12 +36,12 @@ LQM.DelegateChooser {
         roleValue: "legacy-tray-plugin"
         TrayItemPositioner {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "TraySurfacePositioner" }
+            Accessible.id: "TraySurfacePositioner"
             id: traySurfacePositioner
             visualSize: traySurfaceDelegate.visualSize
             contentItem: ActionLegacyTrayPluginDelegate {
                 Accessible.role: Accessible.Button
-                Component.onCompleted: { Accessible.id = "TraySurfaceDelegate" }
+                Accessible.id: "TraySurfaceDelegate"
                 id: traySurfaceDelegate
                 objectName: "tray"
                 inputEventsEnabled: !disableInputEvents && (model.sectionType !== "collapsable" || !DDT.TraySortOrderModel.isCollapsing)
@@ -52,7 +52,7 @@ LQM.DelegateChooser {
                 // trayItem's popup
                 DDT.TrayItemSurfacePopup {
                     Accessible.role: Accessible.Dialog
-                    Component.onCompleted: { Accessible.id = "SurfacePopup" }
+                    Accessible.id: "SurfacePopup"
                     id: surfacePopup
                     surfaceAcceptor: function (surfaceId) {
                         if (root.surfaceAcceptor && !root.surfaceAcceptor(surfaceId))
@@ -68,10 +68,10 @@ LQM.DelegateChooser {
         roleValue: "action-show-stash"
         TrayItemPositioner {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "TrayItemPositioner" }
+            Accessible.id: "TrayItemPositioner"
             contentItem: ActionShowStashDelegate {
                 Accessible.role: Accessible.Button
-                Component.onCompleted: { Accessible.id = "ActionShowStashDelegate" }
+                Accessible.id: "ActionShowStashDelegate"
             }
         }
     }
@@ -79,10 +79,10 @@ LQM.DelegateChooser {
         roleValue: "action-toggle-collapse"
         TrayItemPositioner {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "TrayItemPositioner" }
+            Accessible.id: "TrayItemPositioner"
             contentItem: ActionToggleCollapseDelegate {
                 Accessible.role: Accessible.Button
-                Component.onCompleted: { Accessible.id = "ActionToggleCollapseDelegate" }
+                Accessible.id: "ActionToggleCollapseDelegate"
                 isHorizontal: root.isHorizontal
                 inputEventsEnabled: !disableInputEvents
             }
@@ -92,11 +92,11 @@ LQM.DelegateChooser {
         roleValue: "action-toggle-quick-settings"
         TrayItemPositioner {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "TrayItemPositioner" }
+            Accessible.id: "TrayItemPositioner"
             visualSize: Qt.size(quickSettingsDelegate.width, quickSettingsDelegate.height)
             ActionToggleQuickSettingsDelegate {
                 Accessible.role: Accessible.Button
-                Component.onCompleted: { Accessible.id = "QuickSettingsDelegate" }
+                Accessible.id: "QuickSettingsDelegate"
                 id: quickSettingsDelegate
                 isHorizontal: root.isHorizontal
             }
