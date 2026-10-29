@@ -436,6 +436,9 @@ Item {
         }
     }
 
+    readonly property bool useCompositorTooltip: Qt.platform.pluginName === "wayland"
+    property bool compositorTooltipActive: false
+
     Timer {
         id: previewTimer
         interval: 500
@@ -444,16 +447,34 @@ Item {
         property int xOffset: 0
         property int yOffset: 0
         onTriggered: {
-            if (root.windows.length != 0 || Qt.platform.pluginName === "wayland") {
+            if (root.windows.length != 0) {
                 // 使用基于 modelIndex 的预览API，确保精确匹配
                 taskmanager.Applet.requestPreview(root.modelIndex, Panel.rootObject, xOffset, yOffset, Panel.position);
             }
         }
     }
 
+    Timer {
+        id: tooltipTimer
+        interval: 50
+        running: false
+        repeat: false
+        property int xOffset: 0
+        property int yOffset: 0
+        onTriggered: {
+            var text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
+            // 合成器协议不可用时回退到原生 tooltip，避免 tooltip 直接消失
+            if (taskmanager.Applet.requestTooltip(text, Panel.rootObject, xOffset, yOffset, Panel.position)) {
+                root.compositorTooltipActive = true
+            } else {
+                root.compositorTooltipActive = false
+                toolTipShowTimer.start()
+            }
+        }
+    }
 
     function onEntered() {
-        if (windows.length === 0) {
+        if (windows.length === 0 && !useCompositorTooltip) {
             toolTipShowTimer.start()
             return
         }
@@ -467,6 +488,16 @@ Item {
             xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
             yOffset = itemPos.y + (root.height / 2)
         }
+
+        if (windows.length === 0) {
+            // 无窗口应用：交给合成器绘制 tooltip，以便与窗口预览保持连续的过渡动画
+            tooltipTimer.xOffset = xOffset
+            tooltipTimer.yOffset = yOffset
+            tooltipTimer.start()
+            return
+        }
+
+        compositorTooltipActive = false
         previewTimer.xOffset = xOffset
         previewTimer.yOffset = yOffset
         previewTimer.start()
@@ -481,8 +512,17 @@ Item {
             previewTimer.stop()
         }
 
+        if (tooltipTimer.running) {
+            tooltipTimer.stop()
+        }
+
         if (windows.length === 0) {
-            toolTip.close()
+            if (useCompositorTooltip) {
+                compositorTooltipActive = false
+                taskmanager.Applet.hideItemPreview()
+            } else {
+                toolTip.close()
+            }
             return
         }
         closeItemPreview()
@@ -536,6 +576,14 @@ Item {
                 appItem.grabToImage(function(result) {
                     root.Drag.imageSource = result.url;
                 })
+            }
+            // 按下时立即取消待显示的 tooltip，避免启动应用后 tooltip 才弹出
+            if (tooltipTimer.running) {
+                tooltipTimer.stop()
+            }
+            if (compositorTooltipActive) {
+                compositorTooltipActive = false
+                taskmanager.Applet.hideItemPreview()
             }
             toolTip.close()
             closeItemPreview()
@@ -631,6 +679,13 @@ Item {
         // Close tooltip when window appears
         if (windows.length > 0 && toolTip.toolTipVisible) {
             toolTip.close()
+        }
+        // 无窗口应用在悬停期间新开窗口时，从合成器 tooltip 切换到窗口预览
+        if (windows.length > 0 && compositorTooltipActive) {
+            compositorTooltipActive = false
+            previewTimer.xOffset = tooltipTimer.xOffset
+            previewTimer.yOffset = tooltipTimer.yOffset
+            previewTimer.start()
         }
     }
 

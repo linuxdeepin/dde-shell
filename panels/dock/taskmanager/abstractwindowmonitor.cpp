@@ -69,6 +69,16 @@ void AbstractWindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &i
 {
 }
 
+bool AbstractWindowMonitor::requestTooltip(const QString &text, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+{
+    Q_UNUSED(text)
+    Q_UNUSED(relativePositionItem)
+    Q_UNUSED(previewXoffset)
+    Q_UNUSED(previewYoffset)
+    Q_UNUSED(direction)
+    return false;
+}
+
 void AbstractWindowMonitor::requestWindowsView(const QModelIndexList &indexes) const
 {
     qDebug() << indexes;

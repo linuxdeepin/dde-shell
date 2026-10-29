@@ -9,6 +9,7 @@
 #include "taskmanager.h"
 #include "treelandwindow.h"
 
+#include <QDebug>
 #include <QPointer>
 #include <QIODevice>
 #include <QVarLengthArray>
@@ -59,6 +60,12 @@ void TreeLandDockPreviewContext::showWindowsPreview(QByteArray windowsId, int32_
 {
     m_isDockMouseAreaEnter = true;
     show(windowsId, previewXoffset, previewYoffset, direction);
+}
+
+void TreeLandDockPreviewContext::showTooltip(const QString &text, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
+{
+    m_isDockMouseAreaEnter = true;
+    show_tooltip(text, previewXoffset, previewYoffset, direction);
 }
 
 void TreeLandDockPreviewContext::hideWindowsPreview()
@@ -126,57 +133,82 @@ void TreeLandWindowMonitor::hideItemPreview()
     m_dockPreview->hideWindowsPreview();
 }
 
+void TreeLandWindowMonitor::ensureDockPreviewContext(QWindow *relativePositionItem)
+{
+    if (!m_dockPreview.isNull())
+        return;
+
+    auto window = relativePositionItem;
+    if (!window) return;
+    auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(window->handle());
+    if (!waylandWindow) return;
+
+    auto context = m_foreignToplevelManager->get_dock_preview_context(waylandWindow->wlSurface());
+    m_dockPreview.reset(new TreeLandDockPreviewContext(context));
+    connect(window, &QWindow::visibleChanged, m_dockPreview.get(), [this]() {
+        m_dockPreview.reset();
+    });
+    connect(m_dockPreview.get(), &TreeLandDockPreviewContext::closed, this, [this]() {
+        // 当预览关闭时，发出信号清空过滤状态
+        emit previewShouldClear();
+    });
+}
+
 void TreeLandWindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
                                            QWindow *relativePositionItem,
                                            int32_t previewXoffset,
                                            int32_t previewYoffset,
                                            uint32_t direction)
 {
-    if (!m_foreignToplevelManager->isActive()) {
+    if (!m_foreignToplevelManager || !m_foreignToplevelManager->isActive()) {
         return;
     }
 
-    if (m_dockPreview.isNull()) {
-        auto window = relativePositionItem;
-        if (!window) return;
-        auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(window->handle());
-        if (!waylandWindow) return;
-
-        auto context = m_foreignToplevelManager->get_dock_preview_context(waylandWindow->wlSurface());
-        m_dockPreview.reset(new TreeLandDockPreviewContext(context));
-        connect(window, &QWindow::visibleChanged, m_dockPreview.get(), [this]() {
-            m_dockPreview.reset();
-        });
-        connect(m_dockPreview.get(), &TreeLandDockPreviewContext::closed, this, [this]() {
-            // 当预览关闭时，发出信号清空过滤状态
-            emit previewShouldClear();
-        });
+    if (!sourceModel || sourceModel->rowCount() == 0) {
+        qWarning() << "requestPreview called without any window";
+        return;
     }
 
-    m_dockPreview->m_isDockMouseAreaEnter = true;
+    ensureDockPreviewContext(relativePositionItem);
+    if (m_dockPreview.isNull())
+        return;
 
-    if (sourceModel && sourceModel->rowCount() > 0) {
-        QVarLengthArray<uint32_t> array;
-        for (int i = 0; i < sourceModel->rowCount(); ++i) {
-            QModelIndex index = sourceModel->index(i, 0);
-            uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
-            if (winId != 0) {
-                array.append(winId);
-            }
+    QVarLengthArray<uint32_t> array;
+    for (int i = 0; i < sourceModel->rowCount(); ++i) {
+        QModelIndex index = sourceModel->index(i, 0);
+        uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+        if (winId != 0) {
+            array.append(winId);
         }
-
-        if (!array.isEmpty()) {
-            QByteArray byteArray;
-            int size = array.size() * sizeof(uint32_t);
-            byteArray.resize(size);
-            memcpy(byteArray.data(), array.constData(), size);
-            m_dockPreview->showWindowsPreview(byteArray, previewXoffset, previewYoffset, direction);
-        } else {
-            m_dockPreview->show_tooltip("???", previewXoffset, previewYoffset, direction);
-        }
-    } else {
-        m_dockPreview->show_tooltip("???", previewXoffset, previewYoffset, direction);
     }
+
+    if (array.isEmpty()) {
+        qWarning() << "requestPreview called without any valid window id";
+        return;
+    }
+
+    QByteArray byteArray;
+    int size = array.size() * sizeof(uint32_t);
+    byteArray.resize(size);
+    memcpy(byteArray.data(), array.constData(), size);
+    m_dockPreview->showWindowsPreview(byteArray, previewXoffset, previewYoffset, direction);
+}
+
+bool TreeLandWindowMonitor::requestTooltip(const QString &text,
+                                           QWindow *relativePositionItem,
+                                           int32_t previewXoffset,
+                                           int32_t previewYoffset,
+                                           uint32_t direction)
+{
+    if (!m_foreignToplevelManager || !m_foreignToplevelManager->isActive())
+        return false;
+
+    ensureDockPreviewContext(relativePositionItem);
+    if (m_dockPreview.isNull())
+        return false;
+
+    m_dockPreview->showTooltip(text, previewXoffset, previewYoffset, direction);
+    return true;
 }
 
 void TreeLandWindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const
