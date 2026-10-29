@@ -34,7 +34,6 @@ public:
     int pos() const { return m_positionInPage; };
 };
 
-class AMAppItemModel;
 class AppGroup;
 /*! \brief AppGroupManager is a interface to manager all groups.
  *
@@ -55,9 +54,18 @@ public:
         DndAppend = 1
     };
     Q_ENUM(DndOperation)
-    explicit AppGroupManager(AMAppItemModel * referenceModel, QObject* parent = nullptr);
+    explicit AppGroupManager(QAbstractItemModel *referenceModel, QObject *parent = nullptr);
+    AppGroupManager(QAbstractItemModel *referenceModel, Dtk::Core::DConfig *config, QObject *parent);
 
-    QVariant data(const QModelIndex &index, int role = GroupIdRole) const override;
+    QHash<int, QByteArray> roleNames() const override;
+    Q_INVOKABLE QVariantMap itemPosition(const QString &id);
+    Q_INVOKABLE QVariantMap folderInfo(const QString &id);
+    Q_INVOKABLE int pageCount(int folderId = 0);
+    Q_INVOKABLE void updateFolderName(int folderId, const QString &name);
+    Q_INVOKABLE int createEmptyPage(int folderId = 0);
+    Q_INVOKABLE void removeEmptyPages();
+    Q_INVOKABLE void rearrange(const QString &dragId, const QString &dropId, int operation, int pageHint = -1);
+    Q_INVOKABLE void bringToFront(const QString &id);
 
     Q_INVOKABLE ItemPosition findItem(const QString &appId, int folderId = -1);
     Q_INVOKABLE void appendItemToGroup(const QString &appId, int groupId);
@@ -66,13 +74,19 @@ public:
     AppGroup * group(int groupId);
     AppGroup * group(QModelIndex idx);
     Q_INVOKABLE ItemsPage * groupPages(int groupId);
-    Q_INVOKABLE void bringToFromt(const QString & id);
     Q_INVOKABLE void commitRearrangeOperation(const QString & dragId, const QString & dropId, DndOperation operation, int pageHint = -1);
 
     static QVariantList fromListOfStringList(const QList<QStringList> & list);
 
-private:
+signals:
+    void arrangementChanged();
+
+private slots:
     void onReferenceModelChanged();
+    void scheduleReferenceSync() { m_referenceSyncTimer.start(); }
+
+private:
+    void notifyArrangementChanged();
 
     void launchpadArrangementConfigMigration();
     void loadAppGroupInfo();
@@ -84,9 +98,8 @@ private:
     void removeGroup(int groupId);
 
 private:
-    bool m_appGroupInitialized;
-    QPointer<AMAppItemModel> m_referenceModel;
-    QTimer* m_dumpTimer;
+    QPointer<QAbstractItemModel> m_referenceModel;
     Dtk::Core::DConfig *m_config;
+    QTimer m_referenceSyncTimer;
 };
 }
