@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -171,7 +171,7 @@ void X11WindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &index,
 void X11WindowMonitor::clearPreviewState()
 {
     // 发出信号通知 TaskManager 清空预览过滤状态
-    emit previewShouldClear();
+    Q_EMIT previewShouldClear();
 }
 
 void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)

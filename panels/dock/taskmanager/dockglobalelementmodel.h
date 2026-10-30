@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
@@ -38,7 +38,7 @@ public:
 
     void moveItem(int from, int to);
 
-public slots:
+public Q_SLOTS:
     void initDockedElements(bool unused);
 
 private:

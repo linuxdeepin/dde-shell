@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -402,10 +402,10 @@ TEST(RoleCombineModel, MinorDataChangedForwardToAllMappedMajorRows)
     // Verify DataB::setData emits dataChanged on modelB
     QSignalSpy spyB(&modelB, &QAbstractItemModel::dataChanged);
     modelB.setData(modelB.index(0), "newAppData", TestModelB::dataRole);
-    EXPECT_EQ(spyB.count(), 1) << "modelB should emit dataChanged when setData is called";
+    EXPECT_EQ(spyB.count(), 1) << "modelB should Q_EMIT dataChanged when setData is called";
 
     // Now check if RoleCombineModel forwarded the signal
-    EXPECT_EQ(spy.count(), 2) << "Should emit dataChanged for both major rows mapping to the same minor row";
+    EXPECT_EQ(spy.count(), 2) << "Should Q_EMIT dataChanged for both major rows mapping to the same minor row";
 
     // 验证数据已更新
     EXPECT_EQ(model.index(0, 0).data(bDataRole).toString(), "newAppData");

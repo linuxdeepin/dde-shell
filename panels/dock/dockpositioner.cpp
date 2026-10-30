@@ -65,7 +65,7 @@ void DockPositioner::setBounding(const QRect &newBounding)
     if (m_bounding == newBounding)
         return;
     m_bounding = newBounding;
-    emit boundingChanged();
+    Q_EMIT boundingChanged();
 }
 
 int DockPositioner::x() const
@@ -93,7 +93,7 @@ void DockPositioner::setX(int x)
     if (m_x == x)
         return;
     m_x = x;
-    emit xChanged();
+    Q_EMIT xChanged();
 }
 
 void DockPositioner::setY(int y)
@@ -101,7 +101,7 @@ void DockPositioner::setY(int y)
     if (m_y == y)
         return;
     m_y = y;
-    emit yChanged();
+    Q_EMIT yChanged();
 }
 
 void DockPositioner::update()
@@ -171,7 +171,7 @@ void DockPanelPositioner::setHorizontalOffset(int newHorizontalOffset)
     if (m_horizontalOffset == newHorizontalOffset)
         return;
     m_horizontalOffset = newHorizontalOffset;
-    emit horizontalOffsetChanged();
+    Q_EMIT horizontalOffsetChanged();
 }
 
 int DockPanelPositioner::vertialOffset() const
@@ -184,7 +184,7 @@ void DockPanelPositioner::setVertialOffset(int newVertialOffset)
     if (m_vertialOffset == newVertialOffset)
         return;
     m_vertialOffset = newVertialOffset;
-    emit vertialOffsetChanged();
+    Q_EMIT vertialOffsetChanged();
 }
 
 void DockPanelPositioner::resetHorizontalOffset()

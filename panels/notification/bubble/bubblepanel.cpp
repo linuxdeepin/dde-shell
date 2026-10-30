@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -210,7 +210,7 @@ void BubblePanel::setEnabled(bool newEnabled)
     if (m_enabled == newEnabled)
         return;
     m_enabled = newEnabled;
-    emit enabledChanged();
+    Q_EMIT enabledChanged();
 
     bool isEmpty = m_bubbles->items().isEmpty();
     setVisible(!isEmpty && enabled());

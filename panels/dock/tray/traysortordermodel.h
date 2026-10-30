@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -75,7 +75,7 @@ public:
     Q_INVOKABLE void commitStagedDrop();
     Q_INVOKABLE void clearStagedDrop();
 
-signals:
+Q_SIGNALS:
     void collapsedChanged(bool);
     void isCollapsingChanged(bool);
     void actionsAlwaysVisibleChanged(bool);
@@ -130,7 +130,7 @@ private:
     void saveCollapsedToDConfig();
     void handlePluginVisibleChanged(const QString &surfaceId, bool visible);
 
-private slots:
+private Q_SLOTS:
     void onAvailableSurfacesChanged();
 };
 

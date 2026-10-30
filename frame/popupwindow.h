@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -27,7 +27,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result) override;
 
-signals:
+Q_SIGNALS:
     void x11GrabFocusTransitionChanged();
     void x11FocusOutByGrab();
     void x11FocusInByUngrab();

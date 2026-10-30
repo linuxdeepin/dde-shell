@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -101,7 +101,7 @@ void WindowManager::setWindowInfoActive(uint id, const QString &name)
         if (m_WindowList[i].id == id) {
             m_ActiveId = id;
             m_WindowList[i].name = "ForegroundApp："+name;
-            emit dataChanged(index(i), index(i), {NameRole, IdRole, StartTimeRole});
+            Q_EMIT dataChanged(index(i), index(i), {NameRole, IdRole, StartTimeRole});
             return;
         }
     }
@@ -113,7 +113,7 @@ void WindowManager::setWindowInfoInActive(uint id, const QString &name)
         if (m_ActiveId!=0&&m_WindowList[i].id == m_ActiveId) {
             m_WindowList[i].name = "BackgroundApp："+m_WindowList[i].name.split("：")[1];
             m_ActiveId=0;
-            emit dataChanged(index(i), index(i), {NameRole, IdRole, StartTimeRole});
+            Q_EMIT dataChanged(index(i), index(i), {NameRole, IdRole, StartTimeRole});
             return;
         }
     }

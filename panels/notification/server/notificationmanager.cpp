@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -475,7 +475,7 @@ void NotificationManager::tryPlayNotificationSound(const NotifyEntity &entity, c
 void NotificationManager::emitRecordCountChanged()
 {
     const auto count = m_persistence->fetchEntityCount(DataAccessor::AllApp(), NotifyEntity::Processed);
-    emit RecordCountChanged(count);
+    Q_EMIT RecordCountChanged(count);
 }
 
 void NotificationManager::updateEntityProcessed(qint64 id, uint reason)

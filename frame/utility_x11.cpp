@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -130,7 +130,7 @@ bool MouseGrabEventFilter::eventFilter(QObject *watched, QEvent *event)
             const auto pos = pt.globalPosition();
             if (!bounding.contains(pos.toPoint())) {
                 qCDebug(dsLog) << "touch outside menu window:" << m_target->winId();
-                emit outsideMousePressed();
+                Q_EMIT outsideMousePressed();
                 return true;
             }
         }
@@ -146,7 +146,7 @@ void MouseGrabEventFilter::mousePressEvent(QMouseEvent *e)
     if ((e->position().toPoint().isNull() && !pos.isNull()) ||
         !bounding.contains(pos.toPoint())) {
         instance()->deliverMouseEvent(e->button());
-        emit outsideMousePressed();
+        Q_EMIT outsideMousePressed();
         return;
     }
 }

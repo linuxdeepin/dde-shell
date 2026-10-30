@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -231,7 +231,7 @@ bool TaskManager::init()
 
     connect(m_windowMonitor.data(), &AbstractWindowMonitor::windowFullscreenChanged, this, [this] (bool isFullscreen) {
         m_windowFullscreen = isFullscreen;
-        emit windowFullscreenChanged(isFullscreen);
+        Q_EMIT windowFullscreenChanged(isFullscreen);
     });
 
     connect(m_windowMonitor.data(), &AbstractWindowMonitor::previewShouldClear, this, [this]() {

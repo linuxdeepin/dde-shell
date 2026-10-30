@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,7 +17,7 @@ public:
     explicit ExampleAppletItem(QObject *parent = nullptr);
     virtual bool init() override;
 
-signals:
+Q_SIGNALS:
     void applicationsModelChanged();
 
 private:

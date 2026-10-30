@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -22,7 +22,7 @@ class LayerShellEmulation : public QObject
 public:
     explicit LayerShellEmulation(QWindow* window, QObject* parent = nullptr);
 
-private slots:
+private Q_SLOTS:
     void onLayerChanged();
     // margins or anchor changed
     void onPositionChanged();

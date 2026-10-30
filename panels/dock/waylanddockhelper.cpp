@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -118,7 +118,7 @@ bool WaylandDockHelper::currentActiveWindowFullscreened()
 void WaylandDockHelper::setCurrentActiveWindowFullscreened(bool isFullscreen)
 {
     m_isCurrentActiveWindowFullscreened = isFullscreen;
-    emit currentActiveWindowFullscreenChanged(isFullscreen);
+    Q_EMIT currentActiveWindowFullscreenChanged(isFullscreen);
 }
 
 bool WaylandDockHelper::isWindowOverlap()

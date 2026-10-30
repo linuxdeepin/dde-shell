@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -61,7 +61,7 @@ public:
     bool collapse() const;
     void setCollapse(bool newCollapse);
 
-signals:
+Q_SIGNALS:
     void dataInfoChanged();
     void collapseChanged();
     void countChanged();
@@ -73,7 +73,7 @@ public:
     virtual void timerEvent(QTimerEvent *event) override;
     virtual void sort(int column, Qt::SortOrder order) override;
 
-private slots:
+private Q_SLOTS:
     void doEntityReceived(qint64 id);
     void onCountChanged();
 

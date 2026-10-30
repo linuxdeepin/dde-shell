@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -277,9 +277,9 @@ QAbstractListModel *QuickPanelProxyModel::surfaceModel() const
 
 void QuickPanelProxyModel::updateTrayItemSurface()
 {
-    emit trayItemSurfaceChanged();
+    Q_EMIT trayItemSurfaceChanged();
     if (rowCount() > 0)
-        emit dataChanged(index(0, 0), index(rowCount() - 1, 0), {TraySurface, TraySurfaceItemKey});
+        Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {TraySurface, TraySurfaceItemKey});
 }
 
 void QuickPanelProxyModel::classBegin()
@@ -309,7 +309,7 @@ void QuickPanelProxyModel::setTrayItemPluginId(const QString &newTrayItemPluginI
     if (m_trayItemPluginId == newTrayItemPluginId)
         return;
     m_trayItemPluginId = newTrayItemPluginId;
-    emit trayItemPluginIdChanged();
+    Q_EMIT trayItemPluginIdChanged();
     updateTrayItemSurface();
 }
 
@@ -324,7 +324,7 @@ void QuickPanelProxyModel::setTrayPluginModel(QAbstractItemModel *newTrayPluginM
         return;
     m_trayPluginModel = newTrayPluginModel;
     watchingCountChanged();
-    emit trayPluginModelChanged();
+    Q_EMIT trayPluginModelChanged();
 }
 
 }
