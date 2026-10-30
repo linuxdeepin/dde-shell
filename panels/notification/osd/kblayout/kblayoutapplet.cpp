@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -52,7 +52,7 @@ void KBLayoutApplet::setCurrentLayout(const QString &newCurrentLayout)
     if (m_currentLayout == newCurrentLayout)
         return;
     m_currentLayout = newCurrentLayout;
-    emit currentLayoutChanged();
+    Q_EMIT currentLayoutChanged();
 }
 
 void KBLayoutApplet::fetchLayouts()

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -812,7 +812,7 @@ void PluginSurface::setMargins(int newMargins)
     m_margins = newMargins;
     send_margin(m_margins);
 
-    emit marginsChanged();
+    Q_EMIT marginsChanged();
 }
 
 QSize PluginManager::dockSize() const
@@ -826,7 +826,7 @@ void PluginManager::setDockSize(const QSize &newDockSize)
         return;
     m_dockSize = newDockSize;
     sendEventMsg(dockSizeMsg());
-    emit dockSizeChanged();
+    Q_EMIT dockSizeChanged();
 }
 
 bool PluginManager::fashionMode() const
@@ -840,7 +840,7 @@ void PluginManager::setFashionMode(bool newFashionMode)
         return;
     m_fashionMode = newFashionMode;
     sendEventMsg(fashionModeMsg());
-    emit fashionModeChanged();
+    Q_EMIT fashionModeChanged();
 }
 
 void PluginManager::removePluginSurface(PluginSurface *plugin)

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -43,7 +43,7 @@ TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_pr
 
     connect(m_hideTimer, &QTimer::timeout, this, [this](){
         if (!m_isDockMouseAreaEnter && !m_isPreviewEntered) {
-            emit closed();
+            Q_EMIT closed();
             close();
         }
     }, Qt::QueuedConnection);
@@ -149,7 +149,7 @@ void TreeLandWindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
         });
         connect(m_dockPreview.get(), &TreeLandDockPreviewContext::closed, this, [this]() {
             // 当预览关闭时，发出信号清空过滤状态
-            emit previewShouldClear();
+            Q_EMIT previewShouldClear();
         });
     }
 
@@ -237,7 +237,7 @@ void TreeLandWindowMonitor::updateFullscreenState()
         if (window && window->isFullscreen() && !window->isMinimized()) {
             if (!m_fullscreenState) {
                 m_fullscreenState = true;
-                emit windowFullscreenChanged(true);
+                Q_EMIT windowFullscreenChanged(true);
             }
             return;
         }
@@ -245,7 +245,7 @@ void TreeLandWindowMonitor::updateFullscreenState()
 
     if (m_fullscreenState) {
         m_fullscreenState = false;
-        emit windowFullscreenChanged(false);
+        Q_EMIT windowFullscreenChanged(false);
     }
 }
 }

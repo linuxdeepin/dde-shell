@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -34,7 +34,7 @@ QString ItemsPage::name() const
 void ItemsPage::setName(const QString &name)
 {
     m_displayName = name;
-    emit nameChanged();
+    Q_EMIT nameChanged();
 }
 
 int ItemsPage::maxItemCountPerPage() const
@@ -72,8 +72,8 @@ void ItemsPage::appendEmptyPage()
 {
     m_pages.append(QStringList());
 
-    emit pageCountChanged();
-    emit sigPageAdded(m_pages.count() - 1, m_pages.count() - 1);
+    Q_EMIT pageCountChanged();
+    Q_EMIT sigPageAdded(m_pages.count() - 1, m_pages.count() - 1);
 }
 
 // if length of items larger than max item count per page, there will be another page get appended
@@ -102,8 +102,8 @@ void ItemsPage::appendPage(const QStringList items)
         m_pages.append(newList);
     }
 
-    emit pageCountChanged();
-    emit sigPageAdded(first, m_pages.count() - 1);
+    Q_EMIT pageCountChanged();
+    Q_EMIT sigPageAdded(first, m_pages.count() - 1);
 }
 
 // find a page with empty place and append the item to that page.
@@ -186,8 +186,8 @@ bool ItemsPage::removeItem(const QString id, bool removePageIfPageIsEmpty)
 
         if (removePageIfPageIsEmpty && m_pages.at(page).isEmpty()) {
             m_pages.removeAt(page);
-            emit pageCountChanged();
-            emit sigPageRemoved(m_pages.count() - 1, m_pages.count() - 1);
+            Q_EMIT pageCountChanged();
+            Q_EMIT sigPageRemoved(m_pages.count() - 1, m_pages.count() - 1);
         }
 
         return true;
@@ -214,8 +214,8 @@ void ItemsPage::removeEmptyPages()
     int count = m_pages.size();
     m_pages.removeAll({});
     if (count != m_pages.size()) {
-        emit pageCountChanged();
-        emit sigPageRemoved(m_pages.count() - 1, m_pages.count() - 1);
+        Q_EMIT pageCountChanged();
+        Q_EMIT sigPageRemoved(m_pages.count() - 1, m_pages.count() - 1);
     }
 }
 

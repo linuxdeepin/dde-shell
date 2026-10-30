@@ -76,10 +76,10 @@ public:
     explicit TestLayoutSourceModel(QObject *parent = nullptr) : QStandardItemModel(parent) {}
     void emitLayoutAboutToBeChanged(const QList<QPersistentModelIndex> &parents,
                                     QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint)
-    { emit layoutAboutToBeChanged(parents, hint); }
+    { Q_EMIT layoutAboutToBeChanged(parents, hint); }
     void emitLayoutChanged(const QList<QPersistentModelIndex> &parents,
                            QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint)
-    { emit layoutChanged(parents, hint); }
+    { Q_EMIT layoutChanged(parents, hint); }
 };
 
 namespace {

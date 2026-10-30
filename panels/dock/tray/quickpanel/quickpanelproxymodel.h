@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -36,7 +36,7 @@ public:
     QAbstractItemModel *trayPluginModel() const;
     void setTrayPluginModel(QAbstractItemModel *newTrayPluginModel);
 
-signals:
+Q_SIGNALS:
     void trayItemSurfaceChanged();
     void trayItemPluginIdChanged();
 
@@ -67,7 +67,7 @@ private:
     QString traySurfaceItemKey(const QString &pluginId) const;
     int roleByName(const QByteArray &roleName) const;
     QAbstractListModel *surfaceModel() const;
-private slots:
+private Q_SLOTS:
     void updateTrayItemSurface();
 
 private:

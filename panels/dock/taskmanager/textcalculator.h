@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -158,7 +158,7 @@ Q_SIGNALS:
     void remainingSpaceChanged();
     void enabledChanged();
 
-private slots:
+private Q_SLOTS:
     void onDataModelChanged();
     void onDataModelDestroyed();
     void calculateOptimalTextWidth();

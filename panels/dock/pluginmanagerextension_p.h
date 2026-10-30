@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -239,7 +239,7 @@ public:
     int margins() const;
     void setMargins(int newMargins);
 
-signals:
+Q_SIGNALS:
     void itemActiveChanged();
     void cardOrderChanged();
     void heightChanged();
@@ -322,7 +322,7 @@ public:
     int height() const;
     int width() const;
 
-signals:
+Q_SIGNALS:
     void aboutToDestroy();
 
 protected:

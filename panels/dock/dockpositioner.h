@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -41,11 +41,11 @@ public:
 
     void setX(int x);
     void setY(int y);
-public slots:
+public Q_SLOTS:
     void update();
     virtual void updatePosition();
 
-signals:
+Q_SIGNALS:
     void boundingChanged();
     void xChanged();
     void yChanged();
@@ -80,10 +80,10 @@ public:
     void setVertialOffset(int newVertialOffset);
     void resetVertialOffset();
 
-public slots:
+public Q_SLOTS:
     virtual void updatePosition() override;
 
-signals:
+Q_SIGNALS:
     void horizontalOffsetChanged();
     void vertialOffsetChanged();
 

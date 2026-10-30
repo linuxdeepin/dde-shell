@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -141,7 +141,7 @@ void DQuickDrag::setActive(bool newActive)
     }
 
     d->m_active = newActive;
-    emit activeChanged();
+    Q_EMIT activeChanged();
 }
 
 QPoint DQuickDrag::startDragPoint() const
@@ -162,7 +162,7 @@ void DQuickDrag::setOverlay(QQmlComponent *newOverlay)
     if (d->m_overlay == newOverlay)
         return;
     d->m_overlay = newOverlay;
-    emit overlayChanged();
+    Q_EMIT overlayChanged();
 }
 
 QSizeF DQuickDrag::hotSpotScale() const
@@ -177,14 +177,14 @@ void DQuickDrag::setHotSpotScale(const QSizeF &newHotSpotScale)
     if (d->m_hotSpotScale == newHotSpotScale)
         return;
     d->m_hotSpotScale = newHotSpotScale;
-    emit hotSpotScaleChanged();
+    Q_EMIT hotSpotScaleChanged();
 }
 
 void DQuickDrag::resetHotSpotScale()
 {
     D_D(DQuickDrag);
     d->m_hotSpotScale = {};
-    emit hotSpotScaleChanged();
+    Q_EMIT hotSpotScaleChanged();
 }
 
 QPoint DQuickDrag::currentDragPoint() const
@@ -299,14 +299,14 @@ void DQuickDragPrivate::updateStartDragPoint()
     m_startDragPoint = pos - hotSpot();
 
     D_Q(DQuickDrag);
-    emit q->startDragPointChanged();
+    Q_EMIT q->startDragPointChanged();
 }
 
 void DQuickDragPrivate::updateCurrentDragPoint()
 {
     m_currentDragPoint = m_window->position();
     D_Q(DQuickDrag);
-    emit q->currentDragPointChanged();
+    Q_EMIT q->currentDragPointChanged();
 }
 
 QPoint DQuickDragPrivate::hotSpot() const

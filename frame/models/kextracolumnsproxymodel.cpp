@@ -1,5 +1,5 @@
 /*
-    SPDX-FileCopyrightText: 2015 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+    SPDX-FileCopyrightText: 2015-2026 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
     SPDX-FileContributor: David Faure <david.faure@kdab.com>
 
     SPDX-License-Identifier: LGPL-2.0-or-later

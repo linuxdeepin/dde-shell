@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -50,7 +50,7 @@ void AudioApplet::setIncreaseVolume(bool newIncreaseVolume)
     if (m_increaseVolume == newIncreaseVolume)
         return;
     m_increaseVolume = newIncreaseVolume;
-    emit increaseVolumeChanged();
+    Q_EMIT increaseVolumeChanged();
 }
 
 void AudioApplet::sync()
@@ -120,7 +120,7 @@ void AudioApplet::setIconName(const QString &newIconName)
     if (m_iconName == newIconName)
         return;
     m_iconName = newIconName;
-    emit iconNameChanged();
+    Q_EMIT iconNameChanged();
 }
 
 double AudioApplet::volumeValue() const
@@ -133,7 +133,7 @@ void AudioApplet::setVolumeValue(double newVolumeValue)
     if (qFuzzyCompare(m_volumeValue, newVolumeValue))
         return;
     m_volumeValue = newVolumeValue;
-    emit volumeValueChanged();
+    Q_EMIT volumeValueChanged();
 }
 
 D_APPLET_CLASS(AudioApplet)

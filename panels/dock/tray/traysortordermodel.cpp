@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -373,7 +373,7 @@ QStandardItem *TraySortOrderModel::createTrayItem(const QString &name,
 void TraySortOrderModel::updateVisualIndexes()
 {
     m_isUpdating = true;
-    emit isUpdatingChanged(true);
+    Q_EMIT isUpdatingChanged(true);
     
     // Clear registered sizes before re-assigning visual indexes
     // This ensures that when items are repositioned, the empty placeholder
@@ -509,7 +509,7 @@ void TraySortOrderModel::updateVisualIndexes()
     setProperty("visualItemCount", currentVisualIndex);
     
     m_isUpdating = false;
-    emit isUpdatingChanged(false);
+    Q_EMIT isUpdatingChanged(false);
 
     qDebug() << "update" << m_visualItemCount << currentVisualIndex;
 }
@@ -667,7 +667,7 @@ void TraySortOrderModel::stageDropPosition(const QString &surfaceId, int visualI
     
     m_stagedSurfaceId = surfaceId;
     m_stagedVisualIndex = visualIndex;
-    emit stagedDropChanged();
+    Q_EMIT stagedDropChanged();
     
     // Update visual indexes to show preview position
     updateVisualIndexes();
@@ -685,7 +685,7 @@ void TraySortOrderModel::commitStagedDrop()
     
     m_stagedSurfaceId.clear();
     m_stagedVisualIndex = -1;
-    emit stagedDropChanged();
+    Q_EMIT stagedDropChanged();
     
     updateVisualIndexes();
     dropToDockTray(surfaceId, visualIndex, true);
@@ -700,7 +700,7 @@ void TraySortOrderModel::clearStagedDrop()
     
     m_stagedSurfaceId.clear();
     m_stagedVisualIndex = -1;
-    emit stagedDropChanged();
+    Q_EMIT stagedDropChanged();
     
     // Update visual indexes to remove preview
     updateVisualIndexes();

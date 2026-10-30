@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -89,7 +89,7 @@ void NotificationCenterPanel::setVisible(bool newVisible)
         }
     }
     setBubblePanelEnabled(!m_visible);
-    emit visibleChanged();
+    Q_EMIT visibleChanged();
 }
 
 void NotificationCenterPanel::close()

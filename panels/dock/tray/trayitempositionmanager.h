@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -60,7 +60,7 @@ public:
     Q_INVOKABLE void layoutHealthCheck(int delayMs = 200);
     Q_INVOKABLE void clearRegisteredSizes();
 
-signals:
+Q_SIGNALS:
     void orientationChanged(Qt::Orientation);
     void dockHeightChanged(int);
     void visualSizeChanged(QSize);

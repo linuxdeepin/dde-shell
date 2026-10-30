@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -39,7 +39,7 @@ void TextCalculator::setFont(const QFont &font)
         qCDebug(textCalculatorLog) << "Font changed, clearing cache and recalculating";
         m_font = font;
         m_baselineWidthCache.clear();
-        emit fontChanged();
+        Q_EMIT fontChanged();
         scheduleCalculation();
     }
 }
@@ -48,7 +48,7 @@ void TextCalculator::setIconSize(qreal size)
 {
     if (m_iconSize != size) {
         m_iconSize = size;
-        emit iconSizeChanged();
+        Q_EMIT iconSizeChanged();
         scheduleCalculation();
     }
 }
@@ -57,7 +57,7 @@ void TextCalculator::setCellSize(qreal size)
 {
     if (m_cellSize != size) {
         m_cellSize = size;
-        emit cellSizeChanged();
+        Q_EMIT cellSizeChanged();
         scheduleCalculation();
     }
 }
@@ -66,7 +66,7 @@ void TextCalculator::setSpacing(int spacing)
 {
     if (m_spacing != spacing) {
         m_spacing = spacing;
-        emit spacingChanged();
+        Q_EMIT spacingChanged();
         scheduleCalculation();
     }
 }
@@ -75,7 +75,7 @@ void TextCalculator::setItemPadding(int padding)
 {
     if (m_itemPadding != padding) {
         m_itemPadding = padding;
-        emit itemPaddingChanged();
+        Q_EMIT itemPaddingChanged();
         scheduleCalculation();
     }
 }
@@ -87,7 +87,7 @@ void TextCalculator::setDataModel(QAbstractItemModel *model)
         disconnectDataModelSignals();
         m_dataModel = model;
         connectDataModelSignals();
-        emit dataModelChanged();
+        Q_EMIT dataModelChanged();
         scheduleCalculation();
     }
 }
@@ -96,7 +96,7 @@ void TextCalculator::setRemainingSpace(qreal space)
 {
     if (m_remainingSpace != space) {
         m_remainingSpace = space;
-        emit remainingSpaceChanged();
+        Q_EMIT remainingSpaceChanged();
         scheduleCalculation();
     }
 }
@@ -113,7 +113,7 @@ void TextCalculator::setEnabled(bool enabled)
     } else {
         resetCalculatedWidths();
     }
-    emit enabledChanged();
+    Q_EMIT enabledChanged();
 }
 
 void TextCalculator::componentComplete()
@@ -156,7 +156,7 @@ void TextCalculator::onDataModelChanged()
 void TextCalculator::onDataModelDestroyed()
 {
     m_dataModel = nullptr;
-    emit dataModelChanged();
+    Q_EMIT dataModelChanged();
     resetCalculatedWidths();
 }
 
@@ -181,10 +181,10 @@ void TextCalculator::resetCalculatedWidths()
     m_totalWidth = 0.0;
 
     if (optimalWidthWasSet) {
-        emit optimalSingleTextWidthChanged();
+        Q_EMIT optimalSingleTextWidthChanged();
     }
     if (totalWidthWasSet) {
-        emit totalWidthChanged();
+        Q_EMIT totalWidthChanged();
     }
 }
 
@@ -271,8 +271,8 @@ void TextCalculator::calculateOptimalTextWidth()
             qCDebug(textCalculatorLog) << "Setting optimal width to 0 (no apps or no space)";
             m_optimalSingleTextWidth = 0.0;
             m_totalWidth = 0;
-            emit optimalSingleTextWidthChanged();
-            emit totalWidthChanged();
+            Q_EMIT optimalSingleTextWidthChanged();
+            Q_EMIT totalWidthChanged();
         }
         return;
     }
@@ -323,9 +323,9 @@ void TextCalculator::calculateOptimalTextWidth()
                                    << "Remaining space:" << m_remainingSpace << "Total required:" << newTotalWidth << "Char count:" << charCount
                                    << "spacing:" << m_spacing;
         m_optimalSingleTextWidth = newOptimalWidth;
-        emit optimalSingleTextWidthChanged();
+        Q_EMIT optimalSingleTextWidthChanged();
         m_totalWidth = newTotalWidth;
-        emit totalWidthChanged();
+        Q_EMIT totalWidthChanged();
     }
 }
 
@@ -381,7 +381,7 @@ void TextCalculatorAttached::setText(const QString &text)
     }
     m_text = text;
     ensureInitialize();
-    emit textChanged();
+    Q_EMIT textChanged();
 }
 
 QString TextCalculatorAttached::elidedText() const
@@ -401,7 +401,7 @@ void TextCalculatorAttached::setCalculator(TextCalculator *calculator)
     }
 
     m_calculator = calculator;
-    emit calculatorChanged();
+    Q_EMIT calculatorChanged();
 
     if (m_calculator) {
         connect(m_calculator, &TextCalculator::optimalSingleTextWidthChanged, this, &TextCalculatorAttached::updateElidedText);
@@ -435,8 +435,8 @@ void TextCalculatorAttached::updateElidedText()
         qCDebug(textCalculatorLog) << "No calculator available for elided text update";
         m_elidedText.clear();
         m_ellipsisWidth = 0.0;
-        emit elidedTextChanged();
-        emit ellipsisWidthChanged();
+        Q_EMIT elidedTextChanged();
+        Q_EMIT ellipsisWidthChanged();
         return;
     }
 
@@ -456,15 +456,15 @@ void TextCalculatorAttached::updateElidedText()
 
     if (visibleText != m_text) {
         m_ellipsisWidth = fontMetrics.horizontalAdvance(QString::fromUtf8("…"));
-        emit ellipsisWidthChanged();
+        Q_EMIT ellipsisWidthChanged();
     } else {
         m_ellipsisWidth = 0.0;
-        emit ellipsisWidthChanged();
+        Q_EMIT ellipsisWidthChanged();
     }
 
     if (m_elidedText != visibleText) {
         m_elidedText = visibleText;
-        emit elidedTextChanged();
+        Q_EMIT elidedTextChanged();
     }
 }
 

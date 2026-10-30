@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -76,13 +76,13 @@ public:
 
     QVariantMap appInfo(const QString &id) const;
 
-signals:
+Q_SIGNALS:
     void appAdded(const QString &appId);
     void appRemoved(const QString &id);
     void appValueChanged(const QString &appId, uint configItem, const QVariant &value);
     void systemValueChanged(uint configItem, const QVariant &value);
 
-private slots:
+private Q_SLOTS:
     void onAppsChanged();
 
 private:

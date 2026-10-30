@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: 2010 by Marco Martin <mart@kde.org>
-// SPDX-FileCopyrightText: 2019 by David Edmundson <davidedmundson@kde.org>
+// SPDX-FileCopyrightText: 2010-2026 by Marco Martin <mart@kde.org>
+// SPDX-FileCopyrightText: 2019-2026 by David Edmundson <davidedmundson@kde.org>
 //
 // SPDX-License-Identifier: LGPL-2.0-or-later
 //

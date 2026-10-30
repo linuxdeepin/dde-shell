@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -89,7 +89,7 @@ void NotifyAccessor::setDataUpdater(QObject *updater)
         return;
 
     m_dataUpdater = updater;
-    emit dataUpdaterChanged();
+    Q_EMIT dataUpdaterChanged();
 }
 
 bool NotifyAccessor::enabled() const
@@ -103,7 +103,7 @@ void NotifyAccessor::setEnabled(bool enabled)
         return;
 
     m_enabled = enabled;
-    emit enabledChanged();
+    Q_EMIT enabledChanged();
 }
 
 NotifyEntity NotifyAccessor::fetchEntity(qint64 id) const
@@ -245,16 +245,16 @@ void NotifyAccessor::onNotificationStateChanged(qint64 id, int processedType)
         return;
 
     if (processedType == NotifyEntity::Processed) {
-        emit entityReceived(id);
-        emit stagingEntityClosed(id);
+        Q_EMIT entityReceived(id);
+        Q_EMIT stagingEntityClosed(id);
     } else if (processedType == NotifyEntity::NotProcessed) {
-        emit stagingEntityReceived(id);
+        Q_EMIT stagingEntityReceived(id);
     }
 }
 
 void NotifyAccessor::onReceivedRecord(const QString &id)
 {
-    emit entityReceived(id.toLongLong());
+    Q_EMIT entityReceived(id.toLongLong());
 }
 
 bool NotifyAccessor::debugging() const

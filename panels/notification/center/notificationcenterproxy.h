@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -15,12 +15,12 @@ public:
     explicit NotificationCenterProxy(QObject *parent = nullptr);
     ~NotificationCenterProxy();
 
-public slots:
+public Q_SLOTS:
     void Toggle();
     void Show();
     void Hide();
 
-signals:
+Q_SIGNALS:
     void VisibleChanged(bool visible);
 
 private:

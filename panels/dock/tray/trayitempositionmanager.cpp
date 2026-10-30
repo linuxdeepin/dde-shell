@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -25,7 +25,7 @@ void TrayItemPositionManager::registerVisualItemSize(int index, const QSize &siz
 
     // The registered itemsize may change, and the layout needs to be updated when it does.
     if (oldSize != size) {
-        emit visualItemSizeChanged();
+        Q_EMIT visualItemSizeChanged();
     }
 }
 
@@ -111,7 +111,7 @@ void TrayItemPositionManager::layoutHealthCheck(int delayMs)
         QSize result(visualSize(m_visualItemCount - 1, false));
         if (m_visualSize != result) {
             qWarning() << "layout size not matched, will trigger a force re-layout...";
-            emit orientationChanged(m_orientation);
+            Q_EMIT orientationChanged(m_orientation);
         } else {
             qDebug() << "no problem founded while performing layout health check!";
         }
@@ -127,7 +127,7 @@ void TrayItemPositionManager::clearRegisteredSizes()
     }
     
     m_registeredItemsSize.clear();
-    emit visualItemSizeChanged();
+    Q_EMIT visualItemSizeChanged();
 }
 
 TrayItemPositionManager::TrayItemPositionManager(QObject *parent)
