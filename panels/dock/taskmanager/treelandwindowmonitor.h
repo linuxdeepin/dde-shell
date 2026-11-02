@@ -6,7 +6,7 @@
 
 #include "treelandwindow.h"
 #include "abstractwindowmonitor.h"
-#include "qwayland-treeland-foreign-toplevel-manager-unstable-v2.h"
+#include "qwayland-treeland-foreign-toplevel-manager-unstable-v3.h"
 
 #include <QHash>
 #include <QList>
@@ -16,7 +16,7 @@
 #include <QtWaylandClient/QWaylandClientExtension>
 
 namespace dock {
-class ForeignToplevelManager : public QWaylandClientExtensionTemplate<ForeignToplevelManager, &QtWayland::treeland_foreign_toplevel_manager_v2::destroy>, public QtWayland::treeland_foreign_toplevel_manager_v2
+class ForeignToplevelManager : public QWaylandClientExtensionTemplate<ForeignToplevelManager, &QtWayland::treeland_foreign_toplevel_manager_v3::destroy>, public QtWayland::treeland_foreign_toplevel_manager_v3
 {
     Q_OBJECT
 public:
@@ -26,18 +26,18 @@ Q_SIGNALS:
     void newForeignToplevelHandle(ForeignToplevelHandle *handle);
 
 protected:
-    void treeland_foreign_toplevel_manager_v2_toplevel(struct ::treeland_foreign_toplevel_handle_v2 *toplevel) override;
+    void treeland_foreign_toplevel_manager_v3_toplevel(struct ::treeland_foreign_toplevel_handle_v3 *toplevel) override;
 
 private:
     TreeLandWindowMonitor* m_monitor;
 };
 
-class TreeLandDockPreviewContext : public QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>, public QtWayland::treeland_dock_preview_context_v2
+class TreeLandDockPreviewContext : public QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>, public QtWayland::treeland_dock_preview_context_v3
 {
     Q_OBJECT
 
 public:
-    explicit TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v2 *);
+    explicit TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v3 *);
     ~TreeLandDockPreviewContext();
     void showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
     void hideWindowsPreview();
@@ -48,8 +48,8 @@ Q_SIGNALS:
     void closed();
 
 protected:
-    virtual void treeland_dock_preview_context_v2_enter() override;
-    virtual void treeland_dock_preview_context_v2_leave() override;
+    virtual void treeland_dock_preview_context_v3_enter() override;
+    virtual void treeland_dock_preview_context_v3_leave() override;
     friend class TreeLandWindowMonitor;
 
 private:

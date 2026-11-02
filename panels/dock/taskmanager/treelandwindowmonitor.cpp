@@ -19,18 +19,18 @@
 
 namespace dock {
 ForeignToplevelManager::ForeignToplevelManager(TreeLandWindowMonitor* monitor)
-    : QWaylandClientExtensionTemplate<ForeignToplevelManager, &QtWayland::treeland_foreign_toplevel_manager_v2::destroy>(1)
+    : QWaylandClientExtensionTemplate<ForeignToplevelManager, &QtWayland::treeland_foreign_toplevel_manager_v3::destroy>(1)
     , m_monitor(monitor)
 {
 }
 
-void ForeignToplevelManager::treeland_foreign_toplevel_manager_v2_toplevel(struct ::treeland_foreign_toplevel_handle_v2 *toplevel)
+void ForeignToplevelManager::treeland_foreign_toplevel_manager_v3_toplevel(struct ::treeland_foreign_toplevel_handle_v3 *toplevel)
 {
     ForeignToplevelHandle* handle = new ForeignToplevelHandle(toplevel);
     connect(handle, &ForeignToplevelHandle::handlerIsReady, m_monitor, &TreeLandWindowMonitor::handleForeignToplevelHandleAdded, Qt::UniqueConnection);
 }
 
-TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v2 *context)
+TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v3 *context)
     : QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>(1)
     , m_isPreviewEntered(false)
     , m_isDockMouseAreaEnter(false)
@@ -67,12 +67,12 @@ void TreeLandDockPreviewContext::hideWindowsPreview()
     m_hideTimer->start();
 }
 
-void TreeLandDockPreviewContext::treeland_dock_preview_context_v2_enter()
+void TreeLandDockPreviewContext::treeland_dock_preview_context_v3_enter()
 {
     m_isPreviewEntered = true;
 }
 
-void TreeLandDockPreviewContext::treeland_dock_preview_context_v2_leave()
+void TreeLandDockPreviewContext::treeland_dock_preview_context_v3_leave()
 {
     m_isPreviewEntered = false;
     m_hideTimer->start();
@@ -171,11 +171,7 @@ void TreeLandWindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
             byteArray.resize(size);
             memcpy(byteArray.data(), array.constData(), size);
             m_dockPreview->showWindowsPreview(byteArray, previewXoffset, previewYoffset, direction);
-        } else {
-            m_dockPreview->show_tooltip("???", previewXoffset, previewYoffset, direction);
         }
-    } else {
-        m_dockPreview->show_tooltip("???", previewXoffset, previewYoffset, direction);
     }
 }
 
