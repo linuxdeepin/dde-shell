@@ -4,7 +4,7 @@
 
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS DBus WaylandClient)
 find_package(yaml-cpp REQUIRED)
-find_package(TreelandProtocols REQUIRED)
+find_package(TreelandProtocols 0.9.0 REQUIRED)
 
 set_source_files_properties(
     ${CMAKE_CURRENT_SOURCE_DIR}/api/amdbus/org.desktopspec.ApplicationManager1.Application.xml
@@ -90,7 +90,7 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
 
 qt_generate_wayland_protocol_client_sources(dock-taskmanager
     FILES
-        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-foreign-toplevel-manager-unstable-v2.xml
+        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-foreign-toplevel-manager-unstable-v3.xml
         ${WaylandProtocols_DATADIR}/staging/ext-foreign-toplevel-list/ext-foreign-toplevel-list-v1.xml
 )
 
