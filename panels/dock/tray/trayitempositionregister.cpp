@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -15,12 +15,12 @@ TrayItemPositionRegisterAttachedType::TrayItemPositionRegisterAttachedType(QObje
     connect(this, &TrayItemPositionRegisterAttachedType::visualIndexChanged,
             this, [this](){
                 registerVisualSize();
-                emit visualPositionChanged();
+                Q_EMIT visualPositionChanged();
             });
     connect(this, &TrayItemPositionRegisterAttachedType::visualSizeChanged,
             this, [this](){
                 registerVisualSize();
-                emit visualPositionChanged();
+                Q_EMIT visualPositionChanged();
             });
     // recalculate position
     connect(&TrayItemPositionManager::instance(), &TrayItemPositionManager::orientationChanged,

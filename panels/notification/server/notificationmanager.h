@@ -86,7 +86,7 @@ private:
     void initScreenLockedState();
     void queryScreenLockedState();
 
-private slots:
+private Q_SLOTS:
     void onScreenLockedChanged(bool);
 
 private:
