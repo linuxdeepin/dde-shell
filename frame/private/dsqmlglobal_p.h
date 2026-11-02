@@ -40,7 +40,7 @@ public:
     static DQmlGlobal *instance();
     static QList<QWindow *> allChildrenWindows(QWindow *target);
 
-signals:
+Q_SIGNALS:
     void rootAppletChanged();
 };
 

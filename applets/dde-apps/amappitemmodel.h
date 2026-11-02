@@ -21,7 +21,7 @@ public:
 
     bool ready() const;
 
-signals:
+Q_SIGNALS:
     void readyChanged(bool);
 
 private:

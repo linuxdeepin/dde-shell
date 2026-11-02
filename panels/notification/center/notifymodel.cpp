@@ -800,7 +800,7 @@ void NotifyModel::doEntityReceived(qint64 id)
 void NotifyModel::onCountChanged()
 {
     updateCollapseStatus();
-    emit dataInfoChanged();
+    Q_EMIT dataInfoChanged();
 }
 
 int NotifyModel::notifyCount(const NotifyType &type) const
@@ -856,6 +856,6 @@ void NotifyModel::setCollapse(bool newCollapse)
     if (m_collapse == newCollapse)
         return;
     m_collapse = newCollapse;
-    emit collapseChanged();
+    Q_EMIT collapseChanged();
 }
 }

@@ -31,7 +31,7 @@ public:
     bool appModelReady() const;
     QVariantMap ddeCategories() const;
 
-signals:
+Q_SIGNALS:
     void appModelReadyChanged(bool ready);
 
 private:

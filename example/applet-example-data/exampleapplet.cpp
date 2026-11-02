@@ -53,7 +53,7 @@ void ExampleApplet::setUserData(bool newUserData)
     if (m_userData == newUserData)
         return;
     m_userData = newUserData;
-    emit userDataChanged();
+    Q_EMIT userDataChanged();
 }
 
 QString ExampleApplet::call(const QString &id)

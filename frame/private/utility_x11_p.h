@@ -42,7 +42,7 @@ public:
     static bool isMatchingWindow(QWindow *target);
     void closeAllWindow();
     bool eventFilter(QObject *watched, QEvent *event) override;
-signals:
+Q_SIGNALS:
     void outsideMousePressed();
 private:
     void mousePressEvent(QMouseEvent *e);

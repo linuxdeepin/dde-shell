@@ -60,7 +60,7 @@ public:
     Q_INVOKABLE void layoutHealthCheck(int delayMs = 200);
     Q_INVOKABLE void clearRegisteredSizes();
 
-signals:
+Q_SIGNALS:
     void orientationChanged(Qt::Orientation);
     void dockHeightChanged(int);
     void visualSizeChanged(QSize);

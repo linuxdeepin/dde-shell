@@ -17,7 +17,7 @@ public:
     explicit ExampleAppletItem(QObject *parent = nullptr);
     virtual bool init() override;
 
-signals:
+Q_SIGNALS:
     void applicationsModelChanged();
 
 private:

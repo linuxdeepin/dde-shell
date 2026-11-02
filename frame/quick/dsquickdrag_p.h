@@ -45,7 +45,7 @@ public:
     bool isDragging() const;
 
     static DQuickDrag *qmlAttachedProperties(QObject *object);
-signals:
+Q_SIGNALS:
     void activeChanged();
     void startDragPointChanged();
     void overlayChanged();

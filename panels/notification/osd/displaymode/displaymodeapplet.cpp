@@ -87,7 +87,7 @@ void DisPlayModeApplet::setState(int newState)
     if (m_state == newState)
         return;
     m_state = newState;
-    emit stateChanged();
+    Q_EMIT stateChanged();
 }
 
 DPItem *DisPlayModeApplet::currentPlanItem() const
@@ -149,7 +149,7 @@ void DisPlayModeApplet::setCurrentPlanItem(DPItem *newCurrentPlanItem)
     if (m_currentPlanItem == newCurrentPlanItem)
         return;
     m_currentPlanItem = newCurrentPlanItem;
-    emit currentPlanItemChanged();
+    Q_EMIT currentPlanItemChanged();
 }
 
 void DisPlayModeApplet::fetchPlanItems()

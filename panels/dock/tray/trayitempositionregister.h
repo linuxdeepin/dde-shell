@@ -24,7 +24,7 @@ public:
 
     QPoint visualPosition() const;
 
-signals:
+Q_SIGNALS:
     void surfaceIdChanged(QString);
     void sectionTypeChanged(QString);
     void visualIndexChanged(int);

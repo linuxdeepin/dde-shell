@@ -22,7 +22,7 @@ class LayerShellEmulation : public QObject
 public:
     explicit LayerShellEmulation(QWindow* window, QObject* parent = nullptr);
 
-private slots:
+private Q_SLOTS:
     void onLayerChanged();
     // margins or anchor changed
     void onPositionChanged();

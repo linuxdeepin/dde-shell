@@ -19,7 +19,7 @@ public:
 
     virtual bool load() override;
 
-private slots:
+private Q_SLOTS:
     void onInterfacesRemoved(const QDBusObjectPath &objPath, const QStringList &interfaces);
 
 private:

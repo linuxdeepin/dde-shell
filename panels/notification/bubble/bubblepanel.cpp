@@ -210,7 +210,7 @@ void BubblePanel::setEnabled(bool newEnabled)
     if (m_enabled == newEnabled)
         return;
     m_enabled = newEnabled;
-    emit enabledChanged();
+    Q_EMIT enabledChanged();
 
     bool isEmpty = m_bubbles->items().isEmpty();
     setVisible(!isEmpty && enabled());

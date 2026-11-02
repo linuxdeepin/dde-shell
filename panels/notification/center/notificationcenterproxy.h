@@ -15,12 +15,12 @@ public:
     explicit NotificationCenterProxy(QObject *parent = nullptr);
     ~NotificationCenterProxy();
 
-public slots:
+public Q_SLOTS:
     void Toggle();
     void Show();
     void Hide();
 
-signals:
+Q_SIGNALS:
     void VisibleChanged(bool visible);
 
 private:

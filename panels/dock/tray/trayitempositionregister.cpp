@@ -15,12 +15,12 @@ TrayItemPositionRegisterAttachedType::TrayItemPositionRegisterAttachedType(QObje
     connect(this, &TrayItemPositionRegisterAttachedType::visualIndexChanged,
             this, [this](){
                 registerVisualSize();
-                emit visualPositionChanged();
+                Q_EMIT visualPositionChanged();
             });
     connect(this, &TrayItemPositionRegisterAttachedType::visualSizeChanged,
             this, [this](){
                 registerVisualSize();
-                emit visualPositionChanged();
+                Q_EMIT visualPositionChanged();
             });
     // recalculate position
     connect(&TrayItemPositionManager::instance(), &TrayItemPositionManager::orientationChanged,

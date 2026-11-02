@@ -18,7 +18,7 @@ public:
 
     QVariant extraColumnData(const QModelIndex &parent, int row, int extraColumn, int role = Qt::DisplayRole) const override;
 
-signals:
+Q_SIGNALS:
     void rolesChanged(QList<int> roles);
     void sourceColumnChanged(int sourceColum);
 

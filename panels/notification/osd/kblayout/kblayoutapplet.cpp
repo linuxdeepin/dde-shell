@@ -52,7 +52,7 @@ void KBLayoutApplet::setCurrentLayout(const QString &newCurrentLayout)
     if (m_currentLayout == newCurrentLayout)
         return;
     m_currentLayout = newCurrentLayout;
-    emit currentLayoutChanged();
+    Q_EMIT currentLayoutChanged();
 }
 
 void KBLayoutApplet::fetchLayouts()

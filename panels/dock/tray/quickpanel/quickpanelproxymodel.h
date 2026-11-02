@@ -36,7 +36,7 @@ public:
     QAbstractItemModel *trayPluginModel() const;
     void setTrayPluginModel(QAbstractItemModel *newTrayPluginModel);
 
-signals:
+Q_SIGNALS:
     void trayItemSurfaceChanged();
     void trayItemPluginIdChanged();
 
@@ -67,7 +67,7 @@ private:
     QString traySurfaceItemKey(const QString &pluginId) const;
     int roleByName(const QByteArray &roleName) const;
     QAbstractListModel *surfaceModel() const;
-private slots:
+private Q_SLOTS:
     void updateTrayItemSurface();
 
 private:

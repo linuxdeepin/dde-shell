@@ -115,7 +115,7 @@ void OsdPanel::setVisible(const bool visible)
 void OsdPanel::setOsdType(const QString &osdType)
 {
     m_osdType = osdType;
-    emit osdTypeChanged(m_osdType);
+    Q_EMIT osdTypeChanged(m_osdType);
 }
 
 void OsdPanel::updateLastOsdType(const QString &osdType)

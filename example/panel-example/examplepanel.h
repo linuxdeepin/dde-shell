@@ -18,7 +18,7 @@ public:
 
     virtual bool init() override;
 
-private slots:
+private Q_SLOTS:
     void onReceivedSignal(const QString &id);
 
 };

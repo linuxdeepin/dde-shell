@@ -54,7 +54,7 @@ public:
     void updateOverlapCount(int count);
     void updateContentRowCount(int rowCount);
 
-private slots:
+private Q_SLOTS:
     void push(const NotifyEntity &entity);
     void replace(const NotifyEntity &entity);
     void doEntityReceived(qint64 id);

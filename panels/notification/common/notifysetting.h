@@ -21,7 +21,7 @@ public:
     int bubbleCount() const;
     int contentRowCount() const;
 
-signals:
+Q_SIGNALS:
     void bubbleCountChanged(int count);
     void contentRowCountChanged(int rowCount);
 
