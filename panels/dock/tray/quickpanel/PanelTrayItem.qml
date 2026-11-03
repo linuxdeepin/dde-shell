@@ -14,6 +14,7 @@ import org.deepin.dtk 1.0
 
 Control {
     id: root
+    Accessible.id: "PanelTrayItem_Control"
     property bool useColumnLayout: false
     required property var shellSurface
     property int itemMargins
@@ -32,6 +33,7 @@ Control {
     }
 
     PanelToolTip {
+        Accessible.id: "PanelTrayItem_Pane"
         Accessible.role: Accessible.ToolTip
         Accessible.id: "QuickActions"
         id: toolTip
@@ -94,6 +96,7 @@ Control {
         property alias hovered: surfaceLayer.hovered
 
         ShellSurfaceItemProxy {
+            Accessible.id: "PanelTrayItem_Pane_2"
             Accessible.role: Accessible.Pane
             Accessible.id: "SurfaceLayer"
             id: surfaceLayer

@@ -10,6 +10,7 @@ import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 NotifyItem {
+    Accessible.id: "NormalNotify_AlertMessage"
     Accessible.role: Accessible.ListItem
     Accessible.id: "NotifyItem"
     id: root
@@ -36,6 +37,7 @@ NotifyItem {
 
     Control {
         id: impl
+        Accessible.id: "NormalNotify_Control"
         anchors.fill: parent
         focus: true
 
@@ -54,6 +56,7 @@ NotifyItem {
         }
 
         contentItem: NotifyItemContent {
+            Accessible.id: "NormalNotify_AlertMessage_2"
             Accessible.role: Accessible.Pane
             Accessible.id: "NotifyContent"
             id: notifyContent

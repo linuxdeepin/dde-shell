@@ -10,6 +10,7 @@ import org.deepin.dtk
 
 IconButton {
     id: control
+    Accessible.id: "AppletItemButton_IconButton"
     property bool isActive
     property real radius: 4
     property bool autoClosePopup: false

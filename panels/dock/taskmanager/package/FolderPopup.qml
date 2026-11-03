@@ -101,6 +101,7 @@ PanelPopup {
                 font: D.DTK.fontManager.t6
             }
             Flickable {
+                Accessible.id: "FolderPopup_Flickable"
                 id: flick
                 anchors.fill: parent
                 anchors.topMargin: 44
@@ -112,12 +113,16 @@ PanelPopup {
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 flickableDirection: Flickable.VerticalFlick
-                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                ScrollBar.vertical: ScrollBar {
+                    Accessible.id: "FolderPopup_ScrollBar"
+                    policy: ScrollBar.AsNeeded
+                }
                 Grid {
                     columns: root.columns
                     Repeater {
                         model: root.contents
                         ItemDelegate {
+                            Accessible.id: "FolderPopup_ItemDelegate"
                             id: entryDelegate
                             required property var modelData
                             width: flick.width / root.columns

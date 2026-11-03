@@ -75,6 +75,7 @@ Item {
         model: root.model
 
         delegate: PluginItem {
+            Accessible.id: "PanelPluginPage_Pane"
             Accessible.role: Accessible.Pane
             Accessible.id: "PluginItem"
             id: pluginItem
@@ -104,6 +105,7 @@ Item {
     // TODO same with SideBar of dde-launchpad.
     component SettingButton: ActionButton {
         id: btn
+        Accessible.id: "PanelPluginPage_ActionButton"
         implicitWidth: DStyle.Style.toolButton.width
         implicitHeight: DStyle.Style.toolButton.height
 

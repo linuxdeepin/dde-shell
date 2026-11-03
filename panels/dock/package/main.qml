@@ -472,6 +472,7 @@ Window {
 
     Item {
         id: dockContainer
+        Accessible.id: "main_Item"
         width: dock.useColumnLayout ? dock.dockSize : parent.width
         height: dock.useColumnLayout ? parent.height : dock.dockSize
         property bool touchLongPressed: false
@@ -505,6 +506,7 @@ Window {
             anchors.fill: parent
             active: dock.fashionDock.enabled && Panel.hideState === Dock.Show
             sourceComponent: DockSpotlight {
+                Accessible.id: "main_Pane"
                 containsMouse: Panel.containsMouse
                 cursorPosition: dockContainer.mapFromItem(null, Panel.cursorPosition)
                 itemSize: dock.dockItemMaxSize
@@ -684,6 +686,7 @@ Window {
                 }
 
                 OverflowContainer {
+                    Accessible.id: "main_Pane_8"
                     Accessible.role: Accessible.Pane
                     Accessible.id: "CenterLoader"
                     id: centerLoader
@@ -706,6 +709,7 @@ Window {
         }
 
         Item {
+            Accessible.id: "main_Pane_12"
             id: dockRightPart
             implicitWidth: rightLoader.implicitWidth
             implicitHeight: rightLoader.implicitHeight
@@ -714,6 +718,7 @@ Window {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             OverflowContainer {
+                Accessible.id: "main_Pane_11"
                 Accessible.role: Accessible.Pane
                 Accessible.id: "RightLoader"
                 id: rightLoader

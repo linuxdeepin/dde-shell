@@ -118,6 +118,7 @@ ContainmentItem {
     }
 
     OverflowContainer {
+        Accessible.id: "TaskManager_Pane"
         Accessible.role: Accessible.Pane
         Accessible.id: "AppContainer"
         id: appContainer
@@ -228,6 +229,7 @@ ContainmentItem {
                     }
 
                     AppItem {
+                        Accessible.id: "TaskManager_Pane_2"
                         Accessible.role: Accessible.ListItem
                         Accessible.id: "AppItem"
                         id: appItem

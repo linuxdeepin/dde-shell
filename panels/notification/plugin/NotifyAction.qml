@@ -167,6 +167,7 @@ Control {
                     event.accepted = true
                 }
                 actionMenu: NotifyActionMenu {
+                    Accessible.id: "NotifyAction_Menu"
                     onActionInvoked: function(actionId) {
                         console.log("Action invoked from menu with ID:", actionId)
                         root.actionInvoked(actionId)

@@ -27,6 +27,7 @@ Control {
     }
 
     DragItem {
+        Accessible.id: "PluginItem_Pane"
         Accessible.role: Accessible.Pane
         Accessible.id: "DragLayer"
         id: dragLayer
@@ -52,6 +53,7 @@ Control {
     }
 
     ShellSurfaceItemProxy {
+        Accessible.id: "PluginItem_Pane_3"
         Accessible.role: Accessible.Pane
         Accessible.id: "SurfaceLayer"
         id: surfaceLayer

@@ -59,6 +59,7 @@ Item {
     }
 
     PanelTrayItem {
+        Accessible.id: "QuickPanel_Pane"
         Accessible.role: Accessible.Button
         Accessible.id: "PanelTrayItem"
         id: panelTrayItem
@@ -76,6 +77,7 @@ Item {
     }
 
     PanelPopup {
+        Accessible.id: "QuickPanel_Dialog"
         Accessible.role: Accessible.Dialog
         Accessible.id: "Popup"
         id: popup
@@ -85,12 +87,14 @@ Item {
         popupY: DockPanelPositioner.y
 
         QuickPanelPage {
+            Accessible.id: "QuickPanel_Pane_2"
             Accessible.role: Accessible.Pane
             Accessible.id: "PopupContent"
             id: popupContent
             model: quickpanelModel
 
             DDT.SurfacePopup {
+                Accessible.id: "QuickPanel_Dialog_3"
                 Accessible.role: Accessible.Dialog
                 Accessible.id: "SurfacePopup"
                 objectName: "quickpanel"
@@ -109,6 +113,7 @@ Item {
 
     // trayItem's popup
     DDT.TrayItemSurfacePopup {
+        Accessible.id: "QuickPanel_Dialog_6"
         Accessible.role: Accessible.Dialog
         Accessible.id: "TrayItemSurfacePopup"
         id: trayItemSurfacePopup

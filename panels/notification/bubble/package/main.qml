@@ -183,6 +183,7 @@ Window {
         }
 
         delegate: BubbleDelegate {
+            Accessible.id: "main_Pane"
             Accessible.role: Accessible.ListItem
             Accessible.id: "BubbleDelegate"
             maxCount: model.bubbleCount
