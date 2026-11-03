@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -33,6 +33,7 @@ ApplicationWindow {
 
         ListView {
             id: listView
+            Accessible.id: "ShowRuntimeMenu_ListView"
             anchors.fill: parent
             anchors.topMargin: 30
             model: WindowManagerInstance

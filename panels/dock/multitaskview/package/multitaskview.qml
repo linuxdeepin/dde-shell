@@ -17,6 +17,7 @@ AppletDockItem {
     Accessible.name: toolTip.text
 
     PanelToolTip {
+        Accessible.id: "multitaskview_Pane"
         Accessible.role: Accessible.ToolTip
         Accessible.id: "MultitaskingView"
         id: toolTip

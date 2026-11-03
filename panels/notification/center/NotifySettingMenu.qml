@@ -9,6 +9,7 @@ import org.deepin.ds.notificationcenter
 
 Menu {
     id: root
+    Accessible.id: "NotifySettingMenu_Menu"
 
     closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
     modal: true

@@ -46,6 +46,7 @@ FocusScope {
         objectName: "notificationCenter"
         anchors.fill: parent
         NotifyHeader {
+            Accessible.id: "NotifyCenter_AlertMessage"
             Accessible.role: Accessible.Pane
             Accessible.id: "Header"
             id: header
@@ -74,6 +75,7 @@ FocusScope {
         }
 
         NotifyView {
+            Accessible.id: "NotifyCenter_AlertMessage_2"
             Accessible.role: Accessible.List
             Accessible.id: "View"
             id: view
@@ -99,6 +101,7 @@ FocusScope {
         }
 
         DropShadowText {
+            Accessible.id: "NotifyCenter_Pane_2"
             Accessible.role: Accessible.StaticText
             Accessible.id: "NoRecentNotifications"
             text: qsTr("No recent notifications")

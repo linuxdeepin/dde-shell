@@ -36,6 +36,7 @@ Item {
     ShellSurfaceItem {
         id: impl
         width: parent.width
+        Accessible.id: "ShellSurfaceItemProxy"
         height: parent.height
         shellSurface: root.shellSurface
         inputEventsEnabled: root.inputEventsEnabled

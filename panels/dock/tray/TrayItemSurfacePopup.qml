@@ -27,6 +27,7 @@ Item {
     }
 
     PanelPopup {
+        Accessible.id: "TrayItemSurfacePopup_Dialog"
         Accessible.role: Accessible.Dialog
         Accessible.id: "Popup"
         id: popup
@@ -41,6 +42,7 @@ Item {
         Item {
             anchors.fill: parent
             ShellSurfaceItemProxy {
+                Accessible.id: "TrayItemSurfacePopup_Pane"
                 Accessible.role: Accessible.Pane
                 Accessible.id: "PopupContent"
                 id: popupContent
@@ -54,6 +56,7 @@ Item {
     }
 
     PanelMenu {
+        Accessible.id: "TrayItemSurfacePopup_Menu"
         Accessible.role: Accessible.PopupMenu
         Accessible.id: "PopupMenu"
         id: popupMenu
@@ -75,6 +78,7 @@ Item {
         Item {
             anchors.fill: parent
             ShellSurfaceItemProxy {
+                Accessible.id: "TrayItemSurfacePopup_Pane_4"
                 Accessible.role: Accessible.Pane
                 Accessible.id: "PopupMenuContent"
                 id: popupMenuContent
@@ -99,6 +103,7 @@ Item {
                 id: subMenuLoader
                 active: false
                 sourceComponent: SurfaceSubPopup {
+                    Accessible.id: "TrayItemSurfacePopup_Dialog_3"
                     Accessible.role: Accessible.Dialog
                     Accessible.id: "SurfaceSubPopup"
                     objectName: "tray's subPopup"
@@ -125,6 +130,7 @@ Item {
     }
 
     PanelToolTip {
+        Accessible.id: "TrayItemSurfacePopup_Pane_7"
         Accessible.role: Accessible.ToolTip
         Accessible.id: "ToolTip"
         id: toolTip
@@ -133,6 +139,7 @@ Item {
         toolTipY: DockPanelPositioner.y
 
         ShellSurfaceItemProxy {
+            Accessible.id: "TrayItemSurfacePopup_Pane_6"
             Accessible.role: Accessible.Pane
             Accessible.id: "ToolTipContent"
             id: toolTipContent

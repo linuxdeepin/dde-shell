@@ -35,10 +35,12 @@ Item {
 
     StackView {
         id: panelView
+        Accessible.id: "QuickPanelPage_StackView"
         property int contentHeight: currentItem ? currentItem.height : 10
         width: currentItem ? currentItem.width : 10
         height: panelView.contentHeight
         initialItem: PanelPluginPage {
+            Accessible.id: "QuickPanelPage_Pane"
             Accessible.role: Accessible.Pane
             Accessible.id: "PanelPage"
             id: panelPage
@@ -55,6 +57,7 @@ Item {
     Component {
         id: subPluginPageLoader
         SubPluginPage {
+            Accessible.id: "QuickPanelPage_Pane_3"
             Accessible.role: Accessible.Pane
             Accessible.id: "SubPluginPage"
             width: panelPage.width

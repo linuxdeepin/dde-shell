@@ -10,6 +10,7 @@ import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 NotifyItem {
+    Accessible.id: "GroupNotify_AlertMessage"
     Accessible.role: Accessible.ListItem
     Accessible.id: "NotifyItem"
     id: root
@@ -40,6 +41,7 @@ NotifyItem {
 
     Control {
         id: impl
+        Accessible.id: "GroupNotify_Control"
         anchors.fill: parent
         focus: true
 
@@ -59,6 +61,7 @@ NotifyItem {
 
         contentItem: RowLayout {
             NotifyHeaderTitleText {
+                Accessible.id: "GroupNotify_AlertMessage_2"
                 Accessible.role: Accessible.StaticText
                 Accessible.id: "NotifyHeaderTitleText"
                 text: root.appName
@@ -73,6 +76,7 @@ NotifyItem {
             }
 
             AnimationSettingButton {
+                Accessible.id: "GroupNotify_Button"
                 Accessible.role: Accessible.Button
                 Accessible.id: "Fold"
                 id: foldBtn
@@ -95,6 +99,7 @@ NotifyItem {
                 }
             }
             AnimationSettingButton {
+                Accessible.id: "GroupNotify_Button_5"
                 Accessible.role: Accessible.Button
                 Accessible.id: "More"
                 id: groupMoreBtn
@@ -118,6 +123,7 @@ NotifyItem {
                 }
             }
             AnimationSettingButton {
+                Accessible.id: "GroupNotify_Button_6"
                 Accessible.role: Accessible.Button
                 Accessible.id: "ClearAll"
                 id: groupClearBtn

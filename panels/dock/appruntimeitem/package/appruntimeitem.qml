@@ -20,6 +20,7 @@ AppletItem {
     property bool isMenuVisible: false
 
     PanelToolTip {
+        Accessible.id: "appruntimeitem_Pane"
         Accessible.role: Accessible.ToolTip
         Accessible.id: "Appruntime"
         id: toolTip
@@ -28,6 +29,7 @@ AppletItem {
         toolTipY: DockPanelPositioner.y
     }
     AppletItemButton {
+        Accessible.id: "appruntimeitem_Button"
         Accessible.role: Accessible.Button
         Accessible.id: "Button"
         id: button

@@ -22,10 +22,12 @@ LQM.DelegateChooser {
     LQM.DelegateChoice {
         roleValue: "dummy"
         TrayItemPositioner {
+            Accessible.id: "TrayItemDelegateChooser_Pane"
             Accessible.role: Accessible.Pane
             Accessible.id: "TrayItemPositioner"
             visualSize: dummyDelegate.visualSize
             contentItem: DummyDelegate {
+                Accessible.id: "TrayItemDelegateChooser_Pane_2"
                 Accessible.role: Accessible.Button
                 Accessible.id: "DummyDelegate"
                 id: dummyDelegate
@@ -35,11 +37,13 @@ LQM.DelegateChooser {
     LQM.DelegateChoice {
         roleValue: "legacy-tray-plugin"
         TrayItemPositioner {
+            Accessible.id: "TrayItemDelegateChooser_Pane_5"
             Accessible.role: Accessible.Pane
             Accessible.id: "TraySurfacePositioner"
             id: traySurfacePositioner
             visualSize: traySurfaceDelegate.visualSize
             contentItem: ActionLegacyTrayPluginDelegate {
+                Accessible.id: "TrayItemDelegateChooser_Pane_4"
                 Accessible.role: Accessible.Button
                 Accessible.id: "TraySurfaceDelegate"
                 id: traySurfaceDelegate
@@ -51,6 +55,7 @@ LQM.DelegateChooser {
 
                 // trayItem's popup
                 DDT.TrayItemSurfacePopup {
+                    Accessible.id: "TrayItemDelegateChooser_Dialog"
                     Accessible.role: Accessible.Dialog
                     Accessible.id: "SurfacePopup"
                     id: surfacePopup
@@ -70,6 +75,7 @@ LQM.DelegateChooser {
             Accessible.role: Accessible.Pane
             Accessible.id: "TrayItemPositioner"
             contentItem: ActionShowStashDelegate {
+                Accessible.id: "TrayItemDelegateChooser_Pane_6"
                 Accessible.role: Accessible.Button
                 Accessible.id: "ActionShowStashDelegate"
             }
@@ -81,6 +87,7 @@ LQM.DelegateChooser {
             Accessible.role: Accessible.Pane
             Accessible.id: "TrayItemPositioner"
             contentItem: ActionToggleCollapseDelegate {
+                Accessible.id: "TrayItemDelegateChooser_Pane_8"
                 Accessible.role: Accessible.Button
                 Accessible.id: "ActionToggleCollapseDelegate"
                 isHorizontal: root.isHorizontal
@@ -91,10 +98,12 @@ LQM.DelegateChooser {
     LQM.DelegateChoice {
         roleValue: "action-toggle-quick-settings"
         TrayItemPositioner {
+            Accessible.id: "TrayItemDelegateChooser_Pane_12"
             Accessible.role: Accessible.Pane
             Accessible.id: "TrayItemPositioner"
             visualSize: Qt.size(quickSettingsDelegate.width, quickSettingsDelegate.height)
             ActionToggleQuickSettingsDelegate {
+                Accessible.id: "TrayItemDelegateChooser_Pane_11"
                 Accessible.role: Accessible.Button
                 Accessible.id: "QuickSettingsDelegate"
                 id: quickSettingsDelegate
