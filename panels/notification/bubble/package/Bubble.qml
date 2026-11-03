@@ -10,6 +10,7 @@ import org.deepin.ds.notification 1.0
 import org.deepin.dtk 1.0 as D
 
 NotifyItemContent {
+    Accessible.id: "Bubble_AlertMessage"
     Accessible.role: Accessible.Pane
     Component.onCompleted: { Accessible.id = "Bubble" }
     id: control
@@ -39,3 +40,4 @@ NotifyItemContent {
         Applet.invokeAction(bubble.index, actionId)
     }
 }
+

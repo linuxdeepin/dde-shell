@@ -9,6 +9,7 @@ import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 DropShadowText {
+    Accessible.id: "NotifyHeaderTitleText_Pane"
     Accessible.role: Accessible.StaticText
     Component.onCompleted: { Accessible.id = "DropShadowText" }
     property font tFont: DTK.fontManager.t4
@@ -21,3 +22,4 @@ DropShadowText {
         bold: true
     }
 }
+

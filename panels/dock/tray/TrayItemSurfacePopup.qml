@@ -27,6 +27,7 @@ Item {
     }
 
     PanelPopup {
+        Accessible.id: "TrayItemSurfacePopup_Dialog"
         Accessible.role: Accessible.Dialog
         Component.onCompleted: { Accessible.id = "Popup" }
         id: popup
@@ -41,7 +42,7 @@ Item {
         Item {
             anchors.fill: parent
             ShellSurfaceItemProxy {
-                Accessible.role: Accessible.Pane
+                Accessible.id: "TrayItemSurfacePopup_Pane"
                 Component.onCompleted: { Accessible.id = "PopupContent" }
                 id: popupContent
                 anchors.centerIn: parent
@@ -54,6 +55,7 @@ Item {
     }
 
     PanelMenu {
+        Accessible.id: "TrayItemSurfacePopup_Menu"
         Accessible.role: Accessible.PopupMenu
         Component.onCompleted: { Accessible.id = "PopupMenu" }
         id: popupMenu
@@ -75,7 +77,7 @@ Item {
         Item {
             anchors.fill: parent
             ShellSurfaceItemProxy {
-                Accessible.role: Accessible.Pane
+                Accessible.id: "TrayItemSurfacePopup_Pane_4"
                 Component.onCompleted: { Accessible.id = "PopupMenuContent" }
                 id: popupMenuContent
                 anchors.centerIn: parent
@@ -91,6 +93,7 @@ Item {
                 interval: 1000
                 repeat: false
                 running: false
+                Accessible.id: "TrayItemSurfacePopup_Dialog_2"
                 onTriggered: function () {
                     subMenuLoader.active = false
                 }
@@ -99,6 +102,7 @@ Item {
                 id: subMenuLoader
                 active: false
                 sourceComponent: SurfaceSubPopup {
+                    Accessible.id: "TrayItemSurfacePopup_Dialog_3"
                     Accessible.role: Accessible.Dialog
                     Component.onCompleted: { Accessible.id = "SurfaceSubPopup" }
                     objectName: "tray's subPopup"
@@ -125,6 +129,7 @@ Item {
     }
 
     PanelToolTip {
+        Accessible.id: "TrayItemSurfacePopup_Pane_7"
         Accessible.role: Accessible.ToolTip
         Component.onCompleted: { Accessible.id = "ToolTip" }
         id: toolTip
@@ -133,6 +138,7 @@ Item {
         toolTipY: DockPanelPositioner.y
 
         ShellSurfaceItemProxy {
+            Accessible.id: "TrayItemSurfacePopup_Pane_6"
             Accessible.role: Accessible.Pane
             Component.onCompleted: { Accessible.id = "ToolTipContent" }
             id: toolTipContent
@@ -185,3 +191,5 @@ Item {
         }
     }
 }
+
+

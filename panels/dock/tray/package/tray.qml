@@ -37,6 +37,7 @@ AppletItem {
     }
 
     PanelPopup {
+        Accessible.id: "tray_Dialog"
         Accessible.role: Accessible.Dialog
         id: stashedPopup
         width: stashedContainer.width
@@ -58,7 +59,7 @@ AppletItem {
             id: stashedContainer
             padding: 10
             contentItem: StashContainer {
-                Accessible.role: Accessible.Pane
+                Accessible.id: "tray_Pane"
                 Component.onCompleted: { Accessible.id = "StashContainer" }
                 id: stashContainer
                 color: "transparent"
@@ -133,6 +134,7 @@ AppletItem {
 
 
     TrayContainer {
+        Accessible.id: "tray_Pane_3"
         Accessible.role: Accessible.Pane
         id: trayContainter
         isHorizontal: !tray.useColumnLayout
@@ -235,3 +237,4 @@ AppletItem {
         sizeFollowsWindow: false
     }
 }
+

@@ -7,6 +7,7 @@ import org.deepin.ds 1.0
 
 AppletItem {
     id: appletDockItem
+    Accessible.id: "AppletDockItem"
 
     property int dockOrder: 0
     property bool shouldVisible: Applet.visible && Applet.supported

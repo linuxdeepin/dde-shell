@@ -33,10 +33,11 @@ Item {
         fixPositionTimer.start()
     }
 
-    ShellSurfaceItem {
-        id: impl
-        width: parent.width
-        height: parent.height
+   ShellSurfaceItem {
+       id: impl
+       width: parent.width
+       Accessible.id: "ShellSurfaceItemProxy"
+       height: parent.height
         shellSurface: root.shellSurface
         inputEventsEnabled: root.inputEventsEnabled
         // we need to set smooth to false, otherwise the image

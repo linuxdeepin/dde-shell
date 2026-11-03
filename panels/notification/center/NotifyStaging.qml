@@ -90,6 +90,7 @@ FocusScope {
 
         model: notifyModel
         delegate: OverlapNotify {
+            Accessible.id: "NotifyStaging_AlertMessage"
             Accessible.role: Accessible.Pane
             Component.onCompleted: { Accessible.id = "OverlapNotify" }
             id: overlapNotify
@@ -149,4 +150,5 @@ FocusScope {
         }
     }
 }
+
 

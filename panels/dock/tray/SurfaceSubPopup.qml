@@ -20,6 +20,7 @@ Item {
         compositor: DockCompositor.compositor
         sizeFollowsWindow: false
         window: PanelMenuWindow {
+            Accessible.id: "SurfaceSubPopup_Menu"
             id: menuWindow
             objectName: "subMenu"
             mainMenuWindow: Panel.menuWindow
@@ -47,6 +48,7 @@ Item {
             }
 
             PanelMenu {
+                Accessible.id: "SurfaceSubPopup_Menu_2"
                 Accessible.role: Accessible.PopupMenu
                 Component.onCompleted: { Accessible.id = "Popup" }
                 id: popup
@@ -56,6 +58,7 @@ Item {
 
                 property alias shellSurface: popupSurfaceLayer.shellSurface
                 ShellSurfaceItemProxy {
+                    Accessible.id: "SurfaceSubPopup_Pane"
                     Accessible.role: Accessible.Pane
                     Component.onCompleted: { Accessible.id = "PopupSurfaceLayer" }
                     id: popupSurfaceLayer
@@ -90,3 +93,4 @@ Item {
         }
     }
 }
+

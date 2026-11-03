@@ -21,6 +21,7 @@ AppletItem {
     implicitHeight: shouldVisible ? (useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize) : 0
 
     PanelToolTip {
+        Accessible.id: "showdesktop_Pane"
         Accessible.role: Accessible.ToolTip
         Component.onCompleted: { Accessible.id = "ShowDesktop" }
         id: toolTip
@@ -62,3 +63,4 @@ AppletItem {
         }
     }
 }
+

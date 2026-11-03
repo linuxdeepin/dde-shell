@@ -17,6 +17,7 @@ import org.deepin.dtk.style 1.0 as DStyle
 
 Window {
     id: dock
+    Accessible.id: "main_Window"
     property int positionForAnimation: Panel.position
     property bool useColumnLayout: positionForAnimation % 2
 
@@ -472,6 +473,7 @@ Window {
 
     Item {
         id: dockContainer
+        Accessible.id: "main_Item"
         width: dock.useColumnLayout ? dock.dockSize : parent.width
         height: dock.useColumnLayout ? parent.height : dock.dockSize
         property bool touchLongPressed: false
@@ -505,6 +507,7 @@ Window {
             anchors.fill: parent
             active: dock.fashionDock.enabled && Panel.hideState === Dock.Show
             sourceComponent: DockSpotlight {
+                Accessible.id: "main_Pane"
                 containsMouse: Panel.containsMouse
                 cursorPosition: dockContainer.mapFromItem(null, Panel.cursorPosition)
                 itemSize: dock.dockItemMaxSize
@@ -634,12 +637,13 @@ Window {
                 Accessible.role: Accessible.Grouping
                 Accessible.name: qsTr("Dock Left Area")
                 OverflowContainer {
-                    Accessible.role: Accessible.Pane
+                    Accessible.id: "main_Pane_2"
                     Component.onCompleted: { Accessible.id = "LeftLoader" }
                     id: leftLoader
                     anchors.fill: parent
                     useColumnLayout: dock.useColumnLayout
                     model: DockPartAppletModel {
+                        Accessible.id: "main_Pane_4"
                         id: dockLeftPartModel
                         leftDockOrder: 0
                         rightDockOrder: 10
@@ -676,6 +680,7 @@ Window {
                 }
 
                 Behavior on Layout.topMargin {
+                    Accessible.id: "main_Pane_6"
                     enabled: !dock.isDragging && !Applet.isResizing
                     NumberAnimation {
                         duration: 200
@@ -684,13 +689,14 @@ Window {
                 }
 
                 OverflowContainer {
-                    Accessible.role: Accessible.Pane
+                    Accessible.id: "main_Pane_8"
                     Component.onCompleted: { Accessible.id = "CenterLoader" }
                     id: centerLoader
                     anchors.fill: parent
                     useColumnLayout: dock.useColumnLayout
                     spacing: dock.itemSpacing
                     model: DockPartAppletModel {
+                        Accessible.id: "main_Pane_7"
                         id: dockCenterPartModel
                         leftDockOrder: 10
                         rightDockOrder: 20
@@ -706,6 +712,7 @@ Window {
         }
 
         Item {
+            Accessible.id: "main_Pane_12"
             id: dockRightPart
             implicitWidth: rightLoader.implicitWidth
             implicitHeight: rightLoader.implicitHeight
@@ -714,12 +721,14 @@ Window {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             OverflowContainer {
+                Accessible.id: "main_Pane_11"
                 Accessible.role: Accessible.Pane
                 Component.onCompleted: { Accessible.id = "RightLoader" }
                 id: rightLoader
                 anchors.fill: parent
                 useColumnLayout: dock.useColumnLayout
                 model: DockPartAppletModel {
+                    Accessible.id: "main_Pane_10"
                     id: dockRightPartModel
                     leftDockOrder: 20
                     rightDockOrder: 30
@@ -1048,3 +1057,5 @@ Window {
         changeDragAreaAnchor()
     }
 }
+
+

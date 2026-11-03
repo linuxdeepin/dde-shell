@@ -214,6 +214,7 @@ Window {
         }
 
         NotifyStaging {
+            Accessible.id: "main_AlertMessage"
             Accessible.role: Accessible.Pane
             Component.onCompleted: { Accessible.id = "NotifyStaging" }
             id: notifyStaging
@@ -242,6 +243,7 @@ Window {
         }
 
         NotifyCenter {
+            Accessible.id: "main_AlertMessage_2"
             Accessible.role: Accessible.Pane
             Component.onCompleted: { Accessible.id = "NotifyCenter" }
             id: notifyCenter
@@ -291,3 +293,4 @@ Window {
         }
     }
 }
+

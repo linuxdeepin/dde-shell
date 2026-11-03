@@ -56,6 +56,7 @@ AppletItem {
 
         delegate: D.ItemDelegate {
             id: itemView
+            Accessible.id: "main_ItemDelegate"
             width: view.width
             height: 48
             palette.windowText: undefined
@@ -151,3 +152,4 @@ AppletItem {
         }
     }
 }
+

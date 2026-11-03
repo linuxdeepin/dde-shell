@@ -320,6 +320,7 @@ public:
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         auto closeButton = new DIconButton(parent);
+        closeButton->setObjectName("close window button");
         closeButton->setIcon(DDciIcon::fromTheme("close"));
         closeButton->setEnabledCircle(true);
         QPalette palette = closeButton->palette();
@@ -639,6 +640,7 @@ void X11WindowPreviewContainer::updatePreviewTitle(const QString& title)
 void X11WindowPreviewContainer::initUI()
 {
     m_view = new PreviewsListView(this);
+    m_view->setObjectName("window preview list");
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QHBoxLayout* titleLayout = new QHBoxLayout;
     titleLayout->setContentsMargins(5, 0, 5, 0);

@@ -8,9 +8,11 @@ import org.deepin.ds 1.0
 import org.deepin.dtk 1.0 as D
 
 PanelPopupWindow {
+    Accessible.id: "PanelToolTipWindow_Dialog"
     id: root
 
     flags: Qt.ToolTip | Qt.WindowStaysOnTopHint
     D.DWindow.windowRadius: 8
     D.DWindow.shadowRadius: 8
 }
+

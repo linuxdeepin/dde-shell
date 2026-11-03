@@ -16,6 +16,18 @@ widgets:
   source_file: panels/dock/taskmanager/x11preview.cpp
   class_name: ''
   line: 215
+- variable: closeButton
+  type: DIconButton *
+  object_name: close window button
+  source_file: panels/dock/taskmanager/x11preview.cpp
+  class_name: ''
+  line: 323
+- variable: m_view
+  type: PreviewsListView *
+  object_name: window preview list
+  source_file: panels/dock/taskmanager/x11preview.cpp
+  class_name: X11WindowPreviewContainer
+  line: 643
 qml_elements:
 - element_type: PanelPopup
   id: popup
@@ -247,7 +259,7 @@ qml_elements:
   accessible_role: Accessible.Pane
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: ''
-  line: 78
+  line: 76
 - element_type: WindowIndicator
   id: windowIndicator
   accessible_id: WindowIndicator
@@ -261,21 +273,21 @@ qml_elements:
   accessible_role: Accessible.StaticText
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: ''
-  line: 308
+  line: 309
 - element_type: PanelToolTip
   id: toolTip
   accessible_id: ToolTip
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: Repeater
-  line: 565
+  line: 568
 - element_type: PanelToolTip
   id: dragToolTip
   accessible_id: MoveToTrash
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: Repeater
-  line: 573
+  line: 577
 - element_type: OverflowContainer
   id: appContainer
   accessible_id: AppContainer
@@ -296,35 +308,35 @@ qml_elements:
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: ''
-  line: 22
+  line: 20
 - element_type: ShellSurfaceItemProxy
   id: surfaceLayer
   accessible_id: SurfaceLayer
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: PanelToolTip
-  line: 32
+  line: 31
 - element_type: PanelMenu
   id: menu
   accessible_id: Menu
   accessible_role: Accessible.PopupMenu
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: ''
-  line: 56
+  line: 57
 - element_type: ShellSurfaceItemProxy
   id: menuSurfaceLayer
   accessible_id: MenuSurfaceLayer
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: PanelMenu
-  line: 65
+  line: 68
 - element_type: SurfaceSubPopup
   id: ''
   accessible_id: SurfaceSubPopup
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: Loader
-  line: 88
+  line: 89
 - element_type: PanelMenu
   id: popup
   accessible_id: Popup
@@ -345,14 +357,14 @@ qml_elements:
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: ''
-  line: 31
+  line: 29
 - element_type: ShellSurfaceItemProxy
   id: popupContent
   accessible_id: PopupContent
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: PanelPopup
-  line: 45
+  line: 44
 - element_type: PanelMenu
   id: popupMenu
   accessible_id: PopupMenu
@@ -366,7 +378,7 @@ qml_elements:
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: PanelMenu
-  line: 79
+  line: 80
 - element_type: SurfaceSubPopup
   id: ''
   accessible_id: SurfaceSubPopup
@@ -380,14 +392,14 @@ qml_elements:
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: ''
-  line: 129
+  line: 133
 - element_type: ShellSurfaceItemProxy
   id: toolTipContent
   accessible_id: ToolTipContent
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: PanelToolTip
-  line: 137
+  line: 142
 - element_type: AppletItemButton
   id: root
   accessible_id: AppletItemButton
@@ -632,14 +644,14 @@ qml_elements:
   accessible_role: Accessible.Button
   source_file: panels/dock/tray/quickpanel/QuickPanel.qml
   parent_type: ''
-  line: 63
+  line: 61
 - element_type: PanelPopup
   id: popup
   accessible_id: Popup
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/quickpanel/QuickPanel.qml
   parent_type: ''
-  line: 80
+  line: 79
 - element_type: QuickPanelPage
   id: popupContent
   accessible_id: PopupContent
@@ -653,14 +665,14 @@ qml_elements:
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/quickpanel/QuickPanel.qml
   parent_type: QuickPanelPage
-  line: 95
+  line: 97
 - element_type: TrayItemSurfacePopup
   id: trayItemSurfacePopup
   accessible_id: TrayItemSurfacePopup
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/quickpanel/QuickPanel.qml
   parent_type: ''
-  line: 113
+  line: 116
 - element_type: PanelPluginPage
   id: panelPage
   accessible_id: PanelPage
@@ -709,14 +721,14 @@ qml_elements:
   accessible_role: Accessible.ListItem
   source_file: panels/notification/center/GroupNotify.qml
   parent_type: ''
-  line: 14
+  line: 12
 - element_type: NotifyHeaderTitleText
   id: ''
   accessible_id: NotifyHeaderTitleText
   accessible_role: Accessible.StaticText
   source_file: panels/notification/center/GroupNotify.qml
   parent_type: NotifyItem
-  line: 63
+  line: 62
 - element_type: AnimationSettingButton
   id: foldBtn
   accessible_id: Fold
@@ -730,14 +742,14 @@ qml_elements:
   accessible_role: Accessible.Button
   source_file: panels/notification/center/GroupNotify.qml
   parent_type: NotifyItem
-  line: 99
+  line: 100
 - element_type: AnimationSettingButton
   id: groupClearBtn
   accessible_id: ClearAll
   accessible_role: Accessible.Button
   source_file: panels/notification/center/GroupNotify.qml
   parent_type: NotifyItem
-  line: 122
+  line: 125
 - element_type: NotifyItem
   id: root
   accessible_id: NotifyItem
@@ -997,4 +1009,165 @@ qml_elements:
   source_file: shell/SceneWindow.qml
   parent_type: ApplicationWindow
   line: 24
+- element_type: IconButton
+  id: control
+  accessible_id: AppletItemButton_IconButton
+  accessible_role: ''
+  source_file: panels/dock/AppletItemButton.qml
+  parent_type: ''
+  line: 11
+- element_type: ListView
+  id: ''
+  accessible_id: ShowRuntimeMenu_ListView
+  accessible_role: ''
+  source_file: panels/dock/appruntimeitem/package/ShowRuntimeMenu.qml
+  parent_type: ''
+  line: 34
+- element_type: SwipeView
+  id: ''
+  accessible_id: CardLeftDockArea_SwipeView
+  accessible_role: ''
+  source_file: panels/dock/cardleft/package/CardLeftDockArea.qml
+  parent_type: ''
+  line: 271
+- element_type: Item
+  id: ''
+  accessible_id: CardLeftDockArea_Item
+  accessible_role: ''
+  source_file: panels/dock/cardleft/package/CardLeftDockArea.qml
+  parent_type: ''
+  line: 365
+- element_type: Window
+  id: ''
+  accessible_id: main_Window
+  accessible_role: ''
+  source_file: panels/dock/package/main.qml
+  parent_type: ''
+  line: 18
+- element_type: Item
+  id: ''
+  accessible_id: main_Item
+  accessible_role: ''
+  source_file: panels/dock/package/main.qml
+  parent_type: ''
+  line: 473
+- element_type: Item
+  id: ''
+  accessible_id: TrayContainer_Item
+  accessible_role: ''
+  source_file: panels/dock/tray/package/TrayContainer.qml
+  parent_type: ''
+  line: 73
+- element_type: ActionButton
+  id: ''
+  accessible_id: PanelPluginPage_ActionButton
+  accessible_role: ''
+  source_file: panels/dock/tray/quickpanel/PanelPluginPage.qml
+  parent_type: ''
+  line: 106
+- element_type: Control
+  id: ''
+  accessible_id: PanelTrayItem_Control
+  accessible_role: ''
+  source_file: panels/dock/tray/quickpanel/PanelTrayItem.qml
+  parent_type: ''
+  line: 15
+- element_type: StackView
+  id: panelView
+  accessible_id: QuickPanelPage_StackView
+  accessible_role: ''
+  source_file: panels/dock/tray/quickpanel/QuickPanelPage.qml
+  parent_type: ''
+  line: 36
+- element_type: ActionButton
+  id: ''
+  accessible_id: SubPluginPage_ActionButton
+  accessible_role: ''
+  source_file: panels/dock/tray/quickpanel/SubPluginPage.qml
+  parent_type: ''
+  line: 47
+- element_type: Control
+  id: ''
+  accessible_id: GroupNotify_Control
+  accessible_role: ''
+  source_file: panels/notification/center/GroupNotify.qml
+  parent_type: ''
+  line: 42
+- element_type: Control
+  id: ''
+  accessible_id: NormalNotify_Control
+  accessible_role: ''
+  source_file: panels/notification/center/NormalNotify.qml
+  parent_type: ''
+  line: 38
+- element_type: Menu
+  id: ''
+  accessible_id: NotifySettingMenu_Menu
+  accessible_role: ''
+  source_file: panels/notification/center/NotifySettingMenu.qml
+  parent_type: ''
+  line: 10
+- element_type: ListView
+  id: view
+  accessible_id: NotifyView_ListView
+  accessible_role: ''
+  source_file: panels/notification/center/NotifyView.qml
+  parent_type: ''
+  line: 62
+- element_type: Control
+  id: ''
+  accessible_id: OverlapNotify_Control
+  accessible_role: ''
+  source_file: panels/notification/center/OverlapNotify.qml
+  parent_type: ''
+  line: 83
+- element_type: D.ItemDelegate
+  id: ''
+  accessible_id: main_ItemDelegate
+  accessible_role: ''
+  source_file: panels/notification/osd/kblayout/package/main.qml
+  parent_type: ''
+  line: 57
+- element_type: Item
+  id: ''
+  accessible_id: NotifyItemContent_Item
+  accessible_role: ''
+  source_file: panels/notification/plugin/NotifyItemContent.qml
+  parent_type: ''
+  line: 78
+- element_type: Text
+  id: ''
+  accessible_id: NotifyItemContent_Text
+  accessible_role: ''
+  source_file: panels/notification/plugin/NotifyItemContent.qml
+  parent_type: ''
+  line: 286
+- element_type: ShellSurfaceItem
+  id: ''
+  accessible_id: ShellSurfaceItemProxy
+  accessible_role: ''
+  source_file: panels/dock/ShellSurfaceItemProxy.qml
+  parent_type: ''
+  line: 36
+- element_type: AppletItem
+  id: ''
+  accessible_id: AppletDockItem
+  accessible_role: ''
+  source_file: panels/dock/AppletDockItem.qml
+  parent_type: ''
+  line: 8
+- element_type: ShellSurfaceItem
+  id: ''
+  accessible_id: ShellSurfaceItemProxy
+  accessible_role: ''
+  source_file: panels/dock/ShellSurfaceItemProxy.qml
+  parent_type: ''
+  line: 36
+- element_type: AppletItem
+  id: ''
+  accessible_id: AppletDockItem
+  accessible_role: ''
+  source_file: panels/dock/AppletDockItem.qml
+  parent_type: ''
+  line: 8
 transient_elements: []

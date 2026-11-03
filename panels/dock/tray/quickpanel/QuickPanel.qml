@@ -59,6 +59,7 @@ Item {
     }
 
     PanelTrayItem {
+        Accessible.id: "QuickPanel_Pane"
         Accessible.role: Accessible.Button
         Component.onCompleted: { Accessible.id = "PanelTrayItem" }
         id: panelTrayItem
@@ -76,7 +77,7 @@ Item {
     }
 
     PanelPopup {
-        Accessible.role: Accessible.Dialog
+        Accessible.id: "QuickPanel_Dialog"
         Component.onCompleted: { Accessible.id = "Popup" }
         id: popup
         width: popupContent.width
@@ -85,13 +86,13 @@ Item {
         popupY: DockPanelPositioner.y
 
         QuickPanelPage {
-            Accessible.role: Accessible.Pane
+            Accessible.id: "QuickPanel_Pane_2"
             Component.onCompleted: { Accessible.id = "PopupContent" }
             id: popupContent
             model: quickpanelModel
 
             DDT.SurfacePopup {
-                Accessible.role: Accessible.Dialog
+                Accessible.id: "QuickPanel_Dialog_3"
                 Component.onCompleted: { Accessible.id = "SurfacePopup" }
                 objectName: "quickpanel"
                 surfaceAcceptor: function (surfaceId) {
@@ -109,6 +110,7 @@ Item {
 
     // trayItem's popup
     DDT.TrayItemSurfacePopup {
+        Accessible.id: "QuickPanel_Dialog_6"
         Accessible.role: Accessible.Dialog
         Component.onCompleted: { Accessible.id = "TrayItemSurfacePopup" }
         id: trayItemSurfacePopup
@@ -124,6 +126,7 @@ Item {
     }
 
     QuickPanelModel {
+        Accessible.id: "QuickPanel_Pane_5"
         id: quickpanelModel
         sourceModel: DockCompositor.quickPluginSurfaces
         trayPluginModel: DockCompositor.trayPluginSurfaces
@@ -148,3 +151,5 @@ Item {
         }
     }
 }
+
+

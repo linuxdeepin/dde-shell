@@ -53,6 +53,7 @@ AppletItemButton {
     ]
 
     PanelToolTip {
+        Accessible.id: "ActionToggleCollapseDelegate_Pane"
         Accessible.role: Accessible.ToolTip
         Component.onCompleted: { Accessible.id = "CollapseTray" }
         id: toolTip
@@ -83,3 +84,4 @@ AppletItemButton {
         }
     }
 }
+

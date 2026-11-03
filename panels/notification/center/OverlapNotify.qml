@@ -10,6 +10,7 @@ import org.deepin.ds.notification
 import org.deepin.ds.notificationcenter
 
 NotifyItem {
+    Accessible.id: "OverlapNotify_AlertMessage"
     Accessible.role: Accessible.ListItem
     Component.onCompleted: { Accessible.id = "NotifyItem" }
     id: root
@@ -81,6 +82,7 @@ NotifyItem {
 
     Control {
         id: impl
+        Accessible.id: "OverlapNotify_Control"
         anchors.fill: parent
         focus: true
 
@@ -102,7 +104,7 @@ NotifyItem {
             width: parent.width
             implicitHeight: notifyContent.height + indicator.height
             NotifyItemContent {
-                Accessible.role: Accessible.Pane
+                Accessible.id: "OverlapNotify_AlertMessage_2"
                 Component.onCompleted: { Accessible.id = "NotifyContent" }
                 id: notifyContent
                 width: parent.width
@@ -147,6 +149,7 @@ NotifyItem {
             }
 
             OverlapIndicator {
+                Accessible.id: "OverlapNotify_Pane_2"
                 Accessible.role: Accessible.Indicator
                 Component.onCompleted: { Accessible.id = "Indicator" }
                 id: indicator
@@ -201,3 +204,4 @@ NotifyItem {
         }
     }
 }
+
