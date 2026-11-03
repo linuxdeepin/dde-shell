@@ -4,7 +4,7 @@
 
 #include "treelandbrightness.h"
 
-#include "wayland-treeland-output-manager-v1-client-protocol.h"
+#include "wayland-treeland-output-manager-unstable-v2-client-protocol.h"
 
 #include <QGuiApplication>
 #include <QScreen>
@@ -13,42 +13,53 @@
 
 namespace osd {
 
-TreelandColorControl::TreelandColorControl(struct ::treeland_output_color_control_v1 *object, QObject *parent)
+TreelandPictureControl::TreelandPictureControl(struct ::treeland_output_picture_control_v2 *object, QObject *parent)
     : QObject(parent)
-    , QtWayland::treeland_output_color_control_v1(object)
+    , QtWayland::treeland_output_picture_control_v2(object)
 {
 }
 
-TreelandColorControl::~TreelandColorControl()
+TreelandPictureControl::~TreelandPictureControl()
 {
     if (isInitialized()) {
         destroy();
     }
 }
 
-double TreelandColorControl::brightness() const
+double TreelandPictureControl::brightness() const
 {
     return m_brightness;
 }
 
-void TreelandColorControl::treeland_output_color_control_v1_brightness(wl_fixed_t brightness)
+void TreelandPictureControl::treeland_output_picture_control_v2_brightness(wl_fixed_t brightness)
 {
     m_brightness = wl_fixed_to_double(brightness);
     Q_EMIT brightnessChanged(m_brightness);
 }
 
+void TreelandPictureControl::treeland_output_picture_control_v2_result(uint32_t result)
+{
+    Q_EMIT resultReceived(result);
+}
+
 TreelandBrightness::TreelandBrightness(QObject *parent)
-    : QWaylandClientExtensionTemplate<TreelandBrightness>(treeland_output_manager_v1_interface.version)
+    : QWaylandClientExtensionTemplate<TreelandBrightness>(treeland_output_manager_v2_interface.version)
 {
     setParent(parent);
+
+    m_uuidManager = new ::TreelandOutputUuidManager(this);
+    connect(m_uuidManager, &::TreelandOutputUuidManager::activeChanged, this, &TreelandBrightness::refresh);
     connect(this, &TreelandBrightness::activeChanged, this, &TreelandBrightness::refresh);
+    connect(qApp, &QGuiApplication::primaryScreenChanged, this, &TreelandBrightness::refresh);
 }
 
 TreelandBrightness::~TreelandBrightness()
 {
     delete m_control;
     m_control = nullptr;
-    m_output = nullptr;
+    m_primaryScreen = nullptr;
+    delete m_uuidRequest;
+    m_uuidRequest = nullptr;
     if (isInitialized()) {
         destroy();
     }
@@ -56,50 +67,88 @@ TreelandBrightness::~TreelandBrightness()
 
 void TreelandBrightness::refresh()
 {
-    if (!isActive()) {
+    if (!isActive() || !m_uuidManager || !m_uuidManager->isActive()) {
         delete m_control;
         m_control = nullptr;
-        m_output = nullptr;
+        m_primaryScreen = nullptr;
+        delete m_uuidRequest;
+        m_uuidRequest = nullptr;
+        m_currentUuid.clear();
         return;
     }
 
-    struct wl_output *output = primaryWlOutput();
-    if (m_control && m_output == output && output) {
+    QScreen *screen = qApp->primaryScreen();
+    if (m_primaryScreen == screen && m_control && !m_currentUuid.isEmpty()) {
         return;
     }
 
     delete m_control;
     m_control = nullptr;
-    m_output = output;
+    m_primaryScreen = screen;
+    m_currentUuid.clear();
 
-    if (!output) {
+    if (!screen) {
         return;
     }
 
-    auto *raw = get_color_control(output);
-    if (!raw) {
-        return;
-    }
+    requestPrimaryUuid();
+}
 
-    m_control = new TreelandColorControl(raw, this);
-    connect(m_control, &TreelandColorControl::brightnessChanged,
-            this, &TreelandBrightness::brightnessChanged);
+void TreelandBrightness::requestPrimaryUuid()
+{
+    if (!m_uuidManager || !m_uuidManager->isActive())
+        return;
+
+    if (!m_primaryScreen)
+        return;
+
+    auto *waylandScreen = m_primaryScreen->nativeInterface<QNativeInterface::QWaylandScreen>();
+    if (!waylandScreen || !waylandScreen->output())
+        return;
+
+    struct wl_output *output = waylandScreen->output();
+
+    delete m_uuidRequest;
+    m_uuidRequest = nullptr;
+
+    auto *raw = m_uuidManager->get_uuid(output);
+    if (!raw)
+        return;
+
+    m_uuidRequest = new ::TreelandOutputUuid(raw, this);
+
+    connect(m_uuidRequest, &::TreelandOutputUuid::uuidReceived, this, [this](const QString &uuid) {
+        if (sender() != m_uuidRequest)
+            return;
+
+        if (uuid.isEmpty())
+            return;
+
+        m_currentUuid = uuid;
+
+        delete m_uuidRequest;
+        m_uuidRequest = nullptr;
+
+        auto *raw = get_picture_control(uuid);
+        if (!raw)
+            return;
+
+        m_control = new TreelandPictureControl(raw, this);
+        connect(m_control, &TreelandPictureControl::brightnessChanged,
+                this, &TreelandBrightness::brightnessChanged);
+        connect(m_control, &TreelandPictureControl::resultReceived, this, [this](uint32_t result) {
+            if (result == TreelandPictureControl::commit_result_invalid_output) {
+                delete m_control;
+                m_control = nullptr;
+                m_currentUuid.clear();
+            }
+        });
+    });
 }
 
 double TreelandBrightness::brightness() const
 {
     return m_control ? m_control->brightness() : 0.0;
-}
-
-struct wl_output *TreelandBrightness::primaryWlOutput() const
-{
-    auto *screen = qApp->primaryScreen();
-    if (!screen) {
-        return nullptr;
-    }
-
-    auto *waylandScreen = screen->nativeInterface<QNativeInterface::QWaylandScreen>();
-    return waylandScreen ? waylandScreen->output() : nullptr;
 }
 
 } // namespace osd
