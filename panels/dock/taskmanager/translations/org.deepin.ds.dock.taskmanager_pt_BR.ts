@@ -67,19 +67,19 @@
     <name>FolderApplicationMenu</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Abrir</translation>
     </message>
     <message>
         <source>Remove from desktop</source>
-        <translation type="unfinished"/>
+        <translation>Remover da área de trabalho</translation>
     </message>
     <message>
         <source>Send to desktop</source>
-        <translation type="unfinished"/>
+        <translation>Enviar para a área de trabalho</translation>
     </message>
     <message>
         <source>Remove from dock</source>
-        <translation type="unfinished"/>
+        <translation>Remover da dock</translation>
     </message>
     <message>
         <source>Send to dock</source>
