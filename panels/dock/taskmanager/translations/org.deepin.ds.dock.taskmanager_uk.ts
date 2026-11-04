@@ -63,4 +63,50 @@
         <translation>%1 файлів</translation>
     </message>
 </context>
+<context>
+    <name>FolderApplicationMenu</name>
+    <message>
+        <source>Open</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Remove from desktop</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Send to desktop</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Remove from dock</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Send to dock</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Remove from startup</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Add to startup</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Uninstall</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Uninstall %1?</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
+    <name>FolderContextMenu</name>
+    <message>
+        <source>Undock</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
 </TS>
