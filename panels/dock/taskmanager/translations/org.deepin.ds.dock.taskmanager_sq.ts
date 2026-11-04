@@ -67,46 +67,46 @@
     <name>FolderApplicationMenu</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Hape</translation>
     </message>
     <message>
         <source>Remove from desktop</source>
-        <translation type="unfinished"/>
+        <translation>Hiqe nga desktopi</translation>
     </message>
     <message>
         <source>Send to desktop</source>
-        <translation type="unfinished"/>
+        <translation>Dërgoje në desktop</translation>
     </message>
     <message>
         <source>Remove from dock</source>
-        <translation type="unfinished"/>
+        <translation>Hiqe nga paneli</translation>
     </message>
     <message>
         <source>Send to dock</source>
-        <translation type="unfinished"/>
+        <translation>Dërgoje në panel</translation>
     </message>
     <message>
         <source>Remove from startup</source>
-        <translation type="unfinished"/>
+        <translation>Hiqe nga menu nisjesh</translation>
     </message>
     <message>
         <source>Add to startup</source>
-        <translation type="unfinished"/>
+        <translation>Shtoje te menu nisjesh</translation>
     </message>
     <message>
         <source>Uninstall</source>
-        <translation type="unfinished"/>
+        <translation>Çinstaloje</translation>
     </message>
     <message>
         <source>Uninstall %1?</source>
-        <translation type="unfinished"/>
+        <translation>Të çinstalohet %1?</translation>
     </message>
 </context>
 <context>
     <name>FolderContextMenu</name>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Hiqe nga paneli</translation>
     </message>
 </context>
 </TS>
