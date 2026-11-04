@@ -79,34 +79,34 @@
     </message>
     <message>
         <source>Remove from dock</source>
-        <translation>Remover da dock</translation>
+        <translation>Remover do dock</translation>
     </message>
     <message>
         <source>Send to dock</source>
-        <translation type="unfinished"/>
+        <translation>Enviar para o dock</translation>
     </message>
     <message>
         <source>Remove from startup</source>
-        <translation type="unfinished"/>
+        <translation>Remover da inicialização</translation>
     </message>
     <message>
         <source>Add to startup</source>
-        <translation type="unfinished"/>
+        <translation>Adicionar à inicialização</translation>
     </message>
     <message>
         <source>Uninstall</source>
-        <translation type="unfinished"/>
+        <translation>Desinstalar</translation>
     </message>
     <message>
         <source>Uninstall %1?</source>
-        <translation type="unfinished"/>
+        <translation>Desinstalar %1?</translation>
     </message>
 </context>
 <context>
     <name>FolderContextMenu</name>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Remover do dock</translation>
     </message>
 </context>
 </TS>
