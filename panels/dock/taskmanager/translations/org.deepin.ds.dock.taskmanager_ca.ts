@@ -67,46 +67,46 @@
     <name>FolderApplicationMenu</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Obre</translation>
     </message>
     <message>
         <source>Remove from desktop</source>
-        <translation type="unfinished"/>
+        <translation>Elimina de l&apos;escriptori</translation>
     </message>
     <message>
         <source>Send to desktop</source>
-        <translation type="unfinished"/>
+        <translation>Envia a l&apos;escriptori</translation>
     </message>
     <message>
         <source>Remove from dock</source>
-        <translation type="unfinished"/>
+        <translation>Elimina de l&apos;acoblador</translation>
     </message>
     <message>
         <source>Send to dock</source>
-        <translation type="unfinished"/>
+        <translation>Envia a l&apos;acoblador</translation>
     </message>
     <message>
         <source>Remove from startup</source>
-        <translation type="unfinished"/>
+        <translation>Elimina de l&apos;arrencada</translation>
     </message>
     <message>
         <source>Add to startup</source>
-        <translation type="unfinished"/>
+        <translation>Afegeix a l&apos;arrencada</translation>
     </message>
     <message>
         <source>Uninstall</source>
-        <translation type="unfinished"/>
+        <translation>Desinstal·la</translation>
     </message>
     <message>
         <source>Uninstall %1?</source>
-        <translation type="unfinished"/>
+        <translation>Voleu desinstal·lar %1?</translation>
     </message>
 </context>
 <context>
     <name>FolderContextMenu</name>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Treu de l&apos;acoblador</translation>
     </message>
 </context>
 </TS>
