@@ -5,6 +5,7 @@
 #include "rolegroupmodel.h"
 
 #include <QList>
+#include <algorithm>
 
 RoleGroupModel::RoleGroupModel(QAbstractItemModel *sourceModel, int role, QObject *parent)
     : QAbstractProxyModel(parent)
@@ -94,10 +95,22 @@ void RoleGroupModel::setSourceModel(QAbstractItemModel *model)
     });
 
     connect(sourceModel(), &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
-        // TODO: if roles contains m_roleForDeduplication, need update from topLeft 2 bottomRight or just send dataChanged
-        if (roles.contains(m_roleForDeduplication)) {
-            rebuildTreeSource();
-            return;
+        // An advertised grouping role need not have changed. Keep delegates
+        // intact for ordinary application updates, including all-role updates.
+        if (roles.isEmpty() || roles.contains(m_roleForDeduplication)) {
+            for (int i = topLeft.row(); i <= bottomRight.row(); ++i) {
+                const auto group = sourceModel()->index(i, 0).data(m_roleForDeduplication).toString();
+                const auto rows = m_map.value(group, nullptr);
+                // Empty ids are not grouped, but a row that just lost its id
+                // must be removed from its previous group.
+                const bool changed = group.isEmpty()
+                    ? std::any_of(m_rowMap.cbegin(), m_rowMap.cend(), [i](const QList<int> *rows) { return rows->contains(i); })
+                    : !rows || !rows->contains(i);
+                if (changed) {
+                    rebuildTreeSource();
+                    return;
+                }
+            }
         }
 
         for (int i = topLeft.row(); i <= bottomRight.row(); ++i) {

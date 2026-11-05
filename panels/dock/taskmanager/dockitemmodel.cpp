@@ -52,6 +52,15 @@ void DockItemModel::setSourceModel(QAbstractItemModel *model)
     QAbstractProxyModel::setSourceModel(model);
     endResetModel();
 
+    connect(sourceModel(), &QAbstractItemModel::modelAboutToBeReset, this, [this]() {
+        m_isUpdating = true;
+        beginResetModel();
+    });
+    connect(sourceModel(), &QAbstractItemModel::modelReset, this, [this]() {
+        endResetModel();
+        m_isUpdating = false;
+    });
+
     connect(sourceModel(), &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex &parent, int first, int last) {
         if (parent.isValid() || m_isUpdating)
             return;
