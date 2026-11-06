@@ -626,7 +626,7 @@ void DockPanel::setContextDragging(bool newContextDragging)
     m_contextDragging = newContextDragging;
     if (!m_contextDragging)
         m_helper->checkNeedHideOrNot();
-    emit contextDraggingChanged();
+    Q_EMIT contextDraggingChanged();
 }
 
 bool DockPanel::isResizing() const
@@ -640,7 +640,7 @@ void DockPanel::setIsResizing(bool resizing)
     if (m_isResizing == resizing)
         return;
     m_isResizing = resizing;
-    emit isResizingChanged(m_isResizing);
+    Q_EMIT isResizingChanged(m_isResizing);
 }
 
 bool DockPanel::moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindow *anchorWindow)

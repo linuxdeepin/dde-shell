@@ -488,7 +488,7 @@ TEST(TrayItemPositionManager, UpdateVisualSizeDockHeightZeroNoOp)
     mgr.m_visualSize = QSize(99, 99);
     // Emitting visualItemSizeChanged triggers updateVisualSize,
     // but dockHeight==0 → early return → m_visualSize unchanged.
-    emit mgr.visualItemSizeChanged();
+    Q_EMIT mgr.visualItemSizeChanged();
     EXPECT_EQ(mgr.m_visualSize, QSize(99, 99));
 }
 
@@ -503,7 +503,7 @@ TEST(TrayItemPositionManager, UpdateVisualSizeSetsVisualSize)
     // Emitting visualItemSizeChanged triggers updateVisualSize.
     // visualSize(0, false) = QSize(26, 50) → setProperty sets m_visualSize.
     QSignalSpy spy(&mgr, &TrayItemPositionManager::visualSizeChanged);
-    emit mgr.visualItemSizeChanged();
+    Q_EMIT mgr.visualItemSizeChanged();
     EXPECT_EQ(mgr.m_visualSize, QSize(26, 50));
     EXPECT_GE(spy.count(), 1);
 }

@@ -58,7 +58,7 @@ public:
     void closeNotify(const NotifyEntity &entity, NotifyEntity::ClosedReason reason);
     void invokeNotify(const NotifyEntity &entity, const QString &actionId);
 
-signals:
+Q_SIGNALS:
     void entityReceived(qint64 id);
     void stagingEntityReceived(qint64 id);
     void stagingEntityClosed(qint64 id);
@@ -67,7 +67,7 @@ signals:
     void enabledChanged();
     void dataUpdaterChanged();
 
-private slots:
+private Q_SLOTS:
     void onReceivedRecord(const QString &id);
 
 private:

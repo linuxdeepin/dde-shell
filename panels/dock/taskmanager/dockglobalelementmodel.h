@@ -42,7 +42,7 @@ public:
 
     void moveItem(int from, int to);
 
-public slots:
+public Q_SLOTS:
     void initDockedElements(bool unused);
     void syncApplicationFolders();
 

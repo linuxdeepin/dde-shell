@@ -19,7 +19,7 @@ class DockItemEchoObject : public QObject
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.test.DockItemInfoEcho")
-public slots:
+public Q_SLOTS:
     DockItemInfo echo(const DockItemInfo &info) { return info; }
 };
 

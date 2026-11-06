@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-2.0-or-later
 
@@ -18,7 +18,7 @@ public:
 
     QVariant extraColumnData(const QModelIndex &parent, int row, int extraColumn, int role = Qt::DisplayRole) const override;
 
-signals:
+Q_SIGNALS:
     void rolesChanged(QList<int> roles);
     void sourceColumnChanged(int sourceColum);
 

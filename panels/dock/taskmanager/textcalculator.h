@@ -158,7 +158,7 @@ Q_SIGNALS:
     void remainingSpaceChanged();
     void enabledChanged();
 
-private slots:
+private Q_SLOTS:
     void onDataModelChanged();
     void onDataModelDestroyed();
     void calculateOptimalTextWidth();
