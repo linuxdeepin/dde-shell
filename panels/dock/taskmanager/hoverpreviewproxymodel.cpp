@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2025-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -22,7 +22,12 @@ void HoverPreviewProxyModel::setFilter(QString filter, enum FilterMode mode)
     m_filter = filter;
     m_filterMode = mode;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 12, 0)
+    beginFilterChange();
+    endFilterChange();
+#else
     invalidateFilter();
+#endif
 }
 
 void HoverPreviewProxyModel::clearFilter()
