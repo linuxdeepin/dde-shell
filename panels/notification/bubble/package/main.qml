@@ -183,6 +183,7 @@ Window {
         }
 
         delegate: BubbleDelegate {
+            Accessible.id: "main_Pane"
             Accessible.role: Accessible.ListItem
             Component.onCompleted: { Accessible.id = "BubbleDelegate" }
             maxCount: model.bubbleCount
@@ -197,3 +198,4 @@ Window {
         }
     }
 }
+

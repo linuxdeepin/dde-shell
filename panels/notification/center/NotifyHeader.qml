@@ -72,6 +72,7 @@ FocusScope {
             }
 
             NotifyHeaderTitleText {
+                Accessible.id: "NotifyHeader_AlertMessage"
                 Accessible.role: Accessible.StaticText
                 Component.onCompleted: { Accessible.id = "NotificationCenter" }
                 id: titleText
@@ -82,7 +83,7 @@ FocusScope {
         }
 
         AnimationSettingButton {
-            Accessible.role: Accessible.Button
+            Accessible.id: "NotifyHeader_Button"
             Component.onCompleted: { Accessible.id = "Fold" }
             id: collapseBtn
             objectName: "collapse"
@@ -107,6 +108,7 @@ FocusScope {
         }
 
         AnimationSettingButton {
+            Accessible.id: "NotifyHeader_Button_3"
             Accessible.role: Accessible.Button
             Component.onCompleted: { Accessible.id = "More" }
             id: moreBtn
@@ -149,6 +151,7 @@ FocusScope {
         }
 
         AnimationSettingButton {
+            Accessible.id: "NotifyHeader_Button_4"
             Accessible.role: Accessible.Button
             Component.onCompleted: { Accessible.id = "ClearAll" }
             id: clearAllBtn
@@ -173,3 +176,4 @@ FocusScope {
         }
     }
 }
+

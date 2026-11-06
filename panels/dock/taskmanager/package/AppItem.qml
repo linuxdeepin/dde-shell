@@ -80,6 +80,7 @@ Item {
     }
 
     AppItemPalette {
+        Accessible.id: "AppItem_Pane"
         Accessible.role: Accessible.Pane
         Component.onCompleted: { Accessible.id = "ItemPalette" }
         id: itemPalette
@@ -230,6 +231,7 @@ Item {
                     }
                 }
                 LaunchAnimation {
+                    Accessible.id: "AppItem_Pane_2"
                     id: launchAnimation
                     launchSpace: {
                         switch (Panel.position) {
@@ -262,6 +264,7 @@ Item {
         }
 
         WindowIndicator {
+            Accessible.id: "AppItem_Pane_3"
             Accessible.role: Accessible.Indicator
             id: windowIndicator
             dotWidth: root.useColumnLayout  ? Math.max(iconSize / 16, 2) : Math.max(iconSize / 3, 2)
@@ -321,6 +324,7 @@ Item {
         }
 
         AppItemTitle {
+            Accessible.id: "AppItem_Pane_5"
             Accessible.role: Accessible.StaticText
             Component.onCompleted: { Accessible.id = "TitleLoader" }
             id: titleLoader
@@ -571,6 +575,7 @@ Item {
     }
 
     MouseArea {
+        Accessible.id: "AppItem_Pane_6"
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: false
@@ -633,6 +638,7 @@ Item {
         }
 
         PanelToolTip {
+            Accessible.id: "AppItem_Pane_7"
             Accessible.role: Accessible.ToolTip
             Component.onCompleted: { Accessible.id = "ToolTip" }
             id: toolTip
@@ -641,6 +647,7 @@ Item {
         }
 
         PanelToolTip {
+            Accessible.id: "AppItem_Pane_8"
             Accessible.role: Accessible.ToolTip
             Component.onCompleted: { Accessible.id = "MoveToTrash" }
             id: dragToolTip
@@ -710,3 +717,5 @@ Item {
         updateWindowIconGeometryTimer.start()
     }
 }
+
+

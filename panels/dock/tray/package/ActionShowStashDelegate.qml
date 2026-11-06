@@ -115,6 +115,7 @@ AppletItemButton {
     }
 
     PanelToolTip {
+        Accessible.id: "ActionShowStashDelegate_Pane"
         Accessible.role: Accessible.ToolTip
         Component.onCompleted: { Accessible.id = "ApplicationTray" }
         id: toolTip
@@ -149,3 +150,4 @@ AppletItemButton {
     }
 
 }
+

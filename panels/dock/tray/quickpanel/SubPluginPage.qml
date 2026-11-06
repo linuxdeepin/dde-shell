@@ -46,6 +46,7 @@ Item {
             Layout.rightMargin: 12
             ActionButton {
                 id: actionBtn
+                Accessible.id: "SubPluginPage_ActionButton"
                 Layout.preferredWidth: 20
                 Layout.preferredHeight: 20
                 icon.name: "arrow_ordinary_left"
@@ -89,6 +90,7 @@ Item {
 
         // content
         ShellSurfaceItemProxy {
+            Accessible.id: "SubPluginPage_Pane"
             Accessible.role: Accessible.Pane
             Component.onCompleted: { Accessible.id = "SurfaceLayer" }
             id: surfaceLayer
@@ -103,3 +105,4 @@ Item {
         Item { Layout.fillHeight: true; Layout.preferredWidth: 1 }
     }
 }
+

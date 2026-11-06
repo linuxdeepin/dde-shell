@@ -62,6 +62,7 @@ Item {
 
     // Delegates
     StashedItemDelegateChooser {
+        Accessible.id: "StashContainer_Pane"
         columnCount: root.columnCount
         rowCount: root.rowCount
         itemPadding: root.itemPadding
@@ -71,6 +72,7 @@ Item {
 
     // tooltip and menu
     DDT.SurfacePopup {
+        Accessible.id: "StashContainer_Dialog"
         Accessible.role: Accessible.Dialog
         Component.onCompleted: { Accessible.id = "StashSurfacePopup" }
         id: stashSurfacePopup
@@ -125,3 +127,4 @@ Item {
         }
     }
 }
+

@@ -26,6 +26,7 @@ Control {
     signal gotoHeaderLast()   // Signal to cycle Shift+Tab back to header last button
 
     NotifySetting {
+        Accessible.id: "NotifyView_AlertMessage"
         id: notifySetting
         notifyModel: root.notifyModel
     }
@@ -60,6 +61,7 @@ Control {
 
     contentItem: ListView {
         id: view
+        Accessible.id: "NotifyView_ListView"
         clip: true
         spacing: 10
         snapMode: ListView.NoSnap
@@ -127,6 +129,7 @@ Control {
 
         model: root.notifyModel
         delegate: NotifyViewDelegate {
+            Accessible.id: "NotifyView_AlertMessage_2"
             id: notifyDelegate
             notifyModel: root.notifyModel
             view: view
@@ -247,11 +250,15 @@ Control {
         removeDisplaced: Transition {
             id: removeDisplacedTrans
             NumberAnimation { properties: "y"; duration: 400; easing.type: Easing.OutQuart}
+                Accessible.id: "NotifyView_Pane"
         }
     }
 
     background: BoundingRectangle {
+        Accessible.id: "NotifyView_Pane_2"
         Accessible.role: Accessible.Pane
         Component.onCompleted: { Accessible.id = "BoundingRectangle" }
     }
 }
+
+

@@ -15,6 +15,7 @@ import org.deepin.ds.dock 1.0
 import org.deepin.ds.dock.tray 1.0 as DDT
 
 AppletItemButton {
+    Accessible.id: "ActionLegacyTrayPluginDelegate_Button"
     Accessible.role: Accessible.Button
     Component.onCompleted: { Accessible.id = "AppletItemButton" }
     id: root
@@ -85,6 +86,7 @@ AppletItemButton {
         }
 
         ShellSurfaceItemProxy {
+            Accessible.id: "ActionLegacyTrayPluginDelegate_Pane"
             Accessible.role: Accessible.Pane
             Component.onCompleted: { Accessible.id = "SurfaceItem" }
             id: surfaceItem
@@ -211,3 +213,4 @@ AppletItemButton {
         }
     }
 }
+

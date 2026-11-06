@@ -72,6 +72,7 @@ import org.deepin.ds.dock.tray 1.0 as DDT
 
 Item {
     id: root
+    Accessible.id: "TrayContainer_Item"
 
     required property DDT.TraySortOrderModel model
 
@@ -125,6 +126,7 @@ Item {
 
     // Delegates
     TrayItemDelegateChooser {
+        Accessible.id: "TrayContainer_Pane"
         id: trayItemDelegateChooser
         isHorizontal: root.isHorizontal
         collapsed: root.collapsed
@@ -283,3 +285,4 @@ Item {
         });
     }
 }
+

@@ -12,6 +12,7 @@ import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0 as D
 
 AppletDockItem {
+    Accessible.id: "CardLeftDockArea_Pane"
     id: root
 
     readonly property bool fashionMode: Panel.fashionMode
@@ -218,6 +219,7 @@ AppletDockItem {
     }
 
     AppletItemBackground {
+        Accessible.id: "CardLeftDockArea_Pane_2"
         x: root.hoverInset
         y: root.hoverInset
         width: parent.width - root.hoverInset
@@ -268,6 +270,7 @@ AppletDockItem {
 
     SwipeView {
         id: swipeView
+        Accessible.id: "CardLeftDockArea_SwipeView"
 
         anchors.left: parent.left
         anchors.right: parent.right
@@ -302,6 +305,7 @@ AppletDockItem {
                 readonly property bool surfaceHovered: SwipeView.isCurrentItem && surfaceItem.hovered
 
                 ShellSurfaceItemProxy {
+                    Accessible.id: "CardLeftDockArea_Pane_3"
                     id: surfaceItem
                     width: parent.width
                     height: parent.height
@@ -360,6 +364,7 @@ AppletDockItem {
     }
 
     Item {
+        Accessible.id: "CardLeftDockArea_Item"
         anchors.fill: parent
         z: 1
 
@@ -410,6 +415,7 @@ AppletDockItem {
     // the menu reuse the shared panel windows, whose WaylandOutputs are set up
     // by the tray applet.
     PanelToolTip {
+        Accessible.id: "CardLeftDockArea_Pane_4"
         id: cardToolTip
 
         property alias shellSurface: cardToolTipContent.shellSurface
@@ -418,6 +424,7 @@ AppletDockItem {
         toolTipY: DockPanelPositioner.y
 
         ShellSurfaceItemProxy {
+            Accessible.id: "CardLeftDockArea_Pane_5"
             id: cardToolTipContent
 
             anchors.centerIn: parent
@@ -427,6 +434,7 @@ AppletDockItem {
     }
 
     PanelMenu {
+        Accessible.id: "CardLeftDockArea_Menu"
         id: cardMenu
 
         property alias shellSurface: cardMenuContent.shellSurface
@@ -440,6 +448,7 @@ AppletDockItem {
             anchors.fill: parent
 
             ShellSurfaceItemProxy {
+                Accessible.id: "CardLeftDockArea_Pane_6"
                 id: cardMenuContent
 
                 anchors.centerIn: parent
@@ -516,3 +525,4 @@ AppletDockItem {
         }
     }
 }
+
