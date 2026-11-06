@@ -607,7 +607,7 @@ void PluginManager::setDockPosition(uint32_t dockPosition)
         return;
 
     m_dockPosition = dockPosition;
-    foreach (PluginSurface *plugin, m_pluginSurfaces) {
+    Q_FOREACH (PluginSurface *plugin, m_pluginSurfaces) {
         Resource *target = resourceMap().value(plugin->surface()->waylandClient());
         if (target) {
             send_position_changed(target->handle, m_dockPosition);
@@ -626,7 +626,7 @@ void PluginManager::setDockColorTheme(uint32_t type)
         return;
 
     m_dockColorTheme = type;
-    foreach (PluginSurface *plugin, m_pluginSurfaces) {
+    Q_FOREACH (PluginSurface *plugin, m_pluginSurfaces) {
         Resource *target = resourceMap().value(plugin->surface()->waylandClient());
         if (target) {
             send_color_theme_changed(target->handle, m_dockColorTheme);
@@ -787,7 +787,7 @@ QString PluginManager::toJson(const QJsonObject &jsonObj)
 
 void PluginManager::sendEventMsg(const QString &msg)
 {
-    foreach (PluginSurface *plugin, m_pluginSurfaces) {
+    Q_FOREACH (PluginSurface *plugin, m_pluginSurfaces) {
         Resource *target = resourceMap().value(plugin->surface()->waylandClient());
         sendEventMsg(target, msg);
     }
@@ -885,7 +885,7 @@ void PluginManager::onThemeChanged()
 
 void PluginManager::foreachPluginSurface(PluginSurfaceCallback callback)
 {
-    foreach (PluginSurface *plugin, m_pluginSurfaces) {
+    Q_FOREACH (PluginSurface *plugin, m_pluginSurfaces) {
         Resource *target = resourceMap().value(plugin->surface()->waylandClient());
         if (target) {
             callback(target);

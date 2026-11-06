@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -30,7 +30,7 @@ AppsDockedHelper::AppsDockedHelper(QObject *parent)
     auto updateDockedDesktopfiles = [this](){
         m_dockedDesktopIDs.clear();
         auto dcokedDesktopFilesStrList = m_config->value("Docked_Items").toStringList();
-        foreach(auto dcokedDesktopFilesStr, dcokedDesktopFilesStrList) {
+        Q_FOREACH(auto dcokedDesktopFilesStr, dcokedDesktopFilesStrList) {
             YAML::Node node;
             try {
                 node = YAML::Load("{" + dcokedDesktopFilesStr.toStdString() + "}");
