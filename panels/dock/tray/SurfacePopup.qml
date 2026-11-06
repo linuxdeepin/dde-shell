@@ -19,7 +19,7 @@ Item {
 
     PanelToolTip {
         Accessible.role: Accessible.ToolTip
-        Component.onCompleted: { Accessible.id = "ToolTip" }
+        Accessible.id: "ToolTip"
         id: toolTip
         onToolTipVisibleChanged: function (visible) {
             if (visible && menuWindow.visible)
@@ -29,7 +29,7 @@ Item {
         property alias shellSurface: surfaceLayer.shellSurface
         ShellSurfaceItemProxy {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "SurfaceLayer" }
+            Accessible.id: "SurfaceLayer"
             id: surfaceLayer
             anchors.centerIn: parent
             autoClose: true
@@ -53,7 +53,7 @@ Item {
     }
     PanelMenu {
         Accessible.role: Accessible.PopupMenu
-        Component.onCompleted: { Accessible.id = "Menu" }
+        Accessible.id: "Menu"
         id: menu
         width: menuSurfaceLayer.width
         height: menuSurfaceLayer.height
@@ -62,7 +62,7 @@ Item {
         property alias shellSurface: menuSurfaceLayer.shellSurface
         ShellSurfaceItemProxy {
             Accessible.role: Accessible.Pane
-            Component.onCompleted: { Accessible.id = "MenuSurfaceLayer" }
+            Accessible.id: "MenuSurfaceLayer"
             id: menuSurfaceLayer
             anchors.centerIn: parent
             autoClose: true
@@ -85,7 +85,7 @@ Item {
             active: false
             sourceComponent: SurfaceSubPopup {
                 Accessible.role: Accessible.Dialog
-                Component.onCompleted: { Accessible.id = "SurfaceSubPopup" }
+                Accessible.id: "SurfaceSubPopup"
                 objectName: "stashed's subPopup"
                 transientParent: menuWindow
                 surfaceAcceptor: function (surfaceId) {

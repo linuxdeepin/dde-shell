@@ -72,7 +72,7 @@ AppletItem {
     }
 
     ListView {
-        Component.onCompleted: { Accessible.id = "Listview" }
+        Accessible.id: "Listview"
         id: listview
         width: 410
         height: contentHeight
@@ -84,7 +84,7 @@ AppletItem {
         spacing: 10
 
         delegate: D.ItemDelegate {
-            Component.onCompleted: { Accessible.id = "ItemView" }
+            Accessible.id: "ItemView"
             id: itemView
 
             padding: 0
