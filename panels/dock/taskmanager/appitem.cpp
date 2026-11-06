@@ -15,6 +15,7 @@
 #include <QJsonDocument>
 #include <QStringLiteral>
 #include <QLoggingCategory>
+#include <QTimer>
 
 Q_LOGGING_CATEGORY(appitemLog, "org.deepin.dde.shell.dock.taskmanger.appitem")
 
@@ -346,7 +347,15 @@ void AppItem::checkAppItemNeedDeleteAndDelete()
         return;
     }
 
-    deleteLater();
+    // Grace period: delay deletion to allow a new window (e.g. Electron
+    // main window after splash closes) to re-attach before the AppItem
+    // is actually destroyed. If a new window arrives within the delay,
+    // hasWindow() will return true and the deletion is cancelled.
+    QTimer::singleShot(500, this, [this]() {
+        if (!hasWindow() && !isDocked()) {
+            deleteLater();
+        }
+    });
 }
 
 void AppItem::onWindowDestroyed()
