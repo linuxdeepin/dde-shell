@@ -9,6 +9,7 @@ import QtQml.Models
 import QtQml
 
 import org.deepin.ds 1.0
+import org.deepin.ds.dock 1.0
 import org.deepin.dtk 1.0
 import org.deepin.dtk.private 1.0
 import org.deepin.dtk.style 1.0 as DStyle
@@ -107,6 +108,7 @@ Item {
         implicitWidth: DStyle.Style.toolButton.width
         implicitHeight: DStyle.Style.toolButton.height
 
+        textColor: DockPalette.iconTextPalette
         palette.windowText: ColorSelector.textColor
         flat: true
         icon {
