@@ -246,7 +246,12 @@ void KSortFilterProxyModel::componentComplete()
 
 void KSortFilterProxyModel::invalidateFilter()
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 12, 0)
+    beginFilterChange();
+    endFilterChange();
+#else
     QSortFilterProxyModel::invalidateFilter();
+#endif
 }
 
 #include "moc_ksortfilterproxymodel.cpp"
