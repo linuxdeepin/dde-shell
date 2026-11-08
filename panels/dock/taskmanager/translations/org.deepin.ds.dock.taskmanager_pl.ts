@@ -63,4 +63,50 @@
         <translation>%1 plików</translation>
     </message>
 </context>
+<context>
+    <name>FolderApplicationMenu</name>
+    <message>
+        <source>Open</source>
+        <translation>Otwórz</translation>
+    </message>
+    <message>
+        <source>Remove from desktop</source>
+        <translation>Usuń z pulpitu</translation>
+    </message>
+    <message>
+        <source>Send to desktop</source>
+        <translation>Wyślij na pulpit</translation>
+    </message>
+    <message>
+        <source>Remove from dock</source>
+        <translation>Usuń z doku</translation>
+    </message>
+    <message>
+        <source>Send to dock</source>
+        <translation>Dodaj do doku</translation>
+    </message>
+    <message>
+        <source>Remove from startup</source>
+        <translation>Usuń z startu systemu</translation>
+    </message>
+    <message>
+        <source>Add to startup</source>
+        <translation>Dodaj do startu systemu</translation>
+    </message>
+    <message>
+        <source>Uninstall</source>
+        <translation>Odinstaluj</translation>
+    </message>
+    <message>
+        <source>Uninstall %1?</source>
+        <translation>Odinstalować %1?</translation>
+    </message>
+</context>
+<context>
+    <name>FolderContextMenu</name>
+    <message>
+        <source>Undock</source>
+        <translation>Odepnij</translation>
+    </message>
+</context>
 </TS>
