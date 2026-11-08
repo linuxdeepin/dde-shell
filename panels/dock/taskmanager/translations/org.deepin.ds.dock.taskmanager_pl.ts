@@ -67,46 +67,46 @@
     <name>FolderApplicationMenu</name>
     <message>
         <source>Open</source>
-        <translation type="unfinished"/>
+        <translation>Otwórz</translation>
     </message>
     <message>
         <source>Remove from desktop</source>
-        <translation type="unfinished"/>
+        <translation>Usuń z pulpitu</translation>
     </message>
     <message>
         <source>Send to desktop</source>
-        <translation type="unfinished"/>
+        <translation>Wyślij na pulpit</translation>
     </message>
     <message>
         <source>Remove from dock</source>
-        <translation type="unfinished"/>
+        <translation>Usuń z doku</translation>
     </message>
     <message>
         <source>Send to dock</source>
-        <translation type="unfinished"/>
+        <translation>Dodaj do doku</translation>
     </message>
     <message>
         <source>Remove from startup</source>
-        <translation type="unfinished"/>
+        <translation>Usuń z startu systemu</translation>
     </message>
     <message>
         <source>Add to startup</source>
-        <translation type="unfinished"/>
+        <translation>Dodaj do startu systemu</translation>
     </message>
     <message>
         <source>Uninstall</source>
-        <translation type="unfinished"/>
+        <translation>Odinstaluj</translation>
     </message>
     <message>
         <source>Uninstall %1?</source>
-        <translation type="unfinished"/>
+        <translation>Odinstalować %1?</translation>
     </message>
 </context>
 <context>
     <name>FolderContextMenu</name>
     <message>
         <source>Undock</source>
-        <translation type="unfinished"/>
+        <translation>Odepnij</translation>
     </message>
 </context>
 </TS>
