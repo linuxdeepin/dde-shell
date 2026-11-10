@@ -259,22 +259,11 @@ DLayerShellWindow::DLayerShellWindow(QWindow* window)
 {
     s_map.insert(window, this);
     window->create();
-    auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(window->handle());
-    if (waylandWindow) {
-        static QWaylandLayerShellIntegration *shellIntegration = nullptr;
-        if (!shellIntegration) {
-            shellIntegration = new QWaylandLayerShellIntegration();
-            if (!shellIntegration->initialize(waylandWindow->display())) {
-                delete shellIntegration;
-                shellIntegration = nullptr;
-                qCWarning(layershellwindow) << "failed to init dlayershell intergration";
-                return;
-            }
-        }
-        waylandWindow->setShellIntegration(shellIntegration);
+    if (dynamic_cast<QtWaylandClient::QWaylandWindow *>(window->handle())) {
+        ensureWaylandShellIntegration();
     }
 #ifdef BUILD_WITH_X11
-    else if (dynamic_cast<QNativeInterface::Private::QXcbWindow*>(window->handle())) {
+    else if (dynamic_cast<QNativeInterface::Private::QXcbWindow *>(window->handle())) {
         new LayerShellEmulation(window, this);
         qCInfo(layershellwindow) << "not a wayland window, try to emulate on x11";
     }
@@ -282,6 +271,32 @@ DLayerShellWindow::DLayerShellWindow(QWindow* window)
     else {
         qCWarning(layershellwindow) << "not a wayland window, will not create zwlr_layer_surface";
     }
+}
+
+bool DLayerShellWindow::ensureWaylandShellIntegration()
+{
+    auto *window = d->parentWindow;
+    if (!window->handle())
+        window->create();
+
+    auto *waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow *>(window->handle());
+    if (!waylandWindow)
+        return false;
+
+    static QWaylandLayerShellIntegration *shellIntegration = nullptr;
+    if (!shellIntegration) {
+        shellIntegration = new QWaylandLayerShellIntegration();
+        if (!shellIntegration->initialize(waylandWindow->display())) {
+            delete shellIntegration;
+            shellIntegration = nullptr;
+            qCWarning(layershellwindow) << "failed to init dlayershell intergration";
+            return false;
+        }
+    }
+
+    if (!waylandWindow->shellSurface())
+        waylandWindow->setShellIntegration(shellIntegration);
+    return waylandWindow->shellIntegration() == shellIntegration;
 }
 
 DLayerShellWindow* DLayerShellWindow::get(QWindow* window)
