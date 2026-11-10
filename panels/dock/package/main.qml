@@ -862,16 +862,20 @@ Window {
 
     Connections {
         target: dock
-        enabled: dock.compositorDrivenResize && Applet.isResizing
+        enabled: dock.compositorDrivenResize
+            && !hideShowAnimation.running
+            && !dockAnimation.running
         function onWidthChanged() {
             if (dock.useColumnLayout) {
                 dock.dockSize = dock.width
+                Applet.dockSize = dock.width
             }
         }
 
         function onHeightChanged() {
             if (!dock.useColumnLayout) {
                 dock.dockSize = dock.height
+                Applet.dockSize = dock.height
             }
         }
     }
