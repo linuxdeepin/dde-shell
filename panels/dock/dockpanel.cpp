@@ -6,6 +6,7 @@
 #include "constants.h"
 #include "dockadaptor.h"
 #include "docksettings.h"
+#include "layershell/dlayershellwindow.h"
 #include "layershellextension.h"
 #include "panel.h"
 #include "pluginfactory.h"
@@ -30,6 +31,7 @@
 
 #include <QtWaylandClient/private/qwaylanddisplay_p.h>
 #include <QtWaylandClient/private/qwaylandinputdevice_p.h>
+#include <QtWaylandClient/private/qwaylandscreen_p.h>
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
 
 #ifdef HAVE_DDE_API_EVENTLOGGER
@@ -475,10 +477,20 @@ void DockPanel::launcherVisibleChanged(bool visible)
 
 void DockPanel::updateDockScreen()
 {
-    auto win = window();
+    auto *win = window();
     if (!win)
         return;
-    setDockScreen(qApp->primaryScreen());
+
+    auto *primary = qApp->primaryScreen();
+    setDockScreen(primary);
+    if (sender() != qApp || !primary || win->screen() != primary || win->isVisible() || hideState() != Show)
+        return;
+
+    auto *waylandScreen = dynamic_cast<QtWaylandClient::QWaylandScreen *>(primary->handle());
+    if (!waylandScreen || !waylandScreen->output())
+        return;
+    if (DS_NAMESPACE::DLayerShellWindow::get(win)->ensureWaylandShellIntegration())
+        win->show();
 }
 
 bool DockPanel::showInPrimary() const
