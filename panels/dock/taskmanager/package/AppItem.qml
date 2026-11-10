@@ -30,9 +30,15 @@ Item {
     property var folderPresentation: null
     readonly property bool isFolder: folderType !== ""
     property real blendOpacity: 1.0
+    property bool dragEnabled: true
+    property string dragSource: "taskbar"
+    property bool restorePositionAfterDrag: false
+    property real dragStartX: 0
+    property real dragStartY: 0
+    property bool dragFinishedForPress: false
 
     signal dropFilesOnItem(itemId: string, files: list<string>)
-    signal dragFinished()
+    signal dragFinished(int dropAction)
 
     // Binding Drag.active to mouseArea.drag.active would make Drag.active read
     // back the very property it drives (see visible/fixPosition below),
@@ -42,18 +48,38 @@ Item {
     Drag.hotSpot.x: icon.width / 2
     Drag.hotSpot.y: icon.height / 2
     Drag.dragType: Drag.Automatic
-    Drag.mimeData: root.folderPresentation
-        ? { "text/x-dde-dock-dnd-folder": itemId, "text/x-dde-dock-dnd-source": "taskbar" }
-        : { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": "taskbar", "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
 
     Accessible.role: Accessible.Button
     Accessible.name: root.name
     Accessible.description: root.attention ? qsTr("Demands attention") : (root.active ? qsTr("Active") : "")
     
+    Drag.supportedActions: Qt.CopyAction | Qt.MoveAction
+    Drag.mimeData: root.folderPresentation
+        ? { "text/x-dde-dock-dnd-folder": itemId, "text/x-dde-dock-dnd-source": dragSource }
+        : { "text/x-dde-dock-dnd-appid": itemId, "text/x-dde-dock-dnd-source": dragSource, "text/x-dde-dock-dnd-winid": windows.length > 0 ? windows[0] : ""}
+    Drag.onDragFinished: function(dropAction) {
+        // MouseArea is still processing the initiating move while the native
+        // drag returns. Keep its target alive until that event has finished.
+        Qt.callLater(function() {
+            if (!root)
+                return
+            root.dragFinishedForPress = true
+            if (root.restorePositionAfterDrag) {
+                root.x = root.dragStartX
+                root.y = root.dragStartY
+            }
+        })
+        Panel.contextDragging = false
+        root.dragFinished(dropAction)
+    }
+
     property bool useColumnLayout: Panel.rootObject.useColumnLayout
     property real iconSize: Panel.rootObject.dockItemMaxSize * 9 / 14
     property bool enableTitle: false
     property bool titleActive: enableTitle && titleLoader.active
+    property bool preservePanelPopupOnContextMenu: false
+    property bool updateIconGeometry: true
+    property Item previewAnchor: icon
     property var iconGlobalPoint: {
         var a = icon
         var x = 0, y = 0
@@ -442,6 +468,9 @@ Item {
             }
             FolderPopup {
                 id: folderPopup
+                // An overflow item lives in the shared popup window. Position
+                // from the item before that window switches to folder content.
+                positionerAnchor: root
                 folderName: root.name
                 contents: root.applicationFolderContents
                 presentation: root.folderPresentation
@@ -494,7 +523,12 @@ Item {
         running: false
         repeat: false
         onTriggered: {
-            var pos = icon.mapToItem(null, 0, 0)
+            if (!root.updateIconGeometry)
+                return
+            const point = icon.mapToItem(null, 0, 0)
+            icon.DockPositioner.bounding = Qt.rect(point.x, point.y, 0, 0)
+            icon.DockPositioner.updatePosition()
+            const pos = Qt.point(icon.DockPositioner.x, icon.DockPositioner.y)
             taskmanager.Applet.requestUpdateWindowIconGeometry(root.modelIndex, Qt.rect(pos.x, pos.y,
                 icon.width, icon.height), Panel.rootObject)
         }
@@ -508,6 +542,8 @@ Item {
         property int xOffset: 0
         property int yOffset: 0
         onTriggered: {
+            xOffset = root.previewAnchor.DockPanelPositioner.x
+            yOffset = root.previewAnchor.DockPanelPositioner.y
             if (root.windows.length != 0 || Qt.platform.pluginName === "wayland") {
                 // 使用基于 modelIndex 的预览API，确保精确匹配
                 taskmanager.Applet.requestPreview(root.modelIndex, Panel.rootObject, xOffset, yOffset, Panel.position);
@@ -522,17 +558,9 @@ Item {
             return
         }
 
-        var itemPos = root.mapToItem(null, 0, 0)
-        let xOffset, yOffset, interval = 10
-        if (Panel.position % 2 === 0) {
-            xOffset = itemPos.x + (root.width / 2)
-            yOffset = (Panel.position == 2 ? -interval : interval + Panel.dockSize)
-        } else {
-            xOffset = (Panel.position == 1 ? -interval : interval + Panel.dockSize)
-            yOffset = itemPos.y + (root.height / 2)
-        }
-        previewTimer.xOffset = xOffset
-        previewTimer.yOffset = yOffset
+        const point = root.previewAnchor.mapToItem(null, root.previewAnchor.width / 2, root.previewAnchor.height / 2)
+        root.previewAnchor.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, 0, 0)
+        root.previewAnchor.DockPanelPositioner.updatePosition()
         previewTimer.start()
     }
 
@@ -561,7 +589,9 @@ Item {
     }
 
     function requestAppItemMenu() {
-        Panel.requestClosePopup()
+        if (!root.preservePanelPopupOnContextMenu) {
+            Panel.requestClosePopup()
+        }
         if (root.isFolder) {
             if (folderUi.item) folderUi.item.contextMenu.openFor(root.folderType, root.itemId, root.name)
             return
@@ -577,16 +607,14 @@ Item {
         anchors.fill: parent
         hoverEnabled: false
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        drag.target: root
+        preventStealing: root.dragEnabled
+        drag.target: root.dragEnabled && !root.dragFinishedForPress ? root : null
         drag.onActiveChanged: {
+            // Automatic drag enters the native event loop synchronously. Protect
+            // the popup from focus loss before starting it, not after it returns.
+            if (drag.active && folderUi.item) folderUi.item.popup.close()
+            Panel.contextDragging = drag.active
             root.Drag.active = drag.active
-            if (!drag.active) {
-                Panel.contextDragging = false
-                root.dragFinished()
-                return
-            }
-            if (folderUi.item) folderUi.item.popup.close()
-            Panel.contextDragging = true
         }
 
         // 记录是否是触摸长按导致的，防止在 onClicked 中重复处理
@@ -602,7 +630,10 @@ Item {
         }
         onPressed: function (mouse) {
             isTouchLongPressed = false
-            if (mouse.button === Qt.LeftButton) {
+            root.dragFinishedForPress = false
+            if (root.dragEnabled && mouse.button === Qt.LeftButton) {
+                root.dragStartX = root.x
+                root.dragStartY = root.y
                 appItem.grabToImage(function(result) {
                     root.Drag.imageSource = result.url;
                 })
@@ -638,8 +669,8 @@ Item {
             Accessible.role: Accessible.ToolTip
             Accessible.id: "ToolTip"
             id: toolTip
-            toolTipX: DockPanelPositioner.x
-            toolTipY: DockPanelPositioner.y
+            toolTipX: icon.DockPanelPositioner.x
+            toolTipY: icon.DockPanelPositioner.y
         }
 
         PanelToolTip {
@@ -647,8 +678,8 @@ Item {
             Accessible.id: "MoveToTrash"
             id: dragToolTip
             text: qsTr("Move to Trash")
-            toolTipX: DockPanelPositioner.x
-            toolTipY: DockPanelPositioner.y
+            toolTipX: icon.DockPanelPositioner.x
+            toolTipY: icon.DockPanelPositioner.y
             visible: false
         }
 
@@ -656,9 +687,10 @@ Item {
             id: toolTipShowTimer
             interval: 50
             onTriggered: {
-                var point = root.mapToItem(null, root.width / 2, root.height / 2)
                 toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
-                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+                const point = icon.mapToItem(null, icon.width / 2, icon.height / 2)
+                icon.DockPanelPositioner.bounding = Qt.rect(point.x, point.y,
+                                                            toolTip.width, toolTip.height)
                 toolTip.open()
             }
         }
@@ -680,8 +712,9 @@ Item {
             if (root.itemId === "dde-trash") {
                 dragToolTipCloseTimer.stop()
                 if (!dragToolTip.toolTipVisible) {
-                    var point = root.mapToItem(null, root.width / 2, root.height / 2)
-                    dragToolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, dragToolTip.width, dragToolTip.height)
+                    const point = icon.mapToItem(null, icon.width / 2, icon.height / 2)
+                    icon.DockPanelPositioner.bounding = Qt.rect(point.x, point.y,
+                                                                dragToolTip.width, dragToolTip.height)
                     dragToolTip.open()
                 }
             }
@@ -710,5 +743,24 @@ Item {
 
     onIconGlobalPointChanged: {
         updateWindowIconGeometryTimer.start()
+    }
+
+    onUpdateIconGeometryChanged: updateWindowIconGeometryTimer.start()
+
+    // The recent shortcut can change apps while the pointer stays over it.
+    onItemIdChanged: {
+        if (hoverHandler.hovered) {
+            onExited()
+            onEntered()
+        }
+    }
+
+    onVisibleChanged: {
+        if (!visible) {
+            toolTipShowTimer.stop()
+            toolTip.close()
+            if (hoverHandler.hovered || previewTimer.running)
+                closeItemPreview()
+        }
     }
 }

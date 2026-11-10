@@ -8,6 +8,7 @@
 #include <QGuiApplication>
 #include <QLoggingCategory>
 #include <QQuickItem>
+#include <QTimer>
 
 namespace dock
 {
@@ -169,7 +170,19 @@ void TextCalculator::scheduleCalculation()
         resetCalculatedWidths();
         return;
     }
-    calculateOptimalTextWidth();
+
+    if (m_calculationPending)
+        return;
+
+    m_calculationPending = true;
+    QTimer::singleShot(0, this, [this] {
+        m_calculationPending = false;
+        if (!m_enabled || !m_dataModel) {
+            resetCalculatedWidths();
+            return;
+        }
+        calculateOptimalTextWidth();
+    });
 }
 
 void TextCalculator::resetCalculatedWidths()
@@ -267,12 +280,9 @@ void TextCalculator::calculateOptimalTextWidth()
     const int appCount = titles.size();
 
     if (appCount <= 0 || m_remainingSpace <= 0) {
-        if (m_optimalSingleTextWidth != 0.0) {
+        if (!qFuzzyIsNull(m_optimalSingleTextWidth) || !qFuzzyIsNull(m_totalWidth)) {
             qCDebug(textCalculatorLog) << "Setting optimal width to 0 (no apps or no space)";
-            m_optimalSingleTextWidth = 0.0;
-            m_totalWidth = 0;
-            emit optimalSingleTextWidthChanged();
-            emit totalWidthChanged();
+            resetCalculatedWidths();
         }
         return;
     }
@@ -317,15 +327,20 @@ void TextCalculator::calculateOptimalTextWidth()
         }
     }
 
-    // Update results
-    if (!qFuzzyCompare(m_optimalSingleTextWidth, newOptimalWidth)) {
+    // Publish a single, internally consistent layout result. totalWidth can change
+    // even when the selected character count (and therefore optimal width) does not.
+    const bool optimalWidthChanged = !qFuzzyCompare(m_optimalSingleTextWidth, newOptimalWidth);
+    const bool totalWidthDidChange = !qFuzzyCompare(m_totalWidth, newTotalWidth);
+    if (optimalWidthChanged || totalWidthDidChange) {
         qCDebug(textCalculatorLog) << "Optimal text width changed from" << m_optimalSingleTextWidth << "to" << newOptimalWidth << "App count:" << appCount
                                    << "Remaining space:" << m_remainingSpace << "Total required:" << newTotalWidth << "Char count:" << charCount
                                    << "spacing:" << m_spacing;
         m_optimalSingleTextWidth = newOptimalWidth;
-        emit optimalSingleTextWidthChanged();
         m_totalWidth = newTotalWidth;
-        emit totalWidthChanged();
+        if (optimalWidthChanged)
+            emit optimalSingleTextWidthChanged();
+        if (totalWidthDidChange)
+            emit totalWidthChanged();
     }
 }
 

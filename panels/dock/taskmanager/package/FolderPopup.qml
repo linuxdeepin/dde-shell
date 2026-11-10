@@ -14,6 +14,7 @@ PanelPopup {
     property var contents: []
     property var presentation: null
     property point anchorPoint: Qt.point(0, 0)
+    property Item positionerAnchor: root
     property bool interactionActive: false
     signal activated(var entry)
     signal contextMenuRequested(var entry)
@@ -46,11 +47,10 @@ PanelPopup {
             : Math.min(Math.min(3, rows) * cellHeight + 56, maximumHeight)
     contentReady: hasProviderContent ? contentLoader.status !== Loader.Loading : true
     popupX: Math.max(screenX - Panel.rootObject.x + 10,
-                     Math.min(DockPanelPositioner.x, screenX + screenWidth - Panel.rootObject.x - width - 10))
+                     Math.min(positionerAnchor.DockPanelPositioner.x, screenX + screenWidth - Panel.rootObject.x - width - 10))
     popupY: Math.max(screenY - Panel.rootObject.y + 10,
-                     Math.min(DockPanelPositioner.y, screenY + screenHeight - Panel.rootObject.y - height - 10))
+                     Math.min(positionerAnchor.DockPanelPositioner.y, screenY + screenHeight - Panel.rootObject.y - height - 10))
     closeOnInactive: !interactionActive && !Panel.contextDragging
-    DockPanelPositioner.bounding: Qt.rect(anchorPoint.x, anchorPoint.y, width, height)
 
     function openAt(point) {
         anchorPoint = point
@@ -65,6 +65,11 @@ PanelPopup {
 
     Item {
         anchors.fill: parent
+        Binding {
+            target: root.positionerAnchor.DockPanelPositioner
+            property: "bounding"
+            value: Qt.rect(root.anchorPoint.x, root.anchorPoint.y, root.width, root.height)
+        }
         Loader {
             id: contentLoader
             objectName: "providerContentLoader"

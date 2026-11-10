@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS DBus WaylandClient)
+find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS DBus Quick WaylandClient)
 find_package(yaml-cpp REQUIRED)
 find_package(TreelandProtocols 0.9.0 REQUIRED)
 
@@ -86,6 +86,8 @@ add_library(dock-taskmanager SHARED ${DBUS_INTERFACES}
     treelandwindowmonitor.h
     taskmanagersettings.cpp
     taskmanagersettings.h
+    taskoverflowcontroller.cpp
+    taskoverflowcontroller.h
     textcalculator.h
     textcalculator.cpp
 )
@@ -100,6 +102,7 @@ target_link_libraries(dock-taskmanager PRIVATE
     dde-shell-dock
     Qt${QT_VERSION_MAJOR}::WaylandClientPrivate
     Qt${QT_VERSION_MAJOR}::Concurrent
+    Qt${QT_VERSION_MAJOR}::Quick
     yaml-cpp
     PkgConfig::WaylandClient
 )
