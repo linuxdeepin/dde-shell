@@ -615,6 +615,9 @@ QVariant DockGlobalElementModel::data(const QModelIndex &index, int role) const
         return false;
     }
 
+    case TaskManager::DockedRole:
+        return model == nullptr || m_dockedElements.contains(std::make_tuple("desktop", id));
+
     case TaskManager::MenusRole: {
         return getMenus(index);
     }

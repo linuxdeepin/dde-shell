@@ -55,6 +55,9 @@ signals:
 
 protected:
     void setScreen(QScreen *screen);
+    bool isCrossWindow() const;
+    QRect effectiveBounding() const;
+    QRect attachedItemRectInDock() const;
     QPointer<QScreen> m_screen;
     QPointer<DS_NAMESPACE::DPanel> m_panel;
     QRect m_bounding {};

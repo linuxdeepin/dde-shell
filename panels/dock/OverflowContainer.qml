@@ -8,6 +8,7 @@ import QtQuick.Layouts 2.15
 Item {
     id: root
     required property bool useColumnLayout
+    property real trailingExtent: 0
     property alias model: listView.model
     property alias delegate: listView.delegate
     property alias spacing: listView.spacing
@@ -31,6 +32,11 @@ Item {
     }
 
     function calculateImplicitWidth(prev, current) {
+        // Zero-width delegates are hidden (for example, items moved into the
+        // overflow popup) and must not leave an extra spacing slot behind.
+        if (current <= 0) {
+            return prev
+        }
         if (useColumnLayout) {
             return Math.max(prev, current)
         } else {
@@ -42,6 +48,11 @@ Item {
     }
 
     function calculateImplicitHeight(prev, current) {
+        // Keep the vertical layout consistent with the horizontal one: hidden
+        // delegates contribute neither size nor spacing.
+        if (current <= 0) {
+            return prev
+        }
         if (useColumnLayout) {
             if (prev == 0) {
                 return current
@@ -61,6 +72,8 @@ Item {
         for (let child of listView.contentItem.visibleChildren) {
             width = calculateImplicitWidth(width, child.implicitWidth)
         }
+        if (!useColumnLayout && trailingExtent > 0)
+            width = calculateImplicitWidth(width, trailingExtent)
         // TODO: abvoe qt6.8 implicitSize to 0 will make size to 0 default.
         // so make minimum implicitSize to 1, find why and remove below
         return Math.max(width, 1)
@@ -70,6 +83,8 @@ Item {
         for (let child of listView.contentItem.visibleChildren) {
             height = calculateImplicitHeight(height, child.implicitHeight)
         }
+        if (useColumnLayout && trailingExtent > 0)
+            height = calculateImplicitHeight(height, trailingExtent)
         return Math.max(height, 1)
     }
 }

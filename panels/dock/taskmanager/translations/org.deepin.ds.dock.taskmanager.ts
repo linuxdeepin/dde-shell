@@ -111,4 +111,11 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>TaskOverflowButton</name>
+    <message>
+        <source>Overflow area</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

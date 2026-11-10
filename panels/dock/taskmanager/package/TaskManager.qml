@@ -22,7 +22,7 @@ ContainmentItem {
     function calcRemainingSpace(baseSize) {
         const otherCount = Panel.rootObject.dockCenterPartCount - 1;
         const otherOccupied = otherCount > 0 ? otherCount * baseSize * multitaskViewIconRatio : 0;
-        return Panel.rootObject.dockRawCenterSpace - otherOccupied;
+        return Panel.rootObject.dockEffectiveCenterSpace - otherOccupied;
     }
 
     property real remainingSpacesForTaskManager: fashionMode
@@ -40,6 +40,9 @@ ContainmentItem {
     // Defined in main.qml as dockItemIconSize = dockItemMaxSize * 9 / 14.
     // At default dock size (56), icon = 36px; at min (37), icon ≈ 24px; at max (100), icon ≈ 64px.
     readonly property real iconWidthToMaxSizeRatio: 9 / 14
+    readonly property int minimumDockItemSize: Math.max(
+        Dock.MIN_DOCK_SIZE,
+        Math.round(Panel.rootObject.dockSize * Dock.MIN_DOCK_SIZE / Dock.DEFAULT_DOCK_SIZE))
     readonly property real startPadding: Math.max(0, appTitleSpacing - (Panel.rootObject.dockItemMaxSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2))
 
     implicitWidth: {
@@ -100,6 +103,20 @@ ContainmentItem {
     }
     property real blendOpacity: blendColorAlpha(D.DTK.themeType === D.ApplicationHelper.DarkType ? 0.25 : 1.0)
 
+    TaskOverflowController {
+        id: taskOverflow
+        // Window-split title layout has priority. Only fall back to adaptive icon
+        // shrinking and overflow when no title layout can fit the available space.
+        enabled: !textCalculator.enabled || textCalculator.totalWidth <= 0
+        availableExtent: Math.max(0, taskmanager.calcRemainingSpace(Panel.rootObject.dockItemMaxSize) - taskmanager.startPadding)
+        minimumReached: Panel.rootObject.dockItemMaxSize <= taskmanager.minimumDockItemSize + 0.5
+        fallbackItemExtent: Math.max(1, Panel.rootObject.dockItemMaxSize * taskmanager.iconWidthToMaxSizeRatio)
+        spacing: taskmanager.appTitleSpacing
+        overflowSidePadding: taskmanager.appTitleSpacing + 1
+        visualModel: visualModel
+        dataModel: taskmanager.Applet.dataModel
+    }
+
     TextCalculator {
         id: textCalculator
         enabled: !fashionMode && taskmanager.Applet.windowSplit && (Panel.position == Dock.Bottom || Panel.position == Dock.Top)
@@ -126,6 +143,7 @@ ContainmentItem {
         anchors.topMargin: useColumnLayout ? taskmanager.startPadding : 0
         useColumnLayout: taskmanager.useColumnLayout
         spacing: taskmanager.appTitleSpacing
+        trailingExtent: taskOverflow.trailingExtent
         remove: Transition {
             NumberAnimation {
                 properties: "scale,opacity"
@@ -137,6 +155,10 @@ ContainmentItem {
         model: DelegateModel {
             id: visualModel
             model: taskmanager.Applet.dataModel
+            function sourceIndexAt(visualIndex) {
+                // modelIndex() takes a source row, whereas items can be reordered.
+                return modelIndex(items.get(visualIndex).model.index)
+            }
             // 1:4 the distance between app : dock height; get width/height≈0.8
             property real cellWidth: Panel.rootObject.dockItemMaxSize * 0.8
             delegate: Item {
@@ -163,6 +185,18 @@ ContainmentItem {
                     return windows.length > 0 && launcherDndDropArea.launcherDndWinId !== windows[0]
                 }
 
+                readonly property bool overflowActive: taskOverflow.popupCount > 0
+                readonly property bool hiddenInOverflow: overflowActive
+                    && DelegateModel.itemsIndex >= taskOverflow.visibleItemCount
+                visible: !hiddenInOverflow
+
+                readonly property real normalDelegateWidth: useColumnLayout
+                    ? taskmanager.implicitWidth
+                    : appItem.implicitWidth
+                readonly property real normalDelegateHeight: useColumnLayout
+                    ? Panel.rootObject.dockItemMaxSize * 9 / 14
+                    : taskmanager.implicitHeight
+
                 ListView.onAdd: NumberAnimation {
                     target: delegateRoot
                     properties: "scale,opacity"
@@ -187,8 +221,8 @@ ContainmentItem {
                 Behavior on opacity { NumberAnimation { duration: 200 } }
                 Behavior on scale { NumberAnimation { duration: 200 } }
 
-                implicitWidth: useColumnLayout ? taskmanager.implicitWidth : appItem.implicitWidth
-                implicitHeight: useColumnLayout ? Panel.rootObject.dockItemMaxSize * 9 / 14 : taskmanager.implicitHeight
+                implicitWidth: hiddenInOverflow? 0 : normalDelegateWidth
+                implicitHeight: hiddenInOverflow? 0 : normalDelegateHeight
 
                 property int visualIndex: DelegateModel.itemsIndex
                 property var modelIndex: visualModel.modelIndex(index)
@@ -204,8 +238,28 @@ ContainmentItem {
                     y: delegateRoot.y
                     width: delegateRoot.width
                     height: delegateRoot.height
-                    scale: delegateRoot.scale
+                    readonly property bool hiddenByOverflow: delegateRoot.hiddenInOverflow
+                    property real overflowTransitionScale: hiddenByOverflow ? 0.8 : 1.0
+                    scale: delegateRoot.scale * overflowTransitionScale
+                    opacity: hiddenByOverflow ? 0 : 1
+                    visible: opacity > 0.001
                     property bool positionAnimationEnabled: false
+
+                    Behavior on opacity {
+                        enabled: appItemRect.positionAnimationEnabled
+                        NumberAnimation {
+                            duration: 120
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    Behavior on overflowTransitionScale {
+                        enabled: appItemRect.positionAnimationEnabled
+                        NumberAnimation {
+                            duration: 120
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
                     Behavior on x {
                         enabled: appItemRect.positionAnimationEnabled
                         NumberAnimation {
@@ -250,6 +304,7 @@ ContainmentItem {
                         blendOpacity: taskmanager.blendOpacity
                         title: delegateRoot.title
                         enableTitle: textCalculator.enabled
+                        updateIconGeometry: !delegateRoot.hiddenInOverflow
                         ListView.delayRemove: Drag.active
                         Component.onCompleted: {
                             dropFilesOnItem.connect(taskmanager.Applet.dropFilesOnItem)
@@ -262,6 +317,15 @@ ContainmentItem {
             }
         }
 
+        TaskOverflowButton {
+            id: overflowButton
+            taskManagerItem: taskmanager
+            overflow: taskOverflow
+            onDragFinished: function(dropAction, itemId, canUndock) {
+                launcherDndDropArea.finishDrag(dropAction, itemId, canUndock)
+            }
+        }
+
         DropArea {
             id: launcherDndDropArea
             anchors.fill: parent
@@ -270,65 +334,179 @@ ContainmentItem {
             property string launcherDndDesktopId: ""
             property string launcherDndDragSource: ""
             property string launcherDndWinId: ""
+            property bool launcherDndDocked: false
+            property var pendingOverflowDrop: null
 
-            function resetDndState() {
-                launcherDndDesktopId = ""
-                launcherDndDragSource = ""
-                launcherDndWinId = ""
+            function overflowTargetIndexAt(x, y) {
+                // Include gaps and the trailing shortcuts in the drop target.
+                // A full taskbar makes room by pushing its last app into overflow.
+                const axisPosition = taskmanager.useColumnLayout ? y : x
+                const index = Math.floor((axisPosition + taskOverflow.spacing / 2)
+                    / (taskOverflow.fallbackItemExtent + taskOverflow.spacing))
+                return Math.max(0, Math.min(index, taskOverflow.visibleItemCount - 1))
             }
 
-            onEntered: function(drag) {
-                let desktopId = drag.getDataAsString("text/x-dde-dock-dnd-folder") || drag.getDataAsString("text/x-dde-dock-dnd-appid")
-                launcherDndDragSource = drag.getDataAsString("text/x-dde-dock-dnd-source")
-                launcherDndWinId = drag.getDataAsString("text/x-dde-dock-dnd-winid")
-                launcherDndDesktopId = desktopId
-                if (launcherDndDragSource !== "taskbar" && taskmanager.Applet.requestDockByDesktopId(desktopId) === false) {
-                    drag.accepted = false
-                    resetDndState()
-                }
-            }
-
-            onPositionChanged: function(drag) {
-                if (launcherDndDesktopId === "") return
-                let targetIndex = appContainer.indexAt(drag.x, drag.y)
-                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
-                if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
-                    if (taskmanager.Applet.windowSplit) {
-                        taskmanager.Applet.moveItem(currentIndex, targetIndex)
-                    } else {
-                        visualModel.items.move(currentIndex, targetIndex)
-                    }
-                }
-            }
-
-            onDropped: function(drop) {
-                Panel.contextDragging = false
-                if (launcherDndDesktopId === "") return
-                let targetIndex = appContainer.indexAt(drop.x, drop.y)
-                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
-                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
-                if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
-                    if (taskmanager.Applet.windowSplit) {
-                        taskmanager.Applet.moveItem(currentIndex, targetIndex)
-                    } else {
-                        visualModel.items.move(currentIndex, targetIndex)
-                    }
-                }
+            function saveOrder() {
                 let appIds = []
                 for (let i = 0; i < visualModel.items.count; i++) {
                     appIds.push(visualModel.items.get(i).model.itemId)
                 }
                 taskmanager.Applet.saveDockElementsOrder(appIds)
-                if (drop.formats.indexOf("text/x-dde-dock-dnd-folder") !== -1)
+            }
+
+            function moveApp(appId, winId, targetIndex) {
+                const currentIndex = taskmanager.Applet.windowSplit
+                    ? taskmanager.findAppIndexByWindow(appId, winId)
+                    : taskmanager.findAppIndex(appId)
+                if (currentIndex < 0 || targetIndex < 0) return false
+                if (currentIndex !== targetIndex) {
+                    if (taskmanager.Applet.windowSplit)
+                        taskmanager.Applet.moveItem(currentIndex, targetIndex)
+                    else
+                        visualModel.items.move(currentIndex, targetIndex)
+                    taskOverflow.scheduleSync()
+                }
+                return true
+            }
+
+            function finishDrag(dropAction, itemId, canUndock) {
+                const pending = pendingOverflowDrop
+                pendingOverflowDrop = null
+                const shouldUndock = taskOverflow.finishDrag(dropAction)
+                resetDndState()
+                // Both moves and unpinning can destroy the source. Commit them
+                // only after QDrag and the initiating MouseArea event return.
+                Qt.callLater(function() {
+                    if (pending && dropAction === Qt.MoveAction) {
+                        const targetIndex = Math.min(pending.targetIndex, taskOverflow.visibleItemCount - 1)
+                        if (moveApp(pending.appId, pending.winId, targetIndex))
+                            saveOrder()
+                    } else if (canUndock && shouldUndock) {
+                        taskmanager.Applet.requestUndockByDesktopId(itemId)
+                    }
+                })
+            }
+
+            function resetDndState() {
+                launcherDndDesktopId = ""
+                launcherDndDragSource = ""
+                launcherDndWinId = ""
+                launcherDndDocked = false
+            }
+
+            function isOverflowButtonIndex(targetIndex) {
+                return taskOverflow.popupCount > 0
+                    && (targetIndex < 0 || targetIndex >= taskOverflow.visibleItemCount)
+            }
+
+            function targetIndexAt(x, y) {
+                return appContainer.indexAt(x, y)
+            }
+
+            function isInternalDrag() {
+                return launcherDndDragSource === "taskbar"
+                    || launcherDndDragSource === "overflow-popup"
+            }
+
+            function requestDockIfNeeded() {
+                if (isInternalDrag() || launcherDndDocked) {
+                    return true
+                }
+
+                if (taskmanager.Applet.requestDockByDesktopId(launcherDndDesktopId) === false) {
+                    resetDndState()
+                    return false
+                }
+
+                launcherDndDocked = true
+                return true
+            }
+
+            onEntered: function(drag) {
+                let desktopId = drag.getDataAsString("text/x-dde-dock-dnd-folder") || drag.getDataAsString("text/x-dde-dock-dnd-appid")
+                if (!desktopId) {
+                    drag.accepted = false
+                    resetDndState()
+                    return
+                }
+                launcherDndDragSource = drag.getDataAsString("text/x-dde-dock-dnd-source")
+                launcherDndWinId = drag.getDataAsString("text/x-dde-dock-dnd-winid")
+                launcherDndDesktopId = desktopId
+                if (launcherDndDragSource === "overflow-popup") {
+                    pendingOverflowDrop = null
+                    drag.acceptProposedAction()
+                    return
+                }
+                let targetIndex = targetIndexAt(drag.x, drag.y)
+                if (!isOverflowButtonIndex(targetIndex) && !requestDockIfNeeded()) {
+                    drag.accepted = false
+                    return
+                }
+                if (!isOverflowButtonIndex(targetIndex)) {
+                    drag.acceptProposedAction()
+                }
+            }
+
+            onPositionChanged: function(drag) {
+                if (launcherDndDesktopId === "") return
+                if (launcherDndDragSource === "overflow-popup") return
+                let targetIndex = targetIndexAt(drag.x, drag.y)
+                if (isOverflowButtonIndex(targetIndex) || !requestDockIfNeeded()) return
+                drag.acceptProposedAction()
+                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
+                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
+                if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
+                    if (taskmanager.Applet.windowSplit) {
+                        taskmanager.Applet.moveItem(currentIndex, targetIndex)
+                    } else {
+                        visualModel.items.move(currentIndex, targetIndex)
+                        taskOverflow.scheduleSync()
+                    }
+                }
+            }
+
+            onDropped: function(drop) {
+                if (launcherDndDesktopId === "") return
+                if (launcherDndDragSource === "overflow-popup") {
+                    pendingOverflowDrop = {
+                        appId: taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId),
+                        winId: launcherDndWinId,
+                        targetIndex: overflowTargetIndexAt(drop.x, drop.y)
+                    }
+                    drop.accept(Qt.MoveAction)
+                    resetDndState()
+                    return
+                }
+                Panel.contextDragging = false
+                let targetIndex = targetIndexAt(drop.x, drop.y)
+                if (isOverflowButtonIndex(targetIndex)) {
+                    resetDndState()
+                    return
+                }
+                if (!requestDockIfNeeded()) return
+                let appId = taskmanager.Applet.desktopIdToAppId(launcherDndDesktopId)
+                let currentIndex = taskmanager.Applet.windowSplit ? taskmanager.findAppIndexByWindow(appId, launcherDndWinId) : taskmanager.findAppIndex(appId)
+                if (currentIndex !== -1 && targetIndex !== -1 && currentIndex !== targetIndex) {
+                    if (taskmanager.Applet.windowSplit) {
+                        taskmanager.Applet.moveItem(currentIndex, targetIndex)
+                    } else {
+                        visualModel.items.move(currentIndex, targetIndex)
+                        taskOverflow.scheduleSync()
+                    }
+                }
+                saveOrder()
+                if (drop.formats.indexOf("text/x-dde-dock-dnd-folder") !== -1) {
                     drop.accept(Qt.CopyAction)
-                else
+                } else if (isInternalDrag()) {
+                    drop.accept(Qt.MoveAction)
+                } else {
                     drop.acceptProposedAction()
+                }
                 resetDndState()
             }
 
             onExited: function() {
-                if (launcherDndDesktopId !== "" && launcherDndDragSource !== "taskbar") {
+                if (launcherDndDesktopId !== "" && !isInternalDrag() && launcherDndDocked) {
                     taskmanager.Applet.requestUndockByDesktopId(launcherDndDesktopId)
                 }
                 resetDndState()
@@ -382,8 +560,10 @@ ContainmentItem {
                 return dockSize;
 
             const otherItems = Math.max(0, Panel.rootObject.dockCenterPartCount - 1);
-            const optimal = solveMaxSizeFull(Panel.rootObject.dockRawCenterSpace, appCount, otherItems);
-            return optimal >= dockSize ? dockSize : optimal;
+            const optimal = solveMaxSizeFull(Panel.rootObject.dockEffectiveCenterSpace, appCount, otherItems);
+            const fitted = optimal >= dockSize ? dockSize : optimal;
+            return Math.max(taskmanager.minimumDockItemSize, fitted);
         })
+        taskOverflow.scheduleSync()
     }
 }
