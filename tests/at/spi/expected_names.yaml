@@ -206,11 +206,11 @@ qml_elements:
   line: 23
 - element_type: PanelToolTip
   id: toolTip
-  accessible_id: Appruntime
+  accessible_id: appruntimeitem_Pane
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/appruntimeitem/package/appruntimeitem.qml
   parent_type: ''
-  line: 24
+  line: 23
 - element_type: AppletItemButton
   id: button
   accessible_id: Button
@@ -231,21 +231,21 @@ qml_elements:
   accessible_role: Accessible.Pane
   source_file: panels/dock/package/main.qml
   parent_type: ''
-  line: 625
+  line: 640
 - element_type: OverflowContainer
   id: centerLoader
-  accessible_id: CenterLoader
+  accessible_id: main_Pane_8
   accessible_role: Accessible.Pane
   source_file: panels/dock/package/main.qml
   parent_type: ''
-  line: 675
+  line: 689
 - element_type: OverflowContainer
   id: rightLoader
   accessible_id: RightLoader
   accessible_role: Accessible.Pane
   source_file: panels/dock/package/main.qml
   parent_type: ''
-  line: 705
+  line: 721
 - element_type: PanelToolTip
   id: toolTip
   accessible_id: ShowDesktop
@@ -259,35 +259,35 @@ qml_elements:
   accessible_role: Accessible.Pane
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: ''
-  line: 82
+  line: 84
 - element_type: WindowIndicator
   id: windowIndicator
   accessible_id: WindowIndicator
   accessible_role: Accessible.Indicator
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: ''
-  line: 268
+  line: 267
 - element_type: AppItemTitle
   id: titleLoader
   accessible_id: TitleLoader
   accessible_role: Accessible.StaticText
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: ''
-  line: 328
+  line: 326
 - element_type: PanelToolTip
   id: toolTip
   accessible_id: ToolTip
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: Repeater
-  line: 642
+  line: 639
 - element_type: PanelToolTip
   id: dragToolTip
   accessible_id: MoveToTrash
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: Repeater
-  line: 651
+  line: 647
 - element_type: OverflowContainer
   id: appContainer
   accessible_id: AppContainer
@@ -441,7 +441,7 @@ qml_elements:
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/package/StashContainer.qml
   parent_type: ''
-  line: 75
+  line: 76
 - element_type: StashedItemPositioner
   id: ''
   accessible_id: StashedItemPositioner
@@ -1043,7 +1043,7 @@ qml_elements:
   accessible_role: ''
   source_file: panels/dock/package/main.qml
   parent_type: ''
-  line: 473
+  line: 475
 - element_type: Item
   id: ''
   accessible_id: TrayContainer_Item

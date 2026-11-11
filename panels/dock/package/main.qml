@@ -688,7 +688,6 @@ Window {
                 OverflowContainer {
                     Accessible.id: "main_Pane_8"
                     Accessible.role: Accessible.Pane
-                    Accessible.id: "CenterLoader"
                     id: centerLoader
                     anchors.fill: parent
                     useColumnLayout: dock.useColumnLayout
@@ -718,7 +717,6 @@ Window {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             OverflowContainer {
-                Accessible.id: "main_Pane_11"
                 Accessible.role: Accessible.Pane
                 Accessible.id: "RightLoader"
                 id: rightLoader

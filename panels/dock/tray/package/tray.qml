@@ -37,7 +37,6 @@ AppletItem {
     }
 
     PanelPopup {
-        Accessible.id: "tray_Dialog"
         Accessible.role: Accessible.Dialog
         Accessible.id: "StashedPopup"
         id: stashedPopup
@@ -60,7 +59,6 @@ AppletItem {
             id: stashedContainer
             padding: 10
             contentItem: StashContainer {
-                Accessible.id: "tray_Pane"
                 Accessible.role: Accessible.Pane
                 Accessible.id: "StashContainer"
                 id: stashContainer
@@ -135,7 +133,6 @@ AppletItem {
 
 
     TrayContainer {
-        Accessible.id: "tray_Pane_3"
         Accessible.role: Accessible.Pane
         Accessible.id: "TrayContainter"
         id: trayContainter

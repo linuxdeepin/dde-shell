@@ -263,7 +263,6 @@ Item {
         }
 
         WindowIndicator {
-            Accessible.id: "AppItem_Pane_3"
             Accessible.role: Accessible.Indicator
             Accessible.id: "WindowIndicator"
             id: windowIndicator
@@ -323,7 +322,6 @@ Item {
         }
 
         AppItemTitle {
-            Accessible.id: "AppItem_Pane_5"
             Accessible.role: Accessible.StaticText
             Accessible.id: "TitleLoader"
             id: titleLoader
@@ -637,7 +635,6 @@ Item {
         }
 
         PanelToolTip {
-            Accessible.id: "AppItem_Pane_7"
             Accessible.role: Accessible.ToolTip
             Accessible.id: "ToolTip"
             id: toolTip
@@ -646,7 +643,6 @@ Item {
         }
 
         PanelToolTip {
-            Accessible.id: "AppItem_Pane_8"
             Accessible.role: Accessible.ToolTip
             Accessible.id: "MoveToTrash"
             id: dragToolTip
