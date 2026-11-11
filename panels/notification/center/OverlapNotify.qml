@@ -12,7 +12,6 @@ import org.deepin.ds.notificationcenter
 NotifyItem {
     Accessible.id: "OverlapNotify_AlertMessage"
     Accessible.role: Accessible.ListItem
-    Accessible.id: "NotifyItem"
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
@@ -106,7 +105,6 @@ NotifyItem {
             NotifyItemContent {
                 Accessible.id: "OverlapNotify_AlertMessage_2"
                 Accessible.role: Accessible.Pane
-                Accessible.id: "NotifyContent"
                 id: notifyContent
                 width: parent.width
                 appName: root.appName
@@ -152,7 +150,6 @@ NotifyItem {
             OverlapIndicator {
                 Accessible.id: "OverlapNotify_Pane_2"
                 Accessible.role: Accessible.Indicator
-                Accessible.id: "Indicator"
                 id: indicator
                 enableAnimation: (root.ListView.view && root.ListView.view.panelShown) ?? false
                 clipItems: true

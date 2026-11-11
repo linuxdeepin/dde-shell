@@ -29,7 +29,6 @@ Control {
     DragItem {
         Accessible.id: "PluginItem_Pane"
         Accessible.role: Accessible.Pane
-        Accessible.id: "DragLayer"
         id: dragLayer
         anchors.fill: parent
         dragItem: root
@@ -55,7 +54,6 @@ Control {
     ShellSurfaceItemProxy {
         Accessible.id: "PluginItem_Pane_3"
         Accessible.role: Accessible.Pane
-        Accessible.id: "SurfaceLayer"
         id: surfaceLayer
         anchors.centerIn: parent
         anchors.fill: parent

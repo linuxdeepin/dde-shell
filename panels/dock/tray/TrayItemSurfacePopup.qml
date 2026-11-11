@@ -29,7 +29,6 @@ Item {
     PanelPopup {
         Accessible.id: "TrayItemSurfacePopup_Dialog"
         Accessible.role: Accessible.Dialog
-        Accessible.id: "Popup"
         id: popup
         property alias shellSurface: popupContent.shellSurface
         width: popupContent.width
@@ -44,7 +43,6 @@ Item {
             ShellSurfaceItemProxy {
                 Accessible.id: "TrayItemSurfacePopup_Pane"
                 Accessible.role: Accessible.Pane
-                Accessible.id: "PopupContent"
                 id: popupContent
                 anchors.centerIn: parent
                 autoClose: true
@@ -58,7 +56,6 @@ Item {
     PanelMenu {
         Accessible.id: "TrayItemSurfacePopup_Menu"
         Accessible.role: Accessible.PopupMenu
-        Accessible.id: "PopupMenu"
         id: popupMenu
         property alias shellSurface: popupMenuContent.shellSurface
         width: popupMenuContent.width
@@ -80,7 +77,6 @@ Item {
             ShellSurfaceItemProxy {
                 Accessible.id: "TrayItemSurfacePopup_Pane_4"
                 Accessible.role: Accessible.Pane
-                Accessible.id: "PopupMenuContent"
                 id: popupMenuContent
                 anchors.centerIn: parent
                 autoClose: true
@@ -105,7 +101,6 @@ Item {
                 sourceComponent: SurfaceSubPopup {
                     Accessible.id: "TrayItemSurfacePopup_Dialog_3"
                     Accessible.role: Accessible.Dialog
-                    Accessible.id: "SurfaceSubPopup"
                     objectName: "tray's subPopup"
                     transientParent: popupMenu.menuWindow
                     surfaceAcceptor: function (surfaceId) {
@@ -132,7 +127,6 @@ Item {
     PanelToolTip {
         Accessible.id: "TrayItemSurfacePopup_Pane_7"
         Accessible.role: Accessible.ToolTip
-        Accessible.id: "ToolTip"
         id: toolTip
         property alias shellSurface: toolTipContent.shellSurface
         toolTipX: DockPanelPositioner.x
@@ -141,7 +135,6 @@ Item {
         ShellSurfaceItemProxy {
             Accessible.id: "TrayItemSurfacePopup_Pane_6"
             Accessible.role: Accessible.Pane
-            Accessible.id: "ToolTipContent"
             id: toolTipContent
             anchors.centerIn: parent
             autoClose: true

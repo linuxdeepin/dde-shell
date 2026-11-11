@@ -12,7 +12,6 @@ import org.deepin.ds.notification
 NotifyItem {
     Accessible.id: "NotifyItemContent_AlertMessage"
     Accessible.role: Accessible.ListItem
-    Accessible.id: "NotifyItem"
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
@@ -121,7 +120,6 @@ NotifyItem {
                 sourceComponent: SettingActionButton {
                     Accessible.id: "NotifyItemContent_Button"
                     Accessible.role: Accessible.Button
-                    Accessible.id: "CloseBtn"
                     id: closeBtn
                     objectName: "closeNotify-" + root.appName
                     icon.name: "clean-alone"
@@ -343,7 +341,6 @@ NotifyItem {
                     sourceComponent: NotifyAction {
                         Accessible.id: "NotifyItemContent_AlertMessage_2"
                         Accessible.role: Accessible.Button
-                        Accessible.id: "NotifyAction"
                         actions: root.actions
                         onActionInvoked: function (actionId) {
                             root.actionInvoked(actionId)

@@ -55,7 +55,6 @@ AppletItem {
         implicitWidth: maxItemWidth()
 
         delegate: D.ItemDelegate {
-            Accessible.id: "ItemView"
             id: itemView
             Accessible.id: "main_ItemDelegate"
             width: view.width

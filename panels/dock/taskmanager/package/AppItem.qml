@@ -80,7 +80,6 @@ Item {
     }
 
     AppItemPalette {
-        Accessible.id: "AppItem_Pane"
         Accessible.role: Accessible.Pane
         Accessible.id: "ItemPalette"
         id: itemPalette

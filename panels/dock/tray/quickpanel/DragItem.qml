@@ -124,7 +124,6 @@ Item {
             sourceComponent: ShellSurfaceItemProxy {
                 Accessible.id: "DragItem_Pane"
                 Accessible.role: Accessible.Pane
-                Accessible.id: "ShellSurfaceItemProxy"
                 shellSurface: root.fallbackDragImage
                 width: root.fallbackIconSize.width
                 height: root.fallbackIconSize.height

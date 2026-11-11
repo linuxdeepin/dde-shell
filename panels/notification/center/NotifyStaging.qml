@@ -92,7 +92,6 @@ FocusScope {
         delegate: OverlapNotify {
             Accessible.id: "NotifyStaging_AlertMessage"
             Accessible.role: Accessible.Pane
-            Accessible.id: "OverlapNotify"
             id: overlapNotify
             objectName: "overlap-" + model.appName
             focus: true
