@@ -22,14 +22,12 @@ AppletItem {
     PanelToolTip {
         Accessible.id: "appruntimeitem_Pane"
         Accessible.role: Accessible.ToolTip
-        Accessible.id: "Appruntime"
         id: toolTip
         text: qsTr("appruntime")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
     }
     AppletItemButton {
-        Accessible.id: "appruntimeitem_Button"
         Accessible.role: Accessible.Button
         Accessible.id: "Button"
         id: button

@@ -72,7 +72,6 @@ Item {
 
     // tooltip and menu
     DDT.SurfacePopup {
-        Accessible.id: "StashContainer_Dialog"
         Accessible.role: Accessible.Dialog
         Accessible.id: "StashSurfacePopup"
         id: stashSurfacePopup
