@@ -12,7 +12,6 @@ import org.deepin.ds.notificationcenter
 NotifyItem {
     Accessible.id: "NormalNotify_AlertMessage"
     Accessible.role: Accessible.ListItem
-    Accessible.id: "NotifyItem"
     id: root
     implicitWidth: impl.implicitWidth
     implicitHeight: impl.implicitHeight
@@ -58,7 +57,6 @@ NotifyItem {
         contentItem: NotifyItemContent {
             Accessible.id: "NormalNotify_AlertMessage_2"
             Accessible.role: Accessible.Pane
-            Accessible.id: "NotifyContent"
             id: notifyContent
             width: parent.width
             appName: root.appName

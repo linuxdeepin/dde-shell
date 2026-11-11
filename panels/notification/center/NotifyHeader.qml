@@ -74,7 +74,6 @@ FocusScope {
             NotifyHeaderTitleText {
                 Accessible.id: "NotifyHeader_AlertMessage"
                 Accessible.role: Accessible.StaticText
-                Accessible.id: "NotificationCenter"
                 id: titleText
                 text: qsTr("Notification Center")
                 elide: Text.ElideNone
@@ -85,7 +84,6 @@ FocusScope {
         AnimationSettingButton {
             Accessible.id: "NotifyHeader_Button"
             Accessible.role: Accessible.Button
-            Accessible.id: "Fold"
             id: collapseBtn
             objectName: "collapse"
             visible: !notifyModel.collapse
@@ -111,7 +109,6 @@ FocusScope {
         AnimationSettingButton {
             Accessible.id: "NotifyHeader_Button_3"
             Accessible.role: Accessible.Button
-            Accessible.id: "More"
             id: moreBtn
             objectName: "more"
             Layout.alignment: Qt.AlignRight
@@ -154,7 +151,6 @@ FocusScope {
         AnimationSettingButton {
             Accessible.id: "NotifyHeader_Button_4"
             Accessible.role: Accessible.Button
-            Accessible.id: "ClearAll"
             id: clearAllBtn
             objectName: "closeAllNotify"
             activeFocusOnTab: false

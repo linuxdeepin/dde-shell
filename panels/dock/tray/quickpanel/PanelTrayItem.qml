@@ -35,7 +35,6 @@ Control {
     PanelToolTip {
         Accessible.id: "PanelTrayItem_Pane"
         Accessible.role: Accessible.ToolTip
-        Accessible.id: "QuickActions"
         id: toolTip
         text: qsTr("Quick actions")
         toolTipX: DockPanelPositioner.x
@@ -98,7 +97,6 @@ Control {
         ShellSurfaceItemProxy {
             Accessible.id: "PanelTrayItem_Pane_2"
             Accessible.role: Accessible.Pane
-            Accessible.id: "SurfaceLayer"
             id: surfaceLayer
             property var itemGlobalPoint: {
                 var a = surfaceLayer

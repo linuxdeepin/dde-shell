@@ -259,35 +259,35 @@ qml_elements:
   accessible_role: Accessible.Pane
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: ''
-  line: 76
+  line: 82
 - element_type: WindowIndicator
   id: windowIndicator
   accessible_id: WindowIndicator
   accessible_role: Accessible.Indicator
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: ''
-  line: 249
+  line: 268
 - element_type: AppItemTitle
   id: titleLoader
   accessible_id: TitleLoader
   accessible_role: Accessible.StaticText
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: ''
-  line: 309
+  line: 328
 - element_type: PanelToolTip
   id: toolTip
   accessible_id: ToolTip
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: Repeater
-  line: 568
+  line: 642
 - element_type: PanelToolTip
   id: dragToolTip
   accessible_id: MoveToTrash
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: Repeater
-  line: 577
+  line: 651
 - element_type: OverflowContainer
   id: appContainer
   accessible_id: AppContainer
@@ -308,98 +308,98 @@ qml_elements:
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: ''
-  line: 20
+  line: 21
 - element_type: ShellSurfaceItemProxy
   id: surfaceLayer
   accessible_id: SurfaceLayer
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: PanelToolTip
-  line: 31
+  line: 32
 - element_type: PanelMenu
   id: menu
-  accessible_id: Menu
+  accessible_id: SurfacePopup_Menu
   accessible_role: Accessible.PopupMenu
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: ''
-  line: 56
+  line: 55
 - element_type: ShellSurfaceItemProxy
   id: menuSurfaceLayer
   accessible_id: MenuSurfaceLayer
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: PanelMenu
-  line: 66
+  line: 65
 - element_type: SurfaceSubPopup
   id: ''
   accessible_id: SurfaceSubPopup
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/SurfacePopup.qml
   parent_type: Loader
-  line: 90
+  line: 88
 - element_type: PanelMenu
   id: popup
-  accessible_id: Popup
+  accessible_id: SurfaceSubPopup_Menu_2
   accessible_role: Accessible.PopupMenu
   source_file: panels/dock/tray/SurfaceSubPopup.qml
   parent_type: PanelMenuWindow
-  line: 49
+  line: 50
 - element_type: ShellSurfaceItemProxy
   id: popupSurfaceLayer
   accessible_id: PopupSurfaceLayer
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/SurfaceSubPopup.qml
   parent_type: PanelMenu
-  line: 59
+  line: 60
 - element_type: PanelPopup
   id: popup
-  accessible_id: Popup
+  accessible_id: TrayItemSurfacePopup_Dialog
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: ''
-  line: 29
+  line: 30
 - element_type: ShellSurfaceItemProxy
   id: popupContent
-  accessible_id: PopupContent
+  accessible_id: TrayItemSurfacePopup_Pane
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: PanelPopup
   line: 44
 - element_type: PanelMenu
   id: popupMenu
-  accessible_id: PopupMenu
+  accessible_id: TrayItemSurfacePopup_Menu
   accessible_role: Accessible.PopupMenu
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: ''
-  line: 58
+  line: 57
 - element_type: ShellSurfaceItemProxy
   id: popupMenuContent
-  accessible_id: PopupMenuContent
+  accessible_id: TrayItemSurfacePopup_Pane_4
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: PanelMenu
-  line: 80
+  line: 78
 - element_type: SurfaceSubPopup
   id: ''
-  accessible_id: SurfaceSubPopup
+  accessible_id: TrayItemSurfacePopup_Dialog_3
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: Loader
-  line: 103
+  line: 102
 - element_type: PanelToolTip
   id: toolTip
-  accessible_id: ToolTip
+  accessible_id: TrayItemSurfacePopup_Pane_7
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: ''
-  line: 133
+  line: 128
 - element_type: ShellSurfaceItemProxy
   id: toolTipContent
-  accessible_id: ToolTipContent
+  accessible_id: TrayItemSurfacePopup_Pane_6
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/TrayItemSurfacePopup.qml
   parent_type: PanelToolTip
-  line: 142
+  line: 136
 - element_type: AppletItemButton
   id: root
   accessible_id: AppletItemButton
@@ -598,98 +598,98 @@ qml_elements:
   line: 137
 - element_type: ShellSurfaceItemProxy
   id: ''
-  accessible_id: ShellSurfaceItemProxy
+  accessible_id: DragItem_Pane
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/DragItem.qml
   parent_type: Loader
-  line: 126
+  line: 125
 - element_type: PluginItem
   id: pluginItem
-  accessible_id: PluginItem
+  accessible_id: PanelPluginPage_Pane
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/PanelPluginPage.qml
   parent_type: ''
-  line: 79
+  line: 78
 - element_type: PanelToolTip
   id: toolTip
-  accessible_id: QuickActions
+  accessible_id: PanelTrayItem_Pane
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/tray/quickpanel/PanelTrayItem.qml
   parent_type: ''
   line: 36
 - element_type: ShellSurfaceItemProxy
   id: surfaceLayer
-  accessible_id: SurfaceLayer
+  accessible_id: PanelTrayItem_Pane_2
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/PanelTrayItem.qml
   parent_type: ''
   line: 98
 - element_type: DragItem
   id: dragLayer
-  accessible_id: DragLayer
+  accessible_id: PluginItem_Pane
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/PluginItem.qml
   parent_type: ''
-  line: 31
+  line: 30
 - element_type: ShellSurfaceItemProxy
   id: surfaceLayer
-  accessible_id: SurfaceLayer
+  accessible_id: PluginItem_Pane_3
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/PluginItem.qml
   parent_type: ''
-  line: 56
+  line: 55
 - element_type: PanelTrayItem
   id: panelTrayItem
-  accessible_id: PanelTrayItem
+  accessible_id: QuickPanel_Pane
   accessible_role: Accessible.Button
   source_file: panels/dock/tray/quickpanel/QuickPanel.qml
   parent_type: ''
-  line: 61
+  line: 62
 - element_type: PanelPopup
   id: popup
-  accessible_id: Popup
+  accessible_id: QuickPanel_Dialog
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/quickpanel/QuickPanel.qml
   parent_type: ''
   line: 79
 - element_type: QuickPanelPage
   id: popupContent
-  accessible_id: PopupContent
+  accessible_id: QuickPanel_Pane_2
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/QuickPanel.qml
   parent_type: PanelPopup
-  line: 89
+  line: 88
 - element_type: SurfacePopup
   id: ''
-  accessible_id: SurfacePopup
+  accessible_id: QuickPanel_Dialog_3
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/quickpanel/QuickPanel.qml
   parent_type: QuickPanelPage
-  line: 97
+  line: 94
 - element_type: TrayItemSurfacePopup
   id: trayItemSurfacePopup
-  accessible_id: TrayItemSurfacePopup
+  accessible_id: QuickPanel_Dialog_6
   accessible_role: Accessible.Dialog
   source_file: panels/dock/tray/quickpanel/QuickPanel.qml
   parent_type: ''
-  line: 116
+  line: 112
 - element_type: PanelPluginPage
   id: panelPage
-  accessible_id: PanelPage
+  accessible_id: QuickPanelPage_Pane
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/QuickPanelPage.qml
   parent_type: ''
   line: 43
 - element_type: SubPluginPage
   id: ''
-  accessible_id: SubPluginPage
+  accessible_id: QuickPanelPage_Pane_3
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/QuickPanelPage.qml
   parent_type: Component
   line: 59
 - element_type: ShellSurfaceItemProxy
   id: surfaceLayer
-  accessible_id: SurfaceLayer
+  accessible_id: SubPluginPage_Pane
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/SubPluginPage.qml
   parent_type: ''
@@ -717,95 +717,95 @@ qml_elements:
   line: 187
 - element_type: NotifyItem
   id: root
-  accessible_id: NotifyItem
+  accessible_id: GroupNotify_AlertMessage
   accessible_role: Accessible.ListItem
   source_file: panels/notification/center/GroupNotify.qml
   parent_type: ''
-  line: 12
+  line: 13
 - element_type: NotifyHeaderTitleText
   id: ''
-  accessible_id: NotifyHeaderTitleText
+  accessible_id: GroupNotify_AlertMessage_2
   accessible_role: Accessible.StaticText
   source_file: panels/notification/center/GroupNotify.qml
   parent_type: NotifyItem
-  line: 62
+  line: 63
 - element_type: AnimationSettingButton
   id: foldBtn
-  accessible_id: Fold
+  accessible_id: GroupNotify_Button
   accessible_role: Accessible.Button
   source_file: panels/notification/center/GroupNotify.qml
   parent_type: NotifyItem
   line: 77
 - element_type: AnimationSettingButton
   id: groupMoreBtn
-  accessible_id: More
+  accessible_id: GroupNotify_Button_5
   accessible_role: Accessible.Button
   source_file: panels/notification/center/GroupNotify.qml
   parent_type: NotifyItem
-  line: 100
+  line: 99
 - element_type: AnimationSettingButton
   id: groupClearBtn
-  accessible_id: ClearAll
+  accessible_id: GroupNotify_Button_6
   accessible_role: Accessible.Button
   source_file: panels/notification/center/GroupNotify.qml
   parent_type: NotifyItem
-  line: 125
+  line: 122
 - element_type: NotifyItem
   id: root
-  accessible_id: NotifyItem
+  accessible_id: NormalNotify_AlertMessage
   accessible_role: Accessible.ListItem
   source_file: panels/notification/center/NormalNotify.qml
   parent_type: ''
-  line: 14
+  line: 13
 - element_type: NotifyItemContent
   id: notifyContent
-  accessible_id: NotifyContent
+  accessible_id: NormalNotify_AlertMessage_2
   accessible_role: Accessible.Pane
   source_file: panels/notification/center/NormalNotify.qml
   parent_type: NotifyItem
   line: 58
 - element_type: NotifyHeader
   id: header
-  accessible_id: Header
+  accessible_id: NotifyCenter_AlertMessage
   accessible_role: Accessible.Pane
   source_file: panels/notification/center/NotifyCenter.qml
   parent_type: ''
-  line: 50
+  line: 49
 - element_type: NotifyView
   id: view
-  accessible_id: View
+  accessible_id: NotifyCenter_AlertMessage_2
   accessible_role: Accessible.List
   source_file: panels/notification/center/NotifyCenter.qml
   parent_type: ''
-  line: 78
+  line: 77
 - element_type: DropShadowText
   id: ''
-  accessible_id: NoRecentNotifications
+  accessible_id: NotifyCenter_Pane_2
   accessible_role: Accessible.StaticText
   source_file: panels/notification/center/NotifyCenter.qml
   parent_type: ''
-  line: 103
+  line: 102
 - element_type: NotifyHeaderTitleText
   id: titleText
-  accessible_id: NotificationCenter
+  accessible_id: NotifyHeader_AlertMessage
   accessible_role: Accessible.StaticText
   source_file: panels/notification/center/NotifyHeader.qml
   parent_type: ''
-  line: 76
+  line: 75
 - element_type: AnimationSettingButton
   id: collapseBtn
-  accessible_id: Fold
+  accessible_id: NotifyHeader_Button
   accessible_role: Accessible.Button
   source_file: panels/notification/center/NotifyHeader.qml
   parent_type: ''
-  line: 86
+  line: 85
 - element_type: AnimationSettingButton
   id: moreBtn
-  accessible_id: More
+  accessible_id: NotifyHeader_Button_3
   accessible_role: Accessible.Button
   source_file: panels/notification/center/NotifyHeader.qml
   parent_type: ''
-  line: 111
+  line: 110
 - element_type: MenuItem
   id: ''
   accessible_id: NotificationSetting
@@ -815,18 +815,18 @@ qml_elements:
   line: 141
 - element_type: AnimationSettingButton
   id: clearAllBtn
-  accessible_id: ClearAll
+  accessible_id: NotifyHeader_Button_4
   accessible_role: Accessible.Button
   source_file: panels/notification/center/NotifyHeader.qml
   parent_type: ''
-  line: 153
+  line: 152
 - element_type: DropShadowText
   id: ''
-  accessible_id: DropShadowText
+  accessible_id: NotifyHeaderTitleText_Pane
   accessible_role: Accessible.StaticText
   source_file: panels/notification/center/NotifyHeaderTitleText.qml
   parent_type: ''
-  line: 13
+  line: 12
 - element_type: MenuItem
   id: ''
   accessible_id: Unpin
@@ -850,11 +850,11 @@ qml_elements:
   line: 83
 - element_type: OverlapNotify
   id: overlapNotify
-  accessible_id: OverlapNotify
+  accessible_id: NotifyStaging_AlertMessage
   accessible_role: Accessible.Pane
   source_file: panels/notification/center/NotifyStaging.qml
   parent_type: ListView
-  line: 94
+  line: 93
 - element_type: ScrollBar
   id: ''
   accessible_id: Scrollbar
@@ -864,56 +864,56 @@ qml_elements:
   line: 70
 - element_type: BoundingRectangle
   id: ''
-  accessible_id: BoundingRectangle
+  accessible_id: NotifyView_Pane_2
   accessible_role: Accessible.Pane
   source_file: panels/notification/center/NotifyView.qml
   parent_type: Transition
-  line: 255
+  line: 257
 - element_type: GroupNotify
   id: groupNotify
-  accessible_id: GroupNotify
+  accessible_id: NotifyViewDelegate_AlertMessage
   accessible_role: Accessible.ListItem
   source_file: panels/notification/center/NotifyViewDelegate.qml
   parent_type: ''
-  line: 60
+  line: 59
 - element_type: NormalNotify
   id: normalNotify
-  accessible_id: NormalNotify
+  accessible_id: NotifyViewDelegate_AlertMessage_2
   accessible_role: Accessible.ListItem
   source_file: panels/notification/center/NotifyViewDelegate.qml
   parent_type: ''
-  line: 97
+  line: 96
 - element_type: OverlapNotify
   id: overlapNotify
-  accessible_id: OverlapNotify_2
+  accessible_id: NotifyViewDelegate_AlertMessage_3
   accessible_role: Accessible.Pane
   source_file: panels/notification/center/NotifyViewDelegate.qml
   parent_type: ''
-  line: 171
+  line: 170
 - element_type: AnimationSettingButton
   id: clearBtn
-  accessible_id: CleanAll
+  accessible_id: NotifyViewDelegate_Button
   accessible_role: Accessible.Button
   source_file: panels/notification/center/NotifyViewDelegate.qml
   parent_type: OverlapNotify
-  line: 194
+  line: 193
 - element_type: NotifyItem
   id: root
-  accessible_id: NotifyItem
+  accessible_id: OverlapNotify_AlertMessage
   accessible_role: Accessible.ListItem
   source_file: panels/notification/center/OverlapNotify.qml
   parent_type: ''
-  line: 14
+  line: 13
 - element_type: NotifyItemContent
   id: notifyContent
-  accessible_id: NotifyContent
+  accessible_id: OverlapNotify_AlertMessage_2
   accessible_role: Accessible.Pane
   source_file: panels/notification/center/OverlapNotify.qml
   parent_type: NotifyItem
   line: 106
 - element_type: OverlapIndicator
   id: indicator
-  accessible_id: Indicator
+  accessible_id: OverlapNotify_Pane_2
   accessible_role: Accessible.Indicator
   source_file: panels/notification/center/OverlapNotify.qml
   parent_type: NotifyItem
@@ -983,25 +983,25 @@ qml_elements:
   line: 183
 - element_type: NotifyItem
   id: root
-  accessible_id: NotifyItem
+  accessible_id: NotifyItemContent_AlertMessage
   accessible_role: Accessible.ListItem
   source_file: panels/notification/plugin/NotifyItemContent.qml
   parent_type: ''
-  line: 14
+  line: 13
 - element_type: SettingActionButton
   id: closeBtn
-  accessible_id: CloseBtn
+  accessible_id: NotifyItemContent_Button
   accessible_role: Accessible.Button
   source_file: panels/notification/plugin/NotifyItemContent.qml
   parent_type: Loader
   line: 121
 - element_type: NotifyAction
   id: ''
-  accessible_id: NotifyAction
+  accessible_id: NotifyItemContent_AlertMessage_2
   accessible_role: Accessible.Button
   source_file: panels/notification/plugin/NotifyItemContent.qml
   parent_type: Loader
-  line: 340
+  line: 342
 - element_type: ListView
   id: listView
   accessible_id: ListView

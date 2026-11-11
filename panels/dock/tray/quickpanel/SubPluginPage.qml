@@ -92,7 +92,6 @@ Item {
         ShellSurfaceItemProxy {
             Accessible.id: "SubPluginPage_Pane"
             Accessible.role: Accessible.Pane
-            Accessible.id: "SurfaceLayer"
             id: surfaceLayer
             autoClose: true
             Layout.fillWidth: true

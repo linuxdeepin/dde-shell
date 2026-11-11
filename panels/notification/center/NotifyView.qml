@@ -256,6 +256,5 @@ Control {
     background: BoundingRectangle {
         Accessible.id: "NotifyView_Pane_2"
         Accessible.role: Accessible.Pane
-        Accessible.id: "BoundingRectangle"
     }
 }

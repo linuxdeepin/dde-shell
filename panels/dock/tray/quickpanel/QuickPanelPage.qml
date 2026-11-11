@@ -42,7 +42,6 @@ Item {
         initialItem: PanelPluginPage {
             Accessible.id: "QuickPanelPage_Pane"
             Accessible.role: Accessible.Pane
-            Accessible.id: "PanelPage"
             id: panelPage
             model: root.model
             StackView.onActivating: function () {
@@ -59,7 +58,6 @@ Item {
         SubPluginPage {
             Accessible.id: "QuickPanelPage_Pane_3"
             Accessible.role: Accessible.Pane
-            Accessible.id: "SubPluginPage"
             width: panelPage.width
             onRequestBack: function () {
                 panelView.pop()
