@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -87,7 +87,7 @@ void DisPlayModeApplet::setState(int newState)
     if (m_state == newState)
         return;
     m_state = newState;
-    emit stateChanged();
+    Q_EMIT stateChanged();
 }
 
 DPItem *DisPlayModeApplet::currentPlanItem() const
@@ -149,7 +149,7 @@ void DisPlayModeApplet::setCurrentPlanItem(DPItem *newCurrentPlanItem)
     if (m_currentPlanItem == newCurrentPlanItem)
         return;
     m_currentPlanItem = newCurrentPlanItem;
-    emit currentPlanItemChanged();
+    Q_EMIT currentPlanItemChanged();
 }
 
 void DisPlayModeApplet::fetchPlanItems()

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -83,7 +83,7 @@ QJsonArray ItemModel::dumpDockedItems() const
 {
     QJsonArray result;
 
-    foreach(auto item, m_items) {
+    Q_FOREACH(auto item, m_items) {
         if (!item->isDocked())
             continue;
 

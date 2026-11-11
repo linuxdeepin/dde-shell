@@ -12,6 +12,8 @@ project(DDEShell
     LANGUAGES CXX C
 )
 
+add_compile_definitions(QT_NO_KEYWORDS)
+
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX /usr)
 endif ()

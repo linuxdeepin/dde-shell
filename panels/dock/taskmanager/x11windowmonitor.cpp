@@ -171,7 +171,7 @@ void X11WindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &index,
 void X11WindowMonitor::clearPreviewState()
 {
     // 发出信号通知 TaskManager 清空预览过滤状态
-    emit previewShouldClear();
+    Q_EMIT previewShouldClear();
 }
 
 void X11WindowMonitor::onWindowMapped(xcb_window_t xcb_window)

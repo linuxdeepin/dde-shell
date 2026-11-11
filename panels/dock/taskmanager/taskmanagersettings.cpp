@@ -178,7 +178,7 @@ void TaskManagerSettings::migrateFromDockedItems()
     QJsonArray legacyDockedItems;
 
     auto dcokedDesktopFilesStrList = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDITEMS_KEY).toStringList();
-    foreach(auto dcokedDesktopFilesStr, dcokedDesktopFilesStrList) {
+    Q_FOREACH(auto dcokedDesktopFilesStr, dcokedDesktopFilesStrList) {
         YAML::Node node;
         try {
             node = YAML::Load("{" + dcokedDesktopFilesStr.toStdString() + "}");

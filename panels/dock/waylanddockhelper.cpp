@@ -118,7 +118,7 @@ bool WaylandDockHelper::currentActiveWindowFullscreened()
 void WaylandDockHelper::setCurrentActiveWindowFullscreened(bool isFullscreen)
 {
     m_isCurrentActiveWindowFullscreened = isFullscreen;
-    emit currentActiveWindowFullscreenChanged(isFullscreen);
+    Q_EMIT currentActiveWindowFullscreenChanged(isFullscreen);
 }
 
 bool WaylandDockHelper::isWindowOverlap()

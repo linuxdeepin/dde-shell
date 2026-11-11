@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -49,7 +49,7 @@ public:
 private:
     void moveItem(int fromPage, int fromIndex, int toPage, int toIndex);
 
-signals:
+Q_SIGNALS:
     void nameChanged();
     void pageCountChanged();
     void sigPageAdded(int first, int last);

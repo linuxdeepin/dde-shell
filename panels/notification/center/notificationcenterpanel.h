@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -27,7 +27,7 @@ public:
 Q_SIGNALS:
     void visibleChanged();
 
-private slots:
+private Q_SLOTS:
     void setBubblePanelEnabled(bool enabled);
 
 private:

@@ -77,7 +77,7 @@ void BrightnessApplet::setIconName(const QString &newIconName)
     if (m_iconName == newIconName)
         return;
     m_iconName = newIconName;
-    emit iconNameChanged();
+    Q_EMIT iconNameChanged();
 }
 
 QString BrightnessApplet::fetchIconName() const
@@ -123,7 +123,7 @@ void BrightnessApplet::setBrightness(double newBrightness)
     if (qFuzzyCompare(m_brightness, newBrightness))
         return;
     m_brightness = newBrightness;
-    emit brightnessChanged();
+    Q_EMIT brightnessChanged();
 }
 
 D_APPLET_CLASS(BrightnessApplet)

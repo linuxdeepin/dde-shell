@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -42,7 +42,7 @@ public:
     static bool isMatchingWindow(QWindow *target);
     void closeAllWindow();
     bool eventFilter(QObject *watched, QEvent *event) override;
-signals:
+Q_SIGNALS:
     void outsideMousePressed();
 private:
     void mousePressEvent(QMouseEvent *e);

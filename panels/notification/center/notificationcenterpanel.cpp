@@ -89,7 +89,7 @@ void NotificationCenterPanel::setVisible(bool newVisible)
         }
     }
     setBubblePanelEnabled(!m_visible);
-    emit visibleChanged();
+    Q_EMIT visibleChanged();
 }
 
 void NotificationCenterPanel::close()

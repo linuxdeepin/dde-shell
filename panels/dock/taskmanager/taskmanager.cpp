@@ -235,7 +235,7 @@ bool TaskManager::init()
 
     connect(m_windowMonitor.data(), &AbstractWindowMonitor::windowFullscreenChanged, this, [this] (bool isFullscreen) {
         m_windowFullscreen = isFullscreen;
-        emit windowFullscreenChanged(isFullscreen);
+        Q_EMIT windowFullscreenChanged(isFullscreen);
     });
 
     connect(m_windowMonitor.data(), &AbstractWindowMonitor::previewShouldClear, this, [this]() {

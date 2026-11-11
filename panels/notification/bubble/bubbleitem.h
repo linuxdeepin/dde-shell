@@ -49,7 +49,7 @@ public:
 
     bool isValid() const;
 
-signals:
+Q_SIGNALS:
     void timeTipChanged();
 
 private:

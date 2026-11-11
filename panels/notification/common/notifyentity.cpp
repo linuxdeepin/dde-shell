@@ -274,7 +274,7 @@ void NotifyEntity::setProcessedType(int type)
 QString NotifyEntity::convertActionsToString(const QStringList &actions)
 {
     QString action;
-    foreach (QString text, actions) {
+    Q_FOREACH (QString text, actions) {
         action += text;
         action += ACTION_SEGMENT;
     }
@@ -486,7 +486,7 @@ QVariantMap NotifyEntity::parseHint(const QString &hint)
 
     QVariantMap map;
     QStringList keyValueList = hint.split("|");
-    foreach (QString text, keyValueList) {
+    Q_FOREACH (QString text, keyValueList) {
         QStringList list = text.split("!!!");
         if (list.size() != 2)
             continue;

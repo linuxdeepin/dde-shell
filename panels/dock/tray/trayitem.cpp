@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -32,7 +32,7 @@ void TrayItem::setTrayPluginModel(QAbstractItemModel *newTrayPluginModel)
     if (m_trayPluginModel == newTrayPluginModel)
         return;
     m_trayPluginModel = newTrayPluginModel;
-    emit trayPluginModelChanged();
+    Q_EMIT trayPluginModelChanged();
 }
 
 QAbstractItemModel *TrayItem::quickPluginModel() const
@@ -45,7 +45,7 @@ void TrayItem::setQuickPluginModel(QAbstractItemModel *newQuickPluginModel)
     if (m_quickPluginModel == newQuickPluginModel)
         return;
     m_quickPluginModel = newQuickPluginModel;
-    emit quickPluginModelChanged();
+    Q_EMIT quickPluginModelChanged();
 }
 
 QAbstractItemModel *TrayItem::fixedPluginModel() const
@@ -58,7 +58,7 @@ void TrayItem::setFixedPluginModel(QAbstractItemModel *newFixedPluginModel)
     if (m_fixedPluginModel == newFixedPluginModel)
         return;
     m_fixedPluginModel = newFixedPluginModel;
-    emit fixedPluginModelChanged();
+    Q_EMIT fixedPluginModelChanged();
 }
 
 bool TrayItem::loopDockItemInfosModel(QAbstractItemModel *model, const std::function<bool (const DockItemInfo &)> &cb)

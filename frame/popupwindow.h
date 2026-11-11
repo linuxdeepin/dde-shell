@@ -27,7 +27,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result) override;
 
-signals:
+Q_SIGNALS:
     void x11GrabFocusTransitionChanged();
     void x11FocusOutByGrab();
     void x11FocusInByUngrab();

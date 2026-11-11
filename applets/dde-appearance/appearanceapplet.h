@@ -20,7 +20,7 @@ public:
 
     virtual bool load() override;
     qreal opacity() const;
-signals:
+Q_SIGNALS:
     void opacityChanged();
 private:
     void initDBusProxy();

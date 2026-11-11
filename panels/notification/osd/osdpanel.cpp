@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -115,7 +115,7 @@ void OsdPanel::setVisible(const bool visible)
 void OsdPanel::setOsdType(const QString &osdType)
 {
     m_osdType = osdType;
-    emit osdTypeChanged(m_osdType);
+    Q_EMIT osdTypeChanged(m_osdType);
 }
 
 void OsdPanel::updateLastOsdType(const QString &osdType)
