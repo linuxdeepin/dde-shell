@@ -6,6 +6,7 @@
 
 #include "appitem.h"
 #include "taskmanager.h"
+#include "taskmanagersettings.h"
 #include "x11utils.h"
 #include "x11windowmonitor.h"
 
@@ -231,7 +232,8 @@ public:
         QRect hoverRect = option.rect;
 
         QPen pen;
-        if (WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
+        if (!TaskManagerSettings::instance()->showAppWindowList()
+            && WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
             uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
             auto pixmap = fetchWindowPreview(winId);
             auto size = calSize(pixmap.size());
@@ -307,7 +309,8 @@ public:
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         Q_UNUSED(option)
-        if (!WM_HELPER->hasComposite() || !WM_HELPER->hasBlurWindow()) {
+        if (TaskManagerSettings::instance()->showAppWindowList()
+            || !WM_HELPER->hasComposite() || !WM_HELPER->hasBlurWindow()) {
             return QSize(PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2, PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2);
         }
 
@@ -404,6 +407,14 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
     initUI();
 
     connect(m_hideTimer, &QTimer::timeout, this, &X11WindowPreviewContainer::callHide);
+
+    // showAppWindowList 变更时立即切换文字列表/缩略图展示，无需重新悬停。
+    connect(TaskManagerSettings::instance(), &TaskManagerSettings::showAppWindowListChanged, this, [this]() {
+        updateOrientation();
+        m_view->doItemsLayout();
+        updateSize();
+        m_view->viewport()->update();
+    });
 
     connect(m_closeAllButton, &DIconButton::clicked, this, [this]() {
         qCDebug(x11WindowPreview) << "closeAllButton clicked";
@@ -526,7 +537,8 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
 void X11WindowPreviewContainer::updateOrientation()
 {
 
-    if (m_direction % 2 == 0 && WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
+    if (m_direction % 2 == 0 && !TaskManagerSettings::instance()->showAppWindowList()
+        && WM_HELPER->hasComposite() && WM_HELPER->hasBlurWindow()) {
         m_view->setFlow(QListView::LeftToRight);
     } else {
         m_view->setFlow(QListView::TopToBottom);

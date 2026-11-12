@@ -1,10 +1,12 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
 
 #include "applet.h"
+
+#include <DConfig>
 
 #include <QQmlListProperty>
 #include <QTimer>
@@ -81,6 +83,7 @@ private:
     DPItem *m_currentPlanItem = nullptr;
     int m_state;
     QTimer *m_actionTimer = nullptr;
+    Dtk::Core::DConfig *m_osdConfig = nullptr;
 };
 
 }

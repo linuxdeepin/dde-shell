@@ -1,0 +1,39 @@
+{
+  "magic": "dsg.config.meta",
+  "version": "1.0",
+  "contents": {
+    "hideDuplicateMode": {
+      "value": false,
+      "serial": 0,
+      "flags": [],
+      "name": "hideDuplicateMode",
+      "name[zh_CN]": "隐藏复制模式",
+      "description": "Hide duplicate mode when switching display modes",
+      "description[zh_CN]": "配置为 true 时，切换显示模式时不显示复制模式",
+      "permissions": "readwrite",
+      "visibility": "public"
+    },
+    "hideExtendMode": {
+      "value": false,
+      "serial": 0,
+      "flags": [],
+      "name": "hideExtendMode",
+      "name[zh_CN]": "隐藏扩展模式",
+      "description": "Hide extend mode when switching display modes",
+      "description[zh_CN]": "配置为 true 时，切换显示模式时不显示扩展模式",
+      "permissions": "readwrite",
+      "visibility": "public"
+    },
+    "hideSingleMode": {
+      "value": false,
+      "serial": 0,
+      "flags": [],
+      "name": "hideSingleMode",
+      "name[zh_CN]": "隐藏仅单屏模式",
+      "description": "Hide all single-output modes when switching display modes",
+      "description[zh_CN]": "配置为 true 时，切换显示模式时不显示所有仅单屏模式",
+      "permissions": "readwrite",
+      "visibility": "public"
+    }
+  }
+}

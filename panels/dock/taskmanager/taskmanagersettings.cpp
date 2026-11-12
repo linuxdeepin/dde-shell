@@ -52,6 +52,9 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
         } else if (TASKMANAGER_SHOW_ATTENTION_ANIMATION_KEY == key) {
             m_showAttentionAnimation = m_taskManagerDconfig->value(TASKMANAGER_SHOW_ATTENTION_ANIMATION_KEY, true).toBool();
             Q_EMIT showAttentionAnimationChanged();
+        } else if (TASKMANAGER_SHOW_APP_WINDOW_LIST_KEY == key) {
+            m_showAppWindowList = m_taskManagerDconfig->value(TASKMANAGER_SHOW_APP_WINDOW_LIST_KEY, false).toBool();
+            Q_EMIT showAppWindowListChanged();
         } else if (TASKMANAGER_WINDOWSPLIT_KEY == key) {
             m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
             Q_EMIT windowSplitChanged();
@@ -70,6 +73,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
 
     m_allowForceQuit = enableStr2Bool(m_taskManagerDconfig->value(TASKMANAGER_ALLOWFOCEQUIT_KEY).toString());
     m_showAttentionAnimation = m_taskManagerDconfig->value(TASKMANAGER_SHOW_ATTENTION_ANIMATION_KEY, true).toBool();
+    m_showAppWindowList = m_taskManagerDconfig->value(TASKMANAGER_SHOW_APP_WINDOW_LIST_KEY, false).toBool();
     m_windowSplit = m_taskManagerDconfig->value(TASKMANAGER_WINDOWSPLIT_KEY).toBool();
     m_cgroupsBasedGrouping = m_taskManagerDconfig->value(TASKMANAGER_CGROUPS_BASED_GROUPING_KEY, true).toBool();
     m_dockedElements = m_taskManagerDconfig->value(TASKMANAGER_DOCKEDELEMENTS_KEY, {}).toStringList();
@@ -94,6 +98,11 @@ void TaskManagerSettings::setAllowedForceQuit(bool allowed)
 bool TaskManagerSettings::showAttentionAnimation() const
 {
     return m_showAttentionAnimation;
+}
+
+bool TaskManagerSettings::showAppWindowList() const
+{
+    return m_showAppWindowList;
 }
 
 bool TaskManagerSettings::windowSplitValue() const
