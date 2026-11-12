@@ -57,9 +57,9 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
         },
         Qt::QueuedConnection);
 
-    // Keep the cached apps-model sourceRow in sync when apps are inserted.
-    // Without this the cached sourceRow drifts during the startup app-model
-    // rebuild and docked items resolve to the wrong app (wrong icon/name).
+    // Update sourceRow synchronously: readyChanged can load pins immediately
+    // after a batch of app insertions. Queued insertion notifications would
+    // then shift those already-current rows again and lose their actions.
     connect(
         m_appsModel,
         &QAbstractItemModel::rowsInserted,
@@ -80,8 +80,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                 auto res = m_appsModel->match(m_appsModel->index(0, 0), TaskManager::DesktopIdRole, id, 1, Qt::MatchExactly);
                 std::get<2>(data) = res.isEmpty() ? -1 : res.first().row();
             }
-        },
-        Qt::QueuedConnection);
+        });
 
     // Apps model full rebuild (modelReset): re-resolve every cached sourceRow.
     connect(
