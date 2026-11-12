@@ -16,6 +16,7 @@ target_link_libraries(osdpanel PRIVATE
 )
 
 ds_install_package(PACKAGE org.deepin.ds.osd TARGET osdpanel)
+dtk_add_config_meta_files(APPID org.deepin.dde.shell FILES configs/org.deepin.dde.shell.osd.json)
 
 add_subdirectory(default)
 add_subdirectory(audio)

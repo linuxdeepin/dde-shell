@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -71,10 +71,21 @@ QString DPItem::key() const
 DisPlayModeApplet::DisPlayModeApplet(QObject *parent)
     : DApplet(parent)
     , m_actionTimer(new QTimer(this))
+    , m_osdConfig(Dtk::Core::DConfig::create(QStringLiteral("org.deepin.dde.shell"),
+                                          QStringLiteral("org.deepin.dde.shell.osd"), QString(), this))
 {
     m_actionTimer->setSingleShot(true);
     m_actionTimer->setInterval(2000);
     QObject::connect(m_actionTimer, &QTimer::timeout, this, &DisPlayModeApplet::doAction);
+    connect(m_osdConfig, &Dtk::Core::DConfig::valueChanged, this, [this](const QString &key) {
+        if (key == QLatin1String("hideDuplicateMode") || key == QLatin1String("hideExtendMode")
+            || key == QLatin1String("hideSingleMode")) {
+            m_actionTimer->stop();
+            sync();
+        }
+    });
+    if (!m_osdConfig->isValid())
+        qCWarning(osdDPLog) << "OSD configuration is unavailable; keeping all display modes";
 }
 
 int DisPlayModeApplet::state() const
@@ -115,18 +126,14 @@ void DisPlayModeApplet::sync()
 
 void DisPlayModeApplet::next()
 {
-    auto it = std::find_if(m_planItems.begin(), m_planItems.end(), [this](const DPItem *item) {
-        return m_currentPlanItem && item->key() == m_currentPlanItem->key();
-    });
-    if (it != m_planItems.end()) {
-        auto offset = it - m_planItems.begin();
-        auto nextIndex = (offset + 1) % m_planItems.count();
-        const auto item = m_planItems.at(nextIndex);
-        Q_ASSERT(item);
-        setCurrentPlanItem(item);
-        qCInfo(osdDPLog) << "next display mode" << item->mode() << item->name();
-        m_actionTimer->start();
-    }
+    if (m_planItems.isEmpty())
+        return;
+
+    const auto nextIndex = (m_planItems.indexOf(m_currentPlanItem) + 1) % m_planItems.size();
+    const auto item = m_planItems.at(nextIndex);
+    setCurrentPlanItem(item);
+    qCInfo(osdDPLog) << "next display mode" << item->mode() << item->name();
+    m_actionTimer->start();
 }
 
 void DisPlayModeApplet::doAction()
@@ -154,6 +161,10 @@ void DisPlayModeApplet::setCurrentPlanItem(DPItem *newCurrentPlanItem)
 
 void DisPlayModeApplet::fetchPlanItems()
 {
+    setCurrentPlanItem(nullptr);
+    qDeleteAll(m_planItems);
+    m_planItems.clear();
+
     QDBusReply<QStringList> listOutputNames = displayInter().method("ListOutputNames").call();
     if (!listOutputNames.isValid()) {
         qCWarning(osdDPLog) << "Failed to fetch ListOutputNames" << listOutputNames.error();
@@ -161,13 +172,11 @@ void DisPlayModeApplet::fetchPlanItems()
     }
     auto outputNames = listOutputNames.value();
 
-    qDeleteAll(m_planItems);
-    m_planItems.clear();
-    m_currentPlanItem = nullptr;
-
-    m_planItems << new DPItem(tr("Duplicate"), "osd_multi_screen_copy", DPItem::Merge, this);
-    m_planItems << new DPItem(tr("Extend"), "osd_multi_screen_extension", DPItem::Extend, this);
-    if (outputNames.size() >= 2) {
+    if (!m_osdConfig->value(QStringLiteral("hideDuplicateMode"), false).toBool())
+        m_planItems << new DPItem(tr("Duplicate"), "osd_multi_screen_copy", DPItem::Merge, this);
+    if (!m_osdConfig->value(QStringLiteral("hideExtendMode"), false).toBool())
+        m_planItems << new DPItem(tr("Extend"), "osd_multi_screen_extension", DPItem::Extend, this);
+    if (outputNames.size() >= 2 && !m_osdConfig->value(QStringLiteral("hideSingleMode"), false).toBool()) {
         std::sort(outputNames.begin(), outputNames.end(), std::greater<QString>());
         for (int i = 0; i < outputNames.size(); i++) {
             const auto item = outputNames[i];
@@ -179,6 +188,9 @@ void DisPlayModeApplet::fetchPlanItems()
 
 DPItem *DisPlayModeApplet::fetchCurrentPlanItem() const
 {
+    if (m_planItems.isEmpty())
+        return nullptr;
+
     auto inter = displayInter();
     QDBusReply<QVariant> displayMode = inter.property("DisplayMode").get();
     if (!displayMode.isValid()) {

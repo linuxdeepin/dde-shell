@@ -28,6 +28,8 @@ static inline const QString TASKMANAGER_DOCKEDITEMS_KEY = "Docked_Items";
 constexpr auto TASKMANAGER_DOCKEDELEMENTS_KEY = "dockedElements";
 constexpr auto TASKMANAGER_WINDOW_ICON_WHITELIST_KEY = "windowIconWhitelist";
 constexpr auto TASKMANAGER_ENABLE_DOCKED_APPLICATIONS_KEY = "enableDockedApplications";
+// 鼠标悬停应用图标时强制显示窗口列表（文字）而非窗口预览（缩略图）。
+constexpr auto TASKMANAGER_SHOW_APP_WINDOW_LIST_KEY = "showAppWindowList";
 
 // model roleNames
 constexpr auto MODEL_WINID = "winId";

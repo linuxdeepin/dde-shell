@@ -33,6 +33,17 @@
 			"permissions": "readwrite",
 			"visibility": "private"
 		},
+		"showAppWindowList": {
+			"value": false,
+			"serial": 0,
+			"flags": [],
+			"name": "Show app window list",
+			"name[zh_CN]": "应用多窗口时显示窗口列表",
+			"description": "When set to true, when the mouse is placed on the application icon, the window list is displayed, otherwise, the window preview is displayed",
+			"description[zh_CN]": "控制应用多窗口时的预览显示方式：true 时鼠标悬停在任务栏应用图标上显示窗口列表（文字），false 时显示窗口预览（缩略图）。默认 false。",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
 		"noTaskGrouping": {
 			"value": false,
 			"serial": 0,
