@@ -321,6 +321,29 @@ void TaskManager::requestPreview(const QModelIndex &index, QObject *relativePosi
     m_windowMonitor->requestPreview(m_hoverPreviewModel, qobject_cast<QWindow *>(relativePositionItem), previewXoffset, previewYoffset, direction);
 }
 
+bool TaskManager::requestTooltip(QObject *tooltipOwner,
+                                 const QString &text,
+                                 QObject *relativePositionItem,
+                                 int previewXoffset,
+                                 int previewYoffset,
+                                 uint direction)
+{
+    if (!m_windowMonitor) {
+        qCWarning(taskManagerLog) << "TaskManager::requestTooltip: m_windowMonitor is null";
+        return false;
+    }
+
+    return m_windowMonitor->requestTooltip(tooltipOwner, text, qobject_cast<QWindow *>(relativePositionItem), previewXoffset, previewYoffset, direction);
+}
+
+void TaskManager::hideTooltip(QObject *tooltipOwner)
+{
+    if (!m_windowMonitor)
+        return;
+
+    m_windowMonitor->hideTooltip(tooltipOwner);
+}
+
 void TaskManager::requestWindowsView(const QModelIndexList &indexes) const
 {
     dataModel()->requestWindowsView(indexes);

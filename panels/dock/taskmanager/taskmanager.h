@@ -97,6 +97,9 @@ public:
     Q_INVOKABLE void requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate = nullptr) const override;
     Q_INVOKABLE void
     requestPreview(const QModelIndex &index, QObject *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
+    Q_INVOKABLE bool
+    requestTooltip(QObject *tooltipOwner, const QString &text, QObject *relativePositionItem, int previewXoffset, int previewYoffset, uint direction);
+    Q_INVOKABLE void hideTooltip(QObject *tooltipOwner);
     Q_INVOKABLE void requestWindowsView(const QModelIndexList &indexes) const override;
 
     Q_INVOKABLE QString desktopIdToAppId(const QString& desktopId);

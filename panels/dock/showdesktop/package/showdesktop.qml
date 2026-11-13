@@ -20,10 +20,9 @@ AppletItem {
     implicitWidth: shouldVisible ? (useColumnLayout ? Panel.rootObject.dockSize : showDesktopWidth) : 0
     implicitHeight: shouldVisible ? (useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize) : 0
 
-    PanelToolTip {
-        Accessible.role: Accessible.ToolTip
-        Accessible.id: "ShowDesktop"
+    DockToolTip {
         id: toolTip
+        accessibleId: "ShowDesktop"
         text: qsTr("show desktop")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y

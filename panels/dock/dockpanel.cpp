@@ -437,6 +437,46 @@ bool DockPanel::debugMode() const
 #endif
 }
 
+// taskmanager 插件持有 panel 窗口上唯一的 dock preview context，tooltip 与窗口
+// 预览共用它，合成器才能播放 tooltip<->preview 的过渡动画。这里按 pluginId 找到
+// 同面板的 taskmanager applet 后以鸭子类型调用，避免 dockpanel 链接 dock-taskmanager。
+DS_NAMESPACE::DApplet *DockPanel::taskManagerApplet() const
+{
+    for (auto applet : applets()) {
+        if (applet->pluginId() == QLatin1String("org.deepin.ds.dock.taskmanager"))
+            return applet;
+    }
+    return nullptr;
+}
+
+bool DockPanel::requestDockTooltip(QObject *tooltipOwner, const QString &text, int xOffset, int yOffset, uint direction)
+{
+    auto applet = taskManagerApplet();
+    if (!applet) {
+        qCDebug(dockLog) << "requestDockTooltip: taskmanager applet not found";
+        return false;
+    }
+
+    bool displayed = false;
+    const bool invoked = QMetaObject::invokeMethod(applet,
+                                                   "requestTooltip",
+                                                   Qt::DirectConnection,
+                                                   Q_RETURN_ARG(bool, displayed),
+                                                   Q_ARG(QObject *, tooltipOwner),
+                                                   Q_ARG(QString, text),
+                                                   Q_ARG(QObject *, rootObject()),
+                                                   Q_ARG(int, xOffset),
+                                                   Q_ARG(int, yOffset),
+                                                   Q_ARG(uint, direction));
+    return invoked && displayed;
+}
+
+void DockPanel::hideDockTooltip(QObject *tooltipOwner)
+{
+    if (auto applet = taskManagerApplet())
+        QMetaObject::invokeMethod(applet, "hideTooltip", Qt::DirectConnection, Q_ARG(QObject *, tooltipOwner));
+}
+
 void DockPanel::openDockSettings()
 {
     qCDebug(dockLog) << "openDockSettings";

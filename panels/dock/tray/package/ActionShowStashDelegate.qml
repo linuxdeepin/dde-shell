@@ -114,10 +114,9 @@ AppletItemButton {
         toolTip.close()
     }
 
-    PanelToolTip {
-        Accessible.role: Accessible.ToolTip
-        Accessible.id: "ApplicationTray"
+    DockToolTip {
         id: toolTip
+        accessibleId: "ApplicationTray"
         text: qsTr("Application tray")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y

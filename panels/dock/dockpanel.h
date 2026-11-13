@@ -98,6 +98,11 @@ public:
 
     Q_INVOKABLE void openDockSettings();
 
+    // 将纯文本 tooltip 交给同面板 taskmanager 持有的 dock preview context，
+    // 由 treeland 绘制；返回是否成功，失败时调用方应回退到 PanelToolTip。
+    Q_INVOKABLE bool requestDockTooltip(QObject *tooltipOwner, const QString &text, int xOffset, int yOffset, uint direction);
+    Q_INVOKABLE void hideDockTooltip(QObject *tooltipOwner);
+
     Q_INVOKABLE void notifyDockPositionChanged(int offsetX, int offsetY);
     
     // Move XEmbed window relative to anchor window's surface (Wayland only)
@@ -177,6 +182,8 @@ Q_SIGNALS:
 private:
     void setContainsMouse(bool containsMouse);
     void setCursorPosition(const QPointF &cursorPosition);
+
+    DS_NAMESPACE::DApplet *taskManagerApplet() const;
 
     bool m_spotlightTracking = false;
     bool m_containsMouse = false;

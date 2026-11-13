@@ -19,10 +19,9 @@ AppletItem {
     property D.Palette toolButtonBorderColor: DockPalette.toolButtonBorderColor
     property bool isMenuVisible: false
 
-    PanelToolTip {
-        Accessible.id: "appruntimeitem_Pane"
-        Accessible.role: Accessible.ToolTip
+    DockToolTip {
         id: toolTip
+        accessibleId: "appruntimeitem_Pane"
         text: qsTr("appruntime")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y

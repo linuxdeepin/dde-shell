@@ -86,6 +86,12 @@ Item {
 
         toolTipWindow.close()
         toolTipWindow.currentItem = null
+        // 必须复位：toolTipVisible 直接绑定 readyBinding，不复位就会一直停在
+        // true，调用方会误以为 tooltip 仍在显示（例如据此切换窗口预览）；
+        // 4 个 when: readyBinding 的 Binding 也会继续向共享的 toolTipWindow
+        // 写尺寸与偏移。这里的赋值会断开 open() 建立的 binding，下次 open()
+        // 会重新建立。
+        readyBinding = false
     }
 
     function hide()

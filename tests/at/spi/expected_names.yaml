@@ -210,14 +210,14 @@ qml_elements:
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/appruntimeitem/package/appruntimeitem.qml
   parent_type: ''
-  line: 23
+  line: 24
 - element_type: AppletItemButton
   id: button
   accessible_id: Button
   accessible_role: Accessible.Button
   source_file: panels/dock/appruntimeitem/package/appruntimeitem.qml
   parent_type: ''
-  line: 41
+  line: 40
 - element_type: PanelToolTip
   id: toolTip
   accessible_id: MultitaskingView
@@ -280,14 +280,14 @@ qml_elements:
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: Repeater
-  line: 639
+  line: 646
 - element_type: PanelToolTip
   id: dragToolTip
   accessible_id: MoveToTrash
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/taskmanager/package/AppItem.qml
   parent_type: Repeater
-  line: 647
+  line: 653
 - element_type: OverflowContainer
   id: appContainer
   accessible_id: AppContainer
