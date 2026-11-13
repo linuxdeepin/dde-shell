@@ -24,6 +24,7 @@ Item {
         Accessible.id: "ListView"
         id: listView
         anchors.fill: parent
+        clip: true
         orientation: useColumnLayout ? ListView.Vertical : ListView.Horizontal
         layoutDirection: Qt.LeftToRight
         verticalLayoutDirection: ListView.TopToBottom
