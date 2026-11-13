@@ -17,15 +17,20 @@
 #include <QtWaylandClient/private/qwaylandsurface_p.h>
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
 
+#include <QDBusConnection>
+#include <QDBusInterface>
+
 namespace dock {
 WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     : DockHelper(panel)
     , m_isWindowOverlap(false)
     , m_isCurrentActiveWindowFullscreened(false)
+    , m_showingDesktop(false)
     , m_panel(panel)
 {
     m_xwindowControl.reset(new TreeLandXWindowControl());
     m_regionWatchManager.reset(new TreeLandRegionWatchManager());
+    setupKWinDBusConnection();
     DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
     if (auto applet = bridge.applet()) {
         connect(applet, SIGNAL(windowFullscreenChanged(bool)), this, SLOT(setCurrentActiveWindowFullscreened(bool)));
@@ -123,6 +128,9 @@ void WaylandDockHelper::setCurrentActiveWindowFullscreened(bool isFullscreen)
 
 bool WaylandDockHelper::isWindowOverlap()
 {
+    if (m_showingDesktop) {
+        return false;
+    }
     return m_isWindowOverlap;
 }
 
@@ -202,6 +210,25 @@ bool WaylandDockHelper::moveXEmbedWindow(uint32_t wid, double dx, double dy, QQu
     wl_callback_add_listener(cb, &s_callbackListener, new CallbackData{wid, this});
 
     return true;
+}
+
+void WaylandDockHelper::setupKWinDBusConnection()
+{
+    QDBusInterface kwin("org.kde.KWin", "/KWin", "org.kde.KWin", QDBusConnection::sessionBus());
+    if (kwin.isValid()) {
+        m_showingDesktop = kwin.property("showingDesktop").toBool();
+        kwin.connection().connect("org.kde.KWin", "/KWin", "org.kde.KWin",
+                                 "showingDesktopChanged", this, SLOT(onShowingDesktopChanged(bool)));
+    }
+}
+
+void WaylandDockHelper::onShowingDesktopChanged(bool showing)
+{
+    m_showingDesktop = showing;
+    if (showing) {
+        m_panel->requestClosePopup();
+    }
+    Q_EMIT isWindowOverlapChanged(isWindowOverlap());
 }
 
 WallpaperColorManager::WallpaperColorManager(WaylandDockHelper *helper)
