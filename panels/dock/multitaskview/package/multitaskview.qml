@@ -36,7 +36,7 @@ AppletDockItem {
 
     Timer {
         id: toolTipShowTimer
-        interval: 50
+        interval: 300
         onTriggered: {
             var point = toggleworkspace.mapToItem(null, toggleworkspace.width / 2, toggleworkspace.height / 2)
             toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
@@ -51,6 +51,9 @@ AppletDockItem {
         onTapped: function (eventPoint, buttons) {
             if (buttons === Qt.LeftButton) {
                 Applet.openWorkspace()
+                if (toolTipShowTimer.running) {
+                    toolTipShowTimer.stop()
+                }
                 toolTip.close()
             }
         }
@@ -62,6 +65,9 @@ AppletDockItem {
         gesturePolicy: TapHandler.WithinBounds
         onTapped: function (eventPoint, buttons) {
             Applet.openWorkspace()
+            if (toolTipShowTimer.running) {
+                toolTipShowTimer.stop()
+            }
             toolTip.close()
         }
     }

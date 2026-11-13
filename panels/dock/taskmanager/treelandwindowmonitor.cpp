@@ -39,7 +39,7 @@ TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_pr
     init(context);
 
     m_hideTimer->setSingleShot(true);
-    m_hideTimer->setInterval(800);
+    m_hideTimer->setInterval(350);
 
     connect(m_hideTimer, &QTimer::timeout, this, [this](){
         if (!m_isDockMouseAreaEnter && !m_isPreviewEntered) {

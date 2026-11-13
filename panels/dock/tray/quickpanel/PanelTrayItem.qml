@@ -28,6 +28,7 @@ Control {
 
     onIsOpenedChanged: {
         if (root.isOpened) {
+            toolTipShowTimer.stop()
             toolTip.close()
         }
     }
@@ -39,6 +40,16 @@ Control {
         text: qsTr("Quick actions")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
+    }
+
+    Timer {
+        id: toolTipShowTimer
+        interval: 300
+        onTriggered: {
+            var point = quickpanelPlaceholder.mapToItem(null, quickpanelPlaceholder.width / 2, quickpanelPlaceholder.height / 2)
+            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+            toolTip.open()
+        }
     }
 
     contentItem: GridLayout {
@@ -73,10 +84,9 @@ Control {
                 onHoveredChanged: function () {
                     root.contentHovered = hovered
                     if (hovered && !root.isOpened) {
-                        var point = quickpanelPlaceholder.mapToItem(null, quickpanelPlaceholder.width / 2, quickpanelPlaceholder.height / 2)
-                        toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-                        toolTip.open()
+                        toolTipShowTimer.start()
                     } else {
+                        toolTipShowTimer.stop()
                         toolTip.close()
                     }
                 }

@@ -29,6 +29,16 @@ AppletItem {
         toolTipY: DockPanelPositioner.y
     }
 
+    Timer {
+        id: toolTipShowTimer
+        interval: 300
+        onTriggered: {
+            var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, Applet.rootObject.height / 2)
+            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+            toolTip.open()
+        }
+    }
+
     AppletItemButton {
         anchors.fill: parent
         radius: 0
@@ -47,16 +57,16 @@ AppletItem {
         }
 
         onClicked: {
+            toolTipShowTimer.stop()
             toolTip.close()
             Panel.requestClosePopup()
             Applet.toggleShowDesktop()
         }
         onHoveredChanged: {
             if (hovered) {
-                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, Applet.rootObject.height / 2)
-                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-                toolTip.open()
+                toolTipShowTimer.start()
             } else {
+                toolTipShowTimer.stop()
                 toolTip.close()
             }
         }

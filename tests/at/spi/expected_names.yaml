@@ -217,7 +217,7 @@ qml_elements:
   accessible_role: Accessible.Button
   source_file: panels/dock/appruntimeitem/package/appruntimeitem.qml
   parent_type: ''
-  line: 32
+  line: 41
 - element_type: PanelToolTip
   id: toolTip
   accessible_id: MultitaskingView
@@ -427,7 +427,7 @@ qml_elements:
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/tray/package/ActionToggleCollapseDelegate.qml
   parent_type: AppletItemButton
-  line: 57
+  line: 58
 - element_type: Button
   id: ''
   accessible_id: Button
@@ -616,14 +616,14 @@ qml_elements:
   accessible_role: Accessible.ToolTip
   source_file: panels/dock/tray/quickpanel/PanelTrayItem.qml
   parent_type: ''
-  line: 36
+  line: 37
 - element_type: ShellSurfaceItemProxy
   id: surfaceLayer
   accessible_id: PanelTrayItem_Pane_2
   accessible_role: Accessible.Pane
   source_file: panels/dock/tray/quickpanel/PanelTrayItem.qml
   parent_type: ''
-  line: 98
+  line: 108
 - element_type: DragItem
   id: dragLayer
   accessible_id: PluginItem_Pane
@@ -1064,7 +1064,7 @@ qml_elements:
   accessible_role: ''
   source_file: panels/dock/tray/quickpanel/PanelTrayItem.qml
   parent_type: ''
-  line: 15
+  line: 17
 - element_type: StackView
   id: panelView
   accessible_id: QuickPanelPage_StackView

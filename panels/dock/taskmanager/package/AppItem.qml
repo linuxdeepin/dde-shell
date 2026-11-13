@@ -502,7 +502,7 @@ Item {
 
     Timer {
         id: previewTimer
-        interval: 500
+        interval: 300
         running: false
         repeat: false
         property int xOffset: 0
@@ -654,7 +654,7 @@ Item {
 
         Timer {
             id: toolTipShowTimer
-            interval: 50
+            interval: 300
             onTriggered: {
                 var point = root.mapToItem(null, root.width / 2, root.height / 2)
                 toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name

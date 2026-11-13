@@ -390,7 +390,7 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
 {
     m_hideTimer = new QTimer(this);
     m_hideTimer->setSingleShot(true);
-    m_hideTimer->setInterval(500);
+    m_hideTimer->setInterval(350);
 
     m_previewDelayTimer = new QTimer(this);
     m_previewDelayTimer->setSingleShot(true);
