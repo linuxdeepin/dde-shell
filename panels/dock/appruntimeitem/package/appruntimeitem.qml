@@ -19,13 +19,21 @@ AppletItem {
     property D.Palette toolButtonBorderColor: DockPalette.toolButtonBorderColor
     property bool isMenuVisible: false
 
-    PanelToolTip {
-        Accessible.id: "appruntimeitem_Pane"
-        Accessible.role: Accessible.ToolTip
+    DockToolTip {
         id: toolTip
+        accessibleId: "appruntimeitem_Pane"
         text: qsTr("appruntime")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
+    }
+    Timer {
+        id: toolTipShowTimer
+        interval: 300
+        onTriggered: {
+            var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, Applet.rootObject.height / 2)
+            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+            toolTip.open()
+        }
     }
     AppletItemButton {
         Accessible.role: Accessible.Button
@@ -45,11 +53,9 @@ AppletItem {
         }
         onHoveredChanged: {
             if (hovered) {
-                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, Applet.rootObject.height / 2)
-                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-                toolTip.open()
-
+                toolTipShowTimer.start()
             } else {
+                toolTipShowTimer.stop()
                 toolTip.close()
             }
         }

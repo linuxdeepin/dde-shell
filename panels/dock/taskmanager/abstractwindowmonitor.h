@@ -45,6 +45,18 @@ public:
     virtual void
     requestPreview(QAbstractItemModel *sourceModel, QWindow *relativePositionItem, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction) = 0;
 
+    // tooltipOwner 是 tooltip 的宿主（dock 里的 QML 项），用作「每个 tooltip 一个
+    // 合成器 surface」的身份标识。返回是否已交由合成器绘制，false 时调用方应回退
+    // 到自身的 tooltip。
+    virtual bool requestTooltip(QObject *tooltipOwner,
+                                const QString &text,
+                                QWindow *relativePositionItem,
+                                int32_t previewXoffset,
+                                int32_t previewYoffset,
+                                uint32_t direction);
+    // 收起 tooltipOwner 的 tooltip；实现方应保证只收起它自己的那个，不影响别的。
+    virtual void hideTooltip(QObject *tooltipOwner);
+
     void requestWindowsView(const QModelIndexList &indexes) const override;
 
     virtual void presentWindows(QList<uint32_t> windowsId) = 0;

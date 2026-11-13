@@ -29,6 +29,7 @@ AppletItemButton {
     onClicked: {
         DDT.TraySortOrderModel.isCollapsing = true
         DDT.TraySortOrderModel.collapsed = !DDT.TraySortOrderModel.collapsed
+        toolTipShowTimer.stop()
         toolTip.close()
     }
 
@@ -52,17 +53,16 @@ AppletItemButton {
         }
     ]
 
-    PanelToolTip {
-        Accessible.role: Accessible.ToolTip
-        Accessible.id: "CollapseTray"
+    DockToolTip {
         id: toolTip
+        accessibleId: "CollapseTray"
         text: qsTr("Collapse tray")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
     }
     Timer {
         id: toolTipShowTimer
-        interval: 200
+        interval: 300
         onTriggered: {
             var point = root.mapToItem(null, root.width / 2, root.height / 2)
             toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)

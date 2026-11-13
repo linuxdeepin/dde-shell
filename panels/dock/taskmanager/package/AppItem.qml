@@ -502,19 +502,18 @@ Item {
 
     Timer {
         id: previewTimer
-        interval: 500
+        interval: 300
         running: false
         repeat: false
         property int xOffset: 0
         property int yOffset: 0
         onTriggered: {
-            if (root.windows.length != 0 || Qt.platform.pluginName === "wayland") {
+            if (root.windows.length != 0) {
                 // 使用基于 modelIndex 的预览API，确保精确匹配
                 taskmanager.Applet.requestPreview(root.modelIndex, Panel.rootObject, xOffset, yOffset, Panel.position);
             }
         }
     }
-
 
     function onEntered() {
         if (windows.length === 0) {
@@ -522,6 +521,10 @@ Item {
             return
         }
 
+        startPreviewTimer()
+    }
+
+    function startPreviewTimer() {
         var itemPos = root.mapToItem(null, 0, 0)
         let xOffset, yOffset, interval = 10
         if (Panel.position % 2 === 0) {
@@ -607,6 +610,10 @@ Item {
                     root.Drag.imageSource = result.url;
                 })
             }
+            // 按下时立即取消待显示的 tooltip，避免启动应用后 tooltip 才弹出
+            if (toolTipShowTimer.running) {
+                toolTipShowTimer.stop()
+            }
             toolTip.close()
             closeItemPreview()
         }
@@ -634,18 +641,16 @@ Item {
             }
         }
 
-        PanelToolTip {
-            Accessible.role: Accessible.ToolTip
-            Accessible.id: "ToolTip"
+        DockToolTip {
             id: toolTip
+            accessibleId: "ToolTip"
             toolTipX: DockPanelPositioner.x
             toolTipY: DockPanelPositioner.y
         }
 
-        PanelToolTip {
-            Accessible.role: Accessible.ToolTip
-            Accessible.id: "MoveToTrash"
+        DockToolTip {
             id: dragToolTip
+            accessibleId: "MoveToTrash"
             text: qsTr("Move to Trash")
             toolTipX: DockPanelPositioner.x
             toolTipY: DockPanelPositioner.y
@@ -654,7 +659,7 @@ Item {
 
         Timer {
             id: toolTipShowTimer
-            interval: 50
+            interval: 300
             onTriggered: {
                 var point = root.mapToItem(null, root.width / 2, root.height / 2)
                 toolTip.text = root.itemId === "dde-trash" ? root.name + "-" + taskmanager.Applet.getTrashTipText() : root.name
@@ -702,10 +707,18 @@ Item {
 
     onWindowsChanged: {
         updateWindowIconGeometryTimer.start()
-        // Close tooltip when window appears
-        if (windows.length > 0 && toolTip.toolTipVisible) {
+        if (windows.length === 0)
+            return
+
+        // 无窗口应用在悬停期间新开窗口时，从 tooltip 切换到窗口预览。
+        // toolTipVisible 只说明本项 tooltip 打开过，不能当作悬停证据：指针若已
+        // 离开，预览会凭空弹出，且此时没有任何悬停事件能再把它关掉，所以还要求
+        // hoverHandler.hovered。
+        const hadToolTip = toolTip.toolTipVisible
+        if (hadToolTip)
             toolTip.close()
-        }
+        if (hadToolTip && hoverHandler.hovered && !previewTimer.running)
+            startPreviewTimer()
     }
 
     onIconGlobalPointChanged: {

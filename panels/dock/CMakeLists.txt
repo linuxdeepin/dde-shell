@@ -147,6 +147,7 @@ qt_add_qml_module(dock-plugin
     AppletItemButton.qml
     AppletItemBackground.qml
     AppletDockItem.qml
+    DockToolTip.qml
     OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins/org/deepin/ds/dock/
 )
 

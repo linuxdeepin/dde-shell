@@ -20,13 +20,22 @@ AppletItem {
     implicitWidth: shouldVisible ? (useColumnLayout ? Panel.rootObject.dockSize : showDesktopWidth) : 0
     implicitHeight: shouldVisible ? (useColumnLayout ? showDesktopWidth : Panel.rootObject.dockSize) : 0
 
-    PanelToolTip {
-        Accessible.role: Accessible.ToolTip
-        Accessible.id: "ShowDesktop"
+    DockToolTip {
         id: toolTip
+        accessibleId: "ShowDesktop"
         text: qsTr("show desktop")
         toolTipX: DockPanelPositioner.x
         toolTipY: DockPanelPositioner.y
+    }
+
+    Timer {
+        id: toolTipShowTimer
+        interval: 300
+        onTriggered: {
+            var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, Applet.rootObject.height / 2)
+            toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
+            toolTip.open()
+        }
     }
 
     AppletItemButton {
@@ -47,16 +56,16 @@ AppletItem {
         }
 
         onClicked: {
+            toolTipShowTimer.stop()
             toolTip.close()
             Panel.requestClosePopup()
             Applet.toggleShowDesktop()
         }
         onHoveredChanged: {
             if (hovered) {
-                var point = Applet.rootObject.mapToItem(null, Applet.rootObject.width / 2, Applet.rootObject.height / 2)
-                toolTip.DockPanelPositioner.bounding = Qt.rect(point.x, point.y, toolTip.width, toolTip.height)
-                toolTip.open()
+                toolTipShowTimer.start()
             } else {
+                toolTipShowTimer.stop()
                 toolTip.close()
             }
         }
