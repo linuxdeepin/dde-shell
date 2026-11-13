@@ -406,7 +406,7 @@ Window {
                     name: qsTr("Fashion Mode")
                     prop: "itemAlignment"
                     value: Dock.FashionAlignment
-                    // 时尚模式尚未放开，由 DConfig 的 enableFashionMode 控制入口是否显示
+                    // 由 DConfig 的 enableFashionMode 控制时尚模式入口是否显示
                     visible: Panel.fashionModeEnabled
                 }
             }
@@ -517,7 +517,7 @@ Window {
 
         Loader {
             anchors.fill: parent
-            active: dock.fashionDock.enabled && Panel.hideState === Dock.Show
+            active: dock.fashionDock.enabled && Panel.fashionModeSpotlightEnabled && Panel.hideState === Dock.Show
             sourceComponent: DockSpotlight {
                 Accessible.id: "main_Pane"
                 containsMouse: Panel.containsMouse
