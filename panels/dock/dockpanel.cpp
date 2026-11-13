@@ -55,6 +55,7 @@ DockPanel::DockPanel(QObject *parent)
     , m_isResizing(false)
 {
     connect(this, &DockPanel::fashionModeChanged, this, &DockPanel::syncSpotlightTracking);
+    connect(this, &DockPanel::fashionModeSpotlightEnabledChanged, this, &DockPanel::syncSpotlightTracking);
     connect(this, &DockPanel::hideStateChanged, this, &DockPanel::syncSpotlightTracking);
     connect(this, &DockPanel::rootObjectChanged, this, &DockPanel::syncSpotlightTracking);
 
@@ -172,6 +173,7 @@ bool DockPanel::init()
     connect(SETTINGS, &DockSettings::indicatorStyleChanged, this, &DockPanel::indicatorStyleChanged);
     connect(SETTINGS, &DockSettings::lockedChanged, this, &DockPanel::lockedChanged);
     connect(SETTINGS, &DockSettings::contextMenuEnabledChanged, this, &DockPanel::contextMenuEnabledChanged);
+    connect(SETTINGS, &DockSettings::fashionModeSpotlightEnabledChanged, this, &DockPanel::fashionModeSpotlightEnabledChanged);
     connect(SETTINGS, &DockSettings::fashionModeEnabledChanged, this, [this](bool enabled){
         // 开关被关掉时，正处于时尚模式的任务栏要回退成居中模式
         if (!enabled && SETTINGS->itemAlignment() == ItemAlignment::FashionAlignment) {
@@ -524,6 +526,11 @@ bool DockPanel::fashionModeEnabled() const
     return SETTINGS->fashionModeEnabled();
 }
 
+bool DockPanel::fashionModeSpotlightEnabled() const
+{
+    return SETTINGS->fashionModeSpotlightEnabled();
+}
+
 void DockPanel::setLocked(bool newLocked)
 {
     SETTINGS->setLocked(newLocked);
@@ -604,8 +611,8 @@ bool DockPanel::eventFilter(QObject *watched, QEvent *event)
 
 void DockPanel::syncSpotlightTracking()
 {
-    // Cache the mode so the hot event path never needs to query settings.
-    m_spotlightTracking = fashionMode() && hideState() == Show;
+    // Cache the mode and effect setting so the hot event path never needs to query settings.
+    m_spotlightTracking = fashionMode() && fashionModeSpotlightEnabled() && hideState() == Show;
     if (!m_spotlightTracking)
         setContainsMouse(false);
 }

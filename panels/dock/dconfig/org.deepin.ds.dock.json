@@ -115,13 +115,24 @@
 			"visibility": "private"
 		},
 		"enableFashionMode": {
-			"value": false,
+			"value": true,
 			"serial": 0,
 			"flags": [],
 			"name": "Enable Fashion Mode",
 			"name[zh_CN]": "启用时尚模式",
 			"description": "Allow switching the dock to fashion mode. When disabled, the fashion mode entry is hidden from the dock context menu and the dock falls back to centered mode.",
 			"description[zh_CN]": "是否允许把任务栏切换到时尚模式。关闭时任务栏右键菜单里不显示时尚模式入口，已保存的时尚模式也会回退成居中模式。",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
+		"enableFashionModeSpotlight": {
+			"value": true,
+			"serial": 0,
+			"flags": [],
+			"name": "Enable Fashion Mode Spotlight",
+			"name[zh_CN]": "启用时尚模式鼠标光圈",
+			"description": "Enable or disable the spotlight that follows the mouse pointer in fashion mode. Changes take effect immediately.",
+			"description[zh_CN]": "启用或关闭时尚模式下跟随鼠标移动的光圈效果，修改后立即生效。",
 			"permissions": "readwrite",
 			"visibility": "private"
 		}
