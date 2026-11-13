@@ -113,7 +113,7 @@
     <name>TaskOverflowButton</name>
     <message>
         <source>Overflow area</source>
-        <translation type="unfinished"/>
+        <translation>Área de ícones ocultos</translation>
     </message>
 </context>
 </TS>
