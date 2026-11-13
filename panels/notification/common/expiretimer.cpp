@@ -68,7 +68,7 @@ void ExpireTimer::push(const NotifyEntity &entity)
             m_pendingEntities.erase(iter);
             if (m_blockId == oldId)
                 m_blockId = id;
-            onTimeout();
+            reschedule();
             break;
         }
     }
@@ -97,7 +97,7 @@ void ExpireTimer::remove(qint64 id)
         if (iter.value().id() != id)
             continue;
         m_pendingEntities.erase(iter);
-        onTimeout();
+        reschedule();
         return;
     }
 }
@@ -124,7 +124,7 @@ void ExpireTimer::setBlockId(qint64 id)
     }
 
     m_blockId = id;
-    onTimeout();
+    reschedule();
 }
 
 void ExpireTimer::onTimeout()
@@ -159,7 +159,11 @@ void ExpireTimer::onTimeout()
         Q_EMIT expired(item.id(), item.bubbleId());
     }
 
-    // Reschedule for the nearest remaining deadline.
+    reschedule();
+}
+
+void ExpireTimer::reschedule()
+{
     if (m_pendingEntities.isEmpty()) {
         m_timer->stop();
         m_lastPoint = std::numeric_limits<qint64>::max();
