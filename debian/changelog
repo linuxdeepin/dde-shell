@@ -1,3 +1,9 @@
+dde-shell (2.0.61.1) unstable; urgency=medium
+
+  * fix(taskmanager): sync inserted app rows
+
+ -- WuJiangyu <wujiangyu@uniontech.com>  Fri, 13 Nov 2026 16:20:52 +0800
+
 dde-shell (2.0.61) unstable; urgency=medium
 
   * feat: expose localized Keywords in the app model
