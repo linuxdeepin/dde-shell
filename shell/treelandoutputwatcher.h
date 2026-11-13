@@ -4,13 +4,16 @@
 
 #pragma once
 
-#include "qwayland-treeland-output-manager-v1.h"
+#include "treelandoutputuuid.h"
+#include "qwayland-treeland-output-manager-unstable-v2.h"
 #include <QtWaylandClient/QWaylandClientExtension>
 #include <QString>
+#include <QHash>
+#include <QPointer>
 
 class QScreen;
 
-class TreelandOutputWatcher : public QWaylandClientExtensionTemplate<TreelandOutputWatcher>, public QtWayland::treeland_output_manager_v1
+class TreelandOutputWatcher : public QWaylandClientExtensionTemplate<TreelandOutputWatcher>, public QtWayland::treeland_output_manager_v2
 {
     Q_OBJECT
 public:
@@ -18,11 +21,18 @@ public:
     ~TreelandOutputWatcher();
 
 protected:
-    void treeland_output_manager_v1_primary_output(const QString &output_name) override;
+    void treeland_output_manager_v2_primary_output(const QString &uuid) override;
+    void treeland_output_manager_v2_primary_output_failed(uint32_t reason) override;
 
 private:
-    void onScreenAdded(QScreen *);
-    void applyPrimary(const QString &output_name);
+    void onScreenAdded(QScreen *screen);
+    void onScreenRemoved(QScreen *screen);
+    void applyPrimary(const QString &uuid);
+    void requestUuid(QScreen *screen);
+    void onUuidManagerActiveChanged();
 
-    QString m_pendingPrimaryName;
+    TreelandOutputUuidManager *m_uuidManager = nullptr;
+    QHash<QScreen *, QPointer<TreelandOutputUuid>> m_uuidRequests;
+    QHash<QString, QPointer<QScreen>> m_uuidToScreen;
+    QString m_pendingPrimaryUuid;
 };
