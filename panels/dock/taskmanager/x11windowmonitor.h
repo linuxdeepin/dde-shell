@@ -19,10 +19,16 @@
 #include <QAbstractNativeEventFilter>
 
 namespace dock {
+class X11WindowMonitor;
+
 class XcbEventFilter: public QAbstractNativeEventFilter
 {
 public:
+    explicit XcbEventFilter(X11WindowMonitor *monitor);
     bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *) override;
+
+private:
+    QPointer<X11WindowMonitor> m_monitor;
 };
 
 class X11WindowMonitor : public AbstractWindowMonitor

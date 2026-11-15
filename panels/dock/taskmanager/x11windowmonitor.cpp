@@ -25,17 +25,21 @@
 Q_LOGGING_CATEGORY(x11Log, "org.deepin.dde.shell.dock.taskmanager.x11windowmonitor")
 
 namespace dock {
-static QPointer<X11WindowMonitor> monitor;
+XcbEventFilter::XcbEventFilter(X11WindowMonitor *monitor)
+    : m_monitor(monitor)
+{
+}
+
 bool XcbEventFilter::nativeEventFilter(const QByteArray &eventType, void *message, qintptr *)
 {
-    if (eventType != "xcb_generic_event_t" || monitor.isNull())
+    if (eventType != "xcb_generic_event_t" || m_monitor.isNull())
         return false;
 
     auto xcb_event = reinterpret_cast<xcb_generic_event_t*>(message);
     switch (xcb_event->response_type) {
         case XCB_PROPERTY_NOTIFY: {
             auto pE = reinterpret_cast<xcb_property_notify_event_t*>(xcb_event);
-            Q_EMIT monitor->windowPropertyChanged(pE->window, pE->atom);
+            Q_EMIT m_monitor->windowPropertyChanged(pE->window, pE->atom);
             break;
         }
     }
@@ -46,7 +50,6 @@ X11WindowMonitor::X11WindowMonitor(QObject* parent)
     : AbstractWindowMonitor(parent)
     , m_opacity(0.2)
 {
-    monitor = this;
     connect(this, &X11WindowMonitor::windowMapped, this, &X11WindowMonitor::onWindowMapped);
     connect(this, &X11WindowMonitor::windowDestroyed, this, &X11WindowMonitor::onWindowDestroyed);
     connect(this, &X11WindowMonitor::windowPropertyChanged, this, &X11WindowMonitor::onWindowPropertyChanged);
@@ -76,7 +79,7 @@ void X11WindowMonitor::start()
     xcb_change_window_attributes(X11->getXcbConnection(), m_rootWindow, XCB_CW_EVENT_MASK, value_list);
     xcb_flush(X11->getXcbConnection());
 
-    m_xcbEventFilter.reset(new XcbEventFilter());
+    m_xcbEventFilter.reset(new XcbEventFilter(this));
     qApp->installNativeEventFilter(m_xcbEventFilter.get());
     QMetaObject::invokeMethod(this, &X11WindowMonitor::handleRootWindowClientListChanged);
 }
