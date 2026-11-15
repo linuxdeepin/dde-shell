@@ -19,6 +19,7 @@
 #include "dockdaemonadaptor.h"
 
 #include <DGuiApplicationHelper>
+#include <DConfig>
 #include <QEnterEvent>
 #include <QGuiApplication>
 #include <QLoggingCategory>
@@ -26,6 +27,7 @@
 #include <QProcess>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QTimer>
 
 #include <wayland/xdgactivation.h>
 
@@ -196,6 +198,47 @@ bool DockPanel::init()
         Q_EMIT dockDaemonAdaptor->LockedChanged(locked());
     });
 
+    auto appearanceConfig = DConfig::create(QStringLiteral("org.deepin.dde.appearance"),
+                                             QStringLiteral("org.deepin.dde.appearance"),
+                                             QString(), this);
+    if (appearanceConfig && appearanceConfig->isValid()) {
+        auto dtkThemeConfig = DConfig::create(QStringLiteral("org.deepin.dtk.preference"),
+                                              QStringLiteral("org.deepin.dtk.preference"),
+                                              QString(), this);
+        auto controlCenterThemeConfig = DConfig::create(QStringLiteral("org.deepin.dde.control-center"),
+                                                        QStringLiteral("org.deepin.dtk.preference"),
+                                                        QString(), this);
+        auto fileManagerThemeConfig = DConfig::create(QStringLiteral("dde-file-manager"),
+                                                      QStringLiteral("org.deepin.dtk.preference"),
+                                                      QString(), this);
+        auto shellThemeConfig = DConfig::create(QStringLiteral("org.deepin.dde.shell"),
+                                                QStringLiteral("org.deepin.dtk.preference"),
+                                                QString(), this);
+        const auto applyGlobalTheme = [this, appearanceConfig, dtkThemeConfig,
+                                       controlCenterThemeConfig, fileManagerThemeConfig,
+                                       shellThemeConfig]() {
+            const auto globalTheme = appearanceConfig->value(QStringLiteral("Global_Theme"), QString()).toString();
+            const auto theme = globalTheme.contains(QStringLiteral("dark"), Qt::CaseInsensitive) ? Dark : Light;
+            const auto themeType = theme == Dark ? 2 : 1;
+            const auto applyThemeType = [themeType](DConfig *config) {
+                if (config && config->isValid())
+                    config->setValue(QStringLiteral("themeType"), themeType);
+            };
+            applyThemeType(dtkThemeConfig);
+            applyThemeType(controlCenterThemeConfig);
+            applyThemeType(fileManagerThemeConfig);
+            applyThemeType(shellThemeConfig);
+            Dtk::Gui::DGuiApplicationHelper::instance()->setPaletteType(static_cast<Dtk::Gui::DGuiApplicationHelper::ColorType>(theme));
+            setColorTheme(theme);
+        };
+        applyGlobalTheme();
+        connect(appearanceConfig, &DConfig::valueChanged, this,
+                [applyGlobalTheme](const QString &key) {
+            if (key == QStringLiteral("Global_Theme"))
+                applyGlobalTheme();
+        });
+    }
+
     DPanel::init();
 
     QObject::connect(this, &DApplet::rootObjectChanged, this, [this]() {
@@ -206,14 +249,24 @@ bool DockPanel::init()
             // connect(window(), &QQuickWindow::yChanged, this, &DockPanel::onWindowGeometryChanged);
             connect(window(), &QQuickWindow::widthChanged, this, &DockPanel::onWindowGeometryChanged);
             connect(window(), &QQuickWindow::heightChanged, this, &DockPanel::onWindowGeometryChanged);
-            QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
-            if (showInPrimary())
+            if (mirroredInstance()) {
+                const auto targetName = appletData().value(QStringLiteral("DockScreen")).toString();
+                for (auto *screen : qApp->screens()) {
+                    if (screen->name() == targetName) {
+                        setDockScreen(screen);
+                        break;
+                    }
+                }
+                if (!m_dockScreen)
+                    m_dockScreen = window()->screen();
+            } else if (showInPrimary())
                 updateDockScreen();
             else {
                 m_dockScreen = window()->screen();
             }
+            QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
             // 监听屏幕几何信息变化，当主屏位置变化时重新计算 frontendWindowRect
-            if (auto screen = window()->screen()) {
+            if (auto screen = m_dockScreen) {
                 connect(screen, &QScreen::geometryChanged, this, &DockPanel::onWindowGeometryChanged);
             }
             rootObject()->installEventFilter(this);
@@ -221,7 +274,7 @@ bool DockPanel::init()
         }
     });
 
-    m_theme = static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType());
+    setColorTheme(static_cast<ColorTheme>(Dtk::Gui::DGuiApplicationHelper::instance()->themeType()));
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
         m_helper = new WaylandDockHelper(this);
@@ -480,6 +533,8 @@ void DockPanel::updateDockScreen()
     auto *win = window();
     if (!win)
         return;
+    if (mirroredInstance())
+        return;
 
     auto *primary = qApp->primaryScreen();
     setDockScreen(primary);
@@ -496,6 +551,21 @@ void DockPanel::updateDockScreen()
 bool DockPanel::showInPrimary() const
 {
     return SETTINGS->showInPrimary();
+}
+
+bool DockPanel::showOnAllScreens() const
+{
+    return SETTINGS->showOnAllScreens();
+}
+
+void DockPanel::setShowOnAllScreens(bool newShowOnAllScreens)
+{
+    SETTINGS->setShowOnAllScreens(newShowOnAllScreens);
+}
+
+bool DockPanel::mirroredInstance() const
+{
+    return appletData().value(QStringLiteral("DockMirror")).toBool();
 }
 
 void DockPanel::setShowInPrimary(bool newShowInPrimary)
@@ -550,6 +620,37 @@ void DockPanel::setDockScreen(QScreen *screen)
         return;
     m_dockScreen = screen;
     window()->setScreen(m_dockScreen);
+    if (mirroredInstance()) {
+        QMetaObject::invokeMethod(this, [this, screen] {
+            if (!screen || !window() || m_dockScreen != screen || !qApp->screens().contains(screen))
+                return;
+
+            window()->setScreen(screen);
+            const auto screenGeometry = screen->geometry();
+            const auto windowWidth = window()->width();
+            const auto windowHeight = window()->height();
+            int x = screenGeometry.x() + (screenGeometry.width() - windowWidth) / 2;
+            int y = screenGeometry.y() + (screenGeometry.height() - windowHeight) / 2;
+
+            switch (position()) {
+            case Top:
+                y = screenGeometry.y();
+                break;
+            case Right:
+                x = screenGeometry.right() + 1 - windowWidth;
+                break;
+            case Bottom:
+                y = screenGeometry.bottom() + 1 - windowHeight;
+                break;
+            case Left:
+                x = screenGeometry.x();
+                break;
+            }
+
+            window()->setPosition(x, y);
+            onWindowGeometryChanged();
+        }, Qt::QueuedConnection);
+    }
     Q_EMIT dockScreenChanged(m_dockScreen);
     Q_EMIT screenNameChanged();
 }

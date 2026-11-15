@@ -27,6 +27,7 @@ const static QString keyIndicatorStyle          = "Indicator_Style";
 const static QString keyPluginsVisible           = "Plugins_Visible";
 const static QString keyCardCurrent              = "cardCurrent";
 const static QString keyShowInPrimary           = "Show_In_Primary";
+const static QString keyShowOnAllScreens        = "Show_On_All_Screens";
 const static QString keyLocked                  = "Locked";
 const static QString keyEnableContextMenu       = "enableContextMenu";
 const static QString keyEnableFashionMode       = "enableFashionMode";
@@ -163,6 +164,7 @@ DockSettings::DockSettings(QObject* parent)
     , m_dockPosition(dock::Bottom)
     , m_alignment(dock::CenterAlignment)
     , m_style(dock::Fashion)
+    , m_showOnAllScreens(false)
     , m_locked(false)
     , m_contextMenuEnabled(true)
 {
@@ -190,6 +192,7 @@ void DockSettings::init()
         m_pluginsVisible = m_dockConfig->value(keyPluginsVisible).toMap();
         m_cardCurrent = m_dockConfig->value(keyCardCurrent).toString();
         m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
+        m_showOnAllScreens = m_dockConfig->value(keyShowOnAllScreens, false).toBool();
         m_locked = m_dockConfig->value(keyLocked).toBool();
         m_contextMenuEnabled = m_dockConfig->value(keyEnableContextMenu, true).toBool();
         m_fashionModeEnabled = m_dockConfig->value(keyEnableFashionMode, false).toBool();
@@ -238,6 +241,11 @@ void DockSettings::init()
                 if (showInPrimary == m_showInPrimary) return;
                 m_showInPrimary = showInPrimary;
                 Q_EMIT showInPrimaryChanged(m_showInPrimary);
+            } else if (keyShowOnAllScreens == key) {
+                const auto showOnAllScreens = m_dockConfig->value(keyShowOnAllScreens).toBool();
+                if (showOnAllScreens == m_showOnAllScreens) return;
+                m_showOnAllScreens = showOnAllScreens;
+                Q_EMIT showOnAllScreensChanged(m_showOnAllScreens);
             } else if (keyLocked == key) {
                 auto locked = m_dockConfig->value(keyLocked).toBool();
                 if (locked == m_locked) return;
@@ -377,6 +385,20 @@ void DockSettings::setShowInPrimary(bool newShowInPrimary)
 bool DockSettings::showInPrimary() const
 {
     return m_showInPrimary;
+}
+
+bool DockSettings::showOnAllScreens() const
+{
+    return m_showOnAllScreens;
+}
+
+void DockSettings::setShowOnAllScreens(bool newShowOnAllScreens)
+{
+    if (m_showOnAllScreens == newShowOnAllScreens)
+        return;
+    m_showOnAllScreens = newShowOnAllScreens;
+    m_dockConfig->setValue(keyShowOnAllScreens, m_showOnAllScreens);
+    Q_EMIT showOnAllScreensChanged(m_showOnAllScreens);
 }
 
 bool DockSettings::locked() const
