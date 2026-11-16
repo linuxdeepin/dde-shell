@@ -11,7 +11,7 @@
       "description": "Hide duplicate mode when switching display modes",
       "description[zh_CN]": "配置为 true 时，切换显示模式时不显示复制模式",
       "permissions": "readwrite",
-      "visibility": "public"
+      "visibility": "private"
     },
     "hideExtendMode": {
       "value": false,
@@ -22,7 +22,7 @@
       "description": "Hide extend mode when switching display modes",
       "description[zh_CN]": "配置为 true 时，切换显示模式时不显示扩展模式",
       "permissions": "readwrite",
-      "visibility": "public"
+      "visibility": "private"
     },
     "hideSingleMode": {
       "value": false,
@@ -33,7 +33,7 @@
       "description": "Hide all single-output modes when switching display modes",
       "description[zh_CN]": "配置为 true 时，切换显示模式时不显示所有仅单屏模式",
       "permissions": "readwrite",
-      "visibility": "public"
+      "visibility": "private"
     }
   }
 }
