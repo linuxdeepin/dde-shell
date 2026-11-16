@@ -66,7 +66,7 @@
       "description": "close all notifications",
       "description[zh_CN]": "关闭所有通知",
       "permissions": "readwrite",
-      "visibility": "public"
+      "visibility": "private"
     },
     "maxCount": {
       "value": 2000,
@@ -77,7 +77,7 @@
       "description": "max notification count",
       "description[zh_CN]": "最大通知数量",
       "permissions": "readwrite",
-      "visibility": "public"
+      "visibility": "private"
     },
     "bubbleCount": {
       "value": 3,
@@ -99,7 +99,7 @@
       "description": "notification bubble content row count, the value should be greater than 0",
       "description[zh_CN]": "通知内容行数, 数值应该大于0",
       "permissions": "readwrite",
-      "visibility": "public"
+      "visibility": "private"
     },
     "appsInfo": {
       "value": {},
@@ -154,7 +154,7 @@
       "description": "Number of days after which notifications will be automatically cleaned up",
       "description[zh_CN]": "通知自动清理的天数，超过此天数的通知将被自动删除",
       "permissions": "readwrite",
-      "visibility": "public"
+      "visibility": "private"
     }
   }
 }
