@@ -1,3 +1,37 @@
+dde-shell (6.2.0) unstable; urgency=medium
+
+  * feat(dock): migrate to treeland foreign toplevel manager v3
+  * feat: add dock spotlight cursor tracking
+  * feat: add folder content provider registry
+  * fix: add sidecar .license for SpotlightGradient.png to comply with
+    REUSE spec
+  * feat: add folder menu registry for plugin menu extensions
+  * feat: add popup close policy and dock screen tracking
+  * refactor: fix app group management and folder IDs
+  * feat: dock folder pins for launcher and file manager
+  * refactor: remove folder content test suites
+  * test: remove QML panel popup lifecycle smoke tests
+  * fix: replace deprecated invalidateFilter with begin/endFilterChange
+    on Qt 6.12
+  * fix: possible proxy model desync bug on model reset
+  * Revert "fix(a11y): fix Accessible.id crash and compile warning"
+  * fix(dock): sync the work area after Wayland resize
+  * fix: restore the Dock after display reconnection
+  * refactor: stop invoking legacy dconfig migration
+  * fix: add AT-SPI accessible properties for QML controls
+  * fix(a11y): remove duplicate accessible IDs
+  * fix(a11y): drop more duplicate accessible IDs
+  * feat: add DConfig switches for dock list and OSD modes
+  * fix(taskmanager): sync inserted app rows
+  * feat: add taskbar overflow with cross-window positioning
+  * chore: Sync by
+    https://github.com/linuxdeepin/.github/commit/88d36aea6c90c8d1de4d42
+    c68aebbf72bcb80b1c
+  * fix: adjust shadow offset for non-xcb platforms
+  * fix: prevent dock rendering stall on Wayland resize
+
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 17 Nov 2026 22:07:00 +0800
+
 dde-shell (2.0.61) unstable; urgency=medium
 
   * feat: expose localized Keywords in the app model
