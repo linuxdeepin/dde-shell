@@ -178,6 +178,8 @@ bool DockPanel::init()
             SETTINGS->setItemAlignment(ItemAlignment::CenterAlignment);
         }
         Q_EMIT fashionModeEnabledChanged(enabled);
+        if (!enabled)
+            Q_EMIT requestClosePopup();
     });
     connect(SETTINGS, &DockSettings::cardCurrentChanged, this, &DockPanel::cardCurrentChanged);
 

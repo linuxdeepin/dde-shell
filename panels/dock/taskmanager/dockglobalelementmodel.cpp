@@ -32,7 +32,7 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
 {
     connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedElementsChanged, this, &DockGlobalElementModel::loadDockedElements);
     connect(TaskManagerSettings::instance(), &TaskManagerSettings::windowSplitChanged, this, &DockGlobalElementModel::groupItemsByApp);
-    connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedApplicationsEnabledChanged, this, &DockGlobalElementModel::loadDockedElements);
+    connect(TaskManagerSettings::instance(), &TaskManagerSettings::dockedFoldersEnabledChanged, this, &DockGlobalElementModel::loadDockedElements);
 
     connect(
         m_appsModel,
@@ -378,6 +378,7 @@ void DockGlobalElementModel::loadDockedElements()
             if (content && FolderContentRegistry::instance()->normalizeReference(elementInfo) != elementInfo)
                 continue;
             const bool folder = content || elementInfo.startsWith("internal/folders/");
+            if (folder && !TaskManagerSettings::instance()->dockedFoldersEnabled()) continue;
             if (!folder && (pair.size() != 2 || pair[0] != "desktop")) continue;
             if (folder && !content && !containsApplicationFolder(elementInfo)) continue;
             auto type = folder ? QStringLiteral("group") : pair[0];
