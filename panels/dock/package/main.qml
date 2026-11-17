@@ -49,13 +49,15 @@ Window {
         }
     }
     property int dockCenterPartCount: dockCenterPartModel.count
-    readonly property int centerAlignmentEdgeSpacing: 14
+    readonly property int centerAlignmentEdgeSpacing: Panel.fashionModeEnabled ? 14 : 20
 
     readonly property int dockRawCenterSpace: {
         if (useColumnLayout) {
             return Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight;
         } else {
-            let space = Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth - Math.ceil(gridLayout.columnSpacing);
+            let space = Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth;
+            if (Panel.fashionModeEnabled)
+                space -= Math.ceil(gridLayout.columnSpacing);
             if (fashionDock.enabled && gridLayout) {
                 // 时尚模式下，dockRightPart 在 gridLayout 右侧，之间需要扣除 dockSpacing
                 // 同时保留左右悬浮间距，避免窗口铺满屏幕后圆角边框被屏幕边缘裁剪。
@@ -65,7 +67,7 @@ Window {
         }
     }
     readonly property int dockEffectiveCenterSpace: {
-        if (Panel.itemAlignment !== Dock.CenterAlignment || fashionDock.enabled) {
+        if (!Panel.fashionModeEnabled || Panel.itemAlignment !== Dock.CenterAlignment || fashionDock.enabled) {
             return dockRawCenterSpace
         }
 

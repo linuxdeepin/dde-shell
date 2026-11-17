@@ -432,6 +432,10 @@ bool TaskManager::RequestDock(QString appID)
     if (!Settings->dockedApplicationsEnabled())
         return false;
 
+    if ((appID.startsWith("folder/") || appID.startsWith("internal/folders/"))
+        && !Settings->dockedFoldersEnabled())
+        return false;
+
     if (appID.startsWith("folder/")) {
         const auto normalized = FolderContentRegistry::instance()->normalizeReference(appID);
         if (normalized != appID) return false;
