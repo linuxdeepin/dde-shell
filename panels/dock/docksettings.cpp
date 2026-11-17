@@ -30,6 +30,7 @@ const static QString keyShowInPrimary           = "Show_In_Primary";
 const static QString keyLocked                  = "Locked";
 const static QString keyEnableContextMenu       = "enableContextMenu";
 const static QString keyEnableFashionMode       = "enableFashionMode";
+const static QString keyEnableFashionModeSpotlight = "enableFashionModeSpotlight";
 
 namespace dock {
 
@@ -192,7 +193,8 @@ void DockSettings::init()
         m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
         m_locked = m_dockConfig->value(keyLocked).toBool();
         m_contextMenuEnabled = m_dockConfig->value(keyEnableContextMenu, true).toBool();
-        m_fashionModeEnabled = m_dockConfig->value(keyEnableFashionMode, false).toBool();
+        m_fashionModeEnabled = m_dockConfig->value(keyEnableFashionMode, true).toBool();
+        m_fashionModeSpotlightEnabled = m_dockConfig->value(keyEnableFashionModeSpotlight, true).toBool();
 
         // Log dock config on startup - merge shell_pos and shell_dock_mode into one log entry
         logDockConfig(m_dockPosition, m_alignment, QStringLiteral("on startup"));
@@ -249,10 +251,15 @@ void DockSettings::init()
                 m_contextMenuEnabled = enabled;
                 Q_EMIT contextMenuEnabledChanged(m_contextMenuEnabled);
             } else if (keyEnableFashionMode == key) {
-                const auto enabled = m_dockConfig->value(keyEnableFashionMode, false).toBool();
+                const auto enabled = m_dockConfig->value(keyEnableFashionMode, true).toBool();
                 if (enabled == m_fashionModeEnabled) return;
                 m_fashionModeEnabled = enabled;
                 Q_EMIT fashionModeEnabledChanged(m_fashionModeEnabled);
+            } else if (keyEnableFashionModeSpotlight == key) {
+                const auto enabled = m_dockConfig->value(keyEnableFashionModeSpotlight, true).toBool();
+                if (enabled == m_fashionModeSpotlightEnabled) return;
+                m_fashionModeSpotlightEnabled = enabled;
+                Q_EMIT fashionModeSpotlightEnabledChanged(m_fashionModeSpotlightEnabled);
             }
         });
     } else {
@@ -392,6 +399,11 @@ bool DockSettings::contextMenuEnabled() const
 bool DockSettings::fashionModeEnabled() const
 {
     return m_fashionModeEnabled;
+}
+
+bool DockSettings::fashionModeSpotlightEnabled() const
+{
+    return m_fashionModeSpotlightEnabled;
 }
 
 void DockSettings::setLocked(bool newLocked)

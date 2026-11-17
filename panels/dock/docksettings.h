@@ -31,6 +31,7 @@ class DockSettings : public QObject
     Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
     Q_PROPERTY(bool contextMenuEnabled READ contextMenuEnabled NOTIFY contextMenuEnabledChanged FINAL)
     Q_PROPERTY(bool fashionModeEnabled READ fashionModeEnabled NOTIFY fashionModeEnabledChanged FINAL)
+    Q_PROPERTY(bool fashionModeSpotlightEnabled READ fashionModeSpotlightEnabled NOTIFY fashionModeSpotlightEnabledChanged FINAL)
 
 public:
     static DockSettings* instance();
@@ -45,8 +46,10 @@ public:
     bool showInPrimary() const;
     bool locked() const;
     bool contextMenuEnabled() const;
-    // 时尚模式是否允许开启，由 DConfig 的 enableFashionMode 控制，默认关闭
+    // 时尚模式是否允许开启，由 DConfig 的 enableFashionMode 控制，默认开启
     bool fashionModeEnabled() const;
+    // 时尚模式鼠标光圈，由 DConfig 的 enableFashionModeSpotlight 控制，默认开启
+    bool fashionModeSpotlightEnabled() const;
 
     void setDockSize(const uint& size);
     void setHideMode(const HideMode& mode);
@@ -87,6 +90,7 @@ Q_SIGNALS:
     void lockedChanged(bool locked);
     void contextMenuEnabledChanged(bool enabled);
     void fashionModeEnabledChanged(bool enabled);
+    void fashionModeSpotlightEnabledChanged(bool enabled);
 
 private:
     QScopedPointer<DConfig> m_dockConfig;
@@ -106,6 +110,7 @@ private:
     bool m_showInPrimary;
     bool m_locked;
     bool m_contextMenuEnabled;
-    bool m_fashionModeEnabled = false;
+    bool m_fashionModeEnabled = true;
+    bool m_fashionModeSpotlightEnabled = true;
 };
 }
