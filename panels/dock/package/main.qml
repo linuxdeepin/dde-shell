@@ -93,16 +93,24 @@ Window {
 
     property real dockItemIconSize: dockItemMaxSize * 9 / 14
 
-    // NOTE: -1 means not set its size, follow the platform size
+    // Keep Wayland geometry valid while switching out of fashion mode. A
+    // running width animation can continue after its Behavior is disabled;
+    // animating to -1 can stop rendering before the compositor resize applies.
+    // Opposite LayerShell anchors still request the full output extent.
     width: {
         if (fashionDock.enabled) {
             const maximumWidth = Math.max(1, Screen.width - fashionDock.floatingMargin * 2)
             return Math.max(1, Math.round(Math.min(fashionDock.contentWidth, maximumWidth)))
         }
 
-        return positionForAnimation === Dock.Top || positionForAnimation === Dock.Bottom ? -1 : dockSize
+        if (positionForAnimation === Dock.Top || positionForAnimation === Dock.Bottom) {
+            return compositorDrivenResize ? Screen.width : -1
+        }
+        return dockSize
     }
-    height: positionForAnimation === Dock.Left || positionForAnimation === Dock.Right ? -1 : dockSize
+    height: positionForAnimation === Dock.Left || positionForAnimation === Dock.Right
+        ? (compositorDrivenResize ? Screen.height : -1)
+        : dockSize
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
 
