@@ -175,6 +175,21 @@ bool TaskManager::load()
 #endif
 
     connect(m_windowMonitor.get(), &AbstractWindowMonitor::windowAdded, this, &TaskManager::handleWindowAdded);
+
+    // Splash 窗口标题变化后 shouldSkip 会由 true 变为 false，此时需要补建对应的 AppItem
+    connect(m_windowMonitor.get(), &QAbstractItemModel::dataChanged, this,
+            [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles) {
+        Q_UNUSED(roles)
+        for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
+            const auto index = m_windowMonitor->index(row, 0);
+            if (index.data(TaskManager::ShouldSkipRole).toBool())
+                continue;
+
+            auto window = m_windowMonitor->getWindowByWindowId(index.data(TaskManager::WinIdRole).toULongLong());
+            if (window)
+                handleWindowAdded(window);
+        }
+    });
     return true;
 }
 
@@ -191,6 +206,8 @@ bool TaskManager::init()
 
     DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dde-apps");
     BoolFilterModel *leftModel = new BoolFilterModel(m_windowMonitor.data(), m_windowMonitor->roleNames().key("shouldSkip"), this);
+    // shouldSkip 变化时重新过滤，才能及时把 Splash 窗口从任务栏移除或补回
+    leftModel->setDynamicSortFilter(true);
     if (auto applet = bridge.applet()) {
         auto model = applet->property("appModel").value<QAbstractItemModel *>();
         Q_ASSERT(model);

@@ -167,7 +167,19 @@ bool TreeLandWindow::isActive()
 
 bool TreeLandWindow::shouldSkip()
 {
-    return false;
+    // Electron/Chromium 应用启动时会先创建标题带 "SplashScreen" 的闪屏窗口，
+    // Wayland toplevel 没有窗口类型可供过滤，只能按标题识别
+    return title().contains(QStringLiteral("SplashScreen"), Qt::CaseInsensitive);
+}
+
+void TreeLandWindow::updateShouldSkip()
+{
+    bool shouldSkipNow = shouldSkip();
+    if (shouldSkipNow == m_lastShouldSkip)
+        return;
+
+    m_lastShouldSkip = shouldSkipNow;
+    Q_EMIT shouldSkipChanged();
 }
 
 bool TreeLandWindow::isMinimized()
@@ -251,6 +263,10 @@ void TreeLandWindow::setForeignToplevelHandle(ForeignToplevelHandle* handle)
     connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::pidChanged, this, &AbstractWindow::pidChanged);
     connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::titleChanged, this, &AbstractWindow::titleChanged);
     connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::stateChanged, this, &AbstractWindow::stateChanged);
+    connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::appidChanged, this, &TreeLandWindow::updateShouldSkip);
+    connect(m_foreignToplevelHandle.get(), &ForeignToplevelHandle::titleChanged, this, &TreeLandWindow::updateShouldSkip);
+
+    m_lastShouldSkip = shouldSkip();
 }
 
 }

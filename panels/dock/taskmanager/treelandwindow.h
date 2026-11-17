@@ -82,6 +82,7 @@ public:
     QString title() override;
     bool isActive() override;
     bool shouldSkip() override;
+    void updateShouldSkip();
     bool isMinimized() override;
     bool isFullscreen();
     bool allowClose() override;
@@ -106,6 +107,7 @@ private:
 
 private:
     uint32_t m_id;
+    bool m_lastShouldSkip = false;
 
     QScopedPointer<ForeignToplevelHandle> m_foreignToplevelHandle;
 };
