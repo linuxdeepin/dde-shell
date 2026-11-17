@@ -166,6 +166,9 @@ void AppItem::active() const
 
 bool AppItem::isAttention() const
 {
+    if (m_notificationAttention)
+        return true;
+
     bool res = false;
     for (const auto &window : m_windows) {
         if (window->isAttention()) {
@@ -174,6 +177,19 @@ bool AppItem::isAttention() const
         }
     }
     return res;
+}
+
+void AppItem::setNotificationAttention(bool attention)
+{
+    if (m_notificationAttention == attention)
+        return;
+
+    m_notificationAttention = attention;
+    for (const auto &window : m_windows) {
+        if (window)
+            window->setNotificationAttention(attention);
+    }
+    Q_EMIT attentionChanged();
 }
 
 bool AppItem::isDocked() const
@@ -193,6 +209,8 @@ void AppItem::setDocked(bool docked)
 
 void AppItem::handleClick(const QString& clickItem)
 {
+    setNotificationAttention(false);
+
     if (clickItem.isEmpty()) {
         if (m_windows.size() == 0) {
             launch();
@@ -269,6 +287,7 @@ void AppItem::appendWindow(QPointer<AbstractWindow> window)
     connect(window.get(), &AbstractWindow::stateChanged, this, [window, this](){
         if(window->isActive()) {
             updateCurrentActiveWindow(window);
+            setNotificationAttention(false);
         }
         Q_EMIT activeChanged();
         Q_EMIT attentionChanged();

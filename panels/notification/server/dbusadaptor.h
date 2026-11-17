@@ -6,11 +6,12 @@
 
 #include <QDBusVariant>
 #include <QDBusAbstractAdaptor>
+#include <QDBusContext>
 
 namespace notification {
 
 class NotificationManager;
-class DbusAdaptor : public QDBusAbstractAdaptor
+class DbusAdaptor : public QDBusAbstractAdaptor, public QDBusContext
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.freedesktop.Notifications")
@@ -35,7 +36,7 @@ Q_SIGNALS:
     void ActivationToken(uint id, const QString &token);
 };
 
-class DDENotificationDbusAdaptor : public QDBusAbstractAdaptor
+class DDENotificationDbusAdaptor : public QDBusAbstractAdaptor, public QDBusContext
 {
     Q_OBJECT
     Q_PROPERTY(uint recordCount READ recordCount NOTIFY RecordCountChanged)

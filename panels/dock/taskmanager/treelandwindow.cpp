@@ -187,7 +187,7 @@ bool TreeLandWindow::allowClose()
 
 bool TreeLandWindow::isAttention()
 {
-    return m_foreignToplevelHandle->state().contains(Attention);
+    return notificationAttention() || m_foreignToplevelHandle->state().contains(Attention);
 }
 
 void TreeLandWindow::close()

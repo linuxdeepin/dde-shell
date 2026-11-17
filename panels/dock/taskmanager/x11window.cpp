@@ -125,7 +125,7 @@ bool X11Window::allowClose()
 
 bool X11Window::isAttention()
 {
-    return m_windowStates.contains(X11->getAtomByName("_NET_WM_STATE_DEMANDS_ATTENTION"));
+    return notificationAttention() || m_windowStates.contains(X11->getAtomByName("_NET_WM_STATE_DEMANDS_ATTENTION"));
 }
 
 void X11Window::close()

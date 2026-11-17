@@ -27,6 +27,9 @@ public:
     // Main/model-thread shutdown step, before the manager is deleted on its worker.
     void stopAppMonitoring();
 
+    // Sender pid of the current D-Bus Notify call, set by the D-Bus adaptor.
+    void setCurrentSenderPid(uint pid) { m_currentSenderPid = pid; }
+
     uint recordCount() const;
     Q_INVOKABLE void actionInvoked(qint64 id, const QString &actionKey);
     Q_INVOKABLE void actionInvoked(qint64 id, uint bubbleId, const QString &actionKey);
@@ -91,6 +94,7 @@ private slots:
 
 private:
     uint m_replacesCount = 0;
+    uint m_currentSenderPid = 0;
     bool m_screenLocked = false;
     QDBusPendingCallWatcher *m_screenLockedQueryWatcher = nullptr;
 
