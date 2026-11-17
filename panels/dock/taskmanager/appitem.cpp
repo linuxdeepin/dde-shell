@@ -15,6 +15,7 @@
 #include <QJsonDocument>
 #include <QStringLiteral>
 #include <QLoggingCategory>
+#include <QTimer>
 
 Q_LOGGING_CATEGORY(appitemLog, "org.deepin.dde.shell.dock.taskmanger.appitem")
 
@@ -346,7 +347,11 @@ void AppItem::checkAppItemNeedDeleteAndDelete()
         return;
     }
 
-    deleteLater();
+    // Splash 窗口与主窗口切换时会有短暂的空窗期，延迟删除避免图标闪现或提前销毁
+    QTimer::singleShot(500, this, [this]() {
+        if (!hasWindow() && !isDocked())
+            deleteLater();
+    });
 }
 
 void AppItem::onWindowDestroyed()

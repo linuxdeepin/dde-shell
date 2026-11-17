@@ -14,7 +14,9 @@
 
 #include <DDBusSender>
 #include <QDBusConnection>
+#include <QFile>
 #include <QLoggingCategory>
+#include <QTextStream>
 
 Q_LOGGING_CATEGORY(amdesktopfileLog, "org.deepin.dde.shell.dock.amdesktopfile")
 
@@ -27,6 +29,33 @@ static int pidfd_open(pid_t pid, uint flags)
 {
     // WARNING pidfd_open only support on linux-5.3 or later
     return syscall(SYS_pidfd_open, pid, flags);
+}
+
+// 让 AM 识别指定进程对应的桌面文件 ID，失败返回空
+static QString identifyPid(pid_t pid)
+{
+    if (pid <= 0)
+        return {};
+
+    auto pidfd = pidfd_open(pid, 0);
+    if (pidfd < 0)
+        return {};
+
+    auto res = DDBusSender().service("org.desktopspec.ApplicationManager1")
+                                         .interface("org.desktopspec.ApplicationManager1")
+                                         .path("/org/desktopspec/ApplicationManager1")
+                                         .method("Identify")
+                                         .arg(QDBusUnixFileDescriptor(pidfd))
+                                         .call();
+    res.waitForFinished();
+    close(pidfd);
+    if (res.isValid()) {
+        auto data = res.reply().arguments();
+        if (!data.isEmpty())
+            return data.first().toString();
+    }
+
+    return {};
 }
 
 namespace dock {
@@ -154,22 +183,40 @@ QString DesktopFileAMParser::identifyWindow(QPointer<AbstractWindow> window)
 
     if (!m_amIsAvaliable) return QString();
 
-    auto pidfd = pidfd_open(window->pid(),0);
-    auto res = DDBusSender().service("org.desktopspec.ApplicationManager1")
-                                         .interface("org.desktopspec.ApplicationManager1")
-                                         .path("/org/desktopspec/ApplicationManager1")
-                                         .method("Identify")
-                                         .arg(QDBusUnixFileDescriptor(pidfd))
-                                         .call();
-    res.waitForFinished();
-    close(pidfd);
-    if (res.isValid()) {
-        auto reply = res.reply();
-        QList<QVariant> data = reply.arguments();
-        return data.first().toString();
-    }
+    auto id = identifyPid(window->pid());
+    if (!id.isEmpty())
+        return id;
 
-    qCDebug(amdesktopfileLog()) << "AM failed to identify, reason is: " << res.error().message();
+    // 部分应用（如微信）的窗口属于渲染子进程，AM 无法直接识别，
+    // 需要沿 /proc/<pid>/status 的 PPid 向上回溯父进程再识别
+    pid_t currentPid = window->pid();
+    for (int i = 0; i < 5; ++i) {
+        QFile statusFile(QStringLiteral("/proc/%1/status").arg(currentPid));
+        if (!statusFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            break;
+
+        pid_t parentPid = 0;
+        bool ok = false;
+        QString line;
+        QTextStream stream(&statusFile);
+        while (stream.readLineInto(&line)) {
+            if (line.startsWith(QStringLiteral("PPid:"), Qt::CaseInsensitive)) {
+                parentPid = static_cast<pid_t>(line.mid(5).trimmed().toInt(&ok));
+                break;
+            }
+        }
+
+        if (!ok || parentPid <= 0 || parentPid == currentPid)
+            break;
+
+        auto parentId = identifyPid(parentPid);
+        if (!parentId.isEmpty()) {
+            qCDebug(amdesktopfileLog()) << "Identified via parent pid" << parentPid << window->pid();
+            return parentId;
+        }
+
+        currentPid = parentPid;
+    }
 
     return QString();
 }

@@ -110,6 +110,15 @@ DockGlobalElementModel::DockGlobalElementModel(QAbstractItemModel *appsModel, Do
                 auto index = m_activeAppModel->index(i, 0);
                 auto desktopId = index.data(TaskManager::DesktopIdRole).toString();
 
+                // 窗口重建时（旧窗口销毁后新窗口立即创建），rowsRemoved 的
+                // remove-keep 分支可能已把条目指向这条新窗口行；这里不能再为
+                // 同一行追加条目，否则同一窗口会占两行，任务栏出现两个图标
+                auto dupIt = std::find_if(m_data.begin(), m_data.end(), [this, i](const auto &data) {
+                    return std::get<1>(data) == m_activeAppModel && std::get<2>(data) == i;
+                });
+                if (dupIt != m_data.end())
+                    continue;
+
                if (desktopId.isEmpty())
                     continue;
                 //将同一应用的窗口添加到一起 
