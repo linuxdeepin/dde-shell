@@ -250,6 +250,8 @@ Item {
             height: overflowPopup.height
             sourceComponent: Control {
                 id: overflowPopupContent
+                Accessible.role: Accessible.Pane
+                Accessible.name: qsTr("Overflow popup content")
                 padding: 10
                 implicitWidth: root.popupColumns * overflowGrid.cellWidth + leftPadding + rightPadding
                 implicitHeight: Math.min(root.popupAvailableHeight,
@@ -268,13 +270,19 @@ Item {
 
                 contentItem: GridView {
                     id: overflowGrid
+                    Accessible.role: Accessible.List
+                    Accessible.name: qsTr("Overflow grid")
                     cellWidth: root.popupCellWidth
                     cellHeight: root.popupCellHeight
                     interactive: contentHeight > height && !Panel.contextDragging
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
                     flickableDirection: Flickable.VerticalFlick
-                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                        Accessible.role: Accessible.ScrollBar
+                        Accessible.name: qsTr("Overflow scroll bar")
+                    }
                     model: root.overflow.popupModel
 
                     delegate: Item {
