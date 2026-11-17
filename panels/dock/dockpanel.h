@@ -35,6 +35,8 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
     Q_PROPERTY(bool fashionMode READ fashionMode NOTIFY fashionModeChanged FINAL)
     Q_PROPERTY(IndicatorStyle indicatorStyle READ indicatorStyle WRITE setIndicatorStyle NOTIFY indicatorStyleChanged FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
+    Q_PROPERTY(bool showOnAllScreens READ showOnAllScreens WRITE setShowOnAllScreens NOTIFY showOnAllScreensChanged FINAL)
+    Q_PROPERTY(bool mirroredInstance READ mirroredInstance CONSTANT FINAL)
     Q_PROPERTY(QString screenName READ screenName NOTIFY screenNameChanged FINAL)
     Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
     Q_PROPERTY(bool isResizing READ isResizing WRITE setIsResizing NOTIFY isResizingChanged FINAL)
@@ -108,6 +110,9 @@ public:
 
     bool showInPrimary() const;
     void setShowInPrimary(bool newShowInPrimary);
+    bool showOnAllScreens() const;
+    void setShowOnAllScreens(bool newShowOnAllScreens);
+    bool mirroredInstance() const;
 
     bool locked() const;
     void setLocked(bool newLocked);
@@ -157,6 +162,7 @@ Q_SIGNALS:
     void cardCurrentChanged(const QString &cardCurrent);
     void indicatorStyleChanged(IndicatorStyle style);
     void showInPrimaryChanged(bool showInPrimary);
+    void showOnAllScreensChanged(bool showOnAllScreens);
     void dockScreenChanged(QScreen *screen);
     void screenNameChanged();
     void requestClosePopup();

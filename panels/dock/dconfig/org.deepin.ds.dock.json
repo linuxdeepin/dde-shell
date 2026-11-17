@@ -72,6 +72,16 @@
                         "permissions": "readwrite",
                         "visibility": "private"
 		},
+		"Show_On_All_Screens": {
+			"value": false,
+			"serial": 0,
+			"flags": [],
+			"name": "show_on_all_screens",
+			"name[zh_CN]": "任务栏显示在所有屏幕",
+			"description": "show a mirrored dock on every connected screen",
+			"permissions": "readwrite",
+			"visibility": "private"
+		},
 		"Locked": {
 			"value": false,
                         "serial": 0,

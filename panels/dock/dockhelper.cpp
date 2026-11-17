@@ -26,6 +26,7 @@ DockHelper::DockHelper(DockPanel *parent)
     QMetaObject::invokeMethod(this, &DockHelper::checkNeedShowOrNot, Qt::QueuedConnection);
 
     connect(parent, &DockPanel::rootObjectChanged, this, &DockHelper::initAreas);
+    connect(parent, &DockPanel::dockScreenChanged, this, &DockHelper::initAreas);
     connect(parent, &DockPanel::showInPrimaryChanged, this, &DockHelper::updateAllDockWakeArea);
     connect(parent, &DockPanel::hideStateChanged, this, &DockHelper::updateAllDockWakeArea);
     connect(parent, &DockPanel::hideModeChanged, m_hideTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
@@ -141,6 +142,8 @@ bool DockHelper::eventFilter(QObject *watched, QEvent *event)
 bool DockHelper::wakeUpAreaNeedShowOnThisScreen(QScreen *screen)
 {
     auto isDockAllowedShownOnThisScreen = [this, screen]() -> bool {
+        if (parent()->mirroredInstance())
+            return screen == parent()->dockScreen();
         return (parent()->showInPrimary() && screen == qApp->primaryScreen()) || !parent()->showInPrimary();
     };
 
@@ -301,11 +304,18 @@ void DockHelper::initAreas()
         return;
 
     // init areas
-    for (auto screen : qApp->screens()) {
-        m_areas.insert(screen, createArea(screen));
+    if (parent()->mirroredInstance()) {
+        if (auto *screen = parent()->dockScreen())
+            m_areas.insert(screen, createArea(screen));
+    } else {
+        for (auto screen : qApp->screens()) {
+            m_areas.insert(screen, createArea(screen));
+        }
     }
 
     connect(qApp, &QGuiApplication::screenAdded, this, [this](QScreen *screen) {
+        if (parent()->mirroredInstance() && screen != parent()->dockScreen())
+            return;
         if (m_areas.contains(screen))
             return;
         m_areas.insert(screen, createArea(screen));

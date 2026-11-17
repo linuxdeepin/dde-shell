@@ -28,6 +28,7 @@ class DockSettings : public QObject
     Q_PROPERTY(QVariantMap pluginsVisible READ pluginsVisible WRITE setPluginsVisible NOTIFY pluginsVisibleChanged FINAL)
     Q_PROPERTY(QString cardCurrent READ cardCurrent WRITE setCardCurrent NOTIFY cardCurrentChanged FINAL)
     Q_PROPERTY(bool showInPrimary READ showInPrimary WRITE setShowInPrimary NOTIFY showInPrimaryChanged FINAL)
+    Q_PROPERTY(bool showOnAllScreens READ showOnAllScreens WRITE setShowOnAllScreens NOTIFY showOnAllScreensChanged FINAL)
     Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged FINAL)
     Q_PROPERTY(bool contextMenuEnabled READ contextMenuEnabled NOTIFY contextMenuEnabledChanged FINAL)
     Q_PROPERTY(bool fashionModeEnabled READ fashionModeEnabled NOTIFY fashionModeEnabledChanged FINAL)
@@ -43,6 +44,7 @@ public:
     QVariantMap pluginsVisible();
     QString cardCurrent() const;
     bool showInPrimary() const;
+    bool showOnAllScreens() const;
     bool locked() const;
     bool contextMenuEnabled() const;
     // 时尚模式是否允许开启，由 DConfig 的 enableFashionMode 控制，默认关闭
@@ -56,6 +58,7 @@ public:
     void setPluginsVisible(const QVariantMap & pluginsVisible);
     void setCardCurrent(const QString &cardCurrent);
     void setShowInPrimary(bool newShowInPrimary);
+    void setShowOnAllScreens(bool newShowOnAllScreens);
     void setLocked(bool newLocked);
 
 private:
@@ -84,6 +87,7 @@ Q_SIGNALS:
     void cardCurrentChanged(const QString &cardCurrent);
 
     void showInPrimaryChanged(bool showInPrimary);
+    void showOnAllScreensChanged(bool showOnAllScreens);
     void lockedChanged(bool locked);
     void contextMenuEnabledChanged(bool enabled);
     void fashionModeEnabledChanged(bool enabled);
@@ -104,6 +108,7 @@ private:
     QVariantMap m_pluginsVisible;
     QString m_cardCurrent;
     bool m_showInPrimary;
+    bool m_showOnAllScreens;
     bool m_locked;
     bool m_contextMenuEnabled;
     bool m_fashionModeEnabled = false;
