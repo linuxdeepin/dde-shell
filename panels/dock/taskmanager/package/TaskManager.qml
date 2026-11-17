@@ -107,7 +107,8 @@ ContainmentItem {
         id: taskOverflow
         // Window-split title layout has priority. Only fall back to adaptive icon
         // shrinking and overflow when no title layout can fit the available space.
-        enabled: !textCalculator.enabled || textCalculator.totalWidth <= 0
+        enabled: Panel.fashionModeEnabled
+            && (!textCalculator.enabled || textCalculator.totalWidth <= 0)
         availableExtent: Math.max(0, taskmanager.calcRemainingSpace(Panel.rootObject.dockItemMaxSize) - taskmanager.startPadding)
         minimumReached: Panel.rootObject.dockItemMaxSize <= taskmanager.minimumDockItemSize + 0.5
         fallbackItemExtent: Math.max(1, Panel.rootObject.dockItemMaxSize * taskmanager.iconWidthToMaxSizeRatio)
@@ -562,7 +563,8 @@ ContainmentItem {
             const otherItems = Math.max(0, Panel.rootObject.dockCenterPartCount - 1);
             const optimal = solveMaxSizeFull(Panel.rootObject.dockEffectiveCenterSpace, appCount, otherItems);
             const fitted = optimal >= dockSize ? dockSize : optimal;
-            return Math.max(taskmanager.minimumDockItemSize, fitted);
+            // Before task overflow, icons kept shrinking to fit all tasks.
+            return Panel.fashionModeEnabled ? Math.max(taskmanager.minimumDockItemSize, fitted) : fitted;
         })
         taskOverflow.scheduleSync()
     }

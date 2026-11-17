@@ -43,8 +43,17 @@ TaskManagerSettings* TaskManagerSettings::instance()
 TaskManagerSettings::TaskManagerSettings(QObject *parent)
     : QObject(parent)
     , m_taskManagerDconfig(DConfig::create(QStringLiteral("org.deepin.dde.shell"), QStringLiteral("org.deepin.ds.dock.taskmanager"), QString(), this))
+    , m_dockConfig(DConfig::create(QStringLiteral("org.deepin.dde.shell"), QStringLiteral("org.deepin.ds.dock"), QString(), this))
     , m_dockedApplicationsEnabled(true)
 {
+    m_fashionModeEnabled = m_dockConfig->value("enableFashionMode", false).toBool();
+    connect(m_dockConfig, &DConfig::valueChanged, this, [this](const QString &key) {
+        if (key != "enableFashionMode") return;
+        const bool enabled = m_dockConfig->value(key, false).toBool();
+        if (enabled == m_fashionModeEnabled) return;
+        m_fashionModeEnabled = enabled;
+        Q_EMIT dockedFoldersEnabledChanged(dockedFoldersEnabled());
+    });
     connect(m_taskManagerDconfig, &DConfig::valueChanged, this, [this](const QString &key){
         if (TASKMANAGER_ALLOWFOCEQUIT_KEY == key) {
             m_allowForceQuit = enableStr2Bool(m_taskManagerDconfig->value(TASKMANAGER_ALLOWFOCEQUIT_KEY).toString());
@@ -68,6 +77,7 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
                 return;
             m_dockedApplicationsEnabled = enabled;
             Q_EMIT dockedApplicationsEnabledChanged(m_dockedApplicationsEnabled);
+            Q_EMIT dockedFoldersEnabledChanged(dockedFoldersEnabled());
         }
     });
 
@@ -172,6 +182,11 @@ bool TaskManagerSettings::isDocked(const QString &elementId) const
 bool TaskManagerSettings::dockedApplicationsEnabled() const
 {
     return m_dockedApplicationsEnabled;
+}
+
+bool TaskManagerSettings::dockedFoldersEnabled() const
+{
+    return m_fashionModeEnabled && m_dockedApplicationsEnabled;
 }
 
 void TaskManagerSettings::migrateFromDockedItems()
