@@ -18,6 +18,13 @@
 
 ## 公共模板与交互
 
+文件夹驻留、任务栏溢出和时尚模式统一使用 DConfig 开关
+`org.deepin.dde.shell / org.deepin.ds.dock / enableFashionMode`，默认 `false`。
+关闭时隐藏已有文件夹驻留项、拒绝新增文件夹驻留请求，保留 `dockedElements`
+中的记录，重新开启后恢复；普通应用驻留仍由 `enableDockedApplications` 控制。
+任务区域恢复 `cf0348bf` 提交前的图标缩小布局，不显示新的溢出入口；已有弹窗关闭，
+时尚模式回退为居中模式。开启开关允许使用时尚模式，不会自动切换对齐方式。
+
 FolderIcon 固定保留四个 2×2 预览位置。FolderPopup 接收名称和 contents，通过 activated/contextMenuRequested 输出业务事件，不直接操作应用或文件。最多五列、三行可见，超出后垂直滚动；名称最多两行。PanelPopup 不添加淡入淡出动画，保留原有开关行为；通过 closeOnInactive 在菜单、对话框或拖拽交互期间暂时禁止失焦关闭。
 
 应用菜单单独位于 FolderApplicationMenu，调用启动器 DesktopIntegration 已有的桌面快捷方式、自启动、驻留与卸载接口。启动器原有右键菜单保持自己的文案、状态判断和交互；Dock 处理自己的原生菜单、卸载确认和焦点，不显示尚未支持的缩放操作。打开应用使用 dde-am。后续文件管理器数据源应提供自己的业务菜单和激活回调。

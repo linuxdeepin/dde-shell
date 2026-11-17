@@ -120,8 +120,8 @@
 			"flags": [],
 			"name": "Enable Fashion Mode",
 			"name[zh_CN]": "启用时尚模式",
-			"description": "Allow switching the dock to fashion mode. When disabled, the fashion mode entry is hidden from the dock context menu and the dock falls back to centered mode.",
-			"description[zh_CN]": "是否允许把任务栏切换到时尚模式。关闭时任务栏右键菜单里不显示时尚模式入口，已保存的时尚模式也会回退成居中模式。",
+			"description": "Enable fashion mode, folder residence and task overflow. When disabled, the fashion mode entry is hidden and the dock falls back to centered mode, folder pins are hidden with their saved list preserved and new folder docking requests are rejected, and tasks use the previous icon shrinking layout instead of the overflow popup.",
+			"description[zh_CN]": "统一控制时尚模式、文件夹驻留和任务栏溢出。关闭时隐藏时尚模式入口并回退为居中模式，隐藏文件夹驻留并保留记录、拒绝新增文件夹驻留，任务区域恢复溢出功能引入前的图标缩小布局。",
 			"permissions": "readwrite",
 			"visibility": "private"
 		}
