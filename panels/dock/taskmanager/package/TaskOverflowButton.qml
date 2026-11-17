@@ -256,6 +256,8 @@ Item {
                     Math.ceil(root.overflowCount / root.popupColumns) * overflowGrid.cellHeight
                     + topPadding + bottomPadding)
                 background: Item {}
+                Accessible.role: Accessible.Pane
+                Accessible.name: qsTr("Overflow popup content")
 
                 DropArea {
                     anchors.fill: parent
@@ -274,7 +276,9 @@ Item {
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
                     flickableDirection: Flickable.VerticalFlick
-                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded; Accessible.role: Accessible.ScrollBar; Accessible.name: qsTr("Overflow scroll bar") }
+                    Accessible.role: Accessible.List
+                    Accessible.name: qsTr("Overflow grid")
                     model: root.overflow.popupModel
 
                     delegate: Item {
