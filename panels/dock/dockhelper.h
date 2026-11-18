@@ -22,6 +22,8 @@ public:
 
     void enterScreen(QScreen *screen);
     void leaveScreen();
+
+    virtual QObject *dockPreviewContext(QWindow *anchor) { return nullptr; }
     
     // Move XEmbed window relative to anchor window's surface (no-op on X11)
     virtual bool moveXEmbedWindow(uint32_t wid, double dx, double dy, QQuickWindow *anchorWindow = nullptr) { return false; }

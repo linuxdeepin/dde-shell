@@ -10,6 +10,7 @@
 #include "qwayland-treeland-wallpaper-color-v1.h"
 #include "qwayland-treeland-xwindow-control-unstable-v1.h"
 #include "qwayland-treeland-region-watch-unstable-v1.h"
+#include "qwayland-treeland-foreign-toplevel-manager-unstable-v3.h"
 #include <QWidget>
 
 #include <QtWaylandClient/QWaylandClientExtension>
@@ -22,6 +23,8 @@ class TreeLandDockTriggerArea;
 class TreeLandXWindowControl;
 class TreeLandRegionWatchManager;
 class TreeLandRegionWatch;
+class TreeLandDockPreviewManager;
+class TreeLandDockPreviewContext;
 
 class WaylandDockHelper : public DockHelper
 {
@@ -29,9 +32,12 @@ class WaylandDockHelper : public DockHelper
 
 public:
     WaylandDockHelper(DockPanel *panel);
+    ~WaylandDockHelper() override;
 
     void setDockColorTheme(const ColorTheme &theme);
     QString dockScreenName();
+
+    QObject *dockPreviewContext(QWindow *anchor) override;
     
     // Move XEmbed window relative to anchor window's surface
     // anchorWindow: the window containing the plugin item; falls back to dock panel if null
@@ -43,6 +49,7 @@ Q_SIGNALS:
     void xembedWindowMoveResult(uint32_t wid, bool success);
 
 protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
     bool currentActiveWindowFullscreened() override;
     bool isWindowOverlap() override;
     [[nodiscard]] virtual DockWakeUpArea *createArea(QScreen *screen) override;
@@ -51,9 +58,15 @@ protected:
 protected Q_SLOTS:
     void setCurrentActiveWindowFullscreened(bool);
 
+private Q_SLOTS:
+    void showTooltip();
+
 private:
     void updateRegionWatchPos();
     void initWallpaperColorManager();
+    void resetDockPreview();
+    void setupTooltipWindow();
+    void closeTooltip();
 
 private:
     friend class TreeLandRegionWatch;
@@ -65,6 +78,46 @@ private:
     QScopedPointer<TreeLandRegionWatchManager> m_regionWatchManager;
     QScopedPointer<TreeLandXWindowControl> m_xwindowControl;
     struct ::wl_surface *m_dockWlSurface = nullptr;  // Dock's wl_surface for XEmbed positioning
+    QScopedPointer<TreeLandDockPreviewManager> m_previewManager;
+    QScopedPointer<TreeLandDockPreviewContext> m_dockPreview;
+    QPointer<QWindow> m_previewAnchor;
+    QPointer<QQuickWindow> m_tooltipWindow;
+};
+
+class TreeLandDockPreviewManager : public QWaylandClientExtensionTemplate<TreeLandDockPreviewManager, &QtWayland::treeland_foreign_toplevel_manager_v3::destroy>, public QtWayland::treeland_foreign_toplevel_manager_v3
+{
+    Q_OBJECT
+public:
+    TreeLandDockPreviewManager();
+
+protected:
+    void treeland_foreign_toplevel_manager_v3_toplevel(struct ::treeland_foreign_toplevel_handle_v3 *toplevel) override;
+};
+
+class TreeLandDockPreviewContext : public QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>, public QtWayland::treeland_dock_preview_context_v3
+{
+    Q_OBJECT
+public:
+    explicit TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v3 *context);
+    ~TreeLandDockPreviewContext();
+    Q_INVOKABLE void showWindowsPreview(const QByteArray &windows, int x, int y, uint direction);
+    Q_INVOKABLE void hideWindowsPreview();
+    void showTooltip(struct ::wl_surface *surface, int x, int y, uint direction);
+    void hideTooltip();
+
+Q_SIGNALS:
+    void closed();
+    void windowPreviewShown();
+
+protected:
+    void treeland_dock_preview_context_v3_enter() override;
+    void treeland_dock_preview_context_v3_leave() override;
+
+private:
+    bool m_tooltipActive = false;
+    bool m_isPreviewEntered = false;
+    bool m_isDockMouseAreaEnter = false;
+    QTimer m_hideTimer;
 };
 
 class WallpaperColorManager : public QWaylandClientExtensionTemplate<WallpaperColorManager>, public QtWayland::treeland_wallpaper_color_manager_v1

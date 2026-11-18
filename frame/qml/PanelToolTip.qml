@@ -4,9 +4,9 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Window 2.15
 import org.deepin.ds 1.0
 import org.deepin.dtk 1.0
-import org.deepin.dtk.style as DStyle
 
 Item {
     id: control
@@ -17,7 +17,7 @@ Item {
     property var toolTipWindow: Panel.toolTipWindow
     property int toolTipX: 0
     property int toolTipY: 0
-    property bool readyBinding: false
+    readonly property bool readyBinding: !!toolTipWindow && toolTipWindow.currentItem === control
     property bool openPending: false
     // WM_NAME, used for kwin.
     property string windowTitle: "dde-shell/paneltooltip"
@@ -50,37 +50,16 @@ Item {
         if (!toolTipWindow)
             return
 
-        if (toolTipWindow.visible) {
-            toolTipWindow.close()
-            toolTipWindow.currentItem = null
-            Qt.callLater(function () {
-                if (!toolTip.visible) {
-                    control.open()
-                }
-            })
-            return
-        }
-
-        readyBinding = Qt.binding(function () {
-            return toolTipWindow && toolTipWindow.currentItem === control
-        })
-
+        if (toolTipWindow.currentItem)
+            toolTipWindow.currentItem.close()
         toolTipWindow.currentItem = control
         openPending = true
-        Qt.callLater(function () {
-            if (!toolTipWindow || !openPending || !readyBinding || toolTipWindow.currentItem !== control)
-                return
-
-            toolTipWindow.requestUpdateGeometry()
-        })
+        toolTipWindow.requestUpdateGeometry()
     }
 
     function close()
     {
         openPending = false
-        if (!toolTipWindow)
-            return
-
         if (!readyBinding)
             return
 
@@ -103,6 +82,20 @@ Item {
         toolTipWindow.show()
     }
 
+    onVisibleChanged: {
+        if (!visible)
+            close()
+    }
+    Component.onDestruction: close()
+
+    Connections {
+        target: control.Window.window
+        function onVisibleChanged() {
+            if (!target.visible)
+                control.close()
+        }
+    }
+
     Connections {
         target: toolTipWindow
         function onUpdateGeometryFinished()
@@ -115,7 +108,7 @@ Item {
         id: toolTip
         visible: readyBinding
         anchors.centerIn: parent
-        parent: toolTipWindow ? toolTipWindow.contentItem : control
+        parent: readyBinding ? toolTipWindow.contentItem : control
         font {
             family: DTK.fontManager.t8.family
             pixelSize: DTK.fontManager.t8.pixelSize
