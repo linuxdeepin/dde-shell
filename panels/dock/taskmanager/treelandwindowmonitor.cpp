@@ -9,13 +9,14 @@
 #include "taskmanager.h"
 #include "treelandwindow.h"
 
-#include <QPointer>
+#include <QWindow>
+
 #include <QIODevice>
+#include <QPointer>
 #include <QVarLengthArray>
 
-#include <QtWaylandClient/private/qwaylandwindow_p.h>
-
 #include <cstdint>
+#include <utility>
 
 namespace dock {
 ForeignToplevelManager::ForeignToplevelManager(TreeLandWindowMonitor* monitor)
@@ -30,58 +31,16 @@ void ForeignToplevelManager::treeland_foreign_toplevel_manager_v3_toplevel(struc
     connect(handle, &ForeignToplevelHandle::handlerIsReady, m_monitor, &TreeLandWindowMonitor::handleForeignToplevelHandleAdded, Qt::UniqueConnection);
 }
 
-TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v3 *context)
-    : QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>(1)
-    , m_isPreviewEntered(false)
-    , m_isDockMouseAreaEnter(false)
-    , m_hideTimer(new QTimer(this))
-{
-    init(context);
-
-    m_hideTimer->setSingleShot(true);
-    m_hideTimer->setInterval(800);
-
-    connect(m_hideTimer, &QTimer::timeout, this, [this](){
-        if (!m_isDockMouseAreaEnter && !m_isPreviewEntered) {
-            emit closed();
-            close();
-        }
-    }, Qt::QueuedConnection);
-}
-
-TreeLandDockPreviewContext::~TreeLandDockPreviewContext()
-{
-    if (isInitialized())
-        destroy();
-}
-
-void TreeLandDockPreviewContext::showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction)
-{
-    m_isDockMouseAreaEnter = true;
-    show(windowsId, previewXoffset, previewYoffset, direction);
-}
-
-void TreeLandDockPreviewContext::hideWindowsPreview()
-{
-    m_isDockMouseAreaEnter = false;
-    m_hideTimer->start();
-}
-
-void TreeLandDockPreviewContext::treeland_dock_preview_context_v3_enter()
-{
-    m_isPreviewEntered = true;
-}
-
-void TreeLandDockPreviewContext::treeland_dock_preview_context_v3_leave()
-{
-    m_isPreviewEntered = false;
-    m_hideTimer->start();
-}
-
-TreeLandWindowMonitor::TreeLandWindowMonitor(QObject* parent)
+TreeLandWindowMonitor::TreeLandWindowMonitor(QObject *panel, QObject *parent)
     :AbstractWindowMonitor(parent)
+    , m_panel(panel)
     , m_fullscreenState(false)
 {
+}
+
+TreeLandWindowMonitor::~TreeLandWindowMonitor()
+{
+    releaseDockPreviewContext();
 }
 
 void TreeLandWindowMonitor::start()
@@ -97,15 +56,15 @@ void TreeLandWindowMonitor::start()
 
 void TreeLandWindowMonitor::stop()
 {
+    releaseDockPreviewContext();
     m_foreignToplevelManager.reset(nullptr);
 }
-
 
 void TreeLandWindowMonitor::clear()
 {
     clearTrackedWindows();
     m_windows.clear();
-    m_dockPreview.reset(nullptr);
+    releaseDockPreviewContext();
     updateFullscreenState();
 }
 
@@ -121,9 +80,33 @@ void TreeLandWindowMonitor::presentWindows(QList<uint32_t> windows)
 
 void TreeLandWindowMonitor::hideItemPreview()
 {
-    if (m_dockPreview.isNull())
+    if (m_dockPreview)
+        QMetaObject::invokeMethod(m_dockPreview, "hideWindowsPreview", Qt::DirectConnection);
+}
+
+void TreeLandWindowMonitor::ensureDockPreviewContext(QWindow *anchor)
+{
+    QObject *context = nullptr;
+    if (m_panel)
+        QMetaObject::invokeMethod(m_panel, "dockPreviewContext", Qt::DirectConnection,
+                                  Q_RETURN_ARG(QObject *, context), Q_ARG(QObject *, anchor));
+    if (m_dockPreview == context)
         return;
-    m_dockPreview->hideWindowsPreview();
+
+    releaseDockPreviewContext();
+    if (!context)
+        return;
+    m_dockPreview = context;
+    connect(context, SIGNAL(closed()), this, SIGNAL(previewShouldClear()));
+    connect(context, &QObject::destroyed, this, &TreeLandWindowMonitor::previewShouldClear);
+}
+
+void TreeLandWindowMonitor::releaseDockPreviewContext()
+{
+    hideItemPreview();
+    if (m_dockPreview)
+        disconnect(m_dockPreview, nullptr, this, nullptr);
+    m_dockPreview.clear();
 }
 
 void TreeLandWindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
@@ -132,47 +115,30 @@ void TreeLandWindowMonitor::requestPreview(QAbstractItemModel *sourceModel,
                                            int32_t previewYoffset,
                                            uint32_t direction)
 {
-    if (!m_foreignToplevelManager->isActive()) {
+    if (!sourceModel || !m_foreignToplevelManager || !m_foreignToplevelManager->isActive()) {
         return;
     }
 
-    if (m_dockPreview.isNull()) {
-        auto window = relativePositionItem;
-        if (!window) return;
-        auto waylandWindow = dynamic_cast<QtWaylandClient::QWaylandWindow*>(window->handle());
-        if (!waylandWindow) return;
-
-        auto context = m_foreignToplevelManager->get_dock_preview_context(waylandWindow->wlSurface());
-        m_dockPreview.reset(new TreeLandDockPreviewContext(context));
-        connect(window, &QWindow::visibleChanged, m_dockPreview.get(), [this]() {
-            m_dockPreview.reset();
-        });
-        connect(m_dockPreview.get(), &TreeLandDockPreviewContext::closed, this, [this]() {
-            // 当预览关闭时，发出信号清空过滤状态
-            emit previewShouldClear();
-        });
-    }
-
-    m_dockPreview->m_isDockMouseAreaEnter = true;
-
-    if (sourceModel && sourceModel->rowCount() > 0) {
-        QVarLengthArray<uint32_t> array;
-        for (int i = 0; i < sourceModel->rowCount(); ++i) {
-            QModelIndex index = sourceModel->index(i, 0);
-            uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
-            if (winId != 0) {
-                array.append(winId);
-            }
-        }
-
-        if (!array.isEmpty()) {
-            QByteArray byteArray;
-            int size = array.size() * sizeof(uint32_t);
-            byteArray.resize(size);
-            memcpy(byteArray.data(), array.constData(), size);
-            m_dockPreview->showWindowsPreview(byteArray, previewXoffset, previewYoffset, direction);
+    QVarLengthArray<uint32_t> array;
+    for (int i = 0; i < sourceModel->rowCount(); ++i) {
+        QModelIndex index = sourceModel->index(i, 0);
+        uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
+        if (winId != 0) {
+            array.append(winId);
         }
     }
+
+    if (array.isEmpty())
+        return;
+
+    ensureDockPreviewContext(relativePositionItem);
+    if (!m_dockPreview)
+        return;
+
+    const QByteArray windows(reinterpret_cast<const char *>(array.constData()), array.size() * sizeof(uint32_t));
+    QMetaObject::invokeMethod(m_dockPreview, "showWindowsPreview", Qt::DirectConnection,
+                              Q_ARG(QByteArray, windows), Q_ARG(int, previewXoffset),
+                              Q_ARG(int, previewYoffset), Q_ARG(uint, direction));
 }
 
 void TreeLandWindowMonitor::requestUpdateWindowIconGeometry(const QModelIndex &index, const QRect &geometry, QObject *delegate) const

@@ -98,6 +98,9 @@ public:
 
     Q_INVOKABLE void openDockSettings();
 
+    // All dock applets share the panel's Wayland tooltip/preview context.
+    Q_INVOKABLE QObject *dockPreviewContext(QObject *anchor);
+
     Q_INVOKABLE void notifyDockPositionChanged(int offsetX, int offsetY);
     
     // Move XEmbed window relative to anchor window's surface (Wayland only)
@@ -183,7 +186,7 @@ private:
     QPointF m_cursorPosition;
     ColorTheme m_theme;
     HideState m_hideState;
-    DockHelper* m_helper;
+    DockHelper* m_helper = nullptr;
     QPointer<QScreen> m_dockScreen;
     bool m_compositorReady;
     bool m_launcherShown;
