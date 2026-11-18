@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -37,6 +37,8 @@ public:
     void active() const override;
 
     bool isAttention() const override;
+    void setNotificationAttention(bool attention);
+    bool isNotificationAttention() const { return m_notificationAttention; }
 
     bool isDocked() const override;
     void setDocked(bool docked) override;
@@ -80,6 +82,7 @@ private Q_SLOTS:
 
 private:
     QString m_id;
+    bool m_notificationAttention = false;
     QList<QPointer<AbstractWindow>> m_windows;
     QPointer<AbstractWindow> m_currentActiveWindow;
     QSharedPointer<DesktopfileAbstractParser> m_desktopfileParser;

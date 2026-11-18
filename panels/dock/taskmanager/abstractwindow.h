@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -47,6 +47,16 @@ public:
     void setAppItem(QPointer<AppItem> item) {m_appitem = item;}
     QPointer<AppItem> getAppItem() {return m_appitem;}
 
+    // Attention requested by a desktop notification (taskbar flash), independent of the compositor.
+    void setNotificationAttention(bool attention)
+    {
+        if (m_notificationAttention == attention)
+            return;
+        m_notificationAttention = attention;
+        Q_EMIT stateChanged();
+    }
+    bool notificationAttention() const { return m_notificationAttention; }
+
 protected:
     /** only windowmonitor can call updateXXX(func) to update window data
       */
@@ -60,6 +70,7 @@ protected:
 
 private:
     QPointer<AppItem> m_appitem;
+    bool m_notificationAttention = false;
 
 Q_SIGNALS:
     void pidChanged();

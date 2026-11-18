@@ -6,7 +6,9 @@
 #include "notificationmanager.h"
 
 #include <QDBusConnection>
+#include <QDBusConnectionInterface>
 #include <QDBusMessage>
+#include <QDBusReply>
 #include <QLoggingCategory>
 
 namespace notification {
@@ -30,6 +32,11 @@ uint DbusAdaptor::Notify(const QString &appName, uint replacesId, const QString 
                          const QString &body, const QStringList &actions, const QVariantMap &hints,
                          int expireTimeout)
 {
+    if (calledFromDBus()) {
+        QDBusReply<uint> reply = connection().interface()->servicePid(message().service());
+        manager()->setCurrentSenderPid(reply.value());
+    }
+
     uint id = manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
     if (id == 0) {
         qWarning(notifyLog) << "Notify failed for app:" << appName;
@@ -71,6 +78,11 @@ uint DDENotificationDbusAdaptor::Notify(const QString &appName, uint replacesId,
     const QString &summary, const QString &body, const QStringList &actions, const QVariantMap &hints,
     int expireTimeout)
 {
+    if (calledFromDBus()) {
+        QDBusReply<uint> reply = connection().interface()->servicePid(message().service());
+        manager()->setCurrentSenderPid(reply.value());
+    }
+
     uint id = manager()->Notify(appName, replacesId, appIcon, summary, body, actions, hints, expireTimeout);
     if (id == 0) {
         qWarning(notifyLog) << "Notify failed for app:" << appName;
