@@ -199,7 +199,7 @@ Item {
                 sourceSize: Qt.size(iconSize, iconSize)
                 anchors.centerIn: parent
                 retainWhileLoading: true
-                smooth: false
+                smooth: animationRoot.active
 
                 Loader {
                     anchors.centerIn: parent
