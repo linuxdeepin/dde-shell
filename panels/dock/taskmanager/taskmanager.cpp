@@ -165,7 +165,7 @@ bool TaskManager::load()
 {
     auto platformName = QGuiApplication::platformName();
     if (QStringLiteral("wayland") == platformName) {
-        m_windowMonitor.reset(new TreeLandWindowMonitor());
+        m_windowMonitor.reset(new TreeLandWindowMonitor(parentApplet()));
     }
 
 #ifdef BUILD_WITH_X11

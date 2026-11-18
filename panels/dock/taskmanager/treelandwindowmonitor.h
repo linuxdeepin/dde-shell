@@ -4,14 +4,13 @@
 
 #pragma once
 
-#include "treelandwindow.h"
 #include "abstractwindowmonitor.h"
 #include "qwayland-treeland-foreign-toplevel-manager-unstable-v3.h"
+#include "treelandwindow.h"
 
 #include <QHash>
 #include <QList>
 #include <QObject>
-#include <QTimer>
 
 #include <QtWaylandClient/QWaylandClientExtension>
 
@@ -32,38 +31,13 @@ private:
     TreeLandWindowMonitor* m_monitor;
 };
 
-class TreeLandDockPreviewContext : public QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>, public QtWayland::treeland_dock_preview_context_v3
-{
-    Q_OBJECT
-
-public:
-    explicit TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v3 *);
-    ~TreeLandDockPreviewContext();
-    void showWindowsPreview(QByteArray windowsId, int32_t previewXoffset, int32_t previewYoffset, uint32_t direction);
-    void hideWindowsPreview();
-
-Q_SIGNALS:
-    void entered();
-    void exited();
-    void closed();
-
-protected:
-    virtual void treeland_dock_preview_context_v3_enter() override;
-    virtual void treeland_dock_preview_context_v3_leave() override;
-    friend class TreeLandWindowMonitor;
-
-private:
-    bool m_isPreviewEntered;
-    bool m_isDockMouseAreaEnter;
-    QTimer* m_hideTimer;
-};
-
 class TreeLandWindowMonitor : public AbstractWindowMonitor
 {
     Q_OBJECT
 
 public:
-    explicit TreeLandWindowMonitor(QObject* parent = nullptr);
+    explicit TreeLandWindowMonitor(QObject *panel, QObject *parent = nullptr);
+    ~TreeLandWindowMonitor() override;
     virtual void start() override;
     virtual void stop() override;
     virtual void clear() override;
@@ -85,10 +59,13 @@ private Q_SLOTS:
     void updateFullscreenState();
 
 private:
+    void ensureDockPreviewContext(QWindow *anchor);
+    void releaseDockPreviewContext();
+
+    QPointer<QObject> m_panel;
+    QPointer<QObject> m_dockPreview;
     QHash<ulong, QSharedPointer<TreeLandWindow>> m_windows;
     QScopedPointer<ForeignToplevelManager> m_foreignToplevelManager;
-    QScopedPointer<TreeLandDockPreviewContext> m_dockPreview;
-
     bool m_fullscreenState;
 };
 }

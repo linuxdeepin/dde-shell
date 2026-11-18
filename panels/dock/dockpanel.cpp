@@ -439,6 +439,11 @@ bool DockPanel::debugMode() const
 #endif
 }
 
+QObject *DockPanel::dockPreviewContext(QObject *anchor)
+{
+    return m_helper ? m_helper->dockPreviewContext(qobject_cast<QWindow *>(anchor)) : nullptr;
+}
+
 void DockPanel::openDockSettings()
 {
     qCDebug(dockLog) << "openDockSettings";

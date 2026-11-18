@@ -13,17 +13,122 @@
 #include "qwayland-treeland-region-watch-unstable-v1.h"
 #include "wayland-treeland-region-watch-unstable-v1-client-protocol.h"
 
+#include <QtWaylandClient/private/qwaylandshellintegration_p.h>
+#include <QtWaylandClient/private/qwaylandshellsurface_p.h>
+#include <QtWaylandClient/private/qwaylanddisplay_p.h>
 #include <QtWaylandClient/private/qwaylandscreen_p.h>
 #include <QtWaylandClient/private/qwaylandsurface_p.h>
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
 
 namespace dock {
+namespace {
+// Treeland assigns the role after the first buffer is committed. Creating an
+// xdg or layer surface here would make show_tooltip_surface a protocol error.
+class TooltipShellIntegration : public QtWaylandClient::QWaylandShellIntegration
+{
+public:
+    bool initialize(QtWaylandClient::QWaylandDisplay *) override { return true; }
+    QtWaylandClient::QWaylandShellSurface *createShellSurface(QtWaylandClient::QWaylandWindow *window) override
+    {
+        return new QtWaylandClient::QWaylandShellSurface(window);
+    }
+};
+}
+
+TreeLandDockPreviewManager::TreeLandDockPreviewManager()
+    : QWaylandClientExtensionTemplate<TreeLandDockPreviewManager, &QtWayland::treeland_foreign_toplevel_manager_v3::destroy>(1)
+{
+}
+
+void TreeLandDockPreviewManager::treeland_foreign_toplevel_manager_v3_toplevel(struct ::treeland_foreign_toplevel_handle_v3 *toplevel)
+{
+    // This binding only creates preview contexts. TaskManager tracks the windows.
+    treeland_foreign_toplevel_handle_v3_destroy(toplevel);
+}
+
+TreeLandDockPreviewContext::TreeLandDockPreviewContext(struct ::treeland_dock_preview_context_v3 *context)
+    : QWaylandClientExtensionTemplate<TreeLandDockPreviewContext>(1)
+{
+    init(context);
+    m_hideTimer.setSingleShot(true);
+    m_hideTimer.setInterval(800);
+    connect(&m_hideTimer, &QTimer::timeout, this, [this]() {
+        if (!m_isDockMouseAreaEnter && !m_isPreviewEntered) {
+            m_tooltipActive = false;
+            close();
+            Q_EMIT closed();
+        }
+    });
+}
+
+TreeLandDockPreviewContext::~TreeLandDockPreviewContext()
+{
+    if (isInitialized())
+        destroy();
+}
+
+void TreeLandDockPreviewContext::showWindowsPreview(const QByteArray &windows, int x, int y, uint direction)
+{
+    m_tooltipActive = false;
+    m_isDockMouseAreaEnter = true;
+    m_hideTimer.stop();
+    Q_EMIT windowPreviewShown();
+    show(windows, x, y, direction);
+}
+
+void TreeLandDockPreviewContext::showTooltip(struct ::wl_surface *surface, int x, int y, uint direction)
+{
+    m_tooltipActive = true;
+    m_isDockMouseAreaEnter = true;
+    m_isPreviewEntered = false;
+    m_hideTimer.stop();
+    show_tooltip_surface(surface, x, y, direction);
+}
+
+void TreeLandDockPreviewContext::hideWindowsPreview()
+{
+    if (m_tooltipActive)
+        return;
+    m_isDockMouseAreaEnter = false;
+    m_hideTimer.start();
+}
+
+void TreeLandDockPreviewContext::hideTooltip()
+{
+    if (!m_tooltipActive)
+        return;
+    m_tooltipActive = false;
+    m_isDockMouseAreaEnter = false;
+    m_hideTimer.stop();
+    close();
+    Q_EMIT closed();
+}
+
+void TreeLandDockPreviewContext::treeland_dock_preview_context_v3_enter()
+{
+    m_isPreviewEntered = true;
+}
+
+void TreeLandDockPreviewContext::treeland_dock_preview_context_v3_leave()
+{
+    m_isPreviewEntered = false;
+    m_hideTimer.start();
+}
+
 WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     : DockHelper(panel)
     , m_isWindowOverlap(false)
     , m_isCurrentActiveWindowFullscreened(false)
     , m_panel(panel)
 {
+    m_previewManager.reset(new TreeLandDockPreviewManager());
+    connect(m_previewManager.get(), &TreeLandDockPreviewManager::activeChanged, this, [this]() {
+        if (!m_previewManager->isActive())
+            resetDockPreview();
+    });
+    connect(m_panel, &DockPanel::rootObjectChanged, this, &WaylandDockHelper::resetDockPreview);
+    connect(m_panel, &DockPanel::toolTipWindowChanged, this, &WaylandDockHelper::setupTooltipWindow);
+    setupTooltipWindow();
     m_xwindowControl.reset(new TreeLandXWindowControl());
     m_regionWatchManager.reset(new TreeLandRegionWatchManager());
     DS_NAMESPACE::DAppletBridge bridge("org.deepin.ds.dock.taskmanager");
@@ -55,6 +160,130 @@ WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
     connect(m_regionWatchManager.get(), &TreeLandRegionWatchManager::activeChanged, this, ensureRegionWatch);
     connect(m_panel, &DockPanel::hideModeChanged, this, ensureRegionWatch);
 
+}
+
+WaylandDockHelper::~WaylandDockHelper()
+{
+    resetDockPreview();
+}
+
+void WaylandDockHelper::setupTooltipWindow()
+{
+    closeTooltip();
+    if (m_tooltipWindow)
+        disconnect(m_tooltipWindow, nullptr, this, nullptr);
+    m_tooltipWindow = m_panel->toolTipWindow();
+    if (!m_tooltipWindow)
+        return;
+
+    connect(m_tooltipWindow, SIGNAL(updateGeometryFinished()), m_tooltipWindow, SLOT(update()), Qt::UniqueConnection);
+    connect(m_tooltipWindow, &QObject::destroyed, this, &WaylandDockHelper::closeTooltip);
+    connect(m_tooltipWindow, &QQuickWindow::frameSwapped,
+            this, &WaylandDockHelper::showTooltip, Qt::QueuedConnection);
+}
+
+bool WaylandDockHelper::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched != m_tooltipWindow)
+        return DockHelper::eventFilter(watched, event);
+
+    switch (event->type()) {
+    case QEvent::Show: {
+        if (!dockPreviewContext(m_panel->window()))
+            break;
+
+        // QShowEvent precedes QWaylandWindow::setVisible(), where Qt assigns a role.
+        auto *native = dynamic_cast<QtWaylandClient::QWaylandWindow *>(m_tooltipWindow->handle());
+        if (!native || native->shellSurface() || native->QPlatformWindow::parent())
+            break;
+
+        static TooltipShellIntegration integration;
+        native->setShellIntegration(&integration);
+        break;
+    }
+    case QEvent::Close:
+    case QEvent::Hide:
+        closeTooltip();
+        break;
+    default:
+        break;
+    }
+    return false;
+}
+
+void WaylandDockHelper::closeTooltip()
+{
+    if (m_dockPreview)
+        m_dockPreview->hideTooltip();
+    if (!m_tooltipWindow)
+        return;
+
+    auto *native = dynamic_cast<QtWaylandClient::QWaylandWindow *>(m_tooltipWindow->handle());
+    if (native && dynamic_cast<TooltipShellIntegration *>(native->shellIntegration())) {
+        if (m_tooltipWindow->isVisible())
+            m_tooltipWindow->hide();
+        else // QEvent::Hide arrives after Qt destroys the shell surface.
+            native->setShellIntegration(native->display()->shellIntegration());
+    }
+}
+
+QObject *WaylandDockHelper::dockPreviewContext(QWindow *anchor)
+{
+    if (!anchor || !m_previewManager->isActive())
+        return nullptr;
+    if (m_dockPreview && m_previewAnchor == anchor)
+        return m_dockPreview.get();
+
+    auto *native = dynamic_cast<QtWaylandClient::QWaylandWindow *>(anchor->handle());
+    if (!native || !native->wlSurface())
+        return nullptr;
+
+    resetDockPreview();
+    m_previewAnchor = anchor;
+    auto *context = m_previewManager->get_dock_preview_context(native->wlSurface());
+    m_dockPreview.reset(new TreeLandDockPreviewContext(context));
+    connect(anchor, &QWindow::visibleChanged, m_dockPreview.get(), [this](bool visible) {
+        if (!visible)
+            resetDockPreview();
+    });
+    connect(anchor, &QObject::destroyed, m_dockPreview.get(), [this]() { resetDockPreview(); });
+    connect(native, &QtWaylandClient::QWaylandWindow::wlSurfaceDestroyed,
+            m_dockPreview.get(), [this]() { resetDockPreview(); });
+    // Late tooltip closes and frames must not replace a new preview.
+    connect(m_dockPreview.get(), &TreeLandDockPreviewContext::windowPreviewShown, this, &WaylandDockHelper::closeTooltip);
+    return m_dockPreview.get();
+}
+
+void WaylandDockHelper::resetDockPreview()
+{
+    closeTooltip();
+    m_dockPreview.reset();
+    m_previewAnchor.clear();
+}
+
+void WaylandDockHelper::showTooltip()
+{
+    if (!m_tooltipWindow || !m_dockPreview || !m_tooltipWindow->isVisible())
+        return;
+
+    auto *native = dynamic_cast<QtWaylandClient::QWaylandWindow *>(m_tooltipWindow->handle());
+    if (!native || !dynamic_cast<TooltipShellIntegration *>(native->shellIntegration()) || !native->wlSurface())
+        return;
+
+    const QRectF geometry(QPointF(m_tooltipWindow->property("xOffset").toReal(),
+                                 m_tooltipWindow->property("yOffset").toReal()),
+                          m_tooltipWindow->size());
+    const auto direction = m_panel->position();
+    QPointF anchor = geometry.center();
+    switch (direction) {
+    case Top: anchor.setY(geometry.top()); break;
+    case Right: anchor.setX(geometry.right()); break;
+    case Bottom: anchor.setY(geometry.bottom()); break;
+    case Left: anchor.setX(geometry.left()); break;
+    default: return;
+    }
+    m_dockPreview->showTooltip(native->wlSurface(), qRound(anchor.x()), qRound(anchor.y()), direction);
+    wl_display_flush(native->display()->wl_display());
 }
 
 void WaylandDockHelper::updateRegionWatchPos()
