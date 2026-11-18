@@ -90,7 +90,7 @@ Window {
 
     // visible: true
     visible: Panel.visible
-    flags: Qt.Tool
+    flags: Qt.Window | Qt.FramelessWindowHint
 
     property int contentPadding: 10
     width: NotifyStyle.contentItem.width + contentPadding * 2
