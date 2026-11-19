@@ -19,7 +19,7 @@
 ## 公共模板与交互
 
 文件夹驻留、任务栏溢出和时尚模式统一使用 DConfig 开关
-`org.deepin.dde.shell / org.deepin.ds.dock / enableFashionMode`，默认 `false`。
+`org.deepin.dde.shell / org.deepin.ds.dock / enableFashionMode`，默认 `true`。
 关闭时隐藏已有文件夹驻留项、拒绝新增文件夹驻留请求，保留 `dockedElements`
 中的记录，重新开启后恢复；普通应用驻留仍由 `enableDockedApplications` 控制。
 任务区域恢复 `cf0348bf` 提交前的图标缩小布局，不显示新的溢出入口；已有弹窗关闭，

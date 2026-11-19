@@ -45,7 +45,7 @@ public:
     bool showInPrimary() const;
     bool locked() const;
     bool contextMenuEnabled() const;
-    // 时尚模式是否允许开启，由 DConfig 的 enableFashionMode 控制，默认关闭
+    // 时尚模式是否允许开启，由 DConfig 的 enableFashionMode 控制，默认开启
     bool fashionModeEnabled() const;
 
     void setDockSize(const uint& size);
@@ -106,6 +106,6 @@ private:
     bool m_showInPrimary;
     bool m_locked;
     bool m_contextMenuEnabled;
-    bool m_fashionModeEnabled = false;
+    bool m_fashionModeEnabled = true;
 };
 }
