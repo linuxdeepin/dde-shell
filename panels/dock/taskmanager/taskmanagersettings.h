@@ -85,7 +85,7 @@ private:
     bool m_fashionMode = false;
     bool m_cgroupsBasedGrouping;
     bool m_dockedApplicationsEnabled;
-    bool m_fashionModeEnabled = false;
+    bool m_fashionModeEnabled = true;
     QStringList m_dockedElements;
     QStringList m_windowIconWhitelist;
     QStringList m_cgroupsBasedGroupingSkipAppIds;

@@ -46,10 +46,10 @@ TaskManagerSettings::TaskManagerSettings(QObject *parent)
     , m_dockConfig(DConfig::create(QStringLiteral("org.deepin.dde.shell"), QStringLiteral("org.deepin.ds.dock"), QString(), this))
     , m_dockedApplicationsEnabled(true)
 {
-    m_fashionModeEnabled = m_dockConfig->value("enableFashionMode", false).toBool();
+    m_fashionModeEnabled = m_dockConfig->value("enableFashionMode", true).toBool();
     connect(m_dockConfig, &DConfig::valueChanged, this, [this](const QString &key) {
         if (key != "enableFashionMode") return;
-        const bool enabled = m_dockConfig->value(key, false).toBool();
+        const bool enabled = m_dockConfig->value(key, true).toBool();
         if (enabled == m_fashionModeEnabled) return;
         m_fashionModeEnabled = enabled;
         Q_EMIT dockedFoldersEnabledChanged(dockedFoldersEnabled());
