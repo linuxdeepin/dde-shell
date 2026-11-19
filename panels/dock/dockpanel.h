@@ -112,7 +112,7 @@ public:
     bool locked() const;
     void setLocked(bool newLocked);
     bool contextMenuEnabled() const;
-    // 时尚模式是否允许开启，对应 DConfig 的 enableFashionMode，默认关闭。
+    // 时尚模式是否允许开启，对应 DConfig 的 enableFashionMode，默认开启。
     // 关闭时右键菜单不显示时尚模式入口，已保存的时尚模式也会回退成居中模式。
     bool fashionModeEnabled() const;
 
