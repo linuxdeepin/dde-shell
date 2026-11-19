@@ -115,7 +115,7 @@
 			"visibility": "private"
 		},
 		"enableFashionMode": {
-			"value": false,
+			"value": true,
 			"serial": 0,
 			"flags": [],
 			"name": "Enable Fashion Mode",

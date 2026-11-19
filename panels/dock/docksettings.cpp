@@ -192,7 +192,7 @@ void DockSettings::init()
         m_showInPrimary = m_dockConfig->value(keyShowInPrimary).toBool();
         m_locked = m_dockConfig->value(keyLocked).toBool();
         m_contextMenuEnabled = m_dockConfig->value(keyEnableContextMenu, true).toBool();
-        m_fashionModeEnabled = m_dockConfig->value(keyEnableFashionMode, false).toBool();
+        m_fashionModeEnabled = m_dockConfig->value(keyEnableFashionMode, true).toBool();
 
         // Log dock config on startup - merge shell_pos and shell_dock_mode into one log entry
         logDockConfig(m_dockPosition, m_alignment, QStringLiteral("on startup"));
@@ -249,7 +249,7 @@ void DockSettings::init()
                 m_contextMenuEnabled = enabled;
                 Q_EMIT contextMenuEnabledChanged(m_contextMenuEnabled);
             } else if (keyEnableFashionMode == key) {
-                const auto enabled = m_dockConfig->value(keyEnableFashionMode, false).toBool();
+                const auto enabled = m_dockConfig->value(keyEnableFashionMode, true).toBool();
                 if (enabled == m_fashionModeEnabled) return;
                 m_fashionModeEnabled = enabled;
                 Q_EMIT fashionModeEnabledChanged(m_fashionModeEnabled);
