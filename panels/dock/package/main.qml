@@ -214,9 +214,14 @@ Window {
         onStopped: {
             if (useTransformBasedAnimation) {
                 dock.visible = ((dock.useColumnLayout ? dockTransform.x : dockTransform.y) === 0)
-            } else {
+            } else if (!dock.compositorDrivenResize) {
                 dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) !== 1)
             }
+        }
+        onFinished: {
+            // A late Wayland configure may still report the hidden size.
+            if (dock.compositorDrivenResize)
+                dock.visible = !hiding
         }
     }
 
@@ -889,18 +894,18 @@ Window {
     Connections {
         target: dock
         enabled: dock.compositorDrivenResize
+            // Wayland can apply animation geometry after the animation stops.
+            && dock.isDragging && Applet.isResizing
             && !hideShowAnimation.running
             && !dockAnimation.running
         function onWidthChanged() {
             if (dock.useColumnLayout) {
-                dock.dockSize = dock.width
                 Applet.dockSize = dock.width
             }
         }
 
         function onHeightChanged() {
             if (!dock.useColumnLayout) {
-                dock.dockSize = dock.height
                 Applet.dockSize = dock.height
             }
         }
