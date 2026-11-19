@@ -23,6 +23,55 @@ DS_BEGIN_NAMESPACE
 
 Q_LOGGING_CATEGORY(layershell, "org.deepin.dde.shell.layershell")
 
+static void setSkipSwitcher(QWindow *window)
+{
+    if (!window || !window->isVisible()) {
+        return;
+    }
+
+    auto *x11Application = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
+    if (!x11Application || !window->handle()) {
+        qCDebug(layershell) << "Cannot set SkipSwitcher before an X11 window handle is available";
+        return;
+    }
+
+    auto *connection = x11Application->connection();
+    const auto windowId = static_cast<xcb_window_t>(window->winId());
+    constexpr char wmStateName[] = "_NET_WM_STATE";
+    constexpr char skipSwitcherName[] = "_KDE_NET_WM_STATE_SKIP_SWITCHER";
+    const auto wmStateCookie = xcb_intern_atom(connection, false, sizeof(wmStateName) - 1, wmStateName);
+    const auto skipSwitcherCookie = xcb_intern_atom(connection, false, sizeof(skipSwitcherName) - 1, skipSwitcherName);
+
+    const std::unique_ptr<xcb_intern_atom_reply_t, decltype(&std::free)> wmState(xcb_intern_atom_reply(connection, wmStateCookie, nullptr), &std::free);
+    const std::unique_ptr<xcb_intern_atom_reply_t, decltype(&std::free)> skipSwitcher(xcb_intern_atom_reply(connection, skipSwitcherCookie, nullptr),
+                                                                                      &std::free);
+    if (!wmState || !skipSwitcher) {
+        qCWarning(layershell) << "Failed to resolve SkipSwitcher atoms for window" << windowId;
+        return;
+    }
+
+    const auto stateCookie = xcb_get_property(connection, false, windowId, wmState->atom, XCB_ATOM_ATOM, 0, 1024);
+    const std::unique_ptr<xcb_get_property_reply_t, decltype(&std::free)> state(xcb_get_property_reply(connection, stateCookie, nullptr), &std::free);
+    if (!state) {
+        qCWarning(layershell) << "Failed to read _NET_WM_STATE for window" << windowId;
+        return;
+    }
+    if (state->type == XCB_ATOM_ATOM && state->format == 32) {
+        const auto *atoms = static_cast<const xcb_atom_t *>(xcb_get_property_value(state.get()));
+        if (std::find(atoms, atoms + state->value_len, skipSwitcher->atom) != atoms + state->value_len) {
+            return;
+        }
+    }
+
+    const auto appendCookie = xcb_change_property_checked(connection, XCB_PROP_MODE_APPEND, windowId, wmState->atom, XCB_ATOM_ATOM, 32, 1, &skipSwitcher->atom);
+    const std::unique_ptr<xcb_generic_error_t, decltype(&std::free)> error(xcb_request_check(connection, appendCookie), &std::free);
+    if (error) {
+        qCWarning(layershell) << "Failed to append SkipSwitcher for window" << windowId << "X11 error:" << error->error_code;
+        return;
+    }
+    qCDebug(layershell) << "Appended SkipSwitcher to _NET_WM_STATE for window" << windowId;
+}
+
 LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     : QObject(parent)
     , m_window(window)
@@ -76,6 +125,12 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     connect(m_dlayerShellWindow, &DLayerShellWindow::inputRegionChanged, this, &LayerShellEmulation::onInputRegionChanged);
 
     // connect(m_dlayerShellWindow, &DS_NAMESPACE::DLayerShellWindow::keyboardInteractivityChanged, this, &LayerShellEmulation::onKeyboardInteractivityChanged);
+    // KWin clears _NET_WM_STATE on withdrawal. Qt emits visibleChanged
+    // before mapping the window, so restore the hint on the next show.
+    connect(window, &QWindow::visibleChanged, this, [window] {
+        setSkipSwitcher(window);
+    });
+    setSkipSwitcher(window);
 }
 
 /**
