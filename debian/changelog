@@ -1,3 +1,13 @@
+dde-shell (6.2.1) unstable; urgency=medium
+
+  * fix: keep shell notification and OSD settings private
+  * fix(dock): restore Wayland edge reveal
+  * feat(dock): enable fashion mode by default
+  * feat(dock): route dock tooltip and preview through shared context
+  * fix(dock): enable smooth icon scaling only when scaled
+
+ -- zhaofangxun <zhaofangxun@uniontech.com>  Thu, 19 Nov 2026 20:49:20 +0800
+
 dde-shell (6.2.0) unstable; urgency=medium
 
   * feat(dock): gate fashion mode, folder residence and overflow by one
