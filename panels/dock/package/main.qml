@@ -49,13 +49,15 @@ Window {
         }
     }
     property int dockCenterPartCount: dockCenterPartModel.count
-    readonly property int centerAlignmentEdgeSpacing: 14
+    readonly property int centerAlignmentEdgeSpacing: Panel.fashionModeEnabled ? 14 : 20
 
     readonly property int dockRawCenterSpace: {
         if (useColumnLayout) {
             return Screen.height - dockLeftPart.implicitHeight - dockRightPart.implicitHeight;
         } else {
-            let space = Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth - Math.ceil(gridLayout.columnSpacing);
+            let space = Screen.width - dockLeftPart.implicitWidth - dockRightPart.implicitWidth;
+            if (Panel.fashionModeEnabled)
+                space -= Math.ceil(gridLayout.columnSpacing);
             if (fashionDock.enabled && gridLayout) {
                 // 时尚模式下，dockRightPart 在 gridLayout 右侧，之间需要扣除 dockSpacing
                 // 同时保留左右悬浮间距，避免窗口铺满屏幕后圆角边框被屏幕边缘裁剪。
@@ -65,7 +67,7 @@ Window {
         }
     }
     readonly property int dockEffectiveCenterSpace: {
-        if (Panel.itemAlignment !== Dock.CenterAlignment || fashionDock.enabled) {
+        if (!Panel.fashionModeEnabled || Panel.itemAlignment !== Dock.CenterAlignment || fashionDock.enabled) {
             return dockRawCenterSpace
         }
 
@@ -93,16 +95,24 @@ Window {
 
     property real dockItemIconSize: dockItemMaxSize * 9 / 14
 
-    // NOTE: -1 means not set its size, follow the platform size
+    // Keep Wayland geometry valid while switching out of fashion mode. A
+    // running width animation can continue after its Behavior is disabled;
+    // animating to -1 can stop rendering before the compositor resize applies.
+    // Opposite LayerShell anchors still request the full output extent.
     width: {
         if (fashionDock.enabled) {
             const maximumWidth = Math.max(1, Screen.width - fashionDock.floatingMargin * 2)
             return Math.max(1, Math.round(Math.min(fashionDock.contentWidth, maximumWidth)))
         }
 
-        return positionForAnimation === Dock.Top || positionForAnimation === Dock.Bottom ? -1 : dockSize
+        if (positionForAnimation === Dock.Top || positionForAnimation === Dock.Bottom) {
+            return compositorDrivenResize ? Screen.width : -1
+        }
+        return dockSize
     }
-    height: positionForAnimation === Dock.Left || positionForAnimation === Dock.Right ? -1 : dockSize
+    height: positionForAnimation === Dock.Left || positionForAnimation === Dock.Right
+        ? (compositorDrivenResize ? Screen.height : -1)
+        : dockSize
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
 
