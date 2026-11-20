@@ -268,7 +268,7 @@ void AppItem::appendWindow(QPointer<AbstractWindow> window)
         }
         Q_EMIT activeChanged();
         Q_EMIT attentionChanged();
-    });
+    }, Qt::UniqueConnection);
 }
 
 void AppItem::setDesktopFileParser(QSharedPointer<DesktopfileAbstractParser> desktopfile)
@@ -327,7 +327,7 @@ void AppItem::updateCurrentActiveWindow(QPointer<AbstractWindow> window)
     }
 
     m_currentActiveWindow = window;
-    connect(m_currentActiveWindow.get(), &AbstractWindow::iconChanged, this, &AppItem::iconChanged, Qt::QueuedConnection);
+    connect(m_currentActiveWindow.get(), &AbstractWindow::iconChanged, this, &AppItem::iconChanged, Qt::UniqueConnection | Qt::QueuedConnection);
 
     Q_EMIT currentActiveWindowChanged();
 }
