@@ -194,7 +194,12 @@ Window {
     PropertyAnimation {
         id: hideShowAnimation;
         // Currently, Wayland (Treeland) doesn't support StyledBehindWindowBlur inside the window, thus we keep using the window size approach on Wayland
-        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb" && !fashionDock.enabled
+        // On X11, always use the transform-based animation, including fashion mode.
+        // Shrinking the window height down to 1px relayouts the content and freezes
+        // contentWidth at a stale value; when showing, the width is corrected by
+        // "Behavior on width" again, which makes the dock look like it shrinks and
+        // flickers during the animation.
+        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
         property bool hiding: false
         target: useTransformBasedAnimation ? dockTransform : dock;
         property: {
@@ -209,6 +214,17 @@ Window {
         easing.type: Easing.OutCubic
         onStarted: {
             hiding = Panel.hideState === Dock.Hide
+            // On X11 the QML content slides out via transform, but the native window
+            // background (the rounded island drawn by DTK) does not follow the transform
+            // and would be left behind as a ghost until the window is unmapped. Fade the
+            // whole window in sync with the slide so the background disappears together
+            // with the content. Restarting on an in-flight animation makes a reversed
+            // show/hide transition turn around smoothly from the current value.
+            if (useTransformBasedAnimation) {
+                opacityFade.from = dock.opacity
+                opacityFade.to = hiding ? 0 : 1
+                opacityFade.restart()
+            }
             dock.visible = true
         }
         onStopped: {
@@ -223,6 +239,16 @@ Window {
             if (dock.compositorDrivenResize)
                 dock.visible = !hiding
         }
+    }
+
+    // Fades the whole window in sync with the transform-based hide/show animation on
+    // X11, so that the native window background fades out together with the content.
+    NumberAnimation {
+        id: opacityFade
+        target: dock
+        property: "opacity"
+        duration: 500
+        easing.type: Easing.OutCubic
     }
 
     Connections {
@@ -272,7 +298,9 @@ Window {
 
     SequentialAnimation {
         id: dockAnimation
-        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb" && !fashionDock.enabled
+        // Keep consistent with hideShowAnimation: use the transform-based animation
+        // in fashion mode on X11 as well.
+        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
         property bool isShowing: false
         property bool isPositionChanging: false
         property var target: useTransformBasedAnimation ? dockTransform : dock
