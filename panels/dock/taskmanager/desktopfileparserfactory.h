@@ -57,6 +57,7 @@ public:
         if (desktopFileParser.isNull()) {
             desktopFileParser = QSharedPointer<T>(new T(id));
             m_desktopFileParsers.insert(id, desktopFileParser.toWeakRef());
+            pruneStaleEntries();
         }
         return desktopFileParser;
     }
@@ -65,6 +66,17 @@ private:
     static inline QString identifyWindow(QPointer<AbstractWindow> window)
     {
         return T::identifyWindow(window);
+    }
+
+    static inline void pruneStaleEntries()
+    {
+        for (auto it = m_desktopFileParsers.begin(); it != m_desktopFileParsers.end();) {
+            if (it.value().isNull()) {
+                it = m_desktopFileParsers.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 
 private:

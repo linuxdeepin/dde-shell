@@ -49,3 +49,16 @@ target_include_directories(rolegroupmodel_tests PRIVATE
 )
 
 gtest_discover_tests(rolegroupmodel_tests)
+
+add_executable(desktopfileparserfactory_tests
+    desktopfileparserfactorytests.cpp
+)
+
+target_link_libraries(desktopfileparserfactory_tests
+    GTest::GTest
+    GTest::Main
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Test
+)
+
+gtest_discover_tests(desktopfileparserfactory_tests)
