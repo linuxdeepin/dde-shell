@@ -6,6 +6,7 @@ find_package(Dtk${DTK_VERSION_MAJOR} COMPONENTS Widget REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Widgets Gui WaylandClient)
 find_package(TreelandProtocols REQUIRED)
 pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
+pkg_check_modules(X11 REQUIRED IMPORTED_TARGET x11)
 
 if (NOT DEFINED SYSTEMD_USER_UNIT_DIR)
     find_package(PkgConfig REQUIRED)
@@ -48,6 +49,7 @@ target_link_libraries(dde-shell PRIVATE
     Dtk${DTK_VERSION_MAJOR}::Widget
     Qt${QT_VERSION_MAJOR}::DBus
     PkgConfig::WaylandClient
+    PkgConfig::X11
 )
 
 configure_file(${CMAKE_SOURCE_DIR}/misc/dde-shell-plugin@.service.in
