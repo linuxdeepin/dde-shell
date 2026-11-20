@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2026 UnionTech Software Technology Co., Ltd.
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: Unit Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-test:
+    name: Build and Run Unit Tests
+    runs-on: ubuntu-22.04
+    container: linuxdeepin/deepin:crimson
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup apt sources
+        run: |
+          set -euxo pipefail
+          echo "deb [trusted=yes] http://mirrors.kernel.org/deepin/beige/ crimson main commercial community" > /etc/apt/sources.list
+          echo "deb-src [trusted=yes] http://mirrors.kernel.org/deepin/beige/ crimson main commercial community" >> /etc/apt/sources.list
+          rm -rf /etc/apt/sources.list.d
+          apt-get update
+
+      - name: Install build dependencies
+        run: |
+          set -euxo pipefail
+          apt-get install -y --no-install-recommends \
+            build-essential g++ \
+            devscripts equivs git cmake pkg-config \
+            qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools \
+            qt6-declarative-dev qt6-declarative-private-dev \
+            qt6-svg-dev qt6-l10n-tools \
+            qt6-wayland-dev qt6-wayland-private-dev qt6-wayland-dev-tools \
+            libdtkcommon-dev libdtk6core-dev libdtk6core-bin \
+            libdtk6gui-dev libdtk6declarative libdtk6widget-dev \
+            dde-api-dev dde-tray-loader-dev \
+            dde-application-manager-api \
+            extra-cmake-modules \
+            libgtest-dev libgmock-dev \
+            libicu-dev \
+            libxcb-ewmh-dev libxcb-icccm4-dev libxcb-res0-dev \
+            libxcb-util-dev libxcb1-dev libxcb-shape0-dev \
+            libxtst-dev libyaml-cpp-dev \
+            libqt6svg6 \
+            qml6-module-qtquick-controls2-styles-chameleon \
+            systemd wlr-protocols wayland-protocols treeland-protocols
+
+      - name: Configure
+        run: cmake -B build -DBUILD_TESTING=ON
+
+      - name: Build tests
+        run: cmake --build build -- -j$(nproc)
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
