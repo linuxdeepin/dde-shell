@@ -115,6 +115,10 @@ Window {
         : dockSize
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
+    maximumHeight: useColumnLayout ? Screen.height : Dock.MAX_DOCK_SIZE
+    minimumHeight: useColumnLayout? Screen.height : Dock.MIN_DOCK_SIZE
+    maximumWidth: useColumnLayout ? Dock.MAX_DOCK_SIZE : Screen.width
+    minimumWidth: useColumnLayout ? Dock.MIN_DOCK_SIZE : Screen.width
 
     function blendColorAlpha(fallback) {
         var appearance = DS.applet("org.deepin.ds.dde-appearance")
@@ -788,7 +792,12 @@ Window {
             Panel.requestClosePopup()
             
             if (dock.compositorDrivenResize) {
-                Panel.beginResize()
+                const edge = Panel.position === Dock.Top ? Qt.BottomEdge
+                    : Panel.position === Dock.Bottom ? Qt.TopEdge
+                    : Panel.position === Dock.Left ? Qt.RightEdge : Qt.LeftEdge
+                if (!dock.startSystemResize(edge))
+                    finishResize()
+                return
             }
             DS.grabMouse(Panel.rootObject, true)
         }
@@ -838,12 +847,18 @@ Window {
         onReleased: function(mouse) {
             if (Panel.locked) return
         
-            if (dock.compositorDrivenResize && Applet.isResizing) return
+            if (dock.DLayerShellWindow.resizing) return
 
             finishResize()
         }
 
+        onCanceled: {
+            if (!dock.DLayerShellWindow.resizing)
+                finishResize()
+        }
+
         function finishResize() {
+            if (!dock.isDragging) return
             dock.isDragging = false
             Applet.dockSize = dockSize
             itemIconSizeBase = dockItemMaxSize
@@ -883,9 +898,12 @@ Window {
     }
 
     Connections {
-        target: Panel
-        function onIsResizingChanged(resizing) {
-            if (!resizing && dock.isDragging) {
+        target: dock.DLayerShellWindow
+        function onResizeFinished(size) {
+            Applet.dockSize = dock.useColumnLayout ? size.width : size.height
+        }
+        function onResizingChanged() {
+            if (!dock.DLayerShellWindow.resizing && dock.isDragging) {
                 dragArea.finishResize()
             }
         }
@@ -895,7 +913,7 @@ Window {
         target: dock
         enabled: dock.compositorDrivenResize
             // Wayland can apply animation geometry after the animation stops.
-            && dock.isDragging && Applet.isResizing
+            && dock.isDragging && dock.DLayerShellWindow.resizing
             && !hideShowAnimation.running
             && !dockAnimation.running
         function onWidthChanged() {

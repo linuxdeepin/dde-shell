@@ -32,6 +32,7 @@ class DS_SHARE DLayerShellWindow : public QObject
     Q_PROPERTY(int preferredHeight READ preferredHeight WRITE setPreferredHeight RESET resetPreferredHeight NOTIFY geometryHintsChanged)
     Q_PROPERTY(QRegion inputRegion READ inputRegion WRITE setInputRegion RESET resetInputRegion NOTIFY inputRegionChanged)
     
+    Q_PROPERTY(bool resizing READ isResizing NOTIFY resizingChanged)
     Q_PROPERTY(bool closeOnDismissed READ closeOnDismissed WRITE setCloseOnDismissed)
 
 public:
@@ -149,6 +150,9 @@ public:
 
     bool ensureWaylandShellIntegration();
 
+    /** Whether a system resize is pending or active on this layer surface. */
+    bool isResizing() const;
+
     /**
      * Gets the LayerShell Window for a given Qt Window
      * Ownership is not transferred
@@ -166,8 +170,14 @@ Q_SIGNALS:
     void scopeChanged();
     void geometryHintsChanged();
     void inputRegionChanged();
+    void resizingChanged();
+    // Final size in QWindow coordinates, delivered before resizing becomes false.
+    void resizeFinished(const QSize &size);
 
 private:
+    friend class QWaylandLayerShellSurface;
+    void setResizing(bool resizing);
+
     DLayerShellWindow(QWindow* window);
     QScopedPointer<DLayerShellWindowPrivate> d;
 };

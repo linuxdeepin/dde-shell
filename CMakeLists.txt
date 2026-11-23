@@ -60,6 +60,7 @@ endif()
 find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui)
 find_package(ICU 74.2 REQUIRED COMPONENTS uc i18n io)
 find_package(WaylandProtocols REQUIRED)
+find_package(TreelandProtocols 0.9.0 REQUIRED)
 find_package(PkgConfig REQUIRED)
 
 # Check if dde-api provides EventLogger (header-only)

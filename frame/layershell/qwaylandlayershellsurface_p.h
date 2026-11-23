@@ -7,11 +7,14 @@
 #include "dsglobal.h"
 #include "dlayershellwindow.h"
 
+#include <QPointer>
 #include <private/qwaylandwindow_p.h>
 #include <qwayland-wlr-layer-shell-unstable-v1.h>
 #include <QtWaylandClient/private/qwaylandshellsurface_p.h>
 
 DS_BEGIN_NAMESPACE
+
+class TreeLandLayerShellExtensionObject;
 
 class QWaylandLayerShellSurface : public QtWaylandClient::QWaylandShellSurface, public QtWayland::zwlr_layer_surface_v1
 {
@@ -28,6 +31,7 @@ public:
     void applyConfigure() override;
     void setWindowGeometry(const QRect &geometry) override;
     void attachPopup(QWaylandShellSurface *popup) override;
+    bool resize(QtWaylandClient::QWaylandInputDevice *inputDevice, Qt::Edges edges) override;
 
 private:
     void zwlr_layer_surface_v1_configure(uint32_t serial, uint32_t width, uint32_t height) override;
@@ -51,12 +55,16 @@ private:
     void recreateWindow();
     void flushRecreate();
     void scheduleRecreate();
+    void finishResize();
 
-    DLayerShellWindow* m_dlayerShellWindow;
+    QPointer<DLayerShellWindow> m_dlayerShellWindow;
+    QScopedPointer<TreeLandLayerShellExtensionObject> m_shellExtension;
     QSize m_pendingSize;
     QSize m_requestSize;
     wl_output *m_output = nullptr;
     bool m_configured = false;
+    bool m_applyingConfigure = false;
+    bool m_interactiveResize = false;
     bool m_commitScheduled = false;
     bool m_recreateScheduled = false;
 };

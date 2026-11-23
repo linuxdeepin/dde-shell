@@ -5,12 +5,16 @@
 #include "dsglobal.h"
 #include "dlayershellwindow.h"
 #include "qwaylandlayershellsurface_p.h"
+#include "layershellextension_p.h"
 
 #include <qwayland-wlr-layer-shell-unstable-v1.h>
 #include <wayland-wlr-layer-shell-unstable-v1-client-protocol.h>
 
 #include <QLoggingCategory>
+#include <QScopedValueRollback>
+#include <private/qhighdpiscaling_p.h>
 
+#include <QtWaylandClient/private/qwaylandinputdevice_p.h>
 #include <QtWaylandClient/private/qwaylandscreen_p.h>
 #include <QtWaylandClient/private/qwaylandsurface_p.h>
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
@@ -63,6 +67,9 @@ QWaylandLayerShellSurface::QWaylandLayerShellSurface(QtWayland::zwlr_layer_shell
 
 QWaylandLayerShellSurface::~QWaylandLayerShellSurface()
 {
+    m_shellExtension.reset();
+    if (m_dlayerShellWindow)
+        m_dlayerShellWindow->setResizing(false);
     destroy();
 }
 
@@ -173,7 +180,7 @@ void QWaylandLayerShellSurface::zwlr_layer_surface_v1_configure(uint32_t serial,
 
     if (!m_configured) {
         m_configured = true;
-        window()->resizeFromApplyConfigure(m_pendingSize);
+        applyConfigure();
 #if QT_VERSION < QT_VERSION_CHECK(6, 7, 0)
         window()->handleExpose(QRect(QPoint(), m_pendingSize));
 #elif QT_VERSION < QT_VERSION_CHECK(6, 9, 0)
@@ -189,11 +196,87 @@ void QWaylandLayerShellSurface::zwlr_layer_surface_v1_configure(uint32_t serial,
 
 void QWaylandLayerShellSurface::applyConfigure()
 {
+    if (m_interactiveResize) {
+        // Keep layer layout in step with the size Qt is about to render. In
+        // particular, margin/exclusive-zone commits must not re-anchor the
+        // surface using its pre-drag size. Do not echo unchanged replies.
+        const QSize previousRequest = m_requestSize;
+        calcAndSetRequestSize(m_pendingSize);
+        if (m_requestSize != previousRequest)
+            trySetAnchorsAndSize();
+    }
+
+    QScopedValueRollback<bool> applyingConfigure(m_applyingConfigure, true);
     window()->resizeFromApplyConfigure(m_pendingSize);
+}
+
+void QWaylandLayerShellSurface::finishResize()
+{
+    // An interactive resize can end before Qt applies its last configure.
+    // Adopt it before clients persist their size or restore geometry bindings.
+    if (m_interactiveResize && m_configured) {
+        calcAndSetRequestSize(m_pendingSize);
+        trySetAnchorsAndSize();
+        Q_EMIT m_dlayerShellWindow->resizeFinished(QHighDpi::fromNativePixels(m_pendingSize, windowHandle()));
+    }
+    m_interactiveResize = false;
+    m_dlayerShellWindow->setResizing(false);
+}
+
+bool QWaylandLayerShellSurface::resize(QtWaylandClient::QWaylandInputDevice *inputDevice, Qt::Edges edges)
+{
+    if (!inputDevice || !inputDevice->wl_seat() || !m_configured || m_dlayerShellWindow->isResizing())
+        return false;
+
+    auto *manager = TreeLandLayerShellExtensionManager::instance();
+    if (!manager->isActive())
+        return false;
+
+    // Qt::Edge and the protocol's xdg_toplevel-compatible enum differ.
+    uint32_t protocolEdges = 0;
+    if (edges.testFlag(Qt::TopEdge))
+        protocolEdges |= TreeLandLayerShellExtensionObject::resize_edge_top;
+    if (edges.testFlag(Qt::BottomEdge))
+        protocolEdges |= TreeLandLayerShellExtensionObject::resize_edge_bottom;
+    if (edges.testFlag(Qt::LeftEdge))
+        protocolEdges |= TreeLandLayerShellExtensionObject::resize_edge_left;
+    if (edges.testFlag(Qt::RightEdge))
+        protocolEdges |= TreeLandLayerShellExtensionObject::resize_edge_right;
+
+    if (!m_shellExtension) {
+        m_shellExtension.reset(new TreeLandLayerShellExtensionObject(
+            manager->get_layer_shell_extension_object(window()->wlSurface())));
+        connect(m_shellExtension.get(), &TreeLandLayerShellExtensionObject::resizingChanged, this, [this](bool resizing) {
+            if (resizing)
+                m_interactiveResize = true;
+            else
+                finishResize();
+        });
+        connect(m_shellExtension.get(), &TreeLandLayerShellExtensionObject::resizeRejected, this, [this](uint32_t error) {
+            qCWarning(layershellsurface) << "Layer surface resize rejected:" << error;
+            finishResize();
+        });
+    }
+
+    const QSize minSize = window()->windowMinimumSize();
+    const QSize maxSize = window()->windowMaximumSize();
+    m_shellExtension->begin_resize(inputDevice->wl_seat(), inputDevice->serial(), protocolEdges,
+                                  qMax(0, minSize.width()), qMax(0, minSize.height()),
+                                  maxSize.width() == QWINDOWSIZE_MAX ? 0 : qMax(0, maxSize.width()),
+                                  maxSize.height() == QWINDOWSIZE_MAX ? 0 : qMax(0, maxSize.height()));
+    // QWaylandWindow releases the client pointer grab after this returns.
+    // Keep clients in resize mode while waiting for acceptance or rejection.
+    m_dlayerShellWindow->setResizing(true);
+    return true;
 }
 
 void QWaylandLayerShellSurface::setWindowGeometry(const QRect &geometry)
 {
+    // Qt also calls this while applying a compositor configure. Echoing that
+    // size back can replace a newer client request and start a resize loop.
+    if (m_applyingConfigure)
+        return;
+
     calcAndSetRequestSize(geometry.size());
     trySetAnchorsAndSize();
 }
