@@ -22,6 +22,11 @@ public:
     void lock();
     void shutdown();
     void switchUser();
+    void powerOff();
+    void reboot();
+    void suspend();
+    void hibernate();
+    void logout();
 };
 }
 DS_END_NAMESPACE
