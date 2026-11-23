@@ -43,6 +43,7 @@ public:
     int preferredWidth = -1;
     int preferredHeight = -1;
     bool closeOnDismissed = true;
+    bool resizing = false;
     QRegion inputRegion;
 };
 
@@ -297,6 +298,19 @@ bool DLayerShellWindow::ensureWaylandShellIntegration()
     if (!waylandWindow->shellSurface())
         waylandWindow->setShellIntegration(shellIntegration);
     return waylandWindow->shellIntegration() == shellIntegration;
+}
+
+bool DLayerShellWindow::isResizing() const
+{
+    return d->resizing;
+}
+
+void DLayerShellWindow::setResizing(bool resizing)
+{
+    if (d->resizing == resizing)
+        return;
+    d->resizing = resizing;
+    Q_EMIT resizingChanged();
 }
 
 DLayerShellWindow* DLayerShellWindow::get(QWindow* window)
