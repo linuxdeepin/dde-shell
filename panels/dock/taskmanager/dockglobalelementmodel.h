@@ -47,6 +47,13 @@ public slots:
     void syncApplicationFolders();
 
 private:
+    // Application id, source model, cached row, and stable window id (for running items).
+    // 目前 Item的 保存的 四种属性为： 应用id，源模型，缓存行号，稳定的窗口id（用于运行中的项目）
+    using Item = std::tuple<QString, QAbstractItemModel *, int, QString>;
+    Item makeItem(const QString &id, QAbstractItemModel *model, int row) const;
+    QModelIndex sourceIndex(const Item &item) const;
+    void scheduleWindowSync();
+    void syncWindows();
     QModelIndex applicationFolderIndex(const QString &id) const;
     QString applicationFolderName(const QString &id) const;
     QVariantList applicationFolderContents(const QString &id) const;
@@ -60,11 +67,10 @@ private:
     void dropFolderElement(FolderPresentation *presentation);
     QString getMenus(const QModelIndex &index) const;
     void groupItemsByApp();
-    int findActiveRowByDesktopId(const QString &id) const;
 
 private:
-    // id, model, and pos
-    QList<std::tuple<QString, QAbstractItemModel *, int>> m_data;
+    QList<Item> m_data;
+    bool m_windowSyncPending = false;
 
     // type, id
     QList<std::tuple<QString, QString>> m_dockedElements;
