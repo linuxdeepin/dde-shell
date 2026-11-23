@@ -40,5 +40,39 @@ void TreeLandLockScreen::switchUser()
         trigger(action_show_user_switch);
     }
 }
+void TreeLandLockScreen::powerOff()
+{
+    if (isActive()) {
+        trigger(action_shutdown_menu_power_off);
+    }
+}
+
+void TreeLandLockScreen::reboot()
+{
+    if (isActive()) {
+        trigger(action_shutdown_menu_reboot);
+    }
+}
+
+void TreeLandLockScreen::suspend()
+{
+    if (isActive()) {
+        trigger(action_shutdown_menu_suspend);
+    }
+}
+
+void TreeLandLockScreen::hibernate()
+{
+    if (isActive()) {
+        trigger(action_shutdown_menu_hibernate);
+    }
+}
+
+void TreeLandLockScreen::logout()
+{
+    if (isActive()) {
+        trigger(action_shutdown_menu_log_out);
+    }
+}
 }
 DS_END_NAMESPACE
