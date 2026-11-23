@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -48,16 +48,21 @@ bool ShutdownApplet::requestShutdown(const QString &type)
             // TODO: left mouse clicked, show shutdown page
             m_lockscreen->shutdown();
         } else if (type == QStringLiteral("Shutdown")) {
-            m_lockscreen->shutdown();
+            m_lockscreen->powerOff();
         } else if (type == QStringLiteral("Lock")) {
             m_lockscreen->lock();
         } else if (type == QStringLiteral("SwitchUser")) {
             m_lockscreen->switchUser();
-        } else if (type == QStringLiteral("UpdateAndShutdown") || type == QStringLiteral("UpdateAndReboot") ||
-            type == QStringLiteral("Suspend") || type == QStringLiteral("Hibernate") ||
-            type == QStringLiteral("Restart") || type == QStringLiteral("Logout")) {
-            // TODO: implement these types
-            m_lockscreen->shutdown();
+        } else if (type == QStringLiteral("Restart") || type == QStringLiteral("UpdateAndReboot")) {
+            m_lockscreen->reboot();
+        } else if (type == QStringLiteral("Suspend")) {
+            m_lockscreen->suspend();
+        } else if (type == QStringLiteral("Hibernate")) {
+            m_lockscreen->hibernate();
+        } else if (type == QStringLiteral("Logout")) {
+            m_lockscreen->logout();
+        } else if (type == QStringLiteral("UpdateAndShutdown")) {
+            m_lockscreen->powerOff();
         }
     } else {
         if (type == QStringLiteral("Lock")) {
