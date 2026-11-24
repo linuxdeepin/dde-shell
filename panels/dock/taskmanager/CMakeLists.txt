@@ -118,6 +118,9 @@ if (BUILD_WITH_X11)
     pkg_check_modules(TaskmanagerXcb REQUIRED IMPORTED_TARGET xcb xcb-res xcb-ewmh xcb-icccm)
     find_package(Dtk${DTK_VERSION_MAJOR} REQUIRED COMPONENTS Widget)
     target_sources(dock-taskmanager PRIVATE
+        mirrormodeclient.cpp
+        mirrormodeclient.h
+        mirrormodepolicy.h
         x11preview.h
         x11preview.cpp
         x11preview.qrc

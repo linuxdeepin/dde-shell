@@ -5,6 +5,8 @@
 #include "x11preview.h"
 
 #include "appitem.h"
+#include "mirrormodeclient.h"
+#include "mirrormodepolicy.h"
 #include "taskmanager.h"
 #include "taskmanagersettings.h"
 #include "x11utils.h"
@@ -61,6 +63,48 @@ Q_LOGGING_CATEGORY(x11WindowPreview, "org.deepin.dde.shell.dock.taskmanager.x11W
 DGUI_USE_NAMESPACE
 
 namespace dock {
+
+namespace {
+
+// Every preview item carries its own approval button, tagged with the window it speaks
+// for so a click can never be applied to any other window.
+constexpr char MIRROR_BUTTON_NAME[] = "mirrormodebutton";
+constexpr char MIRROR_BUTTON_WIN_ID[] = "winId";
+// The gap between the two buttons, and between the close button and the item edge.
+constexpr int MIRROR_BUTTON_INSET = 4;
+
+// The control is offered only for the windows KWin publishes as primary, and only while
+// the policy turns the listed flag into an approval the user may change.
+bool mirrorButtonVisible(const MirrorModeClient *client, uint32_t winId)
+{
+    return client && winId != 0 && mirrorModeCanApprove(client->policy()) && client->isPrimary(winId);
+}
+
+bool mirrorButtonApproved(const MirrorModeClient *client, uint32_t winId)
+{
+    return mirrorModeIsApproved(client->policy(), client->isListed(winId));
+}
+
+// A closed shackle reads as approved, an open one as not approved.
+DDciIcon mirrorButtonIcon(bool approved)
+{
+    if (approved) {
+        return DDciIcon::fromTheme(QStringLiteral("lock"), DDciIcon::fromTheme(QStringLiteral("object-locked")));
+    }
+    return DDciIcon::fromTheme(QStringLiteral("unlock"), DDciIcon::fromTheme(QStringLiteral("object-unlocked")));
+}
+
+void updateMirrorButton(DIconButton *button, const MirrorModeClient *client)
+{
+    const uint32_t winId = button->property(MIRROR_BUTTON_WIN_ID).toUInt();
+    const bool visible = mirrorButtonVisible(client, winId);
+    button->setVisible(visible);
+    if (visible) {
+        button->setIcon(mirrorButtonIcon(mirrorButtonApproved(client, winId)));
+    }
+}
+
+} // namespace
 
 static QHash<uint32_t, QPixmap> s_windowPreviewCache;
 
@@ -229,6 +273,11 @@ public:
     {
         auto themeType = DGuiApplicationHelper::instance()->themeType();
 
+        // Named apart from the branch-local winId below, which the paint paths re-read.
+        const uint32_t previewWinId = index.data(TaskManager::WinIdRole).toUInt();
+        // Whether this very item is offered the approval button; the title keeps room for it.
+        const bool mirrorVisible = mirrorButtonVisible(m_parent->mirrorModeClient(), previewWinId);
+
         QRect hoverRect = option.rect;
 
         QPen pen;
@@ -283,8 +332,13 @@ public:
                                     PREVIEW_CONTENT_MAX_WIDTH + PREVIEW_HOVER_BORDER * 2,
                                     PREVIEW_TITLE_HEIGHT + PREVIEW_HOVER_BORDER * 2)
                                 .marginsAdded(QMargins(-PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER, -PREVIEW_HOVER_BORDER));
+            // The buttons own the item's top-right corner, so the title stops before them.
+            int textRightInset = PREVIEW_TITLE_HEIGHT;
+            if (mirrorVisible) {
+                textRightInset += PREVIEW_TITLE_HEIGHT * 2 + MIRROR_BUTTON_INSET * 2;
+            }
             auto text = QFontMetrics(m_parent->font())
-                            .elidedText(index.data(TaskManager::WinTitleRole).toString(), Qt::TextElideMode::ElideRight, rect.width() - PREVIEW_TITLE_HEIGHT);
+                            .elidedText(index.data(TaskManager::WinTitleRole).toString(), Qt::TextElideMode::ElideRight, rect.width() - textRightInset);
             painter->drawText(rect, text);
 
             if (option.state.testFlag(QStyle::State_MouseOver)) {
@@ -340,8 +394,53 @@ public:
 
         closeButton->setIconSize(QSize(16, 16));
         closeButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
-        closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + 4, -5));
+        closeButton->move(option.rect.topRight() - QPoint(PREVIEW_TITLE_HEIGHT + MIRROR_BUTTON_INSET, -5));
         closeButton->setVisible(true);
+
+        // The approval control belongs to this very item: same size and inset as the close
+        // button, one step to its left, and it writes only the window quoted by this index.
+        auto mirrorButton = new DIconButton(parent);
+        mirrorButton->setObjectName(MIRROR_BUTTON_NAME);
+        mirrorButton->setProperty(MIRROR_BUTTON_WIN_ID, index.data(TaskManager::WinIdRole).toUInt());
+        mirrorButton->setEnabledCircle(true);
+        mirrorButton->setPalette(palette);
+        mirrorButton->setIconSize(QSize(16, 16));
+        mirrorButton->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
+        mirrorButton->move(option.rect.topRight()
+                           - QPoint(PREVIEW_TITLE_HEIGHT * 2 + MIRROR_BUTTON_INSET * 2, -5));
+        updateMirrorButton(mirrorButton, m_parent->mirrorModeClient());
+
+        // The view deletes the editor it got but not this second button, so follow it.
+        connect(closeButton, &QObject::destroyed, mirrorButton, [mirrorButton]() {
+            // Losing the name keeps the per-item refresh from showing it again meanwhile.
+            mirrorButton->setObjectName(QString());
+            mirrorButton->hide();
+            mirrorButton->deleteLater();
+        });
+
+        // The write is asynchronous and the button is refreshed from the window lists
+        // KWin publishes afterwards, so the click never waits for KWin, never writes a
+        // state computed from a stale one, and never touches the button once the editor
+        // that owns it is gone.
+        connect(mirrorButton, &DIconButton::clicked, this, [this, button = QPointer<DIconButton>(mirrorButton)]() {
+            if (!button) {
+                return;
+            }
+            MirrorModeClient *client = m_parent->mirrorModeClient();
+            const uint32_t winId = button->property(MIRROR_BUTTON_WIN_ID).toUInt();
+            if (!mirrorButtonVisible(client, winId)) {
+                qCInfo(x11WindowPreview) << "mirror button ignored, winId" << winId << "is not approvable";
+                return;
+            }
+
+            const MirrorModePolicy policy = client->policy();
+            const bool approved = mirrorButtonApproved(client, winId);
+            const bool listed = mirrorModeListedForApproval(policy, !approved);
+            qCInfo(x11WindowPreview) << "mirror button clicked, winId" << winId << "policy"
+                                     << static_cast<uint32_t>(policy) << "approved" << approved
+                                     << "writes listed" << listed;
+            client->setListed(winId, listed);
+        });
 
         connect(closeButton, &DToolButton::clicked, this, [this, index]() {
             uint32_t winId = index.data(TaskManager::WinIdRole).toUInt();
@@ -404,6 +503,17 @@ X11WindowPreviewContainer::X11WindowPreviewContainer(X11WindowMonitor *monitor, 
 
     setWindowFlags(Qt::ToolTip | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus | Qt::FramelessWindowHint);
     setMouseTracking(true);
+    m_mirrorModeClient = new MirrorModeClient(this);
+    // KWin republishes the switch and the policy as a root window property change, while
+    // the window lists come with windowsChanged. Following both keeps the cached state
+    // from going stale while the preview stays open.
+    connect(m_monitor.data(), &X11WindowMonitor::windowPropertyChanged, m_mirrorModeClient,
+            [this](xcb_window_t window, xcb_atom_t atom) {
+                if (m_mirrorModeClient->isModeProperty(window, atom)) {
+                    m_mirrorModeClient->refresh();
+                }
+            },
+            Qt::QueuedConnection);
     initUI();
 
     connect(m_hideTimer, &QTimer::timeout, this, &X11WindowPreviewContainer::callHide);
@@ -493,6 +603,7 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
                             m_view->updateGeometry();
                             m_view->adjustSize();
                             updateSize(m_sourceModel->rowCount());
+                            m_view->viewport()->update();
                         } else {
                             // 如果没有窗口了，隐藏预览容器
                             hide();
@@ -509,6 +620,7 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
                         m_view->updateGeometry();
                         m_view->adjustSize();
                         updateSize(m_sourceModel->rowCount());
+                        m_view->viewport()->update();
                     }
                 });
             });
@@ -529,8 +641,25 @@ void X11WindowPreviewContainer::showPreviewWithModel(QAbstractItemModel *sourceM
         updateSize(0);
     }
 
+    m_mirrorModeClient->refresh();
+    refreshMirrorButtons();
+    m_view->viewport()->update();
+
     if (isHidden()) {
         show();
+    }
+}
+
+MirrorModeClient *X11WindowPreviewContainer::mirrorModeClient() const
+{
+    return m_mirrorModeClient;
+}
+
+void X11WindowPreviewContainer::refreshMirrorButtons()
+{
+    const auto buttons = m_view->viewport()->findChildren<DIconButton *>(QString::fromLatin1(MIRROR_BUTTON_NAME));
+    for (auto *button : buttons) {
+        updateMirrorButton(button, m_mirrorModeClient);
     }
 }
 
@@ -659,6 +788,12 @@ void X11WindowPreviewContainer::initUI()
     titleLayout->setSpacing(0);
 
     m_previewIcon = new QLabel(this);
+    // KWin republishes the window lists whenever a flag changes elsewhere, so both the
+    // items and their approval buttons follow the state KWin actually holds.
+    connect(m_mirrorModeClient, &MirrorModeClient::changed, this, [this]() {
+        refreshMirrorButtons();
+        m_view->viewport()->update();
+    });
     m_previewTitle = new DLabel(this);
     m_previewTitle->setFixedHeight(PREVIEW_TITLE_HEIGHT);
     m_previewIcon->setFixedSize(PREVIEW_TITLE_HEIGHT, PREVIEW_TITLE_HEIGHT);
