@@ -519,8 +519,8 @@ Window {
     Item {
         id: dockContainer
         Accessible.id: "main_Item"
-        width: dock.useColumnLayout ? dock.dockSize : parent.width
-        height: dock.useColumnLayout ? parent.height : dock.dockSize
+        width: dock.useColumnLayout ? (dock.isDragging ? parent.width : dock.dockSize) : parent.width
+        height: dock.useColumnLayout ? parent.height : (dock.isDragging ? parent.height : dock.dockSize)
         property bool touchLongPressed: false
         anchors {
             left: parent.left
