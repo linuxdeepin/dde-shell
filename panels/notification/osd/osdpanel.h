@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -46,6 +46,8 @@ private:
 private:
     bool m_visible = false;
     QTimer *m_osdTimer = nullptr;
+    QTimer *m_hideTimer = nullptr;
+    int m_pendingDispatches = 0;
     QString m_osdType;
     QString m_lastOsdType;
     int m_interval {2000};

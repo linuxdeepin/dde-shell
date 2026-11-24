@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -102,31 +102,33 @@ QQmlListProperty<DPItem> DisPlayModeApplet::planItems()
 
 void DisPlayModeApplet::sync()
 {
-    if (!m_actionTimer->isActive()) {
-        fetchPlanItems();
-        auto current = fetchCurrentPlanItem();
-        setCurrentPlanItem(current);
-        Q_EMIT planItemsChanged();
-    }
-    auto state = fetchState();
+    if (!m_actionTimer->isActive())
+        refreshDisplayState();
 
-    setState(state);
+    setState(fetchState());
+}
+
+void DisPlayModeApplet::refreshDisplayState()
+{
+    m_planItemsValid = fetchPlanItems();
+    const auto current = m_planItemsValid ? fetchCurrentPlanItem() : std::nullopt;
+    setCurrentPlanItem(current.value_or(nullptr));
+    Q_EMIT planItemsChanged();
 }
 
 void DisPlayModeApplet::next()
 {
-    auto it = std::find_if(m_planItems.begin(), m_planItems.end(), [this](const DPItem *item) {
-        return m_currentPlanItem && item->key() == m_currentPlanItem->key();
-    });
-    if (it != m_planItems.end()) {
-        auto offset = it - m_planItems.begin();
-        auto nextIndex = (offset + 1) % m_planItems.count();
-        const auto item = m_planItems.at(nextIndex);
-        Q_ASSERT(item);
-        setCurrentPlanItem(item);
-        qCInfo(osdDPLog) << "next display mode" << item->mode() << item->name();
-        m_actionTimer->start();
-    }
+    if (!m_planItemsValid)
+        refreshDisplayState();
+
+    if (!m_planItemsValid || m_planItems.isEmpty())
+        return;
+
+    const auto nextIndex = (m_planItems.indexOf(m_currentPlanItem) + 1) % m_planItems.size();
+    const auto item = m_planItems.at(nextIndex);
+    setCurrentPlanItem(item);
+    qCInfo(osdDPLog) << "next display mode" << item->mode() << item->name();
+    m_actionTimer->start();
 }
 
 void DisPlayModeApplet::doAction()
@@ -152,18 +154,18 @@ void DisPlayModeApplet::setCurrentPlanItem(DPItem *newCurrentPlanItem)
     emit currentPlanItemChanged();
 }
 
-void DisPlayModeApplet::fetchPlanItems()
+bool DisPlayModeApplet::fetchPlanItems()
 {
+    setCurrentPlanItem(nullptr);
+    qDeleteAll(m_planItems);
+    m_planItems.clear();
+
     QDBusReply<QStringList> listOutputNames = displayInter().method("ListOutputNames").call();
     if (!listOutputNames.isValid()) {
         qCWarning(osdDPLog) << "Failed to fetch ListOutputNames" << listOutputNames.error();
-        return;
+        return false;
     }
     auto outputNames = listOutputNames.value();
-
-    qDeleteAll(m_planItems);
-    m_planItems.clear();
-    m_currentPlanItem = nullptr;
 
     m_planItems << new DPItem(tr("Duplicate"), "osd_multi_screen_copy", DPItem::Merge, this);
     m_planItems << new DPItem(tr("Extend"), "osd_multi_screen_extension", DPItem::Extend, this);
@@ -175,22 +177,26 @@ void DisPlayModeApplet::fetchPlanItems()
             m_planItems << new DPItem(tr("Only on %1").arg(item), item, iconName, DPItem::Single, this);
         }
     }
+    return true;
 }
 
-DPItem *DisPlayModeApplet::fetchCurrentPlanItem() const
+std::optional<DPItem *> DisPlayModeApplet::fetchCurrentPlanItem() const
 {
+    if (m_planItems.isEmpty())
+        return nullptr;
+
     auto inter = displayInter();
     QDBusReply<QVariant> displayMode = inter.property("DisplayMode").get();
     if (!displayMode.isValid()) {
         qCWarning(osdDPLog) << "Failed to fetch DisplayMode" << displayMode.error();
-        return nullptr;
+        return std::nullopt;
     }
     auto mode = qdbus_cast<uchar>(displayMode);
 
     QDBusReply<QVariant> primaryScreen = inter.property("Primary").get();
     if (!primaryScreen.isValid()) {
         qCWarning(osdDPLog) << "Failed to fetch Primary" << primaryScreen.error();
-        return nullptr;
+        return std::nullopt;
     }
     auto screen = qdbus_cast<QString>(primaryScreen);
 
