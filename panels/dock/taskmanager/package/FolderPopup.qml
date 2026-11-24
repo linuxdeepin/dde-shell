@@ -112,7 +112,7 @@ PanelPopup {
                 anchors.topMargin: 44
                 anchors.bottomMargin: 12
                 anchors.leftMargin: 12
-                anchors.rightMargin: 12
+                anchors.rightMargin: 2
                 contentWidth: width
                 contentHeight: root.rows * root.cellHeight
                 clip: true
