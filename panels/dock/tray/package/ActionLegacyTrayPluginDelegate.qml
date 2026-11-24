@@ -20,8 +20,15 @@ AppletItemButton {
     id: root
     property alias inputEventsEnabled: surfaceItem.inputEventsEnabled
 
-    property size visualSize: isHorizontal ? Qt.size(pluginItem.implicitWidth, Math.min(itemHeight, pluginItem.implicitHeight))
-                                           : Qt.size(Math.min(itemWidth, pluginItem.implicitWidth), pluginItem.implicitHeight)
+    property real surfaceAspectRatio: (pluginItem.implicitWidth > 0 && pluginItem.implicitHeight > 0)
+        ? (pluginItem.implicitWidth / pluginItem.implicitHeight)
+        : 1.0
+
+    property size visualSize: isHorizontal
+        ? Qt.size(Math.min(itemHeight, pluginItem.implicitHeight) * surfaceAspectRatio,
+                  Math.min(itemHeight, pluginItem.implicitHeight))
+        : Qt.size(Math.min(itemWidth, pluginItem.implicitWidth),
+                  Math.min(itemWidth, pluginItem.implicitWidth) / surfaceAspectRatio)
 
     readonly property int itemWidth: isHorizontal ? 0 : DDT.TrayItemPositionManager.dockHeight
     readonly property int itemHeight: isHorizontal ? DDT.TrayItemPositionManager.dockHeight : 0
