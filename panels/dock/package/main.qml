@@ -116,9 +116,10 @@ Window {
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
     maximumHeight: useColumnLayout ? Screen.height : Dock.MAX_DOCK_SIZE
-    minimumHeight: useColumnLayout? Screen.height : Dock.MIN_DOCK_SIZE
+    minimumHeight: useColumnLayout ? Screen.height : (isDragging ? Dock.MIN_DOCK_SIZE : 1)
     maximumWidth: useColumnLayout ? Dock.MAX_DOCK_SIZE : Screen.width
-    minimumWidth: useColumnLayout ? Dock.MIN_DOCK_SIZE : Screen.width
+    minimumWidth: useColumnLayout ? (isDragging ? Dock.MIN_DOCK_SIZE : 1)
+        : (fashionDock.enabled ? 1 : Screen.width)
 
     function blendColorAlpha(fallback) {
         var appearance = DS.applet("org.deepin.ds.dde-appearance")
@@ -156,7 +157,20 @@ Window {
     DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityNone
 
     D.DWindow.enabled: true
-    D.DWindow.windowRadius: fashionDock.enabled ? fashionDock.backgroundRadius : 0
+    D.DWindow.windowRadius: {
+        if (!fashionDock.enabled)
+            return 0
+
+        // KWin can turn a rounded window's local blur region into whole-window
+        // blur. Restore the native radius only after the content is back in place;
+        // StyledBehindWindowBlur keeps its own rounded corners during animation.
+        if (Qt.platform.pluginName === "xcb"
+                && (hideShowAnimation.running || dockAnimation.running
+                    || dockTransform.x !== 0 || dockTransform.y !== 0))
+            return 0
+
+        return fashionDock.backgroundRadius
+    }
     //TODO：由于windoweffect处理有BUG，导致动画结束后一致保持无阴影，无borderwidth状态。 无法恢复到最初的阴影和边框
     //D.DWindow.windowEffect: hideShowAnimation.running ? D.PlatformHandle.EffectNoShadow | D.PlatformHandle.EffectNoBorder : 0
     
@@ -198,7 +212,7 @@ Window {
     PropertyAnimation {
         id: hideShowAnimation;
         // Currently, Wayland (Treeland) doesn't support StyledBehindWindowBlur inside the window, thus we keep using the window size approach on Wayland
-        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb" && !fashionDock.enabled
+        property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb"
         property bool hiding: false
         target: useTransformBasedAnimation ? dockTransform : dock;
         property: {
