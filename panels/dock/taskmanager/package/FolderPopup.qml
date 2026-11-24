@@ -21,7 +21,7 @@ PanelPopup {
 
     readonly property bool hasProviderContent: presentation !== null && presentation !== undefined
     readonly property int itemCount: contents.length
-    readonly property int columns: itemCount <= 8 ? 4 : 5
+    readonly property int columns: itemCount < 4 ? Math.max(1, itemCount) : (itemCount <= 8 ? 4 : 5)
     readonly property int rows: Math.max(1, Math.ceil(itemCount / columns))
     readonly property real cellWidth: 96
     readonly property real cellHeight: 104
@@ -34,9 +34,9 @@ PanelPopup {
     readonly property real screenX: workArea.width > 0 ? workArea.x : (screen ? screen.virtualX : 0)
     readonly property real screenY: workArea.height > 0 ? workArea.y : (screen ? screen.virtualY : 0)
     readonly property bool verticalDock: Panel.position === Dock.Left || Panel.position === Dock.Right
-    // Room for a full row of four cells, so a sparse folder still reads as a
-    // popup instead of a narrow strip.
-    readonly property real minimumWidth: 420
+    // Width follows the actual column count so a sparse folder does not
+    // occupy a full four-cell width.
+    readonly property real minimumWidth: 0
     readonly property real maximumWidth: screenWidth - (verticalDock ? Panel.rootObject.width + 30 : 20)
     readonly property real maximumHeight: screenHeight - (verticalDock ? 20 : Panel.rootObject.height + 30)
     width: hasProviderContent
