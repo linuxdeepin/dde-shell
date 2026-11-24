@@ -18,22 +18,19 @@ AppletItem {
 
     function update(osdType)
     {
-        Applet.sync()
-        if (match(osdType)) {
+        if (!match(osdType))
+            return false
 
-            if (osdType === "DirectSwitchLayout") {
-                if (Applet.state !== 2) {
-                    Applet.doAction()
-                }
-            } else if (osdType === "SwitchMonitors") {
-                if (Panel.lastOsdType() === osdType) {
-                    Applet.next()
-                }
-            }
-
+        if (osdType === "SwitchMonitors" && Panel.lastOsdType() === osdType) {
+            Applet.next()
             return true
         }
-        return false
+
+        Applet.sync()
+        if (osdType === "DirectSwitchLayout" && Applet.state !== 2)
+            Applet.doAction()
+
+        return true
     }
     function match(osdType)
     {

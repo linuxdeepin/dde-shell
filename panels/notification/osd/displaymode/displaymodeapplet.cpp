@@ -113,20 +113,26 @@ QQmlListProperty<DPItem> DisPlayModeApplet::planItems()
 
 void DisPlayModeApplet::sync()
 {
-    if (!m_actionTimer->isActive()) {
-        fetchPlanItems();
-        auto current = fetchCurrentPlanItem();
-        setCurrentPlanItem(current);
-        Q_EMIT planItemsChanged();
-    }
-    auto state = fetchState();
+    if (!m_actionTimer->isActive())
+        refreshDisplayState();
 
-    setState(state);
+    setState(fetchState());
+}
+
+void DisPlayModeApplet::refreshDisplayState()
+{
+    m_planItemsValid = fetchPlanItems();
+    const auto current = m_planItemsValid ? fetchCurrentPlanItem() : std::nullopt;
+    setCurrentPlanItem(current.value_or(nullptr));
+    Q_EMIT planItemsChanged();
 }
 
 void DisPlayModeApplet::next()
 {
-    if (m_planItems.isEmpty())
+    if (!m_planItemsValid)
+        refreshDisplayState();
+
+    if (!m_planItemsValid || m_planItems.isEmpty())
         return;
 
     const auto nextIndex = (m_planItems.indexOf(m_currentPlanItem) + 1) % m_planItems.size();
@@ -159,7 +165,7 @@ void DisPlayModeApplet::setCurrentPlanItem(DPItem *newCurrentPlanItem)
     emit currentPlanItemChanged();
 }
 
-void DisPlayModeApplet::fetchPlanItems()
+bool DisPlayModeApplet::fetchPlanItems()
 {
     setCurrentPlanItem(nullptr);
     qDeleteAll(m_planItems);
@@ -168,7 +174,7 @@ void DisPlayModeApplet::fetchPlanItems()
     QDBusReply<QStringList> listOutputNames = displayInter().method("ListOutputNames").call();
     if (!listOutputNames.isValid()) {
         qCWarning(osdDPLog) << "Failed to fetch ListOutputNames" << listOutputNames.error();
-        return;
+        return false;
     }
     auto outputNames = listOutputNames.value();
 
@@ -184,9 +190,10 @@ void DisPlayModeApplet::fetchPlanItems()
             m_planItems << new DPItem(tr("Only on %1").arg(item), item, iconName, DPItem::Single, this);
         }
     }
+    return true;
 }
 
-DPItem *DisPlayModeApplet::fetchCurrentPlanItem() const
+std::optional<DPItem *> DisPlayModeApplet::fetchCurrentPlanItem() const
 {
     if (m_planItems.isEmpty())
         return nullptr;
@@ -195,14 +202,14 @@ DPItem *DisPlayModeApplet::fetchCurrentPlanItem() const
     QDBusReply<QVariant> displayMode = inter.property("DisplayMode").get();
     if (!displayMode.isValid()) {
         qCWarning(osdDPLog) << "Failed to fetch DisplayMode" << displayMode.error();
-        return nullptr;
+        return std::nullopt;
     }
     auto mode = qdbus_cast<uchar>(displayMode);
 
     QDBusReply<QVariant> primaryScreen = inter.property("Primary").get();
     if (!primaryScreen.isValid()) {
         qCWarning(osdDPLog) << "Failed to fetch Primary" << primaryScreen.error();
-        return nullptr;
+        return std::nullopt;
     }
     auto screen = qdbus_cast<QString>(primaryScreen);
 

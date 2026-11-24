@@ -11,6 +11,8 @@
 #include <QQmlListProperty>
 #include <QTimer>
 
+#include <optional>
+
 namespace osd {
 
 class DPItem : public QObject
@@ -74,13 +76,15 @@ Q_SIGNALS:
 private:
     void setState(int newState);
     void setCurrentPlanItem(DPItem *newCurrentPlanItem);
-    void fetchPlanItems();
-    DPItem *fetchCurrentPlanItem() const;
+    void refreshDisplayState();
+    bool fetchPlanItems();
+    std::optional<DPItem *> fetchCurrentPlanItem() const;
     int fetchState() const;
 
 private:
     QList<DPItem *> m_planItems;
     DPItem *m_currentPlanItem = nullptr;
+    bool m_planItemsValid = false;
     int m_state;
     QTimer *m_actionTimer = nullptr;
     Dtk::Core::DConfig *m_osdConfig = nullptr;
