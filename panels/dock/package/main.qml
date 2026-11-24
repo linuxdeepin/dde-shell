@@ -19,6 +19,11 @@ Window {
     id: dock
     property int positionForAnimation: Panel.position
     property bool useColumnLayout: positionForAnimation % 2
+    // Progress of the fashion-mode hide animation: 0 means fully shown and 1 means
+    // fully slid out of the screen. It is animated by hideShowAnimation and applied
+    // to the layer-shell margin, so the whole window slides out of the screen instead
+    // of being squashed.
+    property real fashionHideOffset: 0
 
     property alias fashionDock: fashionDockState
 
@@ -47,6 +52,10 @@ Window {
             }
             return width
         }
+        // Reset the slide progress when leaving fashion mode. Otherwise a leftover
+        // non-zero offset would place the window off-screen when fashion mode is
+        // enabled again.
+        onEnabledChanged: if (!enabled) dock.fashionHideOffset = 0
     }
     property int dockCenterPartCount: dockCenterPartModel.count
     readonly property int centerAlignmentEdgeSpacing: Panel.fashionModeEnabled ? 14 : 20
@@ -142,16 +151,22 @@ Window {
         ? (positionForAnimation === Dock.Top ? DLayerShellWindow.AnchorTop : DLayerShellWindow.AnchorBottom)
         : position2Anchors(positionForAnimation)
     DLayerShellWindow.topMargin: fashionDock.enabled && positionForAnimation === Dock.Top
-        ? fashionDock.floatingMargin
+        ? fashionDock.floatingMargin - fashionHideOffset * (Applet.dockSize + fashionDock.floatingMargin)
         : 0
 
     DLayerShellWindow.bottomMargin: fashionDock.enabled && positionForAnimation === Dock.Bottom
-        ? fashionDock.floatingMargin
+        ? fashionDock.floatingMargin - fashionHideOffset * (Applet.dockSize + fashionDock.floatingMargin)
         : 0
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
-    DLayerShellWindow.exclusionZone: Panel.hideMode === Dock.KeepShowing
-        ? Applet.dockSize + (fashionDock.enabled ? fashionDock.floatingMargin : 0)
-        : 0
+    DLayerShellWindow.exclusionZone: {
+        if (Panel.hideMode !== Dock.KeepShowing) {
+            return 0
+        }
+        const total = Applet.dockSize + (fashionDock.enabled ? fashionDock.floatingMargin : 0)
+        // Shrink the exclusion zone along with the visible part while sliding out, so
+        // the hidden but still mapped window does not keep occupying the screen edge.
+        return fashionDock.enabled ? Math.max(0, Math.round((1 - fashionHideOffset) * total)) : total
+    }
     DLayerShellWindow.scope: "dde-shell/dock"
     DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityNone
 
@@ -199,14 +214,21 @@ Window {
         id: hideShowAnimation;
         // Currently, Wayland (Treeland) doesn't support StyledBehindWindowBlur inside the window, thus we keep using the window size approach on Wayland
         property bool useTransformBasedAnimation: Qt.platform.pluginName === "xcb" && !fashionDock.enabled
+        // In fashion mode on Wayland the window size always equals the content size,
+        // so shrinking the window would squash the dock. Animate fashionHideOffset
+        // instead: it drives the layer-shell margin and slides the whole window out of
+        // the screen, which keeps the content layout stable during the animation.
+        property bool useFashionSlideAnimation: Qt.platform.pluginName !== "xcb" && fashionDock.enabled
         property bool hiding: false
         target: useTransformBasedAnimation ? dockTransform : dock;
         property: {
             if (useTransformBasedAnimation) return dock.useColumnLayout ? "x" : "y";
+            if (useFashionSlideAnimation) return "fashionHideOffset";
             return dock.useColumnLayout ? "width" : "height";
         }
         to: {
             if (useTransformBasedAnimation) return Panel.hideState !== Dock.Hide ? 0 : ((dock.positionForAnimation === Dock.Left || dock.positionForAnimation === Dock.Top) ? -Panel.dockSize : Panel.dockSize);
+            if (useFashionSlideAnimation) return Panel.hideState !== Dock.Hide ? 0 : 1;
             return Panel.hideState !== Dock.Hide ? Panel.dockSize : 1;
         }
         duration: 500
@@ -218,13 +240,21 @@ Window {
         onStopped: {
             if (useTransformBasedAnimation) {
                 dock.visible = ((dock.useColumnLayout ? dockTransform.x : dockTransform.y) === 0)
+            } else if (useFashionSlideAnimation) {
+                // Keep the window mapped after hiding (it is fully outside the screen).
+                // When showing, the margin animation then acts on an already configured
+                // surface and avoids the re-map/configure race that makes the dock
+                // stutter.
+                dock.visible = true
             } else if (!dock.compositorDrivenResize) {
                 dock.visible = ((dock.useColumnLayout ? dock.width : dock.height) !== 1)
             }
         }
         onFinished: {
             // A late Wayland configure may still report the hidden size.
-            if (dock.compositorDrivenResize)
+            // The fashion slide animation keeps its window mapped on purpose, so it
+            // must not be unmapped here.
+            if (dock.compositorDrivenResize && !useFashionSlideAnimation)
                 dock.visible = !hiding
         }
     }
