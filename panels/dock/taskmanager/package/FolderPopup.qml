@@ -23,8 +23,8 @@ PanelPopup {
     readonly property int itemCount: contents.length
     readonly property int columns: itemCount <= 8 ? 4 : 5
     readonly property int rows: Math.max(1, Math.ceil(itemCount / columns))
-    readonly property real cellWidth: 96
-    readonly property real cellHeight: 104
+    readonly property real cellWidth: 90
+    readonly property real cellHeight: 98
     readonly property var screen: Panel.rootObject.screen
     // desktopAvailableWidth/Height describe the virtual desktop, not the
     // current monitor. Use its work area, including offsets from other panels.
@@ -41,10 +41,10 @@ PanelPopup {
     readonly property real maximumHeight: screenHeight - (verticalDock ? 20 : Panel.rootObject.height + 30)
     width: hasProviderContent
             ? Math.max(1, Math.min(maximumWidth, contentLoader.item ? contentLoader.item.implicitWidth : 320))
-            : Math.min(Math.max(minimumWidth, columns * cellWidth + 24), maximumWidth)
+            : Math.min(Math.max(minimumWidth, columns * cellWidth + (columns - 1) * 30 + 24), maximumWidth)
     height: hasProviderContent
             ? Math.max(1, Math.min(maximumHeight, contentLoader.item ? contentLoader.item.implicitHeight : 120))
-            : Math.min(Math.min(3, rows) * cellHeight + 56, maximumHeight)
+            : Math.min(Math.min(3, rows) * cellHeight + (Math.min(3, rows) - 1) * 30 + 56, maximumHeight)
     contentReady: hasProviderContent ? contentLoader.status !== Loader.Loading : true
     popupX: Math.max(screenX - Panel.rootObject.x + 10,
                      Math.min(positionerAnchor.DockPanelPositioner.x, screenX + screenWidth - Panel.rootObject.x - width - 10))
@@ -114,7 +114,7 @@ PanelPopup {
                 anchors.leftMargin: 12
                 anchors.rightMargin: 12
                 contentWidth: width
-                contentHeight: root.rows * root.cellHeight
+                contentHeight: root.rows * root.cellHeight + (root.rows - 1) * 30
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 flickableDirection: Flickable.VerticalFlick
@@ -124,6 +124,7 @@ PanelPopup {
                 }
                 Grid {
                     columns: root.columns
+                    spacing: 30
                     Repeater {
                         model: root.contents
                         ItemDelegate {
