@@ -23,8 +23,14 @@ PanelPopup {
     readonly property int itemCount: contents.length
     readonly property int columns: itemCount < 4 ? Math.max(1, itemCount) : (itemCount <= 8 ? 4 : 5)
     readonly property int rows: Math.max(1, Math.ceil(itemCount / columns))
-    readonly property real cellWidth: 96
-    readonly property real cellHeight: 104
+    readonly property real itemWidth: 70
+    readonly property real itemHeight: 86
+    readonly property real hoverWidth: 90
+    readonly property real hoverHeight: 98
+    readonly property real columnSpacing: 10
+    readonly property real rowSpacing: 18
+    readonly property real cellWidth: hoverWidth + columnSpacing
+    readonly property real cellHeight: hoverHeight + rowSpacing
     readonly property var screen: Panel.rootObject.screen
     // desktopAvailableWidth/Height describe the virtual desktop, not the
     // current monitor. Use its work area, including offsets from other panels.
@@ -114,7 +120,7 @@ PanelPopup {
                 anchors.leftMargin: 12
                 anchors.rightMargin: 2
                 contentWidth: width
-                contentHeight: root.rows * root.cellHeight
+                contentHeight: root.rows * root.cellHeight - root.rowSpacing
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 flickableDirection: Flickable.VerticalFlick
@@ -124,25 +130,31 @@ PanelPopup {
                 }
                 Grid {
                     columns: root.columns
+                    columnSpacing: root.columnSpacing
+                    rowSpacing: root.rowSpacing
                     Repeater {
                         model: root.contents
                         ItemDelegate {
                             Accessible.id: "FolderPopup_ItemDelegate"
                             id: entryDelegate
                             required property var modelData
-                            width: flick.width / root.columns
-                            height: root.cellHeight
+                            width: root.hoverWidth
+                            height: root.hoverHeight
+                            leftPadding: (root.hoverWidth - root.itemWidth) / 2
+                            rightPadding: leftPadding
+                            topPadding: (root.hoverHeight - root.itemHeight) / 2
+                            bottomPadding: topPadding
                             Accessible.name: modelData.name
                             onClicked: root.activated(modelData)
-                            background: Rectangle {
+                            background: AppItemBackground {
                                 radius: 8
-                                color: D.DTK.palette.highlight
-                                opacity: entryDelegate.down ? 0.25 : entryDelegate.hovered ? 0.12 : 0
+                                enabled: false
+                                D.ColorSelector.hovered: entryDelegate.hovered
+                                D.ColorSelector.pressed: entryDelegate.down
                             }
                             contentItem: Item {
                                 D.DciIcon {
                                     anchors.top: parent.top
-                                    anchors.topMargin: 4
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     width: 48
                                     height: 48
