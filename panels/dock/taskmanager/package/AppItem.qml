@@ -80,6 +80,8 @@ Item {
     property bool preservePanelPopupOnContextMenu: false
     property bool updateIconGeometry: true
     property Item previewAnchor: icon
+    // Folder content replaces the overflow popup, so anchor it to the dock.
+    property Item folderAnchor: root
     property var iconGlobalPoint: {
         var a = icon
         var x = 0, y = 0
@@ -448,7 +450,7 @@ Item {
         toolTip.close()
         closeItemPreview()
         if (folderUi.item)
-            folderUi.item.popup.openAt(root.mapToItem(null, root.width / 2, root.height / 2))
+            folderUi.item.popup.openAt(folderAnchor.mapToItem(null, folderAnchor.width / 2, folderAnchor.height / 2))
     }
 
     // One source-neutral popup instance handles launcher folders and provider
@@ -468,9 +470,7 @@ Item {
             }
             FolderPopup {
                 id: folderPopup
-                // An overflow item lives in the shared popup window. Position
-                // from the item before that window switches to folder content.
-                positionerAnchor: root
+                positionerAnchor: root.folderAnchor
                 folderName: root.name
                 contents: root.applicationFolderContents
                 presentation: root.folderPresentation
