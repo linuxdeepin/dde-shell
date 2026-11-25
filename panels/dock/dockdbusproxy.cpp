@@ -113,7 +113,7 @@ QString DockDBusProxy::getAppID(const QString &desktopfile)
 
 QRect DockDBusProxy::geometry()
 {
-    return parent()->window() ? parent()->window()->geometry() : QRect();
+    return parent()->window() ? parent()->contentRectOnScreen() : QRect();
 }
 
 void DockDBusProxy::updateDockPluginsVisible(const QVariantMap &pluginsVisible)
