@@ -19,6 +19,7 @@ public:
     PopupWindow(QWindow *parent = nullptr);
 
     bool x11GrabFocusTransition() const { return m_x11GrabFocusTransition; }
+    void setX11KeyboardGrabbed(bool grabbed) { m_x11KeyboardGrabbed = grabbed; }
     Q_INVOKABLE void setWindowGeometry(int px, int py, int pw, int ph);
 
 protected:
@@ -37,5 +38,6 @@ private:
     bool m_dragging = false;
     bool m_pressing = false;
     bool m_x11GrabFocusTransition = false;
+    bool m_x11KeyboardGrabbed = false;
 };
 DS_END_NAMESPACE
