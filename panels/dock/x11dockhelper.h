@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024-2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
@@ -32,7 +32,7 @@ public:
     uint32_t getCurrentWorkspace();
     void checkCurrentWorkspace();
     bool shouldSkip(const xcb_window_t& window);
-    void monitorWindowChange(const xcb_window_t& window);
+    void monitorWindowChange(const QList<xcb_window_t> &windows);
     void setWindowState(const xcb_window_t& window, uint32_t list_len, xcb_atom_t *state);
 
 Q_SIGNALS:
