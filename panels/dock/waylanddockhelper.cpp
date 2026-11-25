@@ -90,18 +90,18 @@ void TreeLandDockPreviewContext::hideWindowsPreview()
     if (m_tooltipActive)
         return;
     m_isDockMouseAreaEnter = false;
-    m_hideTimer.start();
+    m_hideTimer.start(800);
 }
 
 void TreeLandDockPreviewContext::hideTooltip()
 {
     if (!m_tooltipActive)
         return;
-    m_tooltipActive = false;
     m_isDockMouseAreaEnter = false;
-    m_hideTimer.stop();
-    close();
-    Q_EMIT closed();
+    // Qt destroys the old wl_surface when its tooltip window is hidden.
+    // Keep the popover's last frame until the next surface replaces it, so
+    // Treeland can animate the switch instead of closing and reopening it.
+    m_hideTimer.start(350);
 }
 
 void TreeLandDockPreviewContext::treeland_dock_preview_context_v3_enter()
@@ -112,7 +112,7 @@ void TreeLandDockPreviewContext::treeland_dock_preview_context_v3_enter()
 void TreeLandDockPreviewContext::treeland_dock_preview_context_v3_leave()
 {
     m_isPreviewEntered = false;
-    m_hideTimer.start();
+    m_hideTimer.start(m_tooltipActive ? 350 : 800);
 }
 
 WaylandDockHelper::WaylandDockHelper(DockPanel *panel)
@@ -175,6 +175,8 @@ void WaylandDockHelper::setupTooltipWindow()
     m_tooltipWindow = m_panel->toolTipWindow();
     if (!m_tooltipWindow)
         return;
+
+    m_tooltipWindow->setProperty("enableDWindow", false);
 
     connect(m_tooltipWindow, SIGNAL(updateGeometryFinished()), m_tooltipWindow, SLOT(update()), Qt::UniqueConnection);
     connect(m_tooltipWindow, &QObject::destroyed, this, &WaylandDockHelper::closeTooltip);
