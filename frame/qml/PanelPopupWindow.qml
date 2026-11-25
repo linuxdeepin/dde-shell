@@ -17,6 +17,7 @@ PopupWindow {
     property Item currentItem
     property int requestedWidth: 10
     property int requestedHeight: 10
+    property bool enableDWindow: true
     property bool geometryUpdatePending: false
     signal requestUpdateGeometry()
     signal updateGeometryFinished()
@@ -76,11 +77,11 @@ PopupWindow {
     height: 10
     flags: (Qt.platform.pluginName === "xcb" ?  (Qt.Tool | Qt.WindowStaysOnTopHint | Qt.X11BypassWindowManagerHint) : Qt.Popup)
     font: D.DTK.fontManager.t6
-    D.DWindow.enabled: true
+    D.DWindow.enabled: enableDWindow
     D.DWindow.windowRadius: D.DTK.platformTheme.windowRadius < 0 ? 4 : D.DTK.platformTheme.windowRadius
     D.DWindow.enableSystemResize: false
     D.DWindow.enableSystemMove: false
-    D.DWindow.enableBlurWindow: true
+    D.DWindow.enableBlurWindow: enableDWindow
     // TODO set shadowOffset maunally.
     D.DWindow.shadowOffset: Qt.platform.pluginName === "xcb" ? Qt.point(0, 25) : Qt.point(0, 5)
     D.DWindow.shadowColor: D.DTK.themeType === D.ApplicationHelper.DarkType ? Qt.rgba(0, 0, 0, 0.5) : Qt.rgba(0, 0, 0, 0.2)
@@ -150,6 +151,7 @@ PopupWindow {
     D.StyledBehindWindowBlur {
         control: parent
         anchors.fill: parent
+        visible: root.enableDWindow
         function blendColorAlpha(fallback) {
             var appearance = DS.applet("org.deepin.ds.dde-appearance")
             if (!appearance || appearance.opacity < 0)
