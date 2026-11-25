@@ -204,6 +204,7 @@ bool DockPanel::init()
             // connect(window(), &QQuickWindow::yChanged, this, &DockPanel::onWindowGeometryChanged);
             connect(window(), &QQuickWindow::widthChanged, this, &DockPanel::onWindowGeometryChanged);
             connect(window(), &QQuickWindow::heightChanged, this, &DockPanel::onWindowGeometryChanged);
+            connect(rootObject(), SIGNAL(dockContentRectChanged()), this, SLOT(onWindowGeometryChanged()));
             QMetaObject::invokeMethod(this, &DockPanel::onWindowGeometryChanged);
             if (showInPrimary())
                 updateDockScreen();
@@ -257,6 +258,17 @@ QRect DockPanel::geometry()
     return window()->geometry();
 }
 
+QRect DockPanel::contentRectInWindow()
+{
+    const auto dockContentRect = window()->property("dockContentRect").toRect();
+    return dockContentRect.isEmpty() ? QRect(QPoint(), window()->size()) : dockContentRect;
+}
+
+QRect DockPanel::contentRectOnScreen()
+{
+    return contentRectInWindow().translated(window()->position());
+}
+
 QRect DockPanel::frontendWindowRect()
 {
     return m_frontendWindowRect;
@@ -270,6 +282,15 @@ void DockPanel::setFrontendWindowRect(int transformOffsetX, int transformOffsetY
     auto screenGeometry = window()->screen()->geometry();
     auto geometry = window()->geometry();
     auto xOffset = 0, yOffset = 0;
+
+    const auto dockContentRect = window()->property("dockContentRect").toRect();
+    if (!dockContentRect.isEmpty()) {
+        const auto translatedContentRect = contentRectOnScreen().translated(transformOffsetX, transformOffsetY);
+        m_frontendWindowRect = QRect(screenGeometry.topLeft()
+            + (translatedContentRect.topLeft() - screenGeometry.topLeft()) * ratio,
+            translatedContentRect.size() * ratio);
+        return;
+    }
 
     switch (position()) {
         case Top:

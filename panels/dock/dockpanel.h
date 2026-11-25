@@ -19,6 +19,7 @@ class DockPanel : public DS_NAMESPACE::DPanel, public QDBusContext
 {
     Q_OBJECT
     Q_PROPERTY(QRect geometry READ geometry FINAL)
+    Q_PROPERTY(QRect contentRectInWindow READ contentRectInWindow FINAL)
 
     Q_PROPERTY(QRect frontendWindowRect READ frontendWindowRect NOTIFY frontendWindowRectChanged FINAL)
     Q_PROPERTY(bool compositorReady READ compositorReady WRITE setCompositorReady NOTIFY compositorReadyChanged FINAL)
@@ -58,6 +59,8 @@ public:
     void callShow();
 
     QRect geometry();
+    QRect contentRectInWindow();
+    QRect contentRectOnScreen();
     QRect frontendWindowRect();
     void setFrontendWindowRect(int transformOffsetX, int transformOffsetY);
 

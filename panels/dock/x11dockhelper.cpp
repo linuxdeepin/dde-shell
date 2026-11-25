@@ -467,7 +467,7 @@ void X11DockHelper::updateWindowHideState(xcb_window_t window)
 
 void X11DockHelper::updateDockArea()
 {
-    QRect rect = parent()->geometry();
+    QRect rect = parent()->contentRectOnScreen();
     uint size = parent()->dockSize();
     switch (parent()->position()) {
     case Top:
