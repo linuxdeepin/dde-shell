@@ -307,10 +307,40 @@ bool XcbEventFilter::shouldSkip(const xcb_window_t &window)
     return false;
 }
 
-void XcbEventFilter::monitorWindowChange(const xcb_window_t &window)
+void XcbEventFilter::monitorWindowChange(const QList<xcb_window_t> &windows)
 {
-    uint32_t value_list[] = { XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_VISIBILITY_CHANGE };
-    xcb_change_window_attributes(m_connection, window, XCB_CW_EVENT_MASK, value_list);
+    const uint32_t monitorMask = XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_VISIBILITY_CHANGE;
+
+    // Queue the attribute requests before reading replies to avoid serial round trips.
+    QList<xcb_get_window_attributes_cookie_t> cookies;
+    cookies.reserve(windows.size());
+    for (auto window : windows)
+        cookies.append(xcb_get_window_attributes(m_connection, window));
+
+    for (int i = 0; i < windows.size(); ++i) {
+        xcb_generic_error_t *error = nullptr;
+        xcb_get_window_attributes_reply_t *attributes =
+            xcb_get_window_attributes_reply(m_connection, cookies.at(i), &error);
+        if (!attributes) {
+            if (error) {
+                qCWarning(dockX11Log) << "failed to query event mask of window" << windows.at(i) << "error" << error->error_code;
+                free(error);
+            }
+            continue;
+        }
+
+        const uint32_t currentMask = attributes->your_event_mask;
+        free(attributes);
+
+        const uint32_t mergedMask = currentMask | monitorMask;
+        if (mergedMask == currentMask)
+            continue;
+
+        // This runs on the connection owned by Qt. Merging keeps Qt's own subscriptions
+        // (focus, keyboard, buttons, exposure) instead of replacing them.
+        uint32_t value_list[] = { mergedMask };
+        xcb_change_window_attributes(m_connection, windows.at(i), XCB_CW_EVENT_MASK, value_list);
+    }
 };
 
 void XcbEventFilter::setWindowState(const xcb_window_t& window, uint32_t list_len, xcb_atom_t *state)
@@ -389,11 +419,16 @@ void X11DockHelper::onHideModeChanged(HideMode mode)
 void X11DockHelper::onWindowClientListChanged()
 {
     QList<xcb_window_t> windows = m_xcbHelper->getWindowClientList();
+    QList<xcb_window_t> addedWindows;
     for (auto &&window : windows) {
         if (!m_windows.contains(window) && !m_xcbHelper->shouldSkip(window)) {
             m_windows.insert(window, new WindowData());
-            onWindowAdded(window);
+            addedWindows.append(window);
         }
+    }
+    m_xcbHelper->monitorWindowChange(addedWindows);
+    for (auto &&window : addedWindows) {
+        onWindowAdded(window);
     }
     bool mightNeedRecheckDockOverlap = false;
     for (auto it = m_windows.cbegin(); it != m_windows.cend();) {
@@ -412,7 +447,6 @@ void X11DockHelper::onWindowClientListChanged()
 
 void X11DockHelper::onWindowAdded(xcb_window_t window)
 {
-    m_xcbHelper->monitorWindowChange(window);
     onWindowPropertyChanged(window, m_xcbHelper->getAtomByName("WM_STATE"));
     onWindowGeometryChanged(window);
     onWindowWorkspaceChanged(window);
