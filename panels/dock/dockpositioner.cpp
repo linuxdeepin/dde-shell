@@ -251,6 +251,8 @@ void DockPanelPositioner::resetVertialOffset()
 void DockPanelPositioner::updatePosition()
 {
     const auto dockWindowRect = dockGeometry();
+    const auto panelContentRect = m_panel ? m_panel->property("contentRectInWindow").toRect() : QRect();
+    const auto dockContentRect = panelContentRect.isEmpty() ? QRect(QPoint(), dockWindowRect.size()) : panelContentRect;
     const auto crossWindow = isCrossWindow();
     const auto anchorRect = crossWindow ? attachedItemRectInDock() : QRect();
     int xPosition = 0;
@@ -262,7 +264,7 @@ void DockPanelPositioner::updatePosition()
         xPosition = crossWindow ? anchorRect.center().x() - horizontalOffset
                                 : m_bounding.x() - horizontalOffset;
         yPosition = crossWindow ? anchorRect.y() + anchorRect.height() + 10
-                                : dockWindowRect.height() + 10;
+                                : dockContentRect.y() + dockContentRect.height() + 10;
         break;
     }
     case dock::Right: {
@@ -276,7 +278,7 @@ void DockPanelPositioner::updatePosition()
         xPosition = crossWindow ? anchorRect.center().x() - horizontalOffset
                                 : m_bounding.x() - horizontalOffset;
         yPosition = crossWindow ? anchorRect.top() - m_bounding.height() - 10
-                                : -m_bounding.height() - 10;
+                                : dockContentRect.y() - m_bounding.height() - 10;
         break;
     }
     case dock::Left: {
