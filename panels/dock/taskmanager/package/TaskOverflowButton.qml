@@ -310,6 +310,7 @@ Item {
                             enableTitle: false
                             preservePanelPopupOnContextMenu: true
                             previewAnchor: overflowPopupContent
+                            folderAnchor: root
                             updateIconGeometry: false
                             dragEnabled: popupDelegate.entry.docked && windows.length === 0
                             dragSource: "overflow-popup"
