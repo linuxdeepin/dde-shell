@@ -98,11 +98,13 @@ Item {
         openPending = false
         menuWindow.title = windowTitle
         menuWindow.show()
-        // The panel popup window is override-redirect on xcb since
-        // X11BypassWindowManagerHint was added, so the WM no longer orders it
-        // against this window: map() does not raise, do it explicitly.
-        if (Qt.platform.pluginName === "xcb")
+        // X11 panel and menu windows bypass the WM, so raise explicitly.
+        // Move input focus before grabbing the keyboard: a grab alone leaves
+        // focus on the launcher, whose hiding can then deactivate this menu.
+        if (Qt.platform.pluginName === "xcb") {
             menuWindow.raise()
+            menuWindow.requestActivate()
+        }
         DS.grabMouse(menuWindow)
         DS.grabKeyboard(menuWindow)
     }

@@ -27,6 +27,7 @@ PopupWindow::PopupWindow(QWindow *parent)
 
     connect(this, &QWindow::visibleChanged, this, [this]() {
         if (!isVisible()) {
+            m_x11KeyboardGrabbed = false;
             setX11GrabFocusTransition(false);
         }
     });
@@ -84,6 +85,15 @@ bool PopupWindow::nativeEvent(const QByteArray &eventType, void *message, qintpt
         if (responseType == XCB_FOCUS_IN || responseType == XCB_FOCUS_OUT) {
             auto *focusEvent = reinterpret_cast<xcb_focus_in_event_t *>(event);
             if (focusEvent->event == static_cast<xcb_window_t>(winId())) {
+                // The WM can restore focus to another application when the
+                // launcher hides. With our keyboard grab still active, keys
+                // continue to go to this menu; do not let Qt deactivate it on
+                // an underlying input-focus change.
+                if (responseType == XCB_FOCUS_OUT
+                        && focusEvent->mode == XCB_NOTIFY_MODE_WHILE_GRABBED
+                        && m_x11KeyboardGrabbed && isVisible() && type() == Qt::Popup) {
+                    return true;
+                }
                 if (responseType == XCB_FOCUS_OUT && focusEvent->mode == XCB_NOTIFY_MODE_GRAB) {
                     setX11GrabFocusTransition(true);
                     Q_EMIT x11FocusOutByGrab();
