@@ -303,12 +303,29 @@ AppletDockItem {
 
                 property var plugin: model.shellSurface
                 readonly property bool surfaceHovered: SwipeView.isCurrentItem && surfaceItem.hovered
+                // Track each ancestor like tray items do: the initial dock layout
+                // can move this surface without changing its width or height.
+                readonly property point windowPosition: {
+                    let item = surfaceHost
+                    let x = 0, y = 0
+                    while (item.parent) {
+                        x += item.x
+                        y += item.y
+                        item = item.parent
+                    }
+                    return Qt.point(x, y)
+                }
 
                 ShellSurfaceItemProxy {
                     Accessible.id: "CardLeftDockArea_Pane_3"
                     id: surfaceItem
-                    width: parent.width
-                    height: parent.height
+                    // Keep the last committed buffer at its natural size until
+                    // the plugin renders the new geometry. Stretching the old
+                    // buffer independently in X/Y distorts icons and text.
+                    readonly property size committedSize: shellSurfaceItem.surface && hasSurfaceContent
+                        ? shellSurfaceItem.surface.destinationSize : Qt.size(parent.width, parent.height)
+                    width: committedSize.width
+                    height: committedSize.height
                     shellSurface: surfaceHost.plugin
                 }
 
@@ -317,36 +334,28 @@ AppletDockItem {
                         return
                     }
 
-                    const window = surfaceHost.Window.window
-                    const windowPosition = surfaceHost.mapToItem(window.contentItem, 0, 0)
-                    const globalPosition = Qt.point(windowPosition.x + window.x,
-                                                    windowPosition.y + window.y)
-
                     plugin.updatePluginGeometry(Qt.rect(Math.round(windowPosition.x),
                                                         Math.round(windowPosition.y),
                                                         Math.round(width),
                                                         Math.round(height)))
+                    const globalPosition = surfaceHost.mapToGlobal(0, 0)
                     plugin.setGlobalPos(Qt.point(Math.round(globalPosition.x),
                                                  Math.round(globalPosition.y)))
                     surfaceItem.fixPosition()
                 }
 
                 Component.onCompleted: updateSurfaceGeometry()
-                onWidthChanged: geometryUpdateTimer.restart()
-                onHeightChanged: geometryUpdateTimer.restart()
                 onVisibleChanged: {
-                    geometryUpdateTimer.restart()
+                    Qt.callLater(surfaceHost.updateSurfaceGeometry)
                     root.updateContentHovered()
                 }
-                onSurfaceHoveredChanged: root.updateContentHovered()
-
-                Timer {
-                    id: geometryUpdateTimer
-                    interval: 50
-                    repeat: false
-                    onTriggered: surfaceHost.updateSurfaceGeometry()
+                onWindowPositionChanged: Qt.callLater(surfaceHost.updateSurfaceGeometry)
+                onSurfaceHoveredChanged: {
+                    if (surfaceHovered) {
+                        updateSurfaceGeometry()
+                    }
+                    root.updateContentHovered()
                 }
-
                 // A plugin reports its order right after its card surface is
                 // created, so the card starts out unordered and has to be
                 // sorted into place once the value arrives.
