@@ -145,14 +145,14 @@ Window {
     width: useColumnLayout ? dockSize : (useFullWidthWindow ? Screen.width : dockContainer.implicitWidth)
     height: useColumnLayout
         ? (compositorDrivenResize ? Screen.height : -1)
-        : (compositorDrivenResize ? dockSize : maximumHeight)
+        : dockSize
     color: "transparent"
     flags: Qt.WindowDoesNotAcceptFocus
     // X11 resizes the dock explicitly. Keep both size limits synchronized
-    // when resizing or switching orientation, including the shadow padding.
+    // when resizing or switching orientation. Floating margins stay outside
+    // the window so consumers can use its size as the dock thickness.
     maximumHeight: useColumnLayout ? Screen.height
-        : (compositorDrivenResize ? Dock.MAX_DOCK_SIZE
-            : dockSize + fashionDock.floatingMargin + dock.D.DWindow.shadowRadius)
+        : (compositorDrivenResize ? Dock.MAX_DOCK_SIZE : dockSize)
     minimumHeight: !compositorDrivenResize ? maximumHeight
         : (useColumnLayout ? Screen.height : (isDragging ? Dock.MIN_DOCK_SIZE : 1))
     maximumWidth: useColumnLayout ? (compositorDrivenResize ? Dock.MAX_DOCK_SIZE : dockSize) : Screen.width
@@ -181,11 +181,11 @@ Window {
     DLayerShellWindow.anchors: (fashionDock.enabled || modeTransition.transitionActive) && !useFullWidthWindow
         ? (positionForAnimation === Dock.Top ? DLayerShellWindow.AnchorTop : DLayerShellWindow.AnchorBottom)
         : position2Anchors(positionForAnimation)
-    DLayerShellWindow.topMargin: !useFullWidthWindow && positionForAnimation === Dock.Top
+    DLayerShellWindow.topMargin: positionForAnimation === Dock.Top
         ? Math.round(fashionDock.animatedFloatingMargin)
         : 0
 
-    DLayerShellWindow.bottomMargin: !useFullWidthWindow && positionForAnimation === Dock.Bottom
+    DLayerShellWindow.bottomMargin: positionForAnimation === Dock.Bottom
         ? Math.round(fashionDock.animatedFloatingMargin)
         : 0
     DLayerShellWindow.layer: DLayerShellWindow.LayerTop
@@ -543,9 +543,6 @@ Window {
             : (dock.useFullWidthWindow ? implicitWidth : parent.width)
         height: dock.useColumnLayout ? parent.height : dock.dockSize
         x: dock.useFullWidthWindow ? (dock.width - width) / 2 : 0
-        y: !dock.useFullWidthWindow ? 0
-            : (dock.positionForAnimation === Dock.Top
-                ? fashionDock.animatedFloatingMargin : dock.height - height - fashionDock.animatedFloatingMargin)
         property bool touchLongPressed: false
         Behavior on implicitWidth {
             enabled: fashionDock.enabled && !dock.isDragging && !modeTransition.transitionActive
