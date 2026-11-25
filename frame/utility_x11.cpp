@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "private/utility_x11_p.h"
+#include "popupwindow.h"
 
 #include <QLoggingCategory>
 #include <QMouseEvent>
@@ -59,7 +60,11 @@ bool X11Utility::grabKeyboard(QWindow *target, bool grab)
 {
     if (target) {
         qCDebug(dsLog) << "grab keyboard for the window:" << target->winId();
-        return target->setKeyboardGrabEnabled(grab);
+        const bool result = target->setKeyboardGrabEnabled(grab);
+        if (auto *popup = qobject_cast<PopupWindow *>(target)) {
+            popup->setX11KeyboardGrabbed(grab && result);
+        }
+        return result;
     }
     return false;
 }

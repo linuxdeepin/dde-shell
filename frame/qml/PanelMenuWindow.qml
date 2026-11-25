@@ -9,6 +9,7 @@ PanelPopupWindow {
     id: root
 
     flags: Qt.Popup | Qt.WindowStaysOnTopHint
+        | (Qt.platform.pluginName === "xcb" ? Qt.X11BypassWindowManagerHint : 0)
     // it's value is useful to distinguish MenuWindow with SubMenuWindow in grabMouse
     property QtObject mainMenuWindow
 }
