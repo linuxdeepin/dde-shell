@@ -40,9 +40,6 @@ ContainmentItem {
     // Defined in main.qml as dockItemIconSize = dockItemMaxSize * 9 / 14.
     // At default dock size (56), icon = 36px; at min (37), icon ≈ 24px; at max (100), icon ≈ 64px.
     readonly property real iconWidthToMaxSizeRatio: 9 / 14
-    readonly property int minimumDockItemSize: Math.max(
-        Dock.MIN_DOCK_SIZE,
-        Math.round(Panel.rootObject.dockSize * Dock.MIN_DOCK_SIZE / Dock.DEFAULT_DOCK_SIZE))
     readonly property real startPadding: Math.max(0, appTitleSpacing - (Panel.rootObject.dockItemMaxSize * (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2))
 
     implicitWidth: {
@@ -105,12 +102,10 @@ ContainmentItem {
 
     TaskOverflowController {
         id: taskOverflow
-        // Window-split title layout has priority. Only fall back to adaptive icon
-        // shrinking and overflow when no title layout can fit the available space.
-        enabled: Panel.fashionModeEnabled
-            && (!textCalculator.enabled || textCalculator.totalWidth <= 0)
+        // Window-split title layout has priority. Otherwise keep the dock-sized
+        // icons and move excess tasks into overflow.
+        enabled: !textCalculator.enabled || textCalculator.totalWidth <= 0
         availableExtent: Math.max(0, taskmanager.calcRemainingSpace(Panel.rootObject.dockItemMaxSize) - taskmanager.startPadding)
-        minimumReached: Panel.rootObject.dockItemMaxSize <= taskmanager.minimumDockItemSize + 0.5
         fallbackItemExtent: Math.max(1, Panel.rootObject.dockItemMaxSize * taskmanager.iconWidthToMaxSizeRatio)
         spacing: taskmanager.appTitleSpacing
         overflowSidePadding: taskmanager.appTitleSpacing + 1
@@ -515,57 +510,8 @@ ContainmentItem {
         }
     }
 
-
-    // Solve for S (dockItemMaxSize). The forward layout equation is:
-    //   totalSpace = appCount×S×itemRatio + gaps×max(10, S×spacingRatio)
-    //              + max(0, spacing - S×k) + otherCount×S×multitaskViewIconRatio
-    //
-    // The max(10,…) makes this piecewise. Ignoring Math.round (continuous approx):
-    //
-    //   Regime 1 (S×spacingRatio ≥ 10): no clamp, every term ∝ S.
-    //     Factor out S → S = totalSpace / sum_of_coefficients.
-    //
-    //   Regime 2 (S×spacingRatio < 10): spacing clamped to 10 (constant).
-    //     startPad flips from S×(spacingRatio-k) to 10 - S×k.
-    //     Separate constants from S-terms → S = (total - constants) / S_coefficient.
-    function solveMaxSizeFull(totalSpace, appCount, otherCount) {
-        if (appCount <= 0) {
-            return totalSpace;
-        }
-
-        const spacingRatio = iconWidthToMaxSizeRatio / 3;                      // 9/14 / 3
-        const k = (multitaskViewIconRatio - iconWidthToMaxSizeRatio) / 2;      // ≈ 0.0786
-        const gaps = Math.max(0, appCount - 1);
-        const otherRatio = otherCount > 0 ? otherCount * multitaskViewIconRatio : 0;
-
-        // Regime 1: continuous spacing model
-        const S = totalSpace / (appCount * iconWidthToMaxSizeRatio + gaps * spacingRatio + otherRatio + spacingRatio - k);
-
-        // Regime 2: spacing clamped to 10
-        if (S * spacingRatio < 10) {
-            return Math.max(0, (totalSpace - gaps * 10 - 10) / (appCount * iconWidthToMaxSizeRatio - k + otherRatio));
-        }
-        return Math.max(0, S);
-    }
-
     Component.onCompleted: {
         taskmanager.Applet.setFashionMode(fashionMode)
-        Panel.rootObject.dockItemMaxSize = Qt.binding(function(){
-            const dockSize = Panel.rootObject.dockSize;
-            const appCount = visualModel.count;
-
-            if (appCount <= 0 || dockSize <= 0)
-                return dockSize;
-
-            if (textCalculator.enabled && textCalculator.totalWidth > 0)
-                return dockSize;
-
-            const otherItems = Math.max(0, Panel.rootObject.dockCenterPartCount - 1);
-            const optimal = solveMaxSizeFull(Panel.rootObject.dockEffectiveCenterSpace, appCount, otherItems);
-            const fitted = optimal >= dockSize ? dockSize : optimal;
-            // Before task overflow, icons kept shrinking to fit all tasks.
-            return Panel.fashionModeEnabled ? Math.max(taskmanager.minimumDockItemSize, fitted) : fitted;
-        })
         taskOverflow.scheduleSync()
     }
 }
