@@ -691,6 +691,7 @@ Item {
                 const point = icon.mapToItem(null, icon.width / 2, icon.height / 2)
                 icon.DockPanelPositioner.bounding = Qt.rect(point.x, point.y,
                                                             toolTip.width, toolTip.height)
+                icon.DockPanelPositioner.updatePosition()
                 toolTip.open()
             }
         }
@@ -715,6 +716,7 @@ Item {
                     const point = icon.mapToItem(null, icon.width / 2, icon.height / 2)
                     icon.DockPanelPositioner.bounding = Qt.rect(point.x, point.y,
                                                                 dragToolTip.width, dragToolTip.height)
+                    icon.DockPanelPositioner.updatePosition()
                     dragToolTip.open()
                 }
             }
