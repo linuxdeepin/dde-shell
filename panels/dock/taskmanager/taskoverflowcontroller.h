@@ -37,7 +37,6 @@ class TaskOverflowController : public QObject
     Q_OBJECT
     Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled NOTIFY enabledChanged)
     Q_PROPERTY(qreal availableExtent READ availableExtent WRITE setAvailableExtent)
-    Q_PROPERTY(bool minimumReached READ minimumReached WRITE setMinimumReached)
     Q_PROPERTY(qreal fallbackItemExtent READ fallbackItemExtent WRITE setFallbackItemExtent NOTIFY fallbackItemExtentChanged)
     Q_PROPERTY(qreal spacing READ spacing WRITE setSpacing NOTIFY spacingChanged)
     Q_PROPERTY(qreal overflowSidePadding READ overflowSidePadding WRITE setOverflowSidePadding NOTIFY overflowSidePaddingChanged)
@@ -69,12 +68,6 @@ public:
         return m_availableExtent;
     }
     void setAvailableExtent(qreal availableExtent);
-
-    bool minimumReached() const
-    {
-        return m_minimumReached;
-    }
-    void setMinimumReached(bool minimumReached);
 
     qreal fallbackItemExtent() const
     {
@@ -162,7 +155,6 @@ private:
 
     bool m_enabled = true;
     qreal m_availableExtent = 0;
-    bool m_minimumReached = false;
     qreal m_fallbackItemExtent = 1;
     qreal m_spacing = 0;
     qreal m_overflowSidePadding = 0;

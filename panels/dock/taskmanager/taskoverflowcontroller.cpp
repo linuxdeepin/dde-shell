@@ -94,14 +94,6 @@ void TaskOverflowController::setAvailableExtent(qreal availableExtent)
     }
 }
 
-void TaskOverflowController::setMinimumReached(bool minimumReached)
-{
-    if (m_minimumReached != minimumReached) {
-        m_minimumReached = minimumReached;
-        scheduleSync();
-    }
-}
-
 void TaskOverflowController::setFallbackItemExtent(qreal fallbackItemExtent)
 {
     fallbackItemExtent = std::isfinite(fallbackItemExtent) ? std::max<qreal>(1, fallbackItemExtent) : 1;
@@ -379,7 +371,7 @@ bool TaskOverflowController::syncEnabledState(int totalCount, qreal fullExtent)
     const qreal stopThreshold = std::max<qreal>(0, m_availableExtent - OverflowReleaseHysteresis);
     const bool nextLatched = m_latched
         ? fullExtent > stopThreshold
-        : (m_minimumReached && fullExtent > startThreshold);
+        : fullExtent > startThreshold;
     m_latched = nextLatched;
     return m_latched;
 }
