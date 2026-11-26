@@ -12,7 +12,7 @@
 - dde-launchpad 的 ItemArrangementProxyModel 只提供应用/文件夹联合列表与角色适配；创建、重命名、拖拽、分页、移到首位都转发给共享模型，不再读写独立 INI。
 - DockGlobalElementModel 将应用文件夹映射成驻留项，不拥有另一份子项列表。驻留顺序与是否驻留仍归 TaskManagerSettings 管理，取消驻留不修改源文件夹。
 - 文件夹身份为 internal/folders/N（N > 0）；0 仅代表启动器顶层，不允许驻留。ID 不是模型行号。读取旧数据时兼容 internal/folder/N、internal/group/N 和数字编号。
-- folderInfo 返回 {id, name, contents, pageCount}，contents 中每项为 {id, name, iconName}。AppGroupManager 暴露原始分类名称，Dock 使用启动器翻译上下文解析默认分类名称。
+- folderInfo 返回 {id, name, contents, pageCount}，contents 中每项为 {id, name, iconName, autoStart}。autoStart 来自共享应用模型，自启动状态变化通过 arrangementChanged 通知任务栏刷新角标。AppGroupManager 暴露原始分类名称，Dock 使用启动器翻译上下文解析默认分类名称。
 - Dock 的应用文件夹接口使用 applicationFolder 命名：setApplicationFolderModel、containsApplicationFolder、syncApplicationFolders。名称直接读取共享模型的 name 角色，仅在请求 ApplicationFolderContentsRole 时调用 folderInfo 构造子项；文管目录的图标和页面通过 presentation 提供。
 - 应用源 ready=false 时不清理已有排列；应用源不可用时保留文件夹身份。源恢复为 ready 后才处理应用删除与空文件夹清理。
 
