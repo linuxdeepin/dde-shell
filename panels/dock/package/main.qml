@@ -59,7 +59,6 @@ Window {
         leftAlignedIconX: gridLayout.itemMargin
 
         onTransitionPreparing: {
-            contentWidthAnimation.stop()
             hideTimer.stop()
             Panel.requestClosePopup()
             dock.viewDeactivated()
@@ -137,6 +136,20 @@ Window {
     property int itemSpacing: 0
 
     property bool isDragging: false
+    property bool initialized: false
+    readonly property bool initialSizeReady: !fashionDock.enabled
+        || (dockCenterPartCount > 0 && dockCenterPart.implicitWidth > 1)
+    onInitialSizeReadyChanged: {
+        if (initialSizeReady && !initialized)
+            Qt.callLater(finishInitialization)
+    }
+
+    function finishInitialization() {
+        if (initialized || !initialSizeReady)
+            return
+        initialized = true
+        dock.visible = Panel.hideState !== Dock.Hide
+    }
 
     readonly property bool compositorDrivenResize: Qt.platform.pluginName !== "xcb"
 
@@ -544,14 +557,6 @@ Window {
         height: dock.useColumnLayout ? parent.height : dock.dockSize
         x: dock.useFullWidthWindow ? (dock.width - width) / 2 : 0
         property bool touchLongPressed: false
-        Behavior on implicitWidth {
-            enabled: fashionDock.enabled && !dock.isDragging && !modeTransition.transitionActive
-            NumberAnimation {
-                id: contentWidthAnimation
-                duration: 200
-                easing.type: Easing.OutQuad
-            }
-        }
         transform: Translate {
             id: dockTransform
             onXChanged: dock.updateInputRegion()
@@ -1067,6 +1072,8 @@ Window {
         }
 
         function onHideStateChanged() {
+            if (!dock.initialized)
+                return
             if (Panel.hideState === Dock.Hide) {
                 hideTimer.restart()
             } else if (Panel.hideState === Dock.Show) {
@@ -1172,7 +1179,10 @@ Window {
         })
 
         dock.itemIconSizeBase = dock.dockItemMaxSize
-        dock.visible = Panel.hideState !== Dock.Hide
         changeDragAreaAnchor()
+        if (!fashionDock.enabled)
+            finishInitialization()
+        else
+            Qt.callLater(finishInitialization)
     }
 }
