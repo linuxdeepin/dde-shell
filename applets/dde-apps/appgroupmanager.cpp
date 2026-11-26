@@ -491,7 +491,8 @@ QVariantMap AppGroupManager::folderInfo(const QString &id)
         const auto app = m_referenceModel->match(m_referenceModel->index(0, 0), AppItemModel::DesktopIdRole, appId, 1, Qt::MatchExactly).value(0);
         if (!app.isValid()) continue;
         contents.append(QVariantMap{{"id", appId}, {"name", app.data(AppItemModel::NameRole)},
-                                   {"iconName", app.data(AppItemModel::IconNameRole)}});
+                                   {"iconName", app.data(AppItemModel::IconNameRole)},
+                                   {"autoStart", app.data(AppItemModel::AutoStartRole).toBool()}});
     }
     return {{"id", folder->appId()}, {"name", folder->itemsPage()->name()},
             {"contents", contents}, {"pageCount", folder->itemsPage()->pageCount()}};

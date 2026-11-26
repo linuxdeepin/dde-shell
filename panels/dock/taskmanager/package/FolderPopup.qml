@@ -160,6 +160,16 @@ PanelPopup {
                                     height: 48
                                     sourceSize: Qt.size(width, height)
                                     name: entryDelegate.modelData.iconName
+
+                                    D.DciIcon {
+                                        anchors.left: parent.left
+                                        anchors.bottom: parent.bottom
+                                        name: "emblem_autostart"
+                                        visible: !!entryDelegate.modelData.autoStart
+                                        sourceSize: Qt.size(16, 16)
+                                        palette: D.DTK.makeIconPalette(entryDelegate.palette)
+                                        theme: D.ApplicationHelper.DarkType
+                                    }
                                 }
                                 Text {
                                     anchors.bottom: parent.bottom
