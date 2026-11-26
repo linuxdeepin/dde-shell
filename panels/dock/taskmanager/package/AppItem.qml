@@ -96,6 +96,11 @@ Item {
 
     implicitWidth: appItem.implicitWidth
 
+    function syncIconPosition() {
+        fixPositionTimer.stop()
+        icon.fixPosition()
+    }
+
     // Monitor Panel position changes to update icon geometry
     Connections {
         target: Panel.rootObject
