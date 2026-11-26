@@ -235,25 +235,24 @@ ContainmentItem {
                     width: delegateRoot.width
                     height: delegateRoot.height
                     readonly property bool hiddenByOverflow: delegateRoot.hiddenInOverflow
-                    property real overflowTransitionScale: hiddenByOverflow ? 0.8 : 1.0
-                    scale: delegateRoot.scale * overflowTransitionScale
-                    opacity: hiddenByOverflow ? 0 : 1
+                    scale: delegateRoot.scale * (hiddenByOverflow ? 0.8 : 1.0)
+                    opacity: positionAnimationEnabled && !hiddenByOverflow ? 1 : 0
                     visible: opacity > 0.001
                     property bool positionAnimationEnabled: false
 
-                    Behavior on opacity {
-                        enabled: appItemRect.positionAnimationEnabled
-                        NumberAnimation {
-                            duration: 120
-                            easing.type: Easing.OutCubic
-                        }
+                    onHiddenByOverflowChanged: {
+                        positionAnimationEnabled = false
+                        if (!hiddenByOverflow)
+                            Qt.callLater(preparePosition)
                     }
-                    Behavior on overflowTransitionScale {
-                        enabled: appItemRect.positionAnimationEnabled
-                        NumberAnimation {
-                            duration: 120
-                            easing.type: Easing.OutCubic
-                        }
+
+                    function preparePosition() {
+                        if (hiddenByOverflow || !delegateRoot.ListView.view)
+                            return
+                        // Lay out and center the returning icon before revealing it.
+                        delegateRoot.ListView.view.forceLayout()
+                        appItem.syncIconPosition()
+                        positionAnimationEnabled = true
                     }
 
                     Behavior on x {
@@ -271,11 +270,7 @@ ContainmentItem {
                         }
                     }
 
-                    Component.onCompleted: {
-                        Qt.callLater(function() {
-                            appItemRect.positionAnimationEnabled = true
-                        })
-                    }
+                    Component.onCompleted: Qt.callLater(preparePosition)
 
                     AppItem {
                         Accessible.role: Accessible.ListItem
