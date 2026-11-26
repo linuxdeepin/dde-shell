@@ -28,6 +28,7 @@ Item {
         layoutDirection: Qt.LeftToRight
         verticalLayoutDirection: ListView.TopToBottom
         interactive: false
+        onCountChanged: Qt.callLater(listView.forceLayout)
         Accessible.role: Accessible.List
     }
 
