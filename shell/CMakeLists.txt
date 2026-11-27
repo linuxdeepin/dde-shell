@@ -4,7 +4,7 @@
 
 find_package(Dtk${DTK_VERSION_MAJOR} COMPONENTS Widget REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Widgets Gui WaylandClient)
-find_package(TreelandProtocols REQUIRED)
+find_package(TreelandProtocols 0.9 REQUIRED)
 pkg_check_modules(WaylandClient REQUIRED IMPORTED_TARGET wayland-client)
 
 if (NOT DEFINED SYSTEMD_USER_UNIT_DIR)
@@ -23,6 +23,8 @@ add_executable(dde-shell
     shell.cpp
     treelandoutputwatcher.h
     treelandoutputwatcher.cpp
+    treelandoutputuuid.h
+    treelandoutputuuid.cpp
     dde-shell.qrc
     override_dtkdeclarative_qml.qrc
     dde-shell-icons.qrc
@@ -30,7 +32,8 @@ add_executable(dde-shell
 
 qt_generate_wayland_protocol_client_sources(dde-shell
     FILES
-        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-output-manager-v1.xml
+        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-output-manager-unstable-v2.xml
+        ${TREELAND_PROTOCOLS_DATA_DIR}/treeland-output-uuid-unstable-v1.xml
 )
 
 target_compile_definitions(dde-shell
