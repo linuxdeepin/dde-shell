@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -8,6 +8,8 @@
 
 #include <QQmlListProperty>
 #include <QTimer>
+
+#include <optional>
 
 namespace osd {
 
@@ -72,13 +74,15 @@ Q_SIGNALS:
 private:
     void setState(int newState);
     void setCurrentPlanItem(DPItem *newCurrentPlanItem);
-    void fetchPlanItems();
-    DPItem *fetchCurrentPlanItem() const;
+    void refreshDisplayState();
+    bool fetchPlanItems();
+    std::optional<DPItem *> fetchCurrentPlanItem() const;
     int fetchState() const;
 
 private:
     QList<DPItem *> m_planItems;
     DPItem *m_currentPlanItem = nullptr;
+    bool m_planItemsValid = false;
     int m_state;
     QTimer *m_actionTimer = nullptr;
 };

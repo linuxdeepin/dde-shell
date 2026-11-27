@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -48,6 +48,10 @@ bool OsdPanel::init()
     m_osdTimer->setInterval(m_interval);
     m_osdTimer->setSingleShot(true);
     QObject::connect(m_osdTimer, &QTimer::timeout, this, &OsdPanel::doneSetting);
+
+    m_hideTimer = new QTimer(this);
+    m_hideTimer->setSingleShot(true);
+    QObject::connect(m_hideTimer, &QTimer::timeout, this, &OsdPanel::hideOsd);
     return DPanel::init();
 }
 
@@ -65,12 +69,27 @@ bool OsdPanel::visible() const
 
 void OsdPanel::ShowOSD(const QString &text)
 {
+    // A new request extends the visible period; a hide already scheduled by
+    // doneSetting() must not cut this request short.
+    m_hideTimer->stop();
     qCInfo(osdLog()) << "show text" << text;
     m_osdTimer->setInterval(text == "SwitchWM3D" ? 2000 : 1000);
-
-    QTimer::singleShot(100, this, [this, text]() {
+    const auto dispatch = [this, text] {
         setOsdType(text);
         showOsd();
+    };
+
+    // Keep repeat presses behind any OSD requests already scheduled for delivery.
+    if (m_visible && m_pendingDispatches == 0 && text == QLatin1String("SwitchMonitors")
+        && m_lastOsdType == text) {
+        dispatch();
+        return;
+    }
+
+    ++m_pendingDispatches;
+    QTimer::singleShot(100, this, [this, dispatch] {
+        dispatch();
+        --m_pendingDispatches;
     });
 }
 
@@ -83,13 +102,12 @@ void OsdPanel::doneSetting()
 
     int delay = m_osdTimer->interval() - m_osdTimer->remainingTime();
     if (delay < 0) delay = 0;
-    QTimer::singleShot(delay,this, [this](){
-        hideOsd();
-    });
+    m_hideTimer->start(delay);
 }
 
 void OsdPanel::hideOsd()
 {
+    m_hideTimer->stop();
     m_osdTimer->stop();
     setVisible(false);
     updateLastOsdType({});
@@ -97,6 +115,7 @@ void OsdPanel::hideOsd()
 
 void OsdPanel::showOsd()
 {
+    m_hideTimer->stop();
     m_osdTimer->stop();
 
     m_osdTimer->start();
