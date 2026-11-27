@@ -29,6 +29,7 @@
 #endif
 
 #include <QGuiApplication>
+#include <QDBusConnection>
 #include <QTimer>
 #include <QProcess>
 #include <QStandardPaths>
@@ -186,6 +187,13 @@ bool TaskManager::init()
     Q_UNUSED(adaptor)
     QDBusConnection::sessionBus().registerService("org.deepin.ds.Dock.TaskManager");
     QDBusConnection::sessionBus().registerObject("/org/deepin/ds/Dock/TaskManager", "org.deepin.ds.Dock.TaskManager", this);
+
+    QDBusConnection::sessionBus().connect(
+        QString(),
+        QStringLiteral("/org/deepin/dde/Notification1"),
+        QStringLiteral("org.deepin.dde.Notification1"),
+        QStringLiteral("NotificationReceived"),
+        this, SLOT(onNotificationReceived(QString, QString, QString, uint, QString)));
 
     DApplet::init();
 
@@ -374,6 +382,68 @@ void TaskManager::handleWindowAdded(QPointer<AbstractWindow> window)
     appitem->setDesktopFileParser(desktopfile);
 
     ItemModel::instance()->addItem(appitem);
+}
+
+void TaskManager::onNotificationReceived(const QString &appId, const QString &senderAppId,
+                                         const QString &desktopEntry, uint pid, const QString &category)
+{
+    // 只有即时通讯通知才让任务栏图标闪烁，系统通知不触发
+    if (!category.startsWith(QStringLiteral("im.")))
+        return;
+
+    auto model = ItemModel::instance();
+    AppItem *target = nullptr;
+
+    auto itemAt = [model](int row) -> AppItem * {
+        const auto id = model->data(model->index(row, 0), ItemModel::ItemIdRole).toString();
+        return qobject_cast<AppItem *>(model->getItemById(id).data());
+    };
+
+    // 优先按进程精确匹配，保证同时运行两个微信实例时只闪收到消息的那个
+    if (pid > 0) {
+        for (int row = 0; row < model->rowCount() && !target; ++row) {
+            auto item = itemAt(row);
+            if (!item)
+                continue;
+            const auto windows = item->getAppendWindows();
+            for (const auto &window : windows) {
+                if (window && static_cast<uint>(window->pid()) == pid) {
+                    target = item;
+                    break;
+                }
+            }
+        }
+    }
+
+    auto findById = [model](const QString &id) -> AppItem * {
+        if (id.isEmpty())
+            return nullptr;
+        return qobject_cast<AppItem *>(model->getItemById(id).data());
+    };
+
+    if (!target)
+        target = findById(senderAppId);
+    if (!target)
+        target = findById(appId);
+    if (!target && !desktopEntry.isEmpty()) {
+        const auto suffix = QStringLiteral(".") + desktopEntry;
+        for (int row = 0; row < model->rowCount() && !target; ++row) {
+            auto item = itemAt(row);
+            if (!item)
+                continue;
+            if (item->id() == desktopEntry || item->desktopfileID() == desktopEntry
+                || item->id().endsWith(suffix, Qt::CaseInsensitive))
+                target = item;
+        }
+    }
+
+    if (!target || target->isActive())
+        return;
+
+    qCDebug(taskManagerLog()) << "notification attention:"
+                              << appId << senderAppId << desktopEntry << pid << category
+                              << "target:" << target->id();
+    target->setNotificationAttention(true);
 }
 
 void TaskManager::dropFilesOnItem(const QString& itemId, const QStringList& urls)

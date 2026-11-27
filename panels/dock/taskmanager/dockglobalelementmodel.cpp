@@ -569,6 +569,11 @@ QVariant DockGlobalElementModel::data(const QModelIndex &index, int role) const
                 return false;
             return model->index(row, 0).data(role);
         }
+        if (role == TaskManager::AttentionRole) {
+            // 收进托盘等没有窗口的应用仍有 AppItem，可承载通知触发的闪烁状态
+            if (auto item = ItemModel::instance()->getItemById(id))
+                return item->isAttention();
+        }
         return false;
     }
 

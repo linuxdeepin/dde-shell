@@ -236,6 +236,13 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
                      << ", appName:" << appName << ", summary:" << summary << ", appIcon:" << appIcon << ", body size:" << body.size()
                      << ", actions:" << actions << ", hint: " << hints << ", replaceId:" << replacesId << ", expireTimeout:" << expireTimeout;
 
+    uint senderPid = m_currentSenderPid;
+    m_currentSenderPid = 0;
+    if (senderPid == 0 && calledFromDBus()) {
+        QDBusReply<uint> reply = connection().interface()->servicePid(message().service());
+        senderPid = reply.value();
+    }
+
     if (calledFromDBus() && m_setting->systemValue(NotificationSetting::CloseNotification).toBool()) {
         qDebug(notifyLog) << "Notify has been disabled by CloseNotification setting.";
         return 0;
@@ -243,9 +250,8 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
 
     QString appId = appIdByAppName(appName);
 
-    if (appId.isEmpty() && calledFromDBus()) {
-        QDBusReply<uint> reply = connection().interface()->servicePid(message().service());
-        appId = DSGApplication::getId(reply.value());
+    if (appId.isEmpty() && senderPid > 0) {
+        appId = DSGApplication::getId(senderPid);
     }
 
     if (appId.isEmpty())
@@ -254,6 +260,24 @@ uint NotificationManager::Notify(const QString &appName, uint replacesId, const 
     bool enableAppNotification = m_setting->appValue(appId, NotificationSetting::EnableNotification).toBool();
     if (!enableAppNotification && !m_systemApps.contains(appId)) {
         return 0;
+    }
+
+    // Notify the dock so it can flash the matching app icon, like Windows does.
+    {
+        QString senderAppId;
+        if (senderPid > 0)
+            senderAppId = DSGApplication::getId(senderPid);
+
+        QDBusMessage msg = QDBusMessage::createSignal(
+            DDENotifyDBusPath,
+            DDENotifyDBusServer,
+            QStringLiteral("NotificationReceived"));
+        msg << appId
+            << senderAppId
+            << hints.value(QStringLiteral("desktop-entry")).toString()
+            << senderPid
+            << hints.value(QStringLiteral("category")).toString();
+        QDBusConnection::sessionBus().send(msg);
     }
 
     auto tsAppName = m_setting->appValue(appId, NotificationSetting::AppName).toString();

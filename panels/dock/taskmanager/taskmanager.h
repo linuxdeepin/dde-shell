@@ -133,6 +133,8 @@ Q_SIGNALS:
 private Q_SLOTS:
     void handleWindowAdded(QPointer<AbstractWindow> window);
     void modifyOpacityChanged();
+    void onNotificationReceived(const QString &appId, const QString &senderAppId,
+                                const QString &desktopEntry, uint pid, const QString &category);
 
 private:
     FolderMenuRegistry m_folderMenuRegistry;
