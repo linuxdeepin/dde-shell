@@ -312,8 +312,8 @@ ContainmentItem {
             id: overflowButton
             taskManagerItem: taskmanager
             overflow: taskOverflow
-            onDragFinished: function(dropAction, itemId, canUndock) {
-                launcherDndDropArea.finishDrag(dropAction, itemId, canUndock)
+            onDragFinished: function(dropAction) {
+                launcherDndDropArea.finishDrag(dropAction)
             }
         }
 
@@ -360,20 +360,19 @@ ContainmentItem {
                 return true
             }
 
-            function finishDrag(dropAction, itemId, canUndock) {
+            function finishDrag(dropAction) {
                 const pending = pendingOverflowDrop
                 pendingOverflowDrop = null
-                const shouldUndock = taskOverflow.finishDrag(dropAction)
+                taskOverflow.finishDrag()
                 resetDndState()
-                // Both moves and unpinning can destroy the source. Commit them
-                // only after QDrag and the initiating MouseArea event return.
+                // Dropping outside the dock preserves residence. Only commit
+                // accepted moves after QDrag and the MouseArea event return,
+                // since moving into the taskbar can destroy the source.
                 Qt.callLater(function() {
                     if (pending && dropAction === Qt.MoveAction) {
                         const targetIndex = Math.min(pending.targetIndex, taskOverflow.visibleItemCount - 1)
                         if (moveApp(pending.appId, pending.winId, targetIndex))
                             saveOrder()
-                    } else if (canUndock && shouldUndock) {
-                        taskmanager.Applet.requestUndockByDesktopId(itemId)
                     }
                 })
             }

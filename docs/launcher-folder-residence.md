@@ -31,7 +31,7 @@ FolderIcon 固定保留四个 2×2 预览位置。FolderPopup 接收名称和 co
 
 DockPanelPositioner 暴露当前屏幕 availableGeometry，使模板在任务栏四个方向、多屏和工作区偏移下限制尺寸与位置。不能使用 QML Screen.desktopAvailableWidth/Height 代替单屏工作区。
 
-拖拽使用既有 text/x-dde-dock-dnd-appid/source MIME。进入任务栏时只对新驻留项做预览，离开时回滚预览，不移除本来已驻留的同源项。任务栏内部排序落地后保存混合应用/文件夹顺序。从任务栏拖出不会取消驻留，取消驻留只通过驻留项右键菜单的「移除驻留」完成。
+拖拽使用既有 text/x-dde-dock-dnd-appid/source MIME。进入任务栏时只对新驻留项做预览，离开时回滚预览，不移除本来已驻留的同源项。任务栏内部排序落地后保存混合应用/文件夹顺序。从任务栏或溢出区域拖出不会取消驻留，取消驻留只通过驻留项右键菜单的「移除驻留」完成。
 
 ## 驻留项右键菜单：固定项 + 插件扩展
 

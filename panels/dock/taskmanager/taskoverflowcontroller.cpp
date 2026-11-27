@@ -7,8 +7,6 @@
 #include "globals.h"
 
 #include <QTimer>
-#include <QGuiApplication>
-#include <QKeyEvent>
 #include <QVariantMap>
 
 #include <algorithm>
@@ -177,36 +175,18 @@ void TaskOverflowController::beginDrag()
         return;
     m_dragInProgress = true;
     emit dragInProgressChanged();
-    m_dragCancelled = false;
-    // Install after QDrag starts its event loop so that Escape is observed
-    // before the native drag filter consumes it and clears the mouse state.
-    QTimer::singleShot(0, this, [this] {
-        if (m_dragInProgress)
-            QCoreApplication::instance()->installEventFilter(this);
-    });
 }
 
-bool TaskOverflowController::eventFilter(QObject *watched, QEvent *event)
-{
-    if (event->type() == QEvent::KeyPress && static_cast<QKeyEvent *>(event)->key() == Qt::Key_Escape)
-        m_dragCancelled = true;
-    return QObject::eventFilter(watched, event);
-}
-
-bool TaskOverflowController::finishDrag(int dropAction)
+void TaskOverflowController::finishDrag()
 {
     if (!m_dragInProgress)
-        return false;
+        return;
     m_dragInProgress = false;
-    QCoreApplication::instance()->removeEventFilter(this);
     emit dragInProgressChanged();
     if (m_syncDeferred) {
         m_syncDeferred = false;
         scheduleSync();
     }
-    // IgnoreAction represents both dropping outside and cancelling with Escape.
-    return dropAction == Qt::IgnoreAction && !m_dragCancelled
-        && !(QGuiApplication::mouseButtons() & Qt::LeftButton);
 }
 
 void TaskOverflowController::setLayout(bool showRecent, qreal trailingExtent, qreal buttonOffset,
