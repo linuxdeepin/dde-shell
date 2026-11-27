@@ -6,7 +6,6 @@
 #include "constants.h"
 #include "dockadaptor.h"
 #include "docksettings.h"
-#include "layershell/dlayershellwindow.h"
 #include "panel.h"
 #include "pluginfactory.h"
 #include "waylanddockhelper.h"
@@ -512,8 +511,7 @@ void DockPanel::updateDockScreen()
     auto *waylandScreen = dynamic_cast<QtWaylandClient::QWaylandScreen *>(primary->handle());
     if (!waylandScreen || !waylandScreen->output())
         return;
-    if (DS_NAMESPACE::DLayerShellWindow::get(win)->ensureWaylandShellIntegration())
-        win->show();
+    win->show();
 }
 
 bool DockPanel::showInPrimary() const
