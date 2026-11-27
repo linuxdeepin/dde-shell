@@ -40,15 +40,17 @@ Item {
         height: parent.height
         shellSurface: root.shellSurface
         inputEventsEnabled: root.inputEventsEnabled
-        // we need to set smooth to false, otherwise the image
-        // will be blurred if the scale is 1.25.
-        // If the surface width is 150, the buffer width will be 150 * 1.25 = 188
-        // But the ShellSurfaceItem pixel width on screen is 150 * 1.25 = 187.5
-        // So Qt will use the 188 to scale to 187.5, which will be blurred.
-        // But if we set smooth to false, the Qt doesn't linear interpolation.
-        // TODO: If the buffer size greater than the ShellSurfaceItem pixel
-        // size, we also need enable smooth.
-        smooth: false
+        // When the devicePixelRatio is non-integer (e.g. 1.25), the buffer
+        // size (round(w * dpr)) may not match the display pixel size (w * dpr).
+        // In that case, smooth must be true to avoid nearest-neighbor distortion.
+        // When they match (integer DPR), keep smooth false to avoid blurring.
+        smooth: {
+            if (!impl.surface)
+                return false
+            var dpr = Panel.devicePixelRatio
+            return Math.round(impl.width * dpr) !== impl.width * dpr
+                || Math.round(impl.height * dpr) !== impl.height * dpr
+        }
 
         HoverHandler {
             id: hoverHandler
