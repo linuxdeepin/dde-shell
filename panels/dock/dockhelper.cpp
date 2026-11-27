@@ -309,7 +309,10 @@ void DockHelper::initAreas()
         if (m_areas.contains(screen))
             return;
         m_areas.insert(screen, createArea(screen));
+        updateAllDockWakeArea();
     });
+
+    connect(qApp, &QGuiApplication::primaryScreenChanged, this, &DockHelper::updateAllDockWakeArea);
 
     connect(qApp, &QGuiApplication::screenRemoved, this, [this](QScreen *screen) {
         if (!m_areas.contains(screen))
