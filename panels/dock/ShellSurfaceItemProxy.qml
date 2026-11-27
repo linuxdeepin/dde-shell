@@ -48,7 +48,10 @@ Item {
         // But if we set smooth to false, the Qt doesn't linear interpolation.
         // TODO: If the buffer size greater than the ShellSurfaceItem pixel
         // size, we also need enable smooth.
-        smooth: false
+        // Enable smooth during dock resize drag to avoid aliasing from
+        // nearest-neighbor interpolation; keep false otherwise to preserve
+        // the 1.25x scale blur fix (BUG-306733).
+        smooth: Panel.rootObject ? Panel.rootObject.isDragging : false
 
         HoverHandler {
             id: hoverHandler
