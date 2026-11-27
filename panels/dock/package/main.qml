@@ -206,7 +206,7 @@ Window {
         ? Applet.dockSize + Math.round(fashionDock.animatedFloatingMargin)
         : 0
     DLayerShellWindow.scope: "dde-shell/dock"
-    DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityNone
+    DLayerShellWindow.keyboardInteractivity: DLayerShellWindow.KeyboardInteractivityOnDemand
 
     D.DWindow.enabled: true
     D.DWindow.windowRadius: useFullWidthWindow ? 0 : Math.round(fashionDock.animatedBackgroundRadius)
