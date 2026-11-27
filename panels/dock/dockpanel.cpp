@@ -254,6 +254,14 @@ bool DockPanel::init()
 QRect DockPanel::geometry()
 {
     Q_ASSERT(window());
+    if (!window()) {
+        // The QML root object may not exist yet, e.g. when the panel QML
+        // failed to load or has not finished incubation. Dereferencing a
+        // null window here crashes the whole shell (SEGV in QWindow::geometry,
+        // triggered from DockPositioner::dockGeometry() via QMetaProperty::read).
+        qCWarning(dockLog) << "DockPanel: window is not available, return empty geometry";
+        return QRect();
+    }
     return window()->geometry();
 }
 
