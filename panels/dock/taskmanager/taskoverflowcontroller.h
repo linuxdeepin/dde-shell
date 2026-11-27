@@ -117,7 +117,7 @@ public:
 
     Q_INVOKABLE void scheduleSync();
     Q_INVOKABLE void beginDrag();
-    Q_INVOKABLE bool finishDrag(int dropAction);
+    Q_INVOKABLE void finishDrag();
 
 Q_SIGNALS:
     void enabledChanged();
@@ -134,7 +134,6 @@ private Q_SLOTS:
     void onDataModelDestroyed();
 
 private:
-    bool eventFilter(QObject *watched, QEvent *event) override;
     void sync();
     int modelCount() const;
     QModelIndex modelIndexAt(int visualIndex) const;
@@ -180,7 +179,6 @@ private:
     QSet<QString> m_runningItems;
     bool m_syncPending = false;
     bool m_dragInProgress = false;
-    bool m_dragCancelled = false;
     bool m_syncDeferred = false;
     bool m_showRecent = false;
     qreal m_trailingExtent = 0;

@@ -16,7 +16,7 @@ Item {
     required property var taskManagerItem
     required property var overflow
 
-    signal dragFinished(int dropAction, string itemId, bool canUndock)
+    signal dragFinished(int dropAction)
 
     readonly property int overflowCount: overflow.popupCount
     readonly property var primaryOverflowItem: overflow.popupCount > 0 ? overflow.primaryItem : null
@@ -332,7 +332,7 @@ Item {
                                 root.taskManagerItem.Applet.dropFilesOnItem(itemId, files)
                             }
                             onDragFinished: function(dropAction) {
-                                root.dragFinished(dropAction, itemId, dragEnabled)
+                                root.dragFinished(dropAction)
                             }
                         }
                     }
