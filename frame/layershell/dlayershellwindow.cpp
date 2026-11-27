@@ -30,6 +30,8 @@ public:
     }
 
     QWindow* parentWindow;
+    // 绑定（锁存）的 output。为空表示尚未显式绑定，此时沿用 QWindow::screen()。
+    QPointer<QScreen> screen;
     QString scope;
     DLayerShellWindow::Anchors anchors = {DLayerShellWindow::AnchorNone};
     int32_t exclusionZone = 0;
@@ -155,6 +157,31 @@ void DLayerShellWindow::setScreenConfiguration(DLayerShellWindow::ScreenConfigur
     if (screenConfiguration != d->screenConfiguration) {
         d->screenConfiguration = screenConfiguration;
     }
+}
+
+void DLayerShellWindow::setScreen(QScreen *screen)
+{
+    if (d->screen == screen && (!d->parentWindow || d->parentWindow->screen() == screen)) {
+        return;
+    }
+
+    d->screen = screen;
+
+    // Wayland 下由 QWindow::screen() 决定 zwlr_layer_surface 绑定的 output，
+    // X11 下模拟层会读取 d->screen 锁存，两边都同步一次。
+    if (d->parentWindow && screen && d->parentWindow->screen() != screen) {
+        d->parentWindow->setScreen(screen);
+    }
+
+    Q_EMIT screenChanged(screen);
+}
+
+QScreen *DLayerShellWindow::screen() const
+{
+    if (d->screen) {
+        return d->screen.data();
+    }
+    return d->parentWindow ? d->parentWindow->screen() : nullptr;
 }
 
 void DLayerShellWindow::setPreferredWidth(int width)

@@ -119,6 +119,7 @@ Window {
     onScreenChanged: {
         // 修复：屏幕变化时重新获取dock所在的屏幕
         root.screen = Qt.binding(function () { return getDockScreen() })
+        root.DLayerShellWindow.setScreen(root.screen)
     }
 
     onVisibleChanged: function (v) {
@@ -165,6 +166,7 @@ Window {
         // 修复：监听dock屏幕变化，同步更新通知中心屏幕
         function onScreenNameChanged() {
             root.screen = getDockScreen()
+            root.DLayerShellWindow.setScreen(root.screen)
         }
     }
 

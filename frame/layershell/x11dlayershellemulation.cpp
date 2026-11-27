@@ -27,7 +27,14 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
     : QObject(parent)
     , m_window(window)
     , m_dlayerShellWindow(DLayerShellWindow::get(m_window))
+    , m_screen(m_dlayerShellWindow->screen())
 {
+    // 创建时锁存 output。客户端（如桌面）在创建 layer surface 之前已经
+    // QWindow::setScreen()，此处取到的就是它声明的屏。此后 QWindow::screen()
+    // 会随窗口几何被 Qt 自动推导，导致"窗口压在哪块屏上就属于哪块屏"的
+    // 正反馈，所以不能再拿它当归属依据。
+    qCInfo(layershell) << "layer surface bound to screen:" << (m_screen ? m_screen->name() : QStringLiteral("<null>"))
+                       << "winId:" << m_window->winId();
     onLayerChanged();
     connect(m_dlayerShellWindow, &DLayerShellWindow::layerChanged, this, &LayerShellEmulation::onLayerChanged);
 
@@ -65,6 +72,36 @@ LayerShellEmulation::LayerShellEmulation(QWindow* window, QObject *parent)
         Q_UNUSED(nowScreen)
         onPositionChanged();
         m_exclusionZoneChangedTimer.start();
+    });
+
+    // 只有显式重绑（DLayerShellWindow::setScreen）才允许改变归属屏，
+    // 客户端靠它把已有 surface 搬到另一块屏（如 dock 切换主屏）。
+    connect(m_dlayerShellWindow, &DLayerShellWindow::screenChanged, this, [this](QScreen *newScreen) {
+        m_screen = newScreen ? newScreen : m_window->screen();
+        qCInfo(layershell) << "layer surface rebound to screen:" << (m_screen ? m_screen->name() : QStringLiteral("<null>"));
+        onPositionChanged();
+        m_exclusionZoneChangedTimer.start();
+    });
+
+    // 锁存的 output 被拔掉时退回窗口当前所在屏，避免用空指针算几何。
+    connect(qApp, &QGuiApplication::screenRemoved, this, [this](QScreen *removed) {
+        if (!m_screen || m_screen == removed) {
+            // screenRemoved can be emitted before Qt has moved the window off
+            // the removed screen. Select only from the remaining outputs.
+            const auto screens = qApp->screens();
+            QScreen *fallback = nullptr;
+            const auto primaryScreen = qApp->primaryScreen();
+            for (auto *screen : screens) {
+                if (screen == removed)
+                    continue;
+                if (!fallback || screen == primaryScreen)
+                    fallback = screen;
+                if (screen == primaryScreen)
+                    break;
+            }
+            m_screen = fallback;
+            onPositionChanged();
+        }
     });
 
     connect(qApp, &QGuiApplication::screenRemoved, &m_exclusionZoneChangedTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
@@ -118,10 +155,24 @@ void LayerShellEmulation::onLayerChanged()
     }
 }
 
+QScreen *LayerShellEmulation::targetScreen() const
+{
+    if (m_screen && qApp->screens().contains(m_screen.data())) {
+        return m_screen.data();
+    }
+    // 尚未锁存或锁存的 output 已消失：仅使用仍然有效的窗口屏幕。
+    auto *windowScreen = m_window ? m_window->screen() : nullptr;
+    return windowScreen && qApp->screens().contains(windowScreen) ? windowScreen : nullptr;
+}
+
 void LayerShellEmulation::onPositionChanged()
 {
     auto anchors = m_dlayerShellWindow->anchors();
-    auto screen = m_window->screen();
+    // 注意：这里必须用锁存的 output，不能用 m_window->screen()。
+    // QWindow::screen() 是 Qt 依据窗口几何推导出来的，排列变化后窗口一旦
+    // 落进相邻屏就会被判成"属于那块屏"，再把几何铺满那块屏，形成
+    // "错位 → 判成邻屏 → 更错位" 的正反馈，副屏桌面会永久跑到主屏上。
+    auto screen = targetScreen();
     if (!screen) {
         return;
     }
@@ -189,7 +240,10 @@ void LayerShellEmulation::onExclusionZoneChanged()
     xcb_ewmh_wm_strut_partial_t strut_partial;
     memset(&strut_partial, 0, sizeof(xcb_ewmh_wm_strut_partial_t));
     auto anchors = m_dlayerShellWindow->anchors();
-    QScreen *currentScreen = m_window->screen();
+    QScreen *currentScreen = targetScreen();
+    if (!currentScreen) {
+        return;
+    }
     if ((anchors == DLayerShellWindow::AnchorLeft) || (anchors ^ DLayerShellWindow::AnchorLeft) == (DLayerShellWindow::AnchorTop | DLayerShellWindow::AnchorBottom)) {        
         // 计算独占区域：屏幕X坐标 + 任务栏物理宽度
         // 注意：QScreen::geometry().x() 已经是设备无关像素，不需要缩放
