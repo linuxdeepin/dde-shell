@@ -6,6 +6,7 @@
 
 #include <QMap>
 #include <QPointer>
+#include <QTimer>
 #include <QQuickWindow>
 #include <QtWaylandCompositor/QWaylandCompositor>
 #include <QtWaylandCompositor/QWaylandCompositorExtensionTemplate>
@@ -148,6 +149,7 @@ private:
     QString popupMinHeightMsg() const;
     using PluginSurfaceCallback = std::function<void(Resource *)>;
     void foreachPluginSurface(PluginSurfaceCallback callback);
+    void scheduleThemeNotify();
     PluginSurface* findPluginSurface(const QString &pluginId, const QString &itemKey) const;
 
 private:
@@ -167,6 +169,7 @@ private:
     // Map of pending XEmbed callbacks: wid -> callback info
     // Supports multiple concurrent requests from different clients
     QMap<uint32_t, PendingXEmbedCallback> m_pendingXEmbedCallbacks;
+    QTimer *m_themeNotifyTimer = nullptr;
 };
 
 class PluginSurface : public QWaylandShellSurface, public QtWaylandServer::plugin
