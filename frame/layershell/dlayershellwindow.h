@@ -114,6 +114,20 @@ public:
     void setScreenConfiguration(ScreenConfiguration screenConfiguration);
     ScreenConfiguration screenConfiguration() const;
 
+    /**
+     * Binds the layer surface to @p screen.
+     *
+     * On Wayland this simply forwards to QWindow::setScreen() before the
+     * zwlr_layer_surface is created. On X11 the emulation *latches* the screen:
+     * the surface keeps belonging to it and its geometry is always computed
+     * from that screen, no matter where the window is currently placed.
+     * X11 clients that need to move an existing surface to another screen must
+     * call this, a plain QWindow::setScreen() is no longer enough once the
+     * emulation has been created.
+     */
+    Q_INVOKABLE void setScreen(QScreen *screen);
+    QScreen *screen() const;
+
     void setPreferredWidth(int width);
     void resetPreferredWidth();
     int preferredWidth() const;
@@ -164,6 +178,7 @@ Q_SIGNALS:
     void scopeChanged();
     void geometryHintsChanged();
     void inputRegionChanged();
+    void screenChanged(QScreen *screen);
 
 private:
     DLayerShellWindow(QWindow* window);
