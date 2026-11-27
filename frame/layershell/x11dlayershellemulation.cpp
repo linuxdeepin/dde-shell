@@ -223,6 +223,22 @@ void LayerShellEmulation::onPositionChanged()
         rect.setHeight(screen->geometry().height() - m_dlayerShellWindow->topMargin() - m_dlayerShellWindow->bottomMargin());
     }
 
+    // Qt moves a window to the screen holding its center, re-entering here with that screen's origin forever;
+    // keep the center on this screen but preserve intentional partial overlap (e.g. notifications avoiding the dock).
+    const auto keepOnScreen = [](int pos, int size, int screenStart, int screenSize) {
+        if (size > screenSize) {
+            return screenStart + (screenSize - size) / 2;
+        }
+        return qBound(screenStart, pos, screenStart + screenSize - size);
+    };
+    const QPoint center = rect.center();
+    if (center.x() < screenRect.left() || center.x() > screenRect.right()) {
+        rect.moveLeft(keepOnScreen(rect.left(), rect.width(), screenRect.left(), screenRect.width()));
+    }
+    if (center.y() < screenRect.top() || center.y() > screenRect.bottom()) {
+        rect.moveTop(keepOnScreen(rect.top(), rect.height(), screenRect.top(), screenRect.height()));
+    }
+
     if (m_window->geometry() != rect) {
         m_window->setGeometry(rect);
     }
