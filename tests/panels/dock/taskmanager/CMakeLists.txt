@@ -59,3 +59,12 @@ add_executable(foldermenuregistry_tests
 target_include_directories(foldermenuregistry_tests PRIVATE ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager)
 target_link_libraries(foldermenuregistry_tests PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Test)
 add_test(NAME folder_menu_registry COMMAND foldermenuregistry_tests)
+
+# The mirror mode approval policy is a pure function of the switch and the listed flag.
+add_executable(mirrormodepolicy_tests
+    mirrormodepolicytests.cpp
+    ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager/mirrormodepolicy.h
+)
+target_include_directories(mirrormodepolicy_tests PRIVATE ${CMAKE_SOURCE_DIR}/panels/dock/taskmanager)
+target_link_libraries(mirrormodepolicy_tests PRIVATE GTest::GTest GTest::Main)
+add_test(NAME mirror_mode_policy COMMAND mirrormodepolicy_tests)

@@ -24,6 +24,7 @@ class X11WindowMonitor;
 class DockItemWindowModel;
 class AppItemWindowDeletegate;
 class PreviewsListView;
+class MirrorModeClient;
 
 class DIconButtonHoverFilter : public QObject
 {
@@ -71,6 +72,10 @@ public:
 
     void hidePreView();
 
+    // Mirror-mode approval for the window each preview item stands for. The control is a
+    // button of that item; the container only owns the KWin client.
+    MirrorModeClient *mirrorModeClient() const;
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
     void enterEvent(QEnterEvent *event) override;
@@ -84,6 +89,8 @@ private:
     inline void initUI();
     inline void updateSize(int windowCount = -1);
     void updatePreviewIconFromString(const QString &stringData);
+    // Re-reads the approval state of every preview item's mirror button.
+    void refreshMirrorButtons();
 
 public Q_SLOTS:
     void updatePosition();
@@ -104,6 +111,7 @@ private:
     QLabel* m_previewIcon;
     DLabel* m_previewTitle;
     DIconButton* m_closeAllButton;
+    MirrorModeClient* m_mirrorModeClient = nullptr;
 
     QTimer* m_hideTimer;
     QTimer* m_previewDelayTimer;
