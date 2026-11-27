@@ -148,8 +148,6 @@ public:
     void setCloseOnDismissed(bool close);
     bool closeOnDismissed() const;
 
-    bool ensureWaylandShellIntegration();
-
     /** Whether a system resize is pending or active on this layer surface. */
     bool isResizing() const;
 
@@ -178,6 +176,8 @@ private:
     friend class QWaylandLayerShellSurface;
     void setResizing(bool resizing);
 
+    bool eventFilter(QObject *watched, QEvent *event) override;
+    bool installWaylandShellIntegration();
     DLayerShellWindow(QWindow* window);
     QScopedPointer<DLayerShellWindowPrivate> d;
 };
